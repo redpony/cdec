@@ -1,0 +1,46 @@
+AC_INIT
+AM_INIT_AUTOMAKE(cdec,0.1)
+AC_CONFIG_HEADERS(config.h)
+AC_PROG_RANLIB
+AC_PROG_CC
+AC_PROG_CXX
+AC_LANG_CPLUSPLUS
+AX_BOOST_BASE
+AX_BOOST_PROGRAM_OPTIONS
+CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+AC_CHECK_HEADER(boost/math/special_functions/digamma.hpp,
+               [AC_DEFINE([HAVE_BOOST_DIGAMMA], [], [flag for boost::math::digamma])])
+
+GTEST_LIB_CHECK
+AC_PROG_INSTALL
+
+AC_ARG_WITH(srilm,
+            [AC_HELP_STRING([--with-srilm=PATH], [(optional) path to SRI's LM toolkit])],
+            [with_srilm=$withval],
+            [with_srilm=no]
+           )
+
+AM_CONDITIONAL([SRI_LM], false)
+
+if test "x$with_srilm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_srilm}/include"
+
+  AC_CHECK_HEADER(Ngram.h,
+                 [AC_DEFINE([HAVE_SRILM], [], [flag for SRILM])],
+                 [AC_MSG_ERROR([Cannot find SRILM!])])
+
+  LIB_SRILM="-loolm -ldstruct -lmisc"
+  # ROOT/lib/i686-m64/liboolm.a
+  # ROOT/lib/i686-m64/libdstruct.a
+  # ROOT/lib/i686-m64/libmisc.a
+  MY_ARCH=`${with_srilm}/sbin/machine-type`
+  LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH}"
+  LIBS="$LIBS $LIB_SRILM"
+  FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
+  AM_CONDITIONAL([SRI_LM], true)
+fi
+
+AC_OUTPUT(Makefile src/Makefile vest/Makefile)
+
