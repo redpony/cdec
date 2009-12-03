@@ -3,7 +3,7 @@ cdec is a fast decoder.
 SPEED COMPARISON
 ------------------------------------------------------------------------------
 
-Here is a comparison with a couple of other decoders:
+Here is a comparison with a couple of other decoders doing SCFG decoding:
 
   Decoder  Lang.   BLEU    Run-Time        Memory
   cdec     c++     31.47   0.37 sec/sent   1.0-1.1GB
