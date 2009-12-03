@@ -41,7 +41,6 @@ libhg_a_SOURCES = \
   hg_io.cc \
   viterbi.cc \
   lattice.cc \
-  logging.cc \
   aligner.cc \
   gzstream.cc \
   apply_models.cc \

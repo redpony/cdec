@@ -36,7 +36,7 @@ struct TextRuleBin : public RuleBin {
   }
   void Dump() const {
     for (int i = 0; i < rules_.size(); ++i)
-      VLOG(1) << rules_[i]->AsString() << endl;
+      cerr << rules_[i]->AsString() << endl;
   }
  private:
   vector<TRulePtr> rules_;
