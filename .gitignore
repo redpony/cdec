@@ -1,3 +1,22 @@
+config.h.in~
+src/ff_test
+src/grammar_test
+src/hg_test
+src/parser_test
+src/small_vector_test
+training/atools
+training/collapse_weights
+training/lbfgs_test
+training/mr_em_train
+training/mr_optimize_reduce
+training/optimize_test
+training/plftools
+vest/fast_score
+vest/lo_test
+vest/mr_vest_map
+vest/mr_vest_reduce
+vest/scorer_test
+vest/union_forests
 Makefile
 Makefile.in
 aclocal.m4
@@ -14,6 +33,7 @@ src/.deps/
 src/*.o
 src/Makefile
 src/Makefile.in
+src/cdec
 src/dict_test
 src/libhg.a
 src/trule_test
@@ -23,8 +43,11 @@ training/.deps/
 training/Makefile
 training/Makefile.in
 training/*.o
+training/grammar_convert
+training/model1
 vest/.deps/
 vest/Makefile
 vest/Makefile.in
+vest/mr_vest_generate_mapper_input
 vest/*.o
 
