@@ -39,6 +39,7 @@ libhg_a_SOURCES = \
   scfg_translator.cc \
   hg.cc \
   hg_io.cc \
+  hg_intersect.cc \
   viterbi.cc \
   lattice.cc \
   aligner.cc \
@@ -55,9 +56,8 @@ libhg_a_SOURCES = \
   weights.cc \
   ttables.cc \
   ff.cc \
-  lm_ff.cc \
+  ff_lm.cc \
   ff_wordalign.cc \
-  hg_intersect.cc \
   lexcrf.cc \
   bottom_up_parser.cc \
   phrasebased_translator.cc \

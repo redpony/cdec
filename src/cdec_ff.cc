@@ -1,7 +1,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ff.h"
-#include "lm_ff.h"
+#include "ff_lm.h"
 #include "ff_factory.h"
 #include "ff_wordalign.h"
 

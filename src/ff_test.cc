@@ -4,7 +4,7 @@
 #include <vector>
 #include <gtest/gtest.h>
 #include "hg.h"
-#include "lm_ff.h"
+#include "ff_lm.h"
 #include "ff.h"
 #include "trule.h"
 #include "sentence_metadata.h"
