@@ -1,0 +1,22 @@
+cdec v1.0 (c) 2009 by Chris Dyer
+Configuration file: cdec.ini
+Reading SCFG grammar from australia.scfg.gz
+  33737 rules read.
+Reading weights from weights
+Loaded 7 feature weights
+Reading input from input.txt
+
+INPUT: 澳洲 是 与 北韩 有 邦交 的 少数 国家 之一 。 ||| ...
+  id = 0
+  Goal category: [S]
+    ...........
+  -LM forest (nodes/edges): 77/244232
+  -LM forest       (paths): 3.79555e+28
+  -LM Viterbi: australia is have diplomatic relations with north korea one of the few countries .
+  -LM Viterbi: -12.7893
+  Goal category: [CAT_76]
+    ..................
+  Constr. forest (nodes/edges): 185/827
+  Constr. forest       (paths): 279358
+  Constr. VitTree: (CAT_76 (CAT_75 (CAT_1 (CAT_0 australia)) (CAT_74 is (CAT_31 one of (CAT_20 a few countries)) that (CAT_36 have diplomatic relations (CAT_15 with north korea)) .)))
+Translation: 2.69099 secs (1 calls)

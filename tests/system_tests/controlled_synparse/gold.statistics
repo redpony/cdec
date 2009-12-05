@@ -1,0 +1,16 @@
+-lm_nodes 11
+-lm_edges 18
+-lm_paths 18
+-lm_trans a d c b
+-lm_trans 0
+constr_nodes 8
+constr_edges 8
+constr_paths 1
+-lm_nodes 11
+-lm_edges 18
+-lm_paths 18
+-lm_trans a d c b
+-lm_trans 0
+constr_nodes 12
+constr_edges 14
+constr_paths 3
