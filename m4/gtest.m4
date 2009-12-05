@@ -45,7 +45,7 @@ AS_IF([test "x$enable_gtest" != "xno"],
      [GTEST_CPPFLAGS=$($GTEST_CONFIG --cppflags)
       GTEST_CXXFLAGS=$($GTEST_CONFIG --cxxflags)
       GTEST_LDFLAGS=$($GTEST_CONFIG --ldflags)
-      GTEST_LIBS=$($GTEST_CONFIG --libs)
+      GTEST_LIBS=$($GTEST_CONFIG --libs | sed 's/la/a/')
       GTEST_VERSION=$($GTEST_CONFIG --version)
       AC_DEFINE([HAVE_GTEST],[1],[Defined when Google Test is available.])],
      [AS_IF([test "x$enable_gtest" = "xyes"],
