@@ -14,22 +14,13 @@ Instructions for building
  2) Download, build, and install Google Test
 
  3) Use automake / autoconf to generate the configure script.
-    I'm not an expert at using these tools, so I'm not quite sure how to do
-    this, I just flail around until it works.  Since I have my own m4 scripts
-    you'll need to make sure to do:
+    I'm not an expert at using these tools, but this should be sufficient:
 
-        aclocal -I m4/
-
-    I usually have to do some permutation of the following commands:
-
-        aclocal -I m4/
-        autoconf
-        automake -a
-        autoreconf
+        autoreconf -i
 
  4) Configure and build.  Your command will look something like this.
 
-        ./configure --with-sirlm=/home/me/software/srilm-1.5.9 --with-gtest=/home/me/software/gtest
+        ./configure --with-sirlm=/home/me/software/srilm-1.5.9 --enable-gtest
         make
 
     If you get errors during configure about missing BOOST macros, then step 3
