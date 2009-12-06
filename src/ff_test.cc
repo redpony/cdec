@@ -18,7 +18,7 @@ class FFTest : public testing::Test {
  public:
   FFTest() : smeta(0,Lattice()) {
     if (!lm_) {
-      static LanguageModel slm("-o 2 ./test_data/brown.lm.gz");
+      static LanguageModel slm("-o 2 ./test_data/test_2gram.lm.gz");
       lm_ = &slm;
       static LanguageModel slm3("./test_data/dummy.3gram.lm -o 3");
       lm3_ = &slm3;
