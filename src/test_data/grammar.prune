@@ -1,0 +1,196 @@
+[PHRASE] ||| [PHRASE,1] haus ||| [PHRASE,1] house ||| 1.86183 0 0 0 0.0211892
+[PHRASE] ||| [PHRASE,1] haus ist ||| is [PHRASE,1] house ||| 2.58883 0.311249 0 0.348455 0.0211893
+[PHRASE] ||| [PHRASE,1] haus gibt ||| is [PHRASE,1] house ||| 2.56863 0.291046 0 0.258278 0.0211893
+[PHRASE] ||| [PHRASE,1] ein haus ist ||| [PHRASE,1] is a house ||| 3.16286 0 0 0.576934 0.0211893
+[PHRASE] ||| [PHRASE,1] ist ||| [PHRASE,1] is ||| 2.94101 0 0.676694 0.348455 0
+[PHRASE] ||| [PHRASE,1] ist ||| is [PHRASE,1] ||| 2.36698 0.649056 0.102662 0.348455 0
+[PHRASE] ||| [PHRASE,1] klein ist ||| [PHRASE,1] is small ||| 2.58883 0.124939 0 0.78211 0
+[PHRASE] ||| [PHRASE,1] maus ||| [PHRASE,1] mouse ||| 2.09592 0 0 0 0
+[PHRASE] ||| [PHRASE,1] maus gibt ||| is [PHRASE,1] mouse ||| 2.44865 0 0 0.258278 0
+[PHRASE] ||| [PHRASE,1] kleines ||| [PHRASE,1] small ||| 2.94101 0.439333 0 0.579784 0
+[PHRASE] ||| [PHRASE,1] kleines haus ||| [PHRASE,1] small house ||| 3.24204 0 0 0.579784 0.0211893
+[PHRASE] ||| [PHRASE,1] kleines haus gibt ||| is [PHRASE,1] small house ||| 3.30899 0 0 0.838062 0.0211893
+[PHRASE] ||| [PHRASE,1] kleine ||| [PHRASE,1] small ||| 2.94101 0.439333 0 0.500602 0
+[PHRASE] ||| [PHRASE,1] kleine maus ||| [PHRASE,1] small mouse ||| 3.24204 0 0 0.500602 0
+[PHRASE] ||| [PHRASE,1] kleine maus gibt ||| is [PHRASE,1] small mouse ||| 3.30899 0 0 0.75888 0
+[PHRASE] ||| [PHRASE,1] gelb ||| [PHRASE,1] yellow ||| 2.63998 0 0 0 0
+[PHRASE] ||| [PHRASE,1] gelb haus ||| [PHRASE,1] yellow house ||| 3.24204 0 0 0 0.0211893
+[PHRASE] ||| [PHRASE,1] gelb haus gibt ||| is [PHRASE,1] yellow house ||| 3.30899 0 0 0.258278 0.0211893
+[PHRASE] ||| [PHRASE,1] gelb maus ||| [PHRASE,1] yellow mouse ||| 3.24204 0 0 0 0
+[PHRASE] ||| [PHRASE,1] gelb maus gibt ||| is [PHRASE,1] yellow mouse ||| 3.30899 0 0 0.258278 0
+[PHRASE] ||| [PHRASE,1] gibt ||| is [PHRASE,1] ||| 1.82827 0.110339 0 0.258278 0
+[PHRASE] ||| haus ||| small yellow mouse house ||| 2.46389 0.845098 1.30103 0.278754 1.34341
+[PHRASE] ||| haus ||| house ||| Phrase_0=1.18514 Phrase_2=0.0222764 Phrase_4=0.0211893
+[PHRASE] ||| haus [PHRASE,1] ||| house [PHRASE,1] ||| 2.2878 0 0 0 0.0211893
+[PHRASE] ||| haus ist ||| house is ||| 2.46389 0 0 0.348455 0.0211893
+[PHRASE] ||| haus klein ist ||| house is small ||| 2.2878 0 0 0.78211 0.0211893
+[PHRASE] ||| ein ||| a ||| Phrase_0=1.34995 Phrase_1=0.228479 Phrase_3=0.228479
+[PHRASE] ||| ein [PHRASE,1] ||| a [PHRASE,1] ||| 2.03792 0.290035 0 0.228479 0
+[PHRASE] ||| ein [PHRASE,1] haus ||| a [PHRASE,1] house ||| 2.94101 0 0 0.228479 0.0211893
+[PHRASE] ||| ein [PHRASE,1] haus gibt ||| is a [PHRASE,1] house ||| 3.00796 0 0 0.486757 0.0211893
+[PHRASE] ||| ein [PHRASE,1] ist ||| is a [PHRASE,1] ||| 2.58883 0.535113 0 0.576934 0
+[PHRASE] ||| ein [PHRASE,1] gibt ||| is a [PHRASE,1] ||| 2.56863 0.51491 0 0.486757 0
+[PHRASE] ||| ein haus ||| a house ||| 1.76492 0 0.0791813 0.228479 0.0211893
+[PHRASE] ||| ein haus ||| a small house ||| 2.46389 0.30103 0.778151 0.507233 1.34341
+[PHRASE] ||| ein haus ist ||| is a house ||| 2.76492 0.477121 0 0.576934 0.0211893
+[PHRASE] ||| ein haus gibt ||| is a house ||| 2.46389 0.176091 0.176091 0.486757 0.0211893
+[PHRASE] ||| ein haus gibt ||| is a small house ||| 2.76492 0.39794 0.477121 0.765511 1.34341
+[PHRASE] ||| ein kleines ||| a small ||| 1.86183 0.243038 0 0.808263 0
+[PHRASE] ||| ein kleines [PHRASE,1] ||| a small [PHRASE,1] ||| 3.24204 0.30103 0 0.808263 0
+[PHRASE] ||| ein kleines [PHRASE,1] gibt ||| is a small [PHRASE,1] ||| 3.30899 0.30103 0 1.06654 0
+[PHRASE] ||| ein kleines haus ||| a small house ||| 2.46389 0.30103 0 0.808263 0.0211893
+[PHRASE] ||| ein kleines haus ist ||| is a small house ||| 2.76492 0.39794 0 1.15672 0.0211893
+[PHRASE] ||| ein kleines haus gibt ||| is a small house ||| 3.06595 0.69897 0 1.06654 0.0211893
+[PHRASE] ||| ein kleines gelb ||| a small yellow ||| 2.94101 0.30103 0 0.808263 0
+[PHRASE] ||| ein kleines gelb haus ||| a small yellow house ||| 3.24204 0 0 0.808263 0.0211893
+[PHRASE] ||| ein kleines gelb haus gibt ||| is a small yellow house ||| 3.30899 0 0 1.06654 0.0211893
+[PHRASE] ||| ein gelb ||| a yellow ||| 1.98677 0.221849 0 0.228479 0
+[PHRASE] ||| ein gelb [PHRASE,1] ||| a yellow [PHRASE,1] ||| 3.24204 0.30103 0 0.228479 0
+[PHRASE] ||| ein gelb [PHRASE,1] gibt ||| is a yellow [PHRASE,1] ||| 3.30899 0.30103 0 0.486757 0
+[PHRASE] ||| ein gelb haus ||| a yellow house ||| 2.63998 0 0 0.228479 0.0211893
+[PHRASE] ||| ein gelb haus ist ||| is a yellow house ||| 3.06595 0.30103 0 0.576934 0.0211893
+[PHRASE] ||| ein gelb haus gibt ||| is a yellow house ||| 3.06595 0.30103 0 0.486757 0.0211893
+[PHRASE] ||| ein gelb kleines ||| a yellow small ||| 2.94101 0.30103 0 0.808263 0
+[PHRASE] ||| ein gelb kleines haus ||| a yellow small house ||| 3.24204 0 0 0.808263 0.0211893
+[PHRASE] ||| ein gelb kleines haus gibt ||| is a yellow small house ||| 3.30899 0 0 1.06654 0.0211893
+[PHRASE] ||| ist ||| is ||| 1.34995 0.348455 0 0.348455 0
+[PHRASE] ||| klein ||| small ||| 1.61879 0.410174 0 0.433656 0
+[PHRASE] ||| klein [PHRASE,1] ||| [PHRASE,1] small ||| 3.06595 0.564271 0 0.433656 0
+[PHRASE] ||| klein [PHRASE,1] ist ||| [PHRASE,1] is small ||| 3.06595 0.60206 0 0.78211 0
+[PHRASE] ||| klein ist ||| is small ||| 1.68574 0 0 0.78211 0
+[PHRASE] ||| klein das [PHRASE,1] ||| the [PHRASE,1] small ||| 3.06595 0 0 0.433656 0.30103
+[PHRASE] ||| klein das haus ist ||| the house is small ||| 3.06595 0.477121 0 0.78211 0.322219
+[PHRASE] ||| maus ||| mouse ||| 1.50965 0 0 0 0
+[PHRASE] ||| maus [PHRASE,1] ||| mouse [PHRASE,1] ||| 2.94101 0 0 0 0
+[PHRASE] ||| maus [PHRASE,1] ist ||| mouse is [PHRASE,1] ||| 2.94101 0 0 0.348455 0
+[PHRASE] ||| maus ein haus ist ||| mouse is a house ||| 2.94101 0 0 0.576934 0.0211893
+[PHRASE] ||| kleines ||| small ||| 1.76492 0.556302 0 0.579784 0
+[PHRASE] ||| kleines [PHRASE,1] ||| small [PHRASE,1] ||| 2.94101 0.30103 0 0.579784 0
+[PHRASE] ||| kleines haus ||| small house ||| 1.86183 0.243038 0 0.579784 0.0211893
+[PHRASE] ||| kleines gelb ||| small yellow ||| 2.46389 0.30103 0 0.579784 0
+[PHRASE] ||| kleines gelb haus ||| small yellow house ||| 2.94101 0 0 0.579784 0.0211893
+[PHRASE] ||| kleine ||| small ||| 1.68574 0.477121 0 0.500602 0
+[PHRASE] ||| kleine [PHRASE,1] ||| small [PHRASE,1] ||| 2.94101 0.30103 0 0.500602 0
+[PHRASE] ||| kleine haus ||| small house ||| 2.16286 0.544068 0 0.500602 0.0211893
+[PHRASE] ||| kleine maus ||| small mouse ||| 1.98677 0 0 0.500602 0
+[PHRASE] ||| kleine gelb ||| small yellow ||| 2.46389 0.30103 0 0.500602 0
+[PHRASE] ||| kleine gelb maus ||| small yellow mouse ||| 2.94101 0 0 0.500602 0
+[PHRASE] ||| gelb ||| yellow ||| 1.61879 0 0 0 0
+[PHRASE] ||| gelb [PHRASE,1] ||| yellow [PHRASE,1] ||| 2.63998 0 0 0 0
+[PHRASE] ||| gelb haus ||| yellow house ||| 1.98677 0 0 0 0.0211893
+[PHRASE] ||| gelb maus ||| yellow mouse ||| 2.16286 0 0 0 0
+[PHRASE] ||| gelb kleines ||| yellow small ||| 2.46389 0.30103 0 0.579784 0
+[PHRASE] ||| gelb kleines haus ||| yellow small house ||| 2.94101 0 0 0.579784 0.0211893
+[PHRASE] ||| gelb kleine ||| yellow small ||| 2.46389 0.30103 0 0.500602 0
+[PHRASE] ||| gelb kleine maus ||| yellow small mouse ||| 2.94101 0 0 0.500602 0
+[PHRASE] ||| eine ||| a ||| 1.50965 0.38818 0 0.38818 0
+[PHRASE] ||| eine [PHRASE,1] ||| a [PHRASE,1] ||| 2.0602 0.312311 0 0.38818 0
+[PHRASE] ||| eine [PHRASE,1] maus ||| a [PHRASE,1] mouse ||| 2.94101 0 0 0.38818 0
+[PHRASE] ||| eine [PHRASE,1] maus gibt ||| is a [PHRASE,1] mouse ||| 3.00796 0 0 0.646458 0
+[PHRASE] ||| eine [PHRASE,1] gibt ||| is a [PHRASE,1] ||| 2.44865 0.394934 0 0.646458 0
+[PHRASE] ||| eine maus ||| a mouse ||| 1.98677 0 0 0.38818 0
+[PHRASE] ||| eine maus [PHRASE,1] ||| a mouse [PHRASE,1] ||| 3.16286 0 0 0.38818 0
+[PHRASE] ||| eine maus [PHRASE,1] ist ||| a mouse is [PHRASE,1] ||| 3.16286 0 0 0.736635 0
+[PHRASE] ||| eine maus ein haus ist ||| a mouse is a house ||| 3.16286 0 0 0.965114 0.0211893
+[PHRASE] ||| eine maus gibt ||| is a mouse ||| 2.46389 0 0 0.646458 0
+[PHRASE] ||| eine kleine ||| a small ||| 1.98677 0.367977 0 0.888783 0
+[PHRASE] ||| eine kleine [PHRASE,1] ||| a small [PHRASE,1] ||| 3.24204 0.30103 0 0.888783 0
+[PHRASE] ||| eine kleine [PHRASE,1] gibt ||| is a small [PHRASE,1] ||| 3.30899 0.30103 0 1.14706 0
+[PHRASE] ||| eine kleine maus ||| a small mouse ||| 2.63998 0 0 0.888783 0
+[PHRASE] ||| eine kleine maus gibt ||| is a small mouse ||| 2.76492 0 0 1.14706 0
+[PHRASE] ||| eine kleine gelb ||| a small yellow ||| 2.94101 0.30103 0 0.888783 0
+[PHRASE] ||| eine kleine gelb maus ||| a small yellow mouse ||| 3.24204 0 0 0.888783 0
+[PHRASE] ||| eine kleine gelb maus gibt ||| is a small yellow mouse ||| 3.30899 0 0 1.14706 0
+[PHRASE] ||| eine gelb ||| a yellow ||| 2.16286 0.39794 0 0.38818 0
+[PHRASE] ||| eine gelb [PHRASE,1] ||| a yellow [PHRASE,1] ||| 3.24204 0.30103 0 0.38818 0
+[PHRASE] ||| eine gelb [PHRASE,1] gibt ||| is a yellow [PHRASE,1] ||| 3.30899 0.30103 0 0.646458 0
+[PHRASE] ||| eine gelb maus ||| a yellow mouse ||| 2.94101 0 0 0.38818 0
+[PHRASE] ||| eine gelb maus gibt ||| is a yellow mouse ||| 3.06595 0 0 0.646458 0
+[PHRASE] ||| eine gelb kleine ||| a yellow small ||| 2.94101 0.30103 0 0.888783 0
+[PHRASE] ||| eine gelb kleine maus ||| a yellow small mouse ||| 3.24204 0 0 0.888783 0
+[PHRASE] ||| eine gelb kleine maus gibt ||| is a yellow small mouse ||| 3.30899 0 0 1.14706 0
+[PHRASE] ||| eine gruen ||| a green ||| 2.46389 0 0 0.38818 0
+[PHRASE] ||| eine gruen maus ||| a green mouse ||| 2.94101 0 0 0.38818 0
+[PHRASE] ||| gruen ||| green ||| 2.16286 0 0 0 0
+[PHRASE] ||| gruen maus ||| green mouse ||| 2.46389 0 0 0 0
+[PHRASE] ||| tages ||| day ||| 2.46389 0 0 0 0
+[PHRASE] ||| gibt ||| is ||| 1.25977 0.258278 0 0.258278 0
+[PHRASE] ||| meins ||| mine ||| 2.16286 0 0 0 0
+[PHRASE] ||| meins [PHRASE,1] ||| mine [PHRASE,1] ||| 2.76492 0 0 0 0
+[PHRASE] ||| meins ist ||| is mine ||| 2.46389 0 0 0.348455 0
+[PHRASE] ||| meins klein ist ||| mine is small ||| 2.76492 0 0 0.78211 0
+[PHRASE] ||| geld ||| money ||| 1.98677 0 0 0 0
+[PHRASE] ||| geld ist ||| is money ||| 2.46389 0.30103 0 0.348455 0
+[PHRASE] ||| geld gibt ||| is money ||| 2.46389 0.30103 0 0.258278 0
+[PHRASE] ||| keins ||| none ||| 1.98677 0 0 0 0
+[PHRASE] ||| keins [PHRASE,1] ||| none [PHRASE,1] ||| 2.76492 0 0 0 0
+[PHRASE] ||| keins klein ist ||| none is small ||| 2.76492 0 0 0.78211 0
+[PHRASE] ||| keins gibt ||| is none ||| 2.46389 0 0 0.258278 0
+[PHRASE] ||| dem haeuschen ||| of control ||| 2.46389 0 0 0.681241 0.425969
+[PHRASE] ||| eines ||| one ||| 2.46389 0.30103 0 0.30103 0
+[PHRASE] ||| eines tages ||| one day ||| 2.46389 0 0 0.30103 0
+[PHRASE] ||| eins ||| one ||| 2.46389 0.30103 0 0.30103 0
+[PHRASE] ||| aus ||| out ||| 2.46389 0 0.477121 0 0.221849
+[PHRASE] ||| aus ||| out of ||| 2.16286 0 0.176091 0.0791812 0.619789
+[PHRASE] ||| aus [PHRASE,1] ||| out [PHRASE,1] ||| 2.76492 0 0.367977 0 0.221849
+[PHRASE] ||| aus [PHRASE,1] ||| out of [PHRASE,1] ||| 2.63998 0 0.243038 0.0791812 0.619789
+[PHRASE] ||| aus ein ||| out of a ||| 2.46389 0 0 0.307661 0.619789
+[PHRASE] ||| aus ein haus ||| out of a house ||| 2.94101 0 0 0.307661 0.640978
+[PHRASE] ||| aus dem haeuschen ||| out of control ||| 2.76492 0 0 0.681241 0.647817
+[PHRASE] ||| aus das ||| out of the ||| 2.46389 0 0 0.0791812 0.920819
+[PHRASE] ||| aus das haus ||| out of the house ||| 2.94101 0 0 0.0791812 0.942008
+[PHRASE] ||| das ||| the ||| 1.76492 0 0.30103 0 0.30103
+[PHRASE] ||| das ||| that ||| 1.76492 0 0.30103 0 0.30103
+[PHRASE] ||| das [PHRASE,1] ||| the [PHRASE,1] ||| 2.39695 0 0.41972 0 0.30103
+[PHRASE] ||| das [PHRASE,1] ||| that [PHRASE,1] ||| 2.18514 0 0.207913 0 0.30103
+[PHRASE] ||| das [PHRASE,1] haus ist ||| that is [PHRASE,1] house ||| 2.86183 0 0 0.348455 0.322219
+[PHRASE] ||| das [PHRASE,1] ist ||| that is [PHRASE,1] ||| 2.86183 0 0 0.348455 0.30103
+[PHRASE] ||| das haus ||| the house ||| 1.86183 0 0 0 0.322219
+[PHRASE] ||| das haus [PHRASE,1] ||| the house [PHRASE,1] ||| 2.76492 0 0 0 0.322219
+[PHRASE] ||| das haus ist ||| the house is ||| 2.94101 0 0 0.348455 0.322219
+[PHRASE] ||| das haus klein ist ||| the house is small ||| 2.76492 0.176091 0 0.78211 0.322219
+[PHRASE] ||| das ein [PHRASE,1] ist ||| that is a [PHRASE,1] ||| 2.86183 0 0 0.576934 0.30103
+[PHRASE] ||| das ein kleines haus ist ||| that is a small house ||| 3.16286 0 0 1.15672 0.322219
+[PHRASE] ||| das ein gelb haus ist ||| that is a yellow house ||| 3.16286 0 0 0.576934 0.322219
+[PHRASE] ||| das klein ist ||| that is small ||| 2.76492 0 0 0.78211 0.30103
+[PHRASE] ||| das kleine ||| the small ||| 2.46389 0 0 0.500602 0.30103
+[PHRASE] ||| das kleine haus ||| the small house ||| 2.94101 0 0 0.500602 0.322219
+[PHRASE] ||| das meins ist ||| that is mine ||| 2.76492 0 0 0.348455 0.30103
+[PHRASE] ||| das geld ist ||| that is money ||| 2.76492 0 0 0.348455 0.30103
+[PHRASE] ||| es ||| there ||| 1.25977 0 0 0 0
+[PHRASE] ||| es [PHRASE,1] ||| there [PHRASE,1] ||| 1.83672 0 0 0 0
+[PHRASE] ||| es [PHRASE,1] haus gibt ||| there is [PHRASE,1] house ||| 2.62775 0 0 0.258278 0.0211893
+[PHRASE] ||| es [PHRASE,1] maus gibt ||| there is [PHRASE,1] mouse ||| 2.5166 0 0 0.258278 0
+[PHRASE] ||| es [PHRASE,1] kleines haus gibt ||| there is [PHRASE,1] small house ||| 3.30899 0 0 0.838062 0.0211893
+[PHRASE] ||| es [PHRASE,1] kleine maus gibt ||| there is [PHRASE,1] small mouse ||| 3.30899 0 0 0.75888 0
+[PHRASE] ||| es [PHRASE,1] gelb haus gibt ||| there is [PHRASE,1] yellow house ||| 3.30899 0 0 0.258278 0.0211893
+[PHRASE] ||| es [PHRASE,1] gelb maus gibt ||| there is [PHRASE,1] yellow mouse ||| 3.30899 0 0 0.258278 0
+[PHRASE] ||| es [PHRASE,1] gibt ||| there is [PHRASE,1] ||| 1.9536 0 0 0.258278 0
+[PHRASE] ||| es ein [PHRASE,1] haus gibt ||| there is a [PHRASE,1] house ||| 3.00796 0 0 0.486757 0.0211893
+[PHRASE] ||| es ein [PHRASE,1] gibt ||| there is a [PHRASE,1] ||| 2.62775 0.360151 0 0.486757 0
+[PHRASE] ||| es ein haus gibt ||| there is a house ||| 2.63998 0 0.176091 0.486757 0.0211893
+[PHRASE] ||| es ein haus gibt ||| there is a small house ||| 2.94101 0.20412 0.477121 0.765511 1.34341
+[PHRASE] ||| es ein kleines [PHRASE,1] gibt ||| there is a small [PHRASE,1] ||| 3.30899 0.30103 0 1.06654 0
+[PHRASE] ||| es ein kleines haus gibt ||| there is a small house ||| 3.16286 0.425969 0 1.06654 0.0211893
+[PHRASE] ||| es ein gelb [PHRASE,1] gibt ||| there is a yellow [PHRASE,1] ||| 3.30899 0.30103 0 0.486757 0
+[PHRASE] ||| es ein gelb haus gibt ||| there is a yellow house ||| 3.16286 0 0 0.486757 0.0211893
+[PHRASE] ||| es eine [PHRASE,1] maus gibt ||| there is a [PHRASE,1] mouse ||| 3.00796 0 0 0.646458 0
+[PHRASE] ||| es eine [PHRASE,1] gibt ||| there is a [PHRASE,1] ||| 2.5166 0.249001 0 0.646458 0
+[PHRASE] ||| es eine maus gibt ||| there is a mouse ||| 2.63998 0 0 0.646458 0
+[PHRASE] ||| es eine kleine [PHRASE,1] gibt ||| there is a small [PHRASE,1] ||| 3.30899 0.30103 0 1.14706 0
+[PHRASE] ||| es eine kleine maus gibt ||| there is a small mouse ||| 2.86183 0 0 1.14706 0
+[PHRASE] ||| es eine gelb [PHRASE,1] gibt ||| there is a yellow [PHRASE,1] ||| 3.30899 0.30103 0 0.646458 0
+[PHRASE] ||| es eine gelb maus gibt ||| there is a yellow mouse ||| 3.16286 0 0 0.646458 0
+[PHRASE] ||| es geld gibt ||| there is money ||| 2.76492 0 0 0.258278 0
+[PHRASE] ||| es keins gibt ||| there is none ||| 2.76492 0 0 0.258278 0
+[PHRASE] ||| dieses ||| this ||| 1.98677 0 0 0 0
+[PHRASE] ||| dieses [PHRASE,1] ||| this [PHRASE,1] ||| 2.56995 0 0 0 0
+[PHRASE] ||| dieses [PHRASE,1] haus ist ||| this is [PHRASE,1] house ||| 3.16286 0 0 0.348455 0.0211893
+[PHRASE] ||| dieses [PHRASE,1] ist ||| this is [PHRASE,1] ||| 3.16286 0 0 0.348455 0
+[PHRASE] ||| dieses haus ||| this house ||| 2.46389 0 0 0 0.0211893
+[PHRASE] ||| dieses haus [PHRASE,1] ||| this house [PHRASE,1] ||| 3.06595 0 0 0 0.0211893
+[PHRASE] ||| dieses haus klein ist ||| this house is small ||| 3.06595 0 0 0.78211 0.0211893
+[PHRASE] ||| dieses ein [PHRASE,1] ist ||| this is a [PHRASE,1] ||| 3.16286 0 0 0.576934 0
+[PHRASE] ||| dieses ein kleines haus ist ||| this is a small house ||| 3.16286 0 0 1.15672 0.0211893
+[PHRASE] ||| dieses kleine ||| this small ||| 2.46389 0 0 0.500602 0
+[PHRASE] ||| dieses kleine haus ||| this small house ||| 2.94101 0 0 0.500602 0.0211893

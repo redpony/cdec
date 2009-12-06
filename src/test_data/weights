@@ -1,0 +1,8 @@
+# hiero
+WordPenalty -0.387029
+LanguageModel 0.253195
+PhraseModel_0 0.142926
+PhraseModel_1 0.465119
+PhraseModel_2 0.079503
+CNPosteriorProbability 0.09259
+Inf -inf
