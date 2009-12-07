@@ -179,7 +179,8 @@ void DumpKBest(const int sent_id, const Hypergraph& forest, const int k, const b
       const KBest::KBestDerivations<vector<WordID>, ESentenceTraversal, KBest::FilterUnique>::Derivation* d =
         kbest.LazyKthBest(forest.nodes_.size() - 1, i);
       if (!d) break;
-      cout << sent_id << " ||| " << TD::GetString(d->yield) << " ||| " << d->feature_values << endl;
+      cout << sent_id << " ||| " << TD::GetString(d->yield) << " ||| "
+           << d->feature_values << " ||| " << log(d->score) << endl;
     }
   } else {
     KBest::KBestDerivations<vector<WordID>, ESentenceTraversal> kbest(forest, k);
@@ -187,7 +188,8 @@ void DumpKBest(const int sent_id, const Hypergraph& forest, const int k, const b
       const KBest::KBestDerivations<vector<WordID>, ESentenceTraversal>::Derivation* d =
         kbest.LazyKthBest(forest.nodes_.size() - 1, i);
       if (!d) break;
-      cout << sent_id << " ||| " << TD::GetString(d->yield) << " ||| " << d->feature_values << endl;
+      cout << sent_id << " ||| " << TD::GetString(d->yield) << " ||| "
+           << d->feature_values << " ||| " << log(d->score) << endl;
     }
   }
 }
