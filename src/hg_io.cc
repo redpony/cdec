@@ -409,6 +409,10 @@ float getFloat(const std::string& in, int &c)
     tmp += get(in,c++);
   }
   eatws(in,c);
+  if (tmp.empty()) {
+    cerr << "Syntax error while reading number! col=" << c << endl;
+    abort();
+  }
   return atof(tmp.c_str());
 }
 
@@ -432,7 +436,7 @@ void ReadPLFEdge(const std::string& in, int &c, int cur_node, Hypergraph* hg) {
   vector<WordID> ewords(2, 0);
   ewords[1] = TD::Convert(getEscapedString(in,c));
   TRulePtr r(new TRule(ewords));
-  //cerr << "RULE: " << r->AsString() << endl;
+  // cerr << "RULE: " << r->AsString() << endl;
   if (get(in,c++) != ',') { assert(!"PCN/PLF parse error: expected , after string\n"); }
   size_t cnNext = 1;
   std::vector<float> probs;
@@ -441,12 +445,14 @@ void ReadPLFEdge(const std::string& in, int &c, int cur_node, Hypergraph* hg) {
     c++;
     float val = getFloat(in,c);
     probs.push_back(val);
+    // cerr << val << endl;  //REMO
   }
   //if we read more than one prob, this was a lattice, last item was column increment
   if (probs.size()>1) {
     cnNext = static_cast<size_t>(probs.back());
     probs.pop_back();
-    if (cnNext < 1) { assert(!"PCN/PLF parse error: bad link length at last element of cn alt block\n"); }
+    if (cnNext < 1) { cerr << cnNext << endl;
+             assert(!"PCN/PLF parse error: bad link length at last element of cn alt block\n"); }
   }
   if (get(in,c++) != ')') { assert(!"PCN/PLF parse error: expected ) at end of cn alt block\n"); }
   eatws(in,c);

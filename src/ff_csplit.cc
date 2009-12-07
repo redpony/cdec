@@ -165,7 +165,7 @@ struct ReverseCharLMCSplitFeatureImpl {
     }
     // cerr << "  END sp=" << sp << endl;
     sc[sp] = Vocab_None;
-    const double startprob = -ngram_.wordProb(kEOS, sc);
+    const double startprob = ngram_.wordProb(kEOS, sc);
     // cerr << "  PROB=" << startprob << endl;
     return startprob;
   }
