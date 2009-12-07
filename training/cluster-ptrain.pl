@@ -8,8 +8,10 @@ my $MAX_ITER_ATTEMPTS = 5; # number of times to retry a failed function evaluati
 my $CWD=`pwd`; chomp $CWD;
 my $BIN_DIR = $SCRIPT_DIR;
 my $OPTIMIZER = "$BIN_DIR/mr_optimize_reduce";
-my $DECODER = "$BIN_DIR/cdec";
+my $DECODER = "$BIN_DIR/../src/cdec";
 my $COMBINER_CACHE_SIZE = 150;
+# This is a hack to run this on a weird cluster,
+# eventually, I'll provide Hadoop scripts.
 my $PARALLEL = "/chomes/redpony/svn-trunk/sa-utils/parallelize.pl";
 die "Can't find $OPTIMIZER" unless -f $OPTIMIZER;
 die "Can't execute $OPTIMIZER" unless -x $OPTIMIZER;
