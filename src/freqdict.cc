@@ -2,11 +2,17 @@
 #include <fstream>
 #include <cassert>
 #include "freqdict.h"
+#include "tdict.h"
+#include "filelib.h"
 
-void FreqDict::load(const std::string& fname) {
-  std::ifstream ifs(fname.c_str());
+using namespace std;
+
+void FreqDict::Load(const std::string& fname) {
+  cerr << "Reading word frequencies: " << fname << endl;
+  ReadFile rf(fname);
+  istream& ifs = *rf.stream();
   int cc=0;
-  while (!ifs.eof()) {
+  while (ifs) {
     std::string word;
     ifs >> word;
     if (word.size() == 0) continue;
@@ -14,7 +20,7 @@ void FreqDict::load(const std::string& fname) {
     double count = 0;
     ifs >> count;
     assert(count > 0.0);  // use -log(f)
-    counts_[word]=count;
+    counts_[TD::Convert(word)]=count;
     ++cc;
     if (cc % 10000 == 0) { std::cerr << "."; }
   }

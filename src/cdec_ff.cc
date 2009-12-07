@@ -2,8 +2,9 @@
 
 #include "ff.h"
 #include "ff_lm.h"
-#include "ff_factory.h"
+#include "ff_csplit.h"
 #include "ff_wordalign.h"
+#include "ff_factory.h"
 
 boost::shared_ptr<FFRegistry> global_ff_registry;
 
@@ -14,5 +15,7 @@ void register_feature_functions() {
   global_ff_registry->Register("MarkovJump", new FFFactory<MarkovJump>);
   global_ff_registry->Register("BlunsomSynchronousParseHack", new FFFactory<BlunsomSynchronousParseHack>);
   global_ff_registry->Register("AlignerResults", new FFFactory<AlignerResults>);
+  global_ff_registry->Register("CSplit_BasicFeatures", new FFFactory<BasicCSplitFeatures>);
+  global_ff_registry->Register("CSplit_ReverseCharLM", new FFFactory<ReverseCharLMCSplitFeature>);
 };
 

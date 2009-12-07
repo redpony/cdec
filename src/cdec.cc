@@ -17,6 +17,7 @@
 #include "sampler.h"
 #include "sparse_vector.h"
 #include "lexcrf.h"
+#include "csplit.h"
 #include "weights.h"
 #include "tdict.h"
 #include "ff.h"
@@ -46,7 +47,7 @@ void ShowBanner() {
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()
-        ("formalism,f",po::value<string>()->default_value("scfg"),"Translation formalism; values include SCFG, FST, or PB.  Specify LexicalCRF for experimental unsupervised CRF word alignment")
+        ("formalism,f",po::value<string>()->default_value("scfg"),"Translation formalism; values include SCFG, FST, PB, LexCRF (lexical translation model), CSPLIT (compound splitting)")
         ("input,i",po::value<string>()->default_value("-"),"Source file")
         ("grammar,g",po::value<vector<string> >()->composing(),"Either SCFG grammar file(s) or phrase tables file(s)")
         ("weights,w",po::value<string>(),"Feature weights file")
@@ -100,14 +101,14 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
     exit(1);
   }
 
-  if (conf->count("help") || conf->count("grammar") == 0) {
+  if (conf->count("help") || conf->count("formalism") == 0) {
     cerr << dcmdline_options << endl;
     exit(1);
   }
 
   const string formalism = LowercaseString((*conf)["formalism"].as<string>());
-  if (formalism != "scfg" && formalism != "fst" && formalism != "lexcrf" && formalism != "pb") {
-    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', or 'lexcrf'\n";
+  if (formalism != "scfg" && formalism != "fst" && formalism != "lexcrf" && formalism != "pb" && formalism != "csplit") {
+    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 'csplit' or 'lexcrf'\n";
     cerr << dcmdline_options << endl;
     exit(1);
   }
@@ -231,6 +232,8 @@ int main(int argc, char** argv) {
     translator.reset(new FSTTranslator(conf));
   else if (formalism == "pb")
     translator.reset(new PhraseBasedTranslator(conf));
+  else if (formalism == "csplit")
+    translator.reset(new CompoundSplit(conf));
   else if (formalism == "lexcrf")
     translator.reset(new LexicalCRF(conf));
   else

@@ -3,17 +3,18 @@
 
 #include <map>
 #include <string>
+#include "wordid.h"
 
 class FreqDict {
  public:
-  void load(const std::string& fname);
-  float frequency(const std::string& word) const {
-    std::map<std::string,float>::const_iterator i = counts_.find(word);
+  void Load(const std::string& fname);
+  float LookUp(const WordID& word) const {
+    std::map<WordID,float>::const_iterator i = counts_.find(word);
     if (i == counts_.end()) return 0;
     return i->second;
   }
  private:
-  std::map<std::string, float> counts_;
+  std::map<WordID, float> counts_;
 };
 
 #endif

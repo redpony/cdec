@@ -36,6 +36,7 @@ noinst_LIBRARIES = libhg.a
 
 libhg_a_SOURCES = \
   fst_translator.cc \
+  csplit.cc \
   scfg_translator.cc \
   hg.cc \
   hg_io.cc \
@@ -58,6 +59,8 @@ libhg_a_SOURCES = \
   ff.cc \
   ff_lm.cc \
   ff_wordalign.cc \
+  ff_csplit.cc \
+  freqdict.cc \
   lexcrf.cc \
   bottom_up_parser.cc \
   phrasebased_translator.cc \

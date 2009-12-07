@@ -88,4 +88,14 @@ inline void SplitCommandAndParam(const std::string& in, std::string* cmd, std::s
 
 void ProcessAndStripSGML(std::string* line, std::map<std::string, std::string>* out);
 
+// given the first character of a UTF8 block, find out how wide it is
+// see http://en.wikipedia.org/wiki/UTF-8 for more info
+inline unsigned int UTF8Len(unsigned char x) {
+  if (x < 0x80) return 1;
+  else if ((x >> 5) == 0x06) return 2;
+  else if ((x >> 4) == 0x0e) return 3;
+  else if ((x >> 3) == 0x1e) return 4;
+  else return 0;
+}
+
 #endif
