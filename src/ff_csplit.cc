@@ -3,14 +3,16 @@
 #include <set>
 #include <cstring>
 
+#include "Vocab.h"
+#include "Ngram.h"
+
+#include "sentence_metadata.h"
+#include "lattice.h"
 #include "tdict.h"
 #include "freqdict.h"
 #include "filelib.h"
 #include "stringlib.h"
 #include "tdict.h"
-
-#include "Vocab.h"
-#include "Ngram.h"
 
 using namespace std;
 
@@ -25,6 +27,8 @@ struct BasicCSplitFeaturesImpl {
       high_freq_(FD::Convert("HighFreq")),
       med_freq_(FD::Convert("MedFreq")),
       freq_(FD::Convert("Freq")),
+      fl1_(FD::Convert("FreqLen1")),
+      fl2_(FD::Convert("FreqLen2")),
       bad_(FD::Convert("Bad")) {
     vector<string> argv;
     int argc = SplitOnWhitespace(param, &argv);
@@ -57,6 +61,8 @@ struct BasicCSplitFeaturesImpl {
   const int high_freq_;
   const int med_freq_;
   const int freq_;
+  const int fl1_;
+  const int fl2_;
   const int bad_;
   FreqDict freq_dict_;
   set<WordID> bad_words_;
@@ -78,6 +84,11 @@ void BasicCSplitFeaturesImpl::TraversalFeaturesImpl(
     cur += UTF8Len(sword[cur]);
     ++chars;
   }
+
+  // these are corrections that attempt to make chars
+  // more like a phoneme count than a letter count, they
+  // are only really meaningful for german and should
+  // probably be gotten rid of
   bool has_sch = strstr(sword, "sch");
   bool has_ch = (!has_sch && strstr(sword, "ch"));
   bool has_ie = strstr(sword, "ie");
@@ -107,6 +118,10 @@ void BasicCSplitFeaturesImpl::TraversalFeaturesImpl(
     features->set_value(med_freq_, 1.0);
   if (freq < 10.0f && chars < 5)
     features->set_value(short_range_, 1.0);
+
+  // i don't understand these features, but they really help!
+  features->set_value(fl1_, sqrt(chars * freq));
+  features->set_value(fl2_, freq / chars);
 }
 
 void BasicCSplitFeatures::TraversalFeaturesImpl(
@@ -128,6 +143,7 @@ void BasicCSplitFeatures::TraversalFeaturesImpl(
 struct ReverseCharLMCSplitFeatureImpl {
   ReverseCharLMCSplitFeatureImpl(const string& param) :
       order_(5),
+      vocab_(*TD::dict_),
       ngram_(vocab_, order_) {
     kBOS = vocab_.getIndex("<s>");
     kEOS = vocab_.getIndex("</s>");
@@ -137,41 +153,30 @@ struct ReverseCharLMCSplitFeatureImpl {
     ngram_.read(file);
   }
 
-  double LeftPhonotacticProb(const char* word) {
+  double LeftPhonotacticProb(const Lattice& inword, const int start) {
+    const int end = inword.size();
     for (int i = 0; i < order_; ++i)
       sc[i] = kBOS;
-    const int len = strlen(word);
-    int cur = 0;
-    int chars = 0;
-    while(cur < len) {
-      cur += UTF8Len(word[cur]);
-      ++chars;
-    }
-    const int sp = min(chars, order_-1);
-    int wend = 0; cur = 0;
-    while(cur < sp) {
-      wend += UTF8Len(word[wend]);
-      ++cur;
-    }
-    int wi = 0;
+    int sp = min(end - start, order_ - 1);
+    // cerr << "[" << start << "," << sp << "]\n";
     int ci = (order_ - sp - 1);
-    // cerr << "WORD: " << word << endl;
-    while (wi != wend) {
-      const int clen = UTF8Len(word[wi]);
-      string cur_char(&word[wi], clen);
-      wi += clen;
-      // cerr << " char: " << cur_char << "  ci=" << ci << endl;
-      sc[ci++] = vocab_.getIndex(cur_char.c_str());
+    int wi = start;
+    while (sp > 0) {
+      sc[ci] = inword[wi][0].label;
+      // cerr << " CHAR: " << TD::Convert(sc[ci]) << "  ci=" << ci << endl;
+      ++wi;
+      ++ci;
+      --sp;
     }
-    // cerr << "  END sp=" << sp << endl;
-    sc[sp] = Vocab_None;
+    // cerr << "  END ci=" << ci << endl;
+    sc[ci] = Vocab_None;
     const double startprob = ngram_.wordProb(kEOS, sc);
     // cerr << "  PROB=" << startprob << endl;
     return startprob;
   }
  private:
   const int order_;
-  Vocab vocab_;
+  Vocab& vocab_;
   VocabIndex kBOS;
   VocabIndex kEOS;
   Ngram ngram_;
@@ -189,9 +194,13 @@ void ReverseCharLMCSplitFeature::TraversalFeaturesImpl(
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
                                      void* out_context) const {
+  (void) ant_contexts;
+  (void) estimated_features;
+  (void) out_context;
+
   if (edge.Arity() != 1) return;
   if (edge.rule_->EWords() != 1) return;
-  const double lpp = pimpl_->LeftPhonotacticProb(TD::Convert(edge.rule_->e_[1]));
+  const double lpp = pimpl_->LeftPhonotacticProb(smeta.GetSourceLattice(), edge.i_);
   features->set_value(fid_, lpp);
 }
 

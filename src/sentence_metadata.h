@@ -27,11 +27,16 @@ struct SentenceMetadata {
   int GetSourceLength() const { return src_len_; }
   int GetTargetLength() const { return trg_len_; }
   int GetSentenceID() const { return sent_id_; }
+  // this will be empty if the translator accepts non FS input!
+  const Lattice& GetSourceLattice() const { return src_lattice_; }
 
  private:
   const int sent_id_;
+  // the following should be set, if possible, by the Translator
   int src_len_;
-
+ public:
+  Lattice src_lattice_;  // this will only be set if inputs are finite state!
+ private:
   // you need to be very careful when depending on these values
   // they will only be set during training / alignment contexts
   const bool has_reference_;
