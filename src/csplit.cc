@@ -45,7 +45,8 @@ struct CompoundSplitImpl {
     const int left_rule = forest->AddEdge(kWORDBREAK_RULE, Hypergraph::TailNodeVector())->id_;
     forest->ConnectEdgeToHeadNode(left_rule, nodes[0]);
 
-    const int max_split_ = chars.size() - min_size_ + 1;
+    const int max_split_ = max(static_cast<int>(chars.size()) - min_size_ + 1, 1);
+    cerr << "max: " << max_split_ << "  " << " min: " << min_size_ << endl;
     for (int i = min_size_; i < max_split_; ++i)
       nodes[i] = forest->AddNode(kXCAT)->id_;
     assert(nodes.back() == -1);
@@ -53,7 +54,8 @@ struct CompoundSplitImpl {
 
     for (int i = 0; i < max_split_; ++i) {
       if (nodes[i] < 0) continue;
-      for (int j = i + min_size_; j <= chars.size(); ++j) {
+      const int start = min(i + min_size_, static_cast<int>(chars.size()));
+      for (int j = start; j <= chars.size(); ++j) {
         if (nodes[j] < 0) continue;
         string yield;
         PasteTogetherStrings(chars, i, j, &yield);
@@ -150,5 +152,22 @@ bool CompoundSplit::Translate(const string& input,
   pimpl_->BuildTrellis(in, forest);
   forest->Reweight(weights);
   return true;
+}
+
+int CompoundSplit::GetFullWordEdgeIndex(const Hypergraph& forest) {
+  assert(forest.nodes_.size() > 0);
+  const vector<int> out_edges = forest.nodes_[0].out_edges_;
+  int max_edge = -1;
+  int max_j = -1;
+  for (int i = 0; i < out_edges.size(); ++i) {
+    const int j = forest.edges_[out_edges[i]].j_;
+    if (j > max_j) {
+      max_j = j;
+      max_edge = out_edges[i];
+    }
+  }
+  assert(max_edge >= 0);
+  assert(max_edge < forest.edges_.size());
+  return max_edge;
 }
 

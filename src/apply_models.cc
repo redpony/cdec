@@ -159,7 +159,7 @@ public:
       out(*o),
       D(in.nodes_.size()),
       pop_limit_(pop_limit) {
-    cerr << "  Rescoring forest (cube pruning, pop_limit = " << pop_limit_ << ')' << endl;
+    cerr << "  Applying feature functions (cube pruning, pop_limit = " << pop_limit_ << ')' << endl;
   }
 
   void Apply() {

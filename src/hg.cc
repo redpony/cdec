@@ -77,6 +77,8 @@ prob_t Hypergraph::ComputeBestPathThroughEdges(vector<prob_t>* post) const {
 
   for (int i = 0; i < in.size(); ++i)
     (*post)[i] = in[i] * out[i];
+  // for (int i = 0; i < in.size(); ++i)
+  //   cerr << "edge " << i << ": " << log((*post)[i]) << endl;
 
   return ins_sco;
 }
@@ -161,6 +163,7 @@ void Hypergraph::BeamPruneInsideOutside(
     if (io[i] > best) best = io[i];
   const prob_t aprob(exp(-alpha));
   const prob_t cutoff = best * aprob;
+  // cerr << "aprob = " << aprob << "\t  CUTOFF=" << cutoff << endl;
   vector<bool> prune(edges_.size());
   //cerr << preserve_mask.size() << " " << edges_.size() << endl;
   int pc = 0;
@@ -170,7 +173,7 @@ void Hypergraph::BeamPruneInsideOutside(
     prune[i] = (io[i] < cutoff);
     if (preserve_mask && (*preserve_mask)[i]) prune[i] = false;
   }
-  cerr << "Beam pruning " << pc << "/" << io.size() << " edges\n";
+  // cerr << "Beam pruning " << pc << "/" << io.size() << " edges\n";
   PruneEdges(prune);
 }
 

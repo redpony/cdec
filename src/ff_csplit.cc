@@ -19,6 +19,8 @@ using namespace std;
 struct BasicCSplitFeaturesImpl {
   BasicCSplitFeaturesImpl(const string& param) :
       word_count_(FD::Convert("WordCount")),
+      letters_sq_(FD::Convert("LettersSq")),
+      letters_sqrt_(FD::Convert("LettersSqrt")),
       in_dict_(FD::Convert("InDict")),
       short_(FD::Convert("Short")),
       long_(FD::Convert("Long")),
@@ -53,6 +55,8 @@ struct BasicCSplitFeaturesImpl {
                              SparseVector<double>* features) const;
 
   const int word_count_;
+  const int letters_sq_;
+  const int letters_sqrt_;
   const int in_dict_;
   const int short_;
   const int long_;
@@ -75,6 +79,8 @@ void BasicCSplitFeaturesImpl::TraversalFeaturesImpl(
                                      const Hypergraph::Edge& edge,
                                      SparseVector<double>* features) const {
   features->set_value(word_count_, 1.0);
+  features->set_value(letters_sq_, (edge.j_ - edge.i_) * (edge.j_ - edge.i_));
+  features->set_value(letters_sqrt_, sqrt(edge.j_ - edge.i_));
   const WordID word = edge.rule_->e_[1];
   const char* sword = TD::Convert(word);
   const int len = strlen(sword);

@@ -350,17 +350,24 @@ string HypergraphIO::AsPLF(const Hypergraph& hg, bool include_global_parentheses
   if (include_global_parentheses) os << '(';
   static const string EPS="*EPS*";
   for (int i = 0; i < hg.nodes_.size()-1; ++i) {
-    os << '(';
     if (hg.nodes_[i].out_edges_.empty()) abort();
-    for (int j = 0; j < hg.nodes_[i].out_edges_.size(); ++j) {
-      const Hypergraph::Edge& e = hg.edges_[hg.nodes_[i].out_edges_[j]];
-      const string output = e.rule_->e_.size() ==2 ? Escape(TD::Convert(e.rule_->e_[1])) : EPS;
-      double prob = log(e.edge_prob_);
-      if (isinf(prob)) { prob = -9e20; }
-      if (isnan(prob)) { prob = 0; }
-      os << "('" << output << "'," << prob << "," << e.head_node_ - i << "),";
+    const bool last_node = (i == hg.nodes_.size() - 2);
+    const int out_edges_size = hg.nodes_[i].out_edges_.size();
+    // compound splitter adds an extra goal transition which we suppress with
+    // the following conditional
+    if (!last_node || out_edges_size != 1 ||
+         hg.edges_[hg.nodes_[i].out_edges_[0]].rule_->EWords() == 1) {
+      os << '(';
+      for (int j = 0; j < out_edges_size; ++j) {
+        const Hypergraph::Edge& e = hg.edges_[hg.nodes_[i].out_edges_[j]];
+        const string output = e.rule_->e_.size() ==2 ? Escape(TD::Convert(e.rule_->e_[1])) : EPS;
+        double prob = log(e.edge_prob_);
+        if (isinf(prob)) { prob = -9e20; }
+        if (isnan(prob)) { prob = 0; }
+        os << "('" << output << "'," << prob << "," << e.head_node_ - i << "),";
+      }
+      os << "),";
     }
-    os << "),";
   }
   if (include_global_parentheses) os << ')';
   return os.str();
