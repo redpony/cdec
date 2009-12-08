@@ -63,7 +63,11 @@ while(<STDIN>) {
   for (my $i=0; $i < scalar @words; $i++) {
     my $word = lc $words[$i];
     if (length($word)<6 || $word =~ /^[,\-0-9\.]+$/) {
-      push @res, $word;
+      if ($IS_PLF) {
+        push @res, "(('" . escape($word) . "',0,1),),";
+      } else {
+        push @res, $word;
+      }
     } else {
       push @res, undef;
       push @todo, $word;
@@ -81,8 +85,6 @@ while(<STDIN>) {
           $seg =~ s/^# //o;
         }
         $res[$i] = $seg;
-      } elsif ($IS_PLF) {
-        $res[$i] = "(('" . escape($res[$i]) . "',0,1),),";
       }
     }
   }
