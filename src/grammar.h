@@ -28,7 +28,7 @@ struct Grammar {
 
   virtual ~Grammar();
   virtual const GrammarIter* GetRoot() const = 0;
-  virtual bool HasRuleForSpan(int i, int j) const;
+  virtual bool HasRuleForSpan(int i, int j, int distance) const;
 
   // cat is the category to be rewritten
   inline const std::vector<TRulePtr>& GetAllUnaryRules() const {
@@ -59,7 +59,7 @@ struct TextGrammar : public Grammar {
   virtual const GrammarIter* GetRoot() const;
   void AddRule(const TRulePtr& rule);
   void ReadFromFile(const std::string& filename);
-  virtual bool HasRuleForSpan(int i, int j) const;
+  virtual bool HasRuleForSpan(int i, int j, int distance) const;
   const std::vector<TRulePtr>& GetUnaryRules(const WordID& cat) const;
  private:
   int max_span_;
@@ -70,12 +70,12 @@ struct GlueGrammar : public TextGrammar {
   // read glue grammar from file
   explicit GlueGrammar(const std::string& file);
   GlueGrammar(const std::string& goal_nt, const std::string& default_nt);  // "S", "X"
-  virtual bool HasRuleForSpan(int i, int j) const;
+  virtual bool HasRuleForSpan(int i, int j, int distance) const;
 };
 
 struct PassThroughGrammar : public TextGrammar {
   PassThroughGrammar(const Lattice& input, const std::string& cat);
-  virtual bool HasRuleForSpan(int i, int j) const;
+  virtual bool HasRuleForSpan(int i, int j, int distance) const;
  private:
   std::vector<std::set<int> > has_rule_;  // index by [i][j]
 };

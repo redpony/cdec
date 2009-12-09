@@ -19,6 +19,7 @@ class Array2D {
     width_(w), height_(h), data_(w*h, d) {}
   Array2D(const Array2D& rhs) :
     width_(rhs.width_), height_(rhs.height_), data_(rhs.data_) {}
+  bool empty() const { return data_.empty(); }
   void resize(int w, int h, const T& d = T()) {
     data_.resize(w * h, d);
     width_ = w;

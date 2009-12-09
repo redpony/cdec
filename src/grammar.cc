@@ -15,9 +15,10 @@ RuleBin::~RuleBin() {}
 GrammarIter::~GrammarIter() {}
 Grammar::~Grammar() {}
 
-bool Grammar::HasRuleForSpan(int i, int j) const {
+bool Grammar::HasRuleForSpan(int i, int j, int distance) const {
   (void) i;
   (void) j;
+  (void) distance;
   return true;  // always true by default
 }
 
@@ -119,8 +120,8 @@ void TextGrammar::ReadFromFile(const string& filename) {
   cerr << "  " << rule_count << " rules read.\n";
 }
 
-bool TextGrammar::HasRuleForSpan(int i, int j) const {
-  return (max_span_ >= (j - i));
+bool TextGrammar::HasRuleForSpan(int i, int j, int distance) const {
+  return (max_span_ >= distance);
 }
 
 GlueGrammar::GlueGrammar(const string& file) : TextGrammar(file) {}
@@ -136,7 +137,7 @@ GlueGrammar::GlueGrammar(const string& goal_nt, const string& default_nt) {
   //cerr << "GLUE: " << glue->AsString() << endl;
 }
 
-bool GlueGrammar::HasRuleForSpan(int i, int j) const {
+bool GlueGrammar::HasRuleForSpan(int i, int j, int distance) const {
   (void) j;
   return (i == 0);
 }
@@ -156,7 +157,7 @@ PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat) 
   }
 }
 
-bool PassThroughGrammar::HasRuleForSpan(int i, int j) const {
+bool PassThroughGrammar::HasRuleForSpan(int i, int j, int distance) const {
   const set<int>& hr = has_rule_[i];
   if (i == j) { return !hr.empty(); }
   return (hr.find(j) != hr.end());

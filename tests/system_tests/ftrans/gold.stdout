@@ -1,4 +1,4 @@
-0 ||| CB ||| F4=1;Inv=1
-0 ||| BC ||| F3=0.4;Mono=1
-0 ||| B C ||| F1=1;OtherFeat=1;F2=0.2;Mono=1
-0 ||| C B ||| F1=1;OtherFeat=1;F2=0.2;Inv=1
+0 ||| CB ||| F4=1;Inv=1 ||| 101
+0 ||| BC ||| F3=0.4;Mono=1 ||| 6
+0 ||| B C ||| F1=1;OtherFeat=1;F2=0.2;Mono=1 ||| 3
+0 ||| C B ||| F1=1;OtherFeat=1;F2=0.2;Inv=1 ||| 2

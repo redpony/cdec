@@ -36,6 +36,27 @@ void WordPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   features->set_value(fid_, edge.rule_->EWords() * value_);
 }
 
+SourceWordPenalty::SourceWordPenalty(const string& param) :
+    fid_(FD::Convert("SourceWordPenalty")),
+    value_(-1.0 / log(10)) {
+  if (!param.empty()) {
+    cerr << "Warning SourceWordPenalty ignoring parameter: " << param << endl;
+  }
+}
+
+void SourceWordPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                        const Hypergraph::Edge& edge,
+                                        const std::vector<const void*>& ant_states,
+                                        SparseVector<double>* features,
+                                        SparseVector<double>* estimated_features,
+                                        void* state) const {
+  (void) smeta;
+  (void) ant_states;
+  (void) state;
+  (void) estimated_features;
+  features->set_value(fid_, edge.rule_->FWords() * value_);
+}
+
 ModelSet::ModelSet(const vector<double>& w, const vector<const FeatureFunction*>& models) :
     models_(models),
     weights_(w),
