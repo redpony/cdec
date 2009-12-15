@@ -42,5 +42,5 @@ then
   AM_CONDITIONAL([SRI_LM], true)
 fi
 
-AC_OUTPUT(Makefile src/Makefile training/Makefile vest/Makefile)
+AC_OUTPUT(Makefile decoder/Makefile training/Makefile vest/Makefile)
 

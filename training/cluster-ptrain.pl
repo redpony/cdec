@@ -8,7 +8,7 @@ my $MAX_ITER_ATTEMPTS = 5; # number of times to retry a failed function evaluati
 my $CWD=`pwd`; chomp $CWD;
 my $BIN_DIR = $SCRIPT_DIR;
 my $OPTIMIZER = "$BIN_DIR/mr_optimize_reduce";
-my $DECODER = "$BIN_DIR/../src/cdec";
+my $DECODER = "$BIN_DIR/../decoder/cdec";
 my $COMBINER_CACHE_SIZE = 150;
 # This is a hack to run this on a weird cluster,
 # eventually, I'll provide Hadoop scripts.
@@ -19,32 +19,35 @@ my $restart = '';
 if ($ARGV[0] && $ARGV[0] eq '--restart') { shift @ARGV; $restart = 1; }
 
 my $pmem="2500mb";
-my $nodes = 36;
+my $nodes = 1;
 my $max_iteration = 1000;
 my $PRIOR_FLAG = "";
 my $parallel = 1;
 my $CFLAG = "-C 1";
 my $LOCAL;
+my $DISTRIBUTED;
 my $PRIOR;
 my $OALG = "lbfgs";
 my $sigsq = 1;
 my $means_file;
-GetOptions("decoder=s" => \$DECODER,
+GetOptions("cdec=s" => \$DECODER,
            "run_locally" => \$LOCAL,
-           "gaussian_prior" => \$PRIOR,
+           "distributed" => \$DISTRIBUTED,
            "sigma_squared=f" => \$sigsq,
            "means=s" => \$means_file,
            "optimizer=s" => \$OALG,
+           "jobs=i" => \$nodes,
            "pmem=s" => \$pmem
           ) or usage();
 usage() unless scalar @ARGV==3;
 my $config_file = shift @ARGV;
 my $training_corpus = shift @ARGV;
 my $initial_weights = shift @ARGV;
+unless ($DISTRIBUTED) { $LOCAL = 1; }
 die "Can't find $config_file" unless -f $config_file;
 die "Can't find $DECODER" unless -f $DECODER;
 die "Can't execute $DECODER" unless -x $DECODER;
-if ($LOCAL) { print STDERR "Will running LOCALLY.\n"; $parallel = 0; }
+if ($LOCAL) { print STDERR "Will run LOCALLY.\n"; $parallel = 0; }
 if ($PRIOR) {
   $PRIOR_FLAG="-p --sigma_squared $sigsq";
   if ($means_file) { $PRIOR_FLAG .= " -u $means_file"; }
@@ -56,20 +59,23 @@ if ($parallel) {
 }
 unless ($parallel) { $CFLAG = "-C 500"; }
 unless ($config_file =~ /^\//) { $config_file = $CWD . '/' . $config_file; }
+my $clines = num_lines($training_corpus);
 
 print STDERR <<EOT;
 PTRAIN CONFIGURATION INFORMATION
 
       Config file: $config_file
   Training corpus: $training_corpus
+      Corpus size: $clines
   Initial weights: $initial_weights
    Decoder memory: $pmem
-  Nodes requested: $nodes
    Max iterations: $max_iteration
         Optimizer: $OALG
-            PRIOR: $PRIOR_FLAG
-          restart: $restart
+   Jobs requested: $nodes
+           prior?: $PRIOR_FLAG
+         restart?: $restart
 EOT
+
 if ($OALG) { $OALG="-m $OALG"; }
 
 my $nodelist="1";
@@ -142,5 +148,33 @@ while ($iter < $max_iteration) {
 print "FINAL WEIGHTS: $dir/weights.$iter\n";
 
 sub usage {
-  die "Usage: $0 [OPTIONS] cdec.ini training.corpus weights.init\n";
+  die <<EOT;
+
+Usage: $0 [OPTIONS] cdec.ini training.corpus weights.init
+
+  Options:
+
+    --distributed      Parallelize function evaluation
+    --cdec PATH        Path to cdec binary
+    --optimize OPT     lbfgs, rprop, sgd
+    --gaussian_prior   add Gaussian prior
+    --means FILE       if you want means other than 0
+    --sigma_squared S  variance on prior
+    --pmem MEM         Memory required for decoder
+
+EOT
+}
+
+sub num_lines {
+  my $file = shift;
+  my $fh;
+  if ($file=~ /\.gz$/) {
+    open $fh, "zcat $file|" or die "Couldn't fork zcat $file: $!";
+  } else {
+    open $fh, "<$file" or die "Couldn't read $file: $!";
+  }
+  my $lines = 0;
+  while(<$fh>) { $lines++; }
+  close $fh;
+  return $lines;
 }

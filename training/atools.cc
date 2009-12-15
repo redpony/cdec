@@ -2,6 +2,7 @@
 #include <sstream>
 #include <vector>
 
+#include <queue>
 #include <map>
 #include <boost/program_options.hpp>
 #include <boost/shared_ptr.hpp>
@@ -105,6 +106,99 @@ struct IntersectCommand : public Command {
   }
 };
 
+struct UnionCommand : public Command {
+  string Name() const { return "union"; }
+  bool RequiresTwoOperands() const { return true; }
+  void Apply(const Array2D<bool>& a, const Array2D<bool>& b, Array2D<bool>* x) {
+    EnsureSize(a, b, x);
+    Array2D<bool>& res = *x;
+    for (int i = 0; i < res.width(); ++i)
+      for (int j = 0; j < res.height(); ++j)
+        res(i, j) = Safe(a, i, j) || Safe(b, i, j);
+  }
+};
+
+struct RefineCommand : public Command {
+  RefineCommand() {
+    neighbors_.push_back(make_pair(1,0));
+    neighbors_.push_back(make_pair(-1,0));
+    neighbors_.push_back(make_pair(0,1));
+    neighbors_.push_back(make_pair(0,-1));
+  }
+  bool RequiresTwoOperands() const { return true; }
+ protected:
+  void InitRefine(
+      const Array2D<bool>& a,
+      const Array2D<bool>& b,
+      Array2D<bool>* x) {
+    EnsureSize(a, b, x);
+    in_.clear(); un_.clear(); is_i_aligned_.clear(); is_j_aligned_.clear();
+    EnsureSize(a, b, &in_);
+    EnsureSize(a, b, &un_);
+    is_i_aligned_.resize(x->width(), false);
+    is_j_aligned_.resize(x->height(), false);
+    for (int i = 0; i < in_.width(); ++i)
+      for (int j = 0; j < in_.height(); ++j) {
+        un_(i, j) = Safe(a, i, j) || Safe(b, i, j);
+        in_(i, j) = Safe(a, i, j) && Safe(b, i, j);
+    }
+  }
+  // "grow" the intersection alignment with neighboring points
+  // from the union alignment
+  void Grow(Array2D<bool>* x) {
+    Array2D<bool>& res = *x;
+    queue<pair<int, int> > q;
+    for (int i = 0; i < in_.width(); ++i)
+      for (int j = 0; j < in_.height(); ++j)
+        if (in_(i, j)) {
+          Align(i, j, x);
+          q.push(make_pair(i, j));
+        }
+    while(!q.empty()) {
+      const pair<int,int> point = q.front();
+      q.pop();
+      for (int k = 0; k < neighbors_.size(); ++k) {
+        const int test_i = neighbors_[k].first + point.first;
+        const int test_j = neighbors_[k].second + point.second;
+        if (Safe(un_, test_i, test_j) && !res(test_i, test_j)) {
+          Align(test_i, test_j, x);
+          q.push(make_pair(test_i, test_j));
+        }
+      }
+    }
+  }
+  void Final(bool do_and, Array2D<bool>* x) {
+  }
+  void Align(int i, int j, Array2D<bool>* x) {
+    (*x)(i, j) = true;
+    is_i_aligned_[i] = true;
+    is_j_aligned_[j] = true;
+  }
+  Array2D<bool> in_;   // intersection alignment
+  Array2D<bool> un_;   // union alignment
+  vector<bool> is_i_aligned_;
+  vector<bool> is_j_aligned_;
+  vector<pair<int,int> > neighbors_;
+};
+
+struct DiagCommand : public RefineCommand {
+  DiagCommand() {
+    neighbors_.push_back(make_pair(1,1));
+    neighbors_.push_back(make_pair(-1,1));
+    neighbors_.push_back(make_pair(1,-1));
+    neighbors_.push_back(make_pair(-1,-1));
+  }
+};
+
+struct GDFCommand : public DiagCommand {
+  string Name() const { return "gdf"; }
+  void Apply(const Array2D<bool>& a, const Array2D<bool>& b, Array2D<bool>* x) {
+    InitRefine(a, b, x);
+    Grow(x);
+    Final(false, x);
+  }
+};
+
 map<string, boost::shared_ptr<Command> > commands;
 
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
@@ -163,6 +257,8 @@ int main(int argc, char **argv) {
   AddCommand<ConvertCommand>();
   AddCommand<InvertCommand>();
   AddCommand<IntersectCommand>();
+  AddCommand<UnionCommand>();
+  AddCommand<GDFCommand>();
   AddCommand<FMeasureCommand>();
   po::variables_map conf;
   InitCommandLine(argc, argv, &conf);

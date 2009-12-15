@@ -8,7 +8,7 @@ my $TEMP_DIR = tempdir( CLEANUP => 1 );
 
 #my $cwd = cwd();
 #die "Sanity failed: $cwd" unless -d $cwd;
-my $DECODER = "$script_dir/../src/cdec";
+my $DECODER = "$script_dir/../decoder/cdec";
 my $FILTER = "$script_dir/tools/filter-stderr.pl";
 my $COMPARE_STATS = "$script_dir/tools/compare-statistics.pl";
 

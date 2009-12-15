@@ -11,30 +11,30 @@ bin_PROGRAMS = \
 
 cdec_SOURCES = cdec.cc forest_writer.cc maxtrans_blunsom.cc cdec_ff.cc ff_factory.cc timing_stats.cc
 small_vector_test_SOURCES = small_vector_test.cc
-small_vector_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libhg.a
+small_vector_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 parser_test_SOURCES = parser_test.cc
-parser_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libhg.a
+parser_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 dict_test_SOURCES = dict_test.cc
-dict_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libhg.a
+dict_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 ff_test_SOURCES = ff_test.cc
-ff_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libhg.a
+ff_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 grammar_test_SOURCES = grammar_test.cc
-grammar_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libhg.a
+grammar_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 hg_test_SOURCES = hg_test.cc
-hg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libhg.a
+hg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 trule_test_SOURCES = trule_test.cc
-trule_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libhg.a
+trule_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 weights_test_SOURCES = weights_test.cc
-weights_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libhg.a
+weights_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 
-LDADD = libhg.a
+LDADD = libcdec.a
 
 AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS)
 AM_LDFLAGS = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LIB) -lz
 
-noinst_LIBRARIES = libhg.a
+noinst_LIBRARIES = libcdec.a
 
-libhg_a_SOURCES = \
+libcdec_a_SOURCES = \
   fst_translator.cc \
   csplit.cc \
   scfg_translator.cc \

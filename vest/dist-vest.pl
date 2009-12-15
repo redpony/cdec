@@ -1,17 +1,16 @@
 #!/usr/bin/env perl
 
+use strict;
+my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
 use Getopt::Long;
 use IPC::Open2;
 use strict;
 use POSIX ":sys_wait_h";
 
-my $mydir = `dirname $0`;
-chomp $mydir;
 # Default settings
-my $srcFile = "/fs/cliplab/mteval/Evaluation/Chinese-English/mt03.src.txt";
-my $refFiles = "/fs/cliplab/mteval/Evaluation/Chinese-English/mt03.ref.txt.*";
-my $bin_dir = "/fs/clip-software/cdec/bin";
-$bin_dir = "/Users/redpony/cdyer-svn-root/cdec/vest/bin_dir";
+my $srcFile;
+my $refFiles;
+my $bin_dir = $SCRIPT_DIR;
 die "Bin directory $bin_dir missing/inaccessible" unless -d $bin_dir;
 my $FAST_SCORE="$bin_dir/fast_score";
 die "Can't find $FAST_SCORE" unless -x $FAST_SCORE;
@@ -22,7 +21,7 @@ my $SCORER = $FAST_SCORE;
 die "Can't find $MAPPER" unless -x $MAPPER;
 my $forestUnion = "$bin_dir/union_forests";
 die "Can't find $forestUnion" unless -x $forestUnion;
-my $cdec = "$bin_dir/cdec";
+my $cdec = "$bin_dir/../decoder/cdec";
 die "Can't find decoder in $cdec" unless -x $cdec;
 my $decoder = $cdec;
 my $lines_per_mapper = 440;
@@ -153,7 +152,7 @@ $SIG{HUP} = "cleanup";
 
 my $decoderBase = `basename $decoder`; chomp $decoderBase;
 my $newIniFile = "$dir/$decoderBase.ini";
-my $parallelize = "$mydir/parallelize.pl";
+my $parallelize = '/chomes/redpony/svn-trunk/sa-utils/parallelize.pl';
 my $inputFileName = "$dir/input";
 my $user = $ENV{"USER"};
 
@@ -254,15 +253,18 @@ while (1){
 	print LOGFILE "\nUNION FORESTS\n";
 	print LOGFILE `date`;
 	my $mergeLog="$logdir/prune-merge.log.$iteration";
-	$cmd = "$forestUnion -r $dir/hgs -n $dir/hgs-current -s $devSize";
-	print LOGFILE "COMMAND:\n$cmd\n";
-	$result = system($cmd);
+	`rm -rf $dir/hgs`;
+	`mv $dir/hgs-current $dir/hgs`;
+	#$cmd = "$forestUnion -r $dir/hgs -n $dir/hgs-current -s $devSize";
+	#print LOGFILE "COMMAND:\n$cmd\n";
+	#$result = system($cmd);
 	unless ($result == 0){
 		cleanup();
 		print LOGFILE "ERROR: merge command returned non-zero exit code $result\n";
 		die;
 	}
 	`rm -f $dir/hgs-current/*.json.gz`; # clean up old HGs, they've been moved to the repository
+        `mkdir -p $dir/hgs-current`;
 
 	my $score = 0;
 	my $icc = 0;
@@ -303,7 +305,7 @@ while (1){
 			my $mapoutput = $shard;
 			my $client_name = $shard;
 			$client_name =~ s/mapinput.//;
-			$client_name = "fmert.$client_name";
+			$client_name = "vest.$client_name";
 			$mapoutput =~ s/mapinput/mapoutput/;
 			push @mapoutputs, "$dir/splag.$im1/$mapoutput";
 			$o2i{"$dir/splag.$im1/$mapoutput"} = "$dir/splag.$im1/$shard";
@@ -548,35 +550,8 @@ Options:
 	--decoder <decoder path>
 		Decoder binary to use.
 
-	--decode-nodes <nodelist>
-		A list of nodes used for parallel decoding.  If specific nodes 
-		are not desired, use "1" for each node requested.  Defaults to 
-		"1 1 1 1 1 1 1 1 1 1 1 1 1 1 1", which indicates a request for 
-		15 nodes.
-
-	--dont-clean
-		 If present, this flag prevents intermediate files, including
-		 run files and cumulative files, from being automatically removed
-		 after a successful optimization run (these files are left if the
-		 run fails for any reason).  If used, a makefile containing
-		 cleanup commands is written to the directory.  To clean up
-		 the intermediate files, invoke make without any arguments.
-
-	--dry-run
-		Prints out the settings and exits without doing anything.
-
-	--epsilon <epsilon>
-		Require that the dev set BLEU score improve by at least <epsilon>
-		within <interval> iterations (controlled by parameter --interval).
-		If not specified, defaults to .002.
-
 	--help
 		Print this message and exit.
-
-	--interval <i>
-		Require that the dev set BLEU score improve by at least <epsilon>
-		(controlled by parameter --epsilon) within <interval> iterations.
-		If not specified, defaults to 5.
 
 	--iteration <I> 
 		Starting iteration number.  If not specified, defaults to 1.
@@ -586,18 +561,15 @@ Options:
 		to 10.
 
 	--pmem <N>
-		Amount of physical memory requested for parallel decoding jobs,
-		in the format expected by qsub.  If not specified, defaults to
-		2g.
+		Amount of physical memory requested for parallel decoding jobs.
 
 	--ref-files <files> 
 		Dev set ref files.  This option takes only a single string argument. 
 		To use multiple files (including file globbing), this argument should 
-		be quoted.  If not specified, defaults to
-		/fs/cliplab/mteval/Evaluation/Chinese-English/mt03.ref.txt.* 
+		be quoted.
 
 	--metric <method>
-		Metric to optimize.  See fmert's --metric option for values.
+		Metric to optimize.
 		Example values: IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, Combi
 
 	--normalize <feature-name>
@@ -609,8 +581,7 @@ Options:
 		set this parameter to explore other directions. Defaults to 5.
 
 	--source-file <file> 
-		Dev set source file.  If not specified, defaults to
-		/fs/cliplab/mteval/Evaluation/Chinese-English/mt03.src.txt
+		Dev set source file.
 
 	--weights <file> 
 		A file specifying initial feature weights.  The format is

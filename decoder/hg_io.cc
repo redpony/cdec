@@ -443,6 +443,7 @@ void ReadPLFEdge(const std::string& in, int &c, int cur_node, Hypergraph* hg) {
   vector<WordID> ewords(2, 0);
   ewords[1] = TD::Convert(getEscapedString(in,c));
   TRulePtr r(new TRule(ewords));
+  r->ComputeArity();
   // cerr << "RULE: " << r->AsString() << endl;
   if (get(in,c++) != ',') { assert(!"PCN/PLF parse error: expected , after string\n"); }
   size_t cnNext = 1;

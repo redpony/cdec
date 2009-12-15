@@ -16,6 +16,8 @@ class RelativeSentencePosition : public FeatureFunction {
                                      void* out_context) const;
  private:
   const int fid_;
+  bool condition_on_fclass_;
+  std::string template_;
 };
 
 class MarkovJump : public FeatureFunction {
@@ -32,6 +34,7 @@ class MarkovJump : public FeatureFunction {
   const int fid_;
   bool individual_params_per_jumpsize_;
   bool condition_on_flen_;
+  bool condition_on_fclass_;
   std::string template_;
 };
 

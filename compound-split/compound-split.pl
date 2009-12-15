@@ -5,7 +5,7 @@ my $script_dir; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $script_dir 
 use Getopt::Long;
 use IPC::Open2;
 
-my $CDEC = "$script_dir/../src/cdec";
+my $CDEC = "$script_dir/../decoder/cdec";
 my $LANG = 'de';
 
 my $BEAM = 2.1;

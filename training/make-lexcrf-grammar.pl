@@ -17,22 +17,26 @@ while(<M1>) {
 }
 
 my $ADD_MODEL1 = 0;      # found that model1 hurts performance
-my $IS_FRENCH_F = 0;     # indicates that the f language is french
-my $IS_ARABIC_F = 1;     # indicates that the f language is arabic
+my $IS_FRENCH_F = 1;     # indicates that the f language is french
+my $IS_ARABIC_F = 0;     # indicates that the f language is arabic
+my $IS_URDU_F = 0;     # indicates that the f language is arabic
 my $ADD_PREFIX_ID = 0;
 my $ADD_LEN = 1;
-my $ADD_LD = 0;
+my $ADD_SIM = 1;
 my $ADD_DICE = 1;
 my $ADD_111 = 1;
 my $ADD_ID = 1;
 my $ADD_PUNC = 1;
 my $ADD_NUM_MM = 1;
 my $ADD_NULL = 1;
+my $ADD_STEM_ID = 1;
 my $BEAM_RATIO = 50;
 
 my %fdict;
 my %fcounts;
 my %ecounts;
+
+my %sdict;
 
 while(<EF>) {
   chomp;
@@ -56,10 +60,11 @@ print STDERR "PuncMiss 0\n" if $ADD_PUNC;
 print STDERR "IsNull 0\n" if $ADD_NULL;
 print STDERR "Model1 0\n" if $ADD_MODEL1;
 print STDERR "DLen 0\n" if $ADD_LEN;
-print STDERR "NumMM 0\n" if $ADD_NUM_MM;
-print STDERR "Level 0\n" if $ADD_LD;
+print STDERR "NumMM 0\nNumMatch 0\n" if $ADD_NUM_MM;
+print STDERR "OrthoSim 0\n" if $ADD_SIM;
 print STDERR "PfxIdentical 0\n" if ($ADD_PREFIX_ID);
 my $fc = 1000000;
+my $sids = 1000000;
 for my $f (sort keys %fdict) {
   my $re = $fdict{$f};
   my $max;
@@ -72,7 +77,6 @@ for my $f (sort keys %fdict) {
     my $dice = 2 * $efcount / ($ecounts{$e} + $fcounts{$f});
     my $feats = "F$fc=1";
     my $oe = $e;
-    my $len_e = length($oe);
     my $of = $f;   # normalized form
     if ($IS_FRENCH_F) {
       # see http://en.wikipedia.org/wiki/Use_of_the_circumflex_in_French
@@ -85,7 +89,27 @@ for my $f (sort keys %fdict) {
       if (length($of) > 1 && !($of =~ /\d/)) {
         $of =~ s/\$/sh/g;
       }
+    } elsif ($IS_URDU_F) {
+      if (length($of) > 1 && !($of =~ /\d/)) {
+        $of =~ s/\$/sh/g;
+      }
+      $oe =~ s/^-e-//;
+      $oe =~ s/^al-/al/;
+      $of =~ s/([a-z])\~/$1$1/g;
+      $of =~ s/E/'/g;
+      $of =~ s/^Aw/o/g;
+      $of =~ s/\|/a/g;
+      $of =~ s/@/h/g;
+      $of =~ s/c/ch/g;
+      $of =~ s/x/kh/g;
+      $of =~ s/\*/dh/g;
+      $of =~ s/w/o/g;
+      $of =~ s/Z/dh/g;
+      $of =~ s/y/i/g;
+      $of =~ s/Y/a/g;
+      $of = lc $of;
     }
+    my $len_e = length($oe);
     my $len_f = length($of);
     $feats .= " Model1=$m1" if ($ADD_MODEL1);
     $feats .= " Dice=$dice" if $ADD_DICE;
@@ -100,11 +124,34 @@ for my $f (sort keys %fdict) {
         $feats .= " DLen=$dlen";
       }
     }
-    my $f_num = ($of =~ /^-?\d[0-9\.\,]+%?$/);  # this matches *two digit* and more numbers
-    my $e_num = ($oe =~ /^-?\d[0-9\.\,]+%?$/);
+    my $f_num = ($of =~ /^-?\d[0-9\.\,]+%?$/ && (length($of) > 3));
+    my $e_num = ($oe =~ /^-?\d[0-9\.\,]+%?$/ && (length($oe) > 3));
     my $both_non_numeric = (!$e_num && !$f_num);
     if ($ADD_NUM_MM && (($f_num && !$e_num) || ($e_num && !$f_num))) {
       $feats .= " NumMM=1";
+    }
+    if ($ADD_NUM_MM && ($f_num && $e_num) && ($oe eq $of)) {
+      $feats .= " NumMatch=1";
+    }
+    if ($ADD_STEM_ID) {
+      my $el = 4;
+      my $fl = 4;
+      if ($oe =~ /^al|re|co/) { $el++; }
+      if ($of =~ /^al|re|co/) { $fl++; }
+      if ($oe =~ /^trans|inter/) { $el+=2; }
+      if ($of =~ /^trans|inter/) { $fl+=2; }
+      if ($fl > length($of)) { $fl = length($of); }
+      if ($el > length($oe)) { $el = length($oe); }
+      my $sf = substr $of, 0, $fl;
+      my $se = substr $oe, 0, $el;
+      my $id = $sdict{$sf}->{$se};
+      if (!$id) {
+        $sids++;
+	$sdict{$sf}->{$se} = $sids;
+	$id = $sids;
+	print STDERR "S$sids 0\n"
+      }
+      $feats .= " S$id=1";
     }
     if ($ADD_PREFIX_ID) {
       if ($len_e > 3 && $len_f > 3 && $both_non_numeric) { 
@@ -113,12 +160,14 @@ for my $f (sort keys %fdict) {
         if ($pe eq $pf) { $feats .= " PfxIdentical=1"; }
       }
     }
-    if ($ADD_LD) {
+    if ($ADD_SIM) {
       my $ld = 0;
-      if ($is_null) { $ld = length($e); } else {
-        $ld = levenshtein($e, $f);
+      my $eff = $len_e;
+      if ($eff < $len_f) { $eff = $len_f; }
+      if (!$is_null) {
+        $ld = ($eff - levenshtein($oe, $of)) / sqrt($eff);
       }
-      $feats .= " Leven=$ld";
+      $feats .= " OrthoSim=$ld";
     }
     my $ident = ($e eq $f);
     if ($ident && $ADD_ID) { $feats .= " Identical=1"; }

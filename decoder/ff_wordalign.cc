@@ -14,7 +14,16 @@
 using namespace std;
 
 RelativeSentencePosition::RelativeSentencePosition(const string& param) :
-  fid_(FD::Convert("RelativeSentencePosition")) {}
+    fid_(FD::Convert("RelativeSentencePosition")) {
+  if (!param.empty()) {
+    cerr << "  Loading word classes from " << param << endl;
+    condition_on_fclass_ = true;
+    template_ = "RSP:FC000";
+    assert(!"not implemented");
+  } else {
+    condition_on_fclass_ = false;
+  }
+}
 
 void RelativeSentencePosition::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                                      const Hypergraph::Edge& edge,
@@ -31,6 +40,9 @@ void RelativeSentencePosition::TraversalFeaturesImpl(const SentenceMetadata& sme
   const double val = fabs(static_cast<double>(edge.i_) / smeta.GetSourceLength() -
                           static_cast<double>(edge.prev_i_) / smeta.GetTargetLength());
   features->set_value(fid_, val);
+  if (condition_on_fclass_) {
+    assert(!"not implemented");
+  }
 //  cerr << f_len_ << " " << e_len_ << " [" << edge.i_ << "," << edge.j_ << "|" << edge.prev_i_ << "," << edge.prev_j_ << "]\t" << edge.rule_->AsString() << "\tVAL=" << val << endl;
 }
 
@@ -39,10 +51,15 @@ MarkovJump::MarkovJump(const string& param) :
     fid_(FD::Convert("MarkovJump")),
     individual_params_per_jumpsize_(false),
     condition_on_flen_(false) {
-  cerr << "    MarkovJump: Blunsom&Cohn feature";
+  cerr << "    MarkovJump";
   vector<string> argv;
   int argc = SplitOnWhitespace(param, &argv);
   if (argc > 0) {
+    if (argv[0] == "--fclasses") {
+      argc--;
+      assert(argc > 0);
+      const string f_class_file = argv[1];
+    }
     if (argc != 1 || !(argv[0] == "-f" || argv[0] == "-i" || argv[0] == "-if")) {
       cerr << "MarkovJump: expected parameters to be -f, -i, or -if\n";
       exit(1);
@@ -57,6 +74,8 @@ MarkovJump::MarkovJump(const string& param) :
         cerr << " (split by f-length)";
       }
     }
+  } else {
+    cerr << " (Blunsom & Cohn definition)";
   }
   cerr << endl;
 }
