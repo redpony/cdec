@@ -4,6 +4,7 @@
 #include "ff_lm.h"
 #include "ff_csplit.h"
 #include "ff_wordalign.h"
+#include "ff_tagger.h"
 #include "ff_factory.h"
 
 boost::shared_ptr<FFRegistry> global_ff_registry;
@@ -18,5 +19,7 @@ void register_feature_functions() {
   global_ff_registry->Register("AlignerResults", new FFFactory<AlignerResults>);
   global_ff_registry->Register("CSplit_BasicFeatures", new FFFactory<BasicCSplitFeatures>);
   global_ff_registry->Register("CSplit_ReverseCharLM", new FFFactory<ReverseCharLMCSplitFeature>);
+  global_ff_registry->Register("Tagger_BigramIdentity", new FFFactory<Tagger_BigramIdentity>);
+  global_ff_registry->Register("LexicalPairIdentity", new FFFactory<LexicalPairIdentity>);
 };
 

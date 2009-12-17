@@ -17,6 +17,7 @@
 #include "filelib.h"
 #include "sampler.h"
 #include "sparse_vector.h"
+#include "tagger.h"
 #include "lexcrf.h"
 #include "csplit.h"
 #include "weights.h"
@@ -48,7 +49,7 @@ void ShowBanner() {
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()
-        ("formalism,f",po::value<string>(),"Translation formalism; values include SCFG, FST, PB, LexCRF (lexical translation model), CSplit (compound splitting)")
+        ("formalism,f",po::value<string>(),"Decoding formalism; values include SCFG, FST, PB, LexCRF (lexical translation model), CSplit (compound splitting), Tagger (sequence labeling)")
         ("input,i",po::value<string>()->default_value("-"),"Source file")
         ("grammar,g",po::value<vector<string> >()->composing(),"Either SCFG grammar file(s) or phrase tables file(s)")
         ("weights,w",po::value<string>(),"Feature weights file")
@@ -58,16 +59,18 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
 	("k_best,k",po::value<int>(),"Extract the k best derivations")
 	("unique_k_best,r", "Unique k-best translation list")
         ("aligner,a", "Run as a word/phrase aligner (src & ref required)")
+        ("intersection_strategy,I",po::value<string>()->default_value("cube_pruning"), "Intersection strategy for incorporating finite-state features; values include Cube_pruning, Full")
         ("cubepruning_pop_limit,K",po::value<int>()->default_value(200), "Max number of pops from the candidate heap at each node")
         ("goal",po::value<string>()->default_value("S"),"Goal symbol (SCFG & FST)")
         ("scfg_extra_glue_grammar", po::value<string>(), "Extra glue grammar file (Glue grammars apply when i=0 but have no other span restrictions)")
         ("scfg_no_hiero_glue_grammar,n", "No Hiero glue grammar (nb. by default the SCFG decoder adds Hiero glue rules)")
         ("scfg_default_nt,d",po::value<string>()->default_value("X"),"Default non-terminal symbol in SCFG")
         ("scfg_max_span_limit,S",po::value<int>()->default_value(10),"Maximum non-terminal span limit (except \"glue\" grammar)")
-	("show_tree_structure,T", "Show the Viterbi derivation structure")
+	("show_tree_structure", "Show the Viterbi derivation structure")
         ("show_expected_length", "Show the expected translation length under the model")
         ("show_partition,z", "Compute and show the partition (inside score)")
         ("beam_prune", po::value<double>(), "Prune paths from +LM forest")
+        ("tagger_tagset,t", po::value<string>(), "(Tagger) file containing tag set")
         ("csplit_output_plf", "(Compound splitter) Output lattice in PLF format")
         ("csplit_preserve_full_word", "(Compound splitter) Always include the unsegmented form in the output lattice")
         ("extract_rules", po::value<string>(), "Extract the rules used in translation (de-duped) to this file")
@@ -111,8 +114,8 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
 
   const string formalism = LowercaseString((*conf)["formalism"].as<string>());
-  if (formalism != "scfg" && formalism != "fst" && formalism != "lexcrf" && formalism != "pb" && formalism != "csplit") {
-    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 'csplit' or 'lexcrf'\n";
+  if (formalism != "scfg" && formalism != "fst" && formalism != "lexcrf" && formalism != "pb" && formalism != "csplit" && formalism != "tagger") {
+    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 'csplit', 'lexcrf', or 'tagger'\n";
     cerr << dcmdline_options << endl;
     exit(1);
   }
@@ -255,6 +258,8 @@ int main(int argc, char** argv) {
     translator.reset(new CompoundSplit(conf));
   else if (formalism == "lexcrf")
     translator.reset(new LexicalCRF(conf));
+  else if (formalism == "tagger")
+    translator.reset(new Tagger(conf));
   else
     assert(!"error");
 
@@ -285,6 +290,12 @@ int main(int argc, char** argv) {
     }
   }
   ModelSet late_models(feature_weights, late_ffs);
+  int palg = 1;
+  if (LowercaseString(conf["intersection_strategy"].as<string>()) == "full") {
+    palg = 0;
+    cerr << "Using full intersection (no pruning).\n";
+  }
+  const IntersectionConfiguration inter_conf(palg, conf["cubepruning_pop_limit"].as<int>());
 
   const int sample_max_trans = conf.count("max_translation_sample") ?
     conf["max_translation_sample"].as<int>() : 0;
@@ -374,11 +385,10 @@ int main(int argc, char** argv) {
       forest.Reweight(feature_weights);
       forest.SortInEdgesByEdgeWeights();
       Hypergraph lm_forest;
-      int cubepruning_pop_limit = conf["cubepruning_pop_limit"].as<int>();
       ApplyModelSet(forest,
                     smeta,
                     late_models,
-                    PruningConfiguration(cubepruning_pop_limit),
+                    inter_conf,
                     &lm_forest);
       forest.swap(lm_forest);
       forest.Reweight(feature_weights);

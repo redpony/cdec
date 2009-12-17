@@ -39,6 +39,10 @@ class TRule {
   //    [LHS] ||| term1 [NT] term2 [OTHER_NT] [YET_ANOTHER_NT]
   static TRule* CreateRuleMonolingual(const std::string& rule);
 
+  static TRule* CreateLexicalRule(const WordID& src, const WordID& trg) {
+    return new TRule(src, trg);
+  }
+
   void ESubstitute(const std::vector<const std::vector<WordID>* >& var_values,
                    std::vector<WordID>* result) const {
     int vc = 0;
@@ -116,6 +120,7 @@ class TRule {
   short int prev_j;
 
  private:
+  TRule(const WordID& src, const WordID& trg) : e_(1, trg), f_(1, src), lhs_(), arity_(), prev_i(), prev_j() {}
   bool SanityCheck() const;
 };
 

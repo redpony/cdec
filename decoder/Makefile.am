@@ -60,8 +60,10 @@ libcdec_a_SOURCES = \
   ff_lm.cc \
   ff_wordalign.cc \
   ff_csplit.cc \
+  ff_tagger.cc \
   freqdict.cc \
   lexcrf.cc \
+  tagger.cc \
   bottom_up_parser.cc \
   phrasebased_translator.cc \
   JSON_parser.c \

@@ -36,6 +36,7 @@ GetOptions("cdec=s" => \$DECODER,
            "sigma_squared=f" => \$sigsq,
            "means=s" => \$means_file,
            "optimizer=s" => \$OALG,
+           "gaussian_prior" => \$PRIOR,
            "jobs=i" => \$nodes,
            "pmem=s" => \$pmem
           ) or usage();
