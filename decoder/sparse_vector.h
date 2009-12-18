@@ -185,10 +185,15 @@ public:
     }
 
     std::ostream &operator<<(std::ostream &out) const {
+        bool first = true;
         for (typename std::map<int, T>::const_iterator 
-                it = _values.begin(); it != _values.end(); ++it)
-            out << (it == _values.begin() ? "" : ";")
-	        << FD::Convert(it->first) << '=' << it->second;
+                it = _values.begin(); it != _values.end(); ++it) {
+          // by definition feature id 0 is a dummy value
+          if (it->first == 0) continue;
+          out << (first ? "" : ";")
+	      << FD::Convert(it->first) << '=' << it->second;
+          first = false;
+        }
         return out;
     }
 
@@ -215,6 +220,9 @@ public:
 
     void clear() {
         _values.clear();
+    }
+    void clear_value(int index) {
+      _values.erase(index);
     }
 
     void swap(SparseVector<T>& other) {

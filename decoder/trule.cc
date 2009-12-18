@@ -126,7 +126,11 @@ bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
           if (fv > 9) { cerr << "Too many phrasetable scores - used named format\n"; abort(); }
           fname[12]='0' + fv;
           ++fv;
-          scores_.set_value(FD::Convert(fname), atof(&ss[start]));
+          // if the feature set is frozen, this may return zero, indicating an
+          // undefined feature
+          const int fid = FD::Convert(fname);
+          if (fid)
+            scores_.set_value(fid, atof(&ss[start]));
           //cerr << "F: " << fname << " VAL=" << scores_.value(FD::Convert(fname)) << endl;
         } else {
           const int fid = FD::Convert(ss.substr(start, end - start));
@@ -136,7 +140,8 @@ bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
             ++end;
           if (end < len) { ss[end] = 0; }
 	  assert(start < len);
-          scores_.set_value(fid, atof(&ss[start]));
+          if (fid)
+            scores_.set_value(fid, atof(&ss[start]));
           //cerr << "F: " << FD::Convert(fid) << " VAL=" << scores_.value(fid) << endl;
         }
         start = end + 1;

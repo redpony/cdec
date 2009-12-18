@@ -53,6 +53,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("input,i",po::value<string>()->default_value("-"),"Source file")
         ("grammar,g",po::value<vector<string> >()->composing(),"Either SCFG grammar file(s) or phrase tables file(s)")
         ("weights,w",po::value<string>(),"Feature weights file")
+        ("no_freeze_feature_set,Z", "Do not freeze feature set after reading feature weights file")
         ("feature_function,F",po::value<vector<string> >()->composing(), "Additional feature function(s) (-L for list)")
         ("list_feature_functions,L","List available feature functions")
         ("add_pass_through_rules,P","Add rules to translate OOV words as themselves")
@@ -248,6 +249,20 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
+  // load feature weights (and possibly freeze feature set)
+  vector<double> feature_weights;
+  Weights w;
+  if (conf.count("weights")) {
+    w.InitFromFile(conf["weights"].as<string>());
+    feature_weights.resize(FD::NumFeats());
+    w.InitVector(&feature_weights);
+    if (!conf.count("no_freeze_feature_set")) {
+      cerr << "Freezing feature set (use --no_freeze_feature_set to change)." << endl;
+      FD::Freeze();
+    }
+  }
+
+  // set up translation back end
   if (formalism == "scfg")
     translator.reset(new SCFGTranslator(conf));
   else if (formalism == "fst")
@@ -262,14 +277,6 @@ int main(int argc, char** argv) {
     translator.reset(new Tagger(conf));
   else
     assert(!"error");
-
-  vector<double> feature_weights;
-  Weights w;
-  if (conf.count("weights")) {
-    w.InitFromFile(conf["weights"].as<string>());
-    feature_weights.resize(FD::NumFeats());
-    w.InitVector(&feature_weights);
-  }
 
   // set up additional scoring features
   vector<shared_ptr<FeatureFunction> > pffs;
@@ -480,6 +487,7 @@ int main(int argc, char** argv) {
         }
 
         if (output_training_vector) {
+          acc_vec.clear_value(0);
           ++g_count;
           if (g_count % combine_size == 0) {
             if (encode_b64) {

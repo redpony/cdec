@@ -6,16 +6,23 @@
 #include "dict.h"
 
 struct FD {
-  static Dict dict_;
+  // once the FD is frozen, new features not already in the
+  // dictionary will return 0
+  static void Freeze() {
+    frozen_ = true;
+  }
   static inline int NumFeats() {
     return dict_.max() + 1;
   }
   static inline WordID Convert(const std::string& s) {
-    return dict_.Convert(s);
+    return dict_.Convert(s, frozen_);
   }
   static inline const std::string& Convert(const WordID& w) {
     return dict_.Convert(w);
   }
+  static Dict dict_;
+ private:
+  static bool frozen_;
 };
 
 #endif

@@ -16,9 +16,11 @@ class Dict {
  public:
   Dict() : b0_("<bad0>") { words_.reserve(1000); }
   inline int max() const { return words_.size(); }
-  inline WordID Convert(const std::string& word) {
+  inline WordID Convert(const std::string& word, bool frozen = false) {
     Map::iterator i = d_.find(word);
     if (i == d_.end()) {
+      if (frozen)
+        return 0;
       words_.push_back(word);
       d_[word] = words_.size();
       return words_.size();
