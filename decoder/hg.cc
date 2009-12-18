@@ -190,8 +190,17 @@ void Hypergraph::PrintGraphviz() const {
     cerr << "   A_" << ei << " [label=\"" << rule << " p=" << edge.edge_prob_ 
          << " F:" << edge.feature_values_
          << "\" shape=\"rect\"];\n";
+    Hypergraph::TailNodeVector indorder(edge.tail_nodes_.size(), 0);
+    int ntc = 0;
+    for (int i = 0; i < edge.rule_->e_.size(); ++i) {
+      if (edge.rule_->e_[i] <= 0) indorder[ntc++] = 1 + (-1 * edge.rule_->e_[i]);
+    }
     for (int i = 0; i < edge.tail_nodes_.size(); ++i) {
-      cerr << "     " << edge.tail_nodes_[i] << " -> A_" << ei << ";\n";
+      cerr << "     " << edge.tail_nodes_[i] << " -> A_" << ei;
+      if (edge.tail_nodes_.size() > 1) {
+        cerr << " [label=\"" << indorder[i] << "\"]";
+      }
+      cerr << ";\n";
     }
     cerr << "     A_" << ei << " -> " << edge.head_node_ << ";\n";
   }
