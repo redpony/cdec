@@ -104,7 +104,21 @@ if ($restart) {
   } else {
     `cp $initial_weights $dir/weights.1.gz`;
   }
+  open T, "<$training_corpus" or die "Can't read $training_corpus: $!";
+  open TO, ">$dir/training.in";
+  my $lc = 0;
+  while(<T>) {
+    chomp;
+    s/^\s+//;
+    s/\s+$//;
+    die "Expected A ||| B in input file" unless / \|\|\| /;
+    print TO "<seg id=\"$lc\">$_</seg>\n";
+    $lc++;
+  }
+  close T;
+  close TO;
 }
+$training_corpus = "$dir/training.in";
 
 my $iter_attempts = 1;
 while ($iter < $max_iteration) {

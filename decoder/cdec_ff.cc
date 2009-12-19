@@ -15,6 +15,7 @@ void register_feature_functions() {
   global_ff_registry->Register("SourceWordPenalty", new FFFactory<SourceWordPenalty>);
   global_ff_registry->Register("RelativeSentencePosition", new FFFactory<RelativeSentencePosition>);
   global_ff_registry->Register("MarkovJump", new FFFactory<MarkovJump>);
+  global_ff_registry->Register("SourcePOSBigram", new FFFactory<SourcePOSBigram>);
   global_ff_registry->Register("BlunsomSynchronousParseHack", new FFFactory<BlunsomSynchronousParseHack>);
   global_ff_registry->Register("AlignerResults", new FFFactory<AlignerResults>);
   global_ff_registry->Register("CSplit_BasicFeatures", new FFFactory<BasicCSplitFeatures>);

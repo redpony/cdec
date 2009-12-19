@@ -46,7 +46,7 @@ struct LexicalCRFImpl {
     // hack to tell the feature function system how big the sentence pair is
     const int f_start = (use_null ? -1 : 0);
     int prev_node_id = -1;
-    for (int i = 0; i < e_len; ++i) {  // for each word in the *ref*
+    for (int i = 0; i < e_len; ++i) {  // for each word in the *target*
       Hypergraph::Node* node = forest->AddNode(kXCAT);
       const int new_node_id = node->id_;
       for (int j = f_start; j < f_len; ++j) { // for each word in the source
@@ -73,8 +73,8 @@ struct LexicalCRFImpl {
         const int comb_node_id = forest->AddNode(kXCAT)->id_;
         Hypergraph::TailNodeVector tail(2, prev_node_id);
         tail[1] = new_node_id;
-        const int edge_id = forest->AddEdge(kBINARY, tail)->id_;
-        forest->ConnectEdgeToHeadNode(edge_id, comb_node_id);
+        Hypergraph::Edge* edge = forest->AddEdge(kBINARY, tail);
+        forest->ConnectEdgeToHeadNode(edge->id_, comb_node_id);
         prev_node_id = comb_node_id;
       } else {
         prev_node_id = new_node_id;
