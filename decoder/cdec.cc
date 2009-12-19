@@ -71,6 +71,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("show_expected_length", "Show the expected translation length under the model")
         ("show_partition,z", "Compute and show the partition (inside score)")
         ("beam_prune", po::value<double>(), "Prune paths from +LM forest")
+        ("lexcrf_use_null", "Support source-side null words in lexical translation")
         ("tagger_tagset,t", po::value<string>(), "(Tagger) file containing tag set")
         ("csplit_output_plf", "(Compound splitter) Output lattice in PLF format")
         ("csplit_preserve_full_word", "(Compound splitter) Always include the unsegmented form in the output lattice")

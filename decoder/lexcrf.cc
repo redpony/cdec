@@ -12,7 +12,7 @@ using namespace std;
 
 struct LexicalCRFImpl {
   LexicalCRFImpl(const boost::program_options::variables_map& conf) :
-      use_null(false),
+      use_null(conf.count("lexcrf_use_null") > 0),
       kXCAT(TD::Convert("X")*-1),
       kNULL(TD::Convert("<eps>")),
       kBINARY(new TRule("[X] ||| [X,1] [X,2] ||| [1] [2]")),
