@@ -39,6 +39,7 @@ namespace po = boost::program_options;
 
 // some globals ...
 boost::shared_ptr<RandomNumberGenerator<boost::mt19937> > rng;
+static const double kMINUS_EPSILON = -1e-6;  // don't be too strict
 
 namespace Hack { void MaxTrans(const Hypergraph& in, int beam_size); }
 
@@ -471,7 +472,7 @@ int main(int argc, char** argv) {
         if (write_gradient) {
           log_ref_z = log(
             InsideOutside<prob_t, EdgeProb, SparseVector<double>, EdgeFeaturesWeightFunction>(forest, &ref_exp));
-          if (log_z < log_ref_z) {
+          if ((log_z - log_ref_z) < kMINUS_EPSILON) {
             cerr << "DIFF. ERR! log_z < log_ref_z: " << log_z << " " << log_ref_z << endl;
             exit(1);
           }
