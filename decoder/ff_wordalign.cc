@@ -144,6 +144,15 @@ SourcePOSBigram::SourcePOSBigram(const std::string& param) :
   cerr << "  (" << pos_.size() << " lines)\n";
 }
 
+void SourcePOSBigram::FinalTraversalFeatures(const void* context,
+                                      SparseVector<double>* features) const {
+  WordID left = *static_cast<const WordID*>(context);
+  int left_wc = *(static_cast<const int*>(context) + 1);
+  if (left_wc == 1)
+    FireFeature(-1, left, features);
+  FireFeature(left, -1, features);
+}
+
 void SourcePOSBigram::FireFeature(WordID left,
                    WordID right,
                    SparseVector<double>* features) const {
@@ -187,8 +196,6 @@ void SourcePOSBigram::TraversalFeaturesImpl(const SentenceMetadata& smeta,
       FireFeature(-1, left, features);
     FireFeature(left, right, features);
     out_word_count = left_wc + right_wc;
-    if (out_word_count == smeta.GetSourceLength())
-      FireFeature(right, -1, features);
     out_context = right;
   }
 }

@@ -43,6 +43,8 @@ typedef std::map<WordID, Class2FID> Class2Class2FID;
 class SourcePOSBigram : public FeatureFunction {
  public:
   SourcePOSBigram(const std::string& param);
+  virtual void FinalTraversalFeatures(const void* context,
+                                      SparseVector<double>* features) const;
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
