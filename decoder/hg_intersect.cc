@@ -50,10 +50,11 @@ struct RuleFilter {
 };
 
 static bool FastLinearIntersect(const Lattice& target, Hypergraph* hg) {
+  cerr << "  Fast linear-chain intersection...\n";
   vector<bool> prune(hg->edges_.size(), false);
   set<int> cov;
   for (int i = 0; i < prune.size(); ++i) {
-    const Hypergraph::Edge& edge = hg->edges_[i];
+    Hypergraph::Edge& edge = hg->edges_[i];
     if (edge.Arity() == 0) {
       const int trg_index = edge.prev_i_;
       const WordID trg = target[trg_index][0].label;
@@ -61,6 +62,8 @@ static bool FastLinearIntersect(const Lattice& target, Hypergraph* hg) {
       prune[i] = (edge.rule_->e_[0] != trg);
       if (!prune[i]) {
         cov.insert(trg_index);
+        swap(edge.prev_i_, edge.i_);
+        swap(edge.prev_j_, edge.j_);
       }
     }
   }
