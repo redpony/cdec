@@ -57,6 +57,8 @@ struct TaggerImpl {
         Hypergraph::Edge* edge = forest->AddEdge(rule, Hypergraph::TailNodeVector());
         edge->i_ = i;
         edge->j_ = i+1;
+        edge->prev_i_ = i;    // we set these for FastLinearIntersect
+        edge->prev_j_ = i+1;  //      "      "            "
         forest->ConnectEdgeToHeadNode(edge->id_, new_node_id);
       }
       if (prev_node_id >= 0) {
@@ -104,6 +106,7 @@ bool Tagger::Translate(const string& input,
   }
   pimpl_->BuildTrellis(sequence, forest);
   forest->Reweight(weights);
+  forest->is_linear_chain_ = true;
   return true;
 }
 

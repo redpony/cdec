@@ -54,8 +54,10 @@ void LatticeTools::ConvertTextToLattice(const string& text, Lattice* pl) {
 void LatticeTools::ConvertTextOrPLF(const string& text_or_plf, Lattice* pl) {
   if (LooksLikePLF(text_or_plf))
     HypergraphIO::PLFtoLattice(text_or_plf, pl);
-  else
+  else {
     ConvertTextToLattice(text_or_plf, pl);
+    pl->is_sentence_ = true;
+  }
   pl->ComputeDistances();
 }
 

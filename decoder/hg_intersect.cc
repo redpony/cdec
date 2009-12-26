@@ -49,7 +49,31 @@ struct RuleFilter {
   }
 };
 
+static bool FastLinearIntersect(const Lattice& target, Hypergraph* hg) {
+  vector<bool> prune(hg->edges_.size(), false);
+  set<int> cov;
+  for (int i = 0; i < prune.size(); ++i) {
+    const Hypergraph::Edge& edge = hg->edges_[i];
+    if (edge.Arity() == 0) {
+      const int trg_index = edge.prev_i_;
+      const WordID trg = target[trg_index][0].label;
+      assert(edge.rule_->EWords() == 1);
+      prune[i] = (edge.rule_->e_[0] != trg);
+      if (!prune[i]) {
+        cov.insert(trg_index);
+      }
+    }
+  }
+  hg->PruneEdges(prune);
+  return (cov.size() == target.size());
+}
+
 bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
+  // there are a number of faster algorithms available for restricted
+  // classes of hypergraph and/or target.
+  if (hg->IsLinearChain() && target.IsSentence())
+    return FastLinearIntersect(target, hg);
+
   vector<bool> rem(hg->edges_.size(), false);
   const RuleFilter filter(target, 15);   // TODO make configurable
   for (int i = 0; i < rem.size(); ++i)

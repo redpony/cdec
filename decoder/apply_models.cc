@@ -407,5 +407,7 @@ void ApplyModelSet(const Hypergraph& in,
     cerr << "Don't understand intersection algorithm " << config.algorithm << endl;
     exit(1);
   }
+  out->is_linear_chain_ = in.is_linear_chain_;  // TODO remove when this is computed
+                                                // automatically
 }
 

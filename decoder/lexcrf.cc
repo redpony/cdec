@@ -106,6 +106,7 @@ bool LexicalCRF::Translate(const string& input,
   LatticeTools::ConvertTextToLattice(input, &lattice);
   smeta->SetSourceLength(lattice.size());
   pimpl_->BuildTrellis(lattice, *smeta, forest);
+  forest->is_linear_chain_ = true;
   forest->Reweight(weights);
   return true;
 }

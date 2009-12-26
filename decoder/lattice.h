@@ -24,18 +24,22 @@ struct LatticeArc {
 class Lattice : public std::vector<std::vector<LatticeArc> > {
   friend void LatticeTools::ConvertTextOrPLF(const std::string& text_or_plf, Lattice* pl);
  public:
-  Lattice() {}
+  Lattice() : is_sentence_(false) {}
   explicit Lattice(size_t t, const std::vector<LatticeArc>& v = std::vector<LatticeArc>()) :
-   std::vector<std::vector<LatticeArc> >(t, v) {}
+   std::vector<std::vector<LatticeArc> >(t, v),
+   is_sentence_(false) {}
   int Distance(int from, int to) const {
     if (dist_.empty())
       return (to - from);
     return dist_(from, to);
   }
-
+  // TODO this should actually be computed based on the contents
+  // of the lattice
+  bool IsSentence() const { return is_sentence_; }
  private:
   void ComputeDistances();
   Array2D<int> dist_;
+  bool is_sentence_;
 };
 
 #endif

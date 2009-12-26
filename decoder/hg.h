@@ -14,7 +14,7 @@
 //  - edges have 1 head, 0..n tails
 class Hypergraph {
  public:
-  Hypergraph() {}
+  Hypergraph() : is_linear_chain_(false) {}
 
   // SmallVector is a fast, small vector<int> implementation for sizes <= 2
   typedef SmallVector TailNodeVector;
@@ -57,6 +57,7 @@ class Hypergraph {
 
   void swap(Hypergraph& other) {
     other.nodes_.swap(nodes_);
+    std::swap(is_linear_chain_, other.is_linear_chain_);
     other.edges_.swap(edges_);
   }
 
@@ -174,6 +175,11 @@ class Hypergraph {
   inline size_t NumberOfEdges() const { return edges_.size(); }
   inline size_t NumberOfNodes() const { return nodes_.size(); }
   inline bool empty() const { return nodes_.empty(); }
+
+  // linear chains can be represented in a number of ways in a hypergraph,
+  // we define them to consist only of lexical translations and monotonic rules
+  inline bool IsLinearChain() const { return is_linear_chain_; }
+  bool is_linear_chain_;
 
   // nodes_ is sorted in topological order
   std::vector<Node> nodes_;
