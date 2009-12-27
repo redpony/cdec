@@ -67,7 +67,7 @@ static bool FastLinearIntersect(const Lattice& target, Hypergraph* hg) {
       }
     }
   }
-  hg->PruneEdges(prune);
+  hg->PruneEdges(prune, true);
   return (cov.size() == target.size());
 }
 
@@ -81,7 +81,7 @@ bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
   const RuleFilter filter(target, 15);   // TODO make configurable
   for (int i = 0; i < rem.size(); ++i)
     rem[i] = filter(*hg->edges_[i].rule_);
-  hg->PruneEdges(rem);
+  hg->PruneEdges(rem, true);
 
   const int nedges = hg->edges_.size();
   const int nnodes = hg->nodes_.size();

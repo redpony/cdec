@@ -111,9 +111,45 @@ void Hypergraph::PushWeightsToGoal(double scale) {
   }
 }
 
-void Hypergraph::PruneEdges(const std::vector<bool>& prune_edge) {
+struct EdgeExistsWeightFunction {
+  EdgeExistsWeightFunction(const std::vector<bool>& prunes) : prunes_(prunes) {}
+  double operator()(const Hypergraph::Edge& edge) const {
+    return (prunes_[edge.id_] ? 0.0 : 1.0);
+  }
+ private:
+  const vector<bool>& prunes_;
+};
+
+void Hypergraph::PruneEdges(const std::vector<bool>& prune_edge, bool run_inside_algorithm) {
   assert(prune_edge.size() == edges_.size());
-  TopologicallySortNodesAndEdges(nodes_.size() - 1, &prune_edge);
+  vector<bool> filtered = prune_edge;
+
+  if (run_inside_algorithm) {
+    const EdgeExistsWeightFunction wf(prune_edge);
+    // use double, not bool since vector<bool> causes problems with the Inside algorithm.
+    // I don't know a good c++ way to resolve this short of template specialization which
+    // I dislike.  If you know of a better way that doesn't involve specialization,
+    // fix this!
+    vector<double> reachable;
+    bool goal_derivable = (0 < Inside<double, EdgeExistsWeightFunction>(*this, &reachable, wf));
+
+    assert(reachable.size() == nodes_.size());
+    for (int i = 0; i < edges_.size(); ++i) {
+      bool prune = prune_edge[i];
+      if (!prune) {
+        const Edge& edge = edges_[i];
+        for (int j = 0; j < edge.tail_nodes_.size(); ++j) {
+          if (!reachable[edge.tail_nodes_[j]]) {
+            prune = true;
+            break;
+          }
+        }
+      }
+      filtered[i] = prune;
+    }
+  }
+ 
+  TopologicallySortNodesAndEdges(nodes_.size() - 1, &filtered);
 }
 
 void Hypergraph::DensityPruneInsideOutside(const double scale,

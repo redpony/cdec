@@ -156,7 +156,9 @@ class Hypergraph {
   void RemoveNoncoaccessibleStates(int goal_node_id = -1);
 
   // remove edges from the hypergraph if prune_edge[edge_id] is true
-  void PruneEdges(const std::vector<bool>& prune_edge);
+  // TODO need to investigate why this shouldn't be run for the forest trans
+  // case.  To investigate, change false to true and see where ftrans crashes
+  void PruneEdges(const std::vector<bool>& prune_edge, bool run_inside_algorithm = false);
 
   // if you don't know, use_sum_prod_semiring should be false
   void DensityPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double density,
