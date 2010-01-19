@@ -75,6 +75,15 @@ struct FMeasureCommand : public Command {
   int num_in_ref;
 };
 
+struct DisplayCommand : public Command {
+  string Name() const { return "display"; }
+  bool RequiresTwoOperands() const { return false; }
+  void Apply(const Array2D<bool>& in, const Array2D<bool>&not_used, Array2D<bool>* x) {
+    *x = in;
+    cout << *x << endl;
+  }
+};
+
 struct ConvertCommand : public Command {
   string Name() const { return "convert"; }
   bool RequiresTwoOperands() const { return false; }
@@ -309,6 +318,7 @@ template<class C> static void AddCommand() {
 
 int main(int argc, char **argv) {
   AddCommand<ConvertCommand>();
+  AddCommand<DisplayCommand>();
   AddCommand<InvertCommand>();
   AddCommand<IntersectCommand>();
   AddCommand<UnionCommand>();
