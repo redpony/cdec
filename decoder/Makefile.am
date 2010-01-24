@@ -33,7 +33,7 @@ weights_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 LDADD = libcdec.a
 
 AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS)
-AM_LDFLAGS = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LIB) -lz
+AM_LDFLAGS = -lz
 
 noinst_LIBRARIES = libcdec.a
 

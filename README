@@ -51,5 +51,7 @@ COPYRIGHT AND LICENSE
 Copyright (c) 2009 by Chris Dyer <redpony@gmail.com>
 
 See the file LICENSE.txt for the licensing terms that this software is
-released under.
+released under. This software also includes the file m4/boost.m4 which is
+licensed under the LGPL v3, for more information refer to the comments
+in that file.
 

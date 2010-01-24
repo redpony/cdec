@@ -38,6 +38,5 @@ mr_em_train_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
 plftools_SOURCES = plftools.cc
 plftools_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(BOOST_CPPFLAGS) $(GTEST_CPPFLAGS) -I$(top_srcdir)/decoder
-AM_LDFLAGS = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LIB)
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I$(top_srcdir)/decoder
 

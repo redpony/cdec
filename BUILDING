@@ -11,12 +11,14 @@ Instructions for building
 
  1) Download and build SRILM
 
- 2) Download, build, and install Google Test
+ 2) Download, build, and install Google Test (optional, this is necessary
+    to build unit tests that may be useful in development; system tests
+    work without it)
 
  3) Use automake / autoconf to generate the configure script.
     I'm not an expert at using these tools, but this should be sufficient:
 
-        autoreconf -i
+        autoreconf -ifv
 
  4) Configure and build.  Your command will look something like this.
 

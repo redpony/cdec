@@ -1,3 +1,7 @@
+config.guess
+config.sub
+libtool
+ltmain.sh
 config.h.in~
 decoder/ff_test
 decoder/grammar_test
