@@ -22,7 +22,7 @@ Instructions for building
 
  4) Configure and build.  Your command will look something like this.
 
-        ./configure --with-srilm=/home/me/software/srilm-1.5.9 --enable-gtest
+        ./configure --with-srilm=/home/me/software/srilm-1.5.9 --disable-gtest
         make
 
     If you get errors during configure about missing BOOST macros, then step 3
