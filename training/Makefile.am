@@ -4,9 +4,11 @@ bin_PROGRAMS = \
   grammar_convert \
   atools \
   plftools \
-  lbfgs_test \
   mr_em_train \
-  collapse_weights \
+  collapse_weights
+
+noinst_PROGRAMS = \
+  lbfgs_test \
   optimize_test
 
 atools_SOURCES = atools.cc

@@ -1,11 +1,15 @@
 bin_PROGRAMS = \
   mr_vest_map \
   mr_vest_reduce \
-  scorer_test \
-  lo_test \
   mr_vest_generate_mapper_input \
   fast_score \
   union_forests
+
+if HAVE_GTEST
+noinst_PROGRAMS = \
+  scorer_test \
+  lo_test
+endif
 
 union_forests_SOURCES = union_forests.cc
 union_forests_LDADD = $(top_srcdir)/decoder/libcdec.a -lz

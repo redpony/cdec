@@ -1,14 +1,13 @@
 #!/usr/bin/perl -w
 
 use strict;
-my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
+my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path getcwd /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
 use Getopt::Long;
 
 my $MAX_ITER_ATTEMPTS = 5; # number of times to retry a failed function evaluation
-my $CWD=`pwd`; chomp $CWD;
-my $BIN_DIR = $SCRIPT_DIR;
-my $OPTIMIZER = "$BIN_DIR/mr_optimize_reduce";
-my $DECODER = "$BIN_DIR/../decoder/cdec";
+my $CWD=getcwd();
+my $OPTIMIZER = "$SCRIPT_DIR/mr_optimize_reduce";
+my $DECODER = "$SCRIPT_DIR/../decoder/cdec";
 my $COMBINER_CACHE_SIZE = 150;
 # This is a hack to run this on a weird cluster,
 # eventually, I'll provide Hadoop scripts.
@@ -30,13 +29,15 @@ my $PRIOR;
 my $OALG = "lbfgs";
 my $sigsq = 1;
 my $means_file;
+my $RESTART_IF_NECESSARY;
 GetOptions("cdec=s" => \$DECODER,
-           "run_locally" => \$LOCAL,
            "distributed" => \$DISTRIBUTED,
            "sigma_squared=f" => \$sigsq,
+           "max_iteration=i" => \$max_iteration,
            "means=s" => \$means_file,
            "optimizer=s" => \$OALG,
            "gaussian_prior" => \$PRIOR,
+           "restart_if_necessary" => \$RESTART_IF_NECESSARY,
            "jobs=i" => \$nodes,
            "pmem=s" => \$pmem
           ) or usage();
@@ -61,6 +62,11 @@ if ($parallel) {
 unless ($parallel) { $CFLAG = "-C 500"; }
 unless ($config_file =~ /^\//) { $config_file = $CWD . '/' . $config_file; }
 my $clines = num_lines($training_corpus);
+my $dir = "$CWD/ptrain";
+
+if ($RESTART_IF_NECESSARY && -d $dir) {
+  $restart = 1;
+}
 
 print STDERR <<EOT;
 PTRAIN CONFIGURATION INFORMATION
@@ -83,7 +89,6 @@ my $nodelist="1";
 for (my $i=1; $i<$nodes; $i++) { $nodelist .= " 1"; }
 my $iter = 1;
 
-my $dir = "$CWD/ptrain";
 if ($restart) {
   die "$dir doesn't exist, but --restart specified!\n" unless -d $dir;
   my $o = `ls -t $dir/weights.*`;
@@ -161,6 +166,7 @@ while ($iter < $max_iteration) {
 }
 
 print "FINAL WEIGHTS: $dir/weights.$iter\n";
+`mv $dir/weights.$iter.gz $dir/weights.final.gz`;
 
 sub usage {
   die <<EOT;
@@ -170,6 +176,7 @@ Usage: $0 [OPTIONS] cdec.ini training.corpus weights.init
   Options:
 
     --distributed      Parallelize function evaluation
+    --jobs N           Number of jobs to use
     --cdec PATH        Path to cdec binary
     --optimize OPT     lbfgs, rprop, sgd
     --gaussian_prior   add Gaussian prior

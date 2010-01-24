@@ -11,8 +11,8 @@ CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 AC_CHECK_HEADER(boost/math/special_functions/digamma.hpp,
                [AC_DEFINE([HAVE_BOOST_DIGAMMA], [], [flag for boost::math::digamma])])
 
-GTEST_LIB_CHECK
 AC_PROG_INSTALL
+GTEST_LIB_CHECK
 
 AC_ARG_WITH(srilm,
             [AC_HELP_STRING([--with-srilm=PATH], [(optional) path to SRI's LM toolkit])],

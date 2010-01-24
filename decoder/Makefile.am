@@ -1,4 +1,7 @@
-bin_PROGRAMS = \
+bin_PROGRAMS = cdec
+
+if HAVE_GTEST
+noinst_PROGRAMS = \
   dict_test \
   weights_test \
   trule_test \
@@ -6,8 +9,8 @@ bin_PROGRAMS = \
   ff_test \
   parser_test \
   grammar_test \
-  cdec \
   small_vector_test
+endif
 
 cdec_SOURCES = cdec.cc forest_writer.cc maxtrans_blunsom.cc cdec_ff.cc ff_factory.cc timing_stats.cc
 small_vector_test_SOURCES = small_vector_test.cc
