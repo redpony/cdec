@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
       double obj;
       if (!B64::Decode(&obj, &g, &line[i], line.size() - i)) {
         cerr << "B64 decoder returned error, skipping gradient!\n";
-	cerr << "  START: " << line.substr(0,min(200ul, line.size())) << endl;
+	cerr << "  START: " << line.substr(0,line.size() > 200 ? 200 : line.size()) << endl;
 	if (line.size() > 200)
 	  cerr << "    END: " << line.substr(line.size() - 200, 200) << endl;
         cout << "-1\tRESTART\n";
