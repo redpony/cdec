@@ -23,7 +23,7 @@ struct LMClient {
   };
 
   LMClient(const char* host) : port(6666) {
-    s = strchr(host, ':');
+    s = const_cast<char*>(strchr(host, ':'));  // TODO fix const_cast
     if (s != NULL) {
       *s = '\0';
       ++s;
