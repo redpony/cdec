@@ -4,6 +4,8 @@
 #include "ff.h"
 #include "array2d.h"
 
+#include <boost/multi_array.hpp>
+
 class RelativeSentencePosition : public FeatureFunction {
  public:
   RelativeSentencePosition(const std::string& param);
@@ -18,6 +20,20 @@ class RelativeSentencePosition : public FeatureFunction {
   const int fid_;
   bool condition_on_fclass_;
   std::string template_;
+};
+
+class Model2BinaryFeatures : public FeatureFunction {
+ public:
+  Model2BinaryFeatures(const std::string& param);
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* out_context) const;
+ private:
+  boost::multi_array<int, 3> fids_;
 };
 
 class MarkovJump : public FeatureFunction {

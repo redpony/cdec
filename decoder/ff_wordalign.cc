@@ -12,7 +12,44 @@
 #include "tdict.h"   // Blunsom hack
 #include "filelib.h" // Blunsom hack
 
+static const size_t MAX_SENTENCE_SIZE = 100;
+
 using namespace std;
+
+Model2BinaryFeatures::Model2BinaryFeatures(const string& param) :
+    fids_(boost::extents[MAX_SENTENCE_SIZE][MAX_SENTENCE_SIZE][MAX_SENTENCE_SIZE]) {
+  for (int i = 0; i < MAX_SENTENCE_SIZE; ++i) {
+    for (int j = 0; j < MAX_SENTENCE_SIZE; ++j) {
+      for (int k = 0; k < MAX_SENTENCE_SIZE; ++k) {
+        int& val = fids_[i][j][k];
+        val = -1;
+        if (j < i) {
+          ostringstream os;
+          os << "M2_" << i << '_' << j << ':' << k;
+          val = FD::Convert(os.str());
+        }
+      }
+    }
+  }
+}
+
+void Model2BinaryFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                                 const Hypergraph::Edge& edge,
+                                                 const vector<const void*>& ant_states,
+                                                 SparseVector<double>* features,
+                                                 SparseVector<double>* estimated_features,
+                                                 void* state) const {
+  // if the source word is either null or the generated word
+  // has no position in the reference
+  if (edge.i_ == -1 || edge.prev_i_ == -1)
+    return;
+
+  assert(smeta.GetTargetLength() > 0);
+  const int fid = fids_[smeta.GetSourceLength()][edge.i_][edge.prev_i_];
+  features->set_value(fid, 1.0);
+//  cerr << f_len_ << " " << e_len_ << " [" << edge.i_ << "," << edge.j_ << "|" << edge.prev_i_ << "," << edge.prev_j_ << "]\t" << edge.rule_->AsString() << "\tVAL=" << val << endl;
+}
+
 
 RelativeSentencePosition::RelativeSentencePosition(const string& param) :
     fid_(FD::Convert("RelativeSentencePosition")) {
