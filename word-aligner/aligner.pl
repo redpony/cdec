@@ -1,0 +1,147 @@
+#!/usr/bin/perl -w
+use strict;
+
+my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path getcwd /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
+use Getopt::Long;
+my $training_dir = "$SCRIPT_DIR/../training";
+die "Can't find training dir: $training_dir" unless -d $training_dir;
+
+my $num_classes = 50;
+my $nodes = 40;
+my $pmem = "2500mb";
+my $DECODER = "cdec";
+GetOptions("cdec=s" => \$DECODER,
+           "jobs=i" => \$nodes,
+           "pmem=s" => \$pmem
+          ) or usage();
+usage() unless (scalar @ARGV == 1);
+my $in_file = shift @ARGV;
+die "Expected format corpus.l1-l2 where l1 & l2 are two-letter abbreviations\nfor the source and target language respectively\n" unless ($in_file =~ /^.+\.([a-z][a-z])-([a-z][a-z])$/);
+my $f_lang = $1;
+my $e_lang = $2;
+
+print STDERR "Source language: $f_lang\n";
+print STDERR "Target language: $e_lang\n";
+die "Don't have an orthographic normalizer for $f_lang\n" unless -f "$SCRIPT_DIR/ortho-norm/$f_lang.pl";
+die "Don't have an orthographic normalizer for $e_lang\n" unless -f "$SCRIPT_DIR/ortho-norm/$e_lang.pl";
+
+my @stages = qw(nopos relpos markov);
+my @directions = qw(f-e e-f);
+
+my $mkcls = '/Users/redpony/software/giza/giza-pp/mkcls-v2/mkcls';
+my $corpus = 'c';
+
+my $cwd = getcwd();
+my $align_dir = "$cwd/talign";
+
+mkdir $align_dir;
+mkdir "$align_dir/grammars";
+open IN, "<$in_file" or die "Can't read $in_file: $!";
+open E, ">$align_dir/grammars/corpus.e" or die "Can't write: $!";
+open F, ">$align_dir/grammars/corpus.f" or die "Can't write: $!";
+while(<IN>) {
+  chomp;
+  my ($f, $e) = split / \|\|\| /;
+  die "Bad format, excepted ||| separated line" unless defined $f && defined $e;
+  print F "$f\n";
+  print E "$e\n";
+}
+close F;
+close E;
+close IN;
+`cp $SCRIPT_DIR/makefiles/makefile.grammars $align_dir/grammars/Makefile`;
+die unless $? == 0;
+
+my @targets = qw(grammars);
+
+for my $direction (@directions) {
+  my $prev_stage = undef;
+  for my $stage (@stages) {
+    push @targets, "$stage-$direction";
+    make_stage($stage, $direction, $prev_stage);
+    $prev_stage = $stage;
+  }
+}
+
+open TOPLEVEL, ">$align_dir/Makefile" or die "Can't write $align_dir/Makefile: $!";
+
+print TOPLEVEL <<EOT;
+E_LANG = $e_lang
+F_LANG = $f_lang
+SCRIPT_DIR = $SCRIPT_DIR
+TRAINING_DIR = $training_dir
+MKCLS = $mkcls
+NCLASSES = $num_classes
+
+TARGETS = @targets
+PTRAIN = \$(TRAINING_DIR)/cluster-ptrain.pl --restart_if_necessary
+PTRAIN_PARAMS = --gaussian_prior --sigma_squared 1.0 --max_iteration 5
+
+export
+
+all:
+	\@failcom='exit 1'; \\
+	list='\$(TARGETS)'; for subdir in \$\$list; do \\
+	echo "Making \$\$subdir ..."; \\
+	(cd \$\$subdir && \$(MAKE)) || eval \$\$failcom; \\
+	done
+
+clean:
+	\@failcom='exit 1'; \\
+	list='\$(TARGETS)'; for subdir in \$\$list; do \\
+	echo "Making \$\$subdir ..."; \\
+	(cd \$\$subdir && \$(MAKE) clean) || eval \$\$failcom; \\
+	done
+EOT
+close TOPLEVEL;
+
+sub make_stage {
+  my ($stage, $direction, $prev_stage) = @_;
+  my $stage_dir = "$align_dir/$stage-$direction";
+  my $first = $direction;
+  $first =~ s/^(.+)-.*$/$1/;
+  mkdir $stage_dir;
+  open CDEC, ">$stage_dir/cdec.ini" or die;
+  print CDEC <<EOT;
+formalism=lexcrf
+intersection_strategy=full
+grammar=$align_dir/grammars/corpus.$direction.lex-grammar.gz
+EOT
+  if ($stage =~ /relpos/) {
+    print CDEC "feature_function=RelativeSentencePosition\n";
+  } elsif ($stage =~ /markov/) {
+    print CDEC "feature_function=RelativeSentencePosition\n";
+    print CDEC "feature_function=MarkovJump\n";
+    print CDEC "feature_function=SourcePOSBigram $align_dir/grammars/corpus.class.$first\n";
+  }
+  close CDEC;
+
+  my $init_weights = "weights.init.gz: ../grammars/weights.init.gz\n\tcp \$< \$\@\n";
+  if ($prev_stage) {
+    $init_weights = "weights.init.gz: ../$prev_stage-$direction/weights.final.gz\n\tcp \$< \$\@\n";
+  }
+
+  open MAKE, ">$stage_dir/Makefile" or die;
+  print MAKE <<EOT;
+all: weights.final.gz
+
+clean:
+	\$(RM) -r ptrain weights.init.gz weights.final.gz
+
+$init_weights
+
+weights.final.gz: weights.init.gz cdec.ini
+	\$(PTRAIN) \$(PTRAIN_PARAMS) cdec.ini ../grammars/corpus.$direction weights.init.gz
+	cp ptrain/weights.final.gz weights.final.gz
+	\$(RM) -r ptrain
+EOT
+  close MAKE;
+}
+
+sub usage {
+  die <<EOT;
+
+Usage: $0 [OPTIONS] training_corpus.fr-en
+
+EOT
+}

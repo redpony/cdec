@@ -84,6 +84,23 @@ void RelativeSentencePosition::TraversalFeaturesImpl(const SentenceMetadata& sme
 //  cerr << f_len_ << " " << e_len_ << " [" << edge.i_ << "," << edge.j_ << "|" << edge.prev_i_ << "," << edge.prev_j_ << "]\t" << edge.rule_->AsString() << "\tVAL=" << val << endl;
 }
 
+MarkovJumpFClass::MarkovJumpFClass(const string& param) :
+    FeatureFunction(1) {
+  cerr << "    MarkovJumpFClass" << endl;
+  cerr << "Reading source POS tags from " << param << endl;
+  ReadFile rf(param);
+  istream& in = *rf.stream();
+  while(in) {
+    string line;
+    getline(in, line);
+    if (line.empty()) continue;
+    vector<WordID> v;
+    TD::ConvertSentence(line, &v);
+    pos_.push_back(v);
+  }
+  cerr << "  (" << pos_.size() << " lines)\n";
+}
+
 MarkovJump::MarkovJump(const string& param) :
     FeatureFunction(1),
     fid_(FD::Convert("MarkovJump")),
