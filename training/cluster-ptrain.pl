@@ -29,10 +29,12 @@ my $PRIOR;
 my $OALG = "lbfgs";
 my $sigsq = 1;
 my $means_file;
+my $mem_buffers = 20;
 my $RESTART_IF_NECESSARY;
 GetOptions("cdec=s" => \$DECODER,
            "distributed" => \$DISTRIBUTED,
            "sigma_squared=f" => \$sigsq,
+           "lbfgs_memory_buffers=i" => \$mem_buffers,
            "max_iteration=i" => \$max_iteration,
            "means=s" => \$means_file,
            "optimizer=s" => \$OALG,
@@ -133,7 +135,7 @@ while ($iter < $max_iteration) {
   my $start = time;
   my $next_iter = $iter + 1;
   my $dec_cmd="$DECODER -G $CFLAG -c $config_file -w $dir/weights.$iter.gz < $training_corpus 2> $dir/deco.log.$iter";
-  my $opt_cmd = "$OPTIMIZER $PRIOR_FLAG -M 50 $OALG -s $dir/opt.state -i $dir/weights.$iter.gz -o $dir/weights.$next_iter.gz";
+  my $opt_cmd = "$OPTIMIZER $PRIOR_FLAG -M $mem_buffers $OALG -s $dir/opt.state -i $dir/weights.$iter.gz -o $dir/weights.$next_iter.gz";
   my $pcmd = "$PARALLEL -e $dir/err -p $pmem --nodelist \"$nodelist\" -- ";
   my $cmd = "";
   if ($parallel) { $cmd = $pcmd; }
@@ -183,6 +185,8 @@ Usage: $0 [OPTIONS] cdec.ini training.corpus weights.init
     --means FILE       if you want means other than 0
     --sigma_squared S  variance on prior
     --pmem MEM         Memory required for decoder
+    --lbfgs_memory_buffers Number of buffers to use
+                           with LBFGS optimizer
 
 EOT
 }

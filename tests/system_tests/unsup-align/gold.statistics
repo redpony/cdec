@@ -90,7 +90,7 @@ constr_paths 4
 +lm_nodes 7
 +lm_edges 14
 +lm_paths 16
-+lm_trans end thet
++lm_trans thet thet
 constr_nodes 7
 constr_edges 10
 constr_paths 4

@@ -1,5 +1,6 @@
 #include "ff_wordalign.h"
 
+#include <set>
 #include <sstream>
 #include <string>
 #include <cmath>
@@ -12,20 +13,20 @@
 #include "tdict.h"   // Blunsom hack
 #include "filelib.h" // Blunsom hack
 
-static const size_t MAX_SENTENCE_SIZE = 100;
+static const int MAX_SENTENCE_SIZE = 100;
 
 using namespace std;
 
 Model2BinaryFeatures::Model2BinaryFeatures(const string& param) :
     fids_(boost::extents[MAX_SENTENCE_SIZE][MAX_SENTENCE_SIZE][MAX_SENTENCE_SIZE]) {
-  for (int i = 0; i < MAX_SENTENCE_SIZE; ++i) {
-    for (int j = 0; j < MAX_SENTENCE_SIZE; ++j) {
+  for (int i = 1; i < MAX_SENTENCE_SIZE; ++i) {
+    for (int j = 0; j < i; ++j) {
       for (int k = 0; k < MAX_SENTENCE_SIZE; ++k) {
         int& val = fids_[i][j][k];
         val = -1;
         if (j < i) {
           ostringstream os;
-          os << "M2_" << i << '_' << j << ':' << k;
+          os << "M2_FL:" << i << "_SI:" << j << "_TI:" << k;
           val = FD::Convert(os.str());
         }
       }
@@ -56,8 +57,24 @@ RelativeSentencePosition::RelativeSentencePosition(const string& param) :
   if (!param.empty()) {
     cerr << "  Loading word classes from " << param << endl;
     condition_on_fclass_ = true;
-    template_ = "RSP:FC000";
-    assert(!"not implemented");
+    ReadFile rf(param);
+    istream& in = *rf.stream();
+    set<WordID> classes;
+    while(in) {
+      string line;
+      getline(in, line);
+      if (line.empty()) continue;
+      vector<WordID> v;
+      TD::ConvertSentence(line, &v);
+      pos_.push_back(v);
+      for (int i = 0; i < v.size(); ++i)
+        classes.insert(v[i]);
+      for (set<WordID>::iterator i = classes.begin(); i != classes.end(); ++i) {
+        ostringstream os;
+        os << "RelPos_FC:" << TD::Convert(*i);
+        fids_[*i] = FD::Convert(os.str());
+      }
+    }
   } else {
     condition_on_fclass_ = false;
   }
@@ -79,17 +96,22 @@ void RelativeSentencePosition::TraversalFeaturesImpl(const SentenceMetadata& sme
                           static_cast<double>(edge.prev_i_) / smeta.GetTargetLength());
   features->set_value(fid_, val);
   if (condition_on_fclass_) {
-    assert(!"not implemented");
+    assert(smeta.GetSentenceID() < pos_.size());
+    const WordID cur_fclass = pos_[smeta.GetSentenceID()][edge.i_];
+    const int fid = fids_.find(cur_fclass)->second;
+    features->set_value(fid, val);
   }
 //  cerr << f_len_ << " " << e_len_ << " [" << edge.i_ << "," << edge.j_ << "|" << edge.prev_i_ << "," << edge.prev_j_ << "]\t" << edge.rule_->AsString() << "\tVAL=" << val << endl;
 }
 
 MarkovJumpFClass::MarkovJumpFClass(const string& param) :
-    FeatureFunction(1) {
+    FeatureFunction(1),
+    fids_(MAX_SENTENCE_SIZE) {
   cerr << "    MarkovJumpFClass" << endl;
   cerr << "Reading source POS tags from " << param << endl;
   ReadFile rf(param);
   istream& in = *rf.stream();
+  set<WordID> classes;
   while(in) {
     string line;
     getline(in, line);
@@ -97,8 +119,66 @@ MarkovJumpFClass::MarkovJumpFClass(const string& param) :
     vector<WordID> v;
     TD::ConvertSentence(line, &v);
     pos_.push_back(v);
+    for (int i = 0; i < v.size(); ++i)
+      classes.insert(v[i]);
   }
   cerr << "  (" << pos_.size() << " lines)\n";
+  cerr << "  Classes: " << classes.size() << endl;
+  for (int ss = 1; ss < MAX_SENTENCE_SIZE; ++ss) {
+    map<WordID, map<int, int> >& cfids = fids_[ss];
+    for (set<WordID>::iterator i = classes.begin(); i != classes.end(); ++i) {
+      map<int, int> &fids = cfids[*i];
+      for (int j = -ss; j <= ss; ++j) {
+        ostringstream os;
+        os << "Jump_FL:" << ss << "_FC:" << TD::Convert(*i) << "_J:" << j;
+        fids[j] = FD::Convert(os.str());
+      }
+    }
+  }
+}
+
+void MarkovJumpFClass::FireFeature(const SentenceMetadata& smeta,
+                                   int prev_src_pos,
+                                   int cur_src_pos,
+                                   SparseVector<double>* features) const {
+  const int jumpsize = cur_src_pos - prev_src_pos;
+  assert(smeta.GetSentenceID() < pos_.size());
+  const WordID cur_fclass = pos_[smeta.GetSentenceID()][cur_src_pos];
+  const int fid = fids_[smeta.GetSourceLength()].find(cur_fclass)->second.find(jumpsize)->second;
+  features->set_value(fid, 1.0);
+}
+
+void MarkovJumpFClass::FinalTraversalFeatures(const void* context,
+                                      SparseVector<double>* features) const {
+  int left_index = *static_cast<const unsigned char*>(context);
+//  int right_index = cur_flen;
+  // TODO
+}
+
+void MarkovJumpFClass::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_states,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* state) const {
+  unsigned char& dpstate = *((unsigned char*)state);
+  if (edge.Arity() == 0) {
+    dpstate = static_cast<unsigned int>(edge.i_);
+  } else if (edge.Arity() == 1) {
+    dpstate = *((unsigned char*)ant_states[0]);
+  } else if (edge.Arity() == 2) {
+    int left_index = *((unsigned char*)ant_states[0]);
+    int right_index = *((unsigned char*)ant_states[1]);
+    if (right_index == -1)
+      dpstate = static_cast<unsigned int>(left_index);
+    else
+      dpstate = static_cast<unsigned int>(right_index);
+//    const WordID cur_fclass = pos_[smeta.GetSentenceID()][right_index];
+//    cerr << edge.i_ << "," << edge.j_ << ": fclass=" << TD::Convert(cur_fclass) << " j=" << jumpsize << endl;
+//    const int fid = fids_[smeta.GetSourceLength()].find(cur_fclass)->second.find(jumpsize)->second;
+//    features->set_value(fid, 1.0);
+    FireFeature(smeta, left_index, right_index, features);
+  }
 }
 
 MarkovJump::MarkovJump(const string& param) :

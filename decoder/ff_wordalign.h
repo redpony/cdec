@@ -19,7 +19,8 @@ class RelativeSentencePosition : public FeatureFunction {
  private:
   const int fid_;
   bool condition_on_fclass_;
-  std::string template_;
+  std::vector<std::vector<WordID> > pos_;
+  std::map<WordID, int> fids_;  // fclass -> fid
 };
 
 class Model2BinaryFeatures : public FeatureFunction {
@@ -66,10 +67,14 @@ class MarkovJumpFClass : public FeatureFunction {
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
                                      void* context) const;
- private:
-  void FireFeature(WordID src,
-                   WordID trg,
+
+  void FireFeature(const SentenceMetadata& smeta,
+                   int prev_src_pos,
+                   int cur_src_pos,
                    SparseVector<double>* features) const;
+
+ private:
+  std::vector<std::map<WordID, std::map<int, int> > > fids_;  // flen -> fclass -> jumpsize -> fid
   std::vector<std::vector<WordID> > pos_;
 };
 
