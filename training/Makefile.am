@@ -1,10 +1,12 @@
 bin_PROGRAMS = \
   model1 \
+  mr_em_map_adapter \
+  mr_em_adapted_reduce \
+  mr_reduce_to_weights \
   mr_optimize_reduce \
   grammar_convert \
   atools \
   plftools \
-  mr_em_train \
   collapse_weights
 
 noinst_PROGRAMS = \
@@ -32,8 +34,14 @@ lbfgs_test_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
 mr_optimize_reduce_SOURCES = mr_optimize_reduce.cc optimize.cc
 mr_optimize_reduce_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
 
-mr_em_train_SOURCES = mr_em_train.cc
-mr_em_train_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
+mr_em_map_adapter_SOURCES = mr_em_map_adapter.cc
+mr_em_map_adapter_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
+
+mr_reduce_to_weights_SOURCES = mr_reduce_to_weights.cc
+mr_reduce_to_weights_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
+
+mr_em_adapted_reduce_SOURCES = mr_em_adapted_reduce.cc
+mr_em_adapted_reduce_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
 
 plftools_SOURCES = plftools.cc
 plftools_LDADD = $(top_srcdir)/decoder/libcdec.a -lz

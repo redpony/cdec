@@ -65,7 +65,8 @@ libcdec_a_SOURCES = \
   ff_csplit.cc \
   ff_tagger.cc \
   freqdict.cc \
-  lexcrf.cc \
+  lexalign.cc \
+  lextrans.cc \
   tagger.cc \
   bottom_up_parser.cc \
   phrasebased_translator.cc \

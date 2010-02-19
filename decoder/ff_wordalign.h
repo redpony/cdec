@@ -49,10 +49,8 @@ class MarkovJump : public FeatureFunction {
                                      void* out_context) const;
  private:
   const int fid_;
-  bool individual_params_per_jumpsize_;
-  bool condition_on_flen_;
-  bool condition_on_fclass_;
-  std::string template_;
+  bool binary_params_;
+  std::vector<std::map<int, int> > flen2jump2fid_;
 };
 
 class MarkovJumpFClass : public FeatureFunction {

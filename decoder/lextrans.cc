@@ -1,4 +1,4 @@
-#include "lexcrf.h"
+#include "lextrans.h"
 
 #include <iostream>
 
@@ -10,8 +10,8 @@
 
 using namespace std;
 
-struct LexicalCRFImpl {
-  LexicalCRFImpl(const boost::program_options::variables_map& conf) :
+struct LexicalTransImpl {
+  LexicalTransImpl(const boost::program_options::variables_map& conf) :
       use_null(conf.count("lexcrf_use_null") > 0),
       kXCAT(TD::Convert("X")*-1),
       kNULL(TD::Convert("<eps>")),
@@ -95,10 +95,10 @@ struct LexicalCRFImpl {
   GrammarPtr grammar;
 };
 
-LexicalCRF::LexicalCRF(const boost::program_options::variables_map& conf) :
-  pimpl_(new LexicalCRFImpl(conf)) {}
+LexicalTrans::LexicalTrans(const boost::program_options::variables_map& conf) :
+  pimpl_(new LexicalTransImpl(conf)) {}
 
-bool LexicalCRF::Translate(const string& input,
+bool LexicalTrans::Translate(const string& input,
                       SentenceMetadata* smeta,
                       const vector<double>& weights,
                       Hypergraph* forest) {

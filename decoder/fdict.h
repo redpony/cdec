@@ -20,6 +20,9 @@ struct FD {
   static inline const std::string& Convert(const WordID& w) {
     return dict_.Convert(w);
   }
+  // Escape any string to a form that can be used as the name
+  // of a weight in a weights file
+  static std::string Escape(const std::string& s);
   static Dict dict_;
  private:
   static bool frozen_;

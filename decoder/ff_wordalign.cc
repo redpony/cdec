@@ -26,7 +26,7 @@ Model2BinaryFeatures::Model2BinaryFeatures(const string& param) :
         val = -1;
         if (j < i) {
           ostringstream os;
-          os << "M2_FL:" << i << "_SI:" << j << "_TI:" << k;
+          os << "M2FL:" << i << ":TI:" << k << "_SI:" << j;
           val = FD::Convert(os.str());
         }
       }
@@ -181,32 +181,27 @@ void MarkovJumpFClass::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   }
 }
 
+//  std::vector<std::map<int, int> > flen2jump2fid_;
 MarkovJump::MarkovJump(const string& param) :
     FeatureFunction(1),
     fid_(FD::Convert("MarkovJump")),
-    individual_params_per_jumpsize_(false),
-    condition_on_flen_(false) {
+    binary_params_(false) {
   cerr << "    MarkovJump";
   vector<string> argv;
   int argc = SplitOnWhitespace(param, &argv);
-  if (argc > 0) {
-    if (argv[0] == "--fclasses") {
-      argc--;
-      assert(argc > 0);
-      const string f_class_file = argv[1];
-    }
-    if (argc != 1 || !(argv[0] == "-f" || argv[0] == "-i" || argv[0] == "-if")) {
-      cerr << "MarkovJump: expected parameters to be -f, -i, or -if\n";
-      exit(1);
-    }
-    individual_params_per_jumpsize_ = (argv[0][1] == 'i');
-    condition_on_flen_ = (argv[0][argv[0].size() - 1] == 'f');
-    if (individual_params_per_jumpsize_) {
-      template_ = "Jump:000";
-      cerr << ", individual jump parameters";
-      if (condition_on_flen_) {
-        template_ += ":F00";
-        cerr << " (split by f-length)";
+  if (argc != 1 || !(argv[0] == "-b" || argv[0] == "+b")) {
+    cerr << "MarkovJump: expected parameters to be -b or +b\n";
+    exit(1);
+  }
+  binary_params_ = argv[0] == "+b";
+  if (binary_params_) {
+    flen2jump2fid_.resize(MAX_SENTENCE_SIZE);
+    for (int i = 1; i < MAX_SENTENCE_SIZE; ++i) {
+      map<int, int>& jump2fid = flen2jump2fid_[i];
+      for (int jump = -i; jump <= i; ++jump) {
+        ostringstream os;
+        os << "Jump:FLen:" << i << "_J:" << jump;
+        jump2fid[jump] = FD::Convert(os.str());
       }
     }
   } else {
@@ -215,6 +210,7 @@ MarkovJump::MarkovJump(const string& param) :
   cerr << endl;
 }
 
+// TODO handle NULLs according to Och 2000
 void MarkovJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                        const Hypergraph::Edge& edge,
                                        const vector<const void*>& ant_states,
@@ -222,8 +218,24 @@ void MarkovJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                        SparseVector<double>* estimated_features,
                                        void* state) const {
   unsigned char& dpstate = *((unsigned char*)state);
+  const int flen = smeta.GetSourceLength();
   if (edge.Arity() == 0) {
     dpstate = static_cast<unsigned int>(edge.i_);
+    if (edge.prev_i_ == 0) {
+      if (binary_params_) {
+        // NULL will be tricky
+        // TODO initial state distribution, not normal jumps
+        const int fid = flen2jump2fid_[flen].find(edge.i_ + 1)->second;
+        features->set_value(fid, 1.0);
+      }
+    } else if (edge.prev_i_ == smeta.GetTargetLength() - 1) {
+        // NULL will be tricky
+      if (binary_params_) {
+        int jumpsize = flen - edge.i_;
+        const int fid = flen2jump2fid_[flen].find(jumpsize)->second;
+        features->set_value(fid, 1.0);
+      }
+    }
   } else if (edge.Arity() == 1) {
     dpstate = *((unsigned char*)ant_states[0]);
   } else if (edge.Arity() == 2) {
@@ -234,27 +246,12 @@ void MarkovJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
     else
       dpstate = static_cast<unsigned int>(right_index);
     const int jumpsize = right_index - left_index;
-    features->set_value(fid_, fabs(jumpsize - 1));  // Blunsom and Cohn def
 
-    if (individual_params_per_jumpsize_) {
-      string fname = template_;
-      int param = jumpsize;
-      if (jumpsize < 0) {
-        param *= -1;
-        fname[5]='L';
-      } else if (jumpsize > 0) {
-        fname[5]='R';
-      }
-      if (param) {
-        fname[6] = '0' + (param / 10);
-        fname[7] = '0' + (param % 10);
-      }
-      if (condition_on_flen_) {
-        const int flen = smeta.GetSourceLength();
-        fname[10] = '0' + (flen / 10);
-        fname[11] = '0' + (flen % 10);
-      }
-      features->set_value(FD::Convert(fname), 1.0);
+    if (binary_params_) {
+      const int fid = flen2jump2fid_[flen].find(jumpsize)->second;
+      features->set_value(fid, 1.0);
+    } else {
+      features->set_value(fid_, fabs(jumpsize - 1));  // Blunsom and Cohn def
     }
   } else {
     assert(!"something really unexpected is happening");

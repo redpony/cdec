@@ -55,7 +55,7 @@ for (my $ss=1; $ss < 100; $ss++) {
     # M2_FL:8_SI:3_TI:2=1
     for (my $i = 0; $i < $ss; $i++) {
       for (my $j = 0; $j < 100; $j++) {
-        print "M2_FL:${ss}_SI:${i}_TI:${j} 0\n";
+        print "M2FL:${ss}:TI:${j}_SI:${i} 0\n";
         $added++;
       }
     }

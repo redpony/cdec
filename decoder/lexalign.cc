@@ -31,17 +31,24 @@ struct LexicalAlignImpl {
       const WordID& e_i = target[i][0].label;
       Hypergraph::Node* node = forest->AddNode(kXCAT);
       const int new_node_id = node->id_;
+      int num_srcs = 0;
       for (int j = f_start; j < f_len; ++j) { // for each word in the source
         const WordID src_sym = (j < 0 ? kNULL : lattice[j][0].label);
-        TRulePtr& rule = LexRule(src_sym, e_i);
-        Hypergraph::Edge* edge = forest->AddEdge(rule, Hypergraph::TailNodeVector());
-        edge->i_ = j;
-        edge->j_ = j+1;
-        edge->prev_i_ = i;
-        edge->prev_j_ = i+1;
-        edge->feature_values_ += edge->rule_->GetFeatureValues();
-        forest->ConnectEdgeToHeadNode(edge->id_, new_node_id);
+        const TRulePtr& rule = LexRule(src_sym, e_i);
+        if (rule) {
+          Hypergraph::Edge* edge = forest->AddEdge(rule, Hypergraph::TailNodeVector());
+          edge->i_ = j;
+          edge->j_ = j+1;
+          edge->prev_i_ = i;
+          edge->prev_j_ = i+1;
+          edge->feature_values_ += edge->rule_->GetFeatureValues();
+          ++num_srcs;
+          forest->ConnectEdgeToHeadNode(edge->id_, new_node_id);
+        } else {
+          cerr << TD::Convert(src_sym) << " does not translate to " << TD::Convert(e_i) << endl;
+        }
       }
+      assert(num_srcs > 0);
       if (prev_node_id >= 0) {
         const int comb_node_id = forest->AddNode(kXCAT)->id_;
         Hypergraph::TailNodeVector tail(2, prev_node_id);
@@ -66,21 +73,23 @@ struct LexicalAlignImpl {
       return it->second;
     int& fid = e2fid[e];
     if (f == 0) {
-      fid = FD::Convert("Lx_<eps>_" + FD::Escape(TD::Convert(e)));
+      fid = FD::Convert("Lx:<eps>_" + FD::Escape(TD::Convert(e)));
     } else {
-      fid = FD::Convert("Lx_" + FD::Escape(TD::Convert(f)) + "_" + FD::Escape(TD::Convert(e)));
+      fid = FD::Convert("Lx:" + FD::Escape(TD::Convert(f)) + "_" + FD::Escape(TD::Convert(e)));
     }
     return fid;
   }
 
-  inline TRulePtr& LexRule(const WordID& f, const WordID& e) {
+  inline const TRulePtr& LexRule(const WordID& f, const WordID& e) {
+    const int fid = LexFeatureId(f, e);
+    if (!fid) { return kNULL_PTR; }
     map<int, TRulePtr>& e2rule = f2e2rule[f];
     map<int, TRulePtr>::iterator it = e2rule.find(e);
     if (it != e2rule.end())
       return it->second;
     TRulePtr& tr = e2rule[e];
     tr.reset(TRule::CreateLexicalRule(f, e));
-    tr->scores_.set_value(LexFeatureId(f, e), 1.0);
+    tr->scores_.set_value(fid, 1.0);
     return tr;
   }
 
@@ -90,6 +99,7 @@ struct LexicalAlignImpl {
   const WordID kNULL;
   const TRulePtr kBINARY;
   const TRulePtr kGOAL_RULE;
+  const TRulePtr kNULL_PTR;
   map<int, map<int, TRulePtr> > f2e2rule;
   map<int, map<int, int> > f2e2fid;
   GrammarPtr grammar;

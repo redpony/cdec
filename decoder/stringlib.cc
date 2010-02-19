@@ -1,5 +1,6 @@
 #include "stringlib.h"
 
+#include <cstring>
 #include <cstdlib>
 #include <cassert>
 #include <iostream>

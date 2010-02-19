@@ -18,7 +18,8 @@
 #include "sampler.h"
 #include "sparse_vector.h"
 #include "tagger.h"
-#include "lexcrf.h"
+#include "lextrans.h"
+#include "lexalign.h"
 #include "csplit.h"
 #include "weights.h"
 #include "tdict.h"
@@ -50,7 +51,7 @@ void ShowBanner() {
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()
-        ("formalism,f",po::value<string>(),"Decoding formalism; values include SCFG, FST, PB, LexCRF (lexical translation model), CSplit (compound splitting), Tagger (sequence labeling)")
+        ("formalism,f",po::value<string>(),"Decoding formalism; values include SCFG, FST, PB, LexTrans (lexical translation model, also disc training), CSplit (compound splitting), Tagger (sequence labeling), LexAlign (alignment only, or EM training)")
         ("input,i",po::value<string>()->default_value("-"),"Source file")
         ("grammar,g",po::value<vector<string> >()->composing(),"Either SCFG grammar file(s) or phrase tables file(s)")
         ("weights,w",po::value<string>(),"Feature weights file")
@@ -72,7 +73,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("show_expected_length", "Show the expected translation length under the model")
         ("show_partition,z", "Compute and show the partition (inside score)")
         ("beam_prune", po::value<double>(), "Prune paths from +LM forest")
-        ("lexcrf_use_null", "Support source-side null words in lexical translation")
+        ("lexalign_use_null", "Support source-side null words in lexical translation")
         ("tagger_tagset,t", po::value<string>(), "(Tagger) file containing tag set")
         ("csplit_output_plf", "(Compound splitter) Output lattice in PLF format")
         ("csplit_preserve_full_word", "(Compound splitter) Always include the unsegmented form in the output lattice")
@@ -117,8 +118,8 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
 
   const string formalism = LowercaseString((*conf)["formalism"].as<string>());
-  if (formalism != "scfg" && formalism != "fst" && formalism != "lexcrf" && formalism != "pb" && formalism != "csplit" && formalism != "tagger") {
-    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 'csplit', 'lexcrf', or 'tagger'\n";
+  if (formalism != "scfg" && formalism != "fst" && formalism != "lextrans" && formalism != "pb" && formalism != "csplit" && formalism != "tagger" && formalism != "lexalign") {
+    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 'csplit', 'lextrans', 'lexalign', or 'tagger'\n";
     cerr << dcmdline_options << endl;
     exit(1);
   }
@@ -273,8 +274,10 @@ int main(int argc, char** argv) {
     translator.reset(new PhraseBasedTranslator(conf));
   else if (formalism == "csplit")
     translator.reset(new CompoundSplit(conf));
-  else if (formalism == "lexcrf")
-    translator.reset(new LexicalCRF(conf));
+  else if (formalism == "lextrans")
+    translator.reset(new LexicalTrans(conf));
+  else if (formalism == "lexalign")
+    translator.reset(new LexicalAlign(conf));
   else if (formalism == "tagger")
     translator.reset(new Tagger(conf));
   else
