@@ -188,7 +188,8 @@ namespace KBest {
             if (new_d) {
               cand->push_back(new_d);
               std::push_heap(cand->begin(), cand->end(), HeapCompare());
-              assert(ds->insert(new_d).second);  // insert into uniqueness set, sanity check
+              bool inserted = ds->insert(new_d).second;  // insert into uniqueness set
+              assert(inserted);
             }
           }
         }
