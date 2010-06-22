@@ -1,0 +1,12 @@
+el ||| cat ||| F1=1
+el ||| the ||| F2=1
+el ||| black ||| F3=1
+el ||| book ||| F11=1
+gato ||| cat ||| F4=1 NN=1
+gato ||| black ||| F5=1
+gato ||| the ||| F6=1
+negro ||| the ||| F7=1
+negro ||| cat ||| F8=1
+negro ||| black ||| F9=1
+libro ||| the ||| F10=1
+libro ||| book ||| F12=1 NN=1

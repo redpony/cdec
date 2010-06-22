@@ -1,0 +1,5 @@
+-lm_nodes 13
+-lm_edges 16
+-lm_paths 4
+-lm_trans CB
+-lm_viterbi 101

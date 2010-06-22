@@ -1,0 +1,8 @@
+To run the test:
+
+../dist-vest.pl --local --metric aer cdec.ini --source-file corpus.src --ref-files=ref.0 --weights weights
+
+This will optimize the parameters of the tiny lexical translation model
+so as to minimize the AER of the Viterbi alignment on the development
+set in corpus.src according to the reference alignments in ref.0.
+
