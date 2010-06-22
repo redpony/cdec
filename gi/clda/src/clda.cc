@@ -16,16 +16,29 @@ void ShowTopWords(const map<WordID, int>& counts) {
   multimap<int, WordID> ms;
   for (map<WordID,int>::const_iterator it = counts.begin(); it != counts.end(); ++it)
     ms.insert(make_pair(it->second, it->first));
+  int cc = 0;
+  for (multimap<int, WordID>::reverse_iterator it = ms.rbegin(); it != ms.rend(); ++it) {
+    cerr << it->first << ':' << TD::Convert(it->second) << " ";
+    ++cc;
+    if (cc==12) break;
+  }
+  cerr << endl;
 }
 
 int main(int argc, char** argv) {
-  if (argc != 2) {
-    cerr << "Usage: " << argv[0] << " num-classes\n";
+  if (argc != 3) {
+    cerr << "Usage: " << argv[0] << " num-classes num-samples\n";
     return 1;
   }
   const int num_classes = atoi(argv[1]);
+  const int num_iterations = atoi(argv[2]);
+  const int burnin_size = num_iterations * 0.666;
   if (num_classes < 2) {
     cerr << "Must request more than 1 class\n";
+    return 1;
+  }
+  if (num_iterations < 5) {
+    cerr << "Must request more than 5 iterations\n";
     return 1;
   }
   cerr << "CLASSES: " << num_classes << endl;
@@ -63,8 +76,6 @@ int main(int argc, char** argv) {
   }
   cerr << "SAMPLING\n";
   vector<map<WordID, int> > t2w(num_classes);
-  const int num_iterations = 1000;
-  const int burnin_size = 800;
   bool needline = false;
   Timer timer;
   SampleSet ss;
@@ -114,6 +125,7 @@ int main(int argc, char** argv) {
     }
   }
   if (needline) cerr << endl;
+#if 0
   for (int j = 0; j < zji.size(); ++j) {
     const size_t num_words = wji[j].size();
     vector<int>& zj = zji[j];
@@ -124,17 +136,11 @@ int main(int argc, char** argv) {
     }
     cout << endl;
   }
+#endif
   for (int i = 0; i < num_classes; ++i) {
+    cerr << "---------------------------------\n";
     ShowTopWords(t2w[i]);
   }
-  for (map<int,int>::iterator it = t2w[0].begin(); it != t2w[0].end(); ++it)
-    cerr << TD::Convert(it->first) << " " << it->second << endl;
-  cerr << "---------------------------------\n";
-  for (map<int,int>::iterator it = t2w[1].begin(); it != t2w[1].end(); ++it)
-    cerr << TD::Convert(it->first) << " " << it->second << endl;
-  cerr << "---------------------------------\n";
-  for (map<int,int>::iterator it = t2w[2].begin(); it != t2w[2].end(); ++it)
-    cerr << TD::Convert(it->first) << " " << it->second << endl;
   return 0;
 }
 
