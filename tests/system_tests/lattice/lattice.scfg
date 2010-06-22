@@ -1,0 +1,6 @@
+[X] ||| A ||| a ||| Cost=0.1
+[X] ||| A ||| a' ||| Cost=0.1
+[X] ||| B ||| b ||| Cost=0.2
+[X] ||| AB ||| ab ||| Cost=0.1
+[X] ||| C B ||| cb ||| Cost=0.3
+[X] ||| A B ||| a_b ||| Cost=0.2

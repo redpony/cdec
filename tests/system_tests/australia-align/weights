@@ -1,0 +1,7 @@
+WordPenalty -2.844814
+LanguageModel 1.0
+PhraseModel_0 -1.066893
+PhraseModel_1 -0.752247
+PhraseModel_2 -0.589793
+PassThrough -20.0
+Glue 0

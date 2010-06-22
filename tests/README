@@ -1,0 +1,11 @@
+IPC::Run3 code is included, which is copyright 2003 by R. Barrie Slaymaker and
+makes the disclaimer:
+
+You may use this module under the terms of the BSD, Artistic, or GPL licenses,
+any version.
+
+For more information, refer to:
+  http://search.cpan.org/~rjbs/IPC-Run3-0.043/lib/IPC/Run3.pm
+
+The rest of the code and data is subject to the cdec BSD license.
+

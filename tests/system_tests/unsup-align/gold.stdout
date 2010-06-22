@@ -1,0 +1,8 @@
+bleue ||| blue ||| 0-0
+maison ||| house ||| 0-0
+la maison ||| the house ||| 0-0 1-1
+maison bleue ||| blue house ||| 0-1 1-0
+la fleur ||| the flower ||| 0-0 1-1
+la ||| the ||| 0-0
+la bouche ||| the mouth ||| 0-0 1-1
+le fin ||| thet end ||| 0-0 1-1
