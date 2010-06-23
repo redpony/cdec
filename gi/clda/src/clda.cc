@@ -9,10 +9,11 @@
 Dict TD::dict_;
 std::string TD::empty = "";
 std::string TD::space = " ";
+const size_t MAX_DOC_LEN_CHARS = 1000000;
 
 using namespace std;
 
-void ShowTopWords(const map<WordID, int>& counts) {
+void ShowTopWordsForTopic(const map<WordID, int>& counts) {
   multimap<int, WordID> ms;
   for (map<WordID,int>::const_iterator it = counts.begin(); it != counts.end(); ++it)
     ms.insert(make_pair(it->second, it->first));
@@ -42,12 +43,12 @@ int main(int argc, char** argv) {
     return 1;
   }
   cerr << "CLASSES: " << num_classes << endl;
-  char* buf = new char[800000];
+  char* buf = new char[MAX_DOC_LEN_CHARS];
   vector<vector<int> > wji;   // w[j][i] - observed word i of doc j
   vector<vector<int> > zji;   // z[j][i] - topic assignment for word i of doc j
   cerr << "READING DOCUMENTS\n";
   while(cin) {
-    cin.getline(buf, 800000);
+    cin.getline(buf, MAX_DOC_LEN_CHARS);
     if (buf[0] == 0) continue;
     wji.push_back(vector<WordID>());
     TD::ConvertSentence(buf, &wji.back());
@@ -76,16 +77,15 @@ int main(int argc, char** argv) {
   }
   cerr << "SAMPLING\n";
   vector<map<WordID, int> > t2w(num_classes);
-  bool needline = false;
   Timer timer;
   SampleSet ss;
   ss.resize(num_classes);
   double total_time = 0;
   for (int iter = 0; iter < num_iterations; ++iter) {
+    cerr << '.';
     if (iter && iter % 10 == 0) {
       total_time += timer.Elapsed();
       timer.Reset();
-      cerr << '.'; needline=true;
       prob_t lh = prob_t::One();
       for (int j = 0; j < zji.size(); ++j) {
         const size_t num_words = wji[j].size();
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
           }
         }
       }
-      if (iter && iter % 200 == 0) { cerr << " [ITER=" << iter << " SEC/SAMPLE=" << (total_time / 200) << " LLH=" << log(lh) << "]\n"; needline=false; total_time=0; }
+      if (iter && iter % 40 == 0) { cerr << " [ITER=" << iter << " SEC/SAMPLE=" << (total_time / 40) << " LLH=" << log(lh) << "]\n"; total_time=0; }
       //cerr << "ITERATION " << iter << " LOG LIKELIHOOD: " << log(lh) << endl;
     }
     for (int j = 0; j < zji.size(); ++j) {
@@ -124,22 +124,9 @@ int main(int argc, char** argv) {
       }
     }
   }
-  if (needline) cerr << endl;
-#if 0
-  for (int j = 0; j < zji.size(); ++j) {
-    const size_t num_words = wji[j].size();
-    vector<int>& zj = zji[j];
-    const vector<int>& wj = wji[j];
-    zj.resize(num_words);
-    for (int i = 0; i < num_words; ++i) {
-      cout << TD::Convert(wj[i]) << '(' << zj[i] << ") ";
-    }
-    cout << endl;
-  }
-#endif
   for (int i = 0; i < num_classes; ++i) {
     cerr << "---------------------------------\n";
-    ShowTopWords(t2w[i]);
+    ShowTopWordsForTopic(t2w[i]);
   }
   return 0;
 }
