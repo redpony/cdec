@@ -88,10 +88,12 @@ typedef RandomNumberGenerator<boost::mt19937> MT19937;
 class SampleSet {
  public:
   const prob_t& operator[](int i) const { return m_scores[i]; }
+  prob_t& operator[](int i) { return m_scores[i]; }
   bool empty() const { return m_scores.empty(); }
   void add(const prob_t& s) { m_scores.push_back(s); }
   void clear() { m_scores.clear(); }
   size_t size() const { return m_scores.size(); }
+  void resize(int size) { m_scores.resize(size); }
   std::vector<prob_t> m_scores;
 };
 
