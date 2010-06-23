@@ -22,9 +22,6 @@ class CRP {
     const typename MapType::const_iterator i = counts_.find(dish);
     if (i == counts_.end()) return 0; else return i->second;
   }
-  inline prob_t prob(const DishType& dish) const {
-    return (prob_t(count(dish) + alpha_)) / prob_t(total_customers_ + alpha_);
-  }
   inline prob_t prob(const DishType& dish, const prob_t& p0) const {
     return (prob_t(count(dish)) + palpha_ * p0) / prob_t(total_customers_ + alpha_);
   }
