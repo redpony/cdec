@@ -40,7 +40,7 @@ for line in sys.stdin:
     pi = phrase_index[phrase]
     ci = context_index[context]
     label = phrase_context_index[(pi,ci)]
-    print "%s-%s:%s" % (t1-1,t2-1,label),
+    print "%s-%s:X%s" % (t1-1,t2-1,label),
 #   print phrase, pi, context, ci
 #   print phrase_context_index[(pi,ci)]
   print
