@@ -6,9 +6,6 @@
 #include "crp.h"
 #include "sampler.h"
 #include "tdict.h"
-Dict TD::dict_;
-std::string TD::empty = "";
-std::string TD::space = " ";
 const size_t MAX_DOC_LEN_CHARS = 1000000;
 
 using namespace std;
@@ -57,8 +54,8 @@ int main(int argc, char** argv) {
   MT19937 rng;
   cerr << "INITIALIZING RANDOM TOPIC ASSIGNMENTS\n";
   zji.resize(wji.size());
-  double beta = 0.01;
-  double alpha = 0.001;
+  double beta = 0.1;
+  double alpha = 50.0 / num_classes;
   vector<CRP<int> > dr(zji.size(), CRP<int>(beta)); // dr[i] describes the probability of using a topic in document i
   vector<CRP<int> > wr(num_classes, CRP<int>(alpha)); // wr[k] describes the probability of generating a word in topic k
       int random_topic = rng.next() * num_classes;
@@ -79,9 +76,11 @@ int main(int argc, char** argv) {
   vector<map<WordID, int> > t2w(num_classes);
   Timer timer;
   SampleSet ss;
-  const int num_types = TD::dict_.max();
+  const int num_types = TD::NumWords();
   const prob_t class_p0(1.0 / num_classes);
   const prob_t word_p0(1.0 / num_types);
+  cerr << "CLASS PRIOR    PROB: " << class_p0 << endl;
+  cerr << " WORD PRIOR LOGPROB: " << log(word_p0) << endl;
   ss.resize(num_classes);
   double total_time = 0;
   for (int iter = 0; iter < num_iterations; ++iter) {
@@ -131,6 +130,19 @@ int main(int argc, char** argv) {
     cerr << "---------------------------------\n";
     ShowTopWordsForTopic(t2w[i]);
   }
+  cerr << "-------------\n";
+#if 0
+  for (int j = 0; j < zji.size(); ++j) {
+    const size_t num_words = wji[j].size();
+    vector<int>& zj = zji[j];
+    const vector<int>& wj = wji[j];
+    zj.resize(num_words);
+    for (int i = 0; i < num_words; ++i) {
+      cerr << TD::Convert(wji[j][i]) << '(' << zj[i] << ") ";
+    }
+    cerr << endl;
+  }
+#endif
   return 0;
 }
 

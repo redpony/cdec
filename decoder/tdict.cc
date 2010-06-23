@@ -10,6 +10,10 @@ Vocab* TD::dict_ = new Vocab;
 static const string empty;
 static const string space = " ";
 
+unsigned int TD::NumWords() {
+  return dict_->numWords();
+}
+
 WordID TD::Convert(const std::string& s) {
   return dict_->addWord((VocabString)s.c_str());
 }

@@ -23,6 +23,7 @@ struct TD {
     }
     return (dest - buffer);
   }
+  static unsigned int NumWords();
   static WordID Convert(const std::string& s);
   static const char* Convert(const WordID& w);
 };
