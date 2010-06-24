@@ -2,11 +2,6 @@
 use strict;
 my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path cwd /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
 
-use Getopt::Long "GetOptions";
-use IPC::Run3;
-use File::Temp qw ( tempdir );
-my $TEMP_DIR = tempdir( CLEANUP => 1 );
-
 my $GZIP = 'gzip';
 my $ZCAT = 'gunzip -c';
 
