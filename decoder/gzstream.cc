@@ -21,14 +21,15 @@
 // Revision      : $Revision: 1.1 $
 // Revision_date : $Date: 2006/03/30 04:05:52 $
 // Author(s)     : Deepak Bandyopadhyay, Lutz Kettner
-// 
-// Standard streambuf implementation following Nicolai Josuttis, "The 
+//
+// Standard streambuf implementation following Nicolai Josuttis, "The
 // Standard C++ Library".
 // ============================================================================
 
 #include "gzstream.h"
 #include <iostream>
 #include <cstring>
+#include <stdexcept>
 
 #ifdef GZSTREAM_NAMESPACE
 namespace GZSTREAM_NAMESPACE {
@@ -59,6 +60,7 @@ gzstreambuf* gzstreambuf::open( const char* name, int open_mode) {
     *fmodeptr++ = 'b';
     *fmodeptr = '\0';
     file = gzopen( name, fmode);
+    if (!file) handle_gzerror();
     if (file == 0)
         return (gzstreambuf*)0;
     opened = 1;
@@ -71,8 +73,17 @@ gzstreambuf * gzstreambuf::close() {
         opened = 0;
         if ( gzclose( file) == Z_OK)
             return this;
+        else
+            handle_gzerror();
     }
     return (gzstreambuf*)0;
+}
+
+void gzstreambuf::handle_gzerror() {
+    int errnum;
+    const char *errmsg=gzerror(file,&errnum);
+    if (errnum==Z_DATA_ERROR) errmsg="CRC error reading gzip";
+    throw std::runtime_error(std::string("gzstreambuf error: ")+errmsg);
 }
 
 int gzstreambuf::underflow() { // used for input buffer only
@@ -89,7 +100,11 @@ int gzstreambuf::underflow() { // used for input buffer only
 
     int num = gzread( file, buffer+4, bufferSize-4);
     if (num <= 0) // ERROR or EOF
-        return EOF;
+    {
+        if (gzeof(file))
+            return EOF;
+        handle_gzerror();
+    }
 
     // reset buffer pointers
     setg( buffer + (4 - n_putback),   // beginning of putback area
@@ -97,7 +112,7 @@ int gzstreambuf::underflow() { // used for input buffer only
           buffer + 4 + num);          // end of buffer
 
     // return next character
-    return * reinterpret_cast<unsigned char *>( gptr());    
+    return * reinterpret_cast<unsigned char *>( gptr());
 }
 
 int gzstreambuf::flush_buffer() {
@@ -105,7 +120,7 @@ int gzstreambuf::flush_buffer() {
     // sync() operation.
     int w = pptr() - pbase();
     if ( gzwrite( file, pbase(), w) != w)
-        return EOF;
+        handle_gzerror();
     pbump( -w);
     return w;
 }
