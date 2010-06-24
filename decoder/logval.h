@@ -79,32 +79,29 @@ class LogVal {
   T v_;
 };
 
+// copy elision - as opposed to explicit copy of LogVal<T> const& o1, we should be able to construct Logval r=a+(b+c) as a single result in place in r.  todo: return std::move(o1) - C++0x
 template<typename T>
-LogVal<T> operator+(const LogVal<T>& o1, const LogVal<T>& o2) {
-  LogVal<T> res(o1);
-  res += o2;
-  return res;
+LogVal<T> operator+(LogVal<T> o1, const LogVal<T>& o2) {
+  o1 += o2;
+  return o1;
 }
 
 template<typename T>
-LogVal<T> operator*(const LogVal<T>& o1, const LogVal<T>& o2) {
-  LogVal<T> res(o1);
-  res *= o2;
-  return res;
+LogVal<T> operator*(LogVal<T> o1, const LogVal<T>& o2) {
+  o1 *= o2;
+  return o1;
 }
 
 template<typename T>
-LogVal<T> operator/(const LogVal<T>& o1, const LogVal<T>& o2) {
-  LogVal<T> res(o1);
-  res /= o2;
-  return res;
+LogVal<T> operator/(LogVal<T> o1, const LogVal<T>& o2) {
+  o1 /= o2;
+  return o1;
 }
 
 template<typename T>
-LogVal<T> operator-(const LogVal<T>& o1, const LogVal<T>& o2) {
-  LogVal<T> res(o1);
-  res -= o2;
-  return res;
+LogVal<T> operator-(LogVal<T> o1, const LogVal<T>& o2) {
+  o1 -= o2;
+  return o1;
 }
 
 template<typename T>
