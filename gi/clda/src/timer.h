@@ -1,6 +1,8 @@
 #ifndef _TIMER_STATS_H_
 #define _TIMER_STATS_H_
 
+#include <ctime>
+
 struct Timer {
   Timer() { Reset(); }
   void Reset() {
@@ -12,7 +14,7 @@ struct Timer {
     return elapsed;
   }
  private:
-  clock_t start_t;
+  std::clock_t start_t;
 };
 
 #endif
