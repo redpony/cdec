@@ -28,7 +28,7 @@ my $S2L = "$PYPSCRIPTS/spans2labels.py";
 
 my $PYP_TOPICS_TRAIN="$PYPTOOLS/pyp-topics-train";
 
-my $SORT_KEYS = "$SCRIPT_DIR/sort-by-key.sh";
+my $SORT_KEYS = "$SCRIPT_DIR/scripts/sort-by-key.sh";
 my $EXTRACTOR = "$EXTOOLS/extractor";
 my $FILTER = "$EXTOOLS/filter_grammar";
 my $SCORER = "$EXTOOLS/score_grammar";
