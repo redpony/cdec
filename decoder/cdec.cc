@@ -79,6 +79,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("show_expected_length", "Show the expected translation length under the model")
         ("show_partition,z", "Compute and show the partition (inside score)")
         ("show_cfg_search_space", "Show the search space as a CFG")
+        ("prelm_beam_prune", po::value<double>(), "Prune paths from -LM forest before LM rescoring")
         ("beam_prune", po::value<double>(), "Prune paths from +LM forest")
         ("lexalign_use_null", "Support source-side null words in lexical translation")
         ("tagger_tagset,t", po::value<string>(), "(Tagger) file containing tag set")
@@ -188,7 +189,7 @@ void MaxTranslationSample(Hypergraph* hg, const int samples, const int k) {
 
 // TODO decoder output should probably be moved to another file
 void DumpKBest(const int sent_id, const Hypergraph& forest, const int k, const bool unique) {
-cerr << "In kbest\n"; 
+cerr << "In kbest\n";
  if (unique) {
     KBest::KBestDerivations<vector<WordID>, ESentenceTraversal, KBest::FilterUnique> kbest(forest, k);
     for (int i = 0; i < k; ++i) {
@@ -407,6 +408,11 @@ int main(int argc, char** argv) {
       cerr << "  -LM    tree: " << ViterbiETree(forest) << endl;;
     cerr << "  -LM Viterbi: " << log(vs) << endl;
 
+    if (conf.count("prelm_beam_prune")) {
+      forest.BeamPruneInsideOutside(1.0, false, conf["prelm_beam_prune"].as<double>(), NULL);
+      cerr << "  Pruned -LM forest    (paths): " << forest.NumberOfPaths() << endl;
+    }
+
     bool has_late_models = !late_models.empty();
     if (has_late_models) {
       forest.Reweight(feature_weights);
@@ -544,7 +550,7 @@ int main(int argc, char** argv) {
           acc_obj += (log_z - log_ref_z);
         }
         if (feature_expectations) {
-          const prob_t z = 
+          const prob_t z =
             InsideOutside<prob_t, EdgeProb, SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>(forest, &ref_exp);
           ref_exp /= z;
           acc_obj += log(z);
