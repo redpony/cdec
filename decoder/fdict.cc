@@ -1,5 +1,6 @@
 #include "fdict.h"
-
+#include "stdlib.h"
+//for malloc (need on cygwin); todo <cstdlib> and std::malloc
 #include <string>
 
 using namespace std;
@@ -59,10 +60,10 @@ int UrlDecode(const char *source, char *dest)
     }
     source++;
   }
-  
+
   *dest = 0;
   return dest - start;
-}  
+}
 
 int UrlEncode(const char *source, char *dest, unsigned max) {
   static const char *digits = "0123456789ABCDEF";
@@ -83,7 +84,7 @@ int UrlEncode(const char *source, char *dest, unsigned max) {
     }
     else {
       *dest++ = *source;
-    }  
+    }
     source++;
   }
   *dest = 0;

@@ -168,6 +168,7 @@ class Hypergraph {
   // case.  To investigate, change false to true and see where ftrans crashes
   void PruneEdges(const std::vector<bool>& prune_edge, bool run_inside_algorithm = false);
 
+  // for density>=1.0, keep this many times the edges needed for the 1best derivation
   // if you don't know, use_sum_prod_semiring should be false
   void DensityPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double density,
                                  const std::vector<bool>* preserve_mask = NULL);

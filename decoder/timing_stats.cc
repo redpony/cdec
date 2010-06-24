@@ -1,7 +1,7 @@
 #include "timing_stats.h"
 
 #include <iostream>
-
+#include "time.h" //cygwin needs
 using namespace std;
 
 map<string, TimerInfo> Timer::stats;

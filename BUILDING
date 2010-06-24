@@ -31,6 +31,11 @@ Instructions for building
     version idiosyncracies (generally, I assume you have a relatively new
     of g++).
 
+    If you're building on cygwin, their libtool is buggy; this make command
+    works for now:
+
+        make LIBS+="-loolm -ldstruct -lmisc -lz"
+
  5) Test
 
         ./tests/run-system-tests.pl
