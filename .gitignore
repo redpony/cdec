@@ -61,4 +61,25 @@ vest/Makefile
 vest/Makefile.in
 vest/mr_vest_generate_mapper_input
 vest/*.o
+decoder/logval_test
+extools/build_lexical_translation
+extools/filter_grammar
+extools/score_grammar
+gi/clda/src/.deps/
+gi/clda/src/clda
+gi/clda/src/clda.o
+gi/pyp-topics/src/.deps/
+gi/pyp-topics/src/corpus.o
+gi/pyp-topics/src/gammadist.o
+gi/pyp-topics/src/gzstream.o
+gi/pyp-topics/src/mt19937ar.o
+gi/pyp-topics/src/pyp-topics-train
+gi/pyp-topics/src/pyp-topics.o
+gi/pyp-topics/src/train.o
+m4/libtool.m4
+m4/ltoptions.m4
+m4/ltsugar.m4
+m4/ltversion.m4
+m4/lt~obsolete.m4
+vest/mbr_kbest
 
