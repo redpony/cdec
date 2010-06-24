@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <ctime>
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
@@ -28,7 +29,7 @@ struct RandomNumberGenerator {
     }
     if (r.fail() || !r) {
       std::cerr << "Warning: could not read from /dev/urandom. Seeding from clock" << std::endl;
-      seed = time(NULL);
+      seed = std::time(NULL);
     }
     std::cerr << "Seeding random number sequence to " << seed << std::endl;
     return seed;
@@ -113,7 +114,7 @@ size_t RandomNumberGenerator<RNG>::SelectSample(const SampleSet& ss, double T) {
   }
   //for (size_t i = 0; i < ss.m_scores.size(); ++i) std::cerr << ss.m_scores[i] << ",";
   //std::cerr << std::endl;
- 
+
   prob_t random(this->next());    // random number between 0 and 1
   random *= sum;                  // scale with normalization factor
   //std::cerr << "Random number " << random << std::endl;
@@ -123,10 +124,10 @@ size_t RandomNumberGenerator<RNG>::SelectSample(const SampleSet& ss, double T) {
   sum = ss.m_scores[0];
   if (anneal) {
     sum.poweq(annealing_factor);
-    for (; position < ss.m_scores.size() && sum < random; ++position) 
+    for (; position < ss.m_scores.size() && sum < random; ++position)
       sum += ss.m_scores[position].pow(annealing_factor);
   } else {
-    for (; position < ss.m_scores.size() && sum < random; ++position) 
+    for (; position < ss.m_scores.size() && sum < random; ++position)
       sum += ss.m_scores[position];
   }
   //std::cout << "random: " << random <<  " sample: " << position << std::endl;
