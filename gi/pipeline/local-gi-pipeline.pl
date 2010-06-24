@@ -57,12 +57,14 @@ extract_context();
 contexts_to_documents();
 topic_train();
 label_spans_with_topics();
+my $res;
 if ($BIDIR) {
-  grammar_extract_bidir();
+  $res = grammar_extract_bidir();
 } else {
-  grammar_extract();
+  $res = grammar_extract();
 }
 print STDERR "\n!!!COMPLETE!!!\n";
+print STDERR "GRAMMAR: $res\n\nYou should probably run:\n\n   $SCRIPT_DIR/filter-for-test-set.pl $CORPUS $res TESTSET.TXT > filtered-grammar.scfg\n\n";
 exit 0;
 
 
@@ -146,6 +148,7 @@ sub grammar_extract {
   } else {
     safesystem("$EXTRACTOR -i $LABELED -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE | $SORT_KEYS | $REDUCER -p | $GZIP > $OUTGRAMMAR") or die "Couldn't extract grammar";
   }
+  return $OUTGRAMMAR;
 }
 
 sub grammar_extract_bidir {
@@ -158,7 +161,7 @@ sub grammar_extract_bidir {
   } else {
     safesystem("$EXTRACTOR -i $LABELED -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -b | $SORT_KEYS | $REDUCER -p -b | $SORT_KEYS | $REDUCER | $GZIP > $OUTGRAMMAR") or die "Couldn't extract grammar";
   }
-
+  return $OUTGRAMMAR;
 }
 
 sub safesystem {
