@@ -159,7 +159,7 @@ void Hypergraph::PruneEdges(const std::vector<bool>& prune_edge, bool run_inside
       filtered[i] = prune;
     }
   }
- 
+
   TopologicallySortNodesAndEdges(nodes_.size() - 1, &filtered);
 }
 
@@ -197,7 +197,7 @@ void Hypergraph::BeamPruneInsideOutside(
     const bool use_sum_prod_semiring,
     const double alpha,
     const vector<bool>* preserve_mask) {
-  assert(alpha > 0.0);
+  assert(alpha >= 0.0);
   assert(scale > 0.0);
   vector<prob_t> io(edges_.size());
   if (use_sum_prod_semiring)
@@ -234,7 +234,7 @@ void Hypergraph::PrintGraphviz() const {
     static const string none = "<null>";
     string rule = (edge.rule_ ? edge.rule_->AsString(false) : none);
 
-    cerr << "   A_" << ei << " [label=\"" << rule << " p=" << edge.edge_prob_ 
+    cerr << "   A_" << ei << " [label=\"" << rule << " p=" << edge.edge_prob_
          << " F:" << edge.feature_values_
          << "\" shape=\"rect\"];\n";
     Hypergraph::TailNodeVector indorder(edge.tail_nodes_.size(), 0);
@@ -257,7 +257,7 @@ void Hypergraph::PrintGraphviz() const {
     //cerr << "  " << ni->id_ << "[label=\"" << ni->cat_
          << " n=" << ni->id_
 //         << ",x=" << &*ni
-//         << ",in=" << ni->in_edges_.size() 
+//         << ",in=" << ni->in_edges_.size()
 //         << ",out=" << ni->out_edges_.size()
          << "\"];\n";
   }
