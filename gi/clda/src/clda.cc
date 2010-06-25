@@ -61,13 +61,13 @@ int main(int argc, char** argv) {
   double alpha = 50.0 / num_classes;
   vector<CRP<int> > dr(zji.size(), CRP<int>(beta)); // dr[i] describes the probability of using a topic in document i
   vector<CRP<int> > wr(num_classes, CRP<int>(alpha)); // wr[k] describes the probability of generating a word in topic k
-      int random_topic = rng.next() * num_classes;
   for (int j = 0; j < zji.size(); ++j) {
     const size_t num_words = wji[j].size();
     vector<int>& zj = zji[j];
     const vector<int>& wj = wji[j];
     zj.resize(num_words);
     for (int i = 0; i < num_words; ++i) {
+      int random_topic = rng.next() * num_classes;
       if (random_topic == num_classes) { --random_topic; }
       zj[i] = random_topic;
       const int word = wj[i];

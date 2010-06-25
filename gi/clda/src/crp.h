@@ -3,7 +3,6 @@
 
 // shamelessly adapted from code by Phil Blunsom and Trevor Cohn
 
-#include <map>
 #include <boost/functional/hash.hpp>
 #include <tr1/unordered_map>
 
