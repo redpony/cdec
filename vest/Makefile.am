@@ -3,13 +3,19 @@ bin_PROGRAMS = \
   mr_vest_map \
   mr_vest_reduce \
   mr_vest_generate_mapper_input \
-  fast_score
+  fast_score \
+  sentserver \
+  sentclient
 
 if HAVE_GTEST
 noinst_PROGRAMS = \
   scorer_test \
   lo_test
 endif
+
+sentserver_SOURCES = sentserver.c
+
+sentclient_SOURCES = sentclient.c
 
 mbr_kbest_SOURCES = mbr_kbest.cc ter.cc comb_scorer.cc aer_scorer.cc scorer.cc viterbi_envelope.cc
 mbr_kbest_LDADD = $(top_srcdir)/decoder/libcdec.a -lz

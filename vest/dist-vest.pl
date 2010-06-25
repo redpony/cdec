@@ -6,6 +6,8 @@ use Getopt::Long;
 use IPC::Open2;
 use strict;
 use POSIX ":sys_wait_h";
+#my $QSUB_FLAGS = "-q batch -l pmem=3000mb,walltime=5:00:00";
+my $QSUB_FLAGS = "-l mem_free=9G";
 
 # Default settings
 my $srcFile;
@@ -17,12 +19,13 @@ die "Can't execute $FAST_SCORE" unless -x $FAST_SCORE;
 my $MAPINPUT = "$bin_dir/mr_vest_generate_mapper_input";
 my $MAPPER = "$bin_dir/mr_vest_map";
 my $REDUCER = "$bin_dir/mr_vest_reduce";
+my $parallelize = "$bin_dir/parallelize.pl";
 my $SCORER = $FAST_SCORE;
 die "Can't find $MAPPER" unless -x $MAPPER;
 my $cdec = "$bin_dir/../decoder/cdec";
 die "Can't find decoder in $cdec" unless -x $cdec;
+die "Can't find $parallelize" unless -x $parallelize;
 my $decoder = $cdec;
-my $DISCARD_FORESTS = 0;
 my $lines_per_mapper = 400;
 my $rand_directions = 15;
 my $iteration = 1;
@@ -157,7 +160,6 @@ $SIG{HUP} = "cleanup";
 
 my $decoderBase = `basename $decoder`; chomp $decoderBase;
 my $newIniFile = "$dir/$decoderBase.ini";
-my $parallelize = '/chomes/redpony/svn-trunk/sa-utils/parallelize.pl';
 my $inputFileName = "$dir/input";
 my $user = $ENV{"USER"};
 
@@ -254,12 +256,8 @@ while (1){
 	}
 	
 	# run optimizer
-	print LOGFILE "\nUNION FORESTS\n";
 	print LOGFILE `date`;
 	my $mergeLog="$logdir/prune-merge.log.$iteration";
-	if ($DISCARD_FORESTS) {
-		`rm -f $dir/hgs/*gz`;
-	}
 
 	my $score = 0;
 	my $icc = 0;
@@ -314,7 +312,7 @@ while (1){
 					die;
 				}
 			} else {
-				my $todo = "qsub -q batch -l pmem=3000mb,walltime=5:00:00 -N $client_name -o /dev/null -e $logdir/$client_name.ER";
+				my $todo = "qsub $QSUB_FLAGS -S /bin/bash -N $client_name -o /dev/null -e $logdir/$client_name.ER";
 				local(*QOUT, *QIN);
 				open2(\*QOUT, \*QIN, $todo);
 				print QIN $script;
@@ -323,9 +321,10 @@ while (1){
 				$nmappers++;
 				while (my $jobid=<QOUT>){
 	  				chomp $jobid;
-		  			push(@cleanupcmds, "`qdel $jobid 2> /dev/null`");
 					$jobid =~ s/^(\d+)(.*?)$/\1/g;
-					print STDERR "short job id $jobid\n";
+          $jobid =~ s/^Your job (\d+) .*$/\1/;
+		  	  push(@cleanupcmds, "`qdel $jobid 2> /dev/null`");
+					print LOGFILE " $jobid";
 					if ($joblist == "") { $joblist = $jobid; }
 					else {$joblist = $joblist . "\|" . $jobid; }
 				}
@@ -334,7 +333,8 @@ while (1){
 		}
 		if ($run_local) {
 		} else {
-			print LOGFILE "Launched $nmappers mappers.\n";
+			print LOGFILE "\nLaunched $nmappers mappers.\n";
+      sleep 10;
 			print LOGFILE "Waiting for mappers to complete...\n";
 			while ($nmappers > 0) {
 			  sleep 5;
@@ -353,7 +353,7 @@ while (1){
 		  die "$mo: output lines ($olines) doesn't match input lines ($ilines)" unless $olines==$ilines;
 		}
 		print LOGFILE "Results for $tol/$til lines\n";
-		print LOGFILE "\nSORTING AND RUNNING FMERT REDUCER\n";
+		print LOGFILE "\nSORTING AND RUNNING VEST REDUCER\n";
 		print LOGFILE `date`;
 		$cmd="sort -t \$'\\t' -k 1 @mapoutputs | $REDUCER -l $metric > $dir/redoutput.$im1";
 		print LOGFILE "COMMAND:\n$cmd\n";
