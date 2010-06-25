@@ -7,6 +7,7 @@ use Getopt::Long "GetOptions";
 my $GZIP = 'gzip';
 my $ZCAT = 'gunzip -c';
 my $BASE_PHRASE_MAX_SIZE = 10;
+my $COMPLETE_CACHE = 1;
 my $ITEMS_IN_MEMORY = 3000000;  # cache size in extractors
 my $NUM_TOPICS = 50;
 my $NUM_SAMPLES = 100;
@@ -95,8 +96,13 @@ sub extract_context {
  if (-e $OUT_CONTEXTS) {
    print STDERR "$OUT_CONTEXTS exists, reusing...\n";
  } else {
-   safesystem("$EXTRACTOR -i $CORPUS -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE | $SORT_KEYS | $REDUCER | $GZIP > $OUT_CONTEXTS") or die "Failed to extract contexts.";
- }
+   my $cmd = "$EXTRACTOR -i $CORPUS -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE | $SORT_KEYS | $REDUCER | $GZIP > $OUT_CONTEXTS";
+   if ($COMPLETE_CACHE) {
+     print STDERR "COMPLETE_CACHE is set: removing memory limits on cache.\n";
+     $cmd = "$EXTRACTOR -i $CORPUS -c 0 -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE | $SORT_KEYS | $GZIP > $OUT_CONTEXTS";
+   }
+   safesystem($cmd) or die "Failed to extract contexts.";
+  }
 }
 
 sub contexts_to_documents {

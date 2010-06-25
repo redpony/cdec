@@ -34,7 +34,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("base_phrase,B", "Write base phrases")
         ("base_phrase_spans", "Write base sentences and phrase spans")
         ("bidir,b", "Extract bidirectional rules (for computing p(f|e) in addition to p(e|f))")
-        ("combiner_size,c", po::value<size_t>()->default_value(800000), "Number of unique items to store in cache before writing rule counts. Set to 0 to disable cache.")
+        ("combiner_size,c", po::value<size_t>()->default_value(800000), "Number of unique items to store in cache before writing rule counts. Set to 1 to disable cache. Set to 0 for no limit.")
         ("silent", "Write nothing to stderr except errors")
         ("phrase_context,C", "Write base phrase contexts")
         ("phrase_context_size,S", po::value<int>()->default_value(2), "Use this many words of context on left and write when writing base phrase contexts")
@@ -86,7 +86,9 @@ void WriteBasePhraseSpans(const AnnotatedParallelSentence& sentence,
 }
 
 struct CountCombiner {
-  CountCombiner(size_t csize) : combiner_size(csize) {}
+  CountCombiner(const size_t& csize) : combiner_size(csize) {
+    if (csize == 0) { cerr << "Using unlimited combiner cache.\n"; }
+  }
   ~CountCombiner() {
     if (!cache.empty()) WriteAndClearCache();
   }
@@ -95,13 +97,14 @@ struct CountCombiner {
              const vector<WordID>& val,
              const int count_type,
              const vector<pair<short,short> >& aligns) {
-    if (combiner_size > 0) {
+    if (combiner_size != 1) {
       RuleStatistics& v = cache[key][val];
       float newcount = v.counts.add_value(count_type, 1.0f);
       // hack for adding alignments
       if (newcount < 7.0f && aligns.size() > v.aligns.size())
         v.aligns = aligns;
-      if (cache.size() > combiner_size) WriteAndClearCache();
+      if (combiner_size > 1 && cache.size() > combiner_size)
+        WriteAndClearCache();
     } else {
       cout << TD::GetString(key) << '\t' << TD::GetString(val) << " ||| ";
       cout << RuleStatistics(count_type, 1.0f, aligns) << endl;
@@ -300,8 +303,6 @@ int main(int argc, char** argv) {
     string sdefault_cat = conf["default_category"].as<string>();
     default_cat = -TD::Convert(sdefault_cat);
     cerr << "Default category: " << sdefault_cat << endl;
-  } else {
-    cerr << "No default category (use --default_category if you want to set one)\n";
   }
   ReadFile rf(conf["input"].as<string>());
   istream& in = *rf.stream();
