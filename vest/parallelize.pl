@@ -95,7 +95,7 @@ my $tryp=50;
 my $port = 50300+int(rand($randp));
 my $endp=$port+$tryp;
 if ($verbose){ print STDERR "Testing port $port...";}
-while (`netstat -ln 2>/dev/null | grep -q $port`){
+while (`netstat -ln 2>/dev/null | grep $port`){
 	if ($verbose){ print STDERR "port is busy\n";}
 	$port++;
 	if ($port > $endp){
