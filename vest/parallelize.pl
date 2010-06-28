@@ -1,17 +1,17 @@
 #!/usr/bin/env perl
 
 # Author: Adam Lopez
-# 
+#
 # This script takes a command that processes input
 # from stdin one-line-at-time, and parallelizes it
 # on the cluster using David Chiang's sentserver/
-# sentclient architecture.  
-# 
+# sentclient architecture.
+#
 # Prerequisites: the command *must* read each line
 # without waiting for subsequent lines of input
 # (for instance, a command which must read all lines
-# of input before processing will not work) and 
-# return it to the output *without* buffering 
+# of input before processing will not work) and
+# return it to the output *without* buffering
 # multiple lines.
 
 use Getopt::Long;
@@ -63,12 +63,12 @@ if ($errordir){
 
 if ($verbose){ print STDERR "Parallelizing: $cmd\n\n"; }
 
-# set cleanup handler 
+# set cleanup handler
 my @cleanup_cmds;
 sub cleanup;
 sub cleanup_and_die;
 $SIG{INT} = "cleanup_and_die";
-$SIG{TERM} = "cleanup_and_die"; 
+$SIG{TERM} = "cleanup_and_die";
 $SIG{HUP} = "cleanup_and_die";
 
 # other subs:
@@ -83,24 +83,28 @@ my $sentclient = "$mydir/sentclient";
 my $host = `hostname`;
 chomp $host;
 
-my $executable = $cmd;  
+my $executable = $cmd;
 $executable =~ s/^\s*(\S+)($|\s.*)/$1/;
 $executable=`basename $executable`;
 chomp $executable;
 
 # find open port
-my $port = 50300;
+my $basep=50300;
+my $randp=300;
+my $tryp=50;
+my $port = 50300+int(rand($randp));
+my $endp=$port+$tryp;
 if ($verbose){ print STDERR "Testing port $port...";}
-while (`netstat -l | grep $port`){
+while (`netstat -l 2>/dev/null | grep -q $port`){
 	if ($verbose){ print STDERR "port is busy\n";}
 	$port++;
-	if ($port > 50400){
+	if ($port > $endp){
 		die "Unable to find open port\n";
 	}
 	if ($verbose){ print STDERR "Testing port $port... "; }
 }
 if ($verbose){
-	print STDERR "port is available\n";
+	print STDERR "port $port is available\n";
 }
 
 srand;
@@ -175,7 +179,7 @@ sub launch_job_on_node {
 		$clientname =~ s/^(.{4}).*$/$1/;
 		$clientname = "$clientname.$node.$node_count";
 		if ($errordir){
-			$errorfile = "$errordir/$clientname.ER"; 
+			$errorfile = "$errordir/$clientname.ER";
 			$outfile = "$errordir/$clientname.OU";
 		}
 		my $todo = "qsub -l mem_free=9G -N $clientname -o $outfile -e $errorfile";
@@ -226,7 +230,7 @@ options:
 	-e, --error-dir <dir>
 		Retain output files from jobs in <dir>, rather
 		than silently deleting them.
-	
+
 	-m, --multi-line
 		Expect that command may produce multiple output
 		lines for a single input line.  $name makes a
