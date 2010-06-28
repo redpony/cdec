@@ -54,6 +54,7 @@ my $shell_escape_in_quote=qr.[\\"\$`!].;
 sub escape_shell {
     my ($arg)=@_;
     return undef unless defined $arg;
+    return '""' unless $arg;
     if ($arg =~ /$is_shell_special/) {
         $arg =~ s/($shell_escape_in_quote)/\\$1/g;
         return "\"$arg\"";
