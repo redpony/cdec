@@ -88,7 +88,7 @@ unless (GetOptions(
         "baseport=i" => \$basep,
         "iport=i" => \$randp, #ugly option name so first letter doesn't conflict
         "no-which!" => \$no_which,
-            "n-cd!" => \$no_cd,
+            "no-cd!" => \$no_cd,
 ) && scalar @ARGV){
 	print_help();
     die "bad options.";
