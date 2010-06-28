@@ -18,6 +18,7 @@ use Getopt::Long;
 use IPC::Open2;
 use strict;
 use POSIX ":sys_wait_h";
+use Cwd qw(getcwd);
 
 my $recycle_clients;		# spawn new clients when previous ones terminate
 my $stay_alive;			# dont let server die when having zero clients
@@ -28,15 +29,31 @@ my @files_to_stage;
 my $verbose = 1;
 my $numnodes;
 my $user = $ENV{"USER"};
-my $pmem = "2g";
+my $pmem = "9g";
 my $basep=50300;
 my $randp=300;
 my $tryp=50;
+my $no_which;
+my $no_cd;
+my $DEBUG=$ENV{DEBUG};
+sub debug {
+    if ($DEBUG) {
+        my ($package, $filename, $line) = caller;
+        print STDERR "$filename($line): ",join(' ',@_);
+    }
+}
+sub abspath($) {
+    my $p=shift;
+    my $a=`readlink -f $p`;
+    chomp $a;
+    $a
+}
 
+my $abscwd=abspath(&getcwd);
 sub print_help;
 
 # Process command-line options
-if (GetOptions(
+unless (GetOptions(
 			"stay-alive" => \$stay_alive,
 			"recycle-clients" => \$recycle_clients,
 			"error-dir=s" => \$errordir,
@@ -47,16 +64,28 @@ if (GetOptions(
 			"pmem=s" => \$pmem,
         "baseport=i" => \$basep,
         "iport=i" => \$randp, #ugly option name so first letter doesn't conflict
-) == 0 || @ARGV == 0){
+        "no-which!" => \$no_which,
+            "n-cd!" => \$no_cd,
+) && scalar @ARGV){
 	print_help();
+    die "bad options.";
 }
 
 my $cmd = "";
+my $prog=shift;
+if ($no_which) {
+    $cmd=$prog;
+} else {
+    $cmd=`which $prog`;
+    chomp $cmd;
+    die "$prog not found - $cmd" unless $cmd;
+}
+#$cmd=abspath($cmd);
 for my $arg (@ARGV){
 	if ($arg=~ /\s/){
-		$cmd .= "\"$arg\" ";
+		$cmd .= " \"$arg\"";
 	} else {
-		$cmd .= "$arg "
+		$cmd .= " $arg"
 	}
 }
 
@@ -122,13 +151,16 @@ if ($stay_alive){ $stay_alive_flag = "--stay-alive"; print STDERR "staying alive
 
 my %node_count;
 my $script = "";
-
+my $cdcmd=$no_cd ? '' : "cd '$abscwd'\n"
 # fork == one thread runs the sentserver, while the
 # other spawns the sentclient commands.
 if (my $pid = fork){
 	  sleep 5; # give other thread time to start sentserver
-    $script .= "wait\n";
-	$script .= "$sentclient $host:$port:$key $cmd\n";
+    $script =
+        qq{wait
+$cdcmd
+$sentclient $host:$port:$key $cmd
+};
 	if ($verbose){
 		print STDERR "Client script:\n====\n";
 		print STDERR $script;
@@ -187,7 +219,7 @@ sub launch_job_on_node {
 			$errorfile = "$errordir/$clientname.ER";
 			$outfile = "$errordir/$clientname.OU";
 		}
-		my $todo = "qsub -l mem_free=9G -N $clientname -o $outfile -e $errorfile";
+		my $todo = "qsub -l mem_free=$pmem -N $clientname -o $outfile -e $errorfile";
 		if ($verbose){ print STDERR "Running: $todo\n"; }
 		local(*QOUT, *QIN);
 		open2(\*QOUT, \*QIN, $todo);
