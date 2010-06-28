@@ -94,7 +94,7 @@ if ($no_which) {
 }
 #$cmd=abspath($cmd);
 for my $arg (@ARGV) {
-    $cmd .= " ".shell_escape($arg);
+    $cmd .= " ".escape_shell($arg);
 }
 
 die "Please specify a command to parallelize\n" if $cmd eq '';
