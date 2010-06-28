@@ -61,6 +61,16 @@ sub escape_shell {
     }
     return $arg;
 }
+my $tailn=5;
+sub preview_files {
+    my $n=shift;
+    $n=$tailn unless defined $n;
+    my $fn=join(' ',map {escape_shell($_)} @_);
+    my $cmd="tail -n $n $fn";
+    my $text=`$cmd`;
+    debug($cmd,$text);
+    $text
+}
 
 my $abscwd=abspath(&getcwd);
 sub print_help;
@@ -135,11 +145,15 @@ chomp $executable;
 srand;
 my $port = 50300+int(rand($randp));
 my $endp=$port+$tryp;
-my $netstat=`netstat -a -n 2>/dev/null | grep LISTENING | grep -i tcp`;
+sub listening_port_lines {
+    my $quiet=$verbose?'':'2>/dev/null';
+    `netstat -a -n $quiet | grep LISTENING | grep -i tcp`
+}
+my $netstat=&listening_port_lines;
 
 if ($verbose){ print STDERR "Testing port $port...";}
 
-while ($netstat=~/$port/s){
+while ($netstat=~/$port/ || &listening_port_lines=~/$port/){
 	if ($verbose){ print STDERR "port is busy\n";}
 	$port++;
 	if ($port > $endp){
@@ -164,7 +178,7 @@ my $cdcmd=$no_cd ? '' : "cd '$abscwd'\n";
 # fork == one thread runs the sentserver, while the
 # other spawns the sentclient commands.
 if (my $pid = fork){
-	  sleep 5; # give other thread time to start sentserver
+	  sleep 2; # give other thread time to start sentserver
     $script =
         qq{wait
 $cdcmd
@@ -210,7 +224,13 @@ sub numof_live_jobs {
 	my @livejobs = grep(/$joblist/, split(/\n/, `qstat`));
 	return ($#livejobs + 1);
 }
-
+my (@errors,@outs,@cmds);
+my $scriptfile="$errordir/$executable.sh";
+if ($errordir) {
+    open SF,">",$scriptfile || die;
+    print SF $cmd,"\n";
+    close SF;
+}
 sub launch_job_on_node {
 		my $node = $_[0];
 
@@ -227,8 +247,12 @@ sub launch_job_on_node {
 		if ($errordir){
 			$errorfile = "$errordir/$clientname.ER";
 			$outfile = "$errordir/$clientname.OU";
+            push @errors,$errorfile;
+            push @outs,$outfile;
 		}
 		my $todo = "qsub -l mem_free=$pmem -N $clientname -o $outfile -e $errorfile";
+        push @cmds,$todo;
+
 		if ($verbose){ print STDERR "Running: $todo\n"; }
 		local(*QOUT, *QIN);
 		open2(\*QOUT, \*QIN, $todo);
@@ -237,12 +261,13 @@ sub launch_job_on_node {
 		while (my $jobid=<QOUT>){
 			chomp $jobid;
 			if ($verbose){ print STDERR "Launched client job: $jobid"; }
-			push(@cleanup_cmds, "`qdel $jobid 2> /dev/null`");
 			$jobid =~ s/^(\d+)(.*?)$/\1/g;
-      $jobid =~ s/^Your job (\d+) .*$/\1/;
-			print STDERR "short job id $jobid\n";
+            $jobid =~ s/^Your job (\d+) .*$/\1/;
+			print STDERR " short job id $jobid\n";
 			if ($joblist == "") { $joblist = $jobid; }
 			else {$joblist = $joblist . "\|" . $jobid; }
+            my $cleanfn="`qdel $jobid 2> /dev/null`";
+			push(@cleanup_cmds, $cleanfn);
 		}
 		close QOUT;
 }
@@ -259,6 +284,9 @@ sub cleanup {
 		if ($verbose){ print STDERR "  $cmd\n"; }
 		eval $cmd;
 	}
+    print STDERR "outputs:\n",preview_files(undef,@outs),"\n";
+    print STDERR "errors:\n",preview_files(undef,@errors),"\n";
+    print STDERR "cmd:\n",$cmd,"\n";
 	if ($verbose){ print STDERR "Cleanup finished.\n"; }
 }
 
