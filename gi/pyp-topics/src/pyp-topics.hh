@@ -15,7 +15,7 @@ public:
   typedef long double F;
 
 public:
-  PYPTopics(int num_topics) : m_num_topics(num_topics), m_word_pyps(1), m_backoff(0) {}
+  PYPTopics(int num_topics) : m_num_topics(num_topics), m_word_pyps(1) {}
 
   void sample(const Corpus& corpus, int samples);
   int sample(const DocumentId& doc, const Term& term);
@@ -26,6 +26,9 @@ public:
     m_backoff->read(filename);
     m_word_pyps.clear();
     m_word_pyps.resize(m_backoff->order(), PYPs());
+  }
+  void set_backoff(TermBackoffPtr backoff) {
+    m_backoff = backoff;
   }
 
   F prob(const Term& term, int topic, int level=0) const;
@@ -46,7 +49,7 @@ private:
   PYPs m_document_pyps;
   std::vector<PYPs> m_word_pyps;
 
-  std::auto_ptr<TermBackoff> m_backoff;
+  TermBackoffPtr m_backoff;
 };
 
 #endif // PYP_TOPICS_HH

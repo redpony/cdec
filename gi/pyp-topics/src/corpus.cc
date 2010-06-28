@@ -22,7 +22,7 @@ unsigned Corpus::read(const std::string &filename) {
 
   string buf;
   int token;
-  unsigned count=0;
+  unsigned doc_count=0;
   while (getline(in, buf)) {
     Document* doc(new Document());
     istringstream ss(buf);
@@ -39,13 +39,14 @@ unsigned Corpus::read(const std::string &filename) {
     }
 
     m_documents.push_back(doc);
-    count++;
+    doc_count++;
   }
 
   m_num_types = seen_types.size();
 
-  return count;
+  return doc_count;
 }
+
 
 //////////////////////////////////////////////////
 // TestCorpus

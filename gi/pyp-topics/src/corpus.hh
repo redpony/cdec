@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 
+#include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 ////////////////////////////////////////////////////////////////
@@ -100,4 +101,6 @@ protected:
     int m_backoff_order;
     std::vector<int> m_terms_at_order;
 };
+typedef boost::shared_ptr<TermBackoff> TermBackoffPtr;
+
 #endif // _CORPUS_HH
