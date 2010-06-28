@@ -26,7 +26,7 @@ my $errordir;
 my $multiline;
 my @files_to_stage;
 my $verbose = 1;
-my $nodelist;
+my $numnodes;
 my $user = $ENV{"USER"};
 my $pmem = "2g";
 
@@ -40,19 +40,10 @@ if (GetOptions(
 			"multi-line" => \$multiline,
 			"file=s" => \@files_to_stage,
 			"verbose" => \$verbose,
-			"nodelist=s" => \$nodelist,
+			"jobs=i" => \$numnodes,
 			"pmem=s" => \$pmem
 ) == 0 || @ARGV == 0){
 	print_help();
-}
-
-my @nodes = grep(/^[cd]\d\d$/, split(/\n/, `pbsnodes -a`));
-if ($nodelist){
-	@nodes = split(/ /, $nodelist);
-} 
-
-if ($verbose){
-	print STDERR "Compute nodes: @nodes\n";
 }
 
 my $cmd = "";
@@ -63,6 +54,8 @@ for my $arg (@ARGV){
 		$cmd .= "$arg "
 	}
 }
+
+die "Please specify a command to parallelize\n" if $cmd eq '';
 
 if ($errordir){
 	`mkdir -p $errordir`;
@@ -132,8 +125,8 @@ if (my $pid = fork){
 		print STDERR $script;
 		print STDERR "====\n";
 	}
-	for my $node (@nodes){
-		launch_job_on_node($node);
+	for (my $jobn=0; $jobn<$numnodes; $jobn++){
+		launch_job_on_node(1);
 	}
 	if ($recycle_clients) {
 		my $ret;
@@ -143,9 +136,8 @@ if (my $pid = fork){
 			#print STDERR "waitpid $pid ret = $ret \n";
 			if ($ret != 0) {last; } # break
 			$livejobs = numof_live_jobs();
-			if ( $#nodes >= $livejobs ) {	# a client terminated
-				my $numof_nodes = scalar @nodes;
-				print STDERR "num of requested nodes = $numof_nodes; num of currently live jobs = $livejobs; Client terminated - launching another.\n";
+			if ($numnodes >= $livejobs ) {	# a client terminated
+				print STDERR "num of requested nodes = $numnodes; num of currently live jobs = $livejobs; Client terminated - launching another.\n";
 				launch_job_on_node(1);	# TODO: support named nodes
 			} else {
 				sleep (60);
@@ -197,6 +189,7 @@ sub launch_job_on_node {
 			if ($verbose){ print STDERR "Launched client job: $jobid"; }
 			push(@cleanup_cmds, "`qdel $jobid 2> /dev/null`");
 			$jobid =~ s/^(\d+)(.*?)$/\1/g;
+      $jobid =~ s/^Your job (\d+) .*$/\1/;
 			print STDERR "short job id $jobid\n";
 			if ($joblist == "") { $joblist = $jobid; }
 			else {$joblist = $joblist . "\|" . $jobid; }
@@ -244,9 +237,8 @@ options:
 	-v, --verbose
 		Print diagnostic informatoin on stderr.
 
-	-n, --nodelist
-		Space-delimited list of nodes to request.  There is
-		one qsub command per node.
+	-j, --jobs
+    Number of jobs to use.
 
 	-p, --pmem
 		pmem setting for each job.
