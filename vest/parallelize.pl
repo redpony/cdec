@@ -151,7 +151,7 @@ if ($stay_alive){ $stay_alive_flag = "--stay-alive"; print STDERR "staying alive
 
 my %node_count;
 my $script = "";
-my $cdcmd=$no_cd ? '' : "cd '$abscwd'\n"
+my $cdcmd=$no_cd ? '' : "cd '$abscwd'\n";
 # fork == one thread runs the sentserver, while the
 # other spawns the sentclient commands.
 if (my $pid = fork){
