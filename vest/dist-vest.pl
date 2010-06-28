@@ -34,8 +34,7 @@ my $best_weights;
 my $max_iterations = 15;
 my $optimization_iters = 6;
 my $num_rand_points = 20;
-my $mert_nodes = join(" ", grep(/^c\d\d$/, split(/\n/, `pbsnodes -a`))); # "1 1 1 1 1" fails due to file staging conflicts
-my $decode_nodes = "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1";  # start 15 jobs
+my $decode_nodes = 15;   # number of decode nodes
 my $pmem = "3g";
 my $disable_clean = 0;
 my %seen_weights;
@@ -58,7 +57,7 @@ my $decoderOpt;
 Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
 	"decoder=s" => \$decoderOpt,
-	"decode-nodes=s" => \$decode_nodes,
+	"decode-nodes=i" => \$decode_nodes,
 	"dont-clean" => \$disable_clean,
 	"dry-run" => \$dryrun,
 	"epsilon" => \$epsilon,
@@ -67,7 +66,6 @@ if (GetOptions(
 	"iteration=i" => \$iteration,
 	"local" => \$run_local,
 	"max-iterations=i" => \$max_iterations,
-	"mert-nodes=s" => \$mert_nodes,
 	"normalize=s" => \$normalize,
 	"pmem=s" => \$pmem,
 	"ranges=s" => \$ranges,
@@ -178,6 +176,7 @@ if ($dryrun){
 	} else {
 		mkdir $dir;
 		mkdir "$dir/hgs";
+    mkdir "$dir/scripts";
 		unless (-e $initialWeights) {
 			print STDERR "Please specify an initial weights file with --initial-weights\n";
 			print_help();
@@ -231,7 +230,7 @@ while (1){
 	my $im1 = $iteration - 1;
 	my $weightsFile="$dir/weights.$im1";
 	my $decoder_cmd = "$decoder -c $iniFile -w $weightsFile -O $dir/hgs";
-	my $pcmd = "cat $srcFile | $parallelize -p $pmem -e $logdir -n \"$decode_nodes\" -- ";
+	my $pcmd = "cat $srcFile | $parallelize -p $pmem -e $logdir -j $decode_nodes -- ";
         if ($run_local) { $pcmd = "cat $srcFile |"; }
         my $cmd = $pcmd . "$decoder_cmd 2> $decoderLog 1> $runFile";
 	print LOGFILE "COMMAND:\n$cmd\n";
@@ -312,23 +311,22 @@ while (1){
 					die;
 				}
 			} else {
-				my $todo = "qsub $QSUB_FLAGS -S /bin/bash -N $client_name -o /dev/null -e $logdir/$client_name.ER";
-				local(*QOUT, *QIN);
-				open2(\*QOUT, \*QIN, $todo);
-				print QIN $script;
+        my $script_file = "$dir/scripts/map.$shard";
+        open F, ">$script_file" or die "Can't write $script_file: $!";
+        print F "$script\n";
+        close F;
 				if ($first_shard) { print LOGFILE "$script\n"; $first_shard=0; }
-				close QIN;
+
 				$nmappers++;
-				while (my $jobid=<QOUT>){
-	  				chomp $jobid;
-					$jobid =~ s/^(\d+)(.*?)$/\1/g;
-          $jobid =~ s/^Your job (\d+) .*$/\1/;
-		  	  push(@cleanupcmds, "`qdel $jobid 2> /dev/null`");
-					print LOGFILE " $jobid";
-					if ($joblist == "") { $joblist = $jobid; }
-					else {$joblist = $joblist . "\|" . $jobid; }
-				}
-				close QOUT;
+				my $jobid = `qsub $QSUB_FLAGS -S /bin/bash -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file`;
+        die "qsub failed: $!" unless $? == 0;
+	  		chomp $jobid;
+				$jobid =~ s/^(\d+)(.*?)$/\1/g;
+        $jobid =~ s/^Your job (\d+) .*$/\1/;
+		  	push(@cleanupcmds, "`qdel $jobid 2> /dev/null`");
+			  print LOGFILE " $jobid";
+				if ($joblist == "") { $joblist = $jobid; }
+				else {$joblist = $joblist . "\|" . $jobid; }
 			}
 		}
 		if ($run_local) {
@@ -484,7 +482,6 @@ sub write_config {
 	print $fh "EVAL METRIC:      $metric\n";
 	print $fh "START ITERATION:  $iteration\n";
 	print $fh "MAX ITERATIONS:   $max_iterations\n";
-	print $fh "MERT NODES:       $mert_nodes\n";
 	print $fh "DECODE NODES:     $decode_nodes\n";
 	print $fh "HEAD NODE:        $host\n";
 	print $fh "PMEM (DECODING):  $pmem\n";
