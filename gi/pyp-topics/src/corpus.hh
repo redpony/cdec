@@ -28,6 +28,8 @@ public:
     const_iterator begin() const { return m_documents.begin(); }
     const_iterator end() const { return m_documents.end(); }
 
+    const Document& at(size_t i) const { return m_documents.at(i); }
+
     int num_documents() const { return m_documents.size(); }
     int num_terms() const { return m_num_terms; }
     int num_types() const { return m_num_types; }
