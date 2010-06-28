@@ -29,6 +29,9 @@ my $verbose = 1;
 my $numnodes;
 my $user = $ENV{"USER"};
 my $pmem = "2g";
+my $basep=50300;
+my $randp=300;
+my $tryp=50;
 
 sub print_help;
 
@@ -41,7 +44,9 @@ if (GetOptions(
 			"file=s" => \@files_to_stage,
 			"verbose" => \$verbose,
 			"jobs=i" => \$numnodes,
-			"pmem=s" => \$pmem
+			"pmem=s" => \$pmem,
+        "baseport=i" => \$basep,
+        "iport=i" => \$randp, #ugly option name so first letter doesn't conflict
 ) == 0 || @ARGV == 0){
 	print_help();
 }
@@ -89,13 +94,14 @@ $executable=`basename $executable`;
 chomp $executable;
 
 # find open port
-my $basep=50300;
-my $randp=300;
-my $tryp=50;
+srand;
 my $port = 50300+int(rand($randp));
 my $endp=$port+$tryp;
+my $netstat=`netstat -a -n 2>/dev/null | grep LISTENING | grep -i tcp`;
+
 if ($verbose){ print STDERR "Testing port $port...";}
-while (`netstat -ln 2>/dev/null | grep $port`){
+
+while ($netstat=~/$port/s){
 	if ($verbose){ print STDERR "port is busy\n";}
 	$port++;
 	if ($port > $endp){
@@ -107,7 +113,6 @@ if ($verbose){
 	print STDERR "port $port is available\n";
 }
 
-srand;
 my $key = int(rand()*1000000);
 
 my $multiflag = "";
