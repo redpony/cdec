@@ -35,6 +35,7 @@ my $randp=300;
 my $tryp=50;
 my $no_which;
 my $no_cd;
+
 my $DEBUG=$ENV{DEBUG};
 sub debug {
     if ($DEBUG) {
@@ -47,6 +48,17 @@ sub abspath($) {
     my $a=`readlink -f $p`;
     chomp $a;
     $a
+}
+my $is_shell_special=qr.[ \t\n\\><|&;"'`~*?{}$!()].;
+my $shell_escape_in_quote=qr.[\\"\$`!].;
+sub escape_shell {
+    my ($arg)=@_;
+    return undef unless defined $arg;
+    if ($arg =~ /$is_shell_special/) {
+        $arg =~ s/($shell_escape_in_quote)/\\$1/g;
+        return "\"$arg\"";
+    }
+    return $arg;
 }
 
 my $abscwd=abspath(&getcwd);
@@ -81,12 +93,8 @@ if ($no_which) {
     die "$prog not found - $cmd" unless $cmd;
 }
 #$cmd=abspath($cmd);
-for my $arg (@ARGV){
-	if ($arg=~ /\s/){
-		$cmd .= " \"$arg\"";
-	} else {
-		$cmd .= " $arg"
-	}
+for my $arg (@ARGV) {
+    $cmd .= " ".shell_escape($arg);
 }
 
 die "Please specify a command to parallelize\n" if $cmd eq '';
