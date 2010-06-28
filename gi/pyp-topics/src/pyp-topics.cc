@@ -1,4 +1,5 @@
 #include "pyp-topics.hh"
+//#include "mt19937ar.h"
 
 void PYPTopics::sample(const Corpus& corpus, int samples) {
   if (!m_backoff.get()) {
@@ -45,18 +46,35 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
     }
   }
 
+  int* randomDocIndices = new int[corpus.num_documents()];
+  for (int i = 0; i < corpus.num_documents(); ++i)
+	  randomDocIndices[i] = i;
+
   // Sampling phase
   for (int curr_sample=0; curr_sample < samples; ++curr_sample) {
     std::cerr << "\n  -- Sample " << curr_sample << " "; std::cerr.flush();
 
+    // Randomize the corpus indexing array
+    int tmp;
+    for (int i = corpus.num_documents()-1; i > 0; --i)
+    {
+    	int j = (int)(mt_genrand_real1() * i);
+    	tmp = randomDocIndices[i];
+    	randomDocIndices[i] = randomDocIndices[j];
+    	randomDocIndices[j] = tmp;
+    }
+
     // for each document in the corpus
-    int document_id=0;
-    for (Corpus::const_iterator corpusIt=corpus.begin(); 
-         corpusIt != corpus.end(); ++corpusIt, ++document_id) {
+    int document_id;
+    for (int i=0; i<corpus.num_documents(); ++i)
+    {
+    	document_id = randomDocIndices[i];
+
       // for each term in the document
       int term_index=0;
-      for (Document::const_iterator docIt=corpusIt->begin();
-           docIt != corpusIt->end(); ++docIt, ++term_index) {
+      Document::const_iterator docEnd = corpus.at(document_id).end();
+      for (Document::const_iterator docIt=corpus.at(document_id).begin();
+           docIt != docEnd; ++docIt, ++term_index) {
         Term term = *docIt;
 
         // remove the prevous topic from the PYPs
@@ -101,6 +119,7 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
       std::cerr << " ||| LLH=" << log_p << std::endl;
     }
   }
+  delete [] randomDocIndices;
 }
 
 void PYPTopics::decrement(const Term& term, int topic, int level) {
