@@ -40,6 +40,8 @@ print 'Read in', num_edges, 'edges and', len(types), 'word types'
 
 num_tags = 5
 num_types = len(types)
+num_phrases = len(edges_phrase_to_context)
+num_contexts = len(edges_context_to_phrase)
 delta = int(sys.argv[1])
 gamma = int(sys.argv[2])
 
@@ -51,7 +53,8 @@ tagDist = normalise(random(num_tags)+1)
 # Pr(context at pos i = w | tag) indexed by i, tag, word
 contextWordDist = [[normalise(random(num_types)+1) for t in range(num_tags)] for i in range(4)]
 # PR langrange multipliers
-lamba = zeros(num_edges * num_tags)
+lamba = zeros(2 * num_edges * num_tags)
+omega_offset = num_edges * num_tags
 lamba_index = {}
 next = 0
 for phrase, ccs in edges_phrase_to_context.items():
@@ -88,7 +91,8 @@ for iteration in range(20):
 
                 local_z = 0
                 for t in range(num_tags):
-                    local_z += conditionals[t] * exp(-ls[lamba_index[phrase,context] + t])
+                    li = lamba_index[phrase,context] + t
+                    local_z += conditionals[t] * exp(-ls[li] - ls[omega_offset+li])
                 logz += log(local_z) * count
 
         #print 'ls', ls
@@ -96,12 +100,8 @@ for iteration in range(20):
         #print 'dual', logz
         return logz
 
-    def primal(ls):
-        # FIXME: returns negative values for KL (impossible)
-        logz = dual(ls)
-        kl = -logz
-
-        expectations = zeros(lamba.shape)
+    def loglikelihood():
+        llh = 0
         for phrase, ccs in edges_phrase_to_context.items():
             for context, count in ccs.items():
                 conditionals = zeros(num_tags)
@@ -111,17 +111,15 @@ for iteration in range(20):
                         prob *= contextWordDist[i][t][types[context[i]]]
                     conditionals[t] = prob
                 cz = sum(conditionals)
-                conditionals /= cz
+                llh += log(cz) * count
+        return llh
 
-                scores = zeros(num_tags)
-                for t in range(num_tags):
-                    scores[t] = conditionals[t] * exp(-ls[lamba_index[phrase,context] + t])
-                local_z = sum(scores)
-
-                for t in range(num_tags):
-                    li = lamba_index[phrase,context] + t
-                    expectations[li] = scores[t] / local_z * count
-                    kl -= expectations[li] * ls[li]
+    def primal(ls):
+        # FIXME: returns negative values for KL (impossible)
+        logz = dual(ls)
+        expectations = -dual_deriv(ls)
+        kl = -logz - dot(ls, expectations)
+        llh = loglikelihood()
 
         pt_l1linf = 0
         for phrase, ccs in edges_phrase_to_context.items():
@@ -143,11 +141,11 @@ for iteration in range(20):
                     if s > best: best = s
                 ct_l1linf += best
 
-        return kl, pt_l1linf, ct_l1linf, kl + delta * pt_l1linf + gamma * ct_l1linf
+        return llh, kl, pt_l1linf, ct_l1linf, llh + kl + delta * pt_l1linf + gamma * ct_l1linf
 
     def dual_deriv(ls):
         # d/dl log(z) = E_q[phi]
-        deriv = zeros(num_edges * num_tags)
+        deriv = zeros(2 * num_edges * num_tags)
         for phrase, ccs in edges_phrase_to_context.items():
             for context, count in ccs.items():
                 conditionals = zeros(num_tags)
@@ -161,58 +159,74 @@ for iteration in range(20):
 
                 scores = zeros(num_tags)
                 for t in range(num_tags):
-                    scores[t] = conditionals[t] * exp(-ls[lamba_index[phrase,context] + t])
+                    li = lamba_index[phrase,context] + t
+                    scores[t] = conditionals[t] * exp(-ls[li] - ls[omega_offset + li])
                 local_z = sum(scores)
 
                 for t in range(num_tags):
-                    deriv[lamba_index[phrase,context] + t] -= count * scores[t] / local_z
+                    if delta > 0:
+                        deriv[lamba_index[phrase,context] + t] -= count * scores[t] / local_z
+                    if gamma > 0:
+                        deriv[omega_offset + lamba_index[phrase,context] + t] -= count * scores[t] / local_z
 
         #print 'ddual', deriv
         return deriv
 
     def constraints(ls):
-        cons = []
-        if delta > 0:
-            for phrase, ccs in edges_phrase_to_context.items():
-                for t in range(num_tags):
+        cons = zeros(num_phrases * num_tags + num_edges * num_tags)
+
+        index = 0
+        for phrase, ccs in edges_phrase_to_context.items():
+            for t in range(num_tags):
+                if delta > 0:
                     total = delta
                     for cprime in ccs.keys():
                         total -= ls[lamba_index[phrase, cprime] + t]
-                    cons.append(total)
+                    cons[index] = total
+                index += 1
 
-        if gamma > 0:
-            for context, pcs in edges_context_to_phrase.items():
-                for t in range(num_tags):
+        for context, pcs in edges_context_to_phrase.items():
+            for t in range(num_tags):
+                if gamma > 0:
                     total = gamma
                     for pprime in pcs.keys():
-                        total -= ls[lamba_index[pprime, context] + t]
-                    cons.append(total)
+                        total -= ls[omega_offset + lamba_index[pprime, context] + t]
+                    cons[index] = total
+                index += 1
+
         #print 'cons', cons
         return cons
 
     def constraints_deriv(ls):
-        cons = []
-        if delta > 0:
-            for phrase, ccs in edges_phrase_to_context.items():
-                for t in range(num_tags):
-                    d = zeros(num_edges * num_tags)
+        cons = zeros((num_phrases * num_tags + num_edges * num_tags, 2 * num_edges * num_tags))
+
+        index = 0
+        for phrase, ccs in edges_phrase_to_context.items():
+            for t in range(num_tags):
+                if delta > 0:
+                    d = cons[index,:]#zeros(num_edges * num_tags)
                     for cprime in ccs.keys():
                         d[lamba_index[phrase, cprime] + t] = -1
-                    cons.append(d)
+                    #cons[index] = d
+                index += 1
 
-        if gamma > 0:
-            for context, pcs in edges_context_to_phrase.items():
-                for t in range(num_tags):
-                    d = zeros(num_edges * num_tags)
+        for context, pcs in edges_context_to_phrase.items():
+            for t in range(num_tags):
+                if gamma > 0:
+                    d = cons[index,:]#d = zeros(num_edges * num_tags)
                     for pprime in pcs.keys():
-                        d[lamba_index[pprime, context] + t] = -1
-                    cons.append(d)
+                        d[omega_offset + lamba_index[pprime, context] + t] = -1
+                    #cons[index] = d
+                index += 1
         #print 'dcons', cons
         return cons
 
     print 'Pre lambda optimisation dual', dual(lamba), 'primal', primal(lamba)
+    #print 'lambda', lamba, lamba.shape
+    #print 'bounds', [(0, max(delta, gamma))] * (2 * num_edges * num_tags)
+
     lamba = scipy.optimize.fmin_slsqp(dual, lamba,
-                            bounds=[(0, delta)] * (num_edges * num_tags),
+                            bounds=[(0, max(delta, gamma))] * (2 * num_edges * num_tags),
                             f_ieqcons=constraints,
                             fprime=dual_deriv,
                             fprime_ieqcons=constraints_deriv,
@@ -236,7 +250,7 @@ for iteration in range(20):
             scores = zeros(num_tags)
             li = lamba_index[phrase, context]
             for t in range(num_tags):
-                scores[t] = conditionals[t] * exp(-lamba[li + t])
+                scores[t] = conditionals[t] * exp(-lamba[li + t] - lamba[omega_offset + li + t])
             z += count * sum(scores)
 
             tagCounts += count * scores
@@ -264,9 +278,10 @@ for phrase, ccs in edges_phrase_to_context.items():
         cz = sum(conditionals)
         conditionals /= cz
 
-        scores = zeros(num_tags)
-        li = lamba_index[phrase, context]
-        for t in range(num_tags):
-            scores[t] = conditionals[t] * exp(-lamba[li + t])
+        #scores = zeros(num_tags)
+        #li = lamba_index[phrase, context]
+        #for t in range(num_tags):
+        #    scores[t] = conditionals[t] * exp(-lamba[li + t])
 
-        print '%s\t%s ||| C=%d ||| %d |||' % (phrase, context, count, argmax(scores)), scores / sum(scores)
+        #print '%s\t%s ||| C=%d ||| %d |||' % (phrase, context, count, argmax(scores)), scores / sum(scores)
+        print '%s\t%s ||| C=%d ||| %d |||' % (phrase, context, count, argmax(conditionals)), conditionals
