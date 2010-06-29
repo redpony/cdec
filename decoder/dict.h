@@ -32,15 +32,17 @@ class Dict {
     }
   }
 
-  inline WordID Convert(const std::vector<std::string>& words, bool frozen = false) {
+  inline WordID Convert(const std::vector<std::string>& words, bool frozen = false) 
+  { return Convert(toString(words), frozen); }
+
+  static inline std::string toString(const std::vector<std::string>& words) {
     std::string word= "";
     for (std::vector<std::string>::const_iterator it=words.begin();
          it != words.end(); ++it) {
       if (it != words.begin()) word += "|||";
       word += *it;
     }
-
-    return Convert(word, frozen);
+    return word;
   }
 
   inline const std::string& Convert(const WordID& id) const {
