@@ -264,6 +264,7 @@ sub launch_job_on_node {
 			$jobid =~ s/^(\d+)(.*?)$/\1/g;
             $jobid =~ s/^Your job (\d+) .*$/\1/;
 			print STDERR " short job id $jobid\n";
+            if ($verbose){ print STDERR "cmd: $cmd\n"; }
 			if ($joblist == "") { $joblist = $jobid; }
 			else {$joblist = $joblist . "\|" . $jobid; }
             my $cleanfn="`qdel $jobid 2> /dev/null`";
