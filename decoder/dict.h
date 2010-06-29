@@ -8,6 +8,8 @@
 #include <vector>
 
 #include <boost/functional/hash.hpp>
+#include <boost/regex.hpp>
+#include <boost/algorithm/string/regex.hpp>
 
 #include "wordid.h"
 
@@ -36,7 +38,7 @@ class Dict {
     std::string word= "";
     for (std::vector<std::string>::const_iterator it=words.begin();
          it != words.end(); ++it) {
-      if (it != words.begin()) word += "__";
+      if (it != words.begin()) word += "|||";
       word += *it;
     }
 
@@ -47,6 +49,12 @@ class Dict {
     if (id == 0) return b0_;
     assert(id <= words_.size());
     return words_[id-1];
+  }
+
+  inline std::vector<std::string> AsVector(const WordID& id) const {
+    std::vector<std::string> result;
+    boost::algorithm::split_regex(result, Convert(id), boost::regex("\\|\\|\\|"));
+    return result;
   }
 
   void clear() { words_.clear(); d_.clear(); }

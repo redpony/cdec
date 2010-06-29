@@ -138,7 +138,8 @@ sub label_spans_with_topics {
     print STDERR "$OUT_SPANS exists, reusing...\n";
   } else {
     safesystem("$ZCAT $IN_CLUSTERS > $OUTPUT/clusters.txt") or die "Failed to unzip";
-    safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $OUTPUT/phrases.index $OUTPUT/contexts.index $OUTPUT/clusters.txt > $OUT_SPANS") or die "Failed to label spans";
+#   safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $OUTPUT/phrases.index $OUTPUT/contexts.index $OUTPUT/clusters.txt > $OUT_SPANS") or die "Failed to label spans";
+    safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $OUTPUT/clusters.txt $CONTEXT_SIZE > $OUT_SPANS") or die "Failed to label spans";
     unlink("$OUTPUT/clusters.txt") or warn "Failed to remove $OUTPUT/clusters.txt";
     safesystem("paste -d ' ' $CORPUS $OUT_SPANS > $OUTPUT/corpus.src_trg_al") or die "Couldn't paste";
   }
