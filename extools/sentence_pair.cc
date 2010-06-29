@@ -84,8 +84,10 @@ int AnnotatedParallelSentence::ReadAlignmentPoint(const char* buf,
 void AnnotatedParallelSentence::ParseAlignmentPoint(const char* buf, int start, int end) {
   short a, b;
   ReadAlignmentPoint(buf, start, end, false, &a, &b);
-  assert(a < f_len);
-  assert(b < e_len);
+  if (a >= f_len || b >= e_len) {
+    cerr << "(" << a << ',' << b << ") is out of bounds. INPUT=\n" << buf << endl;
+    exit(1);
+  }
   aligned(a,b) = true;
   ++f_aligned[a];
   ++e_aligned[b];

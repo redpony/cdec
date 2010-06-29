@@ -73,6 +73,7 @@ int ReadPhraseUntilDividerOrEnd(const char* buf, const int sstart, const int end
     if (w == kDIV) return ptr;
     p->push_back(w);
   }
+  assert(p->size() > 0);
   return ptr;
 }
 
