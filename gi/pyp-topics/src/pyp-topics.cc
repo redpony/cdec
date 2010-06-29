@@ -1,7 +1,24 @@
 #include "pyp-topics.hh"
 //#include "mt19937ar.h"
 
+#include <ctime>
+
+struct Timer {
+  Timer() { Reset(); }
+  void Reset() { start_t = clock(); }
+  double Elapsed() const {
+    const clock_t end_t = clock();
+    const double elapsed = (end_t - start_t) / 1000000.0;
+    return elapsed;
+  }
+ private:
+  std::clock_t start_t;
+};
+
+
 void PYPTopics::sample(const Corpus& corpus, int samples) {
+  Timer timer;
+
   if (!m_backoff.get()) {
     m_word_pyps.clear();
     m_word_pyps.push_back(PYPs());
@@ -23,6 +40,7 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
   std::cerr << " Documents: " << corpus.num_documents() << " Terms: " 
     << corpus.num_types() << std::endl;
 
+  timer.Reset();
   // Initialisation pass
   int document_id=0, topic_counter=0;
   for (Corpus::const_iterator corpusIt=corpus.begin(); 
@@ -45,6 +63,7 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
       m_document_pyps[document_id].increment(new_topic, m_topic_p0);
     }
   }
+  std::cerr << "  Initialized in " << timer.Elapsed() << " seconds\n";
 
   int* randomDocIndices = new int[corpus.num_documents()];
   for (int i = 0; i < corpus.num_documents(); ++i)
@@ -96,7 +115,9 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
     }
 
     if (curr_sample != 0 && curr_sample % 10 == 0) {
-      std::cerr << " ||| Resampling hyperparameters "; std::cerr.flush();
+      std::cerr << " ||| time=" << (timer.Elapsed() / 10.0) << " sec/sample" << std::endl;
+      timer.Reset();
+      std::cerr << "     ... Resampling hyperparameters "; std::cerr.flush();
       // resample the hyperparamters
       F log_p=0.0; int resample_counter=0;
       for (std::vector<PYPs>::iterator levelIt=m_word_pyps.begin();
@@ -116,7 +137,8 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
         pypIt->resample_prior();
         log_p += pypIt->log_restaurant_prob();
       }
-      std::cerr << " ||| LLH=" << log_p << std::endl;
+      std::cerr << " ||| LLH=" << log_p << " ||| resampling time=" << timer.Elapsed() << " sec" << std::endl;
+      timer.Reset();
     }
   }
   delete [] randomDocIndices;
