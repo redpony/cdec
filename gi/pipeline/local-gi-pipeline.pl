@@ -24,13 +24,13 @@ my $REDUCER = "$EXTOOLS/mr_stripe_rule_reduce";
 my $C2D = "$PYPSCRIPTS/contexts2documents.py";
 my $S2L = "$PYPSCRIPTS/spans2labels.py";
 
-my $PYP_TOPICS_TRAIN="$PYPTOOLS/pyp-topics-train";
+my $PYP_TOPICS_TRAIN="$PYPTOOLS/pyp-contexts-train";
 
 my $SORT_KEYS = "$SCRIPT_DIR/scripts/sort-by-key.sh";
 my $EXTRACTOR = "$EXTOOLS/extractor";
 my $FILTER = "$EXTOOLS/filter_grammar";
 my $SCORER = "$EXTOOLS/score_grammar";
-my $TOPIC_TRAIN = "$PYPTOOLS/pyp-topics-train";
+my $TOPIC_TRAIN = "$PYPTOOLS/pyp-contexts-train";
 
 assert_exec($SORT_KEYS, $REDUCER, $EXTRACTOR, $FILTER, $SCORER, $PYP_TOPICS_TRAIN, $S2L, $C2D, $TOPIC_TRAIN);
 
@@ -124,7 +124,7 @@ sub topic_train {
   if (-e $OUT_CLUSTERS) {
     print STDERR "$OUT_CLUSTERS exists, reusing...\n";
   } else {
-    safesystem("$TOPIC_TRAIN --contexts $IN_CONTEXTS --backoff-type simple -t $NUM_TOPICS -s $NUM_SAMPLES -o $OUT_CLUSTERS -w /dev/null") or die "Topic training failed.\n";
+    safesystem("$TOPIC_TRAIN --data $IN_CONTEXTS --backoff-type simple -t $NUM_TOPICS -s $NUM_SAMPLES -o $OUT_CLUSTERS -w /dev/null") or die "Topic training failed.\n";
 #   safesystem("$TOPIC_TRAIN -d $IN_DOCS -t $NUM_TOPICS -s $NUM_SAMPLES -o $OUT_CLUSTERS -w /dev/null") or die "Topic training failed.\n";
   }
 }
