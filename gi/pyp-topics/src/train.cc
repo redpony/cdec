@@ -14,7 +14,7 @@
 #include "gzstream.hh"
 #include "mt19937ar.h"
 
-static const char *REVISION = "$Revision: 0.1 $";
+static const char *REVISION = "$Rev$";
 
 // Namespaces
 using namespace boost;
