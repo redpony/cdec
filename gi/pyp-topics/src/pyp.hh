@@ -121,7 +121,7 @@ private:
 };
 
 template <typename Dish, typename Hash>
-PYP<Dish,Hash>::PYP(long double a, long double b, Hash cmp)
+PYP<Dish,Hash>::PYP(long double a, long double b, Hash)
 : std::tr1::unordered_map<Dish, int, Hash>(), _a(a), _b(b), 
   _a_beta_a(1), _a_beta_b(1), _b_gamma_s(1), _b_gamma_c(1),
   //_a_beta_a(1), _a_beta_b(1), _b_gamma_s(10), _b_gamma_c(0.1),

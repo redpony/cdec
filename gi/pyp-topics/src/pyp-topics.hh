@@ -29,6 +29,8 @@ public:
   }
   void set_backoff(TermBackoffPtr backoff) {
     m_backoff = backoff;
+    m_word_pyps.clear();
+    m_word_pyps.resize(m_backoff->order(), PYPs());
   }
 
   F prob(const Term& term, int topic, int level=0) const;
