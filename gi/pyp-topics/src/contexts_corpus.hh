@@ -49,9 +49,6 @@ class ContextsCorpus : public Corpus {
   friend void read_callback(const ContextsLexer::PhraseContextsType&, void*);
 
 public:
-    typedef boost::ptr_vector<Document>::const_iterator const_iterator;
-
-public:
     ContextsCorpus() : m_backoff(new TermBackoff) {}
     virtual ~ContextsCorpus() {}
 
@@ -62,9 +59,18 @@ public:
       return m_backoff;
     }
 
+    std::vector<std::string> context2string(const WordID& id) const {
+      return m_dict.AsVector(id);
+    }
+
+    const std::string& key(const int& i) const {
+      return m_keys.at(i);
+    }
+
 private:
     TermBackoffPtr m_backoff;
     Dict m_dict;
+    std::vector<std::string> m_keys;
 };
 
 #endif // _CONTEXTS_CORPUS_HH
