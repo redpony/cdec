@@ -51,14 +51,15 @@ int AnnotatedParallelSentence::ReadAlignmentPoint(const char* buf,
                                                   short* a,
                                                   short* b) {
   if (end - start < 3) {
-    cerr << "Alignment point badly formed: " << string(buf, start, end-start) << endl; abort();
+    cerr << "Alignment point badly formed: " << string(buf, start, end-start) << endl << buf << endl;
+    exit(1);
   }
   int c = start;
   *a = 0;
   while(c < end && buf[c] != '-') {
     if (buf[c] < '0' || buf[c] > '9') {
-      cerr << "Alignment point badly formed: " << string(buf, start, end-start) << endl;
-      abort();
+      cerr << "Alignment point badly formed: " << string(buf, start, end-start) << endl << buf << endl;
+      exit(1);
     }
     (*a) *= 10;
     (*a) += buf[c] - '0';
@@ -66,13 +67,14 @@ int AnnotatedParallelSentence::ReadAlignmentPoint(const char* buf,
   }
   ++c;
   if (c >= end) {
-    cerr << "Alignment point badly formed: " << string(buf, start, end-start) << endl; abort();
+    cerr << "Alignment point badly formed: " << string(buf, start, end-start) << endl << buf << endl;
+    exit(1);
   }
   (*b) = 0;
   while(c < end && (!permit_col || (permit_col && buf[c] != ':'))) {
     if (buf[c] < '0' || buf[c] > '9') {
-      cerr << "Alignment point badly formed: " << string(buf, start, end-start) << endl;
-      abort();
+      cerr << "Alignment point badly formed: " << string(buf, start, end-start) << endl << buf << endl;
+      exit(1);
     }
     (*b) *= 10;
     (*b) += buf[c] - '0';
@@ -99,7 +101,12 @@ void AnnotatedParallelSentence::ParseSpanLabel(const char* buf, int start, int e
   short a,b;
   int c = ReadAlignmentPoint(buf, start, end, true, &a, &b) + 1;
   if (buf[c-1] != ':' || c >= end) {
-    cerr << "Span badly formed: " << string(buf, start, end-start) << endl; abort();
+    cerr << "Span badly formed: " << string(buf, start, end-start) << endl << buf << endl;
+    exit(1);
+  }
+  if (a >= e_len || b > e_len) {
+    cerr << "(" << a << ',' << b << ") is out of bounds in labeled span. INPUT=\n" << buf << endl;
+    exit(1);
   }
   // cerr << a << " " << b << " " << string(buf,c,end-c) << endl;
   span_types(a,b).push_back(-TD::Convert(string(buf, c, end-c)));
