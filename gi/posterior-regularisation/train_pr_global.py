@@ -7,23 +7,28 @@ from numpy.random import random
 # Step 1: load the concordance counts
 # 
 
-edges_phrase_to_context = {}
-edges_context_to_phrase = {}
+edges_phrase_to_context = []
+edges_context_to_phrase = []
 types = {}
+context_types = {}
 num_edges = 0
 
 for line in sys.stdin:
     phrase, rest = line.strip().split('\t')
     parts = rest.split('|||')
+    edges_phrase_to_context.append((phrase, []))
     for i in range(0, len(parts), 2):
         context, count = parts[i:i+2]
 
         ctx = tuple(filter(lambda x: x != '<PHRASE>', context.split()))
         cnt = int(count.strip()[2:])
-        ccs = edges_phrase_to_context.setdefault(phrase, {})
-        ccs[ctx] = cnt
-        pcs = edges_context_to_phrase.setdefault(ctx, {})
-        pcs[phrase] = cnt
+        edges_phrase_to_context[-1][1].append((ctx, cnt))
+
+        cid = context_types.get(ctx, len(context_types))
+        if cid == len(context_types):
+            context_types[ctx] = cid
+            edges_context_to_phrase.append((ctx, []))
+        edges_context_to_phrase[cid][1].append((phrase, cnt))
 
         for token in ctx:
             types.setdefault(token, len(types))
@@ -33,6 +38,8 @@ for line in sys.stdin:
         num_edges += 1
 
 print 'Read in', num_edges, 'edges and', len(types), 'word types'
+
+print 'edges_phrase_to_context', edges_phrase_to_context
 
 #
 # Step 2: initialise the model parameters
@@ -46,28 +53,31 @@ delta = int(sys.argv[1])
 gamma = int(sys.argv[2])
 
 def normalise(a):
-    return a / sum(a)
+    return a / float(sum(a))
 
-# Pr(tag)
-tagDist = normalise(random(num_tags)+1)
+# Pr(tag | phrase)
+#tagDist = [normalise(random(num_tags)+1) for p in range(num_phrases)]
+tagDist = [normalise(array(range(1,num_tags+1))) for p in range(num_phrases)]
 # Pr(context at pos i = w | tag) indexed by i, tag, word
-contextWordDist = [[normalise(random(num_types)+1) for t in range(num_tags)] for i in range(4)]
+contextWordDist = [[normalise(array(range(1,num_types+1))) for t in range(num_tags)] for i in range(4)]
+#contextWordDist = [[normalise(random(num_types)+1) for t in range(num_tags)] for i in range(4)]
 # PR langrange multipliers
 lamba = zeros(2 * num_edges * num_tags)
 omega_offset = num_edges * num_tags
 lamba_index = {}
 next = 0
-for phrase, ccs in edges_phrase_to_context.items():
-    for context in ccs.keys():
+for phrase, ccs in edges_phrase_to_context:
+    for context, count in ccs:
         lamba_index[phrase,context] = next
         next += num_tags
+#print lamba_index
 
 #
 # Step 3: expectation maximisation
 #
 
 for iteration in range(20):
-    tagCounts = zeros(num_tags)
+    tagCounts = [zeros(num_tags) for p in range(num_phrases)]
     contextWordCounts = [[zeros(num_types) for t in range(num_tags)] for i in range(4)]
 
     #print 'tagDist', tagDist
@@ -78,11 +88,11 @@ for iteration in range(20):
     # sum_c lamba_pct <= delta; sum_p lamba_pct <= gamma
     def dual(ls):
         logz = 0
-        for phrase, ccs in edges_phrase_to_context.items():
-            for context, count in ccs.items():
+        for p, (phrase, ccs) in enumerate(edges_phrase_to_context):
+            for context, count in ccs:
                 conditionals = zeros(num_tags)
                 for t in range(num_tags):
-                    prob = tagDist[t]
+                    prob = tagDist[p][t]
                     for i in range(4):
                         prob *= contextWordDist[i][t][types[context[i]]]
                     conditionals[t] = prob
@@ -96,17 +106,17 @@ for iteration in range(20):
                 logz += log(local_z) * count
 
         #print 'ls', ls
-        #print 'lambda', list(ls)
-        #print 'dual', logz
+        print 'lambda', list(ls)
+        print 'dual', logz
         return logz
 
     def loglikelihood():
         llh = 0
-        for phrase, ccs in edges_phrase_to_context.items():
-            for context, count in ccs.items():
+        for p, (phrase, ccs) in enumerate(edges_phrase_to_context):
+            for context, count in ccs:
                 conditionals = zeros(num_tags)
                 for t in range(num_tags):
-                    prob = tagDist[t]
+                    prob = tagDist[p][t]
                     for i in range(4):
                         prob *= contextWordDist[i][t][types[context[i]]]
                     conditionals[t] = prob
@@ -122,20 +132,20 @@ for iteration in range(20):
         llh = loglikelihood()
 
         pt_l1linf = 0
-        for phrase, ccs in edges_phrase_to_context.items():
+        for phrase, ccs in edges_phrase_to_context:
             for t in range(num_tags):
                 best = -1e500
-                for context, count in ccs.items():
+                for context, count in ccs:
                     li = lamba_index[phrase,context] + t
                     s = expectations[li]
                     if s > best: best = s
                 pt_l1linf += best
 
         ct_l1linf = 0
-        for context, pcs in edges_context_to_phrase.items():
+        for context, pcs in edges_context_to_phrase:
             for t in range(num_tags):
                 best = -1e500
-                for phrase, count in pcs.items():
+                for phrase, count in pcs:
                     li = lamba_index[phrase,context] + t
                     s = expectations[li]
                     if s > best: best = s
@@ -146,11 +156,11 @@ for iteration in range(20):
     def dual_deriv(ls):
         # d/dl log(z) = E_q[phi]
         deriv = zeros(2 * num_edges * num_tags)
-        for phrase, ccs in edges_phrase_to_context.items():
-            for context, count in ccs.items():
+        for p, (phrase, ccs) in enumerate(edges_phrase_to_context):
+            for context, count in ccs:
                 conditionals = zeros(num_tags)
                 for t in range(num_tags):
-                    prob = tagDist[t]
+                    prob = tagDist[p][t]
                     for i in range(4):
                         prob *= contextWordDist[i][t][types[context[i]]]
                     conditionals[t] = prob
@@ -169,27 +179,27 @@ for iteration in range(20):
                     if gamma > 0:
                         deriv[omega_offset + lamba_index[phrase,context] + t] -= count * scores[t] / local_z
 
-        #print 'ddual', deriv
+        print 'ddual', list(deriv)
         return deriv
 
     def constraints(ls):
         cons = zeros(num_phrases * num_tags + num_edges * num_tags)
 
         index = 0
-        for phrase, ccs in edges_phrase_to_context.items():
+        for phrase, ccs in edges_phrase_to_context:
             for t in range(num_tags):
                 if delta > 0:
                     total = delta
-                    for cprime in ccs.keys():
+                    for cprime, count in ccs:
                         total -= ls[lamba_index[phrase, cprime] + t]
                     cons[index] = total
                 index += 1
 
-        for context, pcs in edges_context_to_phrase.items():
+        for context, pcs in edges_context_to_phrase:
             for t in range(num_tags):
                 if gamma > 0:
                     total = gamma
-                    for pprime in pcs.keys():
+                    for pprime, count in pcs:
                         total -= ls[omega_offset + lamba_index[pprime, context] + t]
                     cons[index] = total
                 index += 1
@@ -201,20 +211,20 @@ for iteration in range(20):
         cons = zeros((num_phrases * num_tags + num_edges * num_tags, 2 * num_edges * num_tags))
 
         index = 0
-        for phrase, ccs in edges_phrase_to_context.items():
+        for phrase, ccs in edges_phrase_to_context:
             for t in range(num_tags):
                 if delta > 0:
                     d = cons[index,:]#zeros(num_edges * num_tags)
-                    for cprime in ccs.keys():
+                    for cprime, count in ccs:
                         d[lamba_index[phrase, cprime] + t] = -1
                     #cons[index] = d
                 index += 1
 
-        for context, pcs in edges_context_to_phrase.items():
+        for context, pcs in edges_context_to_phrase:
             for t in range(num_tags):
                 if gamma > 0:
                     d = cons[index,:]#d = zeros(num_edges * num_tags)
-                    for pprime in pcs.keys():
+                    for pprime, count in pcs:
                         d[omega_offset + lamba_index[pprime, context] + t] = -1
                     #cons[index] = d
                 index += 1
@@ -235,11 +245,11 @@ for iteration in range(20):
 
     # E-step
     llh = z = 0
-    for phrase, ccs in edges_phrase_to_context.items():
-        for context, count in ccs.items():
+    for p, (phrase, ccs) in enumerate(edges_phrase_to_context):
+        for context, count in ccs:
             conditionals = zeros(num_tags)
             for t in range(num_tags):
-                prob = tagDist[t]
+                prob = tagDist[p][t]
                 for i in range(4):
                     prob *= contextWordDist[i][t][types[context[i]]]
                 conditionals[t] = prob
@@ -253,7 +263,7 @@ for iteration in range(20):
                 scores[t] = conditionals[t] * exp(-lamba[li + t] - lamba[omega_offset + li + t])
             z += count * sum(scores)
 
-            tagCounts += count * scores
+            tagCounts[p] += count * scores
             for i in range(4):
                 for t in range(num_tags):
                     contextWordCounts[i][t][types[context[i]]] += count * scores[t]
@@ -261,17 +271,17 @@ for iteration in range(20):
     print 'iteration', iteration, 'llh', llh, 'logz', log(z)
 
     # M-step
-    tagDist = normalise(tagCounts)
+    for p in range(num_phrases):
+        tagDist[p] = normalise(tagCounts[p])
     for i in range(4):
         for t in range(num_tags):
             contextWordDist[i][t] = normalise(contextWordCounts[i][t])
 
-
-for phrase, ccs in edges_phrase_to_context.items():
-    for context, count in ccs.items():
+for p, (phrase, ccs) in enumerate(edges_phrase_to_context):
+    for context, count in ccs:
         conditionals = zeros(num_tags)
         for t in range(num_tags):
-            prob = tagDist[t]
+            prob = tagDist[p][t]
             for i in range(4):
                 prob *= contextWordDist[i][t][types[context[i]]]
             conditionals[t] = prob
