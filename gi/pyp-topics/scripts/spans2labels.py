@@ -41,5 +41,5 @@ for line in sys.stdin:
     context = "%s<PHRASE> %s" % (left_context, right_context)
 
     label = phrase_context_index[(phrase,context)]
-    print "%s-%s:X%s" % (t1-1,t2-1,label),
+    print "%s-%s:X%s" % (t1-order,t2-order,label),
   print
