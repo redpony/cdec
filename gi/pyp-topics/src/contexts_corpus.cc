@@ -6,6 +6,9 @@
 #include "gzstream.hh"
 #include "contexts_lexer.h"
 
+#include <boost/tuple/tuple.hpp>
+
+
 using namespace std;
 
 //////////////////////////////////////////////////
@@ -15,18 +18,28 @@ using namespace std;
 void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* extra) {
   assert(new_contexts.contexts.size() == new_contexts.counts.size());
 
-  std::pair<ContextsCorpus*, BackoffGenerator*>* extra_pair
-    = static_cast< std::pair<ContextsCorpus*, BackoffGenerator*>* >(extra);
+  boost::tuple<ContextsCorpus*, BackoffGenerator*, map<string,int>* >* extra_pair
+    = static_cast< boost::tuple<ContextsCorpus*, BackoffGenerator*, map<string,int>* >* >(extra);
 
-  ContextsCorpus* corpus_ptr = extra_pair->first;
-  BackoffGenerator* backoff_gen = extra_pair->second;
+  ContextsCorpus* corpus_ptr = extra_pair->get<0>();
+  BackoffGenerator* backoff_gen = extra_pair->get<1>();
+  map<string,int>* counts = extra_pair->get<2>();
 
   Document* doc(new Document());
 
-  //std::cout << "READ: " << new_contexts.phrase << "\t";
+  //cout << "READ: " << new_contexts.phrase << "\t";
   for (int i=0; i < new_contexts.contexts.size(); ++i) {
     int cache_word_count = corpus_ptr->m_dict.max();
-    WordID id = corpus_ptr->m_dict.Convert(new_contexts.contexts[i]);
+    string context_str = corpus_ptr->m_dict.toString(new_contexts.contexts[i]);
+
+    // filter out singleton contexts
+    if (!counts->empty()) {
+      map<string,int>::const_iterator find_it = counts->find(context_str);
+      if (find_it == counts->end() || find_it->second == 1)
+        continue;
+    }
+
+    WordID id = corpus_ptr->m_dict.Convert(context_str);
     if (cache_word_count != corpus_ptr->m_dict.max()) {
       corpus_ptr->m_backoff->terms_at_level(0)++;
       corpus_ptr->m_num_types++;
@@ -44,11 +57,11 @@ void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* 
       ContextsLexer::Context backedoff_context = new_contexts.contexts[i];
       while (true) {
         if (!corpus_ptr->m_backoff->has_backoff(backoff_id)) {
-          //std::cerr << "Backing off from " << corpus_ptr->m_dict.Convert(backoff_id) << " to ";
+          //cerr << "Backing off from " << corpus_ptr->m_dict.Convert(backoff_id) << " to ";
           backedoff_context = (*backoff_gen)(backedoff_context);
 
           if (backedoff_context.empty()) {
-            //std::cerr << "Nothing." << std::endl;
+            //cerr << "Nothing." << endl;
             (*corpus_ptr->m_backoff)[backoff_id] = -1;
             break;
           }
@@ -61,38 +74,61 @@ void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* 
           if (cache_word_count != corpus_ptr->m_dict.max())
             corpus_ptr->m_backoff->terms_at_level(order-1)++;
 
-          //std::cerr << corpus_ptr->m_dict.Convert(new_backoff_id) << " ." << std::endl;
+          //cerr << corpus_ptr->m_dict.Convert(new_backoff_id) << " ." << endl;
 
           backoff_id = ((*corpus_ptr->m_backoff)[backoff_id] = new_backoff_id);
         }
         else break;
       }
     }
-    //std::cout << context_str << " (" << id << ") ||| C=" << count << " ||| ";
+    //cout << context_str << " (" << id << ") ||| C=" << count << " ||| ";
   }
-  //std::cout << std::endl;
+  //cout << endl;
 
-  corpus_ptr->m_documents.push_back(doc);
-  corpus_ptr->m_keys.push_back(new_contexts.phrase);
+  if (!doc->empty()) {
+    corpus_ptr->m_documents.push_back(doc);
+    corpus_ptr->m_keys.push_back(new_contexts.phrase);
+  }
 }
 
-unsigned ContextsCorpus::read_contexts(const std::string &filename, 
-                                       BackoffGenerator* backoff_gen_ptr) {
+void filter_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* extra) {
+  assert(new_contexts.contexts.size() == new_contexts.counts.size());
+
+  map<string,int>* context_counts = (static_cast<map<string,int>*>(extra));
+
+  for (int i=0; i < new_contexts.contexts.size(); ++i) {
+    int count = new_contexts.counts[i];
+    pair<map<string,int>::iterator,bool> result 
+      = context_counts->insert(make_pair(Dict::toString(new_contexts.contexts[i]),count));
+    if (!result.second)
+      result.first->second += count;
+  }
+}
+
+
+unsigned ContextsCorpus::read_contexts(const string &filename, 
+                                       BackoffGenerator* backoff_gen_ptr,
+                                       bool filter_singeltons) {
+  map<string,int> counts;
+  if (filter_singeltons) {
+    cerr << "--- Filtering singleton contexts ---" << endl;
+    igzstream in(filename.c_str());
+    ContextsLexer::ReadContexts(&in, filter_callback, &counts);
+  }
+
   m_num_terms = 0;
   m_num_types = 0;
 
   igzstream in(filename.c_str());
-  std::pair<ContextsCorpus*, BackoffGenerator*> extra_pair(this,backoff_gen_ptr);
-  ContextsLexer::ReadContexts(&in, 
-                              read_callback, 
-                              &extra_pair);
+  boost::tuple<ContextsCorpus*, BackoffGenerator*, map<string,int>* > extra_pair(this,backoff_gen_ptr,&counts);
+  ContextsLexer::ReadContexts(&in, read_callback, &extra_pair);
 
   //m_num_types = m_dict.max();
 
-  std::cerr << "Read backoff with order " << m_backoff->order() << "\n";
+  cerr << "Read backoff with order " << m_backoff->order() << "\n";
   for (int o=0; o<m_backoff->order(); o++)
-    std::cerr << "  Terms at " << o << " = " << m_backoff->terms_at_level(o) << std::endl;
-  std::cerr << std::endl;
+    cerr << "  Terms at " << o << " = " << m_backoff->terms_at_level(o) << endl;
+  cerr << endl;
 
   return m_documents.size();
 }

@@ -43,6 +43,7 @@ int main(int argc, char **argv)
       ("topic-words-out,w", value<string>(), "file to write the topic word distribution to")
       ("samples,s", value<int>()->default_value(10), "number of sampling passes through the data")
       ("backoff-type", value<string>(), "backoff type: none|simple")
+      ("filter-singleton-contexts", "filter singleton contexts")
       ;
     store(parse_command_line(argc, argv, cmdline_options), vm); 
     notify(vm);
@@ -80,7 +81,7 @@ int main(int argc, char **argv)
   }
 
   ContextsCorpus contexts_corpus;
-  contexts_corpus.read_contexts(vm["data"].as<string>(), backoff_gen);
+  contexts_corpus.read_contexts(vm["data"].as<string>(), backoff_gen, vm.count("filter-singleton-contexts"));
   model.set_backoff(contexts_corpus.backoff_index());
 
   if (backoff_gen) 
