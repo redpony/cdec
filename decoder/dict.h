@@ -8,8 +8,6 @@
 #include <vector>
 
 #include <boost/functional/hash.hpp>
-#include <boost/regex.hpp>
-#include <boost/algorithm/string/regex.hpp>
 
 #include "wordid.h"
 
@@ -51,11 +49,7 @@ class Dict {
     return words_[id-1];
   }
 
-  inline std::vector<std::string> AsVector(const WordID& id) const {
-    std::vector<std::string> result;
-    boost::algorithm::split_regex(result, Convert(id), boost::regex("\\|\\|\\|"));
-    return result;
-  }
+  void AsVector(const WordID& id, std::vector<std::string>* results) const;
 
   void clear() { words_.clear(); d_.clear(); }
 

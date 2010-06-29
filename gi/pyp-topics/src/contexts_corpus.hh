@@ -60,7 +60,9 @@ public:
     }
 
     std::vector<std::string> context2string(const WordID& id) const {
-      return m_dict.AsVector(id);
+      std::vector<std::string> res;
+      m_dict.AsVector(id, &res);
+      return res;
     }
 
     const std::string& key(const int& i) const {
