@@ -73,6 +73,7 @@ void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* 
   //std::cout << std::endl;
 
   corpus_ptr->m_documents.push_back(doc);
+  corpus_ptr->m_keys.push_back(new_contexts.phrase);
 }
 
 unsigned ContextsCorpus::read_contexts(const std::string &filename, 
