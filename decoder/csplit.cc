@@ -40,73 +40,73 @@ struct CompoundSplitImpl {
 
   void BuildTrellis(const vector<string>& chars,
                     Hypergraph* forest) {
-    vector<int> nodes(chars.size()+1, -1);
-    nodes[0] = forest->AddNode(kXCAT)->id_;       // source
-    const int left_rule = forest->AddEdge(kWORDBREAK_RULE, Hypergraph::TailNodeVector())->id_;
-    forest->ConnectEdgeToHeadNode(left_rule, nodes[0]);
-
-    const int max_split_ = max(static_cast<int>(chars.size()) - min_size_ + 1, 1);
-    cerr << "max: " << max_split_ << "  " << " min: " << min_size_ << endl;
-    for (int i = min_size_; i < max_split_; ++i)
-      nodes[i] = forest->AddNode(kXCAT)->id_;
-    assert(nodes.back() == -1);
-    nodes.back() = forest->AddNode(kXCAT)->id_;   // sink
-
-    for (int i = 0; i < max_split_; ++i) {
-      if (nodes[i] < 0) continue;
-      const int start = min(i + min_size_, static_cast<int>(chars.size()));
-      for (int j = start; j <= chars.size(); ++j) {
-        if (nodes[j] < 0) continue;
-        string yield;
-        PasteTogetherStrings(chars, i, j, &yield);
-        // cerr << "[" << i << "," << j << "] " << yield << endl;
-        TRulePtr rule = TRulePtr(new TRule(*kTEMPLATE_RULE));
-        rule->e_[1] = rule->f_[1] = TD::Convert(yield);
-        // cerr << rule->AsString() << endl;
-        int edge = forest->AddEdge(
-          rule,
-          Hypergraph::TailNodeVector(1, nodes[i]))->id_;
-        forest->ConnectEdgeToHeadNode(edge, nodes[j]);
-        forest->edges_[edge].i_ = i;
-        forest->edges_[edge].j_ = j;
-
-        // handle "fugenelemente" here
-        // don't delete "fugenelemente" at the end of words
-        if (fugen_elements_ && j != chars.size()) {
-          const int len = yield.size();
-          string alt;
-          int fid = 0;
-          if (len > (min_size_ + 2) && yield[len-1] == 's' && yield[len-2] == 'e') {
-            alt = yield.substr(0, len - 2);
-            fid = kFUGEN_S;
-          } else if (len > (min_size_ + 1) && yield[len-1] == 's') {
-            alt = yield.substr(0, len - 1);
-            fid = kFUGEN_S;
-          } else if (len > (min_size_ + 2) && yield[len-2] == 'e' && yield[len-1] == 'n') {
-            alt = yield.substr(0, len - 1);
-            fid = kFUGEN_N;
-          }
-          if (alt.size()) {
-            TRulePtr altrule = TRulePtr(new TRule(*rule));
-            altrule->e_[1] = TD::Convert(alt);
-            // cerr << altrule->AsString() << endl;
-            int edge = forest->AddEdge(
-              altrule,
-              Hypergraph::TailNodeVector(1, nodes[i]))->id_;
-            forest->ConnectEdgeToHeadNode(edge, nodes[j]);
-            forest->edges_[edge].feature_values_.set_value(fid, 1.0);
-            forest->edges_[edge].i_ = i;
-            forest->edges_[edge].j_ = j;
-          }
-        }
-      }
-    }
-
-    // add goal rule
-    Hypergraph::TailNodeVector tail(1, forest->nodes_.size() - 1);
-    Hypergraph::Node* goal = forest->AddNode(TD::Convert("Goal")*-1);
-    Hypergraph::Edge* hg_edge = forest->AddEdge(kGOAL_RULE, tail);
-    forest->ConnectEdgeToHeadNode(hg_edge, goal);
+//    vector<int> nodes(chars.size()+1, -1);
+//    nodes[0] = forest->AddNode(kXCAT)->id_;       // source
+//    const int left_rule = forest->AddEdge(kWORDBREAK_RULE, Hypergraph::TailNodeVector())->id_;
+//    forest->ConnectEdgeToHeadNode(left_rule, nodes[0]);
+//
+//    const int max_split_ = max(static_cast<int>(chars.size()) - min_size_ + 1, 1);
+//    cerr << "max: " << max_split_ << "  " << " min: " << min_size_ << endl;
+//    for (int i = min_size_; i < max_split_; ++i)
+//      nodes[i] = forest->AddNode(kXCAT)->id_;
+//    assert(nodes.back() == -1);
+//    nodes.back() = forest->AddNode(kXCAT)->id_;   // sink
+//
+//    for (int i = 0; i < max_split_; ++i) {
+//      if (nodes[i] < 0) continue;
+//      const int start = min(i + min_size_, static_cast<int>(chars.size()));
+//      for (int j = start; j <= chars.size(); ++j) {
+//        if (nodes[j] < 0) continue;
+//        string yield;
+//        PasteTogetherStrings(chars, i, j, &yield);
+//        // cerr << "[" << i << "," << j << "] " << yield << endl;
+//        TRulePtr rule = TRulePtr(new TRule(*kTEMPLATE_RULE));
+//        rule->e_[1] = rule->f_[1] = TD::Convert(yield);
+//        // cerr << rule->AsString() << endl;
+//        int edge = forest->AddEdge(
+//          rule,
+//          Hypergraph::TailNodeVector(1, nodes[i]))->id_;
+//        forest->ConnectEdgeToHeadNode(edge, nodes[j]);
+//        forest->edges_[edge].i_ = i;
+//        forest->edges_[edge].j_ = j;
+//
+//        // handle "fugenelemente" here
+//        // don't delete "fugenelemente" at the end of words
+//        if (fugen_elements_ && j != chars.size()) {
+//          const int len = yield.size();
+//          string alt;
+//          int fid = 0;
+//          if (len > (min_size_ + 2) && yield[len-1] == 's' && yield[len-2] == 'e') {
+//            alt = yield.substr(0, len - 2);
+//            fid = kFUGEN_S;
+//          } else if (len > (min_size_ + 1) && yield[len-1] == 's') {
+//            alt = yield.substr(0, len - 1);
+//            fid = kFUGEN_S;
+//          } else if (len > (min_size_ + 2) && yield[len-2] == 'e' && yield[len-1] == 'n') {
+//            alt = yield.substr(0, len - 1);
+//            fid = kFUGEN_N;
+//          }
+//          if (alt.size()) {
+//            TRulePtr altrule = TRulePtr(new TRule(*rule));
+//            altrule->e_[1] = TD::Convert(alt);
+//            // cerr << altrule->AsString() << endl;
+//            int edge = forest->AddEdge(
+//              altrule,
+//              Hypergraph::TailNodeVector(1, nodes[i]))->id_;
+//            forest->ConnectEdgeToHeadNode(edge, nodes[j]);
+//            forest->edges_[edge].feature_values_.set_value(fid, 1.0);
+//            forest->edges_[edge].i_ = i;
+//            forest->edges_[edge].j_ = j;
+//          }
+//        }
+//      }
+//    }
+//
+//    // add goal rule
+//    Hypergraph::TailNodeVector tail(1, forest->nodes_.size() - 1);
+//    Hypergraph::Node* goal = forest->AddNode(TD::Convert("Goal")*-1);
+//    Hypergraph::Edge* hg_edge = forest->AddEdge(kGOAL_RULE, tail);
+//    forest->ConnectEdgeToHeadNode(hg_edge, goal);
   }
  private:
   const bool fugen_elements_;
