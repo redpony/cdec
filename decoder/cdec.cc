@@ -75,7 +75,8 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("scfg_no_hiero_glue_grammar,n", "No Hiero glue grammar (nb. by default the SCFG decoder adds Hiero glue rules)")
         ("scfg_default_nt,d",po::value<string>()->default_value("X"),"Default non-terminal symbol in SCFG")
         ("scfg_max_span_limit,S",po::value<int>()->default_value(10),"Maximum non-terminal span limit (except \"glue\" grammar)")
-	("show_tree_structure", "Show the Viterbi derivation structure")
+        ("show_joshua_visualization,J", "Produce output compatible with the Joshua visualization tools")
+        ("show_tree_structure", "Show the Viterbi derivation structure")
         ("show_expected_length", "Show the expected translation length under the model")
         ("show_partition,z", "Compute and show the partition (inside score)")
         ("show_cfg_search_space", "Show the search space as a CFG")
@@ -326,6 +327,7 @@ int main(int argc, char** argv) {
   const bool aligner_mode = conf.count("aligner");
   const bool minimal_forests = conf.count("minimal_forests");
   const bool graphviz = conf.count("graphviz");
+  const bool joshua_viz = conf.count("show_joshua_visualization");
   const bool encode_b64 = conf["vector_format"].as<string>() == "b64";
   const bool kbest = conf.count("k_best");
   const bool unique_kbest = conf.count("unique_k_best");
@@ -466,8 +468,11 @@ int main(int argc, char** argv) {
       } else if (csplit_output_plf) {
         cout << HypergraphIO::AsPLF(forest, false) << endl;
       } else {
-        if (!graphviz && !has_ref) {
+        if (!graphviz && !has_ref && !joshua_viz) {
           cout << TD::GetString(trans) << endl << flush;
+        }
+        if (joshua_viz) {
+          cout << sent_id << " ||| " << JoshuaVisualizationString(forest) << " ||| 1.0 ||| " << -1.0 << endl << flush;
         }
       }
     }

@@ -132,6 +132,7 @@ struct ViterbiPathTraversal {
   }
 };
 
+std::string JoshuaVisualizationString(const Hypergraph& hg);
 prob_t ViterbiESentence(const Hypergraph& hg, std::vector<WordID>* result);
 std::string ViterbiETree(const Hypergraph& hg);
 prob_t ViterbiFSentence(const Hypergraph& hg, std::vector<WordID>* result);
