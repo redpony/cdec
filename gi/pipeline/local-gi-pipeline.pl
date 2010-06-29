@@ -52,7 +52,7 @@ my $CORPUS = $ARGV[0];
 open F, "<$CORPUS" or die "Can't read $CORPUS: $!"; close F;
 
 extract_context();
-contexts_to_documents();
+# contexts_to_documents();
 topic_train();
 label_spans_with_topics();
 my $res;
@@ -118,12 +118,14 @@ sub contexts_to_documents {
 
 sub topic_train {
   print STDERR "\n!!!TRAIN PYP TOPICS\n";
-  my $IN_DOCS = "$OUTPUT/ctx.num.gz";
+# my $IN_DOCS = "$OUTPUT/ctx.num.gz";
+  my $IN_CONTEXTS = "$OUTPUT/context.txt.gz";
   my $OUT_CLUSTERS = "$OUTPUT/docs.txt.gz";
   if (-e $OUT_CLUSTERS) {
     print STDERR "$OUT_CLUSTERS exists, reusing...\n";
   } else {
-    safesystem("$TOPIC_TRAIN -d $IN_DOCS -t $NUM_TOPICS -s $NUM_SAMPLES -o $OUT_CLUSTERS -w /dev/null") or die "Topic training failed.\n";
+    safesystem("$TOPIC_TRAIN --contexts $IN_CONTEXTS --backoff-type simple -t $NUM_TOPICS -s $NUM_SAMPLES -o $OUT_CLUSTERS -w /dev/null") or die "Topic training failed.\n";
+#   safesystem("$TOPIC_TRAIN -d $IN_DOCS -t $NUM_TOPICS -s $NUM_SAMPLES -o $OUT_CLUSTERS -w /dev/null") or die "Topic training failed.\n";
   }
 }
 
