@@ -1,5 +1,6 @@
 #include "viterbi.h"
 
+#include <sstream>
 #include <vector>
 #include "hg.h"
 
@@ -35,5 +36,35 @@ int ViterbiPathLength(const Hypergraph& hg) {
   int len = -1;
   Viterbi<int, PathLengthTraversal, prob_t, EdgeProb>(hg, &len);
   return len;
+}
+
+// create a strings of the form (S (X the man) (X said (X he (X would (X go)))))
+struct JoshuaVisTraversal {
+  JoshuaVisTraversal() : left("("), space(" "), right(")") {}
+  const std::string left;
+  const std::string space;
+  const std::string right;
+  void operator()(const Hypergraph::Edge& edge,
+                  const std::vector<const std::vector<WordID>*>& ants,
+                  std::vector<WordID>* result) const {
+    std::vector<WordID> tmp;
+    edge.rule_->ESubstitute(ants, &tmp);
+    const std::string cat = TD::Convert(edge.rule_->GetLHS() * -1);
+    if (cat == "Goal")
+      result->swap(tmp);
+    else {
+      ostringstream os;
+      os << left << cat << '{' << edge.i_ << '-' << edge.j_ << '}'
+         << space << TD::GetString(tmp) << right;
+      TD::ConvertSentence(os.str(),
+                          result);
+    }
+  }
+};
+
+string JoshuaVisualizationString(const Hypergraph& hg) {
+  vector<WordID> tmp;
+  const prob_t p = Viterbi<vector<WordID>, JoshuaVisTraversal, prob_t, EdgeProb>(hg, &tmp);
+  return TD::GetString(tmp);
 }
 
