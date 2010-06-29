@@ -7,29 +7,51 @@ import java.util.regex.Pattern;
 public class Corpus
 {
 	private Lexicon<String> tokenLexicon = new Lexicon<String>();
-	private Lexicon<TIntArrayList> ngramLexicon = new Lexicon<TIntArrayList>();
+	private Lexicon<TIntArrayList> phraseLexicon = new Lexicon<TIntArrayList>();
+	private Lexicon<TIntArrayList> contextLexicon = new Lexicon<TIntArrayList>();
 	private List<Edge> edges = new ArrayList<Edge>();
-	private Map<Ngram,List<Edge>> phraseToContext = new HashMap<Ngram,List<Edge>>();
-	private Map<Ngram,List<Edge>> contextToPhrase = new HashMap<Ngram,List<Edge>>();
+	private List<List<Edge>> phraseToContext = new ArrayList<List<Edge>>();
+	private List<List<Edge>> contextToPhrase = new ArrayList<List<Edge>>();
 	
-	public class Ngram
+	public class Edge
 	{
-		private Ngram(int id)
+		Edge(int phraseId, int contextId, int count)
 		{
-			ngramId = id;
+			this.phraseId = phraseId;
+			this.contextId = contextId;
+			this.count = count;
 		}
-		public int getId()
+		public int getPhraseId()
 		{
-			return ngramId;
+			return phraseId;
 		}
-		public TIntArrayList getTokenIds()
+		public TIntArrayList getPhrase()
 		{
-			return ngramLexicon.lookup(ngramId);
+			return phraseLexicon.lookup(phraseId);
 		}
-		public String toString()
+		public String getPhraseString()
 		{
 			StringBuffer b = new StringBuffer();
-			for (int tid: getTokenIds().toNativeArray())
+			for (int tid: getPhrase().toNativeArray())
+			{
+				if (b.length() > 0)
+					b.append(" ");
+				b.append(tokenLexicon.lookup(tid));
+			}
+			return b.toString();
+		}		
+		public int getContextId()
+		{
+			return contextId;
+		}
+		public TIntArrayList getContext()
+		{
+			return contextLexicon.lookup(contextId);
+		}
+		public String getContextString()
+		{
+			StringBuffer b = new StringBuffer();
+			for (int tid: getContext().toNativeArray())
 			{
 				if (b.length() > 0)
 					b.append(" ");
@@ -37,39 +59,12 @@ public class Corpus
 			}
 			return b.toString();
 		}
-		public int hashCode()
-		{
-			return ngramId;
-		}
-		public boolean equals(Object other)
-		{
-			return other instanceof Ngram && ngramId == ((Ngram) other).ngramId;
-		}
-		private int ngramId;
-	}
-	
-	public class Edge
-	{
-		Edge(Ngram phrase, Ngram context, int count)
-		{
-			this.phrase = phrase;
-			this.context = context;
-			this.count = count;
-		}
-		public Ngram getPhrase()
-		{
-			return phrase;
-		}
-		public Ngram getContext()
-		{
-			return context;
-		}
 		public int getCount()
 		{
 			return count;
 		}
-		private Ngram phrase;
-		private Ngram context;
+		private int phraseId;
+		private int contextId;
 		private int count;
 	}
 
@@ -78,32 +73,32 @@ public class Corpus
 		return edges;
 	}
 	
-	int numEdges()
+	int getNumEdges()
 	{
 		return edges.size();
 	}
 
-	Set<Ngram> getPhrases()
+	int getNumPhrases()
 	{
-		return phraseToContext.keySet();
+		return phraseLexicon.size();
 	}
 	
-	List<Edge> getEdgesForPhrase(Ngram phrase)
+	List<Edge> getEdgesForPhrase(int phraseId)
 	{
-		return phraseToContext.get(phrase);
+		return phraseToContext.get(phraseId);
 	}
 	
-	Set<Ngram> getContexts()
+	int getNumContexts()
 	{
-		return contextToPhrase.keySet();
+		return contextLexicon.size();
 	}
 	
-	List<Edge> getEdgesForContext(Ngram context)
+	List<Edge> getEdgesForContext(int contextId)
 	{
-		return contextToPhrase.get(context);
+		return contextToPhrase.get(contextId);
 	}
 	
-	int numTokens()
+	int getNumTokens()
 	{
 		return tokenLexicon.size();
 	}
@@ -132,8 +127,9 @@ public class Corpus
 			TIntArrayList ptoks = new TIntArrayList();
 			while (st.hasMoreTokens())
 				ptoks.add(c.tokenLexicon.insert(st.nextToken()));
-			int phraseId = c.ngramLexicon.insert(ptoks);
-			Ngram phrase = c.new Ngram(phraseId);
+			int phraseId = c.phraseLexicon.insert(ptoks);
+			if (phraseId == c.phraseToContext.size())
+				c.phraseToContext.add(new ArrayList<Edge>());
 			
 			// process contexts
 			String[] parts = separator.split(rest);
@@ -151,30 +147,18 @@ public class Corpus
 					if (!token.equals("<PHRASE>"))
 						ctx.add(c.tokenLexicon.insert(token));
 				}
-				int contextId = c.ngramLexicon.insert(ctx);
-				Ngram context = c.new Ngram(contextId);
+				int contextId = c.contextLexicon.insert(ctx);
+				if (contextId == c.contextToPhrase.size())
+					c.contextToPhrase.add(new ArrayList<Edge>());
 
 				assert (countString.startsWith("C="));
-				Edge e = c.new Edge(phrase, context, Integer.parseInt(countString.substring(2).trim()));
+				Edge e = c.new Edge(phraseId, contextId, 
+						Integer.parseInt(countString.substring(2).trim()));
 				c.edges.add(e);
 				
-				// index the edge for fast phrase lookup
-				List<Edge> edges = c.phraseToContext.get(phrase);
-				if (edges == null)
-				{
-					edges = new ArrayList<Edge>();
-					c.phraseToContext.put(phrase, edges);
-				}
-				edges.add(e);
-				
-				// index the edge for fast context lookup
-				edges = c.contextToPhrase.get(context);
-				if (edges == null)
-				{
-					edges = new ArrayList<Edge>();
-					c.contextToPhrase.put(context, edges);
-				}
-				edges.add(e);
+				// index the edge for fast phrase, context lookup
+				c.phraseToContext.get(phraseId).add(e);
+				c.contextToPhrase.get(contextId).add(e);
 			}
 		}
 		
