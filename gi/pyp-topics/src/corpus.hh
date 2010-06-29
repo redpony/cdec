@@ -22,7 +22,7 @@ public:
 
 public:
     Corpus();
-    ~Corpus() {}
+    virtual ~Corpus() {}
 
     unsigned read(const std::string &filename);
 
@@ -71,9 +71,10 @@ class TermBackoff {
 public:
     typedef std::vector<Term> dictionary_type;
     typedef dictionary_type::const_iterator const_iterator;
+    const static int NullBackoff=-1;
 
 public:
-    TermBackoff() : m_backoff_order(-1) {}
+    TermBackoff() { order(1); }
     ~TermBackoff() {}
 
     void read(const std::string &filename);
@@ -86,12 +87,33 @@ public:
       return m_dict[t];
     }
 
+    Term& operator[](const Term& t) {
+      if (t >= static_cast<int>(m_dict.size()))
+        m_dict.resize(t+1, -1);
+      return m_dict[t];
+    }
+
+    bool has_backoff(const Term& t) {
+      return t >= 0 && t < static_cast<int>(m_dict.size()) && m_dict[t] >= 0;
+    }
+
     int order() const { return m_backoff_order; }
+    void order(int o) { 
+      if (o >= (int)m_terms_at_order.size())
+        m_terms_at_order.resize(o, 0);
+      m_backoff_order = o; 
+    }
+
 //    int levels() const { return m_terms_at_order.size(); }
     bool is_null(const Term& term) const { return term < 0; }
     int terms_at_level(int level) const { 
       assert (level < (int)m_terms_at_order.size());
-      return m_terms_at_order[level];
+      return m_terms_at_order.at(level);
+    }
+
+    int& terms_at_level(int level) { 
+      assert (level < (int)m_terms_at_order.size());
+      return m_terms_at_order.at(level);
     }
 
     int size() const { return m_dict.size(); }

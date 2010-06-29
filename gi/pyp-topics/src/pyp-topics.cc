@@ -173,7 +173,7 @@ PYPTopics::F PYPTopics::word_pyps_p0(const Term& term, int topic, int level) con
     Term backoff_term = (*m_backoff)[term];
     if (!m_backoff->is_null(backoff_term)) {
       assert (level < m_backoff->order());
-      p0 = m_backoff->terms_at_level(level)*prob(backoff_term, topic, level+1);
+      p0 = (1.0/(double)m_backoff->terms_at_level(level))*prob(backoff_term, topic, level+1);
     }
     else
       p0 = m_term_p0;

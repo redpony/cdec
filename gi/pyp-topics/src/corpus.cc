@@ -11,7 +11,7 @@ using namespace std;
 // Corpus
 //////////////////////////////////////////////////
 
-Corpus::Corpus() {}
+Corpus::Corpus() : m_num_terms(0), m_num_types(0) {}
 
 unsigned Corpus::read(const std::string &filename) {
   m_num_terms = 0;
