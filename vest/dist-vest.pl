@@ -35,7 +35,7 @@ my $max_iterations = 15;
 my $optimization_iters = 6;
 my $num_rand_points = 20;
 my $decode_nodes = 15;   # number of decode nodes
-my $pmem = "3g";
+my $pmem = "9g";
 my $disable_clean = 0;
 my %seen_weights;
 my $normalize;
