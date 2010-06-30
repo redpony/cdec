@@ -23,51 +23,51 @@ public:
   using std::tr1::unordered_map<Dish,int>::begin;
   using std::tr1::unordered_map<Dish,int>::end;
 
-  PYP(long double a, long double b, Hash hash=Hash());
+  PYP(double a, double b, Hash hash=Hash());
 
-  int increment(Dish d, long double p0);
+  int increment(Dish d, double p0);
   int decrement(Dish d);
 
   // lookup functions
   int count(Dish d) const;
-  long double prob(Dish dish, long double p0) const;
-  long double prob(Dish dish, long double dcd, long double dca, 
-                   long double dtd, long double dta, long double p0) const;
+  double prob(Dish dish, double p0) const;
+  double prob(Dish dish, double dcd, double dca, 
+                   double dtd, double dta, double p0) const;
 
   int num_customers() const { return _total_customers; }
   int num_types() const { return std::tr1::unordered_map<Dish,int>::size(); }
   bool empty() const { return _total_customers == 0; }
 
-  long double log_prob(Dish dish, long double log_p0) const;
+  double log_prob(Dish dish, double log_p0) const;
   // nb. d* are NOT logs
-  long double log_prob(Dish dish, long double dcd, long double dca, 
-                       long double dtd, long double dta, long double log_p0) const;
+  double log_prob(Dish dish, double dcd, double dca, 
+                       double dtd, double dta, double log_p0) const;
 
   int num_tables(Dish dish) const;
   int num_tables() const;
 
-  long double a() const { return _a; }
-  void set_a(long double a) { _a = a; }
+  double a() const { return _a; }
+  void set_a(double a) { _a = a; }
 
-  long double b() const { return _b; }
-  void set_b(long double b) { _b = b; }
+  double b() const { return _b; }
+  void set_b(double b) { _b = b; }
 
   void clear();
   std::ostream& debug_info(std::ostream& os) const;
 
-  long double log_restaurant_prob() const;
-  long double log_prior() const;
-  static long double log_prior_a(long double a, long double beta_a, long double beta_b);
-  static long double log_prior_b(long double b, long double gamma_c, long double gamma_s);
+  double log_restaurant_prob() const;
+  double log_prior() const;
+  static double log_prior_a(double a, double beta_a, double beta_b);
+  static double log_prior_b(double b, double gamma_c, double gamma_s);
 
   void resample_prior();
   void resample_prior_a();
   void resample_prior_b();
 
 private:
-  long double _a, _b; // parameters of the Pitman-Yor distribution
-  long double _a_beta_a, _a_beta_b; // parameters of Beta prior on a
-  long double _b_gamma_s, _b_gamma_c; // parameters of Gamma prior on b
+  double _a, _b; // parameters of the Pitman-Yor distribution
+  double _a_beta_a, _a_beta_b; // parameters of Beta prior on a
+  double _b_gamma_s, _b_gamma_c; // parameters of Gamma prior on b
 
   struct TableCounter
   {
@@ -82,16 +82,16 @@ private:
   // Function objects for calculating the parts of the log_prob for 
   // the parameters a and b
   struct resample_a_type {
-    int n, m; long double b, a_beta_a, a_beta_b;
+    int n, m; double b, a_beta_a, a_beta_b;
     const DishTableType& dish_tables;
-    resample_a_type(int n, int m, long double b, long double a_beta_a, 
-                    long double a_beta_b, const DishTableType& dish_tables)
+    resample_a_type(int n, int m, double b, double a_beta_a, 
+                    double a_beta_b, const DishTableType& dish_tables)
       : n(n), m(m), b(b), a_beta_a(a_beta_a), a_beta_b(a_beta_b), dish_tables(dish_tables) {}
 
-    long double operator() (long double proposed_a) const {
-      long double log_prior = log_prior_a(proposed_a, a_beta_a, a_beta_b);
-      long double log_prob = 0.0;
-      long double lgamma1a = lgamma(1.0 - proposed_a);
+    double operator() (double proposed_a) const {
+      double log_prior = log_prior_a(proposed_a, a_beta_a, a_beta_b);
+      double log_prob = 0.0;
+      double lgamma1a = lgamma(1.0 - proposed_a);
       for (typename DishTableType::const_iterator dish_it=dish_tables.begin(); dish_it != dish_tables.end(); ++dish_it) 
         for (std::map<int, int>::const_iterator table_it=dish_it->second.table_histogram.begin(); 
              table_it !=dish_it->second.table_histogram.end(); ++table_it) 
@@ -105,13 +105,13 @@ private:
   };
 
   struct resample_b_type {
-    int n, m; long double a, b_gamma_c, b_gamma_s;
-    resample_b_type(int n, int m, long double a, long double b_gamma_c, long double b_gamma_s)
+    int n, m; double a, b_gamma_c, b_gamma_s;
+    resample_b_type(int n, int m, double a, double b_gamma_c, double b_gamma_s)
       : n(n), m(m), a(a), b_gamma_c(b_gamma_c), b_gamma_s(b_gamma_s) {}
 
-    long double operator() (long double proposed_b) const {
-      long double log_prior = log_prior_b(proposed_b, b_gamma_c, b_gamma_s);
-      long double log_prob = 0.0;
+    double operator() (double proposed_b) const {
+      double log_prior = log_prior_b(proposed_b, b_gamma_c, b_gamma_s);
+      double log_prob = 0.0;
       log_prob += (a == 0.0  ? (m-1.0)*log(proposed_b) 
                   : ((m-1.0)*log(a) + lgamma((m-1.0) + proposed_b/a) - lgamma(proposed_b/a)));
       log_prob += (lgamma(1.0+proposed_b) - lgamma(n+proposed_b));
@@ -121,7 +121,7 @@ private:
 };
 
 template <typename Dish, typename Hash>
-PYP<Dish,Hash>::PYP(long double a, long double b, Hash)
+PYP<Dish,Hash>::PYP(double a, double b, Hash)
 : std::tr1::unordered_map<Dish, int, Hash>(), _a(a), _b(b), 
   _a_beta_a(1), _a_beta_b(1), _b_gamma_s(1), _b_gamma_c(1),
   //_a_beta_a(1), _a_beta_b(1), _b_gamma_s(10), _b_gamma_c(0.1),
@@ -131,11 +131,11 @@ PYP<Dish,Hash>::PYP(long double a, long double b, Hash)
 }
 
 template <typename Dish, typename Hash>
-long double 
-PYP<Dish,Hash>::prob(Dish dish, long double p0) const
+double 
+PYP<Dish,Hash>::prob(Dish dish, double p0) const
 {
   int c = count(dish), t = num_tables(dish);
-  long double r = num_tables() * _a + _b;
+  double r = num_tables() * _a + _b;
   //std::cerr << "\t\t\t\tPYP<Dish,Hash>::prob(" << dish << "," << p0 << ") c=" << c << " r=" << r << std::endl;
   if (c > 0)
     return (c - _a * t + r * p0) / (num_customers() + _b);
@@ -144,13 +144,13 @@ PYP<Dish,Hash>::prob(Dish dish, long double p0) const
 }
 
 template <typename Dish, typename Hash>
-long double 
-PYP<Dish,Hash>::prob(Dish dish, long double dcd, long double dca, 
-                     long double dtd, long double dta, long double p0)
+double 
+PYP<Dish,Hash>::prob(Dish dish, double dcd, double dca, 
+                     double dtd, double dta, double p0)
 const
 {
   int c = count(dish) + dcd, t = num_tables(dish) + dtd;
-  long double r = (num_tables() + dta) * _a + _b;
+  double r = (num_tables() + dta) * _a + _b;
   if (c > 0)
     return (c - _a * t + r * p0) / (num_customers() + dca + _b);
   else
@@ -158,12 +158,12 @@ const
 }
 
 template <typename Dish, typename Hash>
-long double 
-PYP<Dish,Hash>::log_prob(Dish dish, long double log_p0) const
+double 
+PYP<Dish,Hash>::log_prob(Dish dish, double log_p0) const
 {
   using std::log;
   int c = count(dish), t = num_tables(dish);
-  long double r = log(num_tables() * _a + b);
+  double r = log(num_tables() * _a + b);
   if (c > 0)
     return Log<double>::add(log(c - _a * t), r + log_p0)
       - log(num_customers() + _b);
@@ -172,14 +172,14 @@ PYP<Dish,Hash>::log_prob(Dish dish, long double log_p0) const
 }
 
 template <typename Dish, typename Hash>
-long double 
-PYP<Dish,Hash>::log_prob(Dish dish, long double dcd, long double dca, 
-                         long double dtd, long double dta, long double log_p0)
+double 
+PYP<Dish,Hash>::log_prob(Dish dish, double dcd, double dca, 
+                         double dtd, double dta, double log_p0)
 const
 {
   using std::log;
   int c = count(dish) + dcd, t = num_tables(dish) + dtd;
-  long double r = log((num_tables() + dta) * _a + b);
+  double r = log((num_tables() + dta) * _a + b);
   if (c > 0)
     return Log<double>::add(log(c - _a * t), r + log_p0)
       - log(num_customers() + dca + _b);
@@ -189,14 +189,14 @@ const
 
 template <typename Dish, typename Hash>
 int 
-PYP<Dish,Hash>::increment(Dish dish, long double p0) {
+PYP<Dish,Hash>::increment(Dish dish, double p0) {
   int delta = 0;
   TableCounter &tc = _dish_tables[dish];
 
   // seated on a new or existing table?
   int c = count(dish), t = num_tables(dish), T = num_tables();
-  long double pshare = (c > 0) ? (c - _a*t) : 0.0;
-  long double pnew = (_b + _a*T) * p0;
+  double pshare = (c > 0) ? (c - _a*t) : 0.0;
+  double pnew = (_b + _a*T) * p0;
   assert (pshare >= 0.0);
   //assert (pnew > 0.0);
 
@@ -210,7 +210,7 @@ PYP<Dish,Hash>::increment(Dish dish, long double p0) {
   else {
     // randomly assign to an existing table
     // remove constant denominator from inner loop
-    long double r = mt_genrand_res53() * (c - _a*t);
+    double r = mt_genrand_res53() * (c - _a*t);
     for (std::map<int,int>::iterator
          hit = tc.table_histogram.begin();
          hit != tc.table_histogram.end(); ++hit) {
@@ -272,7 +272,7 @@ PYP<Dish,Hash>::decrement(Dish dish)
   //std::cerr << "count: " << count(dish) << " ";
   //std::cerr << "tables: " << tc.tables << "\n";
 
-  long double r = mt_genrand_res53() * count(dish);
+  double r = mt_genrand_res53() * count(dish);
   for (std::map<int,int>::iterator hit = tc.table_histogram.begin();
        hit != tc.table_histogram.end(); ++hit)
   {
@@ -381,13 +381,13 @@ PYP<Dish,Hash>::clear()
 // log_restaurant_prob returns the log probability of the PYP table configuration.
 // Excludes Hierarchical P0 term which must be calculated separately.
 template <typename Dish, typename Hash>
-long double 
+double 
 PYP<Dish,Hash>::log_restaurant_prob() const {
   if (_total_customers < 1)
-    return (long double)0.0;
+    return (double)0.0;
 
-  long double log_prob = 0.0;
-  long double lgamma1a = lgamma(1.0-_a);
+  double log_prob = 0.0;
+  double lgamma1a = lgamma(1.0-_a);
 
   //std::cerr << "-------------------\n" << std::endl;
   for (typename DishTableType::const_iterator dish_it=_dish_tables.begin(); 
@@ -400,7 +400,7 @@ PYP<Dish,Hash>::log_restaurant_prob() const {
   }
   //std::cerr << std::endl;
 
-  log_prob += (_a == (long double)0.0 ? (_total_tables-1.0)*log(_b) : (_total_tables-1.0)*log(_a) + lgamma((_total_tables-1.0) + _b/_a) - lgamma(_b/_a));
+  log_prob += (_a == (double)0.0 ? (_total_tables-1.0)*log(_b) : (_total_tables-1.0)*log(_a) + lgamma((_total_tables-1.0) + _b/_a) - lgamma(_b/_a));
   //std::cerr << "\t\t" << log_prob << std::endl;
   log_prob += (lgamma(1.0 + _b) - lgamma(_total_customers + _b));
 
@@ -414,9 +414,9 @@ PYP<Dish,Hash>::log_restaurant_prob() const {
 }
 
 template <typename Dish, typename Hash>
-long double 
+double 
 PYP<Dish,Hash>::log_prior() const {
-  long double prior = 0.0;
+  double prior = 0.0;
   if (_a_beta_a > 0.0 && _a_beta_b > 0.0 && _a > 0.0)
     prior += log_prior_a(_a, _a_beta_a, _a_beta_b);
   if (_b_gamma_s > 0.0 && _b_gamma_c > 0.0)
@@ -426,14 +426,14 @@ PYP<Dish,Hash>::log_prior() const {
 }
 
 template <typename Dish, typename Hash>
-long double 
-PYP<Dish,Hash>::log_prior_a(long double a, long double beta_a, long double beta_b) {
+double 
+PYP<Dish,Hash>::log_prior_a(double a, double beta_a, double beta_b) {
   return lbetadist(a, beta_a, beta_b); 
 }
 
 template <typename Dish, typename Hash>
-long double 
-PYP<Dish,Hash>::log_prior_b(long double b, long double gamma_c, long double gamma_s) {
+double 
+PYP<Dish,Hash>::log_prior_b(double b, double gamma_c, double gamma_s) {
   return lgammadist(b, gamma_c, gamma_s); 
 }
 
@@ -456,8 +456,8 @@ PYP<Dish,Hash>::resample_prior_b() {
   int niterations = 10;   // number of resampling iterations
   //std::cerr << "\n## resample_prior_b(), initial a = " << _a << ", b = " << _b << std::endl;
   resample_b_type b_log_prob(_total_customers, _total_tables, _a, _b_gamma_c, _b_gamma_s);
-  _b = slice_sampler1d(b_log_prob, _b, mt_genrand_res53, (long double) 0.0, std::numeric_limits<long double>::infinity(), 
-                       (long double) 0.0, niterations, 100*niterations);
+  _b = slice_sampler1d(b_log_prob, _b, mt_genrand_res53, (double) 0.0, std::numeric_limits<double>::infinity(), 
+                       (double) 0.0, niterations, 100*niterations);
   //std::cerr << "\n## resample_prior_b(), final a = " << _a << ", b = " << _b << std::endl;
 }
 
@@ -470,8 +470,8 @@ PYP<Dish,Hash>::resample_prior_a() {
   int niterations = 10;
   //std::cerr << "\n## Initial a = " << _a << ", b = " << _b << std::endl;
   resample_a_type a_log_prob(_total_customers, _total_tables, _b, _a_beta_a, _a_beta_b, _dish_tables);
-  _a = slice_sampler1d(a_log_prob, _a, mt_genrand_res53, std::numeric_limits<long double>::min(), 
-                       (long double) 1.0, (long double) 0.0, niterations, 100*niterations);
+  _a = slice_sampler1d(a_log_prob, _a, mt_genrand_res53, std::numeric_limits<double>::min(), 
+                       (double) 1.0, (double) 0.0, niterations, 100*niterations);
 }
 
 #endif
