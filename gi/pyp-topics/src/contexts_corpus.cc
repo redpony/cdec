@@ -35,7 +35,7 @@ void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* 
     // filter out singleton contexts
     if (!counts->empty()) {
       map<string,int>::const_iterator find_it = counts->find(context_str);
-      if (find_it == counts->end() || find_it->second < 5)
+      if (find_it == counts->end() || find_it->second < 1)
         continue;
     }
 
