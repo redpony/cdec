@@ -23,7 +23,7 @@ use Cwd qw(getcwd);
 my $recycle_clients;		# spawn new clients when previous ones terminate
 my $stay_alive;			# dont let server die when having zero clients
 my $joblist = "";
-my $errordir;
+my $errordir="";
 my $multiline;
 my @files_to_stage;
 my $verbose = 1;
@@ -71,6 +71,32 @@ sub preview_files {
     debug($cmd,$text);
     $text
 }
+sub prefix_dirname($) {
+    #like `dirname but if ends in / then return the whole thing
+    local ($_)=@_;
+    if (/\/$/) {
+        $_;
+    } else {
+        s#/[^/]$##;
+        $_ ? $_ : '';
+    }
+}
+sub extend_path($$;$$) {
+    my ($base,$ext,$mkdir,$baseisdir)=@_;
+    if (-d $base) {
+        $base.="/";
+    } else {
+        my $dir;
+        if ($baseisdir) {
+            $dir=$base;
+            $base.='/' unless $base =~ /\/$/;
+        } else {
+            $dir=prefix_dirname($base);
+        }
+        system("mkdir -p '$dir'") if $mkdir;
+    }
+    return $base.$ext;
+}
 
 my $abscwd=abspath(&getcwd);
 sub print_help;
@@ -109,10 +135,6 @@ for my $arg (@ARGV) {
 }
 
 die "Please specify a command to parallelize\n" if $cmd eq '';
-
-if ($errordir){
-	`mkdir -p $errordir`;
-}
 
 if ($verbose){ print STDERR "Parallelizing: $cmd\n\n"; }
 
@@ -225,7 +247,7 @@ sub numof_live_jobs {
 	return ($#livejobs + 1);
 }
 my (@errors,@outs,@cmds);
-my $scriptfile="$errordir/$executable.sh";
+my $scriptfile=extend_path("$errordir/","$executable.sh",1,1);
 if ($errordir) {
     open SF,">",$scriptfile || die;
     print SF $cmd,"\n";
