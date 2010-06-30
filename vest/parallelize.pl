@@ -14,6 +14,10 @@
 # return it to the output *without* buffering
 # multiple lines.
 
+#TODO: if -j 1, run immediately, not via sentserver?  possible differences in environment might make debugging harder
+
+#BUG: if input is short, nothing ever gets to clients.  bug in sentserver or in this Perl?
+
 use Getopt::Long;
 use IPC::Open2;
 use strict;
@@ -26,8 +30,7 @@ my $joblist = "";
 my $errordir="";
 my $multiline;
 my @files_to_stage;
-my $verbose = 1;
-my $numnodes;
+my $numnodes = 8;
 my $user = $ENV{"USER"};
 my $pmem = "9g";
 my $basep=50300;
@@ -37,10 +40,17 @@ my $no_which;
 my $no_cd;
 
 my $DEBUG=$ENV{DEBUG};
+print STDERR "DEBUG=$DEBUG output enabled.\n" if $DEBUG;
+my $verbose = 1;
+sub verbose {
+    if ($verbose) {
+        print STDERR @_,"\n";
+    }
+}
 sub debug {
     if ($DEBUG) {
         my ($package, $filename, $line) = caller;
-        print STDERR "$filename($line): ",join(' ',@_);
+        print STDERR "DEBUG: $filename($line): ",join(' ',@_),"\n";
     }
 }
 sub abspath($) {
@@ -63,12 +73,12 @@ sub escape_shell {
 }
 my $tailn=5;
 sub preview_files {
-    my $n=shift;
+    my ($l,$skipempty,$n)=@_;
     $n=$tailn unless defined $n;
-    my $fn=join(' ',map {escape_shell($_)} @_);
+    my @f=grep { ! ($skipempty && -z $_) } @$l;
+    my $fn=join(' ',map {escape_shell($_)} @f);
     my $cmd="tail -n $n $fn";
     my $text=`$cmd`;
-    debug($cmd,$text);
     $text
 }
 sub prefix_dirname($) {
@@ -80,6 +90,10 @@ sub prefix_dirname($) {
         s#/[^/]$##;
         $_ ? $_ : '';
     }
+}
+sub ensure_final_slash($) {
+    local ($_)=@_;
+    m#/$# ? $_ : ($_."/");
 }
 sub extend_path($$;$$) {
     my ($base,$ext,$mkdir,$baseisdir)=@_;
@@ -93,7 +107,8 @@ sub extend_path($$;$$) {
         } else {
             $dir=prefix_dirname($base);
         }
-        system("/bin/mkdir","-p",$dir) if $mkdir;
+        my @cmd=("/bin/mkdir","-p",$dir);
+        system(@cmd) if $mkdir;
     }
     return $base.$ext;
 }
@@ -133,10 +148,33 @@ if ($no_which) {
 for my $arg (@ARGV) {
     $cmd .= " ".escape_shell($arg);
 }
-
 die "Please specify a command to parallelize\n" if $cmd eq '';
 
-if ($verbose){ print STDERR "Parallelizing: $cmd\n\n"; }
+my $cdcmd=$no_cd ? '' : ("cd ".escape_shell($abscwd)."\n");
+
+my $executable = $cmd;
+$executable =~ s/^\s*(\S+)($|\s.*)/$1/;
+$executable=`basename $executable`;
+chomp $executable;
+
+
+if ($verbose){ print STDERR "Parallelizing ($numnodes ways): $cmd\n\n"; }
+
+# create -e dir and save .sh
+use File::Temp qw/tempdir/;
+unless ($errordir) {
+    $errordir=tempdir("$executable.XXXXXX",CLEANUP=>1);
+}
+if ($errordir) {
+    my $scriptfile=extend_path("$errordir/","$executable.sh",1,1);
+    -d $errordir || die "should have created -e dir $errordir";
+    open SF,">",$scriptfile || die;
+    print SF "$cdcmd$cmd\n";
+    close SF;
+    chmod 0755,$scriptfile;
+    $errordir=abspath($errordir);
+    &verbose("-e dir: $errordir");
+}
 
 # set cleanup handler
 my @cleanup_cmds;
@@ -158,10 +196,6 @@ my $sentclient = "$mydir/sentclient";
 my $host = `hostname`;
 chomp $host;
 
-my $executable = $cmd;
-$executable =~ s/^\s*(\S+)($|\s.*)/$1/;
-$executable=`basename $executable`;
-chomp $executable;
 
 # find open port
 srand;
@@ -196,11 +230,10 @@ if ($stay_alive){ $stay_alive_flag = "--stay-alive"; print STDERR "staying alive
 
 my %node_count;
 my $script = "";
-my $cdcmd=$no_cd ? '' : "cd '$abscwd'\n";
 # fork == one thread runs the sentserver, while the
 # other spawns the sentclient commands.
 if (my $pid = fork){
-	  sleep 2; # give other thread time to start sentserver
+	  sleep 4; # give other thread time to start sentserver
     $script =
         qq{wait
 $cdcmd$sentclient $host:$port:$key $cmd
@@ -219,13 +252,13 @@ $cdcmd$sentclient $host:$port:$key $cmd
 		while (1) {
 			$ret = waitpid($pid, WNOHANG);
 			#print STDERR "waitpid $pid ret = $ret \n";
-			if ($ret != 0) {last; } # break
+			last if ($ret != 0);
 			$livejobs = numof_live_jobs();
-			if ($numnodes >= $livejobs ) {	# a client terminated
+			if ($numnodes >= $livejobs ) {	# a client terminated, OR # lines of input was less than -j
 				print STDERR "num of requested nodes = $numnodes; num of currently live jobs = $livejobs; Client terminated - launching another.\n";
 				launch_job_on_node(1);	# TODO: support named nodes
 			} else {
-				sleep (60);
+				sleep 15;
 			}
 		}
 	}
@@ -246,14 +279,6 @@ sub numof_live_jobs {
 	return ($#livejobs + 1);
 }
 my (@errors,@outs,@cmds);
-if ($errordir) {
-    my $scriptfile=extend_path("$errordir","$executable.sh",1,1);
-    -d $errordir || die "should have created -e dir $errordir";
-    open SF,">",$scriptfile || die;
-    print SF "$cdcmd$cmd\n";
-    close SF;
-    chmod 0755,$scriptfile;
-}
 sub launch_job_on_node {
 		my $node = $_[0];
 
@@ -288,7 +313,6 @@ sub launch_job_on_node {
             $jobid =~ s/^Your job (\d+) .*$/\1/;
 			print STDERR " short job id $jobid\n";
             if ($verbose){
-                print STDERR "-e dir: $errordir\n" if $errordir;
                 print STDERR "cd: $abscwd\n";
                 print STDERR "cmd: $cmd\n";
             }
@@ -312,8 +336,8 @@ sub cleanup {
 		if ($verbose){ print STDERR "  $cmd\n"; }
 		eval $cmd;
 	}
-    print STDERR "outputs:\n",preview_files(undef,@outs),"\n";
-    print STDERR "errors:\n",preview_files(undef,@errors),"\n";
+    print STDERR "outputs:\n",preview_files(\@outs,1),"\n";
+    print STDERR "errors:\n",preview_files(\@errors,1),"\n";
     print STDERR "cmd:\n",$cmd,"\n";
 	if ($verbose){ print STDERR "Cleanup finished.\n"; }
 }
