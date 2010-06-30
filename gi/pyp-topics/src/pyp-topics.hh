@@ -12,7 +12,7 @@ class PYPTopics {
 public:
   typedef std::vector<int> DocumentTopics;
   typedef std::vector<DocumentTopics> CorpusTopics;
-  typedef long double F;
+  typedef double F;
 
 public:
   PYPTopics(int num_topics) : m_num_topics(num_topics), m_word_pyps(1) {}
