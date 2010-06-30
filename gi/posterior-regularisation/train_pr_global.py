@@ -263,7 +263,9 @@ for iteration in range(20):
                 scores[t] = conditionals[t] * exp(-lamba[li + t] - lamba[omega_offset + li + t])
             z += count * sum(scores)
 
-            tagCounts[p] += count * scores
+            for t in range(num_tags):
+                tagCounts[p][t] += count * scores[t]
+
             for i in range(4):
                 for t in range(num_tags):
                     contextWordCounts[i][t][types[context[i]]] += count * scores[t]
