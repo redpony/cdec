@@ -16,7 +16,7 @@
 
 #TODO: if -j 1, run immediately, not via sentserver?  possible differences in environment might make debugging harder
 
-#BUG: if input is short, nothing ever gets to clients.  bug in sentserver or in this Perl?
+#ANNOYANCE: if input is shorter than -j n lines, or at the very last few lines, repeatedly sleeps.  time cut down to 15s from 60s
 
 use Getopt::Long;
 use IPC::Open2;
