@@ -34,8 +34,8 @@ my $TOPIC_TRAIN = "$PYPTOOLS/pyp-contexts-train";
 
 assert_exec($SORT_KEYS, $REDUCER, $EXTRACTOR, $FILTER, $SCORER, $PYP_TOPICS_TRAIN, $S2L, $C2D, $TOPIC_TRAIN);
 
-my $OUTPUT = './giwork';
 
+my $OUTPUT = './giwork';
 usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'output=s' => \$OUTPUT,
                            'topics=i' => \$NUM_TOPICS,
@@ -43,16 +43,21 @@ usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'samples=i' => \$NUM_SAMPLES,
                           );
 
-mkdir($OUTPUT);
-die "Couldn't create output direction: $OUTPUT" unless -d $OUTPUT;
-print STDERR "OUTPUT DIRECTORY: $OUTPUT\n";
-
 usage() unless scalar @ARGV == 1;
 my $CORPUS = $ARGV[0];
 open F, "<$CORPUS" or die "Can't read $CORPUS: $!"; close F;
 
+print STDERR "   Output: $OUTPUT\n";
+my $CONTEXT_DIR = $OUTPUT . '/' . context_dir();
+my $CLUSTER_DIR = $OUTPUT . '/' . cluster_dir();
+my $GRAMMAR_DIR = $OUTPUT . '/' . grammar_dir();
+print STDERR "  Context: $CONTEXT_DIR\n  Cluster: $CLUSTER_DIR\n  Grammar: $GRAMMAR_DIR\n";
+safemkdir($OUTPUT) or die "Couldn't create output directory $OUTPUT: $!";
+safemkdir($CONTEXT_DIR) or die "Couldn't create output directory $CONTEXT_DIR: $!";
+safemkdir($CLUSTER_DIR) or die "Couldn't create output directory $CLUSTER_DIR: $!";
+safemkdir($GRAMMAR_DIR) or die "Couldn't create output directory $GRAMMAR_DIR: $!";
+
 extract_context();
-# contexts_to_documents();
 topic_train();
 label_spans_with_topics();
 my $res;
@@ -65,11 +70,26 @@ print STDERR "\n!!!COMPLETE!!!\n";
 print STDERR "GRAMMAR: $res\n\nYou should probably run:\n\n   $SCRIPT_DIR/filter-for-test-set.pl $CORPUS $res TESTSET.TXT > filtered-grammar.scfg\n\n";
 exit 0;
 
+sub context_dir {
+  return "ct${CONTEXT_SIZE}s0.L$BASE_PHRASE_MAX_SIZE";
+}
+
+sub cluster_dir {
+  return context_dir() . ".t$NUM_TOPICS.s$NUM_SAMPLES";
+}
+
+sub grammar_dir {
+  # TODO add grammar config options -- adjacent NTs, etc
+  return cluster_dir() . ".grammar";
+}
 
 
 
-
-
+sub safemkdir {
+  my $dir = shift;
+  if (-d $dir) { return 1; }
+  return mkdir($dir);
+}
 
 sub usage {
   print <<EOT;
@@ -92,7 +112,7 @@ sub assert_exec {
 
 sub extract_context {
  print STDERR "\n!!!CONTEXT EXTRACTION\n"; 
- my $OUT_CONTEXTS = "$OUTPUT/context.txt.gz";
+ my $OUT_CONTEXTS = "$CONTEXT_DIR/context.txt.gz";
  if (-e $OUT_CONTEXTS) {
    print STDERR "$OUT_CONTEXTS exists, reusing...\n";
  } else {
@@ -105,22 +125,10 @@ sub extract_context {
   }
 }
 
-sub contexts_to_documents {
- print STDERR "\n!!!CONTEXT TO DOCUMENTS\n"; 
- my $IN_CONTEXTS = "$OUTPUT/context.txt.gz";
- my $OUT_DOCS = "$OUTPUT/ctx.num.gz";
- if (-e $OUT_DOCS) {
-   print STDERR "$OUT_DOCS exists, reusing...\n";
- } else {
-   safesystem("$ZCAT $IN_CONTEXTS | $C2D $OUTPUT/contexts.index $OUTPUT/phrases.index | $GZIP > $OUT_DOCS") or die;
- }
-}
-
 sub topic_train {
   print STDERR "\n!!!TRAIN PYP TOPICS\n";
-# my $IN_DOCS = "$OUTPUT/ctx.num.gz";
-  my $IN_CONTEXTS = "$OUTPUT/context.txt.gz";
-  my $OUT_CLUSTERS = "$OUTPUT/docs.txt.gz";
+  my $IN_CONTEXTS = "$CONTEXT_DIR/context.txt.gz";
+  my $OUT_CLUSTERS = "$CLUSTER_DIR/docs.txt.gz";
   if (-e $OUT_CLUSTERS) {
     print STDERR "$OUT_CLUSTERS exists, reusing...\n";
   } else {
@@ -132,23 +140,22 @@ sub topic_train {
 sub label_spans_with_topics {
   my ($file) = (@_);
   print STDERR "\n!!!LABEL SPANS\n";
-  my $IN_CLUSTERS = "$OUTPUT/docs.txt.gz";
-  my $OUT_SPANS = "$OUTPUT/labeled_spans.txt";
+  my $IN_CLUSTERS = "$CLUSTER_DIR/docs.txt.gz";
+  my $OUT_SPANS = "$CLUSTER_DIR/labeled_spans.txt";
   if (-e $OUT_SPANS) {
     print STDERR "$OUT_SPANS exists, reusing...\n";
   } else {
-    safesystem("$ZCAT $IN_CLUSTERS > $OUTPUT/clusters.txt") or die "Failed to unzip";
-#   safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $OUTPUT/phrases.index $OUTPUT/contexts.index $OUTPUT/clusters.txt > $OUT_SPANS") or die "Failed to label spans";
-    safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $OUTPUT/clusters.txt $CONTEXT_SIZE > $OUT_SPANS") or die "Failed to label spans";
-    unlink("$OUTPUT/clusters.txt") or warn "Failed to remove $OUTPUT/clusters.txt";
-    safesystem("paste -d ' ' $CORPUS $OUT_SPANS > $OUTPUT/corpus.src_trg_al") or die "Couldn't paste";
+    safesystem("$ZCAT $IN_CLUSTERS > $CLUSTER_DIR/clusters.txt") or die "Failed to unzip";
+    safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $CLUSTER_DIR/clusters.txt $CONTEXT_SIZE > $OUT_SPANS") or die "Failed to label spans";
+    unlink("$CLUSTER_DIR/clusters.txt") or warn "Failed to remove $CLUSTER_DIR/clusters.txt";
+    safesystem("paste -d ' ' $CORPUS $OUT_SPANS > $CLUSTER_DIR/corpus.src_trg_al_label") or die "Couldn't paste";
   }
 }
 
 sub grammar_extract {
-  my $LABELED = "$OUTPUT/corpus.src_trg_al";
+  my $LABELED = "$CLUSTER_DIR/corpus.src_trg_al_label";
   print STDERR "\n!!!EXTRACTING GRAMMAR\n";
-  my $OUTGRAMMAR = "$OUTPUT/grammar.gz";
+  my $OUTGRAMMAR = "$GRAMMAR_DIR/grammar.gz";
   if (-e $OUTGRAMMAR) {
     print STDERR "$OUTGRAMMAR exists, reusing...\n";
   } else {
@@ -159,9 +166,9 @@ sub grammar_extract {
 
 sub grammar_extract_bidir {
 #gzcat ex.output.gz | ./mr_stripe_rule_reduce -p -b | sort -t $'\t' -k 1 | ./mr_stripe_rule_reduce | gzip > phrase-table.gz
-  my $LABELED = "$OUTPUT/corpus.src_trg_al";
+  my $LABELED = "$CLUSTER_DIR/corpus.src_trg_al_label";
   print STDERR "\n!!!EXTRACTING GRAMMAR\n";
-  my $OUTGRAMMAR = "$OUTPUT/grammar.bidir.gz";
+  my $OUTGRAMMAR = "$GRAMMAR_DIR/grammar.bidir.gz";
   if (-e $OUTGRAMMAR) {
     print STDERR "$OUTGRAMMAR exists, reusing...\n";
   } else {
