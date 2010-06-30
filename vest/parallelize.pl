@@ -93,7 +93,7 @@ sub extend_path($$;$$) {
         } else {
             $dir=prefix_dirname($base);
         }
-        system("mkdir -p '$dir'") if $mkdir;
+        system("/bin/mkdir","-p",$dir) if $mkdir;
     }
     return $base.$ext;
 }
@@ -246,8 +246,9 @@ sub numof_live_jobs {
 	return ($#livejobs + 1);
 }
 my (@errors,@outs,@cmds);
-my $scriptfile=extend_path("$errordir","$executable.sh",1,1);
 if ($errordir) {
+    my $scriptfile=extend_path("$errordir","$executable.sh",1,1);
+    -d $errordir || die "should have created -e dir $errordir";
     open SF,">",$scriptfile || die;
     print SF "$cdcmd$cmd\n";
     close SF;
