@@ -35,7 +35,7 @@ logval_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
 
 LDADD = libcdec.a
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS)
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I..
 AM_LDFLAGS = -lz
 
 rule_lexer.cc: rule_lexer.l
