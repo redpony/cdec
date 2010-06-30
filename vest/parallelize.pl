@@ -203,8 +203,7 @@ if (my $pid = fork){
 	  sleep 2; # give other thread time to start sentserver
     $script =
         qq{wait
-$cdcmd
-$sentclient $host:$port:$key $cmd
+$cdcmd$sentclient $host:$port:$key $cmd
 };
 	if ($verbose){
 		print STDERR "Client script:\n====\n";
@@ -247,11 +246,12 @@ sub numof_live_jobs {
 	return ($#livejobs + 1);
 }
 my (@errors,@outs,@cmds);
-my $scriptfile=extend_path("$errordir/","$executable.sh",1,1);
+my $scriptfile=extend_path("$errordir","$executable.sh",1,1);
 if ($errordir) {
     open SF,">",$scriptfile || die;
-    print SF $cmd,"\n";
+    print SF "$cdcmd$cmd\n";
     close SF;
+    chmod 0755,$scriptfile;
 }
 sub launch_job_on_node {
 		my $node = $_[0];
@@ -286,7 +286,11 @@ sub launch_job_on_node {
 			$jobid =~ s/^(\d+)(.*?)$/\1/g;
             $jobid =~ s/^Your job (\d+) .*$/\1/;
 			print STDERR " short job id $jobid\n";
-            if ($verbose){ print STDERR "cmd: $cmd\n"; }
+            if ($verbose){
+                print STDERR "-e dir: $errordir\n" if $errordir;
+                print STDERR "cd: $abscwd\n";
+                print STDERR "cmd: $cmd\n";
+            }
 			if ($joblist == "") { $joblist = $jobid; }
 			else {$joblist = $joblist . "\|" . $jobid; }
             my $cleanfn="`qdel $jobid 2> /dev/null`";
