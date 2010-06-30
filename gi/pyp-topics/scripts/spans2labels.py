@@ -40,6 +40,6 @@ for line in sys.stdin:
     right_context = reduce(lambda x, y: x+y+" ", target[t2:t2+order], "").strip()
     context = "%s<PHRASE> %s" % (left_context, right_context)
 
-    label = phrase_context_index.get((phrase,context, "<UNK>")
+    label = phrase_context_index.get((phrase,context), "<UNK>")
     print "%s-%s:X%s" % (t1-order,t2-order,label),
   print
