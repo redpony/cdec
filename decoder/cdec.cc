@@ -417,6 +417,7 @@ int main(int argc, char** argv) {
 
     bool has_late_models = !late_models.empty();
     if (has_late_models) {
+      Timer t("Forest rescoring:");
       forest.Reweight(feature_weights);
       forest.SortInEdgesByEdgeWeights();
       Hypergraph lm_forest;
