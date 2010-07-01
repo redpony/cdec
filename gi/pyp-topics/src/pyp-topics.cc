@@ -165,10 +165,11 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
 
       int k=0;
       std::cerr << "Topics distribution: ";
+      std::cerr.precision(2);
       for (PYPs::iterator pypIt=m_word_pyps.front().begin();
            pypIt != m_word_pyps.front().end(); ++pypIt, ++k) {
         std::cerr << "<" << k << ":" << pypIt->num_customers() << "," 
-          << pypIt->num_types() << "," << m_topic_pyp.count(k) << "> ";
+          << pypIt->num_types() << "," << m_topic_pyp.prob(k, m_topic_p0) << "> ";
         if (k % 5 == 0) std::cerr << std::endl << '\t';
       }
       std::cerr << std::endl;
