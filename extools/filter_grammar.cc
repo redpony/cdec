@@ -189,7 +189,7 @@ int main(int argc, char* argv[]){
 		  {
 			curnode = &root;
 		} else if (curnode) {
-			curnode = root.Extend(cur_key[i]);
+			curnode = curnode->Extend(cur_key[i]);
 			if (!curnode) break;
 		  }
 	      }
