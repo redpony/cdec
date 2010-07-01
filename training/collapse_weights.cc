@@ -1,3 +1,10 @@
+char const* NOTES =
+  "ZF_and_E means unnormalized scaled features.\n"
+  "For grammars with one nonterminal: F_and_E is joint,\n"
+  "F_given_E and E_given_F are conditional.\n"
+  "TODO: group rules by root nonterminal and then normalize.\n";
+
+
 #include <iostream>
 #include <fstream>
 #include <tr1/unordered_map>
@@ -20,7 +27,9 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()
         ("grammar,g", po::value<string>(), "Grammar file")
-        ("weights,w", po::value<string>(), "Weights file");
+        ("weights,w", po::value<string>(), "Weights file")
+    ("unnormalized,u", "Always include ZF_and_E unnormalized score (default: only if sum was >1)")
+    ;
   po::options_description clo("Command line options");
   clo.add_options()
         ("config,c", po::value<string>(), "Configuration file")
@@ -40,6 +49,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
 
   if (conf->count("help") || !conf->count("grammar") || !conf->count("weights")) {
     cerr << dcmdline_options << endl;
+    cerr << NOTES << endl;
     exit(1);
   }
 }
@@ -91,7 +101,7 @@ int main(int argc, char** argv) {
     tr.scores_.clear();
 
     cout << tr.AsString() << " ||| F_and_E=" << lp - log(tot);
-    if (!normalized) {
+    if (!normalized || conf.count("unnormalized")) {
       cout << ";ZF_and_E=" << lp;
     }
     cout << ";F_given_E=" << lp - log(e_tots[tr.e_])
