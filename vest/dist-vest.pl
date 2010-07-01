@@ -33,7 +33,6 @@ my $run_local = 0;
 my $best_weights;
 my $max_iterations = 15;
 my $optimization_iters = 6;
-my $num_rand_points = 20;
 my $decode_nodes = 15;   # number of decode nodes
 my $pmem = "9g";
 my $disable_clean = 0;
@@ -120,9 +119,7 @@ if ($restart){
 	unless (-e $iniFile){
 		die "ERROR: Could not find ini file in $dir to restart\n";
 	}
-	$logfile = "$dir/mert.log";
-	open(LOGFILE, ">>$logfile");
-	print LOGFILE "RESTARTING STOPPED OPTIMIZATION\n\n";
+	print STDERR "RESTARTING STOPPED OPTIMIZATION\n\n";
 
 	# figure out best weights so far and iteration number
 	open(LOG, "$dir/mert.log");
@@ -187,9 +184,9 @@ if ($dryrun){
 	}
 	unless($restart){
 		$logfile = "$dir/mert.log";
-		open(LOGFILE, ">$logfile");
+		open(STDERR, ">$logfile");
 	}
-	write_config(*LOGFILE);
+	write_config(*STDERR);
 }
 
 
@@ -214,7 +211,7 @@ my $lastWeightsFile;
 my $lastPScore = 0;
 # main optimization loop
 while (1){
-	print LOGFILE "\n\nITERATION $iteration\n==========\n";
+	print STDERR "\n\nITERATION $iteration\n==========\n";
 
 	# iteration-specific files
 	my $runFile="$dir/run.raw.$iteration";
@@ -225,62 +222,62 @@ while (1){
 	`mkdir -p $logdir`;
 
 	#decode
-	print LOGFILE "DECODE\n";
-	print LOGFILE `date`;
+	print STDERR "DECODE\n";
+	print STDERR `date`;
 	my $im1 = $iteration - 1;
 	my $weightsFile="$dir/weights.$im1";
 	my $decoder_cmd = "$decoder -c $iniFile -w $weightsFile -O $dir/hgs";
 	my $pcmd = "cat $srcFile | $parallelize -p $pmem -e $logdir -j $decode_nodes -- ";
         if ($run_local) { $pcmd = "cat $srcFile |"; }
         my $cmd = $pcmd . "$decoder_cmd 2> $decoderLog 1> $runFile";
-	print LOGFILE "COMMAND:\n$cmd\n";
+	print STDERR "COMMAND:\n$cmd\n";
 	my $result = 0;
 	$result = system($cmd);
 	unless ($result == 0){
 		cleanup();
-		print LOGFILE "ERROR: Parallel decoder returned non-zero exit code $result\n";
+		print STDERR "ERROR: Parallel decoder returned non-zero exit code $result\n";
 		die;
 	}
 	my $dec_score = `cat $runFile | $SCORER $refs_comma_sep -l $metric`;
 	chomp $dec_score;
-	print LOGFILE "DECODER SCORE: $dec_score\n";
+	print STDERR "DECODER SCORE: $dec_score\n";
 
 	# save space
 	`gzip $runFile`;
 	`gzip $decoderLog`;
 
 	if ($iteration > $max_iterations){
-		print LOGFILE "\nREACHED STOPPING CRITERION: Maximum iterations\n";
+		print STDERR "\nREACHED STOPPING CRITERION: Maximum iterations\n";
 		last;
 	}
 	
 	# run optimizer
-	print LOGFILE `date`;
+	print STDERR `date`;
 	my $mergeLog="$logdir/prune-merge.log.$iteration";
 
 	my $score = 0;
 	my $icc = 0;
 	my $inweights="$dir/weights.$im1";
 	for (my $opt_iter=1; $opt_iter<$optimization_iters; $opt_iter++) {
-		print LOGFILE "\nGENERATE OPTIMIZATION STRATEGY (OPT-ITERATION $opt_iter/$optimization_iters)\n";
-		print LOGFILE `date`;
+		print STDERR "\nGENERATE OPTIMIZATION STRATEGY (OPT-ITERATION $opt_iter/$optimization_iters)\n";
+		print STDERR `date`;
 		$icc++;
 		$cmd="$MAPINPUT -w $inweights -r $dir/hgs -s $devSize -d $rand_directions > $dir/agenda.$im1-$opt_iter";
-		print LOGFILE "COMMAND:\n$cmd\n";
+		print STDERR "COMMAND:\n$cmd\n";
 		$result = system($cmd);
 		unless ($result == 0){
 			cleanup();
-			print LOGFILE "ERROR: mapinput command returned non-zero exit code $result\n";
+			print STDERR "ERROR: mapinput command returned non-zero exit code $result\n";
 			die;
 		}
 
 	        `mkdir $dir/splag.$im1`;
 		$cmd="split -a 3 -l $lines_per_mapper $dir/agenda.$im1-$opt_iter $dir/splag.$im1/mapinput.";
-		print LOGFILE "COMMAND:\n$cmd\n";
+		print STDERR "COMMAND:\n$cmd\n";
 		$result = system($cmd);
 		unless ($result == 0){
 			cleanup();
-			print LOGFILE "ERROR: split command returned non-zero exit code $result\n";
+			print STDERR "ERROR: split command returned non-zero exit code $result\n";
 			die;
 		}
 		opendir(DIR, "$dir/splag.$im1") or die "Can't open directory: $!";
@@ -303,11 +300,11 @@ while (1){
 			$o2i{"$dir/splag.$im1/$mapoutput"} = "$dir/splag.$im1/$shard";
 			my $script = "$MAPPER -s $srcFile -l $metric $refs_comma_sep < $dir/splag.$im1/$shard | sort -t \$'\\t' -k 1 > $dir/splag.$im1/$mapoutput";
 			if ($run_local) {
-				print LOGFILE "COMMAND:\n$script\n";
+				print STDERR "COMMAND:\n$script\n";
 				$result = system($script);
 				unless ($result == 0){
 					cleanup();
-					print LOGFILE "ERROR: mapper returned non-zero exit code $result\n";
+					print STDERR "ERROR: mapper returned non-zero exit code $result\n";
 					die;
 				}
 			} else {
@@ -315,7 +312,7 @@ while (1){
         open F, ">$script_file" or die "Can't write $script_file: $!";
         print F "$script\n";
         close F;
-				if ($first_shard) { print LOGFILE "$script\n"; $first_shard=0; }
+				if ($first_shard) { print STDERR "$script\n"; $first_shard=0; }
 
 				$nmappers++;
 				my $jobid = `qsub $QSUB_FLAGS -S /bin/bash -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file`;
@@ -324,22 +321,22 @@ while (1){
 				$jobid =~ s/^(\d+)(.*?)$/\1/g;
         $jobid =~ s/^Your job (\d+) .*$/\1/;
 		  	push(@cleanupcmds, "`qdel $jobid 2> /dev/null`");
-			  print LOGFILE " $jobid";
+			  print STDERR " $jobid";
 				if ($joblist == "") { $joblist = $jobid; }
 				else {$joblist = $joblist . "\|" . $jobid; }
 			}
 		}
 		if ($run_local) {
 		} else {
-			print LOGFILE "\nLaunched $nmappers mappers.\n";
+			print STDERR "\nLaunched $nmappers mappers.\n";
       sleep 10;
-			print LOGFILE "Waiting for mappers to complete...\n";
+			print STDERR "Waiting for mappers to complete...\n";
 			while ($nmappers > 0) {
 			  sleep 5;
 			  my @livejobs = grep(/$joblist/, split(/\n/, `qstat`));
 			  $nmappers = scalar @livejobs;
 			}
-			print LOGFILE "All mappers complete.\n";
+			print STDERR "All mappers complete.\n";
 		}
 		my $tol = 0;
 		my $til = 0;
@@ -350,31 +347,31 @@ while (1){
 		  $til += $ilines;
 		  die "$mo: output lines ($olines) doesn't match input lines ($ilines)" unless $olines==$ilines;
 		}
-		print LOGFILE "Results for $tol/$til lines\n";
-		print LOGFILE "\nSORTING AND RUNNING VEST REDUCER\n";
-		print LOGFILE `date`;
+		print STDERR "Results for $tol/$til lines\n";
+		print STDERR "\nSORTING AND RUNNING VEST REDUCER\n";
+		print STDERR `date`;
 		$cmd="sort -t \$'\\t' -k 1 @mapoutputs | $REDUCER -l $metric > $dir/redoutput.$im1";
-		print LOGFILE "COMMAND:\n$cmd\n";
+		print STDERR "COMMAND:\n$cmd\n";
 		$result = system($cmd);
 		unless ($result == 0){
 			cleanup();
-			print LOGFILE "ERROR: reducer command returned non-zero exit code $result\n";
+			print STDERR "ERROR: reducer command returned non-zero exit code $result\n";
 			die;
 		}
 		$cmd="sort -nk3 $DIR_FLAG '-t|' $dir/redoutput.$im1 | head -1";
 		my $best=`$cmd`; chomp $best;
-		print LOGFILE "$best\n";
+		print STDERR "$best\n";
 		my ($oa, $x, $xscore) = split /\|/, $best;
 		$score = $xscore;
-		print LOGFILE "PROJECTED SCORE: $score\n";
+		print STDERR "PROJECTED SCORE: $score\n";
 		if (abs($x) < $epsilon) {
-			print LOGFILE "\nOPTIMIZER: no score improvement: abs($x) < $epsilon\n";
+			print STDERR "\nOPTIMIZER: no score improvement: abs($x) < $epsilon\n";
 			last;
 		}
                 my $psd = $score - $last_score;
                 $last_score = $score;
 		if (abs($psd) < $epsilon) {
-			print LOGFILE "\nOPTIMIZER: no score improvement: abs($psd) < $epsilon\n";
+			print STDERR "\nOPTIMIZER: no score improvement: abs($psd) < $epsilon\n";
 			last;
 		}
 		my ($origin, $axis) = split /\s+/, $oa;
@@ -401,15 +398,15 @@ while (1){
 	$lastWeightsFile = "$dir/weights.$iteration";
 	`cp $inweights $lastWeightsFile`;
 	if ($icc < 2) {
-		print LOGFILE "\nREACHED STOPPING CRITERION: score change too little\n";
+		print STDERR "\nREACHED STOPPING CRITERION: score change too little\n";
 		last;
 	}
 	$lastPScore = $score;
 	$iteration++;
-	print LOGFILE "\n==========\n";
+	print STDERR "\n==========\n";
 }
 
-print LOGFILE "\nFINAL WEIGHTS: $dir/$lastWeightsFile\n(Use -w <this file> with hiero)\n\n";
+print STDERR "\nFINAL WEIGHTS: $dir/$lastWeightsFile\n(Use -w <this file> with hiero)\n\n";
 
 sub normalize_weights {
   my ($rfn, $rpts, $feat) = @_;
@@ -425,7 +422,7 @@ sub normalize_weights {
   for (my $i=0; $i < scalar @feat_names; $i++) {
     $pts[$i] /= $z;
   }
-  print LOGFILE " NORM WEIGHTS: @pts\n";
+  print STDERR " NORM WEIGHTS: @pts\n";
   return @pts;
 }
 
