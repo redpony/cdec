@@ -422,7 +422,7 @@ int main(int argc, char** argv) {
       double presize=forest.edges_.size();
       forest.BeamPruneInsideOutside(1.0, false, prelm_beam_prune, NULL);
       cerr << viterbi_stats(forest,"  Pruned -LM forest",false,false);
-      cerr << "  Pruned -LM forest (beam="<<prelm_beam_prune<<") portion of edges kept: "<<forest.edges_.size()/presize;
+      cerr << "  Pruned -LM forest (beam="<<prelm_beam_prune<<") portion of edges kept: "<<forest.edges_.size()/presize<<endl;
     }
 
     bool has_late_models = !late_models.empty();
