@@ -6,6 +6,23 @@
 
 using namespace std;
 
+std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool estring, bool etree)
+{
+  ostringstream o;
+  o << hg.stats(name);
+  if (estring) {
+    vector<WordID> trans;
+    const prob_t vs = ViterbiESentence(hg, &trans);
+    o<<name<<"       Viterbi: "<<log(vs)<<endl;
+    o<<name<<"       Viterbi: "<<TD::GetString(trans)<<endl;
+  }
+  if (etree) {
+    o<<name<<"          tree: "<<ViterbiETree(hg)<<endl;
+  }
+  return o.str();
+}
+
+
 string ViterbiETree(const Hypergraph& hg) {
   vector<WordID> tmp;
   const prob_t p = Viterbi<vector<WordID>, ETreeTraversal, prob_t, EdgeProb>(hg, &tmp);

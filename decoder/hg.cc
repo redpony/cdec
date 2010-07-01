@@ -6,12 +6,22 @@
 #include <set>
 #include <map>
 #include <iostream>
+#include <sstream>
 
 #include "viterbi.h"
 #include "inside_outside.h"
 #include "tdict.h"
 
 using namespace std;
+
+std::string Hypergraph::stats(std::string const& name) const
+{
+  ostringstream o;
+  o<<name<<" (nodes/edges): "<<nodes_.size()<<'/'<<edges_.size()<<endl;
+  o<<name<<"       (paths): "<<NumberOfPaths()<<endl;
+  return o.str();
+}
+
 
 double Hypergraph::NumberOfPaths() const {
   return Inside<double, TransitionCountWeightFunction>(*this);

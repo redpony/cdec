@@ -6,6 +6,8 @@
 #include "hg.h"
 #include "tdict.h"
 
+std::string viterbi_stats(Hypergraph const& hg, std::string const& name="forest", bool estring=true, bool etree=false);
+
 // V must implement:
 //  void operator()(const vector<const T*>& ants, T* result);
 template<typename T, typename Traversal, typename WeightType, typename WeightFunction>
@@ -21,7 +23,7 @@ WeightType Viterbi(const Hypergraph& hg,
     const Hypergraph::Node& cur_node = hg.nodes_[i];
     WeightType* const cur_node_best_weight = &vit_weight[i];
     T*          const cur_node_best_result = &vit_result[i];
-    
+
     const int num_in_edges = cur_node.in_edges_.size();
     if (num_in_edges == 0) {
       *cur_node_best_weight = WeightType(1);

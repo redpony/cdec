@@ -178,6 +178,9 @@ class Hypergraph {
   void BeamPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double alpha,
                               const std::vector<bool>* preserve_mask = NULL);
 
+  // report nodes, edges, paths
+  std::string stats(std::string const& name="forest") const;
+
   void clear() {
     nodes_.clear();
     edges_.clear();

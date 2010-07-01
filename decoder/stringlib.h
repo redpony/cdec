@@ -36,6 +36,13 @@ inline void Tokenize(const std::string& str, char delimiter, std::vector<std::st
     res->push_back(&s[last]);
 }
 
+inline unsigned NTokens(const std::string& str, char delimiter)
+{
+  std::vector<std::string> r;
+  Tokenize(str,delimiter,&r);
+  return r.size();
+}
+
 inline std::string LowercaseString(const std::string& in) {
   std::string res(in.size(),' ');
   for (int i = 0; i < in.size(); ++i)
