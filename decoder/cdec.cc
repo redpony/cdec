@@ -82,6 +82,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("show_cfg_search_space", "Show the search space as a CFG")
         ("prelm_beam_prune", po::value<double>(), "Prune paths from -LM forest before LM rescoring, keeping paths within exp(alpha>=0)")
         ("beam_prune", po::value<double>(), "Prune paths from +LM forest, keep paths within exp(alpha>=0)")
+    ("scale_prune_srclen", "scale beams by the input length (in # of tokens; may not be what you want for lattices")
         ("lexalign_use_null", "Support source-side null words in lexical translation")
         ("tagger_tagset,t", po::value<string>(), "(Tagger) file containing tag set")
         ("csplit_output_plf", "(Compound splitter) Output lattice in PLF format")
@@ -234,6 +235,15 @@ static void ExtractRulesDedupe(const Hypergraph& hg, ostream* os) {
 
 void register_feature_functions();
 
+bool beam_param(po::variables_map const& conf,char const* name,double *val,bool scale_srclen=false,double srclen=1)
+{
+  if (conf.count(name)) {
+    *val=conf[name].as<double>()*(scale_srclen?srclen:1);
+    return true;
+  }
+  return false;
+}
+
 int main(int argc, char** argv) {
   global_ff_registry.reset(new FFRegistry);
   register_feature_functions();
@@ -257,6 +267,7 @@ int main(int argc, char** argv) {
          << "used with csplit AND --beam_prune!\n";
     exit(1);
   }
+  const bool scale_prune_srclen=conf.count("scale_prune_srclen");
   const bool csplit_output_plf = conf.count("csplit_output_plf");
   if (csplit_output_plf && formalism != "csplit") {
     cerr << "--csplit_output_plf should only be used with csplit!\n";
@@ -373,6 +384,8 @@ int main(int argc, char** argv) {
     string to_translate;
     Lattice ref;
     ParseTranslatorInputLattice(buf, &to_translate, &ref);
+    const unsigned srclen=NTokens(to_translate,' ');
+//FIXME: should get the avg. or max source length of the input lattice (like Lattice::dist_(start,end)); but this is only used to scale beam parameters (optionally) anyway so fidelity isn't important.
     const bool has_ref = ref.size() > 0;
     SentenceMetadata smeta(sent_id, ref);
     const bool hadoop_counters = (write_gradient);
@@ -389,8 +402,8 @@ int main(int argc, char** argv) {
       cout << endl << flush;
       continue;
     }
-    cerr << "  -LM forest (nodes/edges): " << forest.nodes_.size() << '/' << forest.edges_.size() << endl;
-    cerr << "  -LM forest       (paths): " << forest.NumberOfPaths() << endl;
+    const bool show_tree_structure=conf.count("show_tree_structure");
+    cerr << viterbi_stats(forest,"  -LM forest",true,show_tree_structure);
     if (conf.count("show_expected_length")) {
       const PRPair<double, double> res =
         Inside<PRPair<double, double>,
@@ -403,16 +416,13 @@ int main(int argc, char** argv) {
     }
     if (extract_file)
       ExtractRulesDedupe(forest, extract_file->stream());
-    vector<WordID> trans;
-    const prob_t vs = ViterbiESentence(forest, &trans);
-    cerr << "  -LM Viterbi: " << TD::GetString(trans) << endl;
-    if (conf.count("show_tree_structure"))
-      cerr << "  -LM    tree: " << ViterbiETree(forest) << endl;;
-    cerr << "  -LM Viterbi: " << log(vs) << endl;
 
-    if (conf.count("prelm_beam_prune")) {
-      forest.BeamPruneInsideOutside(1.0, false, conf["prelm_beam_prune"].as<double>(), NULL);
-      cerr << "  Pruned -LM forest    (paths): " << forest.NumberOfPaths() << endl;
+    double prelm_beam_prune;
+    if (beam_param(conf,"prelm_beam_prune",&prelm_beam_prune,scale_prune_srclen,srclen)) {
+      double presize=forest.edges_.size();
+      forest.BeamPruneInsideOutside(1.0, false, prelm_beam_prune, NULL);
+      cerr << viterbi_stats(forest,"  Pruned -LM forest",false,false);
+      cerr << "  Pruned -LM forest (beam="<<prelm_beam_prune<<") portion of edges kept: "<<forest.edges_.size()/presize;
     }
 
     bool has_late_models = !late_models.empty();
@@ -428,18 +438,15 @@ int main(int argc, char** argv) {
                     &lm_forest);
       forest.swap(lm_forest);
       forest.Reweight(feature_weights);
-      trans.clear();
-      ViterbiESentence(forest, &trans);
-      cerr << "  +LM forest (nodes/edges): " << forest.nodes_.size() << '/' << forest.edges_.size() << endl;
-      cerr << "  +LM forest       (paths): " << forest.NumberOfPaths() << endl;
-      cerr << "  +LM Viterbi: " << TD::GetString(trans) << endl;
+      cerr << viterbi_stats(forest,"  +LM forest",true,show_tree_structure);
     }
-    if (conf.count("beam_prune")) {
+    double beam_prune;
+    if (beam_param(conf,"beam_prune",&beam_prune,scale_prune_srclen,srclen)) {
       vector<bool> preserve_mask(forest.edges_.size(), false);
       if (csplit_preserve_full_word)
         preserve_mask[CompoundSplit::GetFullWordEdgeIndex(forest)] = true;
-      forest.BeamPruneInsideOutside(1.0, false, conf["beam_prune"].as<double>(), &preserve_mask);
-      cerr << "  Pruned forest    (paths): " << forest.NumberOfPaths() << endl;
+      forest.BeamPruneInsideOutside(1.0, false, beam_prune, &preserve_mask);
+      cerr << viterbi_stats(forest,"  Pruned forest",false,false);
     }
 
     if (conf.count("forest_output") && !has_ref) {
@@ -464,6 +471,9 @@ int main(int argc, char** argv) {
     if (sample_max_trans) {
       MaxTranslationSample(&forest, sample_max_trans, conf.count("k_best") ? conf["k_best"].as<int>() : 0);
     } else {
+      vector<WordID> trans;
+      ViterbiESentence(forest, &trans);
+
       if (kbest) {
         DumpKBest(sent_id, forest, conf["k_best"].as<int>(), unique_kbest);
       } else if (csplit_output_plf) {
