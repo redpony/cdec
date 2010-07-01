@@ -338,8 +338,8 @@ int main(int argc, char** argv){
 	   
            scored_grammar << TD::GetString(cur_key);
 	   scored_grammar << " " << TD::GetString(it->first) << " |||";
-	   scored_grammar << " " << safenlog(pFE_) << " " << safenlog(pEF_);
-	   scored_grammar << " " << safenlog(final_lex_e2f) << " " << safenlog(final_lex_f2e) << endl;
+	   scored_grammar << " FGivenE=" << safenlog(pFE_) << " EGivenF=" << safenlog(pEF_);
+	   scored_grammar << " LexE2F=" << safenlog(final_lex_e2f) << " LexF2E=" << safenlog(final_lex_f2e) << endl;
 	}  
     }
 }
