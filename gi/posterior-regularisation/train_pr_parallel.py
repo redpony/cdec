@@ -37,8 +37,6 @@ for line in sys.stdin:
 
         num_edges += 1
 
-print 'Read in', num_edges, 'edges and', len(types), 'word types'
-
 #
 # Step 2: initialise the model parameters
 #
@@ -52,6 +50,8 @@ assert sys.argv[2] in ('local', 'global')
 local = sys.argv[2] == 'local'
 if len(sys.argv) >= 2:
      seed(int(sys.argv[3]))
+
+print 'Read in', num_edges, 'edges', num_phrases, 'phrases', num_contexts, 'contexts and', len(types), 'word types'
 
 def normalise(a):
     return a / float(sum(a))
@@ -131,7 +131,7 @@ class GlobalDualObjective:
         for j, (phrase, edges) in enumerate(edges_phrase_to_context):
             for i, (context, count) in enumerate(edges):
                 for t in range(num_tags):
-                    cons[j,t] -= ls[index,t]
+                    cons[j,t] -= ls[index,t] * count
                 index += 1
         return cons.ravel()
 
@@ -142,7 +142,7 @@ class GlobalDualObjective:
         for j, (phrase, edges) in enumerate(edges_phrase_to_context):
             for i, (context, count) in enumerate(edges):
                 for t in range(num_tags):
-                    gradient[j,t,index,t] -= 1
+                    gradient[j,t,index,t] -= count
                 index += 1
         return gradient.reshape((num_phrases*num_tags, num_edges*num_tags))
 
@@ -231,7 +231,7 @@ class LocalDualObjective:
         cons = ones(num_tags) * self.scale
         for t in range(num_tags):
             for i, (context, count) in enumerate(edges):
-                cons[t] -= ls[i,t]
+                cons[t] -= ls[i,t] * count
         return cons
 
     def constraints_gradient(self, ls):
@@ -240,7 +240,7 @@ class LocalDualObjective:
         gradient = zeros((num_tags, len(edges), num_tags))
         for t in range(num_tags):
             for i, (context, count) in enumerate(edges):
-                gradient[t,i,t] -= 1
+                gradient[t,i,t] -= count
         return gradient.reshape((num_tags, len(edges)*num_tags))
 
     def optimize(self):
