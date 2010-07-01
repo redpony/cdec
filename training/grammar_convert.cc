@@ -1,3 +1,7 @@
+/*
+  this program modifies cfg hypergraphs (forests) and extracts kbests?
+  what are: json, split ?
+ */
 #include <iostream>
 #include <algorithm>
 #include <sstream>
@@ -120,7 +124,7 @@ bool CheckPermutationMask(const vector<int>& mask, const vector<int>& pi) {
       req_min = cur_max - 1;
     }
     if (pi[i] > req_min) {
-      if (pi[i] > cur_max) cur_max = pi[i]; 
+      if (pi[i] > cur_max) cur_max = pi[i];
     } else {
       return false;
     }
@@ -142,7 +146,7 @@ void PermuteYKRecursive(int nodeid, const WordID& parent, const int max_reorder,
     const TRule& rule = *hg->edges_[oe_index].rule_;
     const Hypergraph::TailNodeVector orig_tail = hg->edges_[oe_index].tail_nodes_;
     const int tail_size = orig_tail.size();
-    for (int i = 0; i < tail_size; ++i) {  
+    for (int i = 0; i < tail_size; ++i) {
       PermuteYKRecursive(hg->edges_[oe_index].tail_nodes_[i], node->cat_, max_reorder, hg);
     }
     const vector<WordID>& of = rule.f_;

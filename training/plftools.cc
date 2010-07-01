@@ -1,3 +1,7 @@
+char const* NOTES =
+  "Process (PLF format) lattice: sharpen distribution, nbest, graphviz, push weights\n"
+  ;
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -33,7 +37,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::notify(*conf);
 
   if (conf->count("help") || conf->count("input") == 0) {
-    cerr << dcmdline_options << endl;
+    cerr << dcmdline_options << endl << NOTES << endl;
     exit(1);
   }
 }

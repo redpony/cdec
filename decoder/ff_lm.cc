@@ -16,6 +16,7 @@
 #include "stringlib.h"
 
 #ifdef HAVE_RANDLM
+// http://randlm.sourceforge.net/
 #include "RandLM.h"
 #endif
 
