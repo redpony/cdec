@@ -24,6 +24,7 @@ use strict;
 use POSIX ":sys_wait_h";
 use Cwd qw(getcwd);
 
+my $tailn=5; # +0 = concatenate all the client logs.  5 = last 5 lines
 my $recycle_clients;		# spawn new clients when previous ones terminate
 my $stay_alive;			# dont let server die when having zero clients
 my $joblist = "";
@@ -71,15 +72,13 @@ sub escape_shell {
     }
     return $arg;
 }
-my $tailn=5;
 sub preview_files {
-    my ($l,$skipempty,$n)=@_;
+    my ($l,$skipempty,$footer,$n)=@_;
     $n=$tailn unless defined $n;
     my @f=grep { ! ($skipempty && -z $_) } @$l;
     my $fn=join(' ',map {escape_shell($_)} @f);
     my $cmd="tail -n $n $fn";
-    my $text=`$cmd`;
-    $text
+    `$cmd`.($footer?"\nNONEMPTY FILES:\n$fn\n":"");
 }
 sub prefix_dirname($) {
     #like `dirname but if ends in / then return the whole thing
@@ -127,9 +126,10 @@ unless (GetOptions(
 			"jobs=i" => \$numnodes,
 			"pmem=s" => \$pmem,
         "baseport=i" => \$basep,
-        "iport=i" => \$randp, #ugly option name so first letter doesn't conflict
+#       "iport=i" => \$randp, #for short name -i
         "no-which!" => \$no_which,
             "no-cd!" => \$no_cd,
+            "tailn=s" => \$tailn,
 ) && scalar @ARGV){
 	print_help();
     die "bad options.";
@@ -339,6 +339,7 @@ sub cleanup {
     print STDERR "outputs:\n",preview_files(\@outs,1),"\n";
     print STDERR "errors:\n",preview_files(\@errors,1),"\n";
     print STDERR "cmd:\n",$cmd,"\n";
+    print STDERR " cat $errordir/*.ER\nfor logs.\n";
 	if ($verbose){ print STDERR "Cleanup finished.\n"; }
 }
 
