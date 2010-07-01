@@ -15,7 +15,9 @@ public:
   typedef double F;
 
 public:
-  PYPTopics(int num_topics) : m_num_topics(num_topics), m_word_pyps(1) {}
+  PYPTopics(int num_topics, bool use_topic_pyp=false) 
+    : m_num_topics(num_topics), m_word_pyps(1), 
+    m_topic_pyp(0.5,1.0), m_use_topic_pyp(use_topic_pyp) {}
 
   void sample(const Corpus& corpus, int samples);
   int sample(const DocumentId& doc, const Term& term);
@@ -50,6 +52,8 @@ private:
   typedef std::vector< PYP<int> > PYPs;
   PYPs m_document_pyps;
   std::vector<PYPs> m_word_pyps;
+  PYP<int> m_topic_pyp;
+  bool m_use_topic_pyp;
 
   TermBackoffPtr m_backoff;
 };
