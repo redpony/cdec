@@ -3,6 +3,14 @@
  *
  *  Created on: May 17, 2010
  *      Author: Vlad
+
+NOTE (graehl): this seems to be a (forward) trie of the suffixes (of sentences).
+so O(m*n^2) for m sentences of length n.
+
+For a real suffix tree (linear size/time), see:
+http://en.wikipedia.org/wiki/Suffix_tree
+http://www.cs.helsinki.fi/u/ukkonen/SuffixT1withFigs.pdf
+
  */
 
 #ifndef SUFFIX_TREE_H_
