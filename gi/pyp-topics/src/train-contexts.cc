@@ -44,6 +44,7 @@ int main(int argc, char **argv)
       ("samples,s", value<int>()->default_value(10), "number of sampling passes through the data")
       ("backoff-type", value<string>(), "backoff type: none|simple")
       ("filter-singleton-contexts", "filter singleton contexts")
+      ("hierarchical-topics", "Use a backoff hierarchical PYP as the P0 for the document topics distribution.")
       ;
     store(parse_command_line(argc, argv, cmdline_options), vm); 
     notify(vm);
@@ -63,7 +64,7 @@ int main(int argc, char **argv)
   // seed the random number generator
   //mt_init_genrand(time(0));
 
-  PYPTopics model(vm["topics"].as<int>());
+  PYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"));
 
   // read the data
   BackoffGenerator* backoff_gen=0;

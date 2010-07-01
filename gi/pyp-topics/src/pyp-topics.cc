@@ -60,7 +60,14 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
       // add the new topic to the PYPs
       m_corpus_topics[document_id][term_index] = new_topic;
       increment(term, new_topic);
-      m_document_pyps[document_id].increment(new_topic, m_topic_p0);
+
+      if (m_use_topic_pyp) {
+        F p0 = m_topic_pyp.prob(new_topic, m_topic_p0);
+        int table_delta = m_document_pyps[document_id].increment(new_topic, p0);
+        if (table_delta)
+          m_topic_pyp.increment(new_topic, m_topic_p0);
+      }
+      else m_document_pyps[document_id].increment(new_topic, m_topic_p0);
     }
   }
   std::cerr << "  Initialized in " << timer.Elapsed() << " seconds\n";
@@ -99,7 +106,10 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
         // remove the prevous topic from the PYPs
         int current_topic = m_corpus_topics[document_id][term_index];
         decrement(term, current_topic);
-        m_document_pyps[document_id].decrement(current_topic);
+
+        int table_delta = m_document_pyps[document_id].decrement(current_topic);
+        if (m_use_topic_pyp && table_delta < 0) 
+          m_topic_pyp.decrement(current_topic);
 
         // sample a new_topic
         int new_topic = sample(document_id, term);
@@ -107,7 +117,14 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
         // add the new topic to the PYPs
         m_corpus_topics[document_id][term_index] = new_topic;
         increment(term, new_topic);
-        m_document_pyps[document_id].increment(new_topic, m_topic_p0);
+
+        if (m_use_topic_pyp) {
+          F p0 = m_topic_pyp.prob(new_topic, m_topic_p0);
+          int table_delta = m_document_pyps[document_id].increment(new_topic, p0);
+          if (table_delta)
+            m_topic_pyp.increment(new_topic, m_topic_p0);
+        }
+        else m_document_pyps[document_id].increment(new_topic, m_topic_p0);
       }
       if (document_id && document_id % 10000 == 0) {
         std::cerr << "."; std::cerr.flush();
@@ -126,19 +143,35 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
              pypIt != levelIt->end(); ++pypIt) {
           pypIt->resample_prior();
           log_p += pypIt->log_restaurant_prob();
-          if (resample_counter++ % 100 == 0) {
-            std::cerr << "."; std::cerr.flush();
-          }
         }
       }
 
+      resample_counter=0;
       for (PYPs::iterator pypIt=m_document_pyps.begin();
-           pypIt != m_document_pyps.end(); ++pypIt) {
+           pypIt != m_document_pyps.end(); ++pypIt, ++resample_counter) {
         pypIt->resample_prior();
         log_p += pypIt->log_restaurant_prob();
+        if (resample_counter++ % 10000 == 0) {
+          std::cerr << "."; std::cerr.flush();
+        }
       }
+      if (m_use_topic_pyp) {
+        m_topic_pyp.resample_prior();
+        log_p += m_topic_pyp.log_restaurant_prob();
+      }
+
       std::cerr << " ||| LLH=" << log_p << " ||| resampling time=" << timer.Elapsed() << " sec" << std::endl;
       timer.Reset();
+
+      int k=0;
+      std::cerr << "Topics distribution: ";
+      for (PYPs::iterator pypIt=m_word_pyps.front().begin();
+           pypIt != m_word_pyps.front().end(); ++pypIt, ++k) {
+        std::cerr << "<" << k << ":" << pypIt->num_customers() << "," 
+          << pypIt->num_types() << "," << m_topic_pyp.count(k) << "> ";
+        if (k % 5 == 0) std::cerr << std::endl << '\t';
+      }
+      std::cerr << std::endl;
     }
   }
   delete [] randomDocIndices;
@@ -171,7 +204,11 @@ int PYPTopics::sample(const DocumentId& doc, const Term& term) {
   std::vector<F> sums;
   for (int k=0; k<m_num_topics; ++k) {
     F p_w_k = prob(term, k);
-    F p_k_d = m_document_pyps[doc].prob(k, m_topic_p0);
+
+    F topic_prob = m_topic_p0;
+    if (m_use_topic_pyp) topic_prob = m_topic_pyp.prob(k, m_topic_p0);
+    F p_k_d = m_document_pyps[doc].prob(k, topic_prob);
+
     sum += (p_w_k*p_k_d);
     sums.push_back(sum);
   }
@@ -225,7 +262,11 @@ int PYPTopics::max(const DocumentId& doc, const Term& term) {
   int current_topic=-1;
   for (int k=0; k<m_num_topics; ++k) {
     F p_w_k = prob(term, k);
-    F p_k_d = m_document_pyps[doc].prob(k, m_topic_p0);
+
+    F topic_prob = m_topic_p0;
+    if (m_use_topic_pyp) topic_prob = m_topic_pyp.prob(k, m_topic_p0);
+    F p_k_d = m_document_pyps[doc].prob(k, topic_prob);
+
     F prob = (p_w_k*p_k_d);
     if (prob > current_max) {
       current_max = prob;
