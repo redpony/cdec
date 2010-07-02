@@ -25,8 +25,8 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-  std::cout << "Pitman Yor topic models: Copyright 2010 Phil Blunsom\n";
-  std::cout << REVISION << '\n' << std::endl;
+ cout << "Pitman Yor topic models: Copyright 2010 Phil Blunsom\n";
+ cout << REVISION << '\n' <<endl;
 
   ////////////////////////////////////////////////////////////////////////////////////////////
   // Command line processing
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
       backoff_gen = new SimpleBackoffGenerator();
     }
     else {
-      std::cerr << "Backoff type (--backoff-type) must be one of none|simple." << std::endl;
+     cerr << "Backoff type (--backoff-type) must be one of none|simple." <<endl;
       return(1);
     }
   }
@@ -96,10 +96,10 @@ int main(int argc, char **argv)
     ogzstream documents_out(vm["document-topics-out"].as<string>().c_str());
 
     int document_id=0;
-    std::set<int> all_terms;
+   map<int,int> all_terms;
     for (Corpus::const_iterator corpusIt=contexts_corpus.begin(); 
          corpusIt != contexts_corpus.end(); ++corpusIt, ++document_id) {
-      std::vector<int> unique_terms;
+     vector<int> unique_terms;
       for (Document::const_iterator docIt=corpusIt->begin();
            docIt != corpusIt->end(); ++docIt) {
         if (unique_terms.empty() || *docIt != unique_terms.back())
@@ -110,23 +110,25 @@ int main(int argc, char **argv)
            termIt != unique_terms.end(); ++termIt) {
         if (termIt != unique_terms.begin())
           documents_out << " ||| ";
-        std::vector<std::string> strings = contexts_corpus.context2string(*termIt);
-        std::copy(strings.begin(), strings.end(), std::ostream_iterator<std::string>(documents_out, " "));
+       vector<std::string> strings = contexts_corpus.context2string(*termIt);
+       copy(strings.begin(), strings.end(),ostream_iterator<std::string>(documents_out, " "));
         documents_out << "||| C=" << model.max(document_id, *termIt);
 
-        all_terms.insert(*termIt);
+        // increment this terms frequency
+        pair<map<int,int>::iterator,bool> insert_result = all_terms.insert(make_pair(*termIt,1));
+        if (!insert_result.second) insert_result.first++;
       }
-      documents_out << std::endl;
+      documents_out <<endl;
     }
     documents_out.close();
 
-    std::ofstream default_topics(vm["default-topics-out"].as<string>().c_str());
-    default_topics << model.max_topic() << std::endl;
-    for (std::set<int>::const_iterator termIt=all_terms.begin(); termIt != all_terms.end(); ++termIt) {
-      std::vector<std::string> strings = contexts_corpus.context2string(*termIt);
-      default_topics << model.max(-1, *termIt) << " ||| ";
-      std::copy(strings.begin(), strings.end(), std::ostream_iterator<std::string>(default_topics, " "));
-      default_topics << std::endl;
+   ofstream default_topics(vm["default-topics-out"].as<string>().c_str());
+    default_topics << model.max_topic() <<endl;
+    for (std::map<int,int>::const_iterator termIt=all_terms.begin(); termIt != all_terms.end(); ++termIt) {
+     vector<std::string> strings = contexts_corpus.context2string(termIt->first);
+      default_topics << model.max(-1, termIt->first) << " ||| " << termIt->second << " ||| ";
+     copy(strings.begin(), strings.end(),ostream_iterator<std::string>(default_topics, " "));
+      default_topics <<endl;
     }
   }
 
@@ -136,7 +138,7 @@ int main(int argc, char **argv)
     topics_out.close();
   }
 
-  std::cout << std::endl;
+ cout <<endl;
 
   return 0;
 }
