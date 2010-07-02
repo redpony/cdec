@@ -1,21 +1,27 @@
+#ifdef __CYGWIN__
+# ifndef _POSIX_MONOTONIC_CLOCK
+#  define _POSIX_MONOTONIC_CLOCK
+# endif
+#endif
+
 #include "pyp-topics.hh"
 //#include "mt19937ar.h"
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <time.h>
 #include <sys/time.h>
 #include "clock_gettime_stub.c"
 
-
 struct Timer {
   Timer() { Reset(); }
-  void Reset() 
-  { 
-    clock_gettime(CLOCK_MONOTONIC, &start_t); 
+  void Reset()
+  {
+    clock_gettime(CLOCK_MONOTONIC, &start_t);
   }
   double Elapsed() const {
     timespec end_t;
-    clock_gettime(CLOCK_MONOTONIC, &end_t); 
-    const double elapsed = (end_t.tv_sec - start_t.tv_sec) 
+    clock_gettime(CLOCK_MONOTONIC, &end_t);
+    const double elapsed = (end_t.tv_sec - start_t.tv_sec)
                 + (end_t.tv_nsec - start_t.tv_nsec) / 1000000000.0;
     return elapsed;
   }
@@ -31,7 +37,7 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
     m_word_pyps.push_back(PYPs());
   }
 
-  std::cerr << " Training with " << m_word_pyps.size()-1 << " backoff level" 
+  std::cerr << " Training with " << m_word_pyps.size()-1 << " backoff level"
     << (m_word_pyps.size()==2 ? ":" : "s:") << std::endl;
 
   for (int i=0; i<(int)m_word_pyps.size(); ++i)
@@ -44,13 +50,13 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
   m_term_p0 = 1.0/corpus.num_types();
   m_backoff_p0 = 1.0/corpus.num_documents();
 
-  std::cerr << " Documents: " << corpus.num_documents() << " Terms: " 
+  std::cerr << " Documents: " << corpus.num_documents() << " Terms: "
     << corpus.num_types() << std::endl;
 
   timer.Reset();
   // Initialisation pass
   int document_id=0, topic_counter=0;
-  for (Corpus::const_iterator corpusIt=corpus.begin(); 
+  for (Corpus::const_iterator corpusIt=corpus.begin();
        corpusIt != corpus.end(); ++corpusIt, ++document_id) {
     m_corpus_topics.push_back(DocumentTopics(corpusIt->size(), 0));
 
@@ -115,7 +121,7 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
         decrement(term, current_topic);
 
         int table_delta = m_document_pyps[document_id].decrement(current_topic);
-        if (m_use_topic_pyp && table_delta < 0) 
+        if (m_use_topic_pyp && table_delta < 0)
           m_topic_pyp.decrement(current_topic);
 
         // sample a new_topic
@@ -176,7 +182,7 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
       std::cerr.precision(2);
       for (PYPs::iterator pypIt=m_word_pyps.front().begin();
            pypIt != m_word_pyps.front().end(); ++pypIt, ++k) {
-        std::cerr << "<" << k << ":" << pypIt->num_customers() << "," 
+        std::cerr << "<" << k << ":" << pypIt->num_customers() << ","
           << pypIt->num_types() << "," << m_topic_pyp.prob(k, m_topic_p0) << "> ";
         if (k % 5 == 0) std::cerr << std::endl << '\t';
       }
@@ -227,7 +233,7 @@ int PYPTopics::sample(const DocumentId& doc, const Term& term) {
   // Second pass: sample a topic
   F cutoff = mt_genrand_res53() * sum;
   for (int k=0; k<m_num_topics; ++k) {
-    if (cutoff <= sums[k]) 
+    if (cutoff <= sums[k])
       return k;
   }
   assert(false);
@@ -293,7 +299,7 @@ int PYPTopics::max(const DocumentId& doc) const {
     //F p_w_k = prob(term, k);
 
     F topic_prob = m_topic_p0;
-    if (m_use_topic_pyp) 
+    if (m_use_topic_pyp)
       topic_prob = m_topic_pyp.prob(k, m_topic_p0);
 
     F prob = 0;
@@ -318,7 +324,7 @@ int PYPTopics::max(const DocumentId& doc, const Term& term) const {
     F p_w_k = prob(term, k);
 
     F topic_prob = m_topic_p0;
-    if (m_use_topic_pyp) 
+    if (m_use_topic_pyp)
       topic_prob = m_topic_pyp.prob(k, m_topic_p0);
 
     F p_k_d = 0;
@@ -336,7 +342,7 @@ int PYPTopics::max(const DocumentId& doc, const Term& term) const {
 }
 
 std::ostream& PYPTopics::print_document_topics(std::ostream& out) const {
-  for (CorpusTopics::const_iterator corpusIt=m_corpus_topics.begin(); 
+  for (CorpusTopics::const_iterator corpusIt=m_corpus_topics.begin();
        corpusIt != m_corpus_topics.end(); ++corpusIt) {
     int term_index=0;
     for (DocumentTopics::const_iterator docIt=corpusIt->begin();
@@ -350,7 +356,7 @@ std::ostream& PYPTopics::print_document_topics(std::ostream& out) const {
 }
 
 std::ostream& PYPTopics::print_topic_terms(std::ostream& out) const {
-  for (PYPs::const_iterator pypsIt=m_word_pyps.front().begin(); 
+  for (PYPs::const_iterator pypsIt=m_word_pyps.front().begin();
        pypsIt != m_word_pyps.front().end(); ++pypsIt) {
     int term_index=0;
     for (PYP<int>::const_iterator termIt=pypsIt->begin();
