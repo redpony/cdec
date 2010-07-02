@@ -116,7 +116,9 @@ int main(int argc, char **argv)
 
         // increment this terms frequency
         pair<map<int,int>::iterator,bool> insert_result = all_terms.insert(make_pair(*termIt,1));
-        if (!insert_result.second) insert_result.first++;
+        if (!insert_result.second) 
+          //insert_result.first++;
+          all_terms[*termIt] += 1;
       }
       documents_out <<endl;
     }
