@@ -61,6 +61,9 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("input,i",po::value<string>()->default_value("-"),"Source file")
         ("grammar,g",po::value<vector<string> >()->composing(),"Either SCFG grammar file(s) or phrase tables file(s)")
         ("weights,w",po::value<string>(),"Feature weights file")
+    ("prelm_weights",po::value<string>(),"Feature weights file for prelm_beam_prune.  Requires --weights.")
+    ("prelm_copy_weights","use --weights as value for --prelm_weights.")
+
         ("no_freeze_feature_set,Z", "Do not freeze feature set after reading feature weights file")
         ("feature_function,F",po::value<vector<string> >()->composing(), "Additional feature function(s) (-L for list)")
         ("list_feature_functions,L","List available feature functions")
@@ -244,6 +247,20 @@ bool beam_param(po::variables_map const& conf,char const* name,double *val,bool 
   return false;
 }
 
+bool prelm_weights_string(po::variables_map const& conf,string &s)
+{
+  if (conf.count("prelm_weights")) {
+    s=conf["prelm_weights"].as<string>();
+    return true;
+  }
+  if (conf.count("prelm_copy_weights")) {
+    s=conf["weights"].as<string>();
+    return true;
+  }
+  return false;
+}
+
+
 int main(int argc, char** argv) {
   global_ff_registry.reset(new FFRegistry);
   register_feature_functions();
@@ -275,12 +292,20 @@ int main(int argc, char** argv) {
   }
 
   // load feature weights (and possibly freeze feature set)
-  vector<double> feature_weights;
-  Weights w;
+  vector<double> feature_weights,prelm_feature_weights;
+  Weights w,prelm_w;
+  bool has_prelm_models = false;
   if (conf.count("weights")) {
     w.InitFromFile(conf["weights"].as<string>());
     feature_weights.resize(FD::NumFeats());
     w.InitVector(&feature_weights);
+    string plmw;
+    if (prelm_weights_string(conf,plmw)) {
+      has_prelm_models = true;
+      prelm_w.InitFromFile(plmw);
+      prelm_feature_weights.resize(FD::NumFeats());
+      prelm_w.InitVector(&prelm_feature_weights);
+    }
     if (!conf.count("no_freeze_feature_set")) {
       cerr << "Freezing feature set (use --no_freeze_feature_set to change)." << endl;
       FD::Freeze();
@@ -307,7 +332,8 @@ int main(int argc, char** argv) {
 
   // set up additional scoring features
   vector<shared_ptr<FeatureFunction> > pffs;
-  vector<const FeatureFunction*> late_ffs;
+
+  vector<const FeatureFunction*> late_ffs,prelm_ffs;
   if (conf.count("feature_function") > 0) {
     const vector<string>& add_ffs = conf["feature_function"].as<vector<string> >();
     for (int i = 0; i < add_ffs.size(); ++i) {
@@ -317,13 +343,17 @@ int main(int argc, char** argv) {
       if (param.size() > 0) cerr << " (with config parameters '" << param << "')\n";
       else cerr << " (no config parameters)\n";
       shared_ptr<FeatureFunction> pff = global_ff_registry->Create(ff, param);
-      if (!pff) { exit(1); }
+      FeatureFunction const* p=pff.get();
+      if (!p) { exit(1); }
       // TODO check that multiple features aren't trying to set the same fid
       pffs.push_back(pff);
-      late_ffs.push_back(pff.get());
+      late_ffs.push_back(p);
+      if (p->NumBytesContext()==0)
+        prelm_ffs.push_back(p);
     }
   }
   ModelSet late_models(feature_weights, late_ffs);
+
   int palg = 1;
   if (LowercaseString(conf["intersection_strategy"].as<string>()) == "full") {
     palg = 0;
@@ -416,6 +446,22 @@ int main(int argc, char** argv) {
     }
     if (extract_file)
       ExtractRulesDedupe(forest, extract_file->stream());
+
+    if (has_prelm_models) {
+      ModelSet prelm_models(prelm_feature_weights, prelm_ffs);
+      Timer t("prelm rescoring");
+      forest.Reweight(prelm_feature_weights);
+      forest.SortInEdgesByEdgeWeights();
+      Hypergraph prelm_forest;
+      ApplyModelSet(forest,
+                    smeta,
+                    prelm_models,
+                    inter_conf,
+                    &prelm_forest);
+      forest.swap(prelm_forest);
+      forest.Reweight(prelm_feature_weights);
+      cerr << viterbi_stats(forest," prelm forest",true,show_tree_structure);
+    }
 
     double prelm_beam_prune;
     if (beam_param(conf,"prelm_beam_prune",&prelm_beam_prune,scale_prune_srclen,srclen)) {
