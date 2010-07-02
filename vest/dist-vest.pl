@@ -44,7 +44,6 @@ my $interval = 5;
 my $dryrun = 0;
 my $ranges;
 my $last_score = -10000000;
-my $restart = 0;
 my $metric = "ibm_bleu";
 my $dir;
 my $iniFile;
@@ -71,7 +70,6 @@ if (GetOptions(
 	"rand-directions=i" => \$rand_directions,
 	"ref-files=s" => \$refFiles,
 	"metric=s" => \$metric,
-	"restart" => \$restart,
 	"source-file=s" => \$srcFile,
 	"weights=s" => \$initialWeights,
 	"workdir=s" => \$dir
@@ -114,25 +112,6 @@ unless ($dir =~ /^\//){  # convert relative path to absolute path
 	chomp $basedir;
 	$dir = "$basedir/$dir";
 }
-if ($restart){
-	$iniFile = `ls $dir/*.ini`; chomp $iniFile;
-	unless (-e $iniFile){
-		die "ERROR: Could not find ini file in $dir to restart\n";
-	}
-	print STDERR "RESTARTING STOPPED OPTIMIZATION\n\n";
-
-	# figure out best weights so far and iteration number
-	open(LOG, "$dir/mert.log");
-	my $wi = 0;
-	while (my $line = <LOG>){
-		chomp $line;
-		if ($line =~ /ITERATION (\d+)/) {
-			$iteration = $1;
-		}
-	}
-
-	$iteration = $wi + 1;
-}
 
 if ($decoderOpt){ $decoder = $decoderOpt; }
 
@@ -167,9 +146,7 @@ if ($dryrun){
 	exit 0;
 } else {
 	if (-e $dir){
-		unless($restart){
-			die "ERROR: working dir $dir already exists\n\n";
-		}
+	  die "ERROR: working dir $dir already exists\n\n";
 	} else {
 		mkdir $dir;
 		mkdir "$dir/hgs";
@@ -182,20 +159,16 @@ if ($dryrun){
 		`cp $initialWeights $dir/weights.0`;
 		die "Can't find weights.0" unless (-e "$dir/weights.0");
 	}
-	unless($restart){
-		$logfile = "$dir/mert.log";
-		open(STDERR, ">$logfile");
-	}
 	write_config(*STDERR);
 }
 
 
 # Generate initial files and values
-unless ($restart){ `cp $iniFile $newIniFile`; }
+`cp $iniFile $newIniFile`;
 $iniFile = $newIniFile;
 
 my $newsrc = "$dir/dev.input";
-unless($restart){ enseg($srcFile, $newsrc); }
+enseg($srcFile, $newsrc);
 $srcFile = $newsrc;
 my $devSize = 0;
 open F, "<$srcFile" or die "Can't read $srcFile: $!";
@@ -484,11 +457,6 @@ sub write_config {
 	print $fh "PMEM (DECODING):  $pmem\n";
 	print $fh "CLEANUP:          $cleanup\n";
 	print $fh "INITIAL WEIGHTS:  $initialWeights\n";
-
-	if ($restart){
-		print $fh "PROJECTED BLEU:   $projected_score\n";
-		print $fh "BEST WEIGHTS:     $best_weights\n";
-	}
 }
 
 sub update_weights_file {
@@ -528,7 +496,6 @@ sub print_help {
     print << "Help";
 
 Usage: $executable [options] <ini file>
-       $executable --restart <work dir>
 
 	$executable [options] <ini file> 
 		Runs a complete MERT optimization and test set decoding, using 
@@ -536,11 +503,6 @@ Usage: $executable [options] <ini file>
 		options have default values that are inferred automatically 
 		based on certain conventions.  For details, refer to descriptions
 		of the options --decoder, --weights, and --workdir. 
-
-	$executable --restart <work dir>
-		Continues an optimization run that was stopped for some reason,
-		using configuration information found in the working directory
-		left behind by the stopped run.
 
 Options:
 
