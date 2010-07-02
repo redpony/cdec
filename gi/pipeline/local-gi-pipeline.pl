@@ -10,7 +10,7 @@ my $BASE_PHRASE_MAX_SIZE = 10;
 my $COMPLETE_CACHE = 1;
 my $ITEMS_IN_MEMORY = 10000000;  # cache size in extractors
 my $NUM_TOPICS = 50;
-my $NUM_SAMPLES = 100;
+my $NUM_SAMPLES = 1000;
 my $CONTEXT_SIZE = 1;
 my $BIDIR = 1;
 
