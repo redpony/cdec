@@ -33,6 +33,7 @@ public:
   double prob(Dish dish, double p0) const;
   double prob(Dish dish, double dcd, double dca, 
                    double dtd, double dta, double p0) const;
+  double unnormalised_prob(Dish dish, double p0) const;
 
   int num_customers() const { return _total_customers; }
   int num_types() const { return std::tr1::unordered_map<Dish,int>::size(); }
@@ -141,6 +142,16 @@ PYP<Dish,Hash>::prob(Dish dish, double p0) const
     return (c - _a * t + r * p0) / (num_customers() + _b);
   else
     return r * p0 / (num_customers() + _b);
+}
+
+template <typename Dish, typename Hash>
+double 
+PYP<Dish,Hash>::unnormalised_prob(Dish dish, double p0) const
+{
+  int c = count(dish), t = num_tables(dish);
+  double r = num_tables() * _a + _b;
+  if (c > 0) return (c - _a * t + r * p0);
+  else       return r * p0;
 }
 
 template <typename Dish, typename Hash>
