@@ -21,7 +21,8 @@ public:
 
   void sample(const Corpus& corpus, int samples);
   int sample(const DocumentId& doc, const Term& term);
-  int max(const DocumentId& doc, const Term& term);
+  int max(const DocumentId& doc, const Term& term) const;
+  int max(const DocumentId& doc) const;
   int max_topic() const;
 
   void set_backoff(const std::string& filename) {

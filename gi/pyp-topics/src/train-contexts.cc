@@ -99,7 +99,7 @@ int main(int argc, char **argv)
    map<int,int> all_terms;
     for (Corpus::const_iterator corpusIt=contexts_corpus.begin(); 
          corpusIt != contexts_corpus.end(); ++corpusIt, ++document_id) {
-     vector<int> unique_terms;
+      vector<int> unique_terms;
       for (Document::const_iterator docIt=corpusIt->begin();
            docIt != corpusIt->end(); ++docIt) {
         if (unique_terms.empty() || *docIt != unique_terms.back())
@@ -111,6 +111,7 @@ int main(int argc, char **argv)
           //insert_result.first++;
       }
       documents_out << contexts_corpus.key(document_id) << '\t';
+      documents_out << model.max(document_id) << " ||| ";
       for (std::vector<int>::const_iterator termIt=unique_terms.begin();
            termIt != unique_terms.end(); ++termIt) {
         if (termIt != unique_terms.begin())

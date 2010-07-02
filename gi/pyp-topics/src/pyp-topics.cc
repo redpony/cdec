@@ -180,6 +180,7 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
           << pypIt->num_types() << "," << m_topic_pyp.prob(k, m_topic_p0) << "> ";
         if (k % 5 == 0) std::cerr << std::endl << '\t';
       }
+      std::cerr.precision(4);
       std::cerr << std::endl;
     }
   }
@@ -283,7 +284,32 @@ int PYPTopics::max_topic() const {
   return current_topic;
 }
 
-int PYPTopics::max(const DocumentId& doc, const Term& term) {
+int PYPTopics::max(const DocumentId& doc) const {
+  //std::cerr << "PYPTopics::max(" << doc << "," << term << ")" << std::endl;
+  // collect probs
+  F current_max=0.0;
+  int current_topic=-1;
+  for (int k=0; k<m_num_topics; ++k) {
+    //F p_w_k = prob(term, k);
+
+    F topic_prob = m_topic_p0;
+    if (m_use_topic_pyp) 
+      topic_prob = m_topic_pyp.prob(k, m_topic_p0);
+
+    F prob = 0;
+    if (doc < 0) prob = topic_prob;
+    else         prob = m_document_pyps[doc].prob(k, topic_prob);
+
+    if (prob > current_max) {
+      current_max = prob;
+      current_topic = k;
+    }
+  }
+  assert(current_topic >= 0);
+  return current_topic;
+}
+
+int PYPTopics::max(const DocumentId& doc, const Term& term) const {
   //std::cerr << "PYPTopics::max(" << doc << "," << term << ")" << std::endl;
   // collect probs
   F current_max=0.0;
