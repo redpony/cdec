@@ -104,6 +104,10 @@ int main(int argc, char **argv)
            docIt != corpusIt->end(); ++docIt) {
         if (unique_terms.empty() || *docIt != unique_terms.back())
           unique_terms.push_back(*docIt);
+        // increment this terms frequency
+        pair<map<int,int>::iterator,bool> insert_result = all_terms.insert(make_pair(*docIt,1));
+        if (!insert_result.second) 
+          insert_result.first++;
       }
       documents_out << contexts_corpus.key(document_id) << '\t';
       for (std::vector<int>::const_iterator termIt=unique_terms.begin();
@@ -114,11 +118,6 @@ int main(int argc, char **argv)
        copy(strings.begin(), strings.end(),ostream_iterator<std::string>(documents_out, " "));
         documents_out << "||| C=" << model.max(document_id, *termIt);
 
-        // increment this terms frequency
-        pair<map<int,int>::iterator,bool> insert_result = all_terms.insert(make_pair(*termIt,1));
-        if (!insert_result.second) 
-          //insert_result.first++;
-          all_terms[*termIt] += 1;
       }
       documents_out <<endl;
     }
