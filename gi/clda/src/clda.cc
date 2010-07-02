@@ -6,8 +6,7 @@
 #include "crp.h"
 #include "sampler.h"
 #include "tdict.h"
-const size_t MAX_DOC_LEN_CHARS = 1000000;
-#include <boost/math/distributions/beta.hpp>
+const size_t MAX_DOC_LEN_CHARS = 10000000;
 
 using namespace std;
 
@@ -25,8 +24,6 @@ void ShowTopWordsForTopic(const map<WordID, int>& counts) {
 }
 
 int main(int argc, char** argv) {
-  boost::math::beta_distribution<double> bd(2.0,5.0);
-  cerr << pdf(bd, 0.2152132) << endl;
   if (argc != 3) {
     cerr << "Usage: " << argv[0] << " num-classes num-samples\n";
     return 1;
