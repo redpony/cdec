@@ -14,6 +14,9 @@ my $NUM_SAMPLES = 100;
 my $CONTEXT_SIZE = 1;
 my $BIDIR = 1;
 
+my $HIERARCHICAL_TOPICS = 0;
+my $FILTER_SINGLETONS = 0;
+
 my $EXTOOLS = "$SCRIPT_DIR/../../extools";
 die "Can't find extools: $EXTOOLS" unless -e $EXTOOLS && -d $EXTOOLS;
 my $PYPTOOLS = "$SCRIPT_DIR/../pyp-topics/src";
@@ -39,6 +42,8 @@ usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'topics=i' => \$NUM_TOPICS,
                            'trg_context=i' => \$CONTEXT_SIZE,
                            'samples=i' => \$NUM_SAMPLES,
+                           'hierarchical-topics' => \$HIERARCHICAL_TOPICS,
+                           'filter-singletons' => \$FILTER_SINGLETONS,
                           );
 
 usage() unless scalar @ARGV == 1;
@@ -130,8 +135,11 @@ sub topic_train {
   if (-e $OUT_CLUSTERS) {
     print STDERR "$OUT_CLUSTERS exists, reusing...\n";
   } else {
-    safesystem("$TOPIC_TRAIN --data $IN_CONTEXTS --backoff-type simple -t $NUM_TOPICS -s $NUM_SAMPLES -o $OUT_CLUSTERS -w /dev/null") or die "Topic training failed.\n";
-#   safesystem("$TOPIC_TRAIN -d $IN_DOCS -t $NUM_TOPICS -s $NUM_SAMPLES -o $OUT_CLUSTERS -w /dev/null") or die "Topic training failed.\n";
+    my $FILTER_SINGLETONS_ARG = "";
+    $FILTER_SINGLETONS_ARG = "--filter-singleton-contexts" if $FILTER_SINGLETONS;
+    my $HIERARCHICAL_TOPICS_ARG = "";
+    $HIERARCHICAL_TOPICS_ARG = "--hierarchical-topics" if $HIERARCHICAL_TOPICS;
+    safesystem("$TOPIC_TRAIN --data $IN_CONTEXTS --backoff-type simple -t $NUM_TOPICS -s $NUM_SAMPLES -o $OUT_CLUSTERS $HIERARCHICAL_TOPICS_ARG $FILTER_SINGLETONS_ARG -w /dev/null") or die "Topic training failed.\n";
   }
 }
 
