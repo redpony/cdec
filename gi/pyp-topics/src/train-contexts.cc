@@ -124,8 +124,8 @@ int main(int argc, char **argv)
     default_topics << model.max_topic() << std::endl;
     for (std::set<int>::const_iterator termIt=all_terms.begin(); termIt != all_terms.end(); ++termIt) {
       std::vector<std::string> strings = contexts_corpus.context2string(*termIt);
+      default_topics << model.max(-1, *termIt) << " ||| " << std::endl;
       std::copy(strings.begin(), strings.end(), std::ostream_iterator<std::string>(default_topics, " "));
-      default_topics << "||| " << model.max(-1, *termIt) << std::endl;
     }
   }
 
