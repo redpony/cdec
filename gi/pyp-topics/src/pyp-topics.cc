@@ -3,40 +3,40 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <sys/time.h>
-#include <mach/mach_time.h>  
+//#include <mach/mach_time.h>  
 
 
 struct Timer {
   Timer() { Reset(); }
   void Reset() 
   { 
-    //clock_gettime(CLOCK_MONOTONIC, &start_t); 
-    start_t = mach_absolute_time();  
+    clock_gettime(CLOCK_MONOTONIC, &start_t); 
+    //start_t = mach_absolute_time();  
   }
   double Elapsed() const {
-    //timespec end_t;
-    timespec tp;
-    uint64_t end_t = mach_absolute_time();  
-    mach_absolute_difference(end_t, start_t, &tp);
-    //clock_gettime(CLOCK_MONOTONIC, &end_t); 
-    //const double elapsed = (end_t.tv_sec - start_t.tv_sec) 
-    //            + (end_t.tv_nsec - start_t.tv_nsec) / 1000000000.0;
-    const double elapsed = tp.tv_sec + tp.tv_nsec / 1000000000.0;
+    timespec end_t;
+    //timespec tp;
+    //uint64_t end_t = mach_absolute_time();  
+    //mach_absolute_difference(end_t, start_t, &tp);
+    clock_gettime(CLOCK_MONOTONIC, &end_t); 
+    const double elapsed = (end_t.tv_sec - start_t.tv_sec) 
+                + (end_t.tv_nsec - start_t.tv_nsec) / 1000000000.0;
+    //const double elapsed = tp.tv_sec + tp.tv_nsec / 1000000000.0;
     return elapsed;
   }
  private:
-  void mach_absolute_difference(uint64_t end, uint64_t start, struct timespec *tp) const {  
-    uint64_t difference = end - start;  
-    static mach_timebase_info_data_t info = {0,0};  
-
-    if (info.denom == 0)  
-      mach_timebase_info(&info);  
-    uint64_t elapsednano = difference * (info.numer / info.denom);  
-    tp->tv_sec = elapsednano * 1e-9;  
-    tp->tv_nsec = elapsednano - (tp->tv_sec * 1e9);  
-  }  
-  //timespec start_t;
-  uint64_t start_t;
+//  void mach_absolute_difference(uint64_t end, uint64_t start, struct timespec *tp) const {  
+//    uint64_t difference = end - start;  
+//    static mach_timebase_info_data_t info = {0,0};  
+//
+//    if (info.denom == 0)  
+//      mach_timebase_info(&info);  
+//    uint64_t elapsednano = difference * (info.numer / info.denom);  
+//    tp->tv_sec = elapsednano * 1e-9;  
+//    tp->tv_nsec = elapsednano - (tp->tv_sec * 1e9);  
+//  }  
+  timespec start_t;
+  //uint64_t start_t;
 };
 
 void PYPTopics::sample(const Corpus& corpus, int samples) {
