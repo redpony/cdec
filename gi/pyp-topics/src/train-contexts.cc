@@ -111,7 +111,7 @@ int main(int argc, char **argv)
           //insert_result.first++;
       }
       documents_out << contexts_corpus.key(document_id) << '\t';
-      documents_out << model.max(document_id) << " ||| ";
+      documents_out << model.max(document_id) << " " << corpusIt->size() << " ||| ";
       for (std::vector<int>::const_iterator termIt=unique_terms.begin();
            termIt != unique_terms.end(); ++termIt) {
         if (termIt != unique_terms.begin())
