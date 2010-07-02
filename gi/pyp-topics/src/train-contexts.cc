@@ -96,7 +96,7 @@ int main(int argc, char **argv)
     ogzstream documents_out(vm["document-topics-out"].as<string>().c_str());
 
     int document_id=0;
-   map<int,int> all_terms;
+    map<int,int> all_terms;
     for (Corpus::const_iterator corpusIt=contexts_corpus.begin(); 
          corpusIt != contexts_corpus.end(); ++corpusIt, ++document_id) {
       vector<int> unique_terms;
@@ -125,13 +125,15 @@ int main(int argc, char **argv)
     }
     documents_out.close();
 
-   ofstream default_topics(vm["default-topics-out"].as<string>().c_str());
-    default_topics << model.max_topic() <<endl;
-    for (std::map<int,int>::const_iterator termIt=all_terms.begin(); termIt != all_terms.end(); ++termIt) {
-     vector<std::string> strings = contexts_corpus.context2string(termIt->first);
-      default_topics << model.max(-1, termIt->first) << " ||| " << termIt->second << " ||| ";
-     copy(strings.begin(), strings.end(),ostream_iterator<std::string>(default_topics, " "));
-      default_topics <<endl;
+    if (vm.count("default-topics-out")) {
+      ofstream default_topics(vm["default-topics-out"].as<string>().c_str());
+      default_topics << model.max_topic() <<endl;
+      for (std::map<int,int>::const_iterator termIt=all_terms.begin(); termIt != all_terms.end(); ++termIt) {
+       vector<std::string> strings = contexts_corpus.context2string(termIt->first);
+        default_topics << model.max(-1, termIt->first) << " ||| " << termIt->second << " ||| ";
+       copy(strings.begin(), strings.end(),ostream_iterator<std::string>(default_topics, " "));
+        default_topics <<endl;
+      }
     }
   }
 
