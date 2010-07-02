@@ -187,17 +187,26 @@ public:
         return result /= x;
     }
 
-    std::ostream &operator<<(std::ostream &out) const {
+    std::ostream &operator<<(std::ostream& out) const {
+      Write(true, &out);
+      return out;
+    }
+
+    void Write(const bool with_semi, std::ostream* os) const {
         bool first = true;
         for (typename MapType::const_iterator 
                 it = values_.begin(); it != values_.end(); ++it) {
           // by definition feature id 0 is a dummy value
           if (it->first == 0) continue;
-          out << (first ? "" : ";")
-	      << FD::Convert(it->first) << '=' << it->second;
+          if (with_semi) {
+            (*os) << (first ? "" : ";")
+	         << FD::Convert(it->first) << '=' << it->second;
+          } else {
+            (*os) << (first ? "" : " ")
+	         << FD::Convert(it->first) << '=' << it->second;
+          }
           first = false;
         }
-        return out;
     }
 
     bool operator<(const SparseVector<T> &other) const {

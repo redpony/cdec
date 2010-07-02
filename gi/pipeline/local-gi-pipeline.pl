@@ -28,11 +28,9 @@ my $PYP_TOPICS_TRAIN="$PYPTOOLS/pyp-contexts-train";
 
 my $SORT_KEYS = "$SCRIPT_DIR/scripts/sort-by-key.sh";
 my $EXTRACTOR = "$EXTOOLS/extractor";
-my $FILTER = "$EXTOOLS/filter_grammar";
-my $SCORER = "$EXTOOLS/score_grammar";
 my $TOPIC_TRAIN = "$PYPTOOLS/pyp-contexts-train";
 
-assert_exec($SORT_KEYS, $REDUCER, $EXTRACTOR, $FILTER, $SCORER, $PYP_TOPICS_TRAIN, $S2L, $C2D, $TOPIC_TRAIN);
+assert_exec($SORT_KEYS, $REDUCER, $EXTRACTOR, $PYP_TOPICS_TRAIN, $S2L, $C2D, $TOPIC_TRAIN);
 
 
 my $OUTPUT = './giwork';
@@ -67,7 +65,7 @@ if ($BIDIR) {
   $res = grammar_extract();
 }
 print STDERR "\n!!!COMPLETE!!!\n";
-print STDERR "GRAMMAR: $res\n\nYou should probably run:\n\n   $SCRIPT_DIR/filter-for-test-set.pl $CORPUS $res TESTSET.TXT > filtered-grammar.scfg\n\n";
+print STDERR "GRAMMAR: $res\n\nYou should probably run:\n\n   zcat $res | $SCRIPT_DIR/../../extools/filter_score_grammar -c $CORPUS -t TESTSET.TXT > filtered-grammar.scfg\n\n";
 exit 0;
 
 sub context_dir {
