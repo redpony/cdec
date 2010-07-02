@@ -215,7 +215,9 @@ int PYPTopics::sample(const DocumentId& doc, const Term& term) {
 
     F topic_prob = m_topic_p0;
     if (m_use_topic_pyp) topic_prob = m_topic_pyp.prob(k, m_topic_p0);
-    F p_k_d = m_document_pyps[doc].prob(k, topic_prob);
+
+    //F p_k_d = m_document_pyps[doc].prob(k, topic_prob);
+    F p_k_d = m_document_pyps[doc].unnormalised_prob(k, topic_prob);
 
     sum += (p_w_k*p_k_d);
     sums.push_back(sum);
