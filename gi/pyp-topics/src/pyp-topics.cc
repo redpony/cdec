@@ -3,24 +3,40 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <sys/time.h>
+#include <mach/mach_time.h>  
+
 
 struct Timer {
   Timer() { Reset(); }
   void Reset() 
   { 
-   clock_gettime(CLOCK_MONOTONIC, &start_t); 
+    //clock_gettime(CLOCK_MONOTONIC, &start_t); 
+    start_t = mach_absolute_time();  
   }
   double Elapsed() const {
-    timespec end_t;
-  
-    clock_gettime(CLOCK_MONOTONIC, &end_t); 
-  
-    const double elapsed = (end_t.tv_sec - start_t.tv_sec) 
-                + (end_t.tv_nsec - start_t.tv_nsec) / 1000000000.0;
+    //timespec end_t;
+    timespec tp;
+    uint64_t end_t = mach_absolute_time();  
+    mach_absolute_difference(end_t, start_t, &tp);
+    //clock_gettime(CLOCK_MONOTONIC, &end_t); 
+    //const double elapsed = (end_t.tv_sec - start_t.tv_sec) 
+    //            + (end_t.tv_nsec - start_t.tv_nsec) / 1000000000.0;
+    const double elapsed = tp.tv_sec + tp.tv_nsec / 1000000000.0;
     return elapsed;
   }
  private:
-  timespec start_t;
+  void mach_absolute_difference(uint64_t end, uint64_t start, struct timespec *tp) const {  
+    uint64_t difference = end - start;  
+    static mach_timebase_info_data_t info = {0,0};  
+
+    if (info.denom == 0)  
+      mach_timebase_info(&info);  
+    uint64_t elapsednano = difference * (info.numer / info.denom);  
+    tp->tv_sec = elapsednano * 1e-9;  
+    tp->tv_nsec = elapsednano - (tp->tv_sec * 1e9);  
+  }  
+  //timespec start_t;
+  uint64_t start_t;
 };
 
 void PYPTopics::sample(const Corpus& corpus, int samples) {
@@ -265,6 +281,23 @@ PYPTopics::F PYPTopics::prob(const Term& term, int topic, int level) const {
   return p_w_k;
 }
 
+int PYPTopics::max_topic() const {
+  if (!m_use_topic_pyp)
+    return -1;
+
+  F current_max=0.0;
+  int current_topic=-1;
+  for (int k=0; k<m_num_topics; ++k) {
+    F prob = m_topic_pyp.prob(k, m_topic_p0);
+    if (prob > current_max) {
+      current_max = prob;
+      current_topic = k;
+    }
+  }
+  assert(current_topic >= 0);
+  return current_topic;
+}
+
 int PYPTopics::max(const DocumentId& doc, const Term& term) {
   //std::cerr << "PYPTopics::max(" << doc << "," << term << ")" << std::endl;
   // collect probs
@@ -274,8 +307,12 @@ int PYPTopics::max(const DocumentId& doc, const Term& term) {
     F p_w_k = prob(term, k);
 
     F topic_prob = m_topic_p0;
-    if (m_use_topic_pyp) topic_prob = m_topic_pyp.prob(k, m_topic_p0);
-    F p_k_d = m_document_pyps[doc].prob(k, topic_prob);
+    if (m_use_topic_pyp) 
+      topic_prob = m_topic_pyp.prob(k, m_topic_p0);
+
+    F p_k_d = 0;
+    if (doc < 0) p_k_d = topic_prob;
+    else         p_k_d = m_document_pyps[doc].prob(k, topic_prob);
 
     F prob = (p_w_k*p_k_d);
     if (prob > current_max) {
