@@ -167,6 +167,7 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
         log_p += m_topic_pyp.log_restaurant_prob();
       }
 
+      std::cerr.precision(10);
       std::cerr << " ||| LLH=" << log_p << " ||| resampling time=" << timer.Elapsed() << " sec" << std::endl;
       timer.Reset();
 
