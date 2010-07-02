@@ -40,6 +40,7 @@ int main(int argc, char **argv)
       ("data,d", value<string>(), "file containing the documents and context terms")
       ("topics,t", value<int>()->default_value(50), "number of topics")
       ("document-topics-out,o", value<string>(), "file to write the document topics to")
+      ("default-topics-out", value<string>(), "file to write default term topic assignments.")
       ("topic-words-out,w", value<string>(), "file to write the topic word distribution to")
       ("samples,s", value<int>()->default_value(10), "number of sampling passes through the data")
       ("backoff-type", value<string>(), "backoff type: none|simple")
@@ -95,6 +96,7 @@ int main(int argc, char **argv)
     ogzstream documents_out(vm["document-topics-out"].as<string>().c_str());
 
     int document_id=0;
+    std::set<int> all_terms;
     for (Corpus::const_iterator corpusIt=contexts_corpus.begin(); 
          corpusIt != contexts_corpus.end(); ++corpusIt, ++document_id) {
       std::vector<int> unique_terms;
@@ -111,10 +113,20 @@ int main(int argc, char **argv)
         std::vector<std::string> strings = contexts_corpus.context2string(*termIt);
         std::copy(strings.begin(), strings.end(), std::ostream_iterator<std::string>(documents_out, " "));
         documents_out << "||| C=" << model.max(document_id, *termIt);
+
+        all_terms.insert(*termIt);
       }
       documents_out << std::endl;
     }
     documents_out.close();
+
+    std::ofstream default_topics(vm["default-topics-out"].as<string>().c_str());
+    default_topics << model.max_topic() << std::endl;
+    for (std::set<int>::const_iterator termIt=all_terms.begin(); termIt != all_terms.end(); ++termIt) {
+      std::vector<std::string> strings = contexts_corpus.context2string(*termIt);
+      std::copy(strings.begin(), strings.end(), std::ostream_iterator<std::string>(documents_out, " "));
+      default_topics << model.max(-1, *termIt) << std::endl;
+    }
   }
 
   if (vm.count("topic-words-out")) {
