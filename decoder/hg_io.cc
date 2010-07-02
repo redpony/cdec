@@ -332,7 +332,10 @@ bool HypergraphIO::WriteToJSON(const Hypergraph& hg, bool remove_rules, ostream*
       o << (j == 0 ? "" : ",") << mapped_edge;
     }
     o << "]";
-    if (node.cat_ < 0) { o << ",\"cat\":\"" << TD::Convert(node.cat_ * -1) << '"'; }
+    if (node.cat_ < 0) {
+       o << ",\"cat\":";
+       JSONParser::WriteEscapedString(TD::Convert(node.cat_ * -1), &o);
+    }
     o << "}";
   }
   o << "}\n";
