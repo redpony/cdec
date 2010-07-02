@@ -58,8 +58,8 @@ int ReadPhraseUntilDividerOrEnd(const char* buf, const int sstart, const int end
     if((IsBracket(buf[start]) and IsBracket(buf[ptr-1])) or( w == kDIV))
       p->push_back(-1);
     else {
-	if (w == kDIV) return ptr;
-	p->push_back(w);
+        if (w == kDIV) return ptr;
+        p->push_back(w);
     }
   }
   return ptr;
@@ -140,7 +140,6 @@ int main(int argc, char* argv[]){
   ofstream filter_grammar_;
   bool DEBUG = false;
 
-
   AnnotatedParallelSentence sent;
   char* buf = new char[MAX_LINE_LENGTH];
   cerr << "Build suffix tree from test set in " << argv[1] << endl;
@@ -163,7 +162,7 @@ int main(int argc, char* argv[]){
 
     //add each successive suffix to the tree
     for(int i =0;i<sent.f_len;i++)
-	root.InsertPath(sent.f, i, sent.f_len - 1);
+        root.InsertPath(sent.f, i, sent.f_len - 1);
     if(DEBUG)cerr<<endl;
 
   }  
@@ -174,29 +173,24 @@ int main(int argc, char* argv[]){
   ID2RuleStatistics cur_counts;
   vector<WordID> cur_key;
   line = 0;
-  
-  while(cin)
-      {
-        ++line;
-	cin.getline(buf, MAX_LINE_LENGTH);
-	if (buf[0] == 0) continue;
-	ParseLine(buf, &cur_key, &cur_counts);
-        const Node<int>* curnode = &root;	
-	for(int i=0;i<cur_key.size() - 1; i++)
-	  {
-		if (DEBUG) cerr << line << " " << cur_key[i] << " ::: ";
-		if(cur_key[i] == -1)
-		  {
-			curnode = &root;
-		} else if (curnode) {
-			curnode = curnode->Extend(cur_key[i]);
-			if (!curnode) break;
-		  }
-	      }
-	    
-	if(curnode)
-          cout << buf << endl;
+
+  while(cin) {
+    ++line;
+    cin.getline(buf, MAX_LINE_LENGTH);
+    if (buf[0] == 0) continue;
+    ParseLine(buf, &cur_key, &cur_counts);
+    const Node<int>* curnode = &root;        
+    for(int i=0;i<cur_key.size() - 1; i++) {
+      if (DEBUG) cerr << line << " " << cur_key[i] << " ::: ";
+      if (cur_key[i] == -1) { // non-terminal
+        curnode = &root;
+      } else if (curnode) {
+        curnode = curnode->Extend(cur_key[i]);
+        if (!curnode) break;
       }
+    }
+    if(curnode) cout << buf << endl;
+  }
 
   return 0;
 }
