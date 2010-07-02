@@ -24,13 +24,31 @@
 
 using namespace std;
 using namespace std::tr1;
-
+namespace po = boost::program_options;
 
 static const size_t MAX_LINE_LENGTH = 64000000;
 
 typedef unordered_map<vector<WordID>, RuleStatistics, boost::hash<vector<WordID> > > ID2RuleStatistics;
 
+void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
+  po::options_description opts("Configuration options");
+  opts.add_options()
+        ("top_e_given_f,n", po::value<size_t>()->default_value(30), "Keep top N rules, according to p(e|f). 0 for all")
+        ("aligned_corpus,c", po::value<string>(), "Aligned corpus (single line format)")
+        ("help,h", "Print this help message and exit");
+  po::options_description clo("Command line options");
+  po::options_description dcmdline_options;
+  dcmdline_options.add(opts);
+  
+  po::store(parse_command_line(argc, argv, dcmdline_options), *conf);
+  po::notify(*conf);
 
+  if (conf->count("help") || conf->count("aligned_corpus")==0) {
+    cerr << "\nUsage: score_grammar -c ALIGNED_CORPUS.fr-en-al [-options] < grammar\n";
+    cerr << dcmdline_options << endl;
+    exit(1);
+  }
+}   
 namespace {
   inline bool IsWhitespace(char c) { return c == ' ' || c == '\t'; }
   inline bool IsBracket(char c){return c == '[' || c == ']';}
@@ -130,16 +148,16 @@ void LexTranslationTable::createTTable(const char* buf){
   for(int i =0;i<sent.aligned.width();i++)
     {
       for (int j=0;j<sent.aligned.height();j++)
-	{
-	  if (DEBUG) cerr << sent.aligned(i,j) << " ";
-	  if( sent.aligned(i,j))
-	    {
-	      if (DEBUG) cerr << TD::Convert(sent.f[i])  << " aligned to " << TD::Convert(sent.e[j]);
-	      ++word_translation[pair<WordID,WordID> (sent.f[i], sent.e[j])];
-	      ++total_foreign[sent.f[i]];
-	      ++total_english[sent.e[j]];
-	    }
-	}
+        {
+          if (DEBUG) cerr << sent.aligned(i,j) << " ";
+          if( sent.aligned(i,j))
+            {
+              if (DEBUG) cerr << TD::Convert(sent.f[i])  << " aligned to " << TD::Convert(sent.e[j]);
+              ++word_translation[pair<WordID,WordID> (sent.f[i], sent.e[j])];
+              ++total_foreign[sent.f[i]];
+              ++total_english[sent.e[j]];
+            }
+        }
       if (DEBUG)  cerr << endl;
     }
   if (DEBUG) cerr << endl;
@@ -173,12 +191,11 @@ inline float safenlog(float v) {
 }
 
 int main(int argc, char** argv){
+  po::variables_map conf;
+  InitCommandLine(argc, argv, &conf);
   bool DEBUG= false;
-  if (argc != 2) {
-    cerr << "Usage: " << argv[0] << " corpus.al < filtered.grammar\n";
-    return 1;
-  }
-  ifstream alignment (argv[1]);
+  const int max_options = conf["top_e_given_f"].as<size_t>();;
+  ifstream alignment (conf["aligned_corpus"].as<string>().c_str());
   istream& unscored_grammar = cin;
   ostream& scored_grammar = cout;
 
@@ -193,7 +210,7 @@ int main(int argc, char** argv){
       alignment.getline(buf, MAX_LINE_LENGTH);
       if (buf[0] == 0) continue;
       
-      table.createTTable(buf);      	
+      table.createTTable(buf);              
     }
   
   bool PRINT_TABLE=false;
@@ -203,7 +220,7 @@ int main(int argc, char** argv){
       trans_table.open("lex_trans_table.out");
       for(map < pair<WordID,WordID>,int >::iterator it = table.word_translation.begin(); it != table.word_translation.end(); ++it)
       {
-	trans_table <<  TD::Convert(it->first.first) <<  "|||" << TD::Convert(it->first.second) << "==" << it->second << "//" << table.total_foreign[it->first.first] << "//" << table.total_english[it->first.second] << endl;
+        trans_table <<  TD::Convert(it->first.first) <<  "|||" << TD::Convert(it->first.second) << "==" << it->second << "//" << table.total_foreign[it->first.first] << "//" << table.total_english[it->first.second] << endl;
       } 
 
       trans_table.close();
@@ -221,126 +238,134 @@ int main(int argc, char** argv){
 
   static const int kCF = FD::Convert("CF");
   static const int kCE = FD::Convert("CE");
-  static const int kCFE = FD::Convert("CFE");	
+  static const int kCFE = FD::Convert("CFE");        
 
+  multimap<float, string> options; 
   while(!unscored_grammar.eof())
     {
       ++line;
+      options.clear();
       unscored_grammar.getline(buf, MAX_LINE_LENGTH);
       if (buf[0] == 0) continue;
       ParseLine(buf, &cur_key, &cur_counts);
-      
       //loop over all the Target side phrases that this source aligns to
       for (ID2RuleStatistics::const_iterator it = cur_counts.begin(); it != cur_counts.end(); ++it)
-	{
-	  
-	 /*Compute phrase translation prob.
-	   Print out scores in this format:
-	   Phrase trnaslation prob P(F|E)
-	   Phrase translation prob P(E|F)
-	   Lexical weighting prob lex(F|E)
-	   Lexical weighting prob lex(E|F)
-	 */      
-	  
-	  float pEF_ = it->second.counts.value(kCFE) / it->second.counts.value(kCF);
-	  float pFE_ = it->second.counts.value(kCFE) / it->second.counts.value(kCE);
+        {
+          
+         /*Compute phrase translation prob.
+           Print out scores in this format:
+           Phrase trnaslation prob P(F|E)
+           Phrase translation prob P(E|F)
+           Lexical weighting prob lex(F|E)
+           Lexical weighting prob lex(E|F)
+         */      
+          
+          float pEF_ = it->second.counts.value(kCFE) / it->second.counts.value(kCF);
+          float pFE_ = it->second.counts.value(kCFE) / it->second.counts.value(kCE);
 
-	  map <WordID, pair<int, float> > foreign_aligned;
-	  map <WordID, pair<int, float> > english_aligned;
+          map <WordID, pair<int, float> > foreign_aligned;
+          map <WordID, pair<int, float> > english_aligned;
 
-	  //Loop over all the alignment points to compute lexical translation probability
-	  al = it->second.aligns;	  
-	  for(ita = al.begin(); ita != al.end(); ++ita)
-	    {
-	     
-	      if (DEBUG)
-		{
-		  cerr << "\nA:" << ita->first << "," << ita->second << "::";
-		  cerr <<  TD::Convert(cur_key[ita->first + 2]) << "-" << TD::Convert(it->first[ita->second]);
-		}
+          //Loop over all the alignment points to compute lexical translation probability
+          al = it->second.aligns;          
+          for(ita = al.begin(); ita != al.end(); ++ita)
+            {
+             
+              if (DEBUG)
+                {
+                  cerr << "\nA:" << ita->first << "," << ita->second << "::";
+                  cerr <<  TD::Convert(cur_key[ita->first + 2]) << "-" << TD::Convert(it->first[ita->second]);
+                }
 
 
-	      //Lookup this alignment probability in the table
-	      int temp = table.word_translation[pair<WordID,WordID> (cur_key[ita->first+2],it->first[ita->second])];
-	      float f2e=0, e2f=0;
-	      if ( table.total_foreign[cur_key[ita->first+2]] != 0)
-		f2e = (float) temp / table.total_foreign[cur_key[ita->first+2]];
-	      if ( table.total_english[it->first[ita->second]] !=0 )
-		e2f = (float) temp / table.total_english[it->first[ita->second]];
-	      if (DEBUG) printf (" %d %E %E\n", temp, f2e, e2f);
-	      
-	      
-	      //local counts to keep track of which things haven't been aligned, to later compute their null alignment	      
-	      if (foreign_aligned.count(cur_key[ita->first+2]))
-		{
-		  foreign_aligned[ cur_key[ita->first+2] ].first++;
-		  foreign_aligned[ cur_key[ita->first+2] ].second += e2f;
-		}
-	      else
-		foreign_aligned [ cur_key[ita->first+2] ] = pair<int,float> (1,e2f);
-		
-	      
+              //Lookup this alignment probability in the table
+              int temp = table.word_translation[pair<WordID,WordID> (cur_key[ita->first+2],it->first[ita->second])];
+              float f2e=0, e2f=0;
+              if ( table.total_foreign[cur_key[ita->first+2]] != 0)
+                f2e = (float) temp / table.total_foreign[cur_key[ita->first+2]];
+              if ( table.total_english[it->first[ita->second]] !=0 )
+                e2f = (float) temp / table.total_english[it->first[ita->second]];
+              if (DEBUG) printf (" %d %E %E\n", temp, f2e, e2f);
+              
+              
+              //local counts to keep track of which things haven't been aligned, to later compute their null alignment              
+              if (foreign_aligned.count(cur_key[ita->first+2]))
+                {
+                  foreign_aligned[ cur_key[ita->first+2] ].first++;
+                  foreign_aligned[ cur_key[ita->first+2] ].second += e2f;
+                }
+              else
+                foreign_aligned [ cur_key[ita->first+2] ] = pair<int,float> (1,e2f);
+                
+              
 
-	      if (english_aligned.count( it->first[ ita->second] ))
-		{
-		  english_aligned[ it->first[ ita->second ]].first++;
-		  english_aligned[  it->first[ ita->second] ].second += f2e;
-		}
-	      else
-		english_aligned [ it->first[ ita->second] ] = pair<int,float> (1,f2e);
-		
-	      
-	    
-	   	      
-	    }
+              if (english_aligned.count( it->first[ ita->second] ))
+                {
+                  english_aligned[ it->first[ ita->second ]].first++;
+                  english_aligned[  it->first[ ita->second] ].second += f2e;
+                }
+              else
+                english_aligned [ it->first[ ita->second] ] = pair<int,float> (1,f2e);
+                
+              
+            
+                         
+            }
 
-	  float final_lex_f2e=1, final_lex_e2f=1;
-	  static const WordID NULL_ = TD::Convert("NULL");
+          float final_lex_f2e=1, final_lex_e2f=1;
+          static const WordID NULL_ = TD::Convert("NULL");
 
-	  //compute lexical weight P(F|E) and include unaligned foreign words
-	   for(int i=0;i<cur_key.size(); i++)
-	     {
-	       
-	       if (!table.total_foreign.count(cur_key[i])) continue;      //if we dont have it in the translation table, we won't know its lexical weight
-	       
-	       if (foreign_aligned.count(cur_key[i])) 
-		 {
-		   pair<int, float> temp_lex_prob = foreign_aligned[cur_key[i]];
-		   final_lex_e2f *= temp_lex_prob.second / temp_lex_prob.first;
-		 }
-	       else //dealing with null alignment
-		 {
-		   int temp_count = table.word_translation[pair<WordID,WordID> (cur_key[i],NULL_)];
-		   float temp_e2f = (float) temp_count / table.total_english[NULL_];
-		   final_lex_e2f *= temp_e2f;
-		 }	       	       
+          //compute lexical weight P(F|E) and include unaligned foreign words
+           for(int i=0;i<cur_key.size(); i++)
+             {
+               
+               if (!table.total_foreign.count(cur_key[i])) continue;      //if we dont have it in the translation table, we won't know its lexical weight
+               
+               if (foreign_aligned.count(cur_key[i])) 
+                 {
+                   pair<int, float> temp_lex_prob = foreign_aligned[cur_key[i]];
+                   final_lex_e2f *= temp_lex_prob.second / temp_lex_prob.first;
+                 }
+               else //dealing with null alignment
+                 {
+                   int temp_count = table.word_translation[pair<WordID,WordID> (cur_key[i],NULL_)];
+                   float temp_e2f = (float) temp_count / table.total_english[NULL_];
+                   final_lex_e2f *= temp_e2f;
+                 }                              
 
-	     }
+             }
 
-	   //compute P(E|F) unaligned english words
-	   for(int j=0; j< it->first.size(); j++)
-	     {
-	       if (!table.total_english.count(it->first[j])) continue;
-	       
-	       if (english_aligned.count(it->first[j]))
-		 {
-		   pair<int, float> temp_lex_prob = english_aligned[it->first[j]];
-		   final_lex_f2e *= temp_lex_prob.second / temp_lex_prob.first;
-		 }
-	       else //dealing with null
-		 {
-		   int temp_count = table.word_translation[pair<WordID,WordID> (NULL_,it->first[j])];
-		   float temp_f2e = (float) temp_count / table.total_foreign[NULL_];
-		   final_lex_f2e *= temp_f2e;
-		 }
-	     }
-	   
-	   
-           scored_grammar << TD::GetString(cur_key);
-	   scored_grammar << " " << TD::GetString(it->first) << " |||";
-	   scored_grammar << " FGivenE=" << safenlog(pFE_) << " EGivenF=" << safenlog(pEF_);
-	   scored_grammar << " LexE2F=" << safenlog(final_lex_e2f) << " LexF2E=" << safenlog(final_lex_f2e) << endl;
-	}  
+           //compute P(E|F) unaligned english words
+           for(int j=0; j< it->first.size(); j++)
+             {
+               if (!table.total_english.count(it->first[j])) continue;
+               
+               if (english_aligned.count(it->first[j]))
+                 {
+                   pair<int, float> temp_lex_prob = english_aligned[it->first[j]];
+                   final_lex_f2e *= temp_lex_prob.second / temp_lex_prob.first;
+                 }
+               else //dealing with null
+                 {
+                   int temp_count = table.word_translation[pair<WordID,WordID> (NULL_,it->first[j])];
+                   float temp_f2e = (float) temp_count / table.total_foreign[NULL_];
+                   final_lex_f2e *= temp_f2e;
+                 }
+             }
+           
+           ostringstream os;
+           os << TD::GetString(cur_key)
+              << ' ' << TD::GetString(it->first) << " |||"
+              << " FGivenE=" << safenlog(pFE_) << " EGivenF=" << safenlog(pEF_)
+              << " LexE2F=" << safenlog(final_lex_e2f) << " LexF2E=" << safenlog(final_lex_f2e) << endl;
+           options.insert(pair<float,string>(-pEF_, os.str()));
+        }
+        int ocount = 0;
+        for (multimap<float,string>::iterator it = options.begin(); it != options.end(); ++it) {
+          scored_grammar << it->second;
+          ++ocount;
+          if (ocount == max_options) break;
+        }
     }
 }
 

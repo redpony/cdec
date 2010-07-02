@@ -25,7 +25,7 @@ print STDERR " GRAMMAR: $corpus\n";
 print STDERR "TEST SET: $corpus\n";
 print STDERR "Extracting...\n";
 
-safesystem("$ZCAT $grammar | $FILTER $testset | $SCORE $corpus") or die "Failed";
+safesystem("$ZCAT $grammar | $FILTER $testset | $SCORE -c $corpus") or die "Failed";
 
 sub usage {
   print <<EOT;
