@@ -1,20 +1,27 @@
 #include "pyp-topics.hh"
 //#include "mt19937ar.h"
 
-#include <ctime>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <sys/time.h>
 
 struct Timer {
   Timer() { Reset(); }
-  void Reset() { start_t = clock(); }
+  void Reset() 
+  { 
+   clock_gettime(CLOCK_MONOTONIC, &start_t); 
+  }
   double Elapsed() const {
-    const clock_t end_t = clock();
-    const double elapsed = (end_t - start_t) / 1000000.0;
+    timespec end_t;
+  
+    clock_gettime(CLOCK_MONOTONIC, &end_t); 
+  
+    const double elapsed = (end_t.tv_sec - start_t.tv_sec) 
+                + (end_t.tv_nsec - start_t.tv_nsec) / 1000000000.0;
     return elapsed;
   }
  private:
-  std::clock_t start_t;
+  timespec start_t;
 };
-
 
 void PYPTopics::sample(const Corpus& corpus, int samples) {
   Timer timer;
