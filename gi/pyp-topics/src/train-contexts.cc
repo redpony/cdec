@@ -107,7 +107,8 @@ int main(int argc, char **argv)
         // increment this terms frequency
         pair<map<int,int>::iterator,bool> insert_result = all_terms.insert(make_pair(*docIt,1));
         if (!insert_result.second) 
-          insert_result.first++;
+          all_terms[*docIt] = all_terms[*docIt] + 1;
+          //insert_result.first++;
       }
       documents_out << contexts_corpus.key(document_id) << '\t';
       for (std::vector<int>::const_iterator termIt=unique_terms.begin();
