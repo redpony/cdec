@@ -186,6 +186,9 @@ public class Corpus {
 				tagData.get(i)[j]=tagIdx(s[j]);
 			}
 		}
+		sent=null;
+		tag=null;
+		System.gc();
 	}
 	
 	public int [] getInt(int idx){

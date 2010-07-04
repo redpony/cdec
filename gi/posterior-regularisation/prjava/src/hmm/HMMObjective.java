@@ -18,7 +18,7 @@ public class HMMObjective extends ProjectedObjective{
 	
 	private static final double GRAD_DIFF = 3;
 	public static double INIT_STEP_SIZE=10;
-	public static double VAL_DIFF=2000;
+	public static double VAL_DIFF=1000;
 	
 	private HMM hmm;
 	double[] newPoint  ;
@@ -33,7 +33,7 @@ public class HMMObjective extends ProjectedObjective{
 	private SimplexProjection projection;
 	
 	private int wordFreq[];
-	private static int MIN_FREQ=3;
+	private static int MIN_FREQ=10;
 	private int numWordsToProject=0;
 	
 	private int n_param;
@@ -88,6 +88,9 @@ public class HMMObjective extends ProjectedObjective{
 						if(projectionMap[word]==null){
 							projectionMap[word]=new TIntArrayList[n_states];
 						}
+			//			if(posteriorMap[sentNum][i]==null){
+			//				posteriorMap[sentNum][i]=new int[n_states];
+			//			}
 						
 						posteriorMap[sentNum][i][state]=n_param;
 						if(projectionMap[word][state]==null){
@@ -96,8 +99,8 @@ public class HMMObjective extends ProjectedObjective{
 						}
 						projectionMap[word][state].add(n_param);
 						n_param++;
-					}else{
-						
+					}
+					else{
 						posteriorMap[sentNum][i][state]=-1;
 					}
 				}
