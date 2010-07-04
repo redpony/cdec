@@ -8,8 +8,8 @@ import data.Corpus;
 public class POS {
 
 	//public String trainFilename="../posdata/en_train.conll";
-	//public static String trainFilename="../posdata/small_train.txt";
-	public static String trainFilename="../posdata/en_test.conll";
+	public static String trainFilename="../posdata/small_train.txt";
+//	public static String trainFilename="../posdata/en_test.conll";
 //	public static String trainFilename="../posdata/trial1.txt";
 	
 	public static String testFilename="../posdata/en_test.conll";
@@ -72,21 +72,6 @@ public class POS {
 		}
 
 		hmm.writeModel(modelFilename);
-		
-		Corpus test=new Corpus(testFilename,c.vocab);
-		
-		PrintStream ps= io.FileUtil.openOutFile(predFilename);
-		
-		int [][]data=test.getAllData();
-		for(int i=0;i<data.length;i++){
-			int []tag=hmm.viterbi(data[i]);
-			String sent[]=test.get(i);
-			for(int j=0;j<data[i].length;j++){
-				ps.println(sent[j]+"\t"+tag[j]);
-			}
-			ps.println();
-		}
-		ps.close();
 	}
 	
 	

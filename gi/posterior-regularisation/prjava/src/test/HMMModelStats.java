@@ -89,7 +89,7 @@ public class HMMModelStats {
 			}
 		}
 		
-		ps.println("max w t P(w_i|t)"+sum);
+		ps.println("max w t P(w_i|t): "+sum);
 		
 	}
 	
