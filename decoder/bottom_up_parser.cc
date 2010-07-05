@@ -1,3 +1,5 @@
+//TODO: when using many nonterminals, group passive edges for a span (treat all as a single X for the active items).
+
 #include "bottom_up_parser.h"
 
 #include <iostream>
@@ -17,8 +19,8 @@ struct ParserStats {
   }
   int active_items;
   int passive_items;
-  void NotifyActive(int i, int j) { ++active_items; }
-  void NotifyPassive(int i, int j) { ++passive_items; }
+  void NotifyActive(int , int ) { ++active_items; }
+  void NotifyPassive(int , int ) { ++passive_items; }
 };
 
 ParserStats stats;
@@ -148,7 +150,7 @@ class ActiveChart {
  private:
   const Hypergraph* hg_;
   Array2D<vector<ActiveItem> > act_chart_;
-  const PassiveChart& psv_chart_; 
+  const PassiveChart& psv_chart_;
 };
 
 PassiveChart::PassiveChart(const string& goal,

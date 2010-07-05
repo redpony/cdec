@@ -17,7 +17,7 @@ static const int MAX_SENTENCE_SIZE = 100;
 
 using namespace std;
 
-Model2BinaryFeatures::Model2BinaryFeatures(const string& param) :
+Model2BinaryFeatures::Model2BinaryFeatures(const string& ) :
     fids_(boost::extents[MAX_SENTENCE_SIZE][MAX_SENTENCE_SIZE][MAX_SENTENCE_SIZE]) {
   for (int i = 1; i < MAX_SENTENCE_SIZE; ++i) {
     for (int j = 0; j < i; ++j) {
@@ -36,10 +36,12 @@ Model2BinaryFeatures::Model2BinaryFeatures(const string& param) :
 
 void Model2BinaryFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                                  const Hypergraph::Edge& edge,
-                                                 const vector<const void*>& ant_states,
+                                                 const vector<const void*>& /*ant_states*/,
                                                  SparseVector<double>* features,
-                                                 SparseVector<double>* estimated_features,
-                                                 void* state) const {
+                                                 SparseVector<double>* // estimated_features
+                                                 ,
+                                                 void* // state
+  ) const {
   // if the source word is either null or the generated word
   // has no position in the reference
   if (edge.i_ == -1 || edge.prev_i_ == -1)
@@ -82,10 +84,13 @@ RelativeSentencePosition::RelativeSentencePosition(const string& param) :
 
 void RelativeSentencePosition::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                                      const Hypergraph::Edge& edge,
-                                                     const vector<const void*>& ant_states,
+                                                     const vector<const void*>& // ant_states
+                                                     ,
                                                      SparseVector<double>* features,
-                                                     SparseVector<double>* estimated_features,
-                                                     void* state) const {
+                                                     SparseVector<double>* // estimated_features
+                                                     ,
+                                                     void* // state
+  ) const {
   // if the source word is either null or the generated word
   // has no position in the reference
   if (edge.i_ == -1 || edge.prev_i_ == -1)
@@ -159,7 +164,7 @@ void MarkovJumpFClass::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const std::vector<const void*>& ant_states,
                                      SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
+                                     SparseVector<double>* /* estimated_features */,
                                      void* state) const {
   unsigned char& dpstate = *((unsigned char*)state);
   if (edge.Arity() == 0) {
@@ -215,7 +220,7 @@ void MarkovJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                        const Hypergraph::Edge& edge,
                                        const vector<const void*>& ant_states,
                                        SparseVector<double>* features,
-                                       SparseVector<double>* estimated_features,
+                                       SparseVector<double>* /* estimated_features */,
                                        void* state) const {
   unsigned char& dpstate = *((unsigned char*)state);
   const int flen = smeta.GetSourceLength();
@@ -305,7 +310,7 @@ void SourcePOSBigram::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
+                                            SparseVector<double>* /* estimated_features */,
                                      void* context) const {
   WordID& out_context = *static_cast<WordID*>(context);
   int& out_word_count = *(static_cast<int*>(context) + 1);
@@ -347,7 +352,7 @@ AlignerResults::AlignerResults(const std::string& param) :
   while(in) {
     string line;
     getline(in, line);
-    if (!in) break; 
+    if (!in) break;
     ++lc;
     is_aligned_.push_back(AlignerTools::ReadPharaohAlignmentGrid(line));
   }
@@ -356,10 +361,10 @@ AlignerResults::AlignerResults(const std::string& param) :
 
 void AlignerResults::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                            const Hypergraph::Edge& edge,
-                                           const vector<const void*>& ant_states,
+                                           const vector<const void*>& /* ant_states */,
                                            SparseVector<double>* features,
-                                           SparseVector<double>* estimated_features,
-                                           void* state) const {
+                                           SparseVector<double>* /* estimated_features */,
+                                           void* /* state */) const {
   if (edge.i_ == -1 || edge.prev_i_ == -1)
     return;
 
@@ -389,7 +394,7 @@ BlunsomSynchronousParseHack::BlunsomSynchronousParseHack(const string& param) :
   while(in) {
     string line;
     getline(in, line);
-    if (!in) break; 
+    if (!in) break;
     ++lc;
     refs_.push_back(vector<WordID>());
     TD::ConvertSentence(line, &refs_.back());
@@ -401,7 +406,7 @@ void BlunsomSynchronousParseHack::TraversalFeaturesImpl(const SentenceMetadata& 
                                            const Hypergraph::Edge& edge,
                                            const vector<const void*>& ant_states,
                                            SparseVector<double>* features,
-                                           SparseVector<double>* estimated_features,
+                                           SparseVector<double>* /* estimated_features */,
                                            void* state) const {
   if (cur_sent_ != smeta.GetSentenceID()) {
     // assert(smeta.HasReference());
