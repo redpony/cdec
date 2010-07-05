@@ -1,0 +1,8 @@
+# name path aligned corpus dev dev-refs test1 test1-refs ...
+btec btec/ split.zh-en.al lm/en.3gram.lm.gz devtest/devset1_2.zh devtest/devset1_2.lc.en* devtest/devset3.zh devtest/devset3.lc.en*
+fbis chinese-english.fbis corpus.zh-en.al
+zhen chinese-english corpus.zh-en.al
+aren arabic-english corpus.ar-en.al
+uren urdu-english corpus.ur-en.al
+nlfr dutch-french corpus.nl-fr.al
+
