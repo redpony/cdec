@@ -43,10 +43,16 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
     << (m_word_pyps.size()==2 ? ":" : "s:") << std::endl;
 
   for (int i=0; i<(int)m_word_pyps.size(); ++i)
-    m_word_pyps.at(i).resize(m_num_topics, PYP<int>(0.5, 1.0));
+  {
+    m_word_pyps.at(i).reserve(m_num_topics);
+    for (int j=0; j<m_num_topics; ++j)
+      m_word_pyps.at(i).push_back(new PYP<int>(0.5, 1.0));
+  }
   std::cerr << std::endl;
 
-  m_document_pyps.resize(corpus.num_documents(), PYP<int>(0.5, 1.0));
+  m_document_pyps.reserve(corpus.num_documents());
+  for (int j=0; j<corpus.num_documents(); ++j)
+    m_document_pyps.push_back(new PYP<int>(0.5, 1.0));
 
   m_topic_p0 = 1.0/m_num_topics;
   m_term_p0 = 1.0/corpus.num_types();

@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <iostream>
-
+#include <boost/ptr_container/ptr_vector.hpp>
 #include "pyp.hh"
 #include "corpus.hh"
 
@@ -54,7 +54,7 @@ private:
   F m_term_p0, m_topic_p0, m_backoff_p0;
 
   CorpusTopics m_corpus_topics;
-  typedef std::vector< PYP<int> > PYPs;
+  typedef boost::ptr_vector< PYP<int> > PYPs;
   PYPs m_document_pyps;
   std::vector<PYPs> m_word_pyps;
   PYP<int> m_topic_pyp;
