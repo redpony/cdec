@@ -6,17 +6,13 @@ my $CWD = getcwd;
 
 my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
 
-my $EXTOOLS = "$SCRIPT_DIR/../../extools";
-die "Can't find extools: $EXTOOLS" unless -e $EXTOOLS && -d $EXTOOLS;
-my $VEST = "$SCRIPT_DIR/../../vest";
-die "Can't find vest: $VEST" unless -e $VEST && -d $VEST;
-my $DISTVEST = "$VEST/dist-vest.pl";
-my $FILTSCORE = "$EXTOOLS/filter_score_grammar";
-assert_exec($FILTSCORE, $DISTVEST);
+my @DEFAULT_FEATS = qw(
+  LogRuleCount SingletonRule LexE2F LexF2E WordPenalty
+  LanguageModel Glue GlueTop PassThrough);
 
 my %init_weights = qw(
-  EGivenF -0.3
-  FGivenE -0.3
+  LogRuleCount 0.2
+  SingletonRule -0.6
   LexE2F -0.3
   LexF2E -0.3
   WordPenalty -1.5
@@ -27,6 +23,16 @@ my %init_weights = qw(
   X_EGivenF -0.3
   X_FGivenE -0.3
 );
+
+my $CDEC = "$SCRIPT_DIR/../../decoder/cdec";
+my $PARALLELIZE = "$SCRIPT_DIR/../../vest/parallelize.pl";
+my $EXTOOLS = "$SCRIPT_DIR/../../extools";
+die "Can't find extools: $EXTOOLS" unless -e $EXTOOLS && -d $EXTOOLS;
+my $VEST = "$SCRIPT_DIR/../../vest";
+die "Can't find vest: $VEST" unless -e $VEST && -d $VEST;
+my $DISTVEST = "$VEST/dist-vest.pl";
+my $FILTSCORE = "$EXTOOLS/filter_score_grammar";
+assert_exec($CDEC, $PARALLELIZE, $FILTSCORE, $DISTVEST);
 
 my $config = "$SCRIPT_DIR/config.eval";
 open CONF, "<$config" or die "Can't read $config: $!";
@@ -60,13 +66,17 @@ my %langpairs = map { $_ => 1 } qw( btec zhen fbis aren uren nlfr );
 
 my $outdir = "$CWD/exp";
 my $help;
+my $XFEATS;
 my $dataDir = '/export/ws10smt/data';
 if (GetOptions(
+        "xfeats" => \$XFEATS,
         "data=s" => \$dataDir,
 ) == 0 || @ARGV!=2 || $help) {
         print_help();
         exit;
 }
+if ($XFEATS) { die "TODO: implement adding of X-features\n"; }
+
 my $lp = $ARGV[0];
 my $grammar = $ARGV[1];
 print STDERR "   CORPUS REPO: $dataDir\n";
@@ -109,6 +119,55 @@ my $testgrammar = filter($grammar, $test, 'test', $outdir);
 my $testini = mydircat($outdir, "cdec-test.ini");
 write_cdec_ini($testini, $testgrammar);
 
+
+# CREATE INIT WEIGHTS
+print STDERR "\nCREATING INITIAL WEIGHTS FILE: weights.init\n";
+my $weights = mydircat($outdir, "weights.init");
+write_random_weights_file($weights);
+
+
+# VEST
+print STDERR "\nMINIMUM ERROR TRAINING\n";
+my $cmd = "$DISTVEST --ref-files=$drefs --source-file=$dev --weights $weights $devini";
+print STDERR "MERT COMMAND: $cmd\n";
+`rm -rf $outdir/vest 2> /dev/null`;
+chdir $outdir or die "Can't chdir to $outdir: $!";
+$weights = `$cmd`;
+die "MERT reported non-zero exit code" unless $? == 0;
+my $tuned_weights = mydircat($outdir, 'weights.tuned');
+`cp $weights $tuned_weights`;
+print STDERR "TUNED WEIGHTS: $tuned_weights\n";
+die "$tuned_weights is missing!" unless -f $tuned_weights;
+
+
+# DECODE
+print STDERR "\nDECODE TEST SET\n";
+my $decolog = mydircat($outdir, "test-decode.log");
+my $testtrans = mydircat($outdir, "test.trans");
+$cmd = "cat $test | $PARALLELIZE -j 20 -e $decolog -- $CDEC -c $testini -w $tuned_weights > $testtrans";
+safesystem($cmd) or die "Failed to decode test set!";
+
+
+# EVALUATE
+print STDERR "\nEVALUATE TEST SET\n";
+print STDERR "TEST: $testtrans\n";
+$cmd = "$teval $testtrans";
+safesystem($cmd) or die "Failed to evaluate!";
+exit 0;
+
+
+sub write_random_weights_file {
+  my ($file, @extras) = @_;
+  open F, ">$file" or die "Can't write $file: $!";
+  my @feats = (@DEFAULT_FEATS, @extras);
+  if ($XFEATS) { push @feats, "X_FGivenE"; push @feats, "X_EGivenF"; }
+  for my $feat (@feats) {
+    my $r = rand(1.6);
+    my $w = $init_weights{$feat} * $r;
+    print F "$feat $w\n";
+  }
+  close F;
+}
 
 sub filter {
   my ($grammar, $set, $name, $outdir) = @_;
