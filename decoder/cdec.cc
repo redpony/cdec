@@ -348,8 +348,13 @@ int main(int argc, char** argv) {
       // TODO check that multiple features aren't trying to set the same fid
       pffs.push_back(pff);
       late_ffs.push_back(p);
-      if (p->NumBytesContext()==0)
-        prelm_ffs.push_back(p);
+      if (has_prelm_models) {
+        int nbyte=p->NumBytesContext();
+        if (nbyte==0)
+          prelm_ffs.push_back(p);
+        else
+          cerr << "State required for feature: "<<ff<<" is "<<nbyte<<" - leaving it out of prelm pruning."<<endl;
+}
     }
   }
   ModelSet late_models(feature_weights, late_ffs);
