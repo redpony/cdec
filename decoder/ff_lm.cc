@@ -1,3 +1,5 @@
+//TODO: allow features to reorder by heuristic*weight the rules' terminal phrases (or of hyperedges').  if first pass has pruning, then compute over whole ruleset as part of heuristic
+
 #include "ff_lm.h"
 
 #include <sstream>

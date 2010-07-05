@@ -1,3 +1,7 @@
+//TODO: bottom-up pruning, with actual final models' (appropriately weighted) heuristics and local scores.
+
+//TODO: grammar heuristic (min cost of reachable rule set) for binarizations (active edges) if we wish to prune those also
+
 #include "translator.h"
 
 #include <vector>
@@ -26,11 +30,11 @@ struct SCFGTranslatorImpl {
 	  g->SetMaxSpan(max_span_limit);
 	  g->SetGrammarName(gfiles[i]);
 	  grammars.push_back(GrammarPtr(g));
-	  
+
 	}
       }
     if (!conf.count("scfg_no_hiero_glue_grammar"))
-      { 
+      {
 	GlueGrammar* g = new GlueGrammar(goal, default_nt);
 	g->SetGrammarName("GlueGrammar");
 	grammars.push_back(GrammarPtr(g));
@@ -39,7 +43,7 @@ struct SCFGTranslatorImpl {
     if (conf.count("scfg_extra_glue_grammar"))
       {
 	GlueGrammar* g = new GlueGrammar(conf["scfg_extra_glue_grammar"].as<string>());
-	g->SetGrammarName("ExtraGlueGrammar");		
+	g->SetGrammarName("ExtraGlueGrammar");
 	grammars.push_back(GrammarPtr(g));
 	cerr << "Adding extra glue grammar" << endl;
       }
@@ -69,7 +73,7 @@ struct SCFGTranslatorImpl {
 
 
     if(printGrammarsUsed){    //Iterate trough grammars we have for this sentence and list them
-      for (int gi = 0; gi < glist.size(); ++gi) 
+      for (int gi = 0; gi < glist.size(); ++gi)
 	{
 	  cerr << "Using grammar::" << 	 glist[gi]->GetGrammarName() << endl;
 	}
@@ -96,7 +100,7 @@ bool SCFGTranslator::TranslateImpl(const string& input,
                                SentenceMetadata* smeta,
                                const vector<double>& weights,
                                Hypergraph* minus_lm_forest) {
-  
+
   return pimpl_->Translate(input, smeta, weights, minus_lm_forest);
 }
 
@@ -105,10 +109,10 @@ Check for grammar pointer in the sentence markup, for use with sentence specific
  */
 void SCFGTranslator::ProcessMarkupHintsImpl(const map<string, string>& kv) {
   map<string,string>::const_iterator it = kv.find("grammar");
- 
-  
+
+
   if (it == kv.end()) {
-    usingSentenceGrammar= false; 
+    usingSentenceGrammar= false;
     return;
   }
   //Create sentence specific grammar from specified file name and load grammar into list of grammars
