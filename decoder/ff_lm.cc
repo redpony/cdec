@@ -418,9 +418,10 @@ bool parse_lmspec(std::string const& in, int &order, string &featurename, string
       }
     }
   }
-  return true;
+  if (order > 0 && !filename.empty())
+    return true;
 usage:
-  cerr<<"LanguageModel specification should be: [-o order] [-n featurename] filename"<<endl<<" you provided: "<<in<<endl;
+  cerr<<"LanguageModel specification should be: [-o order>0] [-n featurename] filename"<<endl<<" you provided: "<<in<<endl;
   return false;
 }
 
