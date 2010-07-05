@@ -38,6 +38,8 @@ using namespace std::tr1;
 using boost::shared_ptr;
 namespace po = boost::program_options;
 
+bool verbose_feature_functions=true;
+
 // some globals ...
 boost::shared_ptr<RandomNumberGenerator<boost::mt19937> > rng;
 static const double kMINUS_EPSILON = -1e-6;  // don't be too strict
@@ -63,6 +65,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("weights,w",po::value<string>(),"Feature weights file")
     ("prelm_weights",po::value<string>(),"Feature weights file for prelm_beam_prune.  Requires --weights.")
     ("prelm_copy_weights","use --weights as value for --prelm_weights.")
+    ("keep_prelm_cube_order","when forest rescoring with final models, use the edge ordering from the prelm pruning features*weights.  only meaningful if --prelm_weights given.  UNTESTED but assume that cube pruning gives a sensible result, and that 'good' (as tuned for bleu w/ prelm features) edges come first.")
 
         ("no_freeze_feature_set,Z", "Do not freeze feature set after reading feature weights file")
         ("feature_function,F",po::value<vector<string> >()->composing(), "Additional feature function(s) (-L for list)")
@@ -348,8 +351,10 @@ int main(int argc, char** argv) {
       // TODO check that multiple features aren't trying to set the same fid
       pffs.push_back(pff);
       late_ffs.push_back(p);
+      int nbyte=p->NumBytesContext();
+      if (verbose_feature_functions)
+        cerr<<"State is "<<nbyte<<" bytes for feature "<<ff<<endl;
       if (has_prelm_models) {
-        int nbyte=p->NumBytesContext();
         if (nbyte==0)
           prelm_ffs.push_back(p);
         else
@@ -357,6 +362,9 @@ int main(int argc, char** argv) {
 }
     }
   }
+  if (has_prelm_models)
+        cerr << "prelm rescoring with "<<prelm_ffs.size()<<" 0-state feature functions.  +LM pass will use "<<late_ffs.size()<<" features (not counting rule features)."<<endl;
+
   ModelSet late_models(feature_weights, late_ffs);
 
   int palg = 1;
@@ -454,7 +462,6 @@ int main(int argc, char** argv) {
 
     if (has_prelm_models) {
       ModelSet prelm_models(prelm_feature_weights, prelm_ffs);
-      cerr << "Rescoring with rule probabilities and "<<prelm_ffs.size()<<" 0-state feature functions.  +LM pass will use "<<late_ffs.size()<<" features."<<endl;
       Timer t("prelm rescoring");
       forest.Reweight(prelm_feature_weights);
       forest.SortInEdgesByEdgeWeights();
@@ -482,7 +489,8 @@ int main(int argc, char** argv) {
     if (has_late_models) {
       Timer t("Forest rescoring:");
       forest.Reweight(feature_weights);
-      forest.SortInEdgesByEdgeWeights();
+      if (!has_prelm_models || conf.count("keep_prelm_cube_order"))
+        forest.SortInEdgesByEdgeWeights();
       Hypergraph lm_forest;
       ApplyModelSet(forest,
                     smeta,
