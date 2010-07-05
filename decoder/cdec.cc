@@ -456,7 +456,8 @@ int main(int argc, char** argv) {
       ApplyModelSet(forest,
                     smeta,
                     prelm_models,
-                    inter_conf,
+                    IntersectionConfiguration(exhaustive_t()),
+// avoid overhead of best-first
                     &prelm_forest);
       forest.swap(prelm_forest);
       forest.Reweight(prelm_feature_weights);
