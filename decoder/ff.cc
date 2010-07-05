@@ -1,3 +1,5 @@
+//TODO: 0 size state != rule-local feature, i.e. still may depend on source span loc/context.  identify truly rule-local features so if we want they can be added to grammar rules (minor speedup)
+
 #include "ff.h"
 
 #include "tdict.h"

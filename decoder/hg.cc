@@ -1,3 +1,5 @@
+//TODO: lazily generate feature vectors for hyperarcs (because some of them will be pruned).  this means 1) storing ref to rule for those features 2) providing ff interface for regenerating its feature vector from hyperedge+states and probably 3) still caching feat. vect on hyperedge once it's been generated.  ff would normally just contribute its weighted score and result state, not component features.
+
 #include "hg.h"
 
 #include <algorithm>
