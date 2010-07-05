@@ -14,7 +14,6 @@
 #include "corpus.hh"
 #include "contexts_corpus.hh"
 #include "gzstream.hh"
-#include "mt19937ar.h"
 
 static const char *REVISION = "$Rev$";
 
@@ -78,10 +77,9 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  // seed the random number generator
-  //mt_init_genrand(time(0));
-
-  PYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"));
+  // seed the random number generator: 0 = automatic, specify value otherwise
+  unsigned long seed = 0; 
+  PYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"), seed);
 
   // read the data
   BackoffGenerator* backoff_gen=0;

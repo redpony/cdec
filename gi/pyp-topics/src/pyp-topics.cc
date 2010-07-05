@@ -5,7 +5,6 @@
 #endif
 
 #include "pyp-topics.hh"
-//#include "mt19937ar.h"
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <time.h>
@@ -46,13 +45,13 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
   {
     m_word_pyps.at(i).reserve(m_num_topics);
     for (int j=0; j<m_num_topics; ++j)
-      m_word_pyps.at(i).push_back(new PYP<int>(0.5, 1.0));
+      m_word_pyps.at(i).push_back(new PYP<int>(0.5, 1.0, m_seed));
   }
   std::cerr << std::endl;
 
   m_document_pyps.reserve(corpus.num_documents());
   for (int j=0; j<corpus.num_documents(); ++j)
-    m_document_pyps.push_back(new PYP<int>(0.5, 1.0));
+    m_document_pyps.push_back(new PYP<int>(0.5, 1.0, m_seed));
 
   m_topic_p0 = 1.0/m_num_topics;
   m_term_p0 = 1.0/corpus.num_types();
@@ -118,8 +117,10 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
     int tmp;
     for (int i = corpus.num_documents()-1; i > 0; --i)
     {
-    	int j = (int)(mt_genrand_real1() * i);
-    	tmp = randomDocIndices[i];
+        //i+1 since j \in [0,i] but rnd() \in [0,1)
+    	int j = (int)(rnd() * (i+1));
+      assert(j >= 0 && j <= i);
+     	tmp = randomDocIndices[i];
     	randomDocIndices[i] = randomDocIndices[j];
     	randomDocIndices[j] = tmp;
     }
@@ -258,7 +259,7 @@ int PYPTopics::sample(const DocumentId& doc, const Term& term) {
     sums.push_back(sum);
   }
   // Second pass: sample a topic
-  F cutoff = mt_genrand_res53() * sum;
+  F cutoff = rnd() * sum;
   for (int k=0; k<m_num_topics; ++k) {
     if (cutoff <= sums[k])
       return k;

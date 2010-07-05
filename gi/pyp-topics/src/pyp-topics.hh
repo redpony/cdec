@@ -4,6 +4,11 @@
 #include <vector>
 #include <iostream>
 #include <boost/ptr_container/ptr_vector.hpp>
+
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
+#include <boost/random/mersenne_twister.hpp>
+
 #include "pyp.hh"
 #include "corpus.hh"
 
@@ -15,9 +20,12 @@ public:
   typedef double F;
 
 public:
-  PYPTopics(int num_topics, bool use_topic_pyp=false) 
+  PYPTopics(int num_topics, bool use_topic_pyp=false, unsigned long seed = 0) 
     : m_num_topics(num_topics), m_word_pyps(1), 
-    m_topic_pyp(0.5,1.0), m_use_topic_pyp(use_topic_pyp) {}
+    m_topic_pyp(0.5,1.0,seed), m_use_topic_pyp(use_topic_pyp),
+    m_seed(seed),
+    uni_dist(0,1), rng(seed == 0 ? (unsigned long)this : seed), 
+    rnd(rng, uni_dist) {}
 
   void sample_corpus(const Corpus& corpus, int samples,
                      int freq_cutoff_start=0, int freq_cutoff_end=0, 
@@ -59,6 +67,17 @@ private:
   std::vector<PYPs> m_word_pyps;
   PYP<int> m_topic_pyp;
   bool m_use_topic_pyp;
+
+  unsigned long m_seed;
+
+  typedef boost::mt19937 base_generator_type;
+  typedef boost::uniform_real<> uni_dist_type;
+  typedef boost::variate_generator<base_generator_type&, uni_dist_type> gen_type;
+
+  uni_dist_type uni_dist;
+  base_generator_type rng; //this gets the seed
+  gen_type rnd; //instantiate: rnd(rng, uni_dist)
+                //call: rnd() generates uniform on [0,1)
 
   TermBackoffPtr m_backoff;
 };

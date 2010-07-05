@@ -5,10 +5,13 @@
 #include <map>
 #include <tr1/unordered_map>
 
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
+#include <boost/random/mersenne_twister.hpp>
+
 #include "log_add.h"
 #include "gammadist.h"
 #include "slice-sampler.h"
-#include "mt19937ar.h"
 
 //
 // Pitman-Yor process with customer and table tracking
@@ -23,7 +26,7 @@ public:
   using std::tr1::unordered_map<Dish,int>::begin;
   using std::tr1::unordered_map<Dish,int>::end;
 
-  PYP(double a, double b, Hash hash=Hash());
+  PYP(double a, double b, unsigned long seed = 0, Hash hash=Hash());
 
   int increment(Dish d, double p0);
   int decrement(Dish d);
@@ -80,6 +83,16 @@ private:
   DishTableType _dish_tables;
   int _total_customers, _total_tables;
 
+  typedef boost::mt19937 base_generator_type;
+  typedef boost::uniform_real<> uni_dist_type;
+  typedef boost::variate_generator<base_generator_type&, uni_dist_type> gen_type;
+
+  uni_dist_type uni_dist;
+  base_generator_type rng; //this gets the seed
+  gen_type rnd; //instantiate: rnd(rng, uni_dist)
+                //call: rnd() generates uniform on [0,1)
+ 
+
   // Function objects for calculating the parts of the log_prob for 
   // the parameters a and b
   struct resample_a_type {
@@ -122,11 +135,12 @@ private:
 };
 
 template <typename Dish, typename Hash>
-PYP<Dish,Hash>::PYP(double a, double b, Hash)
+PYP<Dish,Hash>::PYP(double a, double b, unsigned long seed, Hash)
 : std::tr1::unordered_map<Dish, int, Hash>(), _a(a), _b(b), 
   _a_beta_a(1), _a_beta_b(1), _b_gamma_s(1), _b_gamma_c(1),
   //_a_beta_a(1), _a_beta_b(1), _b_gamma_s(10), _b_gamma_c(0.1),
-  _total_customers(0), _total_tables(0)
+  _total_customers(0), _total_tables(0),
+  uni_dist(0,1), rng(seed == 0 ? (unsigned long)this : seed), rnd(rng, uni_dist)
 {
 //  std::cerr << "\t##PYP<Dish,Hash>::PYP(a=" << _a << ",b=" << _b << ")" << std::endl;
 }
@@ -211,7 +225,7 @@ PYP<Dish,Hash>::increment(Dish dish, double p0) {
   assert (pshare >= 0.0);
   //assert (pnew > 0.0);
 
-  if (mt_genrand_res53() < pnew / (pshare + pnew)) {
+  if (rnd() < pnew / (pshare + pnew)) {
     // assign to a new table
     tc.tables += 1;
     tc.table_histogram[1] += 1;
@@ -221,7 +235,7 @@ PYP<Dish,Hash>::increment(Dish dish, double p0) {
   else {
     // randomly assign to an existing table
     // remove constant denominator from inner loop
-    double r = mt_genrand_res53() * (c - _a*t);
+    double r = rnd() * (c - _a*t);
     for (std::map<int,int>::iterator
          hit = tc.table_histogram.begin();
          hit != tc.table_histogram.end(); ++hit) {
@@ -283,7 +297,7 @@ PYP<Dish,Hash>::decrement(Dish dish)
   //std::cerr << "count: " << count(dish) << " ";
   //std::cerr << "tables: " << tc.tables << "\n";
 
-  double r = mt_genrand_res53() * count(dish);
+  double r = rnd() * count(dish);
   for (std::map<int,int>::iterator hit = tc.table_histogram.begin();
        hit != tc.table_histogram.end(); ++hit)
   {
@@ -467,7 +481,7 @@ PYP<Dish,Hash>::resample_prior_b() {
   int niterations = 10;   // number of resampling iterations
   //std::cerr << "\n## resample_prior_b(), initial a = " << _a << ", b = " << _b << std::endl;
   resample_b_type b_log_prob(_total_customers, _total_tables, _a, _b_gamma_c, _b_gamma_s);
-  _b = slice_sampler1d(b_log_prob, _b, mt_genrand_res53, (double) 0.0, std::numeric_limits<double>::infinity(), 
+  _b = slice_sampler1d(b_log_prob, _b, rnd, (double) 0.0, std::numeric_limits<double>::infinity(), 
                        (double) 0.0, niterations, 100*niterations);
   //std::cerr << "\n## resample_prior_b(), final a = " << _a << ", b = " << _b << std::endl;
 }
@@ -481,7 +495,7 @@ PYP<Dish,Hash>::resample_prior_a() {
   int niterations = 10;
   //std::cerr << "\n## Initial a = " << _a << ", b = " << _b << std::endl;
   resample_a_type a_log_prob(_total_customers, _total_tables, _b, _a_beta_a, _a_beta_b, _dish_tables);
-  _a = slice_sampler1d(a_log_prob, _a, mt_genrand_res53, std::numeric_limits<double>::min(), 
+  _a = slice_sampler1d(a_log_prob, _a, rnd, std::numeric_limits<double>::min(), 
                        (double) 1.0, (double) 0.0, niterations, 100*niterations);
 }
 
