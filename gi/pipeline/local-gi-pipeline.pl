@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
+use File::Copy;
+
 my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path cwd /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
 
 use Getopt::Long "GetOptions";
@@ -56,6 +58,7 @@ safemkdir($OUTPUT) or die "Couldn't create output directory $OUTPUT: $!";
 safemkdir($CONTEXT_DIR) or die "Couldn't create output directory $CONTEXT_DIR: $!";
 safemkdir($CLUSTER_DIR) or die "Couldn't create output directory $CLUSTER_DIR: $!";
 safemkdir($GRAMMAR_DIR) or die "Couldn't create output directory $GRAMMAR_DIR: $!";
+copy($TOPICS_CONFIG, $CLUSTER_DIR) or die "Copy failed: $!";
 
 extract_context();
 topic_train();

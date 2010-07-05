@@ -83,7 +83,7 @@ int main(int argc, char **argv)
     model.set_backoff(vm["backoff-paths"].as<string>());
 
   // train the sampler
-  model.sample(corpus, vm["samples"].as<int>());
+  model.sample_corpus(corpus, vm["samples"].as<int>());
 
   if (vm.count("document-topics-out")) {
     ogzstream documents_out(vm["document-topics-out"].as<string>().c_str());

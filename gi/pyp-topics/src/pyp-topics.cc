@@ -29,7 +29,9 @@ struct Timer {
   timespec start_t;
 };
 
-void PYPTopics::sample(const Corpus& corpus, int samples) {
+void PYPTopics::sample_corpus(const Corpus& corpus, int samples, 
+                              int freq_cutoff_start, int freq_cutoff_end, 
+                              int freq_cutoff_interval) {
   Timer timer;
 
   if (!m_backoff.get()) {
@@ -37,7 +39,7 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
     m_word_pyps.push_back(PYPs());
   }
 
-  std::cerr << " Training with " << m_word_pyps.size()-1 << " backoff level"
+  std::cerr << "\n Training with " << m_word_pyps.size()-1 << " backoff level"
     << (m_word_pyps.size()==2 ? ":" : "s:") << std::endl;
 
   for (int i=0; i<(int)m_word_pyps.size(); ++i)
@@ -52,6 +54,9 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
 
   std::cerr << " Documents: " << corpus.num_documents() << " Terms: "
     << corpus.num_types() << std::endl;
+
+  int frequency_cutoff = freq_cutoff_start;
+  std::cerr << " Context frequency cutoff set to " << frequency_cutoff << std::endl; 
 
   timer.Reset();
   // Initialisation pass
@@ -68,19 +73,22 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
 
       // sample a new_topic
       //int new_topic = (topic_counter % m_num_topics);
-      int new_topic = (document_id % m_num_topics);
+      int freq = corpus.context_count(term);
+      int new_topic = (freq > frequency_cutoff ? (document_id % m_num_topics) : -1);
 
       // add the new topic to the PYPs
       m_corpus_topics[document_id][term_index] = new_topic;
-      increment(term, new_topic);
+      if (freq > frequency_cutoff) {
+        increment(term, new_topic);
 
-      if (m_use_topic_pyp) {
-        F p0 = m_topic_pyp.prob(new_topic, m_topic_p0);
-        int table_delta = m_document_pyps[document_id].increment(new_topic, p0);
-        if (table_delta)
-          m_topic_pyp.increment(new_topic, m_topic_p0);
+        if (m_use_topic_pyp) {
+          F p0 = m_topic_pyp.prob(new_topic, m_topic_p0);
+          int table_delta = m_document_pyps[document_id].increment(new_topic, p0);
+          if (table_delta)
+            m_topic_pyp.increment(new_topic, m_topic_p0);
+        }
+        else m_document_pyps[document_id].increment(new_topic, m_topic_p0);
       }
-      else m_document_pyps[document_id].increment(new_topic, m_topic_p0);
     }
   }
   std::cerr << "  Initialized in " << timer.Elapsed() << " seconds\n";
@@ -91,6 +99,13 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
 
   // Sampling phase
   for (int curr_sample=0; curr_sample < samples; ++curr_sample) {
+    if (freq_cutoff_interval > 0 && curr_sample != 1 
+        && curr_sample % freq_cutoff_interval == 1 
+        && frequency_cutoff > freq_cutoff_end) {
+      frequency_cutoff--;
+      std::cerr << "\n Context frequency cutoff set to " << frequency_cutoff << std::endl; 
+    }
+
     std::cerr << "\n  -- Sample " << curr_sample << " "; std::cerr.flush();
 
     // Randomize the corpus indexing array
@@ -115,14 +130,20 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
       for (Document::const_iterator docIt=corpus.at(document_id).begin();
            docIt != docEnd; ++docIt, ++term_index) {
         Term term = *docIt;
+        int freq = corpus.context_count(term);
+        if (freq < frequency_cutoff) 
+          continue;
 
         // remove the prevous topic from the PYPs
         int current_topic = m_corpus_topics[document_id][term_index];
-        decrement(term, current_topic);
+        // a negative label mean that term hasn't been sampled yet
+        if (current_topic >= 0) {
+          decrement(term, current_topic);
 
-        int table_delta = m_document_pyps[document_id].decrement(current_topic);
-        if (m_use_topic_pyp && table_delta < 0)
-          m_topic_pyp.decrement(current_topic);
+          int table_delta = m_document_pyps[document_id].decrement(current_topic);
+          if (m_use_topic_pyp && table_delta < 0) 
+            m_topic_pyp.decrement(current_topic);
+        }
 
         // sample a new_topic
         int new_topic = sample(document_id, term);
@@ -182,9 +203,9 @@ void PYPTopics::sample(const Corpus& corpus, int samples) {
       std::cerr.precision(2);
       for (PYPs::iterator pypIt=m_word_pyps.front().begin();
            pypIt != m_word_pyps.front().end(); ++pypIt, ++k) {
-        std::cerr << "<" << k << ":" << pypIt->num_customers() << ","
-          << pypIt->num_types() << "," << m_topic_pyp.prob(k, m_topic_p0) << "> ";
         if (k % 5 == 0) std::cerr << std::endl << '\t';
+        std::cerr << "<" << k << ":" << pypIt->num_customers() << "," 
+          << pypIt->num_types() << "," << m_topic_pyp.prob(k, m_topic_p0) << "> ";
       }
       std::cerr.precision(4);
       std::cerr << std::endl;

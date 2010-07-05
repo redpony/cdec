@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <limits>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
@@ -34,6 +35,10 @@ public:
     int num_documents() const { return m_documents.size(); }
     int num_terms() const { return m_num_terms; }
     int num_types() const { return m_num_types; }
+
+    virtual int context_count(const int&) const {
+      return std::numeric_limits<int>::max();
+    }
 
 protected:
     int m_num_terms, m_num_types;

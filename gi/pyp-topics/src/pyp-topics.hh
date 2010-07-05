@@ -19,7 +19,10 @@ public:
     : m_num_topics(num_topics), m_word_pyps(1), 
     m_topic_pyp(0.5,1.0), m_use_topic_pyp(use_topic_pyp) {}
 
-  void sample(const Corpus& corpus, int samples);
+  void sample_corpus(const Corpus& corpus, int samples,
+                     int freq_cutoff_start=0, int freq_cutoff_end=0, 
+                     int freq_cutoff_interval=0);
+
   int sample(const DocumentId& doc, const Term& term);
   int max(const DocumentId& doc, const Term& term) const;
   int max(const DocumentId& doc) const;

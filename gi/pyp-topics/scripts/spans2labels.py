@@ -15,6 +15,7 @@ phrase_context_index = {}
 for line in file(sys.argv[1], 'r'):
   phrase,tail= line.split('\t')
   contexts = tail.split(" ||| ")[1:]
+  if len(contexts) == 1: continue
   assert len(contexts) % 2 == 0
   for i in range(0, len(contexts), 2):
     category = contexts[i+1].split("=")[1].strip()
