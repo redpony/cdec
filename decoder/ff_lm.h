@@ -26,7 +26,7 @@ class LanguageModel : public FeatureFunction {
                                      SparseVector<double>* estimated_features,
                                      void* out_context) const;
  private:
-  const int fid_;
+  int fid_; // conceptually const; mutable only to simplify constructor
   mutable LanguageModelImpl* pimpl_;
 };
 

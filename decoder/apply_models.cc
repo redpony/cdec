@@ -1,3 +1,7 @@
+//TODO: (for many nonterminals, or multi-rescoring pass) either global
+//best-first, or group by (NT,span) - use prev forest outside as a (admissable,
+//if models are a subset and weights are same) heuristic
+
 #include "apply_models.h"
 
 #include <vector>
@@ -207,7 +211,7 @@ public:
     new_edge->prev_j_ = item->out_edge_.prev_j_;
     Candidate*& o_item = (*s2n)[item->state_];
     if (!o_item) o_item = item;
-    
+
     int& node_id = o_item->node_index_;
     if (node_id < 0) {
       Hypergraph::Node* new_node = out.AddNode(in.nodes_[item->in_edge_->head_node_].cat_);

@@ -80,6 +80,13 @@ inline int SplitOnWhitespace(const std::string& in, std::vector<std::string>* ou
   return out->size();
 }
 
+inline std::vector<std::string> SplitOnWhitespace(std::string const& in)
+{
+  std::vector<std::string> r;
+  SplitOnWhitespace(in,&r);
+  return r;
+}
+
 inline void SplitCommandAndParam(const std::string& in, std::string* cmd, std::string* param) {
   cmd->clear();
   param->clear();
