@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <tr1/unordered_map>
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
@@ -66,6 +67,11 @@ public:
       return res;
     }
 
+    virtual int context_count(const WordID& id) const {
+      return m_context_counts.find(id)->second;
+    }
+
+
     const std::string& key(const int& i) const {
       return m_keys.at(i);
     }
@@ -74,6 +80,7 @@ private:
     TermBackoffPtr m_backoff;
     Dict m_dict;
     std::vector<std::string> m_keys;
+    std::tr1::unordered_map<int,int> m_context_counts;
 };
 
 #endif // _CONTEXTS_CORPUS_HH

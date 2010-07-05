@@ -23,7 +23,7 @@ void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* 
 
   ContextsCorpus* corpus_ptr = extra_pair->get<0>();
   BackoffGenerator* backoff_gen = extra_pair->get<1>();
-  map<string,int>* counts = extra_pair->get<2>();
+  //map<string,int>* counts = extra_pair->get<2>();
 
   Document* doc(new Document());
 
@@ -33,11 +33,11 @@ void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* 
     string context_str = corpus_ptr->m_dict.toString(new_contexts.contexts[i]);
 
     // filter out singleton contexts
-    if (!counts->empty()) {
-      map<string,int>::const_iterator find_it = counts->find(context_str);
-      if (find_it == counts->end() || find_it->second < 2)
-        continue;
-    }
+    //if (!counts->empty()) {
+    //  map<string,int>::const_iterator find_it = counts->find(context_str);
+    //  if (find_it == counts->end() || find_it->second < 2)
+    //    continue;
+    //}
 
     WordID id = corpus_ptr->m_dict.Convert(context_str);
     if (cache_word_count != corpus_ptr->m_dict.max()) {
@@ -85,10 +85,10 @@ void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* 
   }
   //cout << endl;
 
-  if (!doc->empty()) {
+  //if (!doc->empty()) {
     corpus_ptr->m_documents.push_back(doc);
     corpus_ptr->m_keys.push_back(new_contexts.phrase);
-  }
+  //}
 }
 
 void filter_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* extra) {
@@ -108,10 +108,12 @@ void filter_callback(const ContextsLexer::PhraseContextsType& new_contexts, void
 
 unsigned ContextsCorpus::read_contexts(const string &filename, 
                                        BackoffGenerator* backoff_gen_ptr,
-                                       bool filter_singeltons) {
+                                       bool /*filter_singeltons*/) {
   map<string,int> counts;
-  if (filter_singeltons) {
-    cerr << "--- Filtering singleton contexts ---" << endl;
+  //if (filter_singeltons) 
+  {
+  //  cerr << "--- Filtering singleton contexts ---" << endl;
+
     igzstream in(filename.c_str());
     ContextsLexer::ReadContexts(&in, filter_callback, &counts);
   }
@@ -128,7 +130,15 @@ unsigned ContextsCorpus::read_contexts(const string &filename,
   cerr << "Read backoff with order " << m_backoff->order() << "\n";
   for (int o=0; o<m_backoff->order(); o++)
     cerr << "  Terms at " << o << " = " << m_backoff->terms_at_level(o) << endl;
-  cerr << endl;
+  //cerr << endl;
+
+  int i=0; double av_freq=0;
+  for (map<string,int>::const_iterator it=counts.begin(); it != counts.end(); ++it, ++i) {
+    WordID id = m_dict.Convert(it->first);
+    m_context_counts[id] = it->second;
+    av_freq += it->second;
+  }
+  cerr << "  Average term frequency = " << av_freq / (double) i << endl;
 
   return m_documents.size();
 }

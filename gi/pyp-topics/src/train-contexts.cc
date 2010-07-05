@@ -34,8 +34,13 @@ int main(int argc, char **argv)
 
   // Command line processing
   {
-    options_description cmdline_options("Allowed options");
-    cmdline_options.add_options()
+    options_description cmdline_specific("Command line specific options");
+    cmdline_specific.add_options()
+      ("help,h", "print help message")
+      ("config,c", value<string>(), "config file specifying additional command line options")
+      ;
+    options_description config_options("Allowed options");
+    config_options.add_options()
       ("help,h", "print help message")
       ("data,d", value<string>(), "file containing the documents and context terms")
       ("topics,t", value<int>()->default_value(50), "number of topics")
@@ -44,14 +49,25 @@ int main(int argc, char **argv)
       ("topic-words-out,w", value<string>(), "file to write the topic word distribution to")
       ("samples,s", value<int>()->default_value(10), "number of sampling passes through the data")
       ("backoff-type", value<string>(), "backoff type: none|simple")
-      ("filter-singleton-contexts", "filter singleton contexts")
+//      ("filter-singleton-contexts", "filter singleton contexts")
       ("hierarchical-topics", "Use a backoff hierarchical PYP as the P0 for the document topics distribution.")
+      ("freq-cutoff-start", value<int>()->default_value(0), "initial frequency cutoff.")
+      ("freq-cutoff-end", value<int>()->default_value(0), "final frequency cutoff.")
+      ("freq-cutoff-interval", value<int>()->default_value(0), "number of iterations between frequency decrement.")
       ;
-    store(parse_command_line(argc, argv, cmdline_options), vm); 
+
+    cmdline_specific.add(config_options);
+
+    store(parse_command_line(argc, argv, cmdline_specific), vm); 
     notify(vm);
 
+    if (vm.count("config") > 0) {
+      ifstream config(vm["config"].as<string>().c_str());
+      store(parse_config_file(config, config_options), vm); 
+    }
+
     if (vm.count("help")) { 
-      cout << cmdline_options << "\n"; 
+      cout << cmdline_specific << "\n"; 
       return 1; 
     }
   }
@@ -83,14 +99,17 @@ int main(int argc, char **argv)
   }
 
   ContextsCorpus contexts_corpus;
-  contexts_corpus.read_contexts(vm["data"].as<string>(), backoff_gen, vm.count("filter-singleton-contexts"));
+  contexts_corpus.read_contexts(vm["data"].as<string>(), backoff_gen, /*vm.count("filter-singleton-contexts")*/ false);
   model.set_backoff(contexts_corpus.backoff_index());
 
   if (backoff_gen) 
     delete backoff_gen;
 
   // train the sampler
-  model.sample(contexts_corpus, vm["samples"].as<int>());
+  model.sample_corpus(contexts_corpus, vm["samples"].as<int>(),
+                      vm["freq-cutoff-start"].as<int>(),
+                      vm["freq-cutoff-end"].as<int>(),
+               vm["freq-cutoff-interval"].as<int>());
 
   if (vm.count("document-topics-out")) {
     ogzstream documents_out(vm["document-topics-out"].as<string>().c_str());
