@@ -13,6 +13,18 @@ public class FileUtil {
 		}
 		return localsc;
 	}
+	
+	public static BufferedReader openBufferedReader(String filename){
+		BufferedReader r=null;
+		try
+		{
+			r=(new BufferedReader(new FileReader(new File(filename))));
+		}catch(IOException ioe){
+			System.out.println(ioe.getMessage());
+		}
+		return r;		
+	}
+	
 	public static PrintStream  openOutFile(String filename){
 		PrintStream localps=null;
 		try
