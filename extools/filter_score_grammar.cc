@@ -37,6 +37,8 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("test_set,t", po::value<string>(), "Filter for this test set (not specified = no filtering)")
         ("top_e_given_f,n", po::value<size_t>()->default_value(30), "Keep top N rules, according to p(e|f). 0 for all")
+        ("hiero_features", "Use 'Hiero' features")
+//        ("feature,f", po::value<vector<string> >()->composing(), "List of features to compute")
         ("aligned_corpus,c", po::value<string>(), "Aligned corpus (single line format)")
         ("help,h", "Print this help message and exit");
   po::options_description clo("Command line options");
@@ -245,6 +247,38 @@ struct FeatureExtractor {
   const string extractor_name;
 };
 
+struct LogRuleCount : public FeatureExtractor {
+  LogRuleCount() :
+    FeatureExtractor("LogRuleCount"),
+    fid_(FD::Convert("LogRuleCount")), kCFE(FD::Convert("CFE")) {}
+  virtual void ExtractFeatures(const vector<WordID>& lhs_src,
+                               const vector<WordID>& trg,
+                               const RuleStatistics& info,
+                               SparseVector<float>* result) const {
+    (void) lhs_src; (void) trg;
+    result->set_value(fid_, log(info.counts.value(kCFE)));
+  }
+  const int fid_;
+  const int kCFE;
+};
+
+struct SingletonRule : public FeatureExtractor {
+  SingletonRule() :
+    FeatureExtractor("SingletonRule"),
+    fid_(FD::Convert("SingletonRule")), kCFE(FD::Convert("CFE")) {}
+  virtual void ExtractFeatures(const vector<WordID>& lhs_src,
+                               const vector<WordID>& trg,
+                               const RuleStatistics& info,
+                               SparseVector<float>* result) const {
+    (void) lhs_src; (void) trg;
+    if (info.counts.value(kCFE) > 0.999 && info.counts.value(kCFE) < 1.001) {
+      result->set_value(fid_, 1.0);
+    }
+  }
+  const int fid_;
+  const int kCFE;
+};
+
 struct EGivenFExtractor : public FeatureExtractor {
   EGivenFExtractor() :
     FeatureExtractor("EGivenF"),
@@ -403,9 +437,15 @@ int main(int argc, char** argv){
 
   // TODO make this list configurable
   vector<boost::shared_ptr<FeatureExtractor> > extractors;
-  extractors.push_back(boost::shared_ptr<FeatureExtractor>(new EGivenFExtractor));
-  extractors.push_back(boost::shared_ptr<FeatureExtractor>(new FGivenEExtractor));
-  extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LexProbExtractor(conf["aligned_corpus"].as<string>())));
+  if (conf.count("hiero_features")) {
+    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new EGivenFExtractor));
+    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new FGivenEExtractor));
+    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LexProbExtractor(conf["aligned_corpus"].as<string>())));
+  } else {
+    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LogRuleCount));
+    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new SingletonRule));
+    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LexProbExtractor(conf["aligned_corpus"].as<string>())));
+  }
 
   //score unscored grammar
   cerr <<"Scoring grammar..." << endl;
@@ -415,7 +455,7 @@ int main(int argc, char** argv){
   vector<WordID> key, cur_key,temp_key;
   int line = 0;
 
-  const int kEGivenF = FD::Convert("EGivenF");
+  const int kLogRuleCount = FD::Convert("LogRuleCount");
   multimap<float, string> options; 
   while(!unscored_grammar.eof())
     {
@@ -436,7 +476,7 @@ int main(int argc, char** argv){
            os << TD::GetString(cur_key)
               << ' ' << TD::GetString(it->first) << " ||| ";
            feats.Write(false, &os);
-           options.insert(make_pair(feats.value(kEGivenF), os.str()));
+           options.insert(make_pair(-feats.value(kLogRuleCount), os.str()));
         }
         int ocount = 0;
         for (multimap<float,string>::iterator it = options.begin(); it != options.end(); ++it) {
