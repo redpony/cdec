@@ -42,7 +42,6 @@ my $help = 0;
 my $epsilon = 0.0001;
 my $interval = 5;
 my $dryrun = 0;
-my $ranges;
 my $last_score = -10000000;
 my $metric = "ibm_bleu";
 my $dir;
@@ -66,7 +65,6 @@ if (GetOptions(
 	"max-iterations=i" => \$max_iterations,
 	"normalize=s" => \$normalize,
 	"pmem=s" => \$pmem,
-	"ranges=s" => \$ranges,
 	"rand-directions=i" => \$rand_directions,
 	"ref-files=s" => \$refFiles,
 	"metric=s" => \$metric,
@@ -240,11 +238,10 @@ while (1){
 		$result = system($cmd);
 		unless ($result == 0){
 			cleanup();
-			print STDERR "ERROR: mapinput command returned non-zero exit code $result\n";
-			die;
+			die "ERROR: mapinput command returned non-zero exit code $result\n";
 		}
 
-	        `mkdir $dir/splag.$im1`;
+		`mkdir $dir/splag.$im1`;
 		$cmd="split -a 3 -l $lines_per_mapper $dir/agenda.$im1-$opt_iter $dir/splag.$im1/mapinput.";
 		print STDERR "COMMAND:\n$cmd\n";
 		$result = system($cmd);
@@ -277,8 +274,7 @@ while (1){
 				$result = system($script);
 				unless ($result == 0){
 					cleanup();
-					print STDERR "ERROR: mapper returned non-zero exit code $result\n";
-					die;
+					die "ERROR: mapper returned non-zero exit code $result\n";
 				}
 			} else {
         my $script_file = "$dir/scripts/map.$shard";
@@ -328,8 +324,7 @@ while (1){
 		$result = system($cmd);
 		unless ($result == 0){
 			cleanup();
-			print STDERR "ERROR: reducer command returned non-zero exit code $result\n";
-			die;
+			die "ERROR: reducer command returned non-zero exit code $result\n";
 		}
 		$cmd="sort -nk3 $DIR_FLAG '-t|' $dir/redoutput.$im1 | head -1";
 		my $best=`$cmd`; chomp $best;
@@ -379,7 +374,11 @@ while (1){
 	print STDERR "\n==========\n";
 }
 
-print STDERR "\nFINAL WEIGHTS: $dir/$lastWeightsFile\n(Use -w <this file> with hiero)\n\n";
+print STDERR "\nFINAL WEIGHTS: $dir/$lastWeightsFile\n(Use -w <this file> with the decoder)\n\n";
+
+print STDOUT "$dir/$lastWeightsFile\n";
+
+exit 0;
 
 sub normalize_weights {
   my ($rfn, $rpts, $feat) = @_;
