@@ -2,7 +2,7 @@
 
 //TODO: allow features to reorder by heuristic*weight the rules' terminal phrases (or of hyperedges').  if first pass has pruning, then compute over whole ruleset as part of heuristic
 
-//TODO: verify that this is true: if ngram order is bigger than lm state's, then the longest possible ngram scores are still used.  if you really want a lower order, a truncated copy of the LM should be small enough.  otherwise, an option to null out words outside of the order's window would need to be implemented.
+//NOTE: if ngram order is bigger than lm state's, then the longest possible ngram scores are still used.  if you really want a lower order, a truncated copy of the LM should be small enough.  otherwise, an option to null out words outside of the order's window would need to be implemented.
 
 #include "ff_lm.h"
 
@@ -160,13 +160,14 @@ struct LMClient {
 class LanguageModelImpl {
  public:
   explicit LanguageModelImpl(int order) :
-      ngram_(*TD::dict_, order), buffer_(), order_(order), state_size_(OrderToStateSize(order) - 1),
+    ngram_(*TD::dict_, order), buffer_(), order_(order), state_size_(OrderToStateSize(order) - 1),
       floor_(-100.0),
       kSTART(TD::Convert("<s>")),
       kSTOP(TD::Convert("</s>")),
       kUNKNOWN(TD::Convert("<unk>")),
       kNONE(-1),
-      kSTAR(TD::Convert("<{STAR}>")) {}
+      kSTAR(TD::Convert("<{STAR}>"))
+  , unigram(order<=1) {}
 
   LanguageModelImpl(int order, const string& f) :
       ngram_(*TD::dict_, order), buffer_(), order_(order), state_size_(OrderToStateSize(order) - 1),
@@ -175,7 +176,9 @@ class LanguageModelImpl {
       kSTOP(TD::Convert("</s>")),
       kUNKNOWN(TD::Convert("<unk>")),
       kNONE(-1),
-      kSTAR(TD::Convert("<{STAR}>")) {
+      kSTAR(TD::Convert("<{STAR}>"))
+  , unigram(order<=1)
+  {
     File file(f.c_str(), "r", 0);
     assert(file);
     cerr << "Reading " << order_ << "-gram LM from " << f << endl;
@@ -264,7 +267,7 @@ class LanguageModelImpl {
 
   //TODO: make sure that Vocab_None is set to kNONE in srilm (-1), or that SRILM otherwise interprets -1 as a terminator and not a word
   double EstimateProb(const void* state) {
-    if (!order_) return 0.;
+    if (unigram) return 0.;
     int len = StateSize(state);
     // cerr << "residual len: " << len << endl;
     buffer_.resize(len + 1);
@@ -278,7 +281,7 @@ class LanguageModelImpl {
 
   // for <s> (n-1 left words) and (n-1 right words) </s>
   double FinalTraversalCost(const void* state) {
-    if (!order_) return 0.;
+    if (unigram) return 0.;
     int slen = StateSize(state);
     int len = slen + 2;
     // cerr << "residual len: " << len << endl;
@@ -328,7 +331,7 @@ class LanguageModelImpl {
 
   //NOTE: this is where the scoring of words happens (heuristic happens in EstimateProb)
   double LookupWords(const TRule& rule, const vector<const void*>& ant_states, void* vstate) {
-    if (order_==0)
+    if (unigram)
       return stateless_cost(rule);
     int len = rule.ELength() - rule.Arity();
     for (int i = 0; i < ant_states.size(); ++i)
@@ -399,6 +402,7 @@ public:
   const WordID kUNKNOWN;
   const WordID kNONE;
   const WordID kSTAR;
+  const bool unigram;
 };
 
 struct ClientLMI : public LanguageModelImpl
