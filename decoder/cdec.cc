@@ -353,7 +353,7 @@ int main(int argc, char** argv) {
         if (nbyte==0)
           prelm_ffs.push_back(p);
         else
-          cerr << "State required for feature: "<<ff<<" is "<<nbyte<<" - leaving it out of prelm pruning."<<endl;
+          cerr << "Excluding stateful feature from prelm pruning: "<<ff<<" - state is "<<nbyte<<" bytes."<<endl;
 }
     }
   }
@@ -454,6 +454,7 @@ int main(int argc, char** argv) {
 
     if (has_prelm_models) {
       ModelSet prelm_models(prelm_feature_weights, prelm_ffs);
+      cerr << "Rescoring with rule probabilities and "<<prelm_ffs.size()<<" 0-state feature functions.  +LM pass will use "<<late_ffs.size()<<" features."<<endl;
       Timer t("prelm rescoring");
       forest.Reweight(prelm_feature_weights);
       forest.SortInEdgesByEdgeWeights();
