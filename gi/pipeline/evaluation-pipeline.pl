@@ -1,8 +1,18 @@
 #!/usr/bin/perl -w
 use strict;
 use Getopt::Long;
+use Cwd;
+my $CWD = getcwd;
 
 my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
+
+my $EXTOOLS = "$SCRIPT_DIR/../../extools";
+die "Can't find extools: $EXTOOLS" unless -e $EXTOOLS && -d $EXTOOLS;
+my $VEST = "$SCRIPT_DIR/../../vest";
+die "Can't find vest: $VEST" unless -e $VEST && -d $VEST;
+my $DISTVEST = "$VEST/dist-vest.pl";
+my $FILTSCORE = "$EXTOOLS/filter_score_grammar";
+assert_exec($FILTSCORE, $DISTVEST);
 
 my %init_weights = qw(
   EGivenF -0.3
@@ -21,11 +31,12 @@ my %init_weights = qw(
 my $config = "$SCRIPT_DIR/config.eval";
 open CONF, "<$config" or die "Can't read $config: $!";
 my %paths;
+my %corpora;
 my %lms;
 my %devs;
 my %devrefs;
 my %tests;
-my %testrefs;
+my %testevals;
 print STDERR "LANGUAGE PAIRS:";
 while(<CONF>) {
   chomp;
@@ -33,19 +44,21 @@ while(<CONF>) {
   next if /^\s*$/;
   s/^\s+//;
   s/\s+$//;
-  my ($name, $path, $lm, $dev, $devref, @xtests) = split /\s+/;
+  my ($name, $path, $corpus, $lm, $dev, $devref, @xtests) = split /\s+/;
   $paths{$name} = $path;
+  $corpora{$name} = $corpus;
   $lms{$name} = $lm;
   $devs{$name} = $dev;
   $devrefs{$name} = $devref;
   $tests{$name} = $xtests[0];
-  $testrefs{$name} = $xtests[1];
+  $testevals{$name} = $xtests[1];
   print STDERR " $name";
 }
 print STDERR "\n";
 
 my %langpairs = map { $_ => 1 } qw( btec zhen fbis aren uren nlfr );
 
+my $outdir = "$CWD/exp";
 my $help;
 my $dataDir = '/export/ws10smt/data';
 if (GetOptions(
@@ -63,8 +76,57 @@ my $corpdir = "$dataDir";
 if ($paths{$lp} =~ /^\//) { $corpdir = $paths{$lp}; } else { $corpdir .= '/' . $paths{$lp}; }
 die "I can't find the corpora directory: $corpdir" unless -d $corpdir;
 print STDERR "       GRAMMAR: $grammar\n";
-my $LANG_MODEL = $corpdir . '/' . $lms{$lp};
+my $LANG_MODEL = mydircat($corpdir, $lms{$lp});
 print STDERR "            LM: $LANG_MODEL\n";
+my $CORPUS = mydircat($corpdir, $corpora{$lp});
+die "Can't find corpus: $CORPUS" unless -f $CORPUS;
+
+my $dev = mydircat($corpdir, $devs{$lp});
+my $drefs = $devrefs{$lp};
+die "Can't find dev: $dev\n" unless -f $dev;
+die "Dev refs not set" unless $drefs;
+$drefs = mydircat($corpdir, $drefs);
+
+my $test = mydircat($corpdir, $tests{$lp});
+my $teval = mydircat($corpdir, $testevals{$lp});
+die "Can't find test: $test\n" unless -f $test;
+assert_exec($teval);
+
+# MAKE DEV
+print STDERR "\nFILTERING FOR dev...\n";
+print STDERR "DEV: $dev (REFS=$drefs)\n";
+`mkdir -p $outdir`;
+my $devgrammar = filter($grammar, $dev, 'dev', $outdir);
+my $devini = mydircat($outdir, "cdec-dev.ini");
+write_cdec_ini($devini, $devgrammar);
+
+
+# MAKE TEST
+print STDERR "\nFILTERING FOR test...\n";
+print STDERR "TEST: $test (EVAL=$teval)\n";
+`mkdir -p $outdir`;
+my $testgrammar = filter($grammar, $test, 'test', $outdir);
+my $testini = mydircat($outdir, "cdec-test.ini");
+write_cdec_ini($testini, $testgrammar);
+
+
+sub filter {
+  my ($grammar, $set, $name, $outdir) = @_;
+  my $outgrammar = mydircat($outdir, "$name.scfg.gz");
+  if (-f $outgrammar) { print STDERR "$outgrammar exists - REUSING!\n"; } else {
+    my $cmd = "gunzip -c $grammar | $FILTSCORE -c $CORPUS -t $dev | gzip > $outgrammar";
+    safesystem($cmd) or die "Can't filter and score grammar!";
+  }
+  return $outgrammar;
+}
+
+sub mydircat {
+ my ($base, $suffix) = @_;
+ if ($suffix =~ /^\//) { return $suffix; }
+ my $res = $base . '/' . $suffix;
+ $res =~ s/\/\//\//g;
+ return $res;
+}
 
 sub write_cdec_ini {
   my ($filename, $grammar_path) = (@_);
@@ -73,7 +135,7 @@ sub write_cdec_ini {
 formalism=scfg
 cubepruning_pop_limit=100
 add_pass_through_rules=true
-scfg_extra_glue_grammar=/export/ws10smt/cdyer/glue.scfg.gz
+scfg_extra_glue_grammar=/export/ws10smt/data/glue/glue.scfg.gz
 grammar=$grammar_path
 feature_function=WordPenalty
 feature_function=LanguageModel -o 3 $LANG_MODEL
@@ -92,3 +154,31 @@ run MERT, report scores.
 
 EOT
 }
+
+sub safesystem {
+  print STDERR "Executing: @_\n";
+  system(@_);
+  if ($? == -1) {
+      print STDERR "ERROR: Failed to execute: @_\n  $!\n";
+      exit(1);
+  }
+  elsif ($? & 127) {
+      printf STDERR "ERROR: Execution of: @_\n  died with signal %d, %s coredump\n",
+          ($? & 127),  ($? & 128) ? 'with' : 'without';
+      exit(1);
+  }
+  else {
+    my $exitcode = $? >> 8;
+    print STDERR "Exit code: $exitcode\n" if $exitcode;
+    return ! $exitcode;
+  }
+}
+
+sub assert_exec {
+  my @files = @_;
+  for my $file (@files) {
+    die "Can't find $file - did you run make?\n" unless -e $file;
+    die "Can't execute $file" unless -e $file;
+  }
+};
+
