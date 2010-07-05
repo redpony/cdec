@@ -1,3 +1,5 @@
+//TODO: extra int in state to hold "GAP" token is not needed.  if there are less than (N-1) words, then null terminate the e.g. left words.  however, this would mean treating gapless items differently.  not worth the potential bugs right now.
+
 //TODO: allow features to reorder by heuristic*weight the rules' terminal phrases (or of hyperedges').  if first pass has pruning, then compute over whole ruleset as part of heuristic
 
 //TODO: verify that this is true: if ngram order is bigger than lm state's, then the longest possible ngram scores are still used.  if you really want a lower order, a truncated copy of the LM should be small enough.  otherwise, an option to null out words outside of the order's window would need to be implemented.
@@ -201,6 +203,11 @@ class LanguageModelImpl {
     return ngram_.wordProb(word, (VocabIndex*)context);
   }
 
+  /// NOT a negative logp, i.e. should be worse prob = more negative.  that's what SRI wordProb returns, fortunately.
+  inline double clamp(double logp) const {
+    return logp < floor_ ? floor_ : logp;
+  }
+
   inline double LookupProbForBufferContents(int i) {
 //    int k = i; cerr << "P("; while(buffer_[k] > 0) { std::cerr << TD::Convert(buffer_[k++]) << " "; }
     double p = WordProb(buffer_[i], &buffer_[i+1]);
@@ -251,26 +258,34 @@ class LanguageModelImpl {
     return ProbNoRemnant(len - 1, len);
   }
 
+  //TODO: make sure this doesn't get used in FinalTraversal, or if it does, that it causes no harm.
+
+  //TODO: use stateless_cost instead of ProbNoRemnant, check left words only.  for items w/ fewer words than ctx len, how are they represented?  kNONE padded?
+
+  //TODO: make sure that Vocab_None is set to kNONE in srilm (-1), or that SRILM otherwise interprets -1 as a terminator and not a word
   double EstimateProb(const void* state) {
+    if (!order_) return 0.;
     int len = StateSize(state);
     // cerr << "residual len: " << len << endl;
     buffer_.resize(len + 1);
     buffer_[len] = kNONE;
-    const int* astate = reinterpret_cast<const int*>(state);
+    const int* astate = reinterpret_cast<const WordID*>(state);
     int i = len - 1;
     for (int j = 0; j < len; ++j,--i)
       buffer_[i] = astate[j];
     return ProbNoRemnant(len - 1, len);
   }
 
+  // for <s> (n-1 left words) and (n-1 right words) </s>
   double FinalTraversalCost(const void* state) {
+    if (!order_) return 0.;
     int slen = StateSize(state);
     int len = slen + 2;
     // cerr << "residual len: " << len << endl;
     buffer_.resize(len + 1);
     buffer_[len] = kNONE;
     buffer_[len-1] = kSTART;
-    const int* astate = reinterpret_cast<const int*>(state);
+    const int* astate = reinterpret_cast<const WordID*>(state);
     int i = len - 2;
     for (int j = 0; j < slen; ++j,--i)
       buffer_[i] = astate[j];
@@ -279,8 +294,42 @@ class LanguageModelImpl {
     return ProbNoRemnant(len - 1, len);
   }
 
+  /// just how SRILM likes it: [rbegin,rend) is a phrase in reverse word order and null terminated so *rend=kNONE.  return unigram score for rend[-1] plus
+  /// cost returned is some kind of log prob (who cares, we're just adding)
+  double stateless_cost(WordID *rbegin,WordID *rend) {
+    double sum=0;
+    for (;rend>rbegin;--rend)
+      sum+=clamp(WordProb(rend[-1],rend));
+    return sum;
+  }
+
+  //TODO: this would be a fine rule heuristic (for reordering hyperedges prior to rescoring.  for now you can just use a same-lm-file -o 1 prelm-rescore :(
+  double stateless_cost(TRule const& rule) {
+    int len = rule.ELength(); // use a gap for each variable
+    buffer_.resize(len + 1);
+    buffer_[len] = kNONE;
+    WordID * const rend=&buffer_[0]+len;
+    WordID *r=rend;  // append by *--r = x
+    const vector<WordID>& e = rule.e();
+    //SRILM is reverse order null terminated
+    //let's write down each phrase in reverse order and score it (note: we could lay them out consecutively then score them (we allocated enough buffer for that), but we won't actually use the whole buffer that way, since it wastes L1 cache.
+    double sum=0.;
+    for (unsigned j = 0; j < e.size(); ++j) {
+      if (e[j] < 1) { // variable
+        sum+=stateless_cost(r,rend);
+        r=rend;
+      } else { // terminal
+          *--r=e[j];
+      }
+    }
+    // last phrase (if any)
+    return sum+stateless_cost(r,rend);
+  }
+
   //NOTE: this is where the scoring of words happens (heuristic happens in EstimateProb)
   double LookupWords(const TRule& rule, const vector<const void*>& ant_states, void* vstate) {
+    if (order_==0)
+      return stateless_cost(rule);
     int len = rule.ELength() - rule.Arity();
     for (int i = 0; i < ant_states.size(); ++i)
       len += StateSize(ant_states[i]);
@@ -328,8 +377,14 @@ class LanguageModelImpl {
     return sum;
   }
 
+private:
+public:
+
   static int OrderToStateSize(int order) {
-    return ((order-1) * 2 + 1) * sizeof(WordID) + 1;
+    //TODO: should make the order==0 or not cases virtual overrides (performance gain) except then I have a 2x2 set of options against primary ngram owner vs. copy owner - which is easily factored for a performance loss.  templates would be relatively concise and obviously lose no perf.  honestly why am i even talking about performance?  this is probably irrelevant.  profile.
+    return order>1 ?
+      ((order-1) * 2 + 1) * sizeof(WordID) + 1
+      : 0;
   }
 
  protected:
@@ -375,6 +430,7 @@ LanguageModelImpl *make_lm_impl(int order, string const& f)
   if (f.find("lm://") == 0) {
     return new ClientLMI(order,f.substr(5));
   } else if (ngs.have(f)) {
+    cerr<<"Reusing already loaded Ngram LM: "<<f<<endl;
     return new ReuseLMI(order,ngs.get(f));
   } else {
     LanguageModelImpl *r=new LanguageModelImpl(order,f);
@@ -432,8 +488,9 @@ LanguageModel::LanguageModel(const string& param) {
   if (!parse_lmspec(param,order,featurename,filename))
     abort();
   fid_=FD::Convert("LanguageModel");
-  SetStateSize(LanguageModelImpl::OrderToStateSize(order));
   pimpl_ = make_lm_impl(order,filename);
+  //TODO: see if it's actually possible to set order_ later to mutate an already used FF for e.g. multipass.  comment in ff.h says only to change state size in constructor.  clone instead?  differently -n named ones from same lm filename are already possible, so no urgency.
+  SetStateSize(LanguageModelImpl::OrderToStateSize(order));
 }
 
 LanguageModel::~LanguageModel() {
@@ -527,7 +584,7 @@ LanguageModelRandLM::LanguageModelRandLM(const string& param) :
       filename = argv[0];
     }
   }
-  SetStateSize(LanguageModelImpl::OrderToStateSize(order));
+  set_order(order);
   int cache_MB = 200; // increase cache size
   randlm::RandLM* rlm = randlm::RandLM::initRandLM(filename, order, cache_MB);
   assert(rlm != NULL);
