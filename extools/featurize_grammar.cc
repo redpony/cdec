@@ -1,5 +1,5 @@
 /*
- * Filter & score a grammar in striped format
+ * Featurize a grammar in striped format
  */
 #include <iostream>
 #include <string>
@@ -35,10 +35,7 @@ typedef unordered_map<vector<WordID>, RuleStatistics, boost::hash<vector<WordID>
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()
-        ("test_set,t", po::value<string>(), "Filter for this test set (not specified = no filtering)")
-        ("top_e_given_f,n", po::value<size_t>()->default_value(30), "Keep top N rules, according to p(e|f). 0 for all")
-        ("backoff_features", "Extract backoff X-features, assumes E, F, EF counts")
-//        ("feature,f", po::value<vector<string> >()->composing(), "List of features to compute")
+        ("filtered_grammar,g", po::value<string>(), "Grammar to add features to")
         ("aligned_corpus,c", po::value<string>(), "Aligned corpus (single line format)")
         ("help,h", "Print this help message and exit");
   po::options_description clo("Command line options");
@@ -49,11 +46,12 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::notify(*conf);
 
   if (conf->count("help") || conf->count("aligned_corpus")==0) {
-    cerr << "\nUsage: filter_score_grammar -t TEST-SET.fr -c ALIGNED_CORPUS.fr-en-al [-options] < grammar\n";
+    cerr << "\nUsage: featurize_grammar -g FILTERED-GRAMMAR.gz -c ALIGNED_CORPUS.fr-en-al [-options] < UNFILTERED-GRAMMAR\n";
     cerr << dcmdline_options << endl;
     exit(1);
   }
-}   
+}
+
 namespace {
   inline bool IsWhitespace(char c) { return c == ' ' || c == '\t'; }
   inline bool IsBracket(char c){return c == '[' || c == ']';}
@@ -81,7 +79,6 @@ int ReadPhraseUntilDividerOrEnd(const char* buf, const int sstart, const int end
   }
   return ptr;
 }
-
 
 void ParseLine(const char* buf, vector<WordID>* cur_key, ID2RuleStatistics* counts) {
   static const WordID kDIV = TD::Convert("|||");
@@ -179,7 +176,6 @@ void LexTranslationTable::createTTable(const char* buf){
   }
 }
 
-
 inline float safenlog(float v) {
   if (v == 1.0f) return 0.0f;
   float res = -log(v);
@@ -187,79 +183,42 @@ inline float safenlog(float v) {
   return res;
 }
 
-struct SourceFilter {
-  // return true to keep the rule, otherwise false
-  virtual bool Matches(const vector<WordID>& key) const = 0;
-  virtual ~SourceFilter() {}
-};
-
-struct DumbSuffixTreeFilter : SourceFilter {
-  DumbSuffixTreeFilter(const string& corpus) :
-      kDIV(TD::Convert("|||")) {
-    cerr << "Build suffix tree from test set in " << corpus << endl;
-    assert(FileExists(corpus));
-    ReadFile rfts(corpus);
-    istream& testSet = *rfts.stream();
-    char* buf = new char[MAX_LINE_LENGTH];
-    AnnotatedParallelSentence sent;
-
-    /* process the data set to build suffix tree
-     */
-    while(!testSet.eof()) {
-      testSet.getline(buf, MAX_LINE_LENGTH);
-      if (buf[0] == 0) continue;
-
-      //hack to read in the test set using AnnotatedParallelSentence
-      strcat(buf," ||| fake ||| 0-0");
-      sent.ParseInputLine(buf);
-
-      //add each successive suffix to the tree
-      for(int i=0; i<sent.f_len; i++)
-        root.InsertPath(sent.f, i, sent.f_len - 1);
-    }
-    delete[] buf;
-  }
-  virtual bool Matches(const vector<WordID>& key) const {
-    const Node<int>* curnode = &root;
-    const int ks = key.size() - 1;
-    for(int i=0; i < ks; i++) {
-      const string& word = TD::Convert(key[i]);
-      if (key[i] == kDIV || (word[0] == '[' && word[word.size() - 1] == ']')) { // non-terminal
-        curnode = &root;
-      } else if (curnode) {
-        curnode = curnode->Extend(key[i]);
-        if (!curnode) return false;
-      }
-    }
-    return true;
-  }
-  const WordID kDIV;
-  Node<int> root;
-};
+static bool IsZero(float f) { return (f > 0.999 && f < 1.001); }
 
 struct FeatureExtractor {
-  FeatureExtractor(const std::string& name) : extractor_name(name) {}
-  virtual void ExtractFeatures(const vector<WordID>& lhs_src,
+  // create any keys necessary
+  virtual void ObserveFilteredRule(const WordID lhs,
+                                   const vector<WordID>& src,
+                                   const vector<WordID>& trg) {}
+
+  // compute statistics over keys, the same lhs-src-trg tuple may be seen
+  // more than once
+  virtual void ObserveUnfilteredRule(const WordID lhs,
+                                     const vector<WordID>& src,
+                                     const vector<WordID>& trg,
+                                     const RuleStatistics& info) {}
+
+  // compute features, a unique lhs-src-trg tuple will be seen exactly once
+  virtual void ExtractFeatures(const WordID lhs,
+                               const vector<WordID>& src,
                                const vector<WordID>& trg,
                                const RuleStatistics& info,
                                SparseVector<float>* result) const = 0;
-  virtual ~FeatureExtractor() {}
-  const string extractor_name;
-};
 
-static bool IsZero(float f) { return (f > 0.999 && f < 1.001); }
+  virtual ~FeatureExtractor() {}
+};
 
 struct LogRuleCount : public FeatureExtractor {
   LogRuleCount() :
-    FeatureExtractor("LogRuleCount"),
     fid_(FD::Convert("LogRuleCount")),
     sfid_(FD::Convert("SingletonRule")),
     kCFE(FD::Convert("CFE")) {}
-  virtual void ExtractFeatures(const vector<WordID>& lhs_src,
+  virtual void ExtractFeatures(const WordID lhs,
+                               const vector<WordID>& src,
                                const vector<WordID>& trg,
                                const RuleStatistics& info,
                                SparseVector<float>* result) const {
-    (void) lhs_src; (void) trg;
+    (void) lhs; (void) src; (void) trg;
     result->set_value(fid_, log(info.counts.value(kCFE)));
     if (IsZero(info.counts.value(kCFE)))
       result->set_value(sfid_, 1);
@@ -269,81 +228,11 @@ struct LogRuleCount : public FeatureExtractor {
   const int kCFE;
 };
 
-struct LogECount : public FeatureExtractor {
-  LogECount() :
-    FeatureExtractor("LogECount"),
-    sfid_(FD::Convert("SingletonE")),
-    fid_(FD::Convert("LogECount")), kCE(FD::Convert("CE")) {}
-  virtual void ExtractFeatures(const vector<WordID>& lhs_src,
-                               const vector<WordID>& trg,
-                               const RuleStatistics& info,
-                               SparseVector<float>* result) const {
-    (void) lhs_src; (void) trg;
-    assert(info.counts.value(kCE) > 0);
-    result->set_value(fid_, log(info.counts.value(kCE)));
-    if (IsZero(info.counts.value(kCE)))
-      result->set_value(sfid_, 1);
-  }
-  const int sfid_;
-  const int fid_;
-  const int kCE;
-};
-
-struct LogFCount : public FeatureExtractor {
-  LogFCount() :
-    FeatureExtractor("LogFCount"),
-    sfid_(FD::Convert("SingletonF")),
-    fid_(FD::Convert("LogFCount")), kCF(FD::Convert("CF")) {}
-  virtual void ExtractFeatures(const vector<WordID>& lhs_src,
-                               const vector<WordID>& trg,
-                               const RuleStatistics& info,
-                               SparseVector<float>* result) const {
-    (void) lhs_src; (void) trg;
-    assert(info.counts.value(kCF) > 0);
-    result->set_value(fid_, log(info.counts.value(kCF)));
-    if (IsZero(info.counts.value(kCF)))
-      result->set_value(sfid_, 1);
-  }
-  const int sfid_;
-  const int fid_;
-  const int kCF;
-};
-
-struct EGivenFExtractor : public FeatureExtractor {
-  EGivenFExtractor() :
-    FeatureExtractor("EGivenF"),
-    fid_(FD::Convert("EGivenF")), kCF(FD::Convert("CF")), kCFE(FD::Convert("CFE")) {}
-  virtual void ExtractFeatures(const vector<WordID>& lhs_src,
-                               const vector<WordID>& trg,
-                               const RuleStatistics& info,
-                               SparseVector<float>* result) const {
-    (void) lhs_src; (void) trg;
-    assert(info.counts.value(kCF) > 0.0f);
-    result->set_value(fid_, safenlog(info.counts.value(kCFE) / info.counts.value(kCF)));
-  }
-  const int fid_, kCF, kCFE;
-};
-
-struct FGivenEExtractor : public FeatureExtractor {
-  FGivenEExtractor() :
-    FeatureExtractor("FGivenE"),
-    fid_(FD::Convert("FGivenE")), kCE(FD::Convert("CE")), kCFE(FD::Convert("CFE")) {}
-  virtual void ExtractFeatures(const vector<WordID>& lhs_src,
-                               const vector<WordID>& trg,
-                               const RuleStatistics& info,
-                               SparseVector<float>* result) const {
-    (void) lhs_src; (void) trg;
-    assert(info.counts.value(kCE) > 0.0f);
-    result->set_value(fid_, safenlog(info.counts.value(kCFE) / info.counts.value(kCE)));
-  }
-  const int fid_, kCE, kCFE;
-};
-
 // this extracts the lexical translation prob features
 // in BOTH directions.
 struct LexProbExtractor : public FeatureExtractor {
   LexProbExtractor(const std::string& corpus) :
-      FeatureExtractor("LexProb"), e2f_(FD::Convert("LexE2F")), f2e_(FD::Convert("LexF2E")) {
+      e2f_(FD::Convert("LexE2F")), f2e_(FD::Convert("LexF2E")) {
     ReadFile rf(corpus);
     //create lexical translation table
     cerr << "Computing lexical translation probabilities from " << corpus << "..." << endl;
@@ -355,20 +244,10 @@ struct LexProbExtractor : public FeatureExtractor {
       table.createTTable(buf);              
     }
     delete[] buf;
-#if 0
-    bool PRINT_TABLE=false;
-    if (PRINT_TABLE) {
-      ofstream trans_table;
-      trans_table.open("lex_trans_table.out");
-      for(map < pair<WordID,WordID>,int >::iterator it = table.word_translation.begin(); it != table.word_translation.end(); ++it) {
-        trans_table <<  TD::Convert(trg.first) <<  "|||" << TD::Convert(trg.second) << "==" << it->second << "//" << table.total_foreign[trg.first] << "//" << table.total_english[trg.second] << endl;
-      } 
-      trans_table.close();
-    }
-#endif
   }
 
-  virtual void ExtractFeatures(const vector<WordID>& lhs_src,
+  virtual void ExtractFeatures(const WordID lhs,
+                               const vector<WordID>& src,
                                const vector<WordID>& trg,
                                const RuleStatistics& info,
                                SparseVector<float>* result) const {
@@ -381,24 +260,24 @@ struct LexProbExtractor : public FeatureExtractor {
     for (ita = al.begin(); ita != al.end(); ++ita) {
             if (DEBUG) {
               cerr << "\nA:" << ita->first << "," << ita->second << "::";
-              cerr <<  TD::Convert(lhs_src[ita->first + 2]) << "-" << TD::Convert(trg[ita->second]);
+              cerr <<  TD::Convert(src[ita->first]) << "-" << TD::Convert(trg[ita->second]);
             }
 
             //Lookup this alignment probability in the table
-            int temp = table.word_translation[pair<WordID,WordID> (lhs_src[ita->first+2],trg[ita->second])];
+            int temp = table.word_translation[pair<WordID,WordID> (src[ita->first],trg[ita->second])];
             float f2e=0, e2f=0;
-            if ( table.total_foreign[lhs_src[ita->first+2]] != 0)
-              f2e = (float) temp / table.total_foreign[lhs_src[ita->first+2]];
+            if ( table.total_foreign[src[ita->first]] != 0)
+              f2e = (float) temp / table.total_foreign[src[ita->first]];
             if ( table.total_english[trg[ita->second]] !=0 )
               e2f = (float) temp / table.total_english[trg[ita->second]];
             if (DEBUG) printf (" %d %E %E\n", temp, f2e, e2f);
               
             //local counts to keep track of which things haven't been aligned, to later compute their null alignment
-            if (foreign_aligned.count(lhs_src[ita->first+2])) {
-              foreign_aligned[ lhs_src[ita->first+2] ].first++;
-              foreign_aligned[ lhs_src[ita->first+2] ].second += e2f;
+            if (foreign_aligned.count(src[ita->first])) {
+              foreign_aligned[ src[ita->first] ].first++;
+              foreign_aligned[ src[ita->first] ].second += e2f;
             } else {
-              foreign_aligned[ lhs_src[ita->first+2] ] = pair<int,float> (1,e2f);
+              foreign_aligned[ src[ita->first] ] = pair<int,float> (1,e2f);
             }
   
             if (english_aligned.count( trg[ ita->second] )) {
@@ -413,17 +292,17 @@ struct LexProbExtractor : public FeatureExtractor {
           static const WordID NULL_ = TD::Convert("NULL");
 
           //compute lexical weight P(F|E) and include unaligned foreign words
-           for(int i=0;i<lhs_src.size(); i++) {
-               if (!table.total_foreign.count(lhs_src[i])) continue;      //if we dont have it in the translation table, we won't know its lexical weight
+           for(int i=0;i<src.size(); i++) {
+               if (!table.total_foreign.count(src[i])) continue;      //if we dont have it in the translation table, we won't know its lexical weight
                
-               if (foreign_aligned.count(lhs_src[i])) 
+               if (foreign_aligned.count(src[i])) 
                  {
-                   pair<int, float> temp_lex_prob = foreign_aligned[lhs_src[i]];
+                   pair<int, float> temp_lex_prob = foreign_aligned[src[i]];
                    final_lex_e2f *= temp_lex_prob.second / temp_lex_prob.first;
                  }
                else //dealing with null alignment
                  {
-                   int temp_count = table.word_translation[pair<WordID,WordID> (lhs_src[i],NULL_)];
+                   int temp_count = table.word_translation[pair<WordID,WordID> (src[i],NULL_)];
                    float temp_e2f = (float) temp_count / table.total_english[NULL_];
                    final_lex_e2f *= temp_e2f;
                  }                              
@@ -456,68 +335,76 @@ struct LexProbExtractor : public FeatureExtractor {
 int main(int argc, char** argv){
   po::variables_map conf;
   InitCommandLine(argc, argv, &conf);
-  const int max_options = conf["top_e_given_f"].as<size_t>();;
   ifstream alignment (conf["aligned_corpus"].as<string>().c_str());
-  istream& unscored_grammar = cin;
-  ostream& scored_grammar = cout;
+  ReadFile fg1(conf["filtered_grammar"].as<string>());
 
-  boost::shared_ptr<SourceFilter> filter;
-  if (conf.count("test_set"))
-    filter.reset(new DumbSuffixTreeFilter(conf["test_set"].as<string>()));
+  istream& fs1 = *fg1.stream();
 
   // TODO make this list configurable
   vector<boost::shared_ptr<FeatureExtractor> > extractors;
-  if (conf.count("backoff_features")) {
-    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LogRuleCount));
-    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LogECount));
-    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LogFCount));
-    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new EGivenFExtractor));
-    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new FGivenEExtractor));
-    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LexProbExtractor(conf["aligned_corpus"].as<string>())));
-  } else {
-    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LogRuleCount));
-    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LogFCount));
-    extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LexProbExtractor(conf["aligned_corpus"].as<string>())));
-  }
+  extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LogRuleCount));
+  extractors.push_back(boost::shared_ptr<FeatureExtractor>(new LexProbExtractor(conf["aligned_corpus"].as<string>())));
 
   //score unscored grammar
-  cerr <<"Scoring grammar..." << endl;
+  cerr << "Reading filtered grammar to detect keys..." << endl;
   char* buf = new char[MAX_LINE_LENGTH];
 
   ID2RuleStatistics acc, cur_counts;
   vector<WordID> key, cur_key,temp_key;
+  WordID lhs = 0;
+  vector<WordID> src;
+
+#if 0
   int line = 0;
-
-  const int kLogRuleCount = FD::Convert("LogRuleCount");
-  multimap<float, string> options; 
-  while(!unscored_grammar.eof())
-    {
-      ++line;
-      options.clear();
-      unscored_grammar.getline(buf, MAX_LINE_LENGTH);
-      if (buf[0] == 0) continue;
-      ParseLine(buf, &cur_key, &cur_counts);
-      if (!filter || filter->Matches(cur_key)) {
-        //loop over all the Target side phrases that this source aligns to
-        for (ID2RuleStatistics::const_iterator it = cur_counts.begin(); it != cur_counts.end(); ++it) {
-
-          SparseVector<float> feats;
-          for (int i = 0; i < extractors.size(); ++i)
-            extractors[i]->ExtractFeatures(cur_key, it->first, it->second, &feats);
-
-           ostringstream os;
-           os << TD::GetString(cur_key)
-              << ' ' << TD::GetString(it->first) << " ||| ";
-           feats.Write(false, &os);
-           options.insert(make_pair(-feats.value(kLogRuleCount), os.str()));
-        }
-        int ocount = 0;
-        for (multimap<float,string>::iterator it = options.begin(); it != options.end(); ++it) {
-          scored_grammar << it->second << endl;
-          ++ocount;
-          if (ocount == max_options) break;
-        }
-      }
+  while(fs1) {
+    fs1.getline(buf, MAX_LINE_LENGTH);
+    if (buf[0] == 0) continue;
+    ParseLine(buf, &cur_key, &cur_counts);
+    src.resize(cur_key.size() - 2);
+    for (int i = 0; i < src.size(); ++i) src[i] = cur_key[i+2];
+    lhs = cur_key[0];
+    for (ID2RuleStatistics::const_iterator it = cur_counts.begin(); it != cur_counts.end(); ++it) {
+      for (int i = 0; i < extractors.size(); ++i)
+        extractors[i]->ObserveFilteredRule(lhs, src, it->first);
     }
+  }
+
+  cerr << "Reading unfiltered grammar..." << endl;
+  while(cin) {
+    cin.getline(buf, MAX_LINE_LENGTH);
+    if (buf[0] == 0) continue;
+    ParseLine(buf, &cur_key, &cur_counts);
+    src.resize(cur_key.size() - 2);
+    for (int i = 0; i < src.size(); ++i) src[i] = cur_key[i+2];
+    lhs = cur_key[0];
+    for (ID2RuleStatistics::const_iterator it = cur_counts.begin(); it != cur_counts.end(); ++it) {
+      // TODO set lhs, src, trg
+      for (int i = 0; i < extractors.size(); ++i)
+        extractors[i]->ObserveUnfilteredRule(lhs, src, it->first, it->second);
+    }
+  }
+#endif
+
+  ReadFile fg2(conf["filtered_grammar"].as<string>());
+  istream& fs2 = *fg2.stream();
+  cerr << "Reading filtered grammar and adding features..." << endl;
+  while(fs2) {
+    fs2.getline(buf, MAX_LINE_LENGTH);
+    if (buf[0] == 0) continue;
+    ParseLine(buf, &cur_key, &cur_counts);
+    src.resize(cur_key.size() - 2);
+    for (int i = 0; i < src.size(); ++i) src[i] = cur_key[i+2];
+    lhs = cur_key[0];
+
+    //loop over all the Target side phrases that this source aligns to
+    for (ID2RuleStatistics::const_iterator it = cur_counts.begin(); it != cur_counts.end(); ++it) {
+      SparseVector<float> feats;
+      for (int i = 0; i < extractors.size(); ++i)
+        extractors[i]->ExtractFeatures(lhs, src, it->first, it->second, &feats);
+      cout << TD::GetString(cur_key) << " ||| " << TD::GetString(it->first) << " ||| ";
+      feats.Write(false, &cout);
+      cout << endl;
+    }
+  }
 }
 
