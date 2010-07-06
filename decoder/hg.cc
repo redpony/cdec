@@ -204,6 +204,7 @@ void Hypergraph::DensityPruneInsideOutside(const double scale,
   const int plen = ViterbiPathLength(*this);
   vector<WordID> bp;
   int rnum = min(static_cast<int>(edges_.size()), static_cast<int>(density * static_cast<double>(plen)));
+  cerr << "Density pruning: keep "<<rnum<<" of "<<edges_.size()<<" edges (viterbi = "<<plen<<" edges)"<<endl;
   if (rnum == edges_.size()) {
     cerr << "No pruning required: denisty already sufficient";
     return;
