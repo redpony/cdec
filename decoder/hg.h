@@ -166,6 +166,7 @@ class Hypergraph {
   // remove edges from the hypergraph if prune_edge[edge_id] is true
   // TODO need to investigate why this shouldn't be run for the forest trans
   // case.  To investigate, change false to true and see where ftrans crashes
+  //TODO: what does the above "TODO" comment mean?  that PruneEdges can lead to a crash?  or that run_inside_algorithm should be false?  there definitely is an unsolved bug, see hg.cc - workaround added
   void PruneEdges(const std::vector<bool>& prune_edge, bool run_inside_algorithm = false);
 
   // for density>=1.0, keep this many times the edges needed for the 1best derivation
