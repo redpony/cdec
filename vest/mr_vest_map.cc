@@ -25,6 +25,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("reference,r",po::value<vector<string> >(), "[REQD] Reference translation (tokenized text)")
         ("source,s",po::value<string>(), "Source file (ignored, except for AER)")
         ("loss_function,l",po::value<string>()->default_value("ibm_bleu"), "Loss function being optimized")
+    ("input,i",po::value<string>()->default_value("-"), "Input file to map (- is STDIN)")
         ("help,h", "Help");
   po::options_description dcmdline_options;
   dcmdline_options.add(opts);
@@ -65,9 +66,11 @@ int main(int argc, char** argv) {
   cerr << "Loaded " << ds.size() << " references for scoring with " << loss_function << endl;
   Hypergraph hg;
   string last_file;
-  while(cin) {
+  ReadFile in_read(conf["input"].as<string>());
+  istream &in=*in_read.stream();
+  while(in) {
     string line;
-    getline(cin, line);
+    getline(in, line);
     if (line.empty()) continue;
     istringstream is(line);
     int sent_id;
