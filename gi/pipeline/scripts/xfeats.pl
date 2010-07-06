@@ -1,28 +1,31 @@
 #!/usr/bin/perl -w
 use strict;
 
-die "Usage: $0 x-grammar.scfg < cat-grammar.scfg\n" unless scalar @ARGV > 0;
+die "Usage: $0 x-grammar.scfg[.gz] < cat-grammar.scfg\n" unless scalar @ARGV > 0;
 
 my $xgrammar = shift @ARGV;
-open F, "<$xgrammar" or die "Can't read $xgrammar: $!";
+die "Can't find $xgrammar" unless -f $xgrammar;
+my $fh;
+if ($xgrammar =~ /\.gz$/) {
+  open $fh, "gunzip -c $xgrammar|" or die "Can't fork: $!";
+} else {
+  open $fh, "<$xgrammar" or die "Can't read $xgrammar: $!";
+}
 print STDERR "Reading X-feats from $xgrammar...\n";
 my %dict;
-while(<F>) {
+while(<$fh>) {
   chomp;
   my ($lhs, $f, $e, $feats) = split / \|\|\| /;
   my $xfeats;
   my $cc = 0;
-  if ($feats =~ /(EGivenF=[^ ]+)( |$)/) {
-    $xfeats = "X_$1"; $cc++;
+  my @xfeats = ();
+  while ($feats =~ /(EGivenF|FGivenE|LogRuleCount|LogECount|LogFCount|SingletonRule|SingletonE|SingletonF)=([^ ]+)( |$)/og) {
+    push @xfeats, "X_$1=$2";
   }
-  if ($feats =~ /(FGivenE=[^ ]+)( |$)/) {
-    $xfeats = "$xfeats X_$1"; $cc++;
-  }
-  die "EGivenF and FGivenE features not found: $_" unless $cc == 2;
-  #print "$lhs ||| $f ||| $e ||| $xfeats\n";
-  $dict{"$lhs ||| $f ||| $e"} = $xfeats;
+  #print "$lhs ||| $f ||| $e ||| @xfeats\n";
+  $dict{"$lhs ||| $f ||| $e"} = "@xfeats";
 }
-close F;
+close $fh;
 
 print STDERR "Add features...\n";
 while(<>) {
