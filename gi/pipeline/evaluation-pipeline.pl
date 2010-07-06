@@ -156,7 +156,8 @@ if (-f $tuned_weights) {
   chdir $outdir or die "Can't chdir to $outdir: $!";
   $weights = `$cmd`;
   die "MERT reported non-zero exit code" unless $? == 0;
-  `cp $weights $tuned_weights`;
+  chomp $weights;
+  safesystem($tuned_weights, "cp $weights $tuned_weights");
   print STDERR "TUNED WEIGHTS: $tuned_weights\n";
   die "$tuned_weights is missing!" unless -f $tuned_weights;
 }
