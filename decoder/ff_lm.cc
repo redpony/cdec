@@ -4,6 +4,13 @@
 
 //NOTE: if ngram order is bigger than lm state's, then the longest possible ngram scores are still used.  if you really want a lower order, a truncated copy of the LM should be small enough.  otherwise, an option to null out words outside of the order's window would need to be implemented.
 
+//#define UNIGRAM_DEBUG
+#ifdef UNIGRAM_DEBUG
+# define UNIDBG(x) do { cerr << x; } while(0)
+#else
+# define UNIDBG(x)
+#endif
+
 #include "ff_lm.h"
 
 #include <sstream>
@@ -168,7 +175,7 @@ class LanguageModelImpl {
       kNONE(-1),
       kSTAR(TD::Convert("<{STAR}>"))
   , unigram(order<=1) {}
-
+//TODO: show that unigram special case (0 state) computes what it should.
   LanguageModelImpl(int order, const string& f) :
       ngram_(*TD::dict_, order), buffer_(), order_(order), state_size_(OrderToStateSize(order) - 1),
       floor_(-100.0),
@@ -300,14 +307,19 @@ class LanguageModelImpl {
   /// just how SRILM likes it: [rbegin,rend) is a phrase in reverse word order and null terminated so *rend=kNONE.  return unigram score for rend[-1] plus
   /// cost returned is some kind of log prob (who cares, we're just adding)
   double stateless_cost(WordID *rbegin,WordID *rend) {
+    UNIDBG("p(");
     double sum=0;
-    for (;rend>rbegin;--rend)
+    for (;rend>rbegin;--rend) {
       sum+=clamp(WordProb(rend[-1],rend));
+      UNIDBG(","<<TD::Convert(rend[-1]));
+    }
+    UNIDBG(")="<<sum<<endl);
     return sum;
   }
 
   //TODO: this would be a fine rule heuristic (for reordering hyperedges prior to rescoring.  for now you can just use a same-lm-file -o 1 prelm-rescore :(
   double stateless_cost(TRule const& rule) {
+    //TODO: make sure this is correct.
     int len = rule.ELength(); // use a gap for each variable
     buffer_.resize(len + 1);
     buffer_[len] = kNONE;

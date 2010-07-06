@@ -93,7 +93,7 @@ ModelSet::ModelSet(const vector<double>& w, const vector<const FeatureFunction*>
 }
 
 void ModelSet::AddFeaturesToEdge(const SentenceMetadata& smeta,
-                                 const Hypergraph& hg,
+                                 const Hypergraph& /* hg */,
                                  const vector<string>& node_states,
                                  Hypergraph::Edge* edge,
                                  string* context,

@@ -10,8 +10,8 @@ struct Boolean {
   bool x;
   Boolean() : x() {  }
   Boolean(bool i) : x(i) {  }
-  operator bool() const { return x; }
-  // normally you'd use the logical (short circuit) || &&  operators, but bool really is guaranteed to be 0 or 1 numerically.
+  operator bool() const { return x; } // careful - this might cause a disaster with (bool)a + Boolean(b).
+  // normally you'd use the logical (short circuit) || &&  operators, but bool really is guaranteed to be 0 or 1 numerically.  also note that | and & have equal precedence (!)
   void operator+=(Boolean o) { x|=o.x; }
   friend inline Boolean operator +(Boolean a,Boolean b) {
     return Boolean(a.x|b.x);
