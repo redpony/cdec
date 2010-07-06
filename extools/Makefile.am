@@ -2,6 +2,8 @@ bin_PROGRAMS = \
   extractor \
   mr_stripe_rule_reduce \
   build_lexical_translation \
+  filter_grammar \
+  featurize_grammar \
   filter_score_grammar
 
 noinst_PROGRAMS =
@@ -9,6 +11,14 @@ noinst_PROGRAMS =
 filter_score_grammar_SOURCES = filter_score_grammar.cc extract.cc sentence_pair.cc
 filter_score_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
 filter_score_grammar_LDFLAGS = -all-static
+
+filter_grammar_SOURCES = filter_grammar.cc extract.cc sentence_pair.cc
+filter_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
+filter_grammar_LDFLAGS = -all-static
+
+featurize_grammar_SOURCES = featurize_grammar.cc extract.cc sentence_pair.cc
+featurize_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
+featurize_grammar_LDFLAGS = -all-static
 
 build_lexical_translation_SOURCES = build_lexical_translation.cc extract.cc sentence_pair.cc
 build_lexical_translation_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
