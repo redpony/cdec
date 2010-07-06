@@ -177,6 +177,8 @@ void Hypergraph::PruneEdges(const std::vector<bool>& prune_edge, bool run_inside
 
 void Hypergraph_finish_prune(Hypergraph &hg,vector<prob_t> const& io,double cutoff,vector<bool> const* preserve_mask,bool verbose=false)
 {
+  const double EPSILON=1e-5;
+  cutoff=cutoff-EPSILON; //
   vector<bool> prune(hg.NumberOfEdges());
   if (verbose) {
     if (preserve_mask) cerr << preserve_mask->size() << " " << prune.size() << endl;
@@ -210,9 +212,10 @@ void Hypergraph::DensityPruneInsideOutside(const double scale,
     return;
   }
   vector<prob_t> io(edges_.size());
-  if (use_sum_prod_semiring)
+  if (use_sum_prod_semiring) {
     ComputeEdgePosteriors(scale, &io);
-  else
+    assert(scale > 0.0);
+  } else
     ComputeBestPathThroughEdges(&io);
   assert(edges_.size() == io.size());
   vector<prob_t> sorted = io;
@@ -225,12 +228,12 @@ void Hypergraph::BeamPruneInsideOutside(
     const bool use_sum_prod_semiring,
     const double alpha,
     const vector<bool>* preserve_mask) {
-  assert(alpha > 0.0);
-  assert(scale > 0.0);
+  assert(alpha >= 0.0);
   vector<prob_t> io(edges_.size());
-  if (use_sum_prod_semiring)
+  if (use_sum_prod_semiring) {
     ComputeEdgePosteriors(scale, &io);
-  else
+    assert(scale > 0.0);
+  } else
     ComputeBestPathThroughEdges(&io);
   assert(edges_.size() == io.size());
   prob_t best;  // initializes to zero
