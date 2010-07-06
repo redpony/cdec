@@ -10,7 +10,6 @@
 #include <boost/random/mersenne_twister.hpp>
 
 #include "log_add.h"
-#include "gammadist.h"
 #include "slice-sampler.h"
 
 //
@@ -132,6 +131,17 @@ private:
       return log_prob + log_prior;
     }
   };
+   
+   /* lbetadist() returns the log probability density of x under a Beta(alpha,beta)
+   * distribution. - copied from Mark Johnson's gammadist.c
+   */
+    static long double lbetadist(long double x, long double alpha, long double beta);
+
+   /* lgammadist() returns the log probability density of x under a Gamma(alpha,beta)
+   * distribution - copied from Mark Johnson's gammadist.c
+   */
+  static long double lgammadist(long double x, long double alpha, long double beta);
+
 };
 
 template <typename Dish, typename Hash>
@@ -461,6 +471,24 @@ double
 PYP<Dish,Hash>::log_prior_b(double b, double gamma_c, double gamma_s) {
   return lgammadist(b, gamma_c, gamma_s); 
 }
+
+template <typename Dish, typename Hash>
+long double PYP<Dish,Hash>::lbetadist(long double x, long double alpha, long double beta) {
+  assert(x > 0);
+  assert(x < 1);
+  assert(alpha > 0);
+  assert(beta > 0);
+  return (alpha-1)*log(x)+(beta-1)*log(1-x)+lgamma(alpha+beta)-lgamma(alpha)-lgamma(beta);
+//boost::math::lgamma
+}
+
+template <typename Dish, typename Hash>
+long double PYP<Dish,Hash>::lgammadist(long double x, long double alpha, long double beta) {
+  assert(alpha > 0);
+  assert(beta > 0);
+  return (alpha-1)*log(x) - alpha*log(beta) - x/beta - lgamma(alpha);
+}
+
 
 template <typename Dish, typename Hash>
 void 
