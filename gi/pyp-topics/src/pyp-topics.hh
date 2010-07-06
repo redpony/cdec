@@ -11,7 +11,7 @@
 
 #include "pyp.hh"
 #include "corpus.hh"
-
+#include "workers.hh"
 
 class PYPTopics {
 public:
@@ -20,12 +20,13 @@ public:
   typedef double F;
 
 public:
-  PYPTopics(int num_topics, bool use_topic_pyp=false, unsigned long seed = 0) 
+  PYPTopics(int num_topics, bool use_topic_pyp=false, unsigned long seed = 0,
+        int max_threads = 1) 
     : m_num_topics(num_topics), m_word_pyps(1), 
     m_topic_pyp(0.5,1.0,seed), m_use_topic_pyp(use_topic_pyp),
     m_seed(seed),
     uni_dist(0,1), rng(seed == 0 ? (unsigned long)this : seed), 
-    rnd(rng, uni_dist) {}
+    rnd(rng, uni_dist), max_threads(max_threads) {}
 
   void sample_corpus(const Corpus& corpus, int samples,
                      int freq_cutoff_start=0, int freq_cutoff_end=0, 
@@ -78,6 +79,16 @@ private:
   base_generator_type rng; //this gets the seed
   gen_type rnd; //instantiate: rnd(rng, uni_dist)
                 //call: rnd() generates uniform on [0,1)
+
+  typedef boost::function<F()> JobReturnsF;
+  typedef SimpleWorker<JobReturnsF, F> SimpleResampleWorker;
+  typedef boost::ptr_vector<SimpleResampleWorker> WorkerPtrVect;
+
+  F hresample_docs(int num_threads, int thread_id);
+
+//  F hresample_topics();
+  
+  int max_threads;
 
   TermBackoffPtr m_backoff;
 };
