@@ -269,7 +269,7 @@ class LanguageModelImpl {
   double EstimateProb(const void* state) {
     if (unigram) return 0.;
     int len = StateSize(state);
-    // cerr << "residual len: " << len << endl;
+    //  << "residual len: " << len << endl;
     buffer_.resize(len + 1);
     buffer_[len] = kNONE;
     const int* astate = reinterpret_cast<const WordID*>(state);
