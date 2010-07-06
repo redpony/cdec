@@ -14,7 +14,7 @@ my $ITEMS_IN_MEMORY = 10000000;  # cache size in extractors
 my $NUM_TOPICS = 50;
 my $NUM_SAMPLES = 1000;
 my $CONTEXT_SIZE = 1;
-my $BIDIR = 1;
+my $BIDIR = 0;
 my $TOPICS_CONFIG = "pyp-topics.conf";
 
 my $EXTOOLS = "$SCRIPT_DIR/../../extools";

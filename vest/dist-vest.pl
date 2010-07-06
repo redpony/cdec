@@ -374,9 +374,9 @@ while (1){
 	print STDERR "\n==========\n";
 }
 
-print STDERR "\nFINAL WEIGHTS: $dir/$lastWeightsFile\n(Use -w <this file> with the decoder)\n\n";
+print STDERR "\nFINAL WEIGHTS: $lastWeightsFile\n(Use -w <this file> with the decoder)\n\n";
 
-print STDOUT "$dir/$lastWeightsFile\n";
+print STDOUT "$lastWeightsFile\n";
 
 exit 0;
 
