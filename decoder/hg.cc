@@ -130,8 +130,8 @@ void Hypergraph::PushWeightsToGoal(double scale) {
 
 struct EdgeExistsWeightFunction {
   EdgeExistsWeightFunction(const std::vector<bool>& prunes) : prunes_(prunes) {}
-  double operator()(const Hypergraph::Edge& edge) const {
-    return (prunes_[edge.id_] ? 0.0 : 1.0);
+  bool operator()(const Hypergraph::Edge& edge) const {
+    return !prunes_[edge.id_];
   }
  private:
   const vector<bool>& prunes_;
@@ -147,8 +147,8 @@ void Hypergraph::PruneEdges(const std::vector<bool>& prune_edge, bool run_inside
     // I don't know a good c++ way to resolve this short of template specialization which
     // I dislike.  If you know of a better way that doesn't involve specialization,
     // fix this!
-    vector<double> reachable;
-    bool goal_derivable = (0 < Inside<double, EdgeExistsWeightFunction>(*this, &reachable, wf));
+    vector<Boolean> reachable;
+    bool goal_derivable = Inside/* <Boolean, EdgeExistsWeightFunction> */(*this, &reachable, wf);
     if (!goal_derivable) {
       edges_.clear();
       nodes_.clear();
@@ -195,7 +195,7 @@ void Hypergraph_finish_prune(Hypergraph &hg,vector<prob_t> const& io,double cuto
   }
   if (verbose)
     cerr << "Finished pruning; removed " << pc << "/" << io.size() << " edges\n";
-  hg.PruneEdges(prune);
+  hg.PruneEdges(prune,true); // inside reachability check in case cutoff rounded down too much (probably redundant with EPSILON hack)
 }
 
 void Hypergraph::DensityPruneInsideOutside(const double scale,
