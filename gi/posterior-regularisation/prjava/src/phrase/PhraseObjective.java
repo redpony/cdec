@@ -22,7 +22,6 @@ public class PhraseObjective extends ProjectedObjective{
 	private static final double GRAD_DIFF = 0.002;
 	public static double INIT_STEP_SIZE=1;
 	public static double VAL_DIFF=0.001;
-	private double scale=5;
 	private double c1=0.0001;
 	private double c2=0.9;
 	
@@ -73,7 +72,7 @@ public class PhraseObjective extends ProjectedObjective{
 		newPoint  = new double[n_param];
 		gradient = new double[n_param];
 		initP();
-		projection=new SimplexProjection (scale);
+		projection=new SimplexProjection(c.scale);
 		q=new double [data.length][c.K];
 
 		setParameters(parameters);
@@ -111,8 +110,7 @@ public class PhraseObjective extends ProjectedObjective{
 		}
 	
 		for(int edge=0;edge<data.length;edge++){
-			loglikelihood+=Math.log
-				(data[edge][countIdx]*arr.F.l1norm(q[edge]));
+			loglikelihood+=data[edge][countIdx] * Math.log(arr.F.l1norm(q[edge]));
 			arr.F.l1normalize(q[edge]);
 		}
 		
@@ -222,7 +220,7 @@ public class PhraseObjective extends ProjectedObjective{
 			sum+=max;
 		}
 //		ps.println(", "+sum);
-		l=l-scale*sum;
+		l=l-c.scale*sum;
 		return l;
 	}
 	

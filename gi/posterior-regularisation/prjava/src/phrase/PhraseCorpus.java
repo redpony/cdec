@@ -12,7 +12,6 @@ public class PhraseCorpus {
 
 	
 	public static String LEX_FILENAME="../pdata/lex.out";
-	//public static String DATA_FILENAME="../pdata/canned.con";
 	public static String DATA_FILENAME="../pdata/btec.con";
 	public static int NUM_CONTEXT=4;
 	
