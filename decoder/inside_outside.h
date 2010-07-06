@@ -5,6 +5,23 @@
 #include <algorithm>
 #include "hg.h"
 
+// semiring for Inside/Outside
+struct Boolean {
+  bool x;
+  Boolean() : x() {  }
+  Boolean(bool i) : x(i) {  }
+  operator bool() const { return x; }
+  // normally you'd use the logical (short circuit) || &&  operators, but bool really is guaranteed to be 0 or 1 numerically.
+  void operator+=(Boolean o) { x|=o.x; }
+  friend inline Boolean operator +(Boolean a,Boolean b) {
+    return Boolean(a.x|b.x);
+  }
+  void operator*=(Boolean o) { x&=o.x; }
+  friend inline Boolean operator *(Boolean a,Boolean b) {
+    return Boolean(a.x&b.x);
+  }
+};
+
 // run the inside algorithm and return the inside score
 // if result is non-NULL, result will contain the inside
 // score for each node
