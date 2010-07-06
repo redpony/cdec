@@ -1,33 +1,7 @@
-#ifdef __CYGWIN__
-# ifndef _POSIX_MONOTONIC_CLOCK
-#  define _POSIX_MONOTONIC_CLOCK
-# endif
-#endif
-
 #include "pyp-topics.hh"
+#include "timing.h"
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <time.h>
-#include <sys/time.h>
-#include "clock_gettime_stub.c"
-
-struct Timer {
-  Timer() { Reset(); }
-  void Reset()
-  {
-    clock_gettime(CLOCK_MONOTONIC, &start_t);
-  }
-  double Elapsed() const {
-    timespec end_t;
-    clock_gettime(CLOCK_MONOTONIC, &end_t);
-    const double elapsed = (end_t.tv_sec - start_t.tv_sec)
-                + (end_t.tv_nsec - start_t.tv_nsec) / 1000000000.0;
-    return elapsed;
-  }
- private:
-  timespec start_t;
-};
-
+//#include <boost/date_time/posix_time/posix_time_types.hpp>
 void PYPTopics::sample_corpus(const Corpus& corpus, int samples, 
                               int freq_cutoff_start, int freq_cutoff_end, 
                               int freq_cutoff_interval) {
@@ -175,9 +149,10 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
     if (curr_sample != 0 && curr_sample % 10 == 0) {
       std::cerr << " ||| time=" << (timer.Elapsed() / 10.0) << " sec/sample" << std::endl;
       timer.Reset();
-      std::cerr << "     ... Resampling hyperparameters "; std::cerr.flush();
+      std::cerr << "     ... Resampling hyperparameters (" << max_threads << " threads)"; std::cerr.flush();
+
       // resample the hyperparamters
-      F log_p=0.0; int resample_counter=0;
+      F log_p=0.0;
       for (std::vector<PYPs>::iterator levelIt=m_word_pyps.begin();
            levelIt != m_word_pyps.end(); ++levelIt) {
         for (PYPs::iterator pypIt=levelIt->begin();
@@ -187,15 +162,23 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
         }
       }
 
-      resample_counter=0;
-      for (PYPs::iterator pypIt=m_document_pyps.begin();
-           pypIt != m_document_pyps.end(); ++pypIt, ++resample_counter) {
-        pypIt->resample_prior();
-        log_p += pypIt->log_restaurant_prob();
-        if (resample_counter++ % 10000 == 0) {
-          std::cerr << "."; std::cerr.flush();
-        }
+      WorkerPtrVect workers;
+      for (int i = 0; i < max_threads; ++i)
+      {
+        JobReturnsF job = boost::bind(&PYPTopics::hresample_docs, this, max_threads, i);
+        workers.push_back(new SimpleResampleWorker(job));
       }
+      
+      WorkerPtrVect::iterator workerIt; 
+      for (workerIt = workers.begin(); workerIt != workers.end(); ++workerIt)
+      { 
+        //std::cerr << "Retrieving worker result.."; std::cerr.flush();
+        F wresult = workerIt->getResult(); //blocks until worker done
+        log_p += wresult; 
+        //std::cerr << ".. got " << wresult << std::endl; std::cerr.flush();
+        
+      }
+
       if (m_use_topic_pyp) {
         m_topic_pyp.resample_prior();
         log_p += m_topic_pyp.log_restaurant_prob();
@@ -220,6 +203,46 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
   }
   delete [] randomDocIndices;
 }
+
+PYPTopics::F PYPTopics::hresample_docs(int num_threads, int thread_id)
+{
+  int resample_counter=0;
+  F log_p = 0.0;
+  PYPs::iterator pypIt = m_document_pyps.begin();
+  PYPs::iterator end = m_document_pyps.end();
+  pypIt += thread_id;  
+//  std::cerr << thread_id << " started " << std::endl; std::cerr.flush();
+  
+  while (pypIt < end)
+  {
+    pypIt->resample_prior();
+    log_p += pypIt->log_restaurant_prob();
+    if (resample_counter++ % 5000 == 0) {
+      std::cerr << "."; std::cerr.flush();
+    }
+    pypIt += num_threads;
+  }
+//  std::cerr << thread_id << " did " << resample_counter << " with answer " << log_p << std::endl; std::cerr.flush();
+  
+  return log_p;
+}
+
+//PYPTopics::F PYPTopics::hresample_topics()
+//{
+//  F log_p = 0.0;
+//  for (std::vector<PYPs>::iterator levelIt=m_word_pyps.begin();
+//      levelIt != m_word_pyps.end(); ++levelIt) {
+//    for (PYPs::iterator pypIt=levelIt->begin();
+//        pypIt != levelIt->end(); ++pypIt) {
+//
+//      pypIt->resample_prior();
+//      log_p += pypIt->log_restaurant_prob();
+//    }
+//  }
+//  //std::cerr << "topicworker has answer " << log_p << std::endl; std::cerr.flush();
+//  
+// return log_p; 
+//}
 
 void PYPTopics::decrement(const Term& term, int topic, int level) {
   //std::cerr << "PYPTopics::decrement(" << term << "," << topic << "," << level << ")" << std::endl;

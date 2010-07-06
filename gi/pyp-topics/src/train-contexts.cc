@@ -53,6 +53,7 @@ int main(int argc, char **argv)
       ("freq-cutoff-start", value<int>()->default_value(0), "initial frequency cutoff.")
       ("freq-cutoff-end", value<int>()->default_value(0), "final frequency cutoff.")
       ("freq-cutoff-interval", value<int>()->default_value(0), "number of iterations between frequency decrement.")
+      ("max-threads", value<int>()->default_value(1), "maximum number of simultaneous threads allowed")
       ;
 
     cmdline_specific.add(config_options);
@@ -79,7 +80,7 @@ int main(int argc, char **argv)
 
   // seed the random number generator: 0 = automatic, specify value otherwise
   unsigned long seed = 0; 
-  PYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"), seed);
+  PYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"), seed, vm["max-threads"].as<int>());
 
   // read the data
   BackoffGenerator* backoff_gen=0;
