@@ -25,7 +25,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("reference,r",po::value<vector<string> >(), "[REQD] Reference translation (tokenized text)")
         ("source,s",po::value<string>(), "Source file (ignored, except for AER)")
         ("loss_function,l",po::value<string>()->default_value("ibm_bleu"), "Loss function being optimized")
-    ("input,i",po::value<string>()->default_value("-"), "Input file to map (- is STDIN)")
+        ("input,i",po::value<string>()->default_value("-"), "Input file to map (- is STDIN)")
         ("help,h", "Help");
   po::options_description dcmdline_options;
   dcmdline_options.add(opts);
