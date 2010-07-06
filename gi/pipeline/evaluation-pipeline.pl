@@ -6,31 +6,36 @@ my $CWD = getcwd;
 
 my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
 
-my @DEFAULT_FEATS = qw(
-  LogRuleCount SingletonRule LexE2F LexF2E WordPenalty
-  LogFCount LanguageModel Glue GlueTop PassThrough SingletonF
-);
+# featurize_grammar may add multiple features from a single feature extractor
+# the key in this map is the extractor name, the value is a list of the extracted features
+my $feat_map = {
+  "LogRuleCount" => [ "LogRuleCount", "SingletonRule" ] ,
+  "LexProb" => [ "LexE2F", "LexF2E" ] ,
+};
 
 my %init_weights = qw(
-  LogRuleCount 0.2
-  LexE2F -0.3
-  LexF2E -0.3
-  LogFCount 0.1
-  WordPenalty -1.5
-  LanguageModel 1.2
-  Glue -1.0
-  GlueTop 0.00001
-  PassThrough -10.0
-  SingletonRule -0.1
-  X_EGivenF -0.3
-  X_FGivenE -0.3
-  X_LogECount -1
-  X_LogFCount -0.1
-  X_LogRuleCount 0.3
-  X_SingletonE -0.1
-  X_SingletonF -0.1
-  X_SingletonRule -0.5
+  EGivenF -0.735245
+  FGivenE -0.219391
+  Glue -0.306709
+  GlueTop 0.0473331
+  LanguageModel 2.40403
+  LexE2F -0.266989
+  LexF2E -0.550373
+  LogECount -0.129853
+  LogFCount -0.194037
+  LogRuleCount 0.256706
+  PassThrough -0.9304905
+  SingletonE -3.04161
+  SingletonF 0.0714027
+  SingletonRule -0.889377
+  WordPenalty -7.99495
 );
+
+
+# these features are included by default
+my @DEFAULT_FEATS = qw( Glue GlueTop LanguageModel WordPenalty );
+
+
 
 my $CDEC = "$SCRIPT_DIR/../../decoder/cdec";
 my $PARALLELIZE = "$SCRIPT_DIR/../../vest/parallelize.pl";
@@ -39,9 +44,9 @@ die "Can't find extools: $EXTOOLS" unless -e $EXTOOLS && -d $EXTOOLS;
 my $VEST = "$SCRIPT_DIR/../../vest";
 die "Can't find vest: $VEST" unless -e $VEST && -d $VEST;
 my $DISTVEST = "$VEST/dist-vest.pl";
-my $FILTSCORE = "$EXTOOLS/filter_score_grammar";
-my $ADDXFEATS = "$SCRIPT_DIR/scripts/xfeats.pl";
-assert_exec($CDEC, $PARALLELIZE, $FILTSCORE, $DISTVEST, $ADDXFEATS);
+my $FILTER = "$EXTOOLS/filter_grammar";
+my $FEATURIZE = "$EXTOOLS/featurize_grammar";
+assert_exec($CDEC, $PARALLELIZE, $FILTER, $FEATURIZE, $DISTVEST);
 
 my $config = "$SCRIPT_DIR/clsp.config";
 print STDERR "CORPORA CONFIGURATION: $config\n";
@@ -53,7 +58,6 @@ my %devs;
 my %devrefs;
 my %tests;
 my %testevals;
-my %xgrammars;
 print STDERR "       LANGUAGE PAIRS:";
 while(<CONF>) {
   chomp;
@@ -61,11 +65,10 @@ while(<CONF>) {
   next if /^\s*$/;
   s/^\s+//;
   s/\s+$//;
-  my ($name, $path, $corpus, $lm, $xgrammar, $dev, $devref, @xtests) = split /\s+/;
+  my ($name, $path, $corpus, $lm, $dev, $devref, @xtests) = split /\s+/;
   $paths{$name} = $path;
   $corpora{$name} = $corpus;
   $lms{$name} = $lm;
-  $xgrammars{$name} = $xgrammar;
   $devs{$name} = $dev;
   $devrefs{$name} = $devref;
   $tests{$name} = $xtests[0];
@@ -78,16 +81,27 @@ my %langpairs = map { $_ => 1 } qw( btec zhen fbis aren uren nlfr );
 
 my $outdir = "$CWD/exp";
 my $help;
-my $XFEATS;
-my $EXTRA_FILTER = '';
+my $FEATURIZER_OPTS = '';
 my $dataDir = '/export/ws10smt/data';
+my @features;
 if (GetOptions(
         "data=s" => \$dataDir,
-        "xfeats" => \$XFEATS,
+        "features=s@" => \@features,
 ) == 0 || @ARGV!=2 || $help) {
         print_help();
         exit;
 }
+
+my @xfeats;
+for my $feat (@features) {
+  my $rs = $feat_map->{$feat};
+  if (!defined $rs) { die "DON'T KNOW ABOUT FEATURE $feat\n"; }
+  my @xfs = @$rs;
+  @xfeats = (@xfeats, @xfs);
+  $FEATURIZER_OPTS .= " -f $feat";
+}
+print STDERR "X-FEATS: @xfeats\n";
+
 my $lp = $ARGV[0];
 my $grammar = $ARGV[1];
 print STDERR "   CORPUS REPO: $dataDir\n";
@@ -113,17 +127,16 @@ my $teval = mydircat($corpdir, $testevals{$lp});
 die "Can't find test: $test\n" unless -f $test;
 assert_exec($teval);
 
-if ($XFEATS) {
-  my $xgram = mydircat($corpdir, $xgrammars{$lp});
-  die "Can't find x-grammar: $xgram" unless -f $xgram;
-  $EXTRA_FILTER = "$ADDXFEATS $xgram |";
-  print STDERR "ADDING X-FEATS FROM $xgram\n";
-}
+`mkdir -p $outdir`;
+
+# CREATE INIT WEIGHTS
+print STDERR "\nCREATING INITIAL WEIGHTS FILE: weights.init\n";
+my $weights = mydircat($outdir, "weights.init");
+write_random_weights_file($weights, @xfeats);
 
 # MAKE DEV
 print STDERR "\nFILTERING FOR dev...\n";
 print STDERR "DEV: $dev (REFS=$drefs)\n";
-`mkdir -p $outdir`;
 my $devgrammar = filter($grammar, $dev, 'dev', $outdir);
 my $devini = mydircat($outdir, "cdec-dev.ini");
 write_cdec_ini($devini, $devgrammar);
@@ -137,11 +150,6 @@ my $testgrammar = filter($grammar, $test, 'test', $outdir);
 my $testini = mydircat($outdir, "cdec-test.ini");
 write_cdec_ini($testini, $testgrammar);
 
-
-# CREATE INIT WEIGHTS
-print STDERR "\nCREATING INITIAL WEIGHTS FILE: weights.init\n";
-my $weights = mydircat($outdir, "weights.init");
-write_random_weights_file($weights);
 
 
 # VEST
@@ -182,12 +190,6 @@ sub write_random_weights_file {
   my ($file, @extras) = @_;
   open F, ">$file" or die "Can't write $file: $!";
   my @feats = (@DEFAULT_FEATS, @extras);
-  if ($XFEATS) {
-    my @xfeats = qw(
-      X_LogRuleCount X_LogECount X_LogFCount X_EGivenF X_FGivenE X_SingletonRule X_SingletonE X_SingletonF
-    );
-    @feats = (@feats, @xfeats);
-  }
   for my $feat (@feats) {
     my $r = rand(1.6);
     my $w = $init_weights{$feat} * $r;
@@ -199,10 +201,13 @@ sub write_random_weights_file {
 
 sub filter {
   my ($grammar, $set, $name, $outdir) = @_;
+  my $out1 = mydircat($outdir, "$name.filt.gz");
   my $outgrammar = mydircat($outdir, "$name.scfg.gz");
   if (-f $outgrammar) { print STDERR "$outgrammar exists - REUSING!\n"; } else {
-    my $cmd = "gunzip -c $grammar | $FILTSCORE -c $CORPUS -t $set | $EXTRA_FILTER gzip > $outgrammar";
-    safesystem($outgrammar, $cmd) or die "Can't filter and score grammar!";
+    my $cmd = "gunzip -c $grammar | $FILTER -t $set | gzip > $out1";
+    safesystem($out1, $cmd) or die "Filtering failed.";
+    $cmd = "gunzip -c $out1 | $FEATURIZE $FEATURIZER_OPTS -g $out1 -c $CORPUS | gzip > $outgrammar";
+    safesystem($outgrammar, $cmd) or die "Featurizing failed";
   }
   return $outgrammar;
 }
