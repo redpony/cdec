@@ -41,7 +41,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description clo("Command line options");
   po::options_description dcmdline_options;
   dcmdline_options.add(opts);
-  
+
   po::store(parse_command_line(argc, argv, dcmdline_options), *conf);
   po::notify(*conf);
 
@@ -139,9 +139,9 @@ void ParseLine(const char* buf, vector<WordID>* cur_key, ID2RuleStatistics* coun
 void LexTranslationTable::createTTable(const char* buf){
   AnnotatedParallelSentence sent;
   sent.ParseInputLine(buf);
-      
+
   //iterate over the alignment to compute aligned words
-  
+
   for(int i =0;i<sent.aligned.width();i++)
     {
       for (int j=0;j<sent.aligned.height();j++)
@@ -158,7 +158,7 @@ void LexTranslationTable::createTTable(const char* buf){
       if (DEBUG)  cerr << endl;
     }
   if (DEBUG) cerr << endl;
-  
+
   const WordID NULL_ = TD::Convert("NULL");
   //handle unaligned words - align them to null
   for (int j =0; j < sent.e_len; j++) {
@@ -167,7 +167,7 @@ void LexTranslationTable::createTTable(const char* buf){
     ++total_foreign[NULL_];
     ++total_english[sent.e[j]];
   }
-  
+
   for (int i =0; i < sent.f_len; i++) {
     if (sent.f_aligned[i]) continue;
     ++word_translation[pair<WordID,WordID> (sent.f[i], NULL_)];
@@ -187,16 +187,16 @@ static bool IsZero(float f) { return (f > 0.999 && f < 1.001); }
 
 struct FeatureExtractor {
   // create any keys necessary
-  virtual void ObserveFilteredRule(const WordID lhs,
-                                   const vector<WordID>& src,
-                                   const vector<WordID>& trg) {}
+  virtual void ObserveFilteredRule(const WordID /* lhs */,
+                                   const vector<WordID>& /* src */,
+                                   const vector<WordID>& /* trg */) {}
 
   // compute statistics over keys, the same lhs-src-trg tuple may be seen
   // more than once
-  virtual void ObserveUnfilteredRule(const WordID lhs,
-                                     const vector<WordID>& src,
-                                     const vector<WordID>& trg,
-                                     const RuleStatistics& info) {}
+  virtual void ObserveUnfilteredRule(const WordID /* lhs */,
+                                     const vector<WordID>& /* src */,
+                                     const vector<WordID>& /* trg */,
+                                     const RuleStatistics& /* info */) {}
 
   // compute features, a unique lhs-src-trg tuple will be seen exactly once
   virtual void ExtractFeatures(const WordID lhs,
@@ -241,7 +241,7 @@ struct LexProbExtractor : public FeatureExtractor {
     while(alignment) {
       alignment.getline(buf, MAX_LINE_LENGTH);
       if (buf[0] == 0) continue;
-      table.createTTable(buf);              
+      table.createTTable(buf);
     }
     delete[] buf;
   }
@@ -271,7 +271,7 @@ struct LexProbExtractor : public FeatureExtractor {
             if ( table.total_english[trg[ita->second]] !=0 )
               e2f = (float) temp / table.total_english[trg[ita->second]];
             if (DEBUG) printf (" %d %E %E\n", temp, f2e, e2f);
-              
+
             //local counts to keep track of which things haven't been aligned, to later compute their null alignment
             if (foreign_aligned.count(src[ita->first])) {
               foreign_aligned[ src[ita->first] ].first++;
@@ -279,7 +279,7 @@ struct LexProbExtractor : public FeatureExtractor {
             } else {
               foreign_aligned[ src[ita->first] ] = pair<int,float> (1,e2f);
             }
-  
+
             if (english_aligned.count( trg[ ita->second] )) {
                english_aligned[ trg[ ita->second] ].first++;
                english_aligned[ trg[ ita->second] ].second += f2e;
@@ -294,8 +294,8 @@ struct LexProbExtractor : public FeatureExtractor {
           //compute lexical weight P(F|E) and include unaligned foreign words
            for(int i=0;i<src.size(); i++) {
                if (!table.total_foreign.count(src[i])) continue;      //if we dont have it in the translation table, we won't know its lexical weight
-               
-               if (foreign_aligned.count(src[i])) 
+
+               if (foreign_aligned.count(src[i]))
                  {
                    pair<int, float> temp_lex_prob = foreign_aligned[src[i]];
                    final_lex_e2f *= temp_lex_prob.second / temp_lex_prob.first;
@@ -305,14 +305,14 @@ struct LexProbExtractor : public FeatureExtractor {
                    int temp_count = table.word_translation[pair<WordID,WordID> (src[i],NULL_)];
                    float temp_e2f = (float) temp_count / table.total_english[NULL_];
                    final_lex_e2f *= temp_e2f;
-                 }                              
+                 }
 
              }
 
            //compute P(E|F) unaligned english words
            for(int j=0; j< trg.size(); j++) {
                if (!table.total_english.count(trg[j])) continue;
-               
+
                if (english_aligned.count(trg[j]))
                  {
                    pair<int, float> temp_lex_prob = english_aligned[trg[j]];
@@ -338,7 +338,6 @@ int main(int argc, char** argv){
   ifstream alignment (conf["aligned_corpus"].as<string>().c_str());
   ReadFile fg1(conf["filtered_grammar"].as<string>());
 
-  istream& fs1 = *fg1.stream();
 
   // TODO make this list configurable
   vector<boost::shared_ptr<FeatureExtractor> > extractors;
@@ -355,6 +354,7 @@ int main(int argc, char** argv){
   vector<WordID> src;
 
 #if 0
+  istream& fs1 = *fg1.stream();
   int line = 0;
   while(fs1) {
     fs1.getline(buf, MAX_LINE_LENGTH);
