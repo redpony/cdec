@@ -14,7 +14,7 @@ inline char BitAsChar(bool bit) {
   return (bit ? '1' : '0');
 }
 
-RuleShapeFeatures::RuleShapeFeatures(const string& param) {
+RuleShapeFeatures::RuleShapeFeatures(const string& /* param */) {
   bool first = true;
   for (int i = 0; i < 32; ++i) {
     for (int j = 0; j < 32; ++j) {
@@ -26,7 +26,7 @@ RuleShapeFeatures::RuleShapeFeatures(const string& param) {
         cur = &cur->next_[bit];
         os << BitAsChar(bit);
       }
-      os << "_T"; 
+      os << "_T";
       for (int k = 0; k < 5; ++k) {
         bool bit = IsBitSet(j,k);
         cur = &cur->next_[bit];
@@ -38,12 +38,12 @@ RuleShapeFeatures::RuleShapeFeatures(const string& param) {
   }
 }
 
-void RuleShapeFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+void RuleShapeFeatures::TraversalFeaturesImpl(const SentenceMetadata& /* smeta */,
                                               const Hypergraph::Edge& edge,
-                                              const vector<const void*>& ant_contexts,
+                                              const vector<const void*>& /* ant_contexts */,
                                               SparseVector<double>* features,
-                                              SparseVector<double>* estimated_features,
-                                              void* context) const {
+                                              SparseVector<double>* /* estimated_features */,
+                                              void* /* context */) const {
   const Node* cur = &fidtree_;
   TRule& rule = *edge.rule_;
   int pos = 0;  // feature position

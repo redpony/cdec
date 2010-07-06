@@ -226,7 +226,7 @@ class IBM_BLEUScorer : public BLEUScorerBase {
 		   int n=4) : BLEUScorerBase(references, n), lengths_(references.size()) {
    for (int i=0; i < references.size(); ++i)
      lengths_[i] = references[i].size();
- }   
+ }
  protected:
   float ComputeRefLength(const vector<WordID>& hyp) const {
     if (lengths_.size() == 1) return lengths_[0];
@@ -256,7 +256,7 @@ class NIST_BLEUScorer : public BLEUScorerBase {
        shortest_ = references[i].size();
  }
  protected:
-  float ComputeRefLength(const vector<WordID>& hyp) const {
+  float ComputeRefLength(const vector<WordID>& /* hyp */) const {
     return shortest_;
   }
  private:
@@ -273,7 +273,7 @@ class Koehn_BLEUScorer : public BLEUScorerBase {
    avg_ /= references.size();
  }
  protected:
-  float ComputeRefLength(const vector<WordID>& hyp) const {
+  float ComputeRefLength(const vector<WordID>& /* hyp */) const {
     return avg_;
   }
  private:
@@ -465,7 +465,7 @@ BLEUScorerBase::BLEUScorerBase(const vector<vector<WordID> >& references,
     CountRef(*ci);
   }
 }
- 
+
 Score* BLEUScorerBase::ScoreCandidate(const vector<WordID>& hyp) const {
   BLEUScore* bs = new BLEUScore(n_);
   for (NGramCountMap::iterator i=ngrams_.begin(); i != ngrams_.end(); ++i)
@@ -510,7 +510,7 @@ DocScorer::DocScorer(
 	  if (!expect_eof) {
 	    assert(i == 0);
 	    expect_eof = true;
-	  } 
+	  }
           break;
 	}
       } else {
