@@ -148,7 +148,7 @@ void Hypergraph::PruneEdges(const std::vector<bool>& prune_edge, bool run_inside
     // I dislike.  If you know of a better way that doesn't involve specialization,
     // fix this!
     vector<Boolean> reachable;
-    bool goal_derivable = Inside/* <Boolean, EdgeExistsWeightFunction> */(*this, &reachable, wf);
+    bool goal_derivable = Inside/* <Boolean, EdgeExistsWeightFunction> */(*this, &reachable, wf).get();
     if (!goal_derivable) {
       edges_.clear();
       nodes_.clear();
