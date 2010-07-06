@@ -58,7 +58,9 @@ safemkdir($OUTPUT) or die "Couldn't create output directory $OUTPUT: $!";
 safemkdir($CONTEXT_DIR) or die "Couldn't create output directory $CONTEXT_DIR: $!";
 safemkdir($CLUSTER_DIR) or die "Couldn't create output directory $CLUSTER_DIR: $!";
 safemkdir($GRAMMAR_DIR) or die "Couldn't create output directory $GRAMMAR_DIR: $!";
-copy($TOPICS_CONFIG, $CLUSTER_DIR) or die "Copy failed: $!";
+if (-e $TOPICS_CONFIG) {
+  copy($TOPICS_CONFIG, $CLUSTER_DIR) or die "Copy failed: $!";
+}
 
 extract_context();
 topic_train();
