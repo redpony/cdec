@@ -178,7 +178,8 @@ void Hypergraph::PruneEdges(const std::vector<bool>& prune_edge, bool run_inside
 void Hypergraph_finish_prune(Hypergraph &hg,vector<prob_t> const& io,double cutoff,vector<bool> const* preserve_mask,bool verbose=false)
 {
   const double EPSILON=1e-5;
-  cutoff=cutoff-EPSILON; //
+  //TODO: //FIXME: if EPSILON is 0, then remnants (useless edges that don't connect to top? or top-connected but not bottom-up buildable referneced?) are left in the hypergraph output that cause mr_vest_map to segfault.  adding EPSILON probably just covers up the symptom by making it far less frequent; I imagine any time threshold is set by DensityPrune, cutoff is exactly equal to the io of several nodes, but because of how it's computed, some round slightly down vs. slightly up.  probably the flaw is in PruneEdges.
+  cutoff=cutoff-EPSILON;
   vector<bool> prune(hg.NumberOfEdges());
   if (verbose) {
     if (preserve_mask) cerr << preserve_mask->size() << " " << prune.size() << endl;
