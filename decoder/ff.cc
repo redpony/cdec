@@ -59,7 +59,7 @@ void SourceWordPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   features->set_value(fid_, edge.rule_->FWords() * value_);
 }
 
-ArityPenalty::ArityPenalty(const std::string& param) :
+ArityPenalty::ArityPenalty(const std::string& /* param */) :
     value_(-1.0 / log(10)) {
   string fname = "Arity_X";
   for (int i = 0; i < 10; ++i) {
