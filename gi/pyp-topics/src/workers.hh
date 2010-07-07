@@ -1,6 +1,8 @@
 #ifndef WORKERS_HH
 #define WORKERS_HH
 
+#include "timing.h"
+
 #include <iostream>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
@@ -10,7 +12,6 @@
 
 //#include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "timing.h"
 
 template <typename J, typename R>
 class SimpleWorker
@@ -27,7 +28,7 @@ public:
     R run() //this is called upon thread creation
     {
         R wresult = 0;
-    
+
         assert(job);
         timer.Reset();
         wresult = job();

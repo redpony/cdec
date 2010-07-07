@@ -4,8 +4,14 @@
 #ifdef __CYGWIN__
 # ifndef _POSIX_MONOTONIC_CLOCK
 #  define _POSIX_MONOTONIC_CLOCK
+// this modifies <time.h>
+# endif
+// in case someone included <time.h> before we got here (this is lifted from time.h>)
+# ifndef CLOCK_MONOTONIC
+#  define CLOCK_MONOTONIC (clockid_t)4
 # endif
 #endif
+
 
 #include <time.h>
 #include <sys/time.h>
