@@ -14,13 +14,19 @@ if len(sys.argv) > 2:
 phrase_context_index = {}
 for line in file(sys.argv[1], 'r'):
   phrase,tail= line.split('\t')
-  contexts = tail.split(" ||| ")[1:]
+  contexts = tail.split(" ||| ")
+  try: # remove Phil's bizarre integer pair
+       x,y = contexts[0].split()
+       x=int(x); y=int(y)
+       contexts = contexts[1:]
+  except:
+       pass
   if len(contexts) == 1: continue
   assert len(contexts) % 2 == 0
   for i in range(0, len(contexts), 2):
     category = contexts[i+1].split("=")[1].strip()
     phrase_context_index[(phrase,contexts[i])] = category
-#   print (phrase,contexts[i]), category
+    #print (phrase,contexts[i]), category
 
 for line in sys.stdin:
   line_segments = line.split('|||')
