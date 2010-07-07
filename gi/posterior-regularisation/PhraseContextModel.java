@@ -149,7 +149,7 @@ class PhraseContextModel
 					System.out.println("Failed to optimize");
 				//System.out.println("Ended optimization in " + optimizer.getCurrentIteration());				
 
-				lambda = objective.getParameters();
+				//lambda = objective.getParameters();
 				llh = objective.primal();
 				
 				for (int i = 0; i < training.getNumPhrases(); ++i)

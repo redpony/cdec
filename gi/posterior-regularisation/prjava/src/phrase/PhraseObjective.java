@@ -20,17 +20,17 @@ import optimization.util.MathUtils;
 public class PhraseObjective extends ProjectedObjective{
 
 	private static final double GRAD_DIFF = 0.002;
-	public static double INIT_STEP_SIZE=1;
-	public static double VAL_DIFF=0.001;
-	private double c1=0.0001;
-	private double c2=0.9;
+	public static double INIT_STEP_SIZE = 10;
+	public static double VAL_DIFF = 0.001; // FIXME needs to be tuned
+	//private double c1=0.0001; // wolf stuff
+	//private double c2=0.9;
 	
 	private PhraseCluster c;
 	
 	/**@brief
 	 *  for debugging purposes
 	 */
-	public static PrintStream ps;
+	//public static PrintStream ps;
 	
 	/**@brief current phrase being optimzed*/
 	public int phrase;
@@ -61,7 +61,7 @@ public class PhraseObjective extends ProjectedObjective{
 	/**@brief likelihood under p
 	 * 
 	 */
-	private double llh;
+	public double llh;
 	
 	public PhraseObjective(PhraseCluster cluster, int phraseIdx){
 		phrase=phraseIdx;
@@ -181,7 +181,7 @@ public class PhraseObjective extends ProjectedObjective{
 		boolean succed = optimizer.optimize(this,stats,compositeStop);
 //		System.out.println("Ended optimzation Projected Gradient Descent\n" + stats.prettyPrint(1));
 		if(succed){
-			System.out.println("Ended optimization in " + optimizer.getCurrentIteration());
+			//System.out.println("Ended optimization in " + optimizer.getCurrentIteration());
 		}else{
 			System.out.println("Failed to optimize");
 		}
@@ -208,6 +208,10 @@ public class PhraseObjective extends ProjectedObjective{
 		double kl=-loglikelihood
 			+MathUtils.dotProduct(parameters, gradient);
 //		ps.print(", "+kl);
+		//System.out.println("llh " + llh);
+		//System.out.println("kl " + kl);
+		
+
 		l=l-kl;
 		double sum=0;
 		for(int tag=0;tag<c.K;tag++){
@@ -219,6 +223,7 @@ public class PhraseObjective extends ProjectedObjective{
 			}
 			sum+=max;
 		}
+		//System.out.println("l1lmax " + sum);
 //		ps.println(", "+sum);
 		l=l-c.scale*sum;
 		return l;
