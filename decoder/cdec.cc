@@ -86,6 +86,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("show_expected_length", "Show the expected translation length under the model")
         ("show_partition,z", "Compute and show the partition (inside score)")
         ("show_cfg_search_space", "Show the search space as a CFG")
+    ("show_viterbi_features","Show the feature vector for the viterbi translation")
     ("prelm_density_prune", po::value<double>(), "Applied to -LM forest just before final LM rescoring: keep no more than this many times the number of edges used in the best derivation tree (>=1.0)")
     ("density_prune", po::value<double>(), "Keep no more than this many times the number of edges used in the best derivation tree (>=1.0)")
         ("prelm_beam_prune", po::value<double>(), "Prune paths from -LM forest before LM rescoring, keeping paths within exp(alpha>=0)")
