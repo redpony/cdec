@@ -322,8 +322,8 @@ class LanguageModelImpl {
     //TODO: make sure this is correct.
     int len = rule.ELength(); // use a gap for each variable
     buffer_.resize(len + 1);
-    buffer_[len] = kNONE;
     WordID * const rend=&buffer_[0]+len;
+    *rend=kNONE;
     WordID *r=rend;  // append by *--r = x
     const vector<WordID>& e = rule.e();
     //SRILM is reverse order null terminated
