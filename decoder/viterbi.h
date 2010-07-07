@@ -29,20 +29,23 @@ WeightType Viterbi(const Hypergraph& hg,
       *cur_node_best_weight = WeightType(1);
       continue;
     }
+    Hypergraph::Edge const* edge_best=0;
     for (int j = 0; j < num_in_edges; ++j) {
       const Hypergraph::Edge& edge = hg.edges_[cur_node.in_edges_[j]];
       WeightType score = weight(edge);
-      std::vector<const T*> ants(edge.tail_nodes_.size());
-      for (int k = 0; k < edge.tail_nodes_.size(); ++k) {
-        const int tail_node_index = edge.tail_nodes_[k];
-        score *= vit_weight[tail_node_index];
-        ants[k] = &vit_result[tail_node_index];
-      }
-      if (*cur_node_best_weight < score) {
+      for (int k = 0; k < edge.tail_nodes_.size(); ++k)
+        score *= vit_weight[edge.tail_nodes_[k]];
+      if (!edge_best || *cur_node_best_weight < score) {
         *cur_node_best_weight = score;
-        traverse(edge, ants, cur_node_best_result);
+        edge_best=&edge;
       }
     }
+    assert(edge_best);
+    Hypergraph::Edge const& edgeb=*edge_best;
+    std::vector<const T*> antsb(edgeb.tail_nodes_.size());
+    for (int k = 0; k < edgeb.tail_nodes_.size(); ++k)
+      antsb[k] = &vit_result[edgeb.tail_nodes_[k]];
+    traverse(edgeb, antsb, cur_node_best_result);
   }
   std::swap(*result, vit_result.back());
   return vit_weight.back();
