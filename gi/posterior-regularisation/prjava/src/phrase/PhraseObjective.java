@@ -19,12 +19,12 @@ import optimization.util.MathUtils;
 
 public class PhraseObjective extends ProjectedObjective{
 
-	private static final double GRAD_DIFF = 0.002;
+	private static final double GRAD_DIFF = 0.00002;
 	public static double INIT_STEP_SIZE = 10;
-	public static double VAL_DIFF = 0.001; // FIXME needs to be tuned
+	public static double VAL_DIFF = 0.000001; // FIXME needs to be tuned
 	//private double c1=0.0001; // wolf stuff
 	//private double c2=0.9;
-	
+	private static double lambda[][];
 	private PhraseCluster c;
 	
 	/**@brief
@@ -68,7 +68,16 @@ public class PhraseObjective extends ProjectedObjective{
 		c=cluster;
 		data=c.c.data[phrase];
 		n_param=data.length*c.K;
-		parameters=new double [n_param];
+		
+		if( lambda==null){
+			lambda=new double[c.c.data.length][];
+		}
+		
+		if(lambda[phrase]==null){
+			lambda[phrase]=new double[n_param];
+		}
+		
+		parameters=lambda[phrase];
 		newPoint  = new double[n_param];
 		gradient = new double[n_param];
 		initP();
@@ -172,7 +181,7 @@ public class PhraseObjective extends ProjectedObjective{
 		
 		ProjectedGradientDescent optimizer = new ProjectedGradientDescent(ls);
 		StopingCriteria stopGrad = new ProjectedGradientL2Norm(GRAD_DIFF);
-		StopingCriteria stopValue = new ValueDifference(VAL_DIFF);
+		StopingCriteria stopValue = new ValueDifference(VAL_DIFF*(-llh));
 		CompositeStopingCriteria compositeStop = new CompositeStopingCriteria();
 		compositeStop.add(stopGrad);
 		compositeStop.add(stopValue);
@@ -185,7 +194,7 @@ public class PhraseObjective extends ProjectedObjective{
 		}else{
 			System.out.println("Failed to optimize");
 		}
-		
+		lambda[phrase]=parameters;
 		//	ps.println(Arrays.toString(parameters));
 		
 		//	for(int edge=0;edge<data.length;edge++){
