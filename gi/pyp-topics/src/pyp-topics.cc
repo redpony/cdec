@@ -1,9 +1,9 @@
-#include "pyp-topics.hh"
 #include "timing.h"
+#include "pyp-topics.hh"
 
 //#include <boost/date_time/posix_time/posix_time_types.hpp>
-void PYPTopics::sample_corpus(const Corpus& corpus, int samples, 
-                              int freq_cutoff_start, int freq_cutoff_end, 
+void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
+                              int freq_cutoff_start, int freq_cutoff_end,
                               int freq_cutoff_interval) {
   Timer timer;
 
@@ -35,7 +35,7 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
     << corpus.num_types() << std::endl;
 
   int frequency_cutoff = freq_cutoff_start;
-  std::cerr << " Context frequency cutoff set to " << frequency_cutoff << std::endl; 
+  std::cerr << " Context frequency cutoff set to " << frequency_cutoff << std::endl;
 
   timer.Reset();
   // Initialisation pass
@@ -78,11 +78,11 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
 
   // Sampling phase
   for (int curr_sample=0; curr_sample < samples; ++curr_sample) {
-    if (freq_cutoff_interval > 0 && curr_sample != 1 
-        && curr_sample % freq_cutoff_interval == 1 
+    if (freq_cutoff_interval > 0 && curr_sample != 1
+        && curr_sample % freq_cutoff_interval == 1
         && frequency_cutoff > freq_cutoff_end) {
       frequency_cutoff--;
-      std::cerr << "\n Context frequency cutoff set to " << frequency_cutoff << std::endl; 
+      std::cerr << "\n Context frequency cutoff set to " << frequency_cutoff << std::endl;
     }
 
     std::cerr << "\n  -- Sample " << curr_sample << " "; std::cerr.flush();
@@ -112,7 +112,7 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
            docIt != docEnd; ++docIt, ++term_index) {
         Term term = *docIt;
         int freq = corpus.context_count(term);
-        if (freq < frequency_cutoff) 
+        if (freq < frequency_cutoff)
           continue;
 
         // remove the prevous topic from the PYPs
@@ -122,7 +122,7 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
           decrement(term, current_topic);
 
           int table_delta = m_document_pyps[document_id].decrement(current_topic);
-          if (m_use_topic_pyp && table_delta < 0) 
+          if (m_use_topic_pyp && table_delta < 0)
             m_topic_pyp.decrement(current_topic);
         }
 
@@ -168,15 +168,15 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
         JobReturnsF job = boost::bind(&PYPTopics::hresample_docs, this, max_threads, i);
         workers.push_back(new SimpleResampleWorker(job));
       }
-      
-      WorkerPtrVect::iterator workerIt; 
+
+      WorkerPtrVect::iterator workerIt;
       for (workerIt = workers.begin(); workerIt != workers.end(); ++workerIt)
-      { 
+      {
         //std::cerr << "Retrieving worker result.."; std::cerr.flush();
         F wresult = workerIt->getResult(); //blocks until worker done
-        log_p += wresult; 
+        log_p += wresult;
         //std::cerr << ".. got " << wresult << std::endl; std::cerr.flush();
-        
+
       }
 
       if (m_use_topic_pyp) {
@@ -194,7 +194,7 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
       for (PYPs::iterator pypIt=m_word_pyps.front().begin();
            pypIt != m_word_pyps.front().end(); ++pypIt, ++k) {
         if (k % 5 == 0) std::cerr << std::endl << '\t';
-        std::cerr << "<" << k << ":" << pypIt->num_customers() << "," 
+        std::cerr << "<" << k << ":" << pypIt->num_customers() << ","
           << pypIt->num_types() << "," << m_topic_pyp.prob(k, m_topic_p0) << "> ";
       }
       std::cerr.precision(4);
@@ -210,9 +210,9 @@ PYPTopics::F PYPTopics::hresample_docs(int num_threads, int thread_id)
   F log_p = 0.0;
   PYPs::iterator pypIt = m_document_pyps.begin();
   PYPs::iterator end = m_document_pyps.end();
-  pypIt += thread_id;  
+  pypIt += thread_id;
 //  std::cerr << thread_id << " started " << std::endl; std::cerr.flush();
-  
+
   while (pypIt < end)
   {
     pypIt->resample_prior();
@@ -223,7 +223,7 @@ PYPTopics::F PYPTopics::hresample_docs(int num_threads, int thread_id)
     pypIt += num_threads;
   }
 //  std::cerr << thread_id << " did " << resample_counter << " with answer " << log_p << std::endl; std::cerr.flush();
-  
+
   return log_p;
 }
 
@@ -240,8 +240,8 @@ PYPTopics::F PYPTopics::hresample_docs(int num_threads, int thread_id)
 //    }
 //  }
 //  //std::cerr << "topicworker has answer " << log_p << std::endl; std::cerr.flush();
-//  
-// return log_p; 
+//
+// return log_p;
 //}
 
 void PYPTopics::decrement(const Term& term, int topic, int level) {
