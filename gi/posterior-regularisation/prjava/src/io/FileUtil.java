@@ -1,5 +1,7 @@
 package io;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import java.io.*;
 public class FileUtil {
 	public static Scanner openInFile(String filename){
@@ -18,7 +20,10 @@ public class FileUtil {
 		BufferedReader r=null;
 		try
 		{
-			r=(new BufferedReader(new FileReader(new File(filename))));
+			if (filename.endsWith(".gz"))
+				r=(new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(new File(filename))))));
+			else
+				r=(new BufferedReader(new FileReader(new File(filename))));
 		}catch(IOException ioe){
 			System.out.println(ioe.getMessage());
 		}
@@ -29,7 +34,10 @@ public class FileUtil {
 		PrintStream localps=null;
 		try
 		{
-			localps=new PrintStream (new FileOutputStream(filename));
+			if (filename.endsWith(".gz"))
+				localps=new PrintStream (new GZIPOutputStream(new FileOutputStream(filename)));
+			else
+				localps=new PrintStream (new FileOutputStream(filename));
 
 		}catch(IOException ioe){
 			System.out.println(ioe.getMessage());

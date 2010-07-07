@@ -290,10 +290,4 @@ for p, (phrase, ccs) in enumerate(edges_phrase_to_context):
         cz = sum(conditionals)
         conditionals /= cz
 
-        #scores = zeros(num_tags)
-        #li = lamba_index[phrase, context]
-        #for t in range(num_tags):
-        #    scores[t] = conditionals[t] * exp(-lamba[li + t])
-
-        #print '%s\t%s ||| C=%d ||| %d |||' % (phrase, context, count, argmax(scores)), scores / sum(scores)
-        print '%s\t%s ||| C=%d ||| %d |||' % (phrase, context, count, argmax(conditionals)), conditionals
+        print '%s\t%s ||| C=%d |||' % (phrase, context, argmax(conditionals)), conditionals

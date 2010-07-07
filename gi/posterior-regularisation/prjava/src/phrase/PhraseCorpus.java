@@ -9,11 +9,9 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class PhraseCorpus {
-
 	
 	public static String LEX_FILENAME="../pdata/lex.out";
 	public static String DATA_FILENAME="../pdata/btec.con";
-	public static int NUM_CONTEXT=4;
 	
 	public HashMap<String,Integer>wordLex;
 	public HashMap<String,Integer>phraseLex;
@@ -23,6 +21,7 @@ public class PhraseCorpus {
 	
 	//data[phrase][num context][position]
 	public int data[][][];
+	public int numContexts;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -40,6 +39,7 @@ public class PhraseCorpus {
 		
 		ArrayList<int[][]>dataList=new ArrayList<int[][]>();
 		String line=null;
+		numContexts = 0;
 		
 		while((line=readLine(r))!=null){
 			
@@ -54,7 +54,12 @@ public class PhraseCorpus {
 			for(int i=0;i<toks.length;i+=2){
 				String ctx=toks[i];
 				String words[]=ctx.split(" ");
-				int []context=new int [NUM_CONTEXT+1];
+				if (numContexts == 0)
+					numContexts = words.length - 1;
+				else
+					assert numContexts == words.length - 1;
+				
+				int []context=new int [numContexts+1];
 				int idx=0;
 				for(String word:words){
 					if(word.equals("<PHRASE>")){
@@ -68,9 +73,7 @@ public class PhraseCorpus {
 				String count=toks[i+1];
 				context[idx]=Integer.parseInt(count.trim().substring(2));
 				
-				
 				ctxList.add(context);
-				
 			}
 			
 			dataList.add(ctxList.toArray(new int [0][]));
@@ -157,13 +160,17 @@ public class PhraseCorpus {
 		return dict;
 	}
 	
-	public String getContextString(int context[])
+	public String getContextString(int context[], boolean addPhraseMarker)
 	{
 		StringBuffer b = new StringBuffer();
 		for (int i=0;i<context.length-1;i++)
 		{
 			if (b.length() > 0)
 				b.append(" ");
+
+			if (i == context.length/2)
+				b.append("<PHRASE> ");
+			
 			b.append(wordList[context[i]]);
 		}
 		return b.toString();
