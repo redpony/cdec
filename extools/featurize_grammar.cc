@@ -228,15 +228,11 @@ int ReadPhraseUntilDividerOrEnd(const char* buf, const int sstart, const int end
     while(ptr < end && !IsWhitespace(buf[ptr])) { ++ptr; }
     if (ptr == start) {cerr << "Warning! empty token.\n"; return ptr; }
     const WordID w = TD::Convert(string(buf, start, ptr - start));
-
-    if((IsBracket(buf[start]) and IsBracket(buf[ptr-1])) or( w == kDIV))
-      p->push_back(1 * w);
-    else {
-      if (w == kDIV) return ptr;
-      p->push_back(w);
-    }
+    if (w == kDIV) return ptr;
+    p->push_back(w);
   }
-  return ptr;
+  assert(p->size() > 0);
+  return ptr;  
 }
 
 void ParseLine(const char* buf, vector<WordID>* cur_key, ID2RuleStatistics* counts) {
@@ -251,8 +247,10 @@ void ParseLine(const char* buf, vector<WordID>* cur_key, ID2RuleStatistics* coun
   cur_key->clear();
   // key is: "[X] ||| word word word"
   int tmpp = ReadPhraseUntilDividerOrEnd(buf, 0, ptr, cur_key);
-  cur_key->push_back(kDIV);
-  ReadPhraseUntilDividerOrEnd(buf, tmpp, ptr, cur_key);
+  if (buf[tmpp] != '\t') {
+    cur_key->push_back(kDIV);
+    ReadPhraseUntilDividerOrEnd(buf, tmpp, ptr, cur_key);
+  }
   ++ptr;
   int start = ptr;
   int end = ptr;
@@ -293,7 +291,6 @@ void ParseLine(const char* buf, vector<WordID>* cur_key, ID2RuleStatistics* coun
     }
   }
 }
-
 
 void LexTranslationTable::createTTable(const char* buf){
   AnnotatedParallelSentence sent;
@@ -657,20 +654,11 @@ int main(int argc, char** argv){
     fs1.getline(buf, MAX_LINE_LENGTH);
     if (buf[0] == 0) continue;
     ParseLine(buf, &cur_key, &cur_counts);
-    //src.resize(cur_key.size() - 4);
-    src.resize(cur_key.size() - 3);
+    src.resize(cur_key.size() - 2);
     for (int i = 0; i < src.size(); ++i) src.at(i) = cur_key.at(i+2);
 
-    cerr << "Key: "; for (vector<WordID>::const_iterator wit=cur_key.begin(); wit!=cur_key.end(); ++wit) cerr << TD::Convert(*wit) << " "; cerr << endl;
-
     lhs = cur_key[0];
-    cerr << buf << endl;
     for (ID2RuleStatistics::const_iterator it = cur_counts.begin(); it != cur_counts.end(); ++it) {
-
-      cerr << "READ: <"; for (vector<WordID>::const_iterator wit=src.begin(); wit!=src.end(); ++wit) cerr << TD::Convert(*wit) << " ";
-      cerr << "|||"; for (vector<WordID>::const_iterator wit=it->first.begin(); wit!=it->first.end(); ++wit) cerr << " " << TD::Convert(*wit);
-      cerr << ">\n";
-
       for (int i = 0; i < extractors.size(); ++i)
         extractors[i]->ObserveFilteredRule(lhs, src, it->first);
     }
@@ -681,7 +669,7 @@ int main(int argc, char** argv){
     cin.getline(buf, MAX_LINE_LENGTH);
     if (buf[0] == 0) continue;
     ParseLine(buf, &cur_key, &cur_counts);
-    src.resize(cur_key.size() - 3);
+    src.resize(cur_key.size() - 2);
     for (int i = 0; i < src.size(); ++i) src[i] = cur_key[i+2];
     lhs = cur_key[0];
     for (ID2RuleStatistics::const_iterator it = cur_counts.begin(); it != cur_counts.end(); ++it) {
@@ -697,7 +685,7 @@ int main(int argc, char** argv){
     fs2.getline(buf, MAX_LINE_LENGTH);
     if (buf[0] == 0) continue;
     ParseLine(buf, &cur_key, &cur_counts);
-    src.resize(cur_key.size() - 3);
+    src.resize(cur_key.size() - 2);
     for (int i = 0; i < src.size(); ++i) src[i] = cur_key[i+2];
     lhs = cur_key[0];
 

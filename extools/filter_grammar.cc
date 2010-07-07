@@ -53,7 +53,6 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
 }   
 namespace {
   inline bool IsWhitespace(char c) { return c == ' ' || c == '\t'; }
-  inline bool IsBracket(char c){return c == '[' || c == ']';}
   inline void SkipWhitespace(const char* buf, int* ptr) {
     while (buf[*ptr] && IsWhitespace(buf[*ptr])) { ++(*ptr); }
   }
@@ -68,14 +67,10 @@ int ReadPhraseUntilDividerOrEnd(const char* buf, const int sstart, const int end
     while(ptr < end && !IsWhitespace(buf[ptr])) { ++ptr; }
     if (ptr == start) {cerr << "Warning! empty token.\n"; return ptr; }
     const WordID w = TD::Convert(string(buf, start, ptr - start));
-
-    if((IsBracket(buf[start]) and IsBracket(buf[ptr-1])) or( w == kDIV))
-      p->push_back(1 * w);
-    else {
-      if (w == kDIV) return ptr;
-      p->push_back(w);
-    }
+    if (w == kDIV) return ptr;
+    p->push_back(w);
   }
+  assert(p->size() > 0);
   return ptr;
 }
 
