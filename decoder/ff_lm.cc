@@ -1,3 +1,5 @@
+//TODO: backoff wordclasses for named entity xltns, esp. numbers.  e.g. digits -> @.  idealy rule features would specify replacement lm tokens/classes
+
 //TODO: extra int in state to hold "GAP" token is not needed.  if there are less than (N-1) words, then null terminate the e.g. left words.  however, this would mean treating gapless items differently.  not worth the potential bugs right now.
 
 //TODO: allow features to reorder by heuristic*weight the rules' terminal phrases (or of hyperedges').  if first pass has pruning, then compute over whole ruleset as part of heuristic
@@ -311,7 +313,7 @@ class LanguageModelImpl {
     double sum=0;
     for (;rend>rbegin;--rend) {
       sum+=clamp(WordProb(rend[-1],rend));
-      UNIDBG(","<<TD::Convert(rend[-1]));
+      UNIDBG(" "<<TD::Convert(rend[-1]));
     }
     UNIDBG(")="<<sum<<endl);
     return sum;

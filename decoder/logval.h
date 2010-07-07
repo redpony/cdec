@@ -1,6 +1,8 @@
 #ifndef LOGVAL_H_
 #define LOGVAL_H_
 
+#define LOGVAL_CHECK_NEG_POW false
+
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
@@ -11,9 +13,12 @@ class LogVal {
  public:
   LogVal() : s_(), v_(-std::numeric_limits<T>::infinity()) {}
   explicit LogVal(double x) : s_(std::signbit(x)), v_(s_ ? std::log(-x) : std::log(x)) {}
+  LogVal(double lnx,bool sign) : s_(sign),v_(lnx) {}
+  static LogVal<T> exp(T lnx) { return LogVal(lnx,false); }
+
   static LogVal<T> One() { return LogVal(1); }
   static LogVal<T> Zero() { return LogVal(); }
-
+  static LogVal<T> e() { return LogVal(1,false); }
   void logeq(const T& v) { s_ = false; v_ = v; }
 
   LogVal& operator+=(const LogVal& a) {
@@ -54,12 +59,13 @@ class LogVal {
   }
 
   LogVal& poweq(const T& power) {
+#if LOGVAL_CHECK_NEG_POW
     if (s_) {
       std::cerr << "poweq(T) not implemented when s_ is true\n";
       std::abort();
-    } else {
+    } else
+#endif
       v_ *= power;
-    }
     return *this;
   }
 
@@ -69,6 +75,10 @@ class LogVal {
     LogVal res = *this;
     res.poweq(power);
     return res;
+  }
+
+  LogVal root(const T& root) const {
+    return pow(1/root);
   }
 
   operator T() const {
