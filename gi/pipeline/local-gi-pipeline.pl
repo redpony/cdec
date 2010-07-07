@@ -17,17 +17,25 @@ my $CONTEXT_SIZE = 1;
 my $BIDIR = 0;
 my $TOPICS_CONFIG = "pyp-topics.conf";
 
+my $MODEL = "pyp";
+my $NUM_EM_PR_ITERS = 20;
+my $PR_SCALE = 10.0;
+my $PR_THREADS = 0;
+
 my $EXTOOLS = "$SCRIPT_DIR/../../extools";
 die "Can't find extools: $EXTOOLS" unless -e $EXTOOLS && -d $EXTOOLS;
 my $PYPTOOLS = "$SCRIPT_DIR/../pyp-topics/src";
-die "Can't find extools: $PYPTOOLS" unless -e $PYPTOOLS && -d $PYPTOOLS;
+die "Can't find pyp-topics: $PYPTOOLS" unless -e $PYPTOOLS && -d $PYPTOOLS;
 my $PYPSCRIPTS = "$SCRIPT_DIR/../pyp-topics/scripts";
-die "Can't find extools: $PYPSCRIPTS" unless -e $PYPSCRIPTS && -d $PYPSCRIPTS;
+die "Can't find pyp-topics: $PYPSCRIPTS" unless -e $PYPSCRIPTS && -d $PYPSCRIPTS;
+my $PRTOOLS = "$SCRIPT_DIR/../posterior-regularisation";
+die "Can't find posterior-regularisation: $PRTOOLS" unless -e $PRTOOLS && -d $PRTOOLS;
 my $REDUCER = "$EXTOOLS/mr_stripe_rule_reduce";
 my $C2D = "$PYPSCRIPTS/contexts2documents.py";
 my $S2L = "$PYPSCRIPTS/spans2labels.py";
 
 my $PYP_TOPICS_TRAIN="$PYPTOOLS/pyp-contexts-train";
+my $PREM_TRAIN="java -ea -Xmx4g -jar $PRTOOLS/prjava.jar";
 
 my $SORT_KEYS = "$SCRIPT_DIR/scripts/sort-by-key.sh";
 my $EXTRACTOR = "$EXTOOLS/extractor";
@@ -35,14 +43,17 @@ my $TOPIC_TRAIN = "$PYPTOOLS/pyp-contexts-train";
 
 assert_exec($SORT_KEYS, $REDUCER, $EXTRACTOR, $PYP_TOPICS_TRAIN, $S2L, $C2D, $TOPIC_TRAIN);
 
-
 my $OUTPUT = './giwork';
 usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'output=s' => \$OUTPUT,
+                           'model=s' => \$MODEL,
                            'topics=i' => \$NUM_TOPICS,
                            'trg_context=i' => \$CONTEXT_SIZE,
                            'samples=i' => \$NUM_SAMPLES,
                            'topics-config=s' => \$TOPICS_CONFIG,
+                           'em-iterations=i' => \$NUM_EM_PR_ITERS,
+                           'pr-scale=f' => \$PR_SCALE,
+                           'pr-threads=i' => \$PR_THREADS,
                           );
 
 usage() unless scalar @ARGV == 1;
@@ -63,7 +74,11 @@ if (-e $TOPICS_CONFIG) {
 }
 
 extract_context();
-topic_train();
+if (lc($MODEL) eq "pyp") {
+    topic_train();
+} else {
+    prem_train();
+}
 label_spans_with_topics();
 my $res;
 if ($BIDIR) {
@@ -80,7 +95,14 @@ sub context_dir {
 }
 
 sub cluster_dir {
-  return context_dir() . ".t$NUM_TOPICS.s$NUM_SAMPLES";
+    if (lc($MODEL) eq "pyp") {
+        return context_dir() . ".PYP.t$NUM_TOPICS.s$NUM_SAMPLES";
+    } elsif (lc($MODEL) eq "em") {
+        return context_dir() . ".EM.t$NUM_TOPICS.i$NUM_EM_PR_ITERS";
+    } elsif (lc($MODEL) eq "pr") {
+        return context_dir() . ".PR.t$NUM_TOPICS.i$NUM_EM_PR_ITERS.s$PR_SCALE";
+    }
+    die "Badness 10000\n";
 }
 
 sub grammar_dir {
@@ -101,7 +123,7 @@ sub usage {
 
 Usage: $0 [OPTIONS] corpus.fr-en-al
 
-Induces a grammar using Pitman-Yor topic modeling.
+Induces a grammar using Pitman-Yor topic modeling or Posterior Regularisation.
 
 EOT
   exit 1;
@@ -138,6 +160,20 @@ sub topic_train {
     print STDERR "$OUT_CLUSTERS exists, reusing...\n";
   } else {
     safesystem("$TOPIC_TRAIN --data $IN_CONTEXTS --backoff-type simple -t $NUM_TOPICS -s $NUM_SAMPLES -o $OUT_CLUSTERS -c $TOPICS_CONFIG -w /dev/null") or die "Topic training failed.\n";
+  }
+}
+
+sub prem_train {
+  print STDERR "\n!!!TRAIN PR/EM model\n";
+  my $IN_CONTEXTS = "$CONTEXT_DIR/context.txt.gz";
+  my $OUT_CLUSTERS = "$CLUSTER_DIR/docs.txt.gz";
+  if (-e $OUT_CLUSTERS) {
+    print STDERR "$OUT_CLUSTERS exists, reusing...\n";
+  } else {
+    my $emflag="false";
+    if (lc($MODEL) eq "em") { $emflag="true"; }
+    elsif (lc($MODEL) ne "pr") { die "Unsupported model type: $MODEL"; }
+    safesystem("$PREM_TRAIN $IN_CONTEXTS $NUM_TOPICS $OUT_CLUSTERS $NUM_EM_PR_ITERS $PR_SCALE $PR_THREADS $emflag") or die "Topic training failed.\n";
   }
 }
 
