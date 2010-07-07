@@ -132,20 +132,23 @@ class Hypergraph {
     }
   }
 
+  typedef std::vector<prob_t> EdgeProbs;
+  typedef std::vector<bool> EdgeMask;
+
   // computes inside and outside scores for each
   // edge in the hypergraph
   // alpha->size = edges_.size = beta->size
   // returns inside prob of goal node
   prob_t ComputeEdgePosteriors(double scale,
-                               std::vector<prob_t>* posts) const;
+                               EdgeProbs* posts) const;
 
   // find the score of the very best path passing through each edge
-  prob_t ComputeBestPathThroughEdges(std::vector<prob_t>* posts) const;
+  prob_t ComputeBestPathThroughEdges(EdgeProbs* posts) const;
 
   // create a new hypergraph consisting only of the nodes / edges
   // in the Viterbi derivation of this hypergraph
   // if edges is set, use the EdgeSelectEdgeWeightFunction
-  Hypergraph* CreateViterbiHypergraph(const std::vector<bool>* edges = NULL) const;
+  Hypergraph* CreateViterbiHypergraph(const EdgeMask* edges = NULL) const;
 
   // move weights as near to the source as possible, resulting in a
   // stochastic automaton.  ONLY FUNCTIONAL FOR *LATTICES*.
@@ -164,20 +167,20 @@ class Hypergraph {
   void RemoveNoncoaccessibleStates(int goal_node_id = -1);
 
   // remove edges from the hypergraph if prune_edge[edge_id] is true
-  // TODO need to investigate why this shouldn't be run for the forest trans
-  // case.  To investigate, change false to true and see where ftrans crashes
-  //TODO: what does the above "TODO" comment mean?  that PruneEdges can lead to a crash?  or that run_inside_algorithm should be false?  there definitely is an unsolved bug, see hg.cc - workaround added
-  void PruneEdges(const std::vector<bool>& prune_edge, bool run_inside_algorithm = false);
+  // note: if run_inside_algorithm is false, then consumers may be unhappy if you pruned nodes that are built on by nodes that are kept.
+  void PruneEdges(const EdgeMask& prune_edge, bool run_inside_algorithm = false);
 
   // for density>=1.0, keep this many times the edges needed for the 1best derivation
   // if you don't know, use_sum_prod_semiring should be false
-  void DensityPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double density,
-                                 const std::vector<bool>* preserve_mask = NULL);
+  void DensityPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double density,const EdgeMask* preserve_mask = NULL,bool safe_inside=false);
+
+  /// drop edge i if edge_margin[i] < prune_below, unless preserve_mask[i]
+  void MarginPrune(EdgeProbs const& edge_margin,prob_t prune_below,EdgeMask const* preserve_mask=0,bool safe_inside=false,bool verbose=false);
+  // safe_inside: if true, a theoretically redundant (but practically important .001% of the time due to rounding error) inside pruning pass will happen after max-marginal pruning.  if you don't do this, it's possible that the pruned hypergraph will contain outside-reachable (but not inside-buildable) nodes.  that is, a parent will be kept whose children were pruned.  if output, those forests may confuse (crash) e.g. mr_vest_map.  however, if the hyperedges occur in defined-before-use (all edges with head h occur before h is used as a tail) order, then a grace margin for keeping edges that starts leniently and becomes more forbidding will make it impossible for this to occur, i.e. safe_inside=true is not needed.
 
   // prunes any edge whose score on the best path taking that edge is more than alpha away
   // from the score of the global best past (or the highest edge posterior)
-  void BeamPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double alpha,
-                              const std::vector<bool>* preserve_mask = NULL);
+  void BeamPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double alpha,const EdgeMask* preserve_mask = NULL,bool safe_inside=false);
 
   // report nodes, edges, paths
   std::string stats(std::string const& name="forest") const;
@@ -204,7 +207,7 @@ class Hypergraph {
   // reorder nodes_ so they are in topological order
   // source nodes at 0 sink nodes at size-1
   void TopologicallySortNodesAndEdges(int goal_idx,
-                                      const std::vector<bool>* prune_edges = NULL);
+                                      const EdgeMask* prune_edges = NULL);
  private:
   Hypergraph(int num_nodes, int num_edges, bool is_lc) : is_linear_chain_(is_lc), nodes_(num_nodes), edges_(num_edges) {}
 
@@ -219,13 +222,14 @@ struct EdgeProb {
 };
 
 struct EdgeSelectEdgeWeightFunction {
-  EdgeSelectEdgeWeightFunction(const std::vector<bool>& v) : v_(v) {}
+  typedef std::vector<bool> EdgeMask;
+  EdgeSelectEdgeWeightFunction(const EdgeMask& v) : v_(v) {}
   inline prob_t operator()(const Hypergraph::Edge& e) const {
     if (v_[e.id_]) return prob_t::One();
     else return prob_t::Zero();
   }
  private:
-  const std::vector<bool>& v_;
+  const EdgeMask& v_;
 };
 
 struct ScaledEdgeProb {
