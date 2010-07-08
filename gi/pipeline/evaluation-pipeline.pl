@@ -10,6 +10,9 @@ my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR 
 # the key in this map is the extractor name, the value is a list of the extracted features
 my $feat_map = {
   "LogRuleCount" => [ "LogRuleCount", "SingletonRule" ] ,
+#  "XFeatures" => [ "XFE","XEF" ] ,
+  "XFeatures" => [ "XFE","XEF","LabelledEF","LabelledFE"] ,
+  "LabelledRuleConditionals" => [ "LabelledFE","LabelledEF" ] ,
   "LexProb" => [ "LexE2F", "LexF2E" ] ,
 };
 
@@ -24,11 +27,15 @@ my %init_weights = qw(
   LogECount -0.129853
   LogFCount -0.194037
   LogRuleCount 0.256706
+  XFE -0.256706
+  XEF -0.256706
+  LabelledFE -0.256706
+  LabelledEF -0.256706
   PassThrough -0.9304905
   SingletonE -3.04161
   SingletonF 0.0714027
   SingletonRule -0.889377
-  WordPenalty -7.99495
+  WordPenalty -1.99495
 );
 
 
