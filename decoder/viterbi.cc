@@ -124,12 +124,12 @@ FeatureVector ViterbiFeatures(Hypergraph const& hg,FeatureWeights const* weights
     double fv=r.dot(*weights);
     const double EPSILON=1e-5;
     if (!close_enough(logp,fv,EPSILON)) {
-      complaint="ViterbiFeatures log prob disagrees with features.dot(weights)"+boost::lexical_cast<string>(logp)+"!="+boost::lexical_cast<string>(fv);
+      string complaint="ViterbiFeatures log prob disagrees with features.dot(weights)"+boost::lexical_cast<string>(logp)+"!="+boost::lexical_cast<string>(fv);
       if (fatal_dotprod_disagreement)
         throw std::runtime_error(complaint);
       else
         cerr<<complaint<<endl;
-
+    }
   }
   return r;
 }
