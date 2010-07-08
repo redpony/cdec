@@ -491,7 +491,7 @@ int main(int argc, char** argv) {
     }
     const bool show_tree_structure=conf.count("show_tree_structure");
     const bool show_features=conf.count("show_features");
-    forest_stats(forest,"  -LM forest",show_tree_structure,show_features);
+    forest_stats(forest,"  -LM forest",show_tree_structure,show_features,&feature_weights);
     if (conf.count("show_expected_length")) {
       const PRPair<double, double> res =
         Inside<PRPair<double, double>,
@@ -519,7 +519,7 @@ int main(int argc, char** argv) {
                     &prelm_forest);
       forest.swap(prelm_forest);
       forest.Reweight(prelm_feature_weights);
-      forest_stats(forest," prelm forest",show_tree_structure,show_features);
+      forest_stats(forest," prelm forest",show_tree_structure,show_features,&prelm_feature_weights);
     }
 
     maybe_prune(forest,conf,"prelm_beam_prune","prelm_density_prune","-LM",srclen);
@@ -538,7 +538,7 @@ int main(int argc, char** argv) {
                     &lm_forest);
       forest.swap(lm_forest);
       forest.Reweight(feature_weights);
-      forest_stats(forest,"  +LM forest",show_tree_structure,show_features);
+      forest_stats(forest,"  +LM forest",show_tree_structure,show_features,&feature_weights);
     }
 
     maybe_prune(forest,conf,"beam_prune","density_prune","+LM",srclen);

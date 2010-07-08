@@ -204,7 +204,7 @@ std::string ViterbiFTree(const Hypergraph& hg);
 int ViterbiELength(const Hypergraph& hg);
 int ViterbiPathLength(const Hypergraph& hg);
 
-/// if weights supplied, assert viterbi prob = features.dot(*weights).  return features (sum over all edges in viterbi derivation)
-FeatureVector ViterbiFeatures(Hypergraph const& hg,FeatureWeights const* weights=0);
+/// if weights supplied, assert viterbi prob = features.dot(*weights) (exception if fatal, cerr warn if not).  return features (sum over all edges in viterbi derivation)
+FeatureVector ViterbiFeatures(Hypergraph const& hg,FeatureWeights const* weights=0,bool fatal_dotprod_disagreement=false);
 
 #endif

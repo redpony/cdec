@@ -116,15 +116,20 @@ inline bool close_enough(double a,double b,double epsilon)
     return diff<=epsilon*fabs(a) || diff<=epsilon*fabs(b);
 }
 
-FeatureVector ViterbiFeatures(Hypergraph const& hg,FeatureWeights const* weights) {
+FeatureVector ViterbiFeatures(Hypergraph const& hg,FeatureWeights const* weights,bool fatal_dotprod_disagreement) {
   FeatureVector r;
   const prob_t p = Viterbi<FeatureVectorTraversal>(hg, &r);
   if (weights) {
     double logp=log(p);
     double fv=r.dot(*weights);
     const double EPSILON=1e-5;
-    if (!close_enough(logp,fv,EPSILON))
-      throw std::runtime_error("ViterbiFeatures log prob disagrees with features.dot(weights)"+boost::lexical_cast<string>(logp)+"!="+boost::lexical_cast<string>(fv));
+    if (!close_enough(logp,fv,EPSILON)) {
+      complaint="ViterbiFeatures log prob disagrees with features.dot(weights)"+boost::lexical_cast<string>(logp)+"!="+boost::lexical_cast<string>(fv);
+      if (fatal_dotprod_disagreement)
+        throw std::runtime_error(complaint);
+      else
+        cerr<<complaint<<endl;
+
   }
   return r;
 }
