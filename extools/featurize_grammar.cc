@@ -385,6 +385,22 @@ struct LogRuleCount : public FeatureExtractor {
   const int kCFE;
 };
 
+struct BackoffRule : public FeatureExtractor {
+  BackoffRule() :
+    fid_(FD::Convert("BackoffRule")) {}
+  virtual void ExtractFeatures(const WordID lhs,
+                               const vector<WordID>& src,
+                               const vector<WordID>& trg,
+                               const RuleStatistics& info,
+                               SparseVector<float>* result) const {
+    (void) lhs; (void) src; (void) trg;
+    string lhstr = TD::Convert(lhs);
+    if(lhstr.find('_')!=string::npos)
+        result->set_value(fid_, -1);
+  }
+  const int fid_;
+};
+
 // The negative log of the condition rule probs 
 // ignoring the identities of the  non-terminals. 
 // i.e. the prob Hiero would assign.
@@ -656,6 +672,7 @@ int main(int argc, char** argv){
   reg.Register("LexProb", new FEFactory<LexProbExtractor>);
   reg.Register("XFeatures", new FEFactory<XFeatures>);
   reg.Register("LabelledRuleConditionals", new FEFactory<LabelledRuleConditionals>);
+  reg.Register("BackoffRule", new FEFactory<BackoffRule>);
   po::variables_map conf;
   InitCommandLine(reg, argc, argv, &conf);
   aligned_corpus = conf["aligned_corpus"].as<string>();  // GLOBAL VAR

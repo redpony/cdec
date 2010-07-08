@@ -14,6 +14,7 @@ my $feat_map = {
   "XFeatures" => [ "XFE","XEF","LabelledEF","LabelledFE"] ,
   "LabelledRuleConditionals" => [ "LabelledFE","LabelledEF" ] ,
   "LexProb" => [ "LexE2F", "LexF2E" ] ,
+  "BackoffRule" => [ "BackoffRule", "BackoffRule" ] ,
 };
 
 my %init_weights = qw(
@@ -27,6 +28,7 @@ my %init_weights = qw(
   LogECount -0.129853
   LogFCount -0.194037
   LogRuleCount 0.256706
+  BackoffRule 0.5
   XFE -0.256706
   XEF -0.256706
   LabelledFE -0.256706

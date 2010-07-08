@@ -69,8 +69,8 @@ safemkdir($OUTPUT) or die "Couldn't create output directory $OUTPUT: $!";
 safemkdir($CONTEXT_DIR) or die "Couldn't create output directory $CONTEXT_DIR: $!";
 safemkdir($CLUSTER_DIR) or die "Couldn't create output directory $CLUSTER_DIR: $!";
 safemkdir($GRAMMAR_DIR) or die "Couldn't create output directory $GRAMMAR_DIR: $!";
-if (-e $TOPICS_CONFIG) {
-  copy($TOPICS_CONFIG, $CLUSTER_DIR) or die "Copy failed: $!";
+if(-e $TOPICS_CONFIG) {
+    copy($TOPICS_CONFIG, $CLUSTER_DIR) or die "Copy failed: $!";
 }
 
 extract_context();
@@ -199,7 +199,7 @@ sub grammar_extract {
   if (-e $OUTGRAMMAR) {
     print STDERR "$OUTGRAMMAR exists, reusing...\n";
   } else {
-    safesystem("$EXTRACTOR -i $LABELED -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE | $SORT_KEYS | $REDUCER -p | $GZIP > $OUTGRAMMAR") or die "Couldn't extract grammar";
+    safesystem("$EXTRACTOR -i $LABELED -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -t $NUM_TOPICS -g | $SORT_KEYS | $REDUCER -p | $GZIP > $OUTGRAMMAR") or die "Couldn't extract grammar";
   }
   return $OUTGRAMMAR;
 }
@@ -212,7 +212,7 @@ sub grammar_extract_bidir {
   if (-e $OUTGRAMMAR) {
     print STDERR "$OUTGRAMMAR exists, reusing...\n";
   } else {
-    safesystem("$EXTRACTOR -i $LABELED -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -b | $SORT_KEYS | $REDUCER -p -b | $SORT_KEYS | $REDUCER | $GZIP > $OUTGRAMMAR") or die "Couldn't extract grammar";
+    safesystem("$EXTRACTOR -i $LABELED -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -b -t $NUM_TOPICS -g | $SORT_KEYS | $REDUCER -p -b | $SORT_KEYS | $REDUCER | $GZIP > $OUTGRAMMAR") or die "Couldn't extract grammar";
   }
   return $OUTGRAMMAR;
 }

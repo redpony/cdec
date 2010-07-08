@@ -87,7 +87,8 @@ struct Extract {
                           const int max_syms,
                           const bool permit_adjacent_nonterminals,
                           const bool require_aligned_terminal,
-                          RuleObserver* observer);
+                          RuleObserver* observer,
+                          std::vector<WordID>* all_cats);
 };
 
 // represents statistics / information about a rule pair
