@@ -8,11 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class PhraseCorpus {
-	
-	public static String LEX_FILENAME="../pdata/lex.out";
-	public static String DATA_FILENAME="../pdata/btec.con";
-	
+public class PhraseCorpus 
+{
 	public HashMap<String,Integer>wordLex;
 	public HashMap<String,Integer>phraseLex;
 	
@@ -21,16 +18,8 @@ public class PhraseCorpus {
 	
 	//data[phrase][num context][position]
 	public int data[][][];
-	public int numContexts;
-	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		PhraseCorpus c=new PhraseCorpus(DATA_FILENAME);
-		c.saveLex(LEX_FILENAME);
-		c.loadLex(LEX_FILENAME);
-		c.saveLex(LEX_FILENAME);
-	}
-	
+	public int numContexts;	
+
 	public PhraseCorpus(String filename){
 		BufferedReader r=io.FileUtil.openBufferedReader(filename);
 		
@@ -185,5 +174,13 @@ public class PhraseCorpus {
 		}
 		return null;
 	}
-	
+
+	public static void main(String[] args) {
+		String LEX_FILENAME="../pdata/lex.out";
+		String DATA_FILENAME="../pdata/btec.con";
+		PhraseCorpus c=new PhraseCorpus(DATA_FILENAME);
+		c.saveLex(LEX_FILENAME);
+		c.loadLex(LEX_FILENAME);
+		c.saveLex(LEX_FILENAME);
+	}
 }
