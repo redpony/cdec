@@ -45,7 +45,7 @@ public:
 
     void store(std::valarray<T>* target) const {
       (*target) *= 0;
-      for (typename MapType::const_iterator 
+      for (typename MapType::const_iterator
               it = values_.begin(); it != values_.end(); ++it) {
         if (it->first >= target->size()) break;
         (*target)[it->first] = it->second;
@@ -63,7 +63,7 @@ public:
     // as the sparse vector
     T dot() const {
         T sum = 0;
-        for (typename MapType::const_iterator 
+        for (typename MapType::const_iterator
                 it = values_.begin(); it != values_.end(); ++it)
             sum += it->second;
         return sum;
@@ -72,21 +72,21 @@ public:
     template<typename S>
     S dot(const SparseVector<S> &vec) const {
         S sum = 0;
-        for (typename MapType::const_iterator 
+        for (typename MapType::const_iterator
                 it = values_.begin(); it != values_.end(); ++it)
         {
-            typename MapType::const_iterator 
+            typename MapType::const_iterator
                 found = vec.values_.find(it->first);
             if (found != vec.values_.end())
                 sum += it->second * found->second;
         }
         return sum;
     }
-    
+
     template<typename S>
     S dot(const std::vector<S> &vec) const {
         S sum = 0;
-        for (typename MapType::const_iterator 
+        for (typename MapType::const_iterator
                 it = values_.begin(); it != values_.end(); ++it)
         {
             if (it->first < static_cast<int>(vec.size()))
@@ -99,7 +99,7 @@ public:
     S dot(const S *vec) const {
         // this is not range checked!
         S sum = 0;
-        for (typename MapType::const_iterator 
+        for (typename MapType::const_iterator
                 it = values_.begin(); it != values_.end(); ++it)
             sum += it->second * vec[it->first];
         std::cout << "dot(*vec) " << sum << std::endl;
@@ -108,22 +108,22 @@ public:
 
     T l1norm() const {
       T sum = 0;
-      for (typename MapType::const_iterator 
+      for (typename MapType::const_iterator
               it = values_.begin(); it != values_.end(); ++it)
         sum += fabs(it->second);
       return sum;
     }
-    
+
     T l2norm() const {
       T sum = 0;
-      for (typename MapType::const_iterator 
+      for (typename MapType::const_iterator
               it = values_.begin(); it != values_.end(); ++it)
         sum += it->second * it->second;
       return sqrt(sum);
     }
-    
+
     SparseVector<T> &operator+=(const SparseVector<T> &other) {
-        for (typename MapType::const_iterator 
+        for (typename MapType::const_iterator
                 it = other.values_.begin(); it != other.values_.end(); ++it)
         {
             T v = (values_[it->first] += it->second);
@@ -134,7 +134,7 @@ public:
     }
 
     SparseVector<T> &operator-=(const SparseVector<T> &other) {
-        for (typename MapType::const_iterator 
+        for (typename MapType::const_iterator
                 it = other.values_.begin(); it != other.values_.end(); ++it)
         {
             T v = (values_[it->first] -= it->second);
@@ -145,28 +145,28 @@ public:
     }
 
     SparseVector<T> &operator-=(const double &x) {
-        for (typename MapType::iterator 
+        for (typename MapType::iterator
                 it = values_.begin(); it != values_.end(); ++it)
             it->second -= x;
         return *this;
     }
 
     SparseVector<T> &operator+=(const double &x) {
-        for (typename MapType::iterator 
+        for (typename MapType::iterator
                 it = values_.begin(); it != values_.end(); ++it)
             it->second += x;
         return *this;
     }
 
     SparseVector<T> &operator/=(const T &x) {
-        for (typename MapType::iterator 
+        for (typename MapType::iterator
                 it = values_.begin(); it != values_.end(); ++it)
             it->second /= x;
         return *this;
     }
 
     SparseVector<T> &operator*=(const T& x) {
-        for (typename MapType::iterator 
+        for (typename MapType::iterator
                 it = values_.begin(); it != values_.end(); ++it)
             it->second *= x;
         return *this;
@@ -194,7 +194,7 @@ public:
 
     void Write(const bool with_semi, std::ostream* os) const {
         bool first = true;
-        for (typename MapType::const_iterator 
+        for (typename MapType::const_iterator
                 it = values_.begin(); it != values_.end(); ++it) {
           // by definition feature id 0 is a dummy value
           if (it->first == 0) continue;
@@ -243,6 +243,9 @@ public:
 private:
   MapType values_;
 };
+
+typedef SparseVector<double> FeatureVector;
+typedef std::vector<double> FeatureWeights;
 
 template <typename T>
 SparseVector<T> operator+(const SparseVector<T>& a, const SparseVector<T>& b) {

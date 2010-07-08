@@ -7,6 +7,11 @@
 
 using namespace std;
 
+bool TRule::IsGoal() const {
+  static const int kGOAL(TD::Convert("Goal") * -1); // this will happen once, and after static init of trule.cc static dict.
+  return GetLHS() == kGOAL;
+}
+
 static WordID ConvertTrgString(const string& w) {
   int len = w.size();
   WordID id = 0;

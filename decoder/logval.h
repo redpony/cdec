@@ -1,7 +1,7 @@
 #ifndef LOGVAL_H_
 #define LOGVAL_H_
 
-#define LOGVAL_CHECK_NEG_POW false
+#define LOGVAL_CHECK_NEG false
 
 #include <iostream>
 #include <cstdlib>
@@ -59,7 +59,7 @@ class LogVal {
   }
 
   LogVal& poweq(const T& power) {
-#if LOGVAL_CHECK_NEG_POW
+#if LOGVAL_CHECK_NEG
     if (s_) {
       std::cerr << "poweq(T) not implemented when s_ is true\n";
       std::abort();
@@ -116,7 +116,9 @@ LogVal<T> operator-(LogVal<T> o1, const LogVal<T>& o2) {
 
 template<typename T>
 T log(const LogVal<T>& o) {
+#ifdef LOGVAL_CHECK_NEG
   if (o.s_) return log(-1.0);
+#endif
   return o.v_;
 }
 

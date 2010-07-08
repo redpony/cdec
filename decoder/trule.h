@@ -28,6 +28,8 @@ class TRule {
       scores_.set_value(feat_ids[i], feat_vals[i]);
   }
 
+  bool IsGoal() const;
+
   explicit TRule(const std::vector<WordID>& e) : e_(e), lhs_(0), prev_i(-1), prev_j(-1) {}
   TRule(const std::vector<WordID>& e, const std::vector<WordID>& f, const WordID& lhs) :
     e_(e), f_(f), lhs_(lhs), prev_i(-1), prev_j(-1) {}
@@ -126,7 +128,7 @@ class TRule {
   std::vector<WordID> f_;
   WordID lhs_;
   SparseVector<double> scores_;
-  
+
   char arity_;
   TRulePtr parent_rule_;  // usually NULL, except when doing constrained decoding
 
