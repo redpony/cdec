@@ -350,7 +350,9 @@ int main(int argc, char** argv) {
       prelm_w.InitFromFile(plmw);
       prelm_feature_weights.resize(FD::NumFeats());
       prelm_w.InitVector(&prelm_feature_weights);
+      cerr << "prelm_weights: " << FeatureVector(prelm_feature_weights)<<endl;
     }
+    cerr << "+LM weights: " << FeatureVector(feature_weights)<<endl;
     if (!conf.count("no_freeze_feature_set")) {
       cerr << "Freezing feature set (use --no_freeze_feature_set to change)." << endl;
       FD::Freeze();
