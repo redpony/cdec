@@ -28,6 +28,7 @@ shared_ptr<FeatureFunction> FFRegistry::Create(const string& ffname, const strin
     cerr << "I don't know how to create feature " << ffname << endl;
   } else {
     res = it->second->Create(param);
+    res->name=ffname;
   }
   return res;
 }

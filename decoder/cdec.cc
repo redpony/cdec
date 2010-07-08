@@ -56,7 +56,28 @@ void ConvertSV(const SparseVector<prob_t>& src, SparseVector<double>* trg) {
     trg->set_value(it->first, it->second);
 }
 
-void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
+
+inline string str(char const* name,po::variables_map const& conf) {
+  return conf[name].as<string>();
+}
+
+shared_ptr<FeatureFunction> make_ff(string const& ffp,bool verbose_feature_functions,char const* pre="") {
+  string ff, param;
+  SplitCommandAndParam(ffp, &ff, &param);
+  cerr << "Feature: " << ff;
+  if (param.size() > 0) cerr << " (with config parameters '" << param << "')\n";
+  else cerr << " (no config parameters)\n";
+  shared_ptr<FeatureFunction> pf = global_ff_registry->Create(ff, param);
+  if (!pf)
+    exit(1);
+  int nbyte=pf->NumBytesContext();
+  if (verbose_feature_functions)
+    cerr<<"State is "<<nbyte<<" bytes for "<<pre<<"feature "<<ffp<<endl;
+  return pf;
+}
+
+void InitCommandLine(int argc, char** argv, po::variables_map* confp) {
+  po::variables_map &conf=*confp;
   po::options_description opts("Configuration options");
   opts.add_options()
         ("formalism,f",po::value<string>(),"Decoding formalism; values include SCFG, FST, PB, LexTrans (lexical translation model, also disc training), CSplit (compound splitting), Tagger (sequence labeling), LexAlign (alignment only, or EM training)")
@@ -65,8 +86,9 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("weights,w",po::value<string>(),"Feature weights file")
     ("prelm_weights",po::value<string>(),"Feature weights file for prelm_beam_prune.  Requires --weights.")
     ("prelm_copy_weights","use --weights as value for --prelm_weights.")
+    ("prelm_feature_function",po::value<vector<string> >()->composing(),"Additional feature functions for prelm pass only (in addition to the 0-state subset of feature_function")
     ("keep_prelm_cube_order","when forest rescoring with final models, use the edge ordering from the prelm pruning features*weights.  only meaningful if --prelm_weights given.  UNTESTED but assume that cube pruning gives a sensible result, and that 'good' (as tuned for bleu w/ prelm features) edges come first.")
-
+    ("warn_0_weight","Warn about any feature id that has a 0 weight (this is perfectly safe if you intend 0 weight, though)")
         ("no_freeze_feature_set,Z", "Do not freeze feature set after reading feature weights file")
         ("feature_function,F",po::value<vector<string> >()->composing(), "Additional feature function(s) (-L for list)")
         ("list_feature_functions,L","List available feature functions")
@@ -111,33 +133,44 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description clo("Command line options");
   clo.add_options()
         ("config,c", po::value<string>(), "Configuration file")
-        ("help,h", "Print this help message and exit");
+        ("help,h", "Print this help message and exit")
+    ("usage", po::value<string>(), "Describe a feature function type")
+    ;
+
   po::options_description dconfig_options, dcmdline_options;
   dconfig_options.add(opts);
   dcmdline_options.add(opts).add(clo);
 
-  po::store(parse_command_line(argc, argv, dcmdline_options), *conf);
-  if (conf->count("config")) {
-    const string cfg = (*conf)["config"].as<string>();
+  po::store(parse_command_line(argc, argv, dcmdline_options), conf);
+  if (conf.count("config")) {
+    const string cfg = str("config",conf);
     cerr << "Configuration file: " << cfg << endl;
     ifstream config(cfg.c_str());
-    po::store(po::parse_config_file(config, dconfig_options), *conf);
+    po::store(po::parse_config_file(config, dconfig_options), conf);
   }
-  po::notify(*conf);
+  po::notify(conf);
 
-  if (conf->count("list_feature_functions")) {
+  if (conf.count("list_feature_functions")) {
     cerr << "Available feature functions (specify with -F):\n";
     global_ff_registry->DisplayList();
     cerr << endl;
     exit(1);
   }
 
-  if (conf->count("help") || conf->count("formalism") == 0) {
+  if (conf.count("usage")) {
+    cout<<global_ff_registry->usage(str("usage",conf),true,true)<<endl;
+    exit(0);
+  }
+  if (conf.count("help")) {
+    cout << dcmdline_options << endl;
+    exit(0);
+  }
+  if (conf.count("help") || conf.count("formalism") == 0) {
     cerr << dcmdline_options << endl;
     exit(1);
   }
 
-  const string formalism = LowercaseString((*conf)["formalism"].as<string>());
+  const string formalism = LowercaseString(str("formalism",conf));
   if (formalism != "scfg" && formalism != "fst" && formalism != "lextrans" && formalism != "pb" && formalism != "csplit" && formalism != "tagger" && formalism != "lexalign") {
     cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 'csplit', 'lextrans', 'lexalign', or 'tagger'\n";
     cerr << dcmdline_options << endl;
@@ -256,16 +289,15 @@ bool beam_param(po::variables_map const& conf,string const& name,double *val,boo
 bool prelm_weights_string(po::variables_map const& conf,string &s)
 {
   if (conf.count("prelm_weights")) {
-    s=conf["prelm_weights"].as<string>();
+    s=str("prelm_weights",conf);
     return true;
   }
   if (conf.count("prelm_copy_weights")) {
-    s=conf["weights"].as<string>();
+    s=str("weights",conf);
     return true;
   }
   return false;
 }
-
 
 
 void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,FeatureWeights *weights=0) {
@@ -305,6 +337,10 @@ void maybe_prune(Hypergraph &forest,po::variables_map const& conf,string nbeam,s
     }
 }
 
+void show_models(po::variables_map const& conf,ModelSet &ms,char const* header) {
+  cerr<<header<<": ";
+  ms.show_features(cerr,cerr,conf.count("warn_0_weight"));
+}
 
 
 int main(int argc, char** argv) {
@@ -322,7 +358,7 @@ int main(int argc, char** argv) {
   const bool output_training_vector = (write_gradient || feature_expectations);
 
   boost::shared_ptr<Translator> translator;
-  const string formalism = LowercaseString(conf["formalism"].as<string>());
+  const string formalism = LowercaseString(str("formalism",conf));
   const bool csplit_preserve_full_word = conf.count("csplit_preserve_full_word");
   if (csplit_preserve_full_word &&
       (formalism != "csplit" || !(conf.count("beam_prune")||conf.count("density_prune")||conf.count("prelm_beam_prune")||conf.count("prelm_density_prune")))) {
@@ -341,7 +377,7 @@ int main(int argc, char** argv) {
   Weights w,prelm_w;
   bool has_prelm_models = false;
   if (conf.count("weights")) {
-    w.InitFromFile(conf["weights"].as<string>());
+    w.InitFromFile(str("weights",conf));
     feature_weights.resize(FD::NumFeats());
     w.InitVector(&feature_weights);
     string plmw;
@@ -350,13 +386,9 @@ int main(int argc, char** argv) {
       prelm_w.InitFromFile(plmw);
       prelm_feature_weights.resize(FD::NumFeats());
       prelm_w.InitVector(&prelm_feature_weights);
-      cerr << "prelm_weights: " << FeatureVector(prelm_feature_weights)<<endl;
+//      cerr << "prelm_weights: " << FeatureVector(prelm_feature_weights)<<endl;
     }
-    cerr << "+LM weights: " << FeatureVector(feature_weights)<<endl;
-    if (!conf.count("no_freeze_feature_set")) {
-      cerr << "Freezing feature set (use --no_freeze_feature_set to change)." << endl;
-      FD::Freeze();
-    }
+//    cerr << "+LM weights: " << FeatureVector(feature_weights)<<endl;
   }
 
   // set up translation back end
@@ -378,41 +410,46 @@ int main(int argc, char** argv) {
     assert(!"error");
 
   // set up additional scoring features
-  vector<shared_ptr<FeatureFunction> > pffs;
+  vector<shared_ptr<FeatureFunction> > pffs,prelm_only_ffs;
 
   vector<const FeatureFunction*> late_ffs,prelm_ffs;
   if (conf.count("feature_function") > 0) {
     const vector<string>& add_ffs = conf["feature_function"].as<vector<string> >();
     for (int i = 0; i < add_ffs.size(); ++i) {
-      string ff, param;
-      SplitCommandAndParam(add_ffs[i], &ff, &param);
-      cerr << "Feature: " << ff;
-      if (param.size() > 0) cerr << " (with config parameters '" << param << "')\n";
-      else cerr << " (no config parameters)\n";
-      shared_ptr<FeatureFunction> pff = global_ff_registry->Create(ff, param);
-      FeatureFunction const* p=pff.get();
-      if (!p) { exit(1); }
-      // TODO check that multiple features aren't trying to set the same fid
-      pffs.push_back(pff);
+      pffs.push_back(make_ff(add_ffs[i],verbose_feature_functions));
+      FeatureFunction const* p=pffs.back().get();
       late_ffs.push_back(p);
-      int nbyte=p->NumBytesContext();
-      if (verbose_feature_functions)
-        cerr<<"State is "<<nbyte<<" bytes for feature "<<ff<<endl;
       if (has_prelm_models) {
-        if (nbyte==0)
+        if (p->NumBytesContext()==0)
           prelm_ffs.push_back(p);
         else
-          cerr << "Excluding stateful feature from prelm pruning: "<<ff<<" - state is "<<nbyte<<" bytes."<<endl;
+          cerr << "Excluding stateful feature from prelm pruning: "<<add_ffs[i]<<endl;
 }
     }
   }
+  if (conf.count("prelm_feature_function") > 0) {
+    const vector<string>& add_ffs = conf["prelm_feature_function"].as<vector<string> >();
+    for (int i = 0; i < add_ffs.size(); ++i) {
+      prelm_only_ffs.push_back(make_ff(add_ffs[i],verbose_feature_functions,"prelm-only "));
+      prelm_ffs.push_back(prelm_only_ffs.back().get());
+    }
+  }
+
   if (has_prelm_models)
         cerr << "prelm rescoring with "<<prelm_ffs.size()<<" 0-state feature functions.  +LM pass will use "<<late_ffs.size()<<" features (not counting rule features)."<<endl;
 
   ModelSet late_models(feature_weights, late_ffs);
+  show_models(conf,late_models,"late ");
+  ModelSet prelm_models(prelm_feature_weights, prelm_ffs);
+  if (has_prelm_models)
+    show_models(conf,prelm_models,"prelm ");
+  if (!conf.count("no_freeze_feature_set")) { // this used to happen immediately after loading weights, but now show_models will extend weight vector nicely.
+    cerr << "Freezing feature set (use --no_freeze_feature_set to change)." << endl;
+    FD::Freeze();
+  }
 
   int palg = 1;
-  if (LowercaseString(conf["intersection_strategy"].as<string>()) == "full") {
+  if (LowercaseString(str("intersection_strategy",conf)) == "full") {
     palg = 0;
     cerr << "Using full intersection (no pruning).\n";
   }
@@ -426,17 +463,17 @@ int main(int argc, char** argv) {
   const bool minimal_forests = conf.count("minimal_forests");
   const bool graphviz = conf.count("graphviz");
   const bool joshua_viz = conf.count("show_joshua_visualization");
-  const bool encode_b64 = conf["vector_format"].as<string>() == "b64";
+  const bool encode_b64 = str("vector_format",conf) == "b64";
   const bool kbest = conf.count("k_best");
   const bool unique_kbest = conf.count("unique_k_best");
   const bool crf_uniform_empirical = conf.count("crf_uniform_empirical");
   shared_ptr<WriteFile> extract_file;
   if (conf.count("extract_rules"))
-    extract_file.reset(new WriteFile(conf["extract_rules"].as<string>()));
+    extract_file.reset(new WriteFile(str("extract_rules",conf)));
 
   int combine_size = conf["combine_size"].as<int>();
   if (combine_size < 1) combine_size = 1;
-  const string input = conf["input"].as<string>();
+    const string input = str("input",conf);
   cerr << "Reading input from " << ((input == "-") ? "STDIN" : input.c_str()) << endl;
   ReadFile in_read(input);
   istream *in = in_read.stream();
@@ -506,7 +543,6 @@ int main(int argc, char** argv) {
       ExtractRulesDedupe(forest, extract_file->stream());
 
     if (has_prelm_models) {
-      ModelSet prelm_models(prelm_feature_weights, prelm_ffs);
       Timer t("prelm rescoring");
       forest.Reweight(prelm_feature_weights);
       forest.SortInEdgesByEdgeWeights();
@@ -544,7 +580,7 @@ int main(int argc, char** argv) {
     maybe_prune(forest,conf,"beam_prune","density_prune","+LM",srclen);
 
     if (conf.count("forest_output") && !has_ref) {
-      ForestWriter writer(conf["forest_output"].as<string>(), sent_id);
+      ForestWriter writer(str("forest_output",conf), sent_id);
       if (FileExists(writer.fname_)) {
         cerr << "  Unioning...\n";
         Hypergraph new_hg;
@@ -621,7 +657,7 @@ int main(int argc, char** argv) {
         }
         //DumpKBest(sent_id, forest, 1000);
         if (conf.count("forest_output")) {
-          ForestWriter writer(conf["forest_output"].as<string>(), sent_id);
+          ForestWriter writer(str("forest_output",conf), sent_id);
           if (FileExists(writer.fname_)) {
             cerr << "  Unioning...\n";
             Hypergraph new_hg;
