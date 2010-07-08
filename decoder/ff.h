@@ -15,6 +15,7 @@ class FeatureFunction;  // see definition below
 // FinalTraversalFeatures(...)
 class FeatureFunction {
  public:
+  std::string name; // set by FF factory using usage()
   FeatureFunction() : state_size_() {}
   explicit FeatureFunction(int state_size) : state_size_(state_size) {}
   virtual ~FeatureFunction();
@@ -24,12 +25,14 @@ class FeatureFunction {
     return usage_helper("FIXME_feature_needs_name","[no parameters]","[no documentation yet]",show_params,show_details);
   }
 
-  static std::string usage_helper(std::string const& name,std::string const& params,std::string const& details,bool show_params,bool show_details);
+  typedef std::vector<WordID> Features; // set of features ids
 
+protected:
+  static std::string usage_helper(std::string const& name,std::string const& params,std::string const& details,bool show_params,bool show_details);
+  static Features single_feature(WordID feat);
 public:
 
-  typedef std::vector<WordID> Features;
-  virtual Features features() { return Features(); }
+  virtual Features features() const { return Features(); }
   // returns the number of bytes of context that this feature function will
   // (maximally) use.  By default, 0 ("stateless" models in Hiero/Joshua).
   // NOTE: this value is fixed for the instance of your class, you cannot
@@ -87,7 +90,11 @@ public:
 // add value_
 class WordPenalty : public FeatureFunction {
  public:
+  Features features() const;
   WordPenalty(const std::string& param);
+  static std::string usage(bool p,bool d) {
+    return usage_helper("WordPenalty","","number of target words (local feature)",p,d);
+  }
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
@@ -102,7 +109,11 @@ class WordPenalty : public FeatureFunction {
 
 class SourceWordPenalty : public FeatureFunction {
  public:
+  Features features() const;
   SourceWordPenalty(const std::string& param);
+  static std::string usage(bool p,bool d) {
+    return usage_helper("SourceWordPenalty","","number of source words (local feature, and meaningless except when input has non-constant number of source words, e.g. segmentation/morphology/speech recognition lattice)",p,d);
+  }
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
@@ -117,7 +128,12 @@ class SourceWordPenalty : public FeatureFunction {
 
 class ArityPenalty : public FeatureFunction {
  public:
+  Features features() const;
   ArityPenalty(const std::string& param);
+  static std::string usage(bool p,bool d) {
+    return usage_helper("ArityPenalty","","Indicator feature Arity_N=1 for rule of arity N (local feature)",p,d);
+  }
+
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
@@ -126,7 +142,10 @@ class ArityPenalty : public FeatureFunction {
                                      SparseVector<double>* estimated_features,
                                      void* context) const;
  private:
-  int fids_[10];
+  enum {N_ARITIES=10};
+
+
+  int fids_[N_ARITIES];
   const double value_;
 };
 
@@ -153,6 +172,9 @@ class ModelSet {
                         Hypergraph::Edge* edge) const;
 
   bool empty() const { return models_.empty(); }
+
+  FeatureFunction::Features all_features(std::ostream *warnings=0); // this will warn about duplicate features as well (one function overwrites the feature of another).  also resizes weights_ so it is large enough to hold the (0) weight for the largest reported feature id
+  void show_features(std::ostream &out,std::ostream &warn,bool warn_zero_wt=true); //show features and weights
  private:
   std::vector<const FeatureFunction*> models_;
   std::vector<double> weights_;

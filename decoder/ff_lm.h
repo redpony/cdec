@@ -19,6 +19,7 @@ class LanguageModel : public FeatureFunction {
                                       SparseVector<double>* features) const;
   std::string DebugStateToString(const void* state) const;
   static std::string usage(bool param,bool verbose);
+  Features features() const;
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,

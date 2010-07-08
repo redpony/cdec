@@ -12,13 +12,14 @@ boost::shared_ptr<FFRegistry> global_ff_registry;
 
 void register_feature_functions() {
   global_ff_registry->Register(new FFFactory<LanguageModel>);
-  //TODO: define usage(false,false) for each of the below
+
+  //TODO: use for all features the new Register which requires usage(...)
 #ifdef HAVE_RANDLM
   global_ff_registry->Register("RandLM", new FFFactory<LanguageModelRandLM>);
 #endif
-  global_ff_registry->Register("WordPenalty", new FFFactory<WordPenalty>);
-  global_ff_registry->Register("SourceWordPenalty", new FFFactory<SourceWordPenalty>);
-  global_ff_registry->Register("ArityPenalty", new FFFactory<ArityPenalty>);
+  global_ff_registry->Register(new FFFactory<WordPenalty>);
+  global_ff_registry->Register(new FFFactory<SourceWordPenalty>);
+  global_ff_registry->Register(new FFFactory<ArityPenalty>);
   global_ff_registry->Register("RuleShape", new FFFactory<RuleShapeFeatures>);
   global_ff_registry->Register("RelativeSentencePosition", new FFFactory<RelativeSentencePosition>);
   global_ff_registry->Register("Model2BinaryFeatures", new FFFactory<Model2BinaryFeatures>);

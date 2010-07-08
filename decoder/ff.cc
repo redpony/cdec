@@ -29,6 +29,55 @@ string FeatureFunction::usage_helper(std::string const& name,std::string const& 
   return r;
 }
 
+FeatureFunction::Features FeatureFunction::single_feature(WordID feat) {
+  return Features(1,feat);
+}
+
+FeatureFunction::Features ModelSet::all_features(std::ostream *warn) {
+  typedef FeatureFunction::Features FFS;
+  FFS ffs;
+#define WARNFF(x) do { if (warn) { *warn << "WARNING: "<< x ; *warn<<endl; } } while(0)
+  typedef std::map<WordID,string> FFM;
+  FFM ff_from;
+  for (unsigned i=0;i<models_.size();++i) {
+    FeatureFunction const& ff=*models_[i];
+    string const& ffname=ff.name;
+    FFS si=ff.features();
+    if (si.empty()) {
+      WARNFF(ffname<<" doesn't yet report any feature IDs - implement features() method?");
+    }
+    for (unsigned j=0;j<si.size();++j) {
+      WordID fid=si[j];
+      if (fid >= weights_.size())
+        weights_.resize(fid+1);
+      pair<FFM::iterator,bool> i_new=ff_from.insert(FFM::value_type(fid,ffname));
+      if (i_new.second)
+        ffs.push_back(fid);
+      else {
+        WARNFF(ffname<<" models["<<i<<"] tried to define feature "<<FD::Convert(fid)<<" already defined earlier by "<<i_new.first->second);
+      }
+    }
+  }
+  return ffs;
+#undef WARNFF
+}
+
+void ModelSet::show_features(std::ostream &out,std::ostream &warn,bool warn_zero_wt)
+{
+  typedef FeatureFunction::Features FFS;
+  FFS ffs=all_features(&warn);
+  out << "Weight  Feature\n";
+  for (unsigned i=0;i<ffs.size();++i) {
+    WordID fid=ffs[i];
+    string const& fname=FD::Convert(fid);
+    double wt=weights_[fid];
+    if (warn_zero_wt && wt==0)
+      warn<<"WARNING: "<<fname<<" has 0 weight."<<endl;
+    out << wt << "  " << fname<<endl;
+  }
+
+}
+
 // Hiero and Joshua use log_10(e) as the value, so I do to
 WordPenalty::WordPenalty(const string& param) :
     fid_(FD::Convert("WordPenalty")),
@@ -59,6 +108,15 @@ SourceWordPenalty::SourceWordPenalty(const string& param) :
   }
 }
 
+FeatureFunction::Features SourceWordPenalty::features() const {
+  return single_feature(fid_);
+}
+
+FeatureFunction::Features WordPenalty::features() const {
+  return single_feature(fid_);
+}
+
+
 void SourceWordPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                         const Hypergraph::Edge& edge,
                                         const std::vector<const void*>& ant_states,
@@ -75,10 +133,14 @@ void SourceWordPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
 ArityPenalty::ArityPenalty(const std::string& /* param */) :
     value_(-1.0 / log(10)) {
   string fname = "Arity_X";
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < N_ARITIES; ++i) {
     fname[6]=i + '0';
     fids_[i] = FD::Convert(fname);
   }
+}
+
+FeatureFunction::Features ArityPenalty::features() const {
+  return Features(&fids_[0],&fids_[N_ARITIES]);
 }
 
 void ArityPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
