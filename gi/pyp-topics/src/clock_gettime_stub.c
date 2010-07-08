@@ -82,7 +82,7 @@ typedef enum {
 
 static mach_timebase_info_data_t __clock_gettime_inf;
 
-int clock_gettime(clockid_t clk_id, struct timespec *tp) {
+static int clock_gettime(clockid_t clk_id, struct timespec *tp) {
 	kern_return_t   ret;
 	clock_serv_t    clk;
 	clock_id_t clk_serv_id;
