@@ -43,6 +43,8 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("max_vars,v", po::value<int>()->default_value(2), "Maximum number of nonterminal variables in final phrase size")
         ("permit_adjacent_nonterminals,A", "Permit adjacent nonterminals in source side of rules")
         ("no_required_aligned_terminal,n", "Do not require an aligned terminal")
+        ("topics,t", po::value<int>()->default_value(50), "Number of categories assigned during clustering")
+        ("backoff,g","Produce a backoff grammar")
         ("help,h", "Print this help message and exit");
   po::options_description clo("Command line options");
   po::options_description dcmdline_options;
@@ -299,6 +301,7 @@ int main(int argc, char** argv) {
   WordID default_cat = 0;  // 0 means no default- extraction will
                            // fail if a phrase is extracted without a
                            // category
+  const bool backoff = (conf.count("backoff") ? true : false);
   if (conf.count("default_category")) {
     string sdefault_cat = conf["default_category"].as<string>();
     default_cat = -TD::Convert(sdefault_cat);
@@ -310,6 +313,7 @@ int main(int argc, char** argv) {
   char buf[MAX_LINE_LENGTH];
   AnnotatedParallelSentence sentence;
   vector<ParallelSpan> phrases;
+  vector<WordID> all_cats;
   const int max_base_phrase_size = conf["max_base_phrase_size"].as<int>();
   const bool write_phrase_contexts = conf.count("phrase_context") > 0;
   const bool write_base_phrases = conf.count("base_phrase") > 0;
@@ -319,12 +323,19 @@ int main(int argc, char** argv) {
   const int max_syms = conf["max_syms"].as<int>();
   const int max_vars = conf["max_vars"].as<int>();
   const int ctx_size = conf["phrase_context_size"].as<int>();
+  const int num_categories = conf["topics"].as<int>();
   const bool permit_adjacent_nonterminals = conf.count("permit_adjacent_nonterminals") > 0;
   const bool require_aligned_terminal = conf.count("no_required_aligned_terminal") == 0;
   int line = 0;
   CountCombiner cc(conf["combiner_size"].as<size_t>());
   HadoopStreamingRuleObserver o(&cc,
                                 conf.count("bidir") > 0);
+  
+  if(backoff) {
+    for (int i=0;i < num_categories;++i)
+        all_cats.push_back(TD::Convert("X"+boost::lexical_cast<string>(i)));
+  }
+  
   //SimpleRuleWriter o;
   while(in) {
     ++line;
@@ -356,9 +367,8 @@ int main(int argc, char** argv) {
       continue;
     }
     Extract::AnnotatePhrasesWithCategoryTypes(default_cat, sentence.span_types, &phrases);
-    Extract::ExtractConsistentRules(sentence, phrases, max_vars, max_syms, permit_adjacent_nonterminals, require_aligned_terminal, &o);
+    Extract::ExtractConsistentRules(sentence, phrases, max_vars, max_syms, permit_adjacent_nonterminals, require_aligned_terminal, &o, &all_cats);
   }
   if (!silent) cerr << endl;
   return 0;
 }
-
