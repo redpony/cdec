@@ -1,3 +1,7 @@
+char const* usage_name="LanguageModel";
+char const* usage_short="srilm.gz [-n FeatureName] [-o StateOrder] [-m LimitLoadOrder]";
+char const* usage_verbose="-n determines the name of the feature (and its weight).  -o defaults to 3.  -m defaults to effectively infinite, otherwise says what order lm probs to use (up to).  you could use -o > -m but that would be wasteful.  -o < -m means some ngrams are scored longer (whenever a word is inserted by a rule next to a variable) than the state would ordinarily allow.  NOTE: multiple LanguageModel features are allowed, but they will wastefully duplicate state, except in the special case of -o 1 (which uses no state).  subsequent references to the same a.lm.gz. unless they specify -m, will reuse the same SRI LM in memory; this means that the -m used in the first load of a.lm.gz will take effect.";
+
 //TODO: backoff wordclasses for named entity xltns, esp. numbers.  e.g. digits -> @.  idealy rule features would specify replacement lm tokens/classes
 
 //TODO: extra int in state to hold "GAP" token is not needed.  if there are less than (N-1) words, then null terminate the e.g. left words.  however, this would mean treating gapless items differently.  not worth the potential bugs right now.
@@ -38,7 +42,12 @@
 
 using namespace std;
 
-// intend to have a 0-state prelm-pass heuristic LM that is better than 1gram (like how estimated_features are lower order estimates).  NgramShare will keep track of all loaded lms and reuse them.
+string LanguageModel::usage(bool param,bool verbose) {
+  return usage_helper(usage_name,usage_short,usage_verbose,param,verbose);
+}
+
+
+// NgramShare will keep track of all loaded lms and reuse them.
 //TODO: ref counting by shared_ptr?  for now, first one to load LM needs to stick around as long as all subsequent users.
 
 #include <boost/shared_ptr.hpp>
@@ -167,27 +176,31 @@ struct LMClient {
 };
 
 class LanguageModelImpl {
+  void init(int order) {
+    //all these used to be const members, but that has no performance implication, and now there's less duplication.
+    order_=order;
+    state_size_ = OrderToStateSize(order)-1;
+    unigram=(order<=1);
+    floor_=-100;
+    kSTART = TD::Convert("<s>");
+    kSTOP = TD::Convert("</s>");
+    kUNKNOWN = TD::Convert("<unk>");
+    kNONE = -1;
+    kSTAR = TD::Convert("<{STAR}>");
+  }
+
  public:
-  explicit LanguageModelImpl(int order) :
-    ngram_(*TD::dict_, order), buffer_(), order_(order), state_size_(OrderToStateSize(order) - 1),
-      floor_(-100.0),
-      kSTART(TD::Convert("<s>")),
-      kSTOP(TD::Convert("</s>")),
-      kUNKNOWN(TD::Convert("<unk>")),
-      kNONE(-1),
-      kSTAR(TD::Convert("<{STAR}>"))
-  , unigram(order<=1) {}
-//TODO: show that unigram special case (0 state) computes what it should.
-  LanguageModelImpl(int order, const string& f) :
-      ngram_(*TD::dict_, order), buffer_(), order_(order), state_size_(OrderToStateSize(order) - 1),
-      floor_(-100.0),
-      kSTART(TD::Convert("<s>")),
-      kSTOP(TD::Convert("</s>")),
-      kUNKNOWN(TD::Convert("<unk>")),
-      kNONE(-1),
-      kSTAR(TD::Convert("<{STAR}>"))
-  , unigram(order<=1)
+  explicit LanguageModelImpl(int order) : ngram_(*TD::dict_, order)
   {
+    init(order);
+  }
+
+
+//TODO: show that unigram special case (0 state) computes what it should.
+  LanguageModelImpl(int order, const string& f, int load_order=0) :
+    ngram_(*TD::dict_, load_order ? load_order : order)
+  {
+    init(order);
     File file(f.c_str(), "r", 0);
     assert(file);
     cerr << "Reading " << order_ << "-gram LM from " << f << endl;
@@ -407,16 +420,16 @@ public:
  protected:
   Ngram ngram_;
   vector<WordID> buffer_;
-  const int order_;
-  const int state_size_;
-  const double floor_;
+  int order_;
+  int state_size_;
+  double floor_;
  public:
-  const WordID kSTART;
-  const WordID kSTOP;
-  const WordID kUNKNOWN;
-  const WordID kNONE;
-  const WordID kSTAR;
-  const bool unigram;
+  WordID kSTART;
+  WordID kSTOP;
+  WordID kUNKNOWN;
+  WordID kNONE;
+  WordID kSTAR;
+  bool unigram;
 };
 
 struct ClientLMI : public LanguageModelImpl
@@ -436,32 +449,33 @@ struct ReuseLMI : public LanguageModelImpl
 {
   ReuseLMI(int order, Ngram *ng) : LanguageModelImpl(order), ng(ng)
   {}
-  virtual double WordProb(int word, int* context) {
+  double WordProb(int word, int* context) {
     return ng->wordProb(word, (VocabIndex*)context);
   }
 protected:
   Ngram *ng;
 };
 
-LanguageModelImpl *make_lm_impl(int order, string const& f)
+LanguageModelImpl *make_lm_impl(int order, string const& f, int load_order)
 {
   if (f.find("lm://") == 0) {
     return new ClientLMI(order,f.substr(5));
-  } else if (ngs.have(f)) {
+  } else if (load_order==0 && ngs.have(f)) {
     cerr<<"Reusing already loaded Ngram LM: "<<f<<endl;
     return new ReuseLMI(order,ngs.get(f));
   } else {
-    LanguageModelImpl *r=new LanguageModelImpl(order,f);
+    LanguageModelImpl *r=new LanguageModelImpl(order,f,load_order);
     ngs.add(f,r->get_lm());
     return r;
   }
 }
 
-bool parse_lmspec(std::string const& in, int &order, string &featurename, string &filename)
+bool parse_lmspec(std::string const& in, int &order, string &featurename, string &filename, int &load_order)
 {
   vector<string> const& argv=SplitOnWhitespace(in);
   featurename="LanguageModel";
   order=3;
+  load_order=0;
 #define LMSPEC_NEXTARG if (i==argv.end()) {            \
     cerr << "Missing argument for "<<*last<<". "; goto usage; \
     } else { ++i; }
@@ -476,6 +490,9 @@ bool parse_lmspec(std::string const& in, int &order, string &featurename, string
         break;
       case 'n':
         LMSPEC_NEXTARG; featurename=*i;
+        break;
+      case 'm':
+        LMSPEC_NEXTARG; load_order=lexical_cast<int>(*i);
         break;
 #undef LMSPEC_NEXTARG
       default:
@@ -495,18 +512,22 @@ bool parse_lmspec(std::string const& in, int &order, string &featurename, string
   if (order > 0 && !filename.empty())
     return true;
 usage:
-  cerr<<"LanguageModel specification should be: [-o order>0] [-n featurename] filename"<<endl<<" you provided: "<<in<<endl;
+  cerr<<usage_name<<" specification should be: "<<usage_short<<"; you provided: "<<in<<usage_verbose<<endl;
   return false;
 }
 
 
 LanguageModel::LanguageModel(const string& param) {
-  int order;
+  int order,load_order;
   string featurename,filename;
-  if (!parse_lmspec(param,order,featurename,filename))
+  if (!parse_lmspec(param,order,featurename,filename,load_order))
     abort();
-  fid_=FD::Convert("LanguageModel");
-  pimpl_ = make_lm_impl(order,filename);
+  cerr<<"LM feature name: "<<featurename<<" from file "<<filename<<" order "<<order;
+  if (load_order)
+    cerr<<" loading LM as order "<<load_order;
+  cerr<<endl;
+  fid_=FD::Convert(featurename);
+  pimpl_ = make_lm_impl(order,filename,load_order);
   //TODO: see if it's actually possible to set order_ later to mutate an already used FF for e.g. multipass.  comment in ff.h says only to change state size in constructor.  clone instead?  differently -n named ones from same lm filename are already possible, so no urgency.
   SetStateSize(LanguageModelImpl::OrderToStateSize(order));
 }

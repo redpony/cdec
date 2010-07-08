@@ -16,6 +16,19 @@ void FeatureFunction::FinalTraversalFeatures(const void* ant_state,
   (void) features;
 }
 
+string FeatureFunction::usage_helper(std::string const& name,std::string const& params,std::string const& details,bool sp,bool sd) {
+  string r=name;
+  if (sp) {
+    r+=": ";
+    r+=params;
+  }
+  if (sd) {
+    r+="\n";
+    r+=details;
+  }
+  return r;
+}
+
 // Hiero and Joshua use log_10(e) as the value, so I do to
 WordPenalty::WordPenalty(const string& param) :
     fid_(FD::Convert("WordPenalty")),

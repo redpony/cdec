@@ -19,9 +19,9 @@ public:
   typedef typename std::map<int, T>::const_iterator const_iterator;
   SparseVector() {}
   explicit SparseVector(std::vector<T> const& v) {
-    MapType::iterator p=values_.end();
+    typename MapType::iterator p=values_.begin();
     for (unsigned i=0;i<v.size();++i)
-      p=values_.insert(p,MapType::value_type(i,v[i])); //faster
+      p=values_.insert(p,typename MapType::value_type(i,v[i])); //faster
   }
 
   const T operator[](int index) const {
