@@ -11,7 +11,8 @@
 boost::shared_ptr<FFRegistry> global_ff_registry;
 
 void register_feature_functions() {
-  global_ff_registry->Register("LanguageModel", new FFFactory<LanguageModel>);
+  global_ff_registry->Register(new FFFactory<LanguageModel>);
+  //TODO: define usage(false,false) for each of the below
 #ifdef HAVE_RANDLM
   global_ff_registry->Register("RandLM", new FFFactory<LanguageModelRandLM>);
 #endif
