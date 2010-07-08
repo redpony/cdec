@@ -25,33 +25,33 @@ std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool es
 
 string ViterbiETree(const Hypergraph& hg) {
   vector<WordID> tmp;
-  const prob_t p = Viterbi<vector<WordID>, ETreeTraversal, prob_t, EdgeProb>(hg, &tmp);
+  Viterbi<ETreeTraversal>(hg, &tmp);
   return TD::GetString(tmp);
 }
 
 string ViterbiFTree(const Hypergraph& hg) {
   vector<WordID> tmp;
-  const prob_t p = Viterbi<vector<WordID>, FTreeTraversal, prob_t, EdgeProb>(hg, &tmp);
+  Viterbi<FTreeTraversal>(hg, &tmp);
   return TD::GetString(tmp);
 }
 
 prob_t ViterbiESentence(const Hypergraph& hg, vector<WordID>* result) {
-  return Viterbi<vector<WordID>, ESentenceTraversal, prob_t, EdgeProb>(hg, result);
+  return Viterbi<ESentenceTraversal>(hg, result);
 }
 
 prob_t ViterbiFSentence(const Hypergraph& hg, vector<WordID>* result) {
-  return Viterbi<vector<WordID>, FSentenceTraversal, prob_t, EdgeProb>(hg, result);
+  return Viterbi<FSentenceTraversal>(hg, result);
 }
 
 int ViterbiELength(const Hypergraph& hg) {
   int len = -1;
-  Viterbi<int, ELengthTraversal, prob_t, EdgeProb>(hg, &len);
+  Viterbi<ELengthTraversal>(hg, &len);
   return len;
 }
 
 int ViterbiPathLength(const Hypergraph& hg) {
   int len = -1;
-  Viterbi<int, PathLengthTraversal, prob_t, EdgeProb>(hg, &len);
+  Viterbi<PathLengthTraversal>(hg, &len);
   return len;
 }
 
@@ -61,10 +61,11 @@ struct JoshuaVisTraversal {
   const std::string left;
   const std::string space;
   const std::string right;
+  typedef std::vector<WordID> Result;
   void operator()(const Hypergraph::Edge& edge,
-                  const std::vector<const std::vector<WordID>*>& ants,
-                  std::vector<WordID>* result) const {
-    std::vector<WordID> tmp;
+                  const std::vector<const Result*>& ants,
+                  Result* result) const {
+    Result tmp;
     edge.rule_->ESubstitute(ants, &tmp);
     const std::string cat = TD::Convert(edge.rule_->GetLHS() * -1);
     if (cat == "Goal")
@@ -81,7 +82,50 @@ struct JoshuaVisTraversal {
 
 string JoshuaVisualizationString(const Hypergraph& hg) {
   vector<WordID> tmp;
-  const prob_t p = Viterbi<vector<WordID>, JoshuaVisTraversal, prob_t, EdgeProb>(hg, &tmp);
+  Viterbi<JoshuaVisTraversal>(hg, &tmp);
   return TD::GetString(tmp);
+}
+
+
+//TODO: move to appropriate header if useful elsewhere
+/*
+  The simple solution like abs(f1-f2) <= e does not work for very small or very big values. This floating-point comparison algorithm is based on the more confident solution presented by Knuth in [1]. For a given floating point values u and v and a tolerance e:
+
+| u - v | <= e * |u| and | u - v | <= e * |v|
+defines a "very close with tolerance e" relationship between u and v
+        (1)
+
+| u - v | <= e * |u| or   | u - v | <= e * |v|
+defines a "close enough with tolerance e" relationship between u and v
+        (2)
+
+Both relationships are commutative but are not transitive. The relationship defined by inequations (1) is stronger that the relationship defined by inequations (2) (i.e. (1) => (2) ). Because of the multiplication in the right side of inequations, that could cause an unwanted underflow condition, the implementation is using modified version of the inequations (1) and (2) where all underflow, overflow conditions could be guarded safely:
+
+| u - v | / |u| <= e and | u - v | / |v| <= e
+| u - v | / |u| <= e or   | u - v | / |v| <= e
+        (1`)
+(2`)
+*/
+#include <cmath>
+#include <stdexcept>
+#include <boost/lexical_cast.hpp>
+inline bool close_enough(double a,double b,double epsilon)
+{
+    using std::fabs;
+    double diff=fabs(a-b);
+    return diff<=epsilon*fabs(a) || diff<=epsilon*fabs(b);
+}
+
+FeatureVector ViterbiFeatures(Hypergraph const& hg,FeatureWeights const* weights) {
+  FeatureVector r;
+  const prob_t p = Viterbi<FeatureVectorTraversal>(hg, &r);
+  if (weights) {
+    double logp=log(p);
+    double fv=r.dot(*weights);
+    const double EPSILON=1e-5;
+    if (!close_enough(logp,fv,EPSILON))
+      throw std::runtime_error("ViterbiFeatures log prob disagrees with features.dot(weights)"+boost::lexical_cast<string>(logp)+"!="+boost::lexical_cast<string>(fv));
+  }
+  return r;
 }
 

@@ -86,7 +86,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("show_expected_length", "Show the expected translation length under the model")
         ("show_partition,z", "Compute and show the partition (inside score)")
         ("show_cfg_search_space", "Show the search space as a CFG")
-    ("show_viterbi_features","Show the feature vector for the viterbi translation")
+    ("show_features","Show the feature vector for the viterbi translation")
     ("prelm_density_prune", po::value<double>(), "Applied to -LM forest just before final LM rescoring: keep no more than this many times the number of edges used in the best derivation tree (>=1.0)")
     ("density_prune", po::value<double>(), "Keep no more than this many times the number of edges used in the best derivation tree (>=1.0)")
         ("prelm_beam_prune", po::value<double>(), "Prune paths from -LM forest before LM rescoring, keeping paths within exp(alpha>=0)")
@@ -266,6 +266,23 @@ bool prelm_weights_string(po::variables_map const& conf,string &s)
   return false;
 }
 
+
+
+void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,FeatureWeights *weights=0) {
+    cerr << viterbi_stats(forest,name,true,show_tree);
+    if (show_features) {
+      cerr << name<<"     features: ";
+/*      Hypergraph::Edge const* best=forest.ViterbiGoalEdge();
+      if (!best)
+        cerr << name<<" has no goal edge.";
+      else
+        cerr<<best->feature_values_;
+*/
+      cerr << ViterbiFeatures(forest,weights);
+      cerr << endl;
+    }
+}
+
 void maybe_prune(Hypergraph &forest,po::variables_map const& conf,string nbeam,string ndensity,string forestname,double srclen) {
     double beam_prune,density_prune;
     bool use_beam_prune=beam_param(conf,nbeam,&beam_prune,conf.count("scale_prune_srclen"),srclen);
@@ -283,10 +300,11 @@ void maybe_prune(Hypergraph &forest,po::variables_map const& conf,string nbeam,s
       if (use_density_prune)
         forest.DensityPruneInsideOutside(1.0 ,false, density_prune, pm);
       if (!forestname.empty()) forestname=" "+forestname;
-      cerr << viterbi_stats(forest,"  Pruned "+forestname+" forest",false,false);
+      forest_stats(forest,"  Pruned "+forestname+" forest",false,false);
       cerr << "  Pruned "<<forestname<<" forest portion of edges kept: "<<forest.edges_.size()/presize<<endl;
     }
 }
+
 
 
 int main(int argc, char** argv) {
@@ -470,7 +488,8 @@ int main(int argc, char** argv) {
       continue;
     }
     const bool show_tree_structure=conf.count("show_tree_structure");
-    cerr << viterbi_stats(forest,"  -LM forest",true,show_tree_structure);
+    const bool show_features=conf.count("show_features");
+    forest_stats(forest,"  -LM forest",show_tree_structure,show_features);
     if (conf.count("show_expected_length")) {
       const PRPair<double, double> res =
         Inside<PRPair<double, double>,
@@ -498,7 +517,7 @@ int main(int argc, char** argv) {
                     &prelm_forest);
       forest.swap(prelm_forest);
       forest.Reweight(prelm_feature_weights);
-      cerr << viterbi_stats(forest," prelm forest",true,show_tree_structure);
+      forest_stats(forest," prelm forest",show_tree_structure,show_features);
     }
 
     maybe_prune(forest,conf,"prelm_beam_prune","prelm_density_prune","-LM",srclen);
@@ -517,7 +536,7 @@ int main(int argc, char** argv) {
                     &lm_forest);
       forest.swap(lm_forest);
       forest.Reweight(feature_weights);
-      cerr << viterbi_stats(forest,"  +LM forest",true,show_tree_structure);
+      forest_stats(forest,"  +LM forest",show_tree_structure,show_features);
     }
 
     maybe_prune(forest,conf,"beam_prune","density_prune","+LM",srclen);

@@ -16,6 +16,17 @@
 
 using namespace std;
 
+Hypergraph::Edge const* Hypergraph::ViterbiGoalEdge() const
+{
+  Edge const* r=0;
+  for (unsigned i=0,e=edges_.size();i<e;++i) {
+    Edge const& e=edges_[i];
+    if (e.rule_ && e.rule_->IsGoal() && (!r || e.edge_prob_ > r->edge_prob_))
+      r=&e;
+  }
+  return r;
+}
+
 std::string Hypergraph::stats(std::string const& name) const
 {
   ostringstream o;
@@ -568,12 +579,13 @@ void Hypergraph::SortInEdgesByEdgeWeights() {
 }
 
 Hypergraph* Hypergraph::CreateViterbiHypergraph(const vector<bool>* edges) const {
-  vector<const Edge*> vit_edges;
+  typedef ViterbiPathTraversal::Result VE;
+  VE vit_edges;
   if (edges) {
     assert(edges->size() == edges_.size());
-    Viterbi<vector<const Edge*>, ViterbiPathTraversal, prob_t, EdgeSelectEdgeWeightFunction>(*this, &vit_edges, ViterbiPathTraversal(), EdgeSelectEdgeWeightFunction(*edges));
+    Viterbi(*this, &vit_edges, ViterbiPathTraversal(), EdgeSelectEdgeWeightFunction(*edges));
   } else {
-    Viterbi<vector<const Edge*>, ViterbiPathTraversal, prob_t, EdgeProb>(*this, &vit_edges);
+    Viterbi(*this, &vit_edges, ViterbiPathTraversal() ,EdgeProb());
   }
   map<int, int> old2new_node;
   int num_new_nodes = 0;

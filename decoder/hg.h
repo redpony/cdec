@@ -59,6 +59,9 @@ class Hypergraph {
     short int prev_j_;
   };
 
+  // returns edge with rule_.IsGoal, returns 0 if none found.  otherwise gives best edge_prob_ - note: I don't think edge_prob_ is viterbi cumulative, so this would just be the best local probability.
+  Edge const* ViterbiGoalEdge() const;
+
   void swap(Hypergraph& other) {
     other.nodes_.swap(nodes_);
     std::swap(is_linear_chain_, other.is_linear_chain_);
@@ -218,10 +221,12 @@ class Hypergraph {
 // common WeightFunctions, map an edge -> WeightType
 // for generic Viterbi/Inside algorithms
 struct EdgeProb {
+  typedef prob_t Weight;
   inline const prob_t& operator()(const Hypergraph::Edge& e) const { return e.edge_prob_; }
 };
 
 struct EdgeSelectEdgeWeightFunction {
+  typedef prob_t Weight;
   typedef std::vector<bool> EdgeMask;
   EdgeSelectEdgeWeightFunction(const EdgeMask& v) : v_(v) {}
   inline prob_t operator()(const Hypergraph::Edge& e) const {
@@ -236,10 +241,12 @@ struct ScaledEdgeProb {
   ScaledEdgeProb(const double& alpha) : alpha_(alpha) {}
   inline prob_t operator()(const Hypergraph::Edge& e) const { return e.edge_prob_.pow(alpha_); }
   const double alpha_;
+  typedef prob_t Weight;
 };
 
 // see Li (2010), Section 3.2.2-- this is 'x_e = p_e*r_e'
 struct EdgeFeaturesAndProbWeightFunction {
+  typedef const SparseVector<prob_t> Weight;
   inline const SparseVector<prob_t> operator()(const Hypergraph::Edge& e) const {
     SparseVector<prob_t> res;
     for (SparseVector<double>::const_iterator it = e.feature_values_.begin();
@@ -250,6 +257,7 @@ struct EdgeFeaturesAndProbWeightFunction {
 };
 
 struct TransitionCountWeightFunction {
+  typedef double Weight;
   inline double operator()(const Hypergraph::Edge& e) const { (void)e; return 1.0; }
 };
 
