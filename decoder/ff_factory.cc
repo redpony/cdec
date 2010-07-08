@@ -14,6 +14,13 @@ void FFRegistry::DisplayList() const {
   }
 }
 
+string FFRegistry::usage(string const& ffname,bool params,bool verbose) const {
+  map<string, shared_ptr<FFFactoryBase> >::const_iterator it = reg_.find(ffname);
+  return it == reg_.end()
+    ? "Unknown feature " + ffname
+    : it->second->usage(params,verbose);
+}
+
 shared_ptr<FeatureFunction> FFRegistry::Create(const string& ffname, const string& param) const {
   map<string, shared_ptr<FFFactoryBase> >::const_iterator it = reg_.find(ffname);
   shared_ptr<FeatureFunction> res;
@@ -33,3 +40,8 @@ void FFRegistry::Register(const string& ffname, FFFactoryBase* factory) {
   reg_[ffname].reset(factory);
 }
 
+
+void FFRegistry::Register(FFFactoryBase* factory)
+{
+  Register(factory->usage(false,false),factory);
+}

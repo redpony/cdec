@@ -19,6 +19,17 @@ class FeatureFunction {
   explicit FeatureFunction(int state_size) : state_size_(state_size) {}
   virtual ~FeatureFunction();
 
+  // override this.  not virtual because we want to expose this to factory template for help before creating a FF
+  static std::string usage(bool show_params,bool show_details) {
+    return usage_helper("FIXME_feature_needs_name","[no parameters]","[no documentation yet]",show_params,show_details);
+  }
+
+  static std::string usage_helper(std::string const& name,std::string const& params,std::string const& details,bool show_params,bool show_details);
+
+public:
+
+  typedef std::vector<WordID> Features;
+  virtual Features features() { return Features(); }
   // returns the number of bytes of context that this feature function will
   // (maximally) use.  By default, 0 ("stateless" models in Hiero/Joshua).
   // NOTE: this value is fixed for the instance of your class, you cannot
@@ -144,7 +155,7 @@ class ModelSet {
   bool empty() const { return models_.empty(); }
  private:
   std::vector<const FeatureFunction*> models_;
-  std::vector<double> weights_; 
+  std::vector<double> weights_;
   int state_size_;
   std::vector<int> model_state_pos_;
 };
