@@ -76,6 +76,19 @@ shared_ptr<FeatureFunction> make_ff(string const& ffp,bool verbose_feature_funct
   return pf;
 }
 
+// print just the --long_opt names suitable for bash compgen
+void print_options(std::ostream &out,po::options_description const& opts) {
+  typedef std::vector< shared_ptr<po::option_description> > Ds;
+  Ds const& ds=opts.options();
+  out << '"';
+  for (unsigned i=0;i<ds.size();++i) {
+    if (i) out<<' ';
+    out<<"--"<<ds[i]->long_name();
+  }
+  out << '"';
+}
+
+
 void InitCommandLine(int argc, char** argv, po::variables_map* confp) {
   po::variables_map &conf=*confp;
   po::options_description opts("Configuration options");
@@ -135,6 +148,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* confp) {
         ("config,c", po::value<string>(), "Configuration file")
         ("help,h", "Print this help message and exit")
     ("usage,u", po::value<string>(), "Describe a feature function type")
+    ("compgen", "Print just option names suitable for bash command line completion builtin 'compgen'")
     ;
 
   po::options_description dconfig_options, dcmdline_options;
@@ -142,6 +156,12 @@ void InitCommandLine(int argc, char** argv, po::variables_map* confp) {
   dcmdline_options.add(opts).add(clo);
 
   po::store(parse_command_line(argc, argv, dcmdline_options), conf);
+  if (conf.count("compgen")) {
+    print_options(cout,dcmdline_options);
+    cout << endl;
+    exit(0);
+  }
+  ShowBanner();
   if (conf.count("config")) {
     const string cfg = str("config",conf);
     cerr << "Configuration file: " << cfg << endl;
@@ -151,11 +171,12 @@ void InitCommandLine(int argc, char** argv, po::variables_map* confp) {
   po::notify(conf);
 
   if (conf.count("list_feature_functions")) {
-    cerr << "Available feature functions (specify with -F):\n";
+    cerr << "Available feature functions (specify with -F; describe with -u FeatureName):\n";
     global_ff_registry->DisplayList();
     cerr << endl;
     exit(1);
   }
+
 
   if (conf.count("usage")) {
     cout<<global_ff_registry->usage(str("usage",conf),true,true)<<endl;
@@ -346,7 +367,6 @@ void show_models(po::variables_map const& conf,ModelSet &ms,char const* header) 
 int main(int argc, char** argv) {
   global_ff_registry.reset(new FFRegistry);
   register_feature_functions();
-  ShowBanner();
   po::variables_map conf;
   InitCommandLine(argc, argv, &conf);
   const bool write_gradient = conf.count("cll_gradient");
@@ -390,8 +410,12 @@ int main(int argc, char** argv) {
     }
 //    cerr << "+LM weights: " << FeatureVector(feature_weights)<<endl;
   }
-  if (!conf.count("no_freeze_feature_set")) {
-    cerr << "Freezing feature set (use --no_freeze_feature_set to change)." << endl;
+  bool warn0=conf.count("warn_0_weight");
+  bool freeze=!conf.count("no_freeze_feature_set");
+  bool early_freeze=freeze && !warn0;
+  bool late_freeze=freeze && warn0;
+  if (early_freeze) {
+    cerr << "Freezing feature set (use --no_freeze_feature_set or --warn_0_weight to prevent)." << endl;
     FD::Freeze(); // this means we can't see the feature names of not-weighted features
   }
 
@@ -437,6 +461,11 @@ int main(int argc, char** argv) {
       prelm_only_ffs.push_back(make_ff(add_ffs[i],verbose_feature_functions,"prelm-only "));
       prelm_ffs.push_back(prelm_only_ffs.back().get());
     }
+  }
+
+  if (late_freeze) {
+    cerr << "Late freezing feature set (use --no_freeze_feature_set to prevent)." << endl;
+    FD::Freeze(); // this means we can't see the feature names of not-weighted features
   }
 
   if (has_prelm_models)
