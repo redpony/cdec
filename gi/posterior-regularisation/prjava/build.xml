@@ -7,6 +7,7 @@
       <pathelement location="lib/trove-2.0.2.jar"/>
       <pathelement location="lib/optimization.jar"/>
       <pathelement location="lib/jopt-simple-3.2.jar"/>
+      <pathelement location="lib/commons-math-2.1.jar"/>
   </path>
 
   <target name="init">

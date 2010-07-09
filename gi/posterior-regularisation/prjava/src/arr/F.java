@@ -4,18 +4,25 @@ import java.util.Random;
 
 public class F {
 	public static Random rng = new Random();
-	
+
 	public static void randomise(double probs[])
+	{
+		randomise(probs, true);
+	}
+
+	public static void randomise(double probs[], boolean normalise)
 	{
 		double z = 0;
 		for (int i = 0; i < probs.length; ++i)
 		{
 			probs[i] = 3 + rng.nextDouble();
-			z += probs[i];
+			if (normalise)
+				z += probs[i];
 		}
 
-		for (int i = 0; i < probs.length; ++i)
-			probs[i] /= z;
+		if (normalise)
+			for (int i = 0; i < probs.length; ++i)
+				probs[i] /= z;
 	}
 	
 	public static void l1normalize(double [] a){
