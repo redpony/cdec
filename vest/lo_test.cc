@@ -147,7 +147,7 @@ TEST_F(OptTest, TestS1) {
   
   RandomNumberGenerator<boost::mt19937> rng;
 
-  vector<SparseVector<double> > axes;
+  vector<SparseVector<double> > axes; // directions to search
   LineOptimizer::CreateOptimizationDirections(
      to_optimize,
      10,
@@ -161,7 +161,7 @@ TEST_F(OptTest, TestS1) {
   cerr << "Computing Viterbi envelope using inside algorithm...\n";
   cerr << "axis: " << axis << endl;
   clock_t t_start=clock();
-  ViterbiEnvelopeWeightFunction wf(wts, axis);
+  ViterbiEnvelopeWeightFunction wf(wts, axis);  // wts = starting point, axis = search direction
   envs[0] = Inside<ViterbiEnvelope, ViterbiEnvelopeWeightFunction>(hg, NULL, wf);
   envs[1] = Inside<ViterbiEnvelope, ViterbiEnvelopeWeightFunction>(hg2, NULL, wf);
 
