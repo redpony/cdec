@@ -25,73 +25,6 @@ public class PhraseCluster {
 	// pi[phrase][tag] = p(tag | phrase)
 	private double pi[][];
 	
-	public static void main(String[] args) 
-	{
-		String input_fname = args[0];
-		int tags = Integer.parseInt(args[1]);
-		String output_fname = args[2];
-		int iterations = Integer.parseInt(args[3]);
-		double scalePT = Double.parseDouble(args[4]);
-		double scaleCT = Double.parseDouble(args[5]);
-		int threads = Integer.parseInt(args[6]);
-		boolean runEM = Boolean.parseBoolean(args[7]);
-		
-		assert(tags >= 2);
-		assert(scalePT >= 0);
-		assert(scaleCT >= 0);
-		
-		Corpus corpus = null;
-		try {
-			corpus = Corpus.readFromFile(FileUtil.openBufferedReader(input_fname));
-		} catch (IOException e) {
-			System.err.println("Failed to open input file: " + input_fname);
-			e.printStackTrace();
-			System.exit(1);
-		}
-		PhraseCluster cluster = new PhraseCluster(tags, corpus, scalePT, scaleCT, threads);
-		
-		//PhraseObjective.ps = FileUtil.openOutFile(outputDir + "/phrase_stat.out");
-		
-		double last = 0;
-		for(int i=0;i<iterations;i++){
-			
-			double o;
-			if (runEM || i < 3) 
-				o = cluster.EM();
-			else if (scaleCT == 0)
-			{
-				if (threads >= 1)
-					o = cluster.PREM_phrase_constraints_parallel();
-				else
-					o = cluster.PREM_phrase_constraints();
-			}
-			else 
-				o = cluster.PREM_phrase_context_constraints();
-			
-			//PhraseObjective.ps.
-			System.out.println("ITER: "+i+" objective: " + o);
-			last = o;
-		}
-		
-		double pl1lmax = cluster.phrase_l1lmax();
-		double cl1lmax = cluster.context_l1lmax();
-		System.out.println("Final posterior phrase l1lmax " + pl1lmax + " context l1lmax " + cl1lmax);
-		if (runEM) System.out.println("With PR objective " + (last - scalePT*pl1lmax - scaleCT*cl1lmax));
-		
-		PrintStream ps=io.FileUtil.openOutFile(output_fname);
-		cluster.displayPosterior(ps);
-		ps.close();
-		
-		//PhraseObjective.ps.close();
-
-		//ps = io.FileUtil.openOutFile(outputDir + "/parameters.out");
-		//cluster.displayModelParam(ps);
-		//ps.close();
-		
-		if (cluster.pool != null)
-			cluster.pool.shutdown();
-	}
-
 	public PhraseCluster(int numCluster, Corpus corpus, double scalep, double scalec, int threads){
 		K=numCluster;
 		c=corpus;
@@ -134,7 +67,7 @@ public class PhraseCluster {
 				double p[]=posterior(edge);
 				double z = arr.F.l1norm(p);
 				assert z > 0;
-				loglikelihood+=Math.log(z);
+				loglikelihood += edge.getCount() * Math.log(z);
 				arr.F.l1normalize(p);
 				
 				int count = edge.getCount();
@@ -150,7 +83,7 @@ public class PhraseCluster {
 			}
 		}
 		
-		System.out.println("Log likelihood: "+loglikelihood);
+		//System.out.println("Log likelihood: "+loglikelihood);
 		
 		//M
 		for(double [][]i:exp_emit){

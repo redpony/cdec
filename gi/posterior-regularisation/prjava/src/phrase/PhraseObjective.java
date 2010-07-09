@@ -21,7 +21,7 @@ import optimization.util.MathUtils;
 public class PhraseObjective extends ProjectedObjective
 {
 	static final double GRAD_DIFF = 0.00002;
-	static double INIT_STEP_SIZE = 10;
+	static double INIT_STEP_SIZE = 300;
 	static double VAL_DIFF = 1e-4; // FIXME needs to be tuned - and this might be too weak
 	static int ITERATIONS = 100;
 	//private double c1=0.0001; // wolf stuff

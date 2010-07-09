@@ -3,7 +3,24 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.io.*;
-public class FileUtil {
+public class FileUtil 
+{
+	public static BufferedReader reader(File file) throws FileNotFoundException, IOException
+	{
+		if (file.getName().endsWith(".gz"))
+			return new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
+		else
+			return new BufferedReader(new FileReader(file));
+	}
+	
+	public static PrintStream printstream(File file) throws FileNotFoundException, IOException
+	{
+		if (file.getName().endsWith(".gz"))
+			return new PrintStream(new GZIPOutputStream(new FileOutputStream(file)));
+		else
+			return new PrintStream(new FileOutputStream(file));
+	}
+
 	public static Scanner openInFile(String filename){
 		Scanner localsc=null;
 		try
@@ -16,34 +33,6 @@ public class FileUtil {
 		return localsc;
 	}
 	
-	public static BufferedReader openBufferedReader(String filename){
-		BufferedReader r=null;
-		try
-		{
-			if (filename.endsWith(".gz"))
-				r=(new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(new File(filename))))));
-			else
-				r=(new BufferedReader(new FileReader(new File(filename))));
-		}catch(IOException ioe){
-			System.out.println(ioe.getMessage());
-		}
-		return r;		
-	}
-	
-	public static PrintStream  openOutFile(String filename){
-		PrintStream localps=null;
-		try
-		{
-			if (filename.endsWith(".gz"))
-				localps=new PrintStream (new GZIPOutputStream(new FileOutputStream(filename)));
-			else
-				localps=new PrintStream (new FileOutputStream(filename));
-
-		}catch(IOException ioe){
-			System.out.println(ioe.getMessage());
-		}
-		return localps;
-	}
 	public static FileInputStream openInputStream(String infilename){
 		FileInputStream fis=null;
 		try {
