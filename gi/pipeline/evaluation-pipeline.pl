@@ -50,7 +50,7 @@ my %init_weights = qw(
 
 
 # these features are included by default
-my @DEFAULT_FEATS = qw( Glue GlueTop LanguageModel WordPenalty );
+my @DEFAULT_FEATS = qw( PassThrough Glue GlueTop LanguageModel WordPenalty );
 
 
 
