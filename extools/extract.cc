@@ -283,7 +283,7 @@ void Extract::ExtractConsistentRules(const AnnotatedParallelSentence& sentence,
               for (short j = 0; j < cur_es.size(); ++j)
                 if (cur_es[j] >= 0 && sentence.aligned(cur_fs[i],cur_es[j]))
                   cur_terminal_align.push_back(make_pair(i,j));
-          observer->CountRule(lhs, cur_rhs_f, cur_rhs_e, cur_terminal_align);
+          //observer->CountRule(lhs, cur_rhs_f, cur_rhs_e, cur_terminal_align);
           
           if(!all_cats->empty()) {
             //produce the backoff grammar if the category wordIDs are available
@@ -294,7 +294,7 @@ void Extract::ExtractConsistentRules(const AnnotatedParallelSentence& sentence,
               nonterm+=bkoff_mrkr;
               bkoff = -TD::Convert(nonterm);
               cur_rhs_f[i]=bkoff;
-              vector<WordID> rhs_f_bkoff;
+              /*vector<WordID> rhs_f_bkoff;
               vector<WordID> rhs_e_bkoff;
               vector<pair<short,short> > bkoff_align;
               bkoff_align.clear();
@@ -307,19 +307,12 @@ void Extract::ExtractConsistentRules(const AnnotatedParallelSentence& sentence,
                 rhs_e_bkoff.push_back(0);
                 observer->CountRule(bkoff,rhs_f_bkoff,rhs_e_bkoff,bkoff_align);
                 
-              }
-            }//else
-                //cerr << cur_rhs_f[i] << ": (words,f) |" << TD::Convert(cur_rhs_f[i]) << endl;
+              }*/
+            }
           }
-          /*for (int i=0; i < cur_rhs_e.size(); ++i)
-            if(cur_rhs_e[i] <= 0)
-                cerr << cur_rhs_e[i] << ": (cats,e) |" << TD::Convert(1-cur_rhs_e[i]) << endl;
-            else
-                cerr << cur_rhs_e[i] << ": (words,e) |" << TD::Convert(cur_rhs_e[i]) << endl;
-          */
-            
+           
+          } 
           observer->CountRule(lhs, cur_rhs_f, cur_rhs_e, cur_terminal_align);
-          }
         }
       }
     }

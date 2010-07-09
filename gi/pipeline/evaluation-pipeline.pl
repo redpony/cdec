@@ -65,6 +65,8 @@ my $FILTER = "$EXTOOLS/filter_grammar";
 my $FEATURIZE = "$EXTOOLS/featurize_grammar";
 assert_exec($CDEC, $PARALLELIZE, $FILTER, $FEATURIZE, $DISTVEST);
 
+my $numtopics = 25;
+
 my $config = "$SCRIPT_DIR/clsp.config";
 print STDERR "CORPORA CONFIGURATION: $config\n";
 open CONF, "<$config" or die "Can't read $config: $!";
@@ -101,7 +103,9 @@ my $help;
 my $FEATURIZER_OPTS = '';
 my $dataDir = '/export/ws10smt/data';
 my @features;
+my $bkoffgram;
 if (GetOptions(
+        "backoff_grammar" => \$bkoffgram,
         "data=s" => \$dataDir,
         "features=s@" => \@features,
 ) == 0 || @ARGV!=2 || $help) {
@@ -156,6 +160,9 @@ write_random_weights_file($weights, @xfeats);
 print STDERR "\nFILTERING FOR dev...\n";
 print STDERR "DEV: $dev (REFS=$drefs)\n";
 my $devgrammar = filter($grammar, $dev, 'dev', $outdir);
+if($bkoffgram) {
+  $devgrammar = add_backoff($devgrammar, $numtopics, 'dev', $outdir);
+}
 my $devini = mydircat($outdir, "cdec-dev.ini");
 write_cdec_ini($devini, $devgrammar);
 
@@ -165,6 +172,9 @@ print STDERR "\nFILTERING FOR test...\n";
 print STDERR "TEST: $test (EVAL=$teval)\n";
 `mkdir -p $outdir`;
 my $testgrammar = filter($grammar, $test, 'test', $outdir);
+if($bkoffgram) {
+  $testgrammar = add_backoff($testgrammar, $numtopics, 'test', $outdir);
+}
 my $testini = mydircat($outdir, "cdec-test.ini");
 write_cdec_ini($testini, $testgrammar);
 
@@ -229,6 +239,29 @@ sub filter {
   }
   return $outgrammar;
 }
+
+sub add_backoff {
+  my ($grammar, $topics, $name, $outdir) = @_;
+  my $out = mydircat($outdir, "backoff.$name.scfg");
+  my $outgrammar = mydircat($outdir, "$name.scfg.gz");
+  my $cmd = "zcat $grammar > $out";
+  safesystem($out,$cmd) or die "Adding backoff rules failed.";
+  for(my $tpcnum=0;$tpcnum<$topics;$tpcnum++) {
+    for(my $tpc2=0;$tpc2<$topics;$tpc2++) {
+      my $bkoff = "1";
+      if($tpc2 == $tpcnum) {
+        $bkoff = "0";
+      }
+      my $rule = "[X$tpcnum\_] ||| [X$tpc2,1] ||| [1] ||| BackoffRule=$bkoff";
+      $cmd = "echo '$rule' >> $out";
+      safesystem($out,$cmd) or die "Adding backoff rules failed.";
+    }
+  }
+  $cmd = "cat $out | gzip > $outgrammar";
+  safesystem($outgrammar, $cmd) or die "Adding backoff rules failed.";
+  return $outgrammar;
+}
+  
 
 sub mydircat {
  my ($base, $suffix) = @_;
