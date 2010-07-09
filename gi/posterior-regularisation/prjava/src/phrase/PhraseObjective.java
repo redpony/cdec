@@ -1,7 +1,5 @@
 package phrase;
 
-import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.List;
 
 import optimization.gradientBasedMethods.ProjectedGradientDescent;
@@ -163,9 +161,7 @@ public class PhraseObjective extends ProjectedObjective
 	public double [][]posterior(){
 		return q;
 	}
-	
-	public int iterations = 0;
-	
+		
 	public boolean optimizeWithProjectedGradientDescent(){
 		LineSearchMethod ls =
 			new ArmijoLineSearchMinimizationAlongProjectionArc
@@ -184,7 +180,6 @@ public class PhraseObjective extends ProjectedObjective
 		optimizer.setMaxIterations(ITERATIONS);
 		updateFunction();
 		boolean success = optimizer.optimize(this,stats,compositeStop);
-		iterations += optimizer.getCurrentIteration();
 //		System.out.println("Ended optimzation Projected Gradient Descent\n" + stats.prettyPrint(1));
 		//if(succed){
 			//System.out.println("Ended optimization in " + optimizer.getCurrentIteration());

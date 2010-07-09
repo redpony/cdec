@@ -59,6 +59,10 @@ public abstract  class Objective {
 		return gradientCalls;
 	}
 	
+	public int getNumberUpdateCalls() {
+		return updateCalls;
+	}
+	
 	public String finalInfoString() {
 		return "FE: " + functionCalls + " GE " + gradientCalls + " Params updates" +
 		updateCalls;
