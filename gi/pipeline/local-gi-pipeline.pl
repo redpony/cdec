@@ -206,7 +206,8 @@ sub grammar_extract {
   if (-e $OUTGRAMMAR) {
     print STDERR "$OUTGRAMMAR exists, reusing...\n";
   } else {
-    safesystem("$EXTRACTOR -i $LABELED -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -t $NUM_TOPICS -g | $SORT_KEYS | $REDUCER -p | $GZIP > $OUTGRAMMAR") or die "Couldn't extract grammar";
+    my $BACKOFF_ARG = ($BACKOFF_GRAMMAR ? "-g" : "");
+    safesystem("$EXTRACTOR -i $LABELED -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -t $NUM_TOPICS $BACKOFF_ARG | $SORT_KEYS | $REDUCER -p | $GZIP > $OUTGRAMMAR") or die "Couldn't extract grammar";
   }
   return $OUTGRAMMAR;
 }
