@@ -134,7 +134,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* confp) {
   clo.add_options()
         ("config,c", po::value<string>(), "Configuration file")
         ("help,h", "Print this help message and exit")
-    ("usage", po::value<string>(), "Describe a feature function type")
+    ("usage,u", po::value<string>(), "Describe a feature function type")
     ;
 
   po::options_description dconfig_options, dcmdline_options;
