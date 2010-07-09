@@ -1,5 +1,8 @@
 package hmm;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
 
@@ -23,11 +26,17 @@ public class POS {
 	public static void main(String[] args) {
 		//POS p=new POS();
 		//POS p=new POS(true);
-		PRPOS();
+		try {
+			PRPOS();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	
-	public POS(){
+	public POS() throws FileNotFoundException, IOException{
 		Corpus c= new Corpus(trainFilename);
 		//size of vocabulary +1 for unknown tokens
 		HMM hmm =new HMM(N_STATE, c.getVocabSize()+1,c.getAllData());
@@ -43,7 +52,7 @@ public class POS {
 		
 		Corpus test=new Corpus(testFilename,c.vocab);
 		
-		PrintStream ps= io.FileUtil.openOutFile(predFilename);
+		PrintStream ps= io.FileUtil.printstream(new File(predFilename));
 		
 		int [][]data=test.getAllData();
 		for(int i=0;i<data.length;i++){
@@ -58,7 +67,7 @@ public class POS {
 	}
 	
 	//POS induction with L1/Linf constraints
-	public static void PRPOS(){
+	public static void PRPOS() throws FileNotFoundException, IOException{
 		Corpus c= new Corpus(trainFilename);
 		//size of vocabulary +1 for unknown tokens
 		HMM hmm =new HMM(N_STATE, c.getVocabSize()+1,c.getAllData());
@@ -75,7 +84,7 @@ public class POS {
 	}
 	
 	
-	public POS(boolean supervised){
+	public POS(boolean supervised) throws FileNotFoundException, IOException{
 		Corpus c= new Corpus(trainFilename);
 		//size of vocabulary +1 for unknown tokens
 		HMM hmm =new HMM(c.tagVocab.size() , c.getVocabSize()+1,c.getAllData());
@@ -95,7 +104,7 @@ public class POS {
 		
 		System.out.println(c.vocab.get("<e>"));
 		
-		PrintStream ps= io.FileUtil.openOutFile(predFilename);
+		PrintStream ps= io.FileUtil.printstream(new File(predFilename));
 		
 		int [][]data=test.getAllData();
 		for(int i=0;i<data.length;i++){
