@@ -63,7 +63,7 @@ public class C2F {
 	public static void main(String args[]){
 		String in="../pdata/canned.con";
 		String out="../pdata/posterior.out";
-		int numCluster=5;
+		int numCluster=25;
 		Corpus corpus = null;
 		File infile = new File(in);
 		try {
@@ -88,8 +88,8 @@ public class C2F {
 		try {
 			PrintStream ps = FileUtil.printstream(outfile);
 			c2f.displayPosterior(ps);
-			ps.println();
-			c2f.displayModelParam(ps);
+		//	ps.println();
+		//	c2f.displayModelParam(ps);
 			ps.close();
 		} catch (IOException e) {
 			System.err.println("Failed to open output file: " + outfile);
@@ -153,7 +153,7 @@ public class C2F {
 
 	public double[] posterior(Corpus.Edge edge) 
 	{
-		double[] prob=Arrays.copyOf(pi[edge.getPhraseId()], K);
+		double[] prob=Arrays.copyOf(pi[edge.getContextId()], K);
 		
 		TIntArrayList phrase = edge.getPhrase();
 		for(int tag=0;tag<K;tag++)
