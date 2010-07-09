@@ -70,7 +70,8 @@ if (GetOptions(
 	"metric=s" => \$metric,
 	"source-file=s" => \$srcFile,
 	"weights=s" => \$initialWeights,
-	"workdir=s" => \$dir
+	"workdir=s" => \$dir,
+    "opt-iterations=i" => \$optimization_iters,
 ) == 0 || @ARGV!=1 || $help) {
 	print_help();
 	exit;
@@ -102,7 +103,7 @@ if ($metric =~ /^ter$|^aer$/i) {
 
 my $refs_comma_sep = get_comma_sep_refs($refFiles);
 
-unless ($dir){ 
+unless ($dir){
 	$dir = "vest";
 }
 unless ($dir =~ /^\//){  # convert relative path to absolute path
@@ -127,7 +128,7 @@ sub cleanup {
 	exit 1;
 };
 $SIG{INT} = "cleanup";
-$SIG{TERM} = "cleanup"; 
+$SIG{TERM} = "cleanup";
 $SIG{HUP} = "cleanup";
 
 my $decoderBase = `basename $decoder`; chomp $decoderBase;
@@ -221,7 +222,7 @@ while (1){
 		print STDERR "\nREACHED STOPPING CRITERION: Maximum iterations\n";
 		last;
 	}
-	
+
 	# run optimizer
 	print STDERR `date`;
 	my $mergeLog="$logdir/prune-merge.log.$iteration";
@@ -496,12 +497,12 @@ sub print_help {
 
 Usage: $executable [options] <ini file>
 
-	$executable [options] <ini file> 
-		Runs a complete MERT optimization and test set decoding, using 
+	$executable [options] <ini file>
+		Runs a complete MERT optimization and test set decoding, using
 		the decoder configuration in ini file.  Note that many of the
-		options have default values that are inferred automatically 
+		options have default values that are inferred automatically
 		based on certain conventions.  For details, refer to descriptions
-		of the options --decoder, --weights, and --workdir. 
+		of the options --decoder, --weights, and --workdir.
 
 Options:
 
@@ -514,19 +515,19 @@ Options:
 	--help
 		Print this message and exit.
 
-	--iteration <I> 
+	--iteration <I>
 		Starting iteration number.  If not specified, defaults to 1.
 
-	--max-iterations <M> 
+	--max-iterations <M>
 		Maximum number of iterations to run.  If not specified, defaults
 		to 10.
 
 	--pmem <N>
 		Amount of physical memory requested for parallel decoding jobs.
 
-	--ref-files <files> 
-		Dev set ref files.  This option takes only a single string argument. 
-		To use multiple files (including file globbing), this argument should 
+	--ref-files <files>
+		Dev set ref files.  This option takes only a single string argument.
+		To use multiple files (including file globbing), this argument should
 		be quoted.
 
 	--metric <method>
@@ -541,19 +542,19 @@ Options:
 		MERT will attempt to optimize along all of the principle directions,
 		set this parameter to explore other directions. Defaults to 5.
 
-	--source-file <file> 
+	--source-file <file>
 		Dev set source file.
 
-	--weights <file> 
+	--weights <file>
 		A file specifying initial feature weights.  The format is
 		FeatureName_1 value1
 		FeatureName_2 value2
 
-	--workdir <dir> 
+	--workdir <dir>
 		Directory for intermediate and output files.  If not specified, the
-		name is derived from the ini filename.  Assuming that the ini 
+		name is derived from the ini filename.  Assuming that the ini
 		filename begins with the decoder name and ends with ini, the default
-		name of the working directory is inferred from the middle part of 
+		name of the working directory is inferred from the middle part of
 		the filename.  E.g. an ini file named decoder.foo.ini would have
 		a default working directory name foo.
 
