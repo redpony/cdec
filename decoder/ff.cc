@@ -1,5 +1,6 @@
 //TODO: 0 size state != rule-local feature, i.e. still may depend on source span loc/context.  identify truly rule-local features so if we want they can be added to grammar rules (minor speedup)
 
+#include <boost/lexical_cast.hpp>
 #include "ff.h"
 
 #include "tdict.h"
@@ -33,7 +34,7 @@ FeatureFunction::Features FeatureFunction::single_feature(WordID feat) {
   return Features(1,feat);
 }
 
-FeatureFunction::Features ModelSet::all_features(std::ostream *warn) {
+FeatureFunction::Features ModelSet::all_features(std::ostream *warn,bool warn0) {
   typedef FeatureFunction::Features FFS;
   FFS ffs;
 #define WARNFF(x) do { if (warn) { *warn << "WARNING: "<< x ; *warn<<endl; } } while(0)
@@ -46,17 +47,26 @@ FeatureFunction::Features ModelSet::all_features(std::ostream *warn) {
     if (si.empty()) {
       WARNFF(ffname<<" doesn't yet report any feature IDs - implement features() method?");
     }
+    unsigned n0=0;
     for (unsigned j=0;j<si.size();++j) {
       WordID fid=si[j];
+      if (!fid) ++n0;
       if (fid >= weights_.size())
         weights_.resize(fid+1);
-      pair<FFM::iterator,bool> i_new=ff_from.insert(FFM::value_type(fid,ffname));
-      if (i_new.second)
-        ffs.push_back(fid);
-      else {
-        WARNFF(ffname<<" models["<<i<<"] tried to define feature "<<FD::Convert(fid)<<" already defined earlier by "<<i_new.first->second);
+      if (warn0 || fid) {
+        pair<FFM::iterator,bool> i_new=ff_from.insert(FFM::value_type(fid,ffname));
+        if (i_new.second) {
+          if (fid)
+            ffs.push_back(fid);
+          else
+            WARNFF("Feature id 0 for "<<ffname<<" (models["<<i<<"]) - probably no weight provided.  Don't freeze feature ids to see the name");
+        } else {
+          WARNFF(ffname<<" (models["<<i<<"]) tried to define feature "<<FD::Convert(fid)<<" already defined earlier by "<<i_new.first->second);
+        }
       }
     }
+    if (n0)
+      WARNFF(ffname<<" (models["<<i<<"]) had "<<n0<<" unused features (--no_freeze_feature_set to see them)");
   }
   return ffs;
 #undef WARNFF
@@ -130,17 +140,22 @@ void SourceWordPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   features->set_value(fid_, edge.rule_->FWords() * value_);
 }
 
-ArityPenalty::ArityPenalty(const std::string& /* param */) :
+ArityPenalty::ArityPenalty(const std::string& param) :
     value_(-1.0 / log(10)) {
-  string fname = "Arity_X";
-  for (int i = 0; i < N_ARITIES; ++i) {
-    fname[6]=i + '0';
-    fids_[i] = FD::Convert(fname);
+  string fname = "Arity_";
+  unsigned MAX=DEFAULT_MAX_ARITY;
+  using namespace boost;
+  if (!param.empty())
+    MAX=lexical_cast<unsigned>(param);
+  for (unsigned i = 0; i <= MAX; ++i) {
+    WordID fid=FD::Convert(fname+lexical_cast<string>(i));
+    fids_.push_back(fid);
   }
+  while (!fids_.empty() && fids_.back()==0) fids_.pop_back(); // pretty up features vector in case FD was frozen.  doesn't change anything
 }
 
 FeatureFunction::Features ArityPenalty::features() const {
-  return Features(&fids_[0],&fids_[N_ARITIES]);
+  return Features(fids_.begin(),fids_.end());
 }
 
 void ArityPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
@@ -153,7 +168,8 @@ void ArityPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   (void) ant_states;
   (void) state;
   (void) estimated_features;
-  features->set_value(fids_[edge.Arity()], value_);
+  unsigned a=edge.Arity();
+  features->set_value(a<fids_.size()?fids_[a]:0, value_);
 }
 
 ModelSet::ModelSet(const vector<double>& w, const vector<const FeatureFunction*>& models) :

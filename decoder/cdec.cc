@@ -390,6 +390,10 @@ int main(int argc, char** argv) {
     }
 //    cerr << "+LM weights: " << FeatureVector(feature_weights)<<endl;
   }
+  if (!conf.count("no_freeze_feature_set")) {
+    cerr << "Freezing feature set (use --no_freeze_feature_set to change)." << endl;
+    FD::Freeze(); // this means we can't see the feature names of not-weighted features
+  }
 
   // set up translation back end
   if (formalism == "scfg")
@@ -443,10 +447,6 @@ int main(int argc, char** argv) {
   ModelSet prelm_models(prelm_feature_weights, prelm_ffs);
   if (has_prelm_models)
     show_models(conf,prelm_models,"prelm ");
-  if (!conf.count("no_freeze_feature_set")) { // this used to happen immediately after loading weights, but now show_models will extend weight vector nicely.
-    cerr << "Freezing feature set (use --no_freeze_feature_set to change)." << endl;
-    FD::Freeze();
-  }
 
   int palg = 1;
   if (LowercaseString(str("intersection_strategy",conf)) == "full") {
@@ -518,6 +518,7 @@ int main(int argc, char** argv) {
     Timer t("Translation");
     const bool translation_successful =
       translator->Translate(to_translate, &smeta, feature_weights, &forest);
+    //TODO: modify translator to incorporate all 0-state model scores immediately?
     translator->SentenceComplete();
     if (!translation_successful) {
       cerr << "  NO PARSE FOUND.\n";
@@ -550,8 +551,7 @@ int main(int argc, char** argv) {
       ApplyModelSet(forest,
                     smeta,
                     prelm_models,
-                    IntersectionConfiguration(exhaustive_t()),
-// avoid overhead of best-first
+                    inter_conf, // this is now reduced to exhaustive if all are stateless
                     &prelm_forest);
       forest.swap(prelm_forest);
       forest.Reweight(prelm_feature_weights);

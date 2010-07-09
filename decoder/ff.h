@@ -2,7 +2,6 @@
 #define _FF_H_
 
 #include <vector>
-
 #include "fdict.h"
 #include "hg.h"
 
@@ -31,7 +30,10 @@ protected:
   static std::string usage_helper(std::string const& name,std::string const& params,std::string const& details,bool show_params,bool show_details);
   static Features single_feature(WordID feat);
 public:
+  // stateless feature that doesn't depend on source span: override and return true.  then your feature can be precomputed over rules.
+  virtual bool rule_feature() const { return false; }
 
+  //OVERRIDE THIS:
   virtual Features features() const { return Features(); }
   // returns the number of bytes of context that this feature function will
   // (maximally) use.  By default, 0 ("stateless" models in Hiero/Joshua).
@@ -95,6 +97,7 @@ class WordPenalty : public FeatureFunction {
   static std::string usage(bool p,bool d) {
     return usage_helper("WordPenalty","","number of target words (local feature)",p,d);
   }
+  bool rule_feature() const { return true; }
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
@@ -109,6 +112,7 @@ class WordPenalty : public FeatureFunction {
 
 class SourceWordPenalty : public FeatureFunction {
  public:
+  bool rule_feature() const { return true; }
   Features features() const;
   SourceWordPenalty(const std::string& param);
   static std::string usage(bool p,bool d) {
@@ -126,12 +130,18 @@ class SourceWordPenalty : public FeatureFunction {
   const double value_;
 };
 
+#define DEFAULT_MAX_ARITY 9
+#define DEFAULT_MAX_ARITY_STRINGIZE(x) #x
+#define DEFAULT_MAX_ARITY_STRINGIZE_EVAL(x) DEFAULT_MAX_ARITY_STRINGIZE(x)
+#define DEFAULT_MAX_ARITY_STR DEFAULT_MAX_ARITY_STRINGIZE_EVAL(DEFAULT_MAX_ARITY)
+
 class ArityPenalty : public FeatureFunction {
  public:
+  bool rule_feature() const { return true; }
   Features features() const;
   ArityPenalty(const std::string& param);
   static std::string usage(bool p,bool d) {
-    return usage_helper("ArityPenalty","","Indicator feature Arity_N=1 for rule of arity N (local feature)",p,d);
+    return usage_helper("ArityPenalty","[MaxArity(default " DEFAULT_MAX_ARITY_STR ")]","Indicator feature Arity_N=1 for rule of arity N (local feature).  0<=N<=MaxArity(default " DEFAULT_MAX_ARITY_STR ")",p,d);
   }
 
  protected:
@@ -142,10 +152,7 @@ class ArityPenalty : public FeatureFunction {
                                      SparseVector<double>* estimated_features,
                                      void* context) const;
  private:
-  enum {N_ARITIES=10};
-
-
-  int fids_[N_ARITIES];
+  std::vector<WordID> fids_;
   const double value_;
 };
 
@@ -173,7 +180,8 @@ class ModelSet {
 
   bool empty() const { return models_.empty(); }
 
-  FeatureFunction::Features all_features(std::ostream *warnings=0); // this will warn about duplicate features as well (one function overwrites the feature of another).  also resizes weights_ so it is large enough to hold the (0) weight for the largest reported feature id
+  bool stateless() const { return !state_size_; }
+  FeatureFunction::Features all_features(std::ostream *warnings=0,bool warn_fid_zero=false); // this will warn about duplicate features as well (one function overwrites the feature of another).  also resizes weights_ so it is large enough to hold the (0) weight for the largest reported feature id.  since 0 is a NULL feature id, it's never included.  if warn_fid_zero, then even the first 0 id is
   void show_features(std::ostream &out,std::ostream &warn,bool warn_zero_wt=true); //show features and weights
  private:
   std::vector<const FeatureFunction*> models_;
