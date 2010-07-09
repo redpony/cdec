@@ -22,7 +22,7 @@ public class PhraseObjective extends ProjectedObjective
 {
 	static final double GRAD_DIFF = 0.00002;
 	static double INIT_STEP_SIZE = 300;
-	static double VAL_DIFF = 1e-4; // FIXME needs to be tuned - and this might be too weak
+	static double VAL_DIFF = 1e-6; // FIXME needs to be tuned - and this might be too weak
 	static int ITERATIONS = 100;
 	//private double c1=0.0001; // wolf stuff
 	//private double c2=0.9;
@@ -164,7 +164,9 @@ public class PhraseObjective extends ProjectedObjective
 		return q;
 	}
 	
-	public void optimizeWithProjectedGradientDescent(){
+	public int iterations = 0;
+	
+	public boolean optimizeWithProjectedGradientDescent(){
 		LineSearchMethod ls =
 			new ArmijoLineSearchMinimizationAlongProjectionArc
 				(new InterpolationPickFirstStep(INIT_STEP_SIZE));
@@ -181,13 +183,14 @@ public class PhraseObjective extends ProjectedObjective
 		compositeStop.add(stopValue);
 		optimizer.setMaxIterations(ITERATIONS);
 		updateFunction();
-		boolean succed = optimizer.optimize(this,stats,compositeStop);
+		boolean success = optimizer.optimize(this,stats,compositeStop);
+		iterations += optimizer.getCurrentIteration();
 //		System.out.println("Ended optimzation Projected Gradient Descent\n" + stats.prettyPrint(1));
-		if(succed){
+		//if(succed){
 			//System.out.println("Ended optimization in " + optimizer.getCurrentIteration());
-		}else{
-			System.out.println("Failed to optimize");
-		}
+		//}else{
+//			System.out.println("Failed to optimize");
+		//}
 		lambda[phrase]=parameters;
 		//	ps.println(Arrays.toString(parameters));
 		
@@ -195,6 +198,7 @@ public class PhraseObjective extends ProjectedObjective
 		//	ps.println(Arrays.toString(q[edge]));
 		//	}
 		
+		return success;
 	}
 	
 	public double KL_divergence()
