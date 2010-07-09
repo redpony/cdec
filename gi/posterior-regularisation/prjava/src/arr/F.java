@@ -1,12 +1,16 @@
 package arr;
 
+import java.util.Random;
+
 public class F {
+	private static Random rng = new Random(); //(9562724l);
+	
 	public static void randomise(double probs[])
 	{
 		double z = 0;
 		for (int i = 0; i < probs.length; ++i)
 		{
-			probs[i] = 3 + Math.random();
+			probs[i] = 3 + rng.nextDouble();
 			z += probs[i];
 		}
 
