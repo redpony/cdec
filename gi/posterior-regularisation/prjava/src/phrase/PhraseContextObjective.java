@@ -1,10 +1,13 @@
 package phrase;
 
-import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import optimization.gradientBasedMethods.ProjectedGradientDescent;
 import optimization.gradientBasedMethods.ProjectedObjective;
@@ -12,7 +15,6 @@ import optimization.gradientBasedMethods.stats.OptimizerStats;
 import optimization.linesearch.ArmijoLineSearchMinimizationAlongProjectionArc;
 import optimization.linesearch.InterpolationPickFirstStep;
 import optimization.linesearch.LineSearchMethod;
-import optimization.linesearch.WolfRuleLineSearch;
 import optimization.projections.SimplexProjection;
 import optimization.stopCriteria.CompositeStopingCriteria;
 import optimization.stopCriteria.ProjectedGradientL2Norm;
@@ -52,11 +54,17 @@ public class PhraseContextObjective extends ProjectedObjective
 	
 	private Map<Corpus.Edge, Integer> edgeIndex;
 	
-	public PhraseContextObjective(PhraseCluster cluster, double[] startingParameters)
+	private long projectionTime;
+	private long objectiveTime;
+	private long actualProjectionTime;
+	private ExecutorService pool;
+	
+	public PhraseContextObjective(PhraseCluster cluster, double[] startingParameters, ExecutorService pool)
 	{
 		c=cluster;
 		data=c.c.getEdges();
 		n_param=data.size()*c.K*2;
+		this.pool=pool;
 		
 		parameters = startingParameters;
 		if (parameters == null)
@@ -99,6 +107,7 @@ public class PhraseContextObjective extends ProjectedObjective
 		updateCalls++;
 		loglikelihood=0;
 
+		long begin = System.currentTimeMillis();
 		for (int e=0; e<data.size(); e++) 
 		{
 			Edge edge = data.get(e);
@@ -129,29 +138,64 @@ public class PhraseContextObjective extends ProjectedObjective
 				gradient[ic]=-q[e][tag];
 			}
 		}
-		//System.out.println("objective " + loglikelihood + " gradient: " + Arrays.toString(gradient));
+		//System.out.println("objective " + loglikelihood + " gradient: " + Arrays.toString(gradient));		
+		objectiveTime += System.currentTimeMillis() - begin;
 	}
 	
 	@Override
 	public double[] projectPoint(double[] point) 
 	{
+		long begin = System.currentTimeMillis();
+		List<Future<?>> tasks = new ArrayList<Future<?>>();
+
 		//System.out.println("projectPoint: " + Arrays.toString(point));
 		Arrays.fill(newPoint, 0, newPoint.length, 0);
+		
 		if (c.scalePT > 0)
 		{
 			// first project using the phrase-tag constraints,
 			// for all p,t: sum_c lambda_ptc < scaleP 
-			for (int p = 0; p < c.c.getNumPhrases(); ++p)
+			if (pool == null)
 			{
-				List<Edge> edges = c.c.getEdgesForPhrase(p);
-				double toProject[] = new double[edges.size()];
-				for(int tag=0;tag<c.K;tag++)
+				for (int p = 0; p < c.c.getNumPhrases(); ++p)
 				{
-					for(int e=0; e<edges.size(); e++)
-						toProject[e] = point[index(edges.get(e), tag, true)];
-					projectionPhrase.project(toProject);
-					for(int e=0; e<edges.size(); e++)
-						newPoint[index(edges.get(e),tag, true)] = toProject[e];
+					List<Edge> edges = c.c.getEdgesForPhrase(p);
+					double[] toProject = new double[edges.size()];
+					for(int tag=0;tag<c.K;tag++)
+					{
+						for(int e=0; e<edges.size(); e++)
+							toProject[e] = point[index(edges.get(e), tag, true)];
+						long lbegin = System.currentTimeMillis();
+						projectionPhrase.project(toProject);
+						actualProjectionTime += System.currentTimeMillis() - lbegin;
+						for(int e=0; e<edges.size(); e++)
+							newPoint[index(edges.get(e), tag, true)] = toProject[e];
+					}
+				}
+			}
+			else // do above in parallel using thread pool
+			{	
+				for (int p = 0; p < c.c.getNumPhrases(); ++p)
+				{
+					final int phrase = p;
+					final double[] inPoint = point;
+					Runnable task = new Runnable()
+					{
+						public void run()
+						{
+							List<Edge> edges = c.c.getEdgesForPhrase(phrase);
+							double toProject[] = new double[edges.size()];
+							for(int tag=0;tag<c.K;tag++)
+							{
+								for(int e=0; e<edges.size(); e++)
+									toProject[e] = inPoint[index(edges.get(e), tag, true)];
+								projectionPhrase.project(toProject);
+								for(int e=0; e<edges.size(); e++)
+									newPoint[index(edges.get(e), tag, true)] = toProject[e];
+							}
+						}		
+					};
+					tasks.add(pool.submit(task));
 				}
 			}
 		}
@@ -161,22 +205,79 @@ public class PhraseContextObjective extends ProjectedObjective
 		{
 			// now project using the context-tag constraints,
 			// for all c,t: sum_p omega_pct < scaleC
-			for (int ctx = 0; ctx < c.c.getNumContexts(); ++ctx)
+			if (pool == null)
 			{
-				List<Edge> edges = c.c.getEdgesForContext(ctx);
-				double toProject[] = new double[edges.size()];
-				for(int tag=0;tag<c.K;tag++)
+				for (int ctx = 0; ctx < c.c.getNumContexts(); ++ctx)
 				{
-					for(int e=0; e<edges.size(); e++)
-						toProject[e] = point[index(edges.get(e), tag, false)];
-					projectionContext.project(toProject);
-					for(int e=0; e<edges.size(); e++)
-						newPoint[index(edges.get(e),tag, false)] = toProject[e];
+					List<Edge> edges = c.c.getEdgesForContext(ctx);
+					double toProject[] = new double[edges.size()];
+					for(int tag=0;tag<c.K;tag++)
+					{
+						for(int e=0; e<edges.size(); e++)
+							toProject[e] = point[index(edges.get(e), tag, false)];
+						long lbegin = System.currentTimeMillis();
+						projectionContext.project(toProject);
+						actualProjectionTime += System.currentTimeMillis() - lbegin;
+						for(int e=0; e<edges.size(); e++)
+							newPoint[index(edges.get(e), tag, false)] = toProject[e];
+					}
+				}
+			}
+			else
+			{
+				// do above in parallel using thread pool
+				for (int ctx = 0; ctx < c.c.getNumContexts(); ++ctx)
+				{
+					final int context = ctx;
+					final double[] inPoint = point;
+					Runnable task = new Runnable()
+					{
+						public void run()
+						{
+							List<Edge> edges = c.c.getEdgesForContext(context);
+							double toProject[] = new double[edges.size()];
+							for(int tag=0;tag<c.K;tag++)
+							{
+								for(int e=0; e<edges.size(); e++)
+									toProject[e] = inPoint[index(edges.get(e), tag, false)];
+								projectionContext.project(toProject);
+								for(int e=0; e<edges.size(); e++)
+									newPoint[index(edges.get(e), tag, false)] = toProject[e];
+							}
+						}
+					};
+					tasks.add(pool.submit(task));
 				}
 			}
 		}
+		
+		if (pool != null)
+		{
+			// wait for all the jobs to complete
+			Exception failure = null;
+			for (Future<?> task: tasks)
+			{
+				try {
+					task.get();
+				} catch (InterruptedException e) {
+					System.err.println("ERROR: Projection thread interrupted");
+					e.printStackTrace();
+					failure = e;
+				} catch (ExecutionException e) {
+					System.err.println("ERROR: Projection thread died");
+					e.printStackTrace();
+					failure = e;
+				}
+			}
+			// rethrow the exception
+			if (failure != null)
+				throw new RuntimeException(failure);
+		}
+		
 		double[] tmp = newPoint;
 		newPoint = point;
+		projectionTime += System.currentTimeMillis() - begin;
+
 		
 		//System.out.println("\treturning " + Arrays.toString(tmp));
 		return tmp;
@@ -214,6 +315,11 @@ public class PhraseContextObjective extends ProjectedObjective
 	
 	public double[] optimizeWithProjectedGradientDescent()
 	{
+		projectionTime = 0;
+		actualProjectionTime = 0;
+		objectiveTime = 0;
+		long start = System.currentTimeMillis();
+
 		LineSearchMethod ls =
 			new ArmijoLineSearchMinimizationAlongProjectionArc
 				(new InterpolationPickFirstStep(INIT_STEP_SIZE));
@@ -230,20 +336,17 @@ public class PhraseContextObjective extends ProjectedObjective
 		compositeStop.add(stopValue);
 		optimizer.setMaxIterations(ITERATIONS);
 		updateFunction();
-		boolean succed = optimizer.optimize(this,stats,compositeStop);
+		boolean success = optimizer.optimize(this,stats,compositeStop);
 //		System.out.println("Ended optimzation Projected Gradient Descent\n" + stats.prettyPrint(1));
-		if(succed){
-			//System.out.println("Ended optimization in " + optimizer.getCurrentIteration());
-		}else{
-			System.out.println("Failed to optimize");
-		}
-		//	ps.println(Arrays.toString(parameters));
 		
-		//	for(int edge=0;edge<data.getSize();edge++){
-		//	ps.println(Arrays.toString(q[edge]));
-		//	}
-		//System.out.println(Arrays.toString(parameters));
-		
+		if (success)
+			System.out.print("\toptimization took " + optimizer.getCurrentIteration() + " iterations");
+	 	else
+			System.out.print("\toptimization failed to converge");
+		long total = System.currentTimeMillis() - start;
+		System.out.println(" and " + total + " ms: projection " + projectionTime + 
+				" actual " + actualProjectionTime + " objective " + objectiveTime);
+
 		return parameters;
 	}
 	
@@ -298,5 +401,4 @@ public class PhraseContextObjective extends ProjectedObjective
 	{
 		return loglikelihood() - KL_divergence() - c.scalePT * phrase_l1lmax() - c.scalePT * context_l1lmax();
 	}
-	
 }

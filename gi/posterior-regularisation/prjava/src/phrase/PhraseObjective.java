@@ -22,7 +22,7 @@ public class PhraseObjective extends ProjectedObjective
 {
 	static final double GRAD_DIFF = 0.00002;
 	static double INIT_STEP_SIZE = 10;
-	static double VAL_DIFF = 1e-6; // FIXME needs to be tuned
+	static double VAL_DIFF = 1e-4; // FIXME needs to be tuned - and this might be too weak
 	static int ITERATIONS = 100;
 	//private double c1=0.0001; // wolf stuff
 	//private double c2=0.9;
@@ -128,7 +128,8 @@ public class PhraseObjective extends ProjectedObjective
 	}
 	
 	@Override
-	public double[] projectPoint(double[] point) {
+	public double[] projectPoint(double[] point) 
+	{
 		double toProject[]=new double[data.size()];
 		for(int tag=0;tag<c.K;tag++){
 			for(int edge=0;edge<data.size();edge++){
