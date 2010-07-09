@@ -43,8 +43,12 @@ my $TOPIC_TRAIN = "$PYPTOOLS/pyp-contexts-train";
 
 assert_exec($SORT_KEYS, $REDUCER, $EXTRACTOR, $PYP_TOPICS_TRAIN, $S2L, $C2D, $TOPIC_TRAIN);
 
+my $BACKOFF_GRAMMAR;
+my $TAGGED_CORPUS;
+
 my $OUTPUT = './giwork';
 usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
+                           'backoff_grammar' => \$BACKOFF_GRAMMAR,
                            'output=s' => \$OUTPUT,
                            'model=s' => \$MODEL,
                            'topics=i' => \$NUM_TOPICS,
@@ -54,6 +58,7 @@ usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'em-iterations=i' => \$NUM_EM_PR_ITERS,
                            'pr-scale=f' => \$PR_SCALE,
                            'pr-threads=i' => \$PR_THREADS,
+                           'tagged_corpus=s' => \$TAGGED_CORPUS,
                           );
 
 usage() unless scalar @ARGV == 1;

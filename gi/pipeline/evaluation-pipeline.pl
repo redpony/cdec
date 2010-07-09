@@ -100,7 +100,8 @@ if (GetOptions(
         print_help();
         exit;
 }
-
+my @fkeys = keys %$feat_map;
+die "You must specify one or more features with -f. Known features: @fkeys\n" unless scalar @features > 0;
 my @xfeats;
 for my $feat (@features) {
   my $rs = $feat_map->{$feat};
