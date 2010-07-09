@@ -40,10 +40,11 @@ my $PYP_TOPICS_TRAIN="$PYPTOOLS/pyp-contexts-train";
 my $PREM_TRAIN="$PRTOOLS/prjava/train-PR-cluster.sh";
 
 my $SORT_KEYS = "$SCRIPT_DIR/scripts/sort-by-key.sh";
+my $PATCH_CORPUS = "$SCRIPT_DIR/scripts/patch-corpus.pl";
 my $EXTRACTOR = "$EXTOOLS/extractor";
 my $TOPIC_TRAIN = "$PYPTOOLS/pyp-contexts-train";
 
-assert_exec($SORT_KEYS, $REDUCER, $EXTRACTOR, $PYP_TOPICS_TRAIN, $S2L, $C2D, $TOPIC_TRAIN);
+assert_exec($PATCH_CORPUS, $SORT_KEYS, $REDUCER, $EXTRACTOR, $PYP_TOPICS_TRAIN, $S2L, $C2D, $TOPIC_TRAIN);
 
 my $BACKOFF_GRAMMAR;
 my $TAGGED_CORPUS;
@@ -70,17 +71,25 @@ my $CORPUS = $ARGV[0];
 open F, "<$CORPUS" or die "Can't read $CORPUS: $!"; close F;
 
 print STDERR "   Output: $OUTPUT\n";
+my $DATA_DIR = $OUTPUT . '/corpora';
+my $LEX_NAME = 'corpus.f_e_a.lex';
+my $CORPUS_LEX = $DATA_DIR . '/' . $LEX_NAME;  # corpus used to extract rules
+my $CORPUS_CLUSTER = $DATA_DIR . '/corpus.f_e_a.cluster'; # corpus used for clustering (often identical)
+
 my $CONTEXT_DIR = $OUTPUT . '/' . context_dir();
 my $CLUSTER_DIR = $OUTPUT . '/' . cluster_dir();
 my $GRAMMAR_DIR = $OUTPUT . '/' . grammar_dir();
 print STDERR "  Context: $CONTEXT_DIR\n  Cluster: $CLUSTER_DIR\n  Grammar: $GRAMMAR_DIR\n";
 safemkdir($OUTPUT) or die "Couldn't create output directory $OUTPUT: $!";
+safemkdir($DATA_DIR) or die "Couldn't create output directory $DATA_DIR: $!";
 safemkdir($CONTEXT_DIR) or die "Couldn't create output directory $CONTEXT_DIR: $!";
 safemkdir($CLUSTER_DIR) or die "Couldn't create output directory $CLUSTER_DIR: $!";
 safemkdir($GRAMMAR_DIR) or die "Couldn't create output directory $GRAMMAR_DIR: $!";
 if(-e $TOPICS_CONFIG) {
     copy($TOPICS_CONFIG, $CLUSTER_DIR) or die "Copy failed: $!";
 }
+
+setup_data();
 
 extract_context();
 if (lc($MODEL) eq "pyp") {
@@ -96,8 +105,24 @@ if ($BIDIR) {
   $res = grammar_extract();
 }
 print STDERR "\n!!!COMPLETE!!!\n";
-print STDERR "GRAMMAR: $res\n\nYou should probably run:\n\n   zcat $res | $SCRIPT_DIR/../../extools/filter_score_grammar -c $CORPUS -t TESTSET.TXT > filtered-grammar.scfg\n\n";
+print STDERR "GRAMMAR: $res\nYou should probably run: $SCRIPT_DIR/evaluation-pipeline.pl LANGPAIR giwork/ct1s0.L10.PYP.t4.s20.grammar/grammar.gz -f FEAT1 -f FEAT2\n\n";
 exit 0;
+
+sub setup_data {
+  print STDERR "\n!!!PREPARE CORPORA!!!\n";
+  if (-f $CORPUS_LEX && $CORPUS_CLUSTER) {
+    print STDERR "$CORPUS_LEX and $CORPUS_CLUSTER exist, reusing...\n";
+    return;
+  }
+  copy($CORPUS, $CORPUS_LEX);
+  if ($TAGGED_CORPUS) {
+    die "Can't find $TAGGED_CORPUS" unless -f $TAGGED_CORPUS;
+    my $cmd="$PATCH_CORPUS $TAGGED_CORPUS $CORPUS_LEX > $CORPUS_CLUSTER";
+    safesystem($cmd) or die "Failed to extract contexts.";
+  } else {
+    symlink($LEX_NAME, $CORPUS_CLUSTER);
+  }
+}
 
 sub context_dir {
   return "ct${CONTEXT_SIZE}s0.L$BASE_PHRASE_MAX_SIZE";
@@ -153,10 +178,10 @@ sub extract_context {
  if (-e $OUT_CONTEXTS) {
    print STDERR "$OUT_CONTEXTS exists, reusing...\n";
  } else {
-   my $cmd = "$EXTRACTOR -i $CORPUS -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE | $SORT_KEYS | $REDUCER | $GZIP > $OUT_CONTEXTS";
+   my $cmd = "$EXTRACTOR -i $CORPUS_CLUSTER -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE | $SORT_KEYS | $REDUCER | $GZIP > $OUT_CONTEXTS";
    if ($COMPLETE_CACHE) {
      print STDERR "COMPLETE_CACHE is set: removing memory limits on cache.\n";
-     $cmd = "$EXTRACTOR -i $CORPUS -c 0 -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE | $SORT_KEYS | $GZIP > $OUT_CONTEXTS";
+     $cmd = "$EXTRACTOR -i $CORPUS_CLUSTER -c 0 -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE | $SORT_KEYS | $GZIP > $OUT_CONTEXTS";
    }
    safesystem($cmd) or die "Failed to extract contexts.";
   }
@@ -193,9 +218,9 @@ sub label_spans_with_topics {
     print STDERR "$OUT_SPANS exists, reusing...\n";
   } else {
     safesystem("$ZCAT $IN_CLUSTERS > $CLUSTER_DIR/clusters.txt") or die "Failed to unzip";
-    safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $CLUSTER_DIR/clusters.txt $CONTEXT_SIZE > $OUT_SPANS") or die "Failed to label spans";
+    safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS_CLUSTER -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $CLUSTER_DIR/clusters.txt $CONTEXT_SIZE > $OUT_SPANS") or die "Failed to label spans";
     unlink("$CLUSTER_DIR/clusters.txt") or warn "Failed to remove $CLUSTER_DIR/clusters.txt";
-    safesystem("paste -d ' ' $CORPUS $OUT_SPANS > $CLUSTER_DIR/corpus.src_trg_al_label") or die "Couldn't paste";
+    safesystem("paste -d ' ' $CORPUS_LEX $OUT_SPANS > $CLUSTER_DIR/corpus.src_trg_al_label") or die "Couldn't paste";
   }
 }
 
