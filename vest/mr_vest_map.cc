@@ -75,6 +75,7 @@ int main(int argc, char** argv) {
     istringstream is(line);
     int sent_id;
     string file, s_origin, s_axis;
+    // path-to-file (JSON) sent_ed starting-point search-direction
     is >> file >> sent_id >> s_origin >> s_axis;
     SparseVector<double> origin;
     assert(ReadSparseVectorString(s_origin, &origin));
@@ -96,7 +97,7 @@ int main(int argc, char** argv) {
     es.Serialize(&val);
     cout << 'M' << ' ' << s_origin << ' ' << s_axis << '\t';
     B64::b64encode(val.c_str(), val.size(), &cout);
-    cout << endl;
+    cout << endl << flush;
   }
   return 0;
 }
