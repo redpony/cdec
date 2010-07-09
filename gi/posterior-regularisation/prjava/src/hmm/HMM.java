@@ -1,5 +1,8 @@
 package hmm;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -248,8 +251,8 @@ public class HMM {
 		}
 	}
 	
-	public void writeModel(String modelFilename){
-		PrintStream ps=io.FileUtil.openOutFile(modelFilename);
+	public void writeModel(String modelFilename) throws FileNotFoundException, IOException{
+		PrintStream ps=io.FileUtil.printstream(new File(modelFilename));
 		ps.println(trans.length);
 		ps.println("Initial Probabilities:");
 		for(int i=0;i<pi.length;i++){

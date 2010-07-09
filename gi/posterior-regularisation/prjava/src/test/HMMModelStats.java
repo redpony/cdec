@@ -3,6 +3,9 @@ package test;
 import hmm.HMM;
 import hmm.POS;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +42,13 @@ public class HMMModelStats {
 
 		
 		
-		PrintStream ps=io.FileUtil.openOutFile(statsFilename);
+		PrintStream ps = null;
+		try {
+			ps = io.FileUtil.printstream(new File(statsFilename));
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 		
 		double [][] emit=hmm.getEmitProb();
 		for(int i=0;i<emit.length;i++){
