@@ -75,7 +75,7 @@ FeatureFunction::Features ModelSet::all_features(std::ostream *warn,bool warn0) 
 void ModelSet::show_features(std::ostream &out,std::ostream &warn,bool warn_zero_wt)
 {
   typedef FeatureFunction::Features FFS;
-  FFS ffs=all_features(&warn);
+  FFS ffs=all_features(&warn,warn_zero_wt);
   out << "Weight  Feature\n";
   for (unsigned i=0;i<ffs.size();++i) {
     WordID fid=ffs[i];
