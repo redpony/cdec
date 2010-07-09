@@ -15,6 +15,10 @@ my $feat_map = {
   "LabelledRuleConditionals" => [ "LabelledFE","LabelledEF" ] ,
   "LexProb" => [ "LexE2F", "LexF2E" ] ,
   "BackoffRule" => [ "BackoffRule" ] ,
+  "RulePenalty" => [ "RulePenalty" ] ,
+  "LHSProb" => [ "LHSProb" ] ,
+  "LabellingShape" => [ "LabellingShape" ] ,
+  "GenerativeProb" => [ "GenerativeProb" ] ,
 };
 
 my %init_weights = qw(
@@ -38,6 +42,10 @@ my %init_weights = qw(
   SingletonF 0.0714027
   SingletonRule -0.889377
   WordPenalty -1.99495
+  RulePenalty -0.1
+  LabellingShape -0.1
+  LHSProb -0.1
+  GenerativeProb -0.1
 );
 
 
