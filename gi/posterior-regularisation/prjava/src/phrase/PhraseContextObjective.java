@@ -26,7 +26,7 @@ import phrase.Corpus.Edge;
 public class PhraseContextObjective extends ProjectedObjective
 {
 	private static final double GRAD_DIFF = 0.00002;
-	private static double INIT_STEP_SIZE = 10;
+	private static double INIT_STEP_SIZE = 300;
 	private static double VAL_DIFF = 1e-4; // FIXME needs to be tuned
 	private static int ITERATIONS = 100;
 	

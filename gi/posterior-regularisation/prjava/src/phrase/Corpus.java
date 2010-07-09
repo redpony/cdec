@@ -217,5 +217,11 @@ public class Corpus
 		}
 		
 		return c;
+	}
+
+	public void printStats(PrintStream out) 
+	{
+		out.println("Corpus has " + edges.size() + " edges " + phraseLexicon.size() + " phrases " 
+				+ contextLexicon.size() + " contexts and " + wordLexicon.size() + " word types");
 	}	
 }

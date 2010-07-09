@@ -1,7 +1,11 @@
 package phrase;
 
+import io.FileUtil;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -20,8 +24,9 @@ public class PhraseCorpus
 	public int data[][][];
 	public int numContexts;	
 
-	public PhraseCorpus(String filename){
-		BufferedReader r=io.FileUtil.openBufferedReader(filename);
+	public PhraseCorpus(String filename) throws FileNotFoundException, IOException
+	{
+		BufferedReader r = FileUtil.reader(new File(filename));
 		
 		phraseLex=new HashMap<String,Integer>();
 		wordLex=new HashMap<String,Integer>();
@@ -84,8 +89,9 @@ public class PhraseCorpus
 	}
 	
 	//for debugging
-	public void saveLex(String lexFilename){
-		PrintStream ps=io.FileUtil.openOutFile(lexFilename);
+	public void saveLex(String lexFilename) throws FileNotFoundException, IOException
+	{
+		PrintStream ps = FileUtil.printstream(new File(lexFilename));
 		ps.println("Phrase Lexicon");
 		ps.println(phraseLex.size());
 		printDict(phraseLex,ps);
@@ -175,7 +181,8 @@ public class PhraseCorpus
 		return null;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception 
+	{
 		String LEX_FILENAME="../pdata/lex.out";
 		String DATA_FILENAME="../pdata/btec.con";
 		PhraseCorpus c=new PhraseCorpus(DATA_FILENAME);

@@ -3,7 +3,7 @@ package arr;
 import java.util.Random;
 
 public class F {
-	private static Random rng = new Random(); //(9562724l);
+	public static Random rng = new Random();
 	
 	public static void randomise(double probs[])
 	{
