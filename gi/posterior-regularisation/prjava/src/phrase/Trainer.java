@@ -30,6 +30,7 @@ public class Trainer
         parser.accepts("variational-bayes");
         parser.accepts("alpha-emit").withRequiredArg().ofType(Double.class).defaultsTo(0.1);
         parser.accepts("alpha-pi").withRequiredArg().ofType(Double.class).defaultsTo(0.01);
+        parser.accepts("agree");
         OptionSet options = parser.parse(args);
 
         if (options.has("help") || !options.has("in"))
@@ -37,7 +38,7 @@ public class Trainer
         	try {
 				parser.printHelpOn(System.err);
 			} catch (IOException e) {
-				System.err.println("This should never happen. Really.");
+				System.err.println("This should never happen.");
 				e.printStackTrace();
 			}
         	System.exit(1);     
@@ -75,34 +76,46 @@ public class Trainer
 			System.exit(1);
 		}
 		
- 		System.out.println("Running with " + tags + " tags " +
- 				"for " + em_iterations + " EM and " + pr_iterations + " PR iterations " +
- 				"with scale " + scale_phrase + " phrase and " + scale_context + " context " +
- 				"and " + threads + " threads");
- 		System.out.println();
+		if (!options.has("agree"))
+			System.out.println("Running with " + tags + " tags " +
+					"for " + em_iterations + " EM and " + pr_iterations + " PR iterations " +
+					"with scale " + scale_phrase + " phrase and " + scale_context + " context " +
+					"and " + threads + " threads");
+		else
+			System.out.println("Running agreement model with " + tags + " tags " +
+	 				"for " + em_iterations);
+
+	 	System.out.println();
 		
-		PhraseCluster cluster = new PhraseCluster(tags, corpus, scale_phrase, scale_context, threads, alphaEmit, alphaPi);
+ 		PhraseCluster cluster = null;
+ 		Agree agree = null;
+ 		if (options.has("agree"))
+ 			agree = new Agree(tags, corpus);
+ 		else
+ 		{
+ 			cluster = new PhraseCluster(tags, corpus);
+ 			if (threads > 0) cluster.useThreadPool(threads);
+ 			if (vb)	cluster.initialiseVB(alphaEmit, alphaPi);
+ 		}
 				
 		double last = 0;
 		for (int i=0; i<em_iterations+pr_iterations; i++)
 		{
 			double o;
-			if (i < em_iterations) 
+			if (agree != null)
+				o = agree.EM();
+			else
 			{
-				if (!vb)
-					o = cluster.EM();
+				if (i < em_iterations)
+				{
+					if (!vb)
+						o = cluster.EM();
+					else
+						o = cluster.VBEM(alphaEmit, alphaPi);	
+				}
 				else
-					o = cluster.VBEM();
+					o = cluster.PREM(scale_phrase, scale_context);
 			}
-			else if (scale_context == 0)
-			{
-				if (threads >= 1)
-					o = cluster.PREM_phrase_constraints_parallel();
-				else
-					o = cluster.PREM_phrase_constraints();
-			}
-			else 
-				o = cluster.PREM_phrase_context_constraints();
 			
 			System.out.println("ITER: "+i+" objective: " + o);
 			
@@ -120,6 +133,9 @@ public class Trainer
 			last = o;
 		}
 		
+		if (cluster == null)
+			cluster = agree.model1;
+
 		double pl1lmax = cluster.phrase_l1lmax();
 		double cl1lmax = cluster.context_l1lmax();
 		System.out.println("\nFinal posterior phrase l1lmax " + pl1lmax + " context l1lmax " + cl1lmax);

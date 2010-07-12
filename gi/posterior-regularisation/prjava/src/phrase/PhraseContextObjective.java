@@ -59,12 +59,18 @@ public class PhraseContextObjective extends ProjectedObjective
 	private long actualProjectionTime;
 	private ExecutorService pool;
 	
-	public PhraseContextObjective(PhraseCluster cluster, double[] startingParameters, ExecutorService pool)
+	double scalePT;
+	double scaleCT;
+	
+	public PhraseContextObjective(PhraseCluster cluster, double[] startingParameters, ExecutorService pool,
+			double scalePT, double scaleCT)
 	{
 		c=cluster;
 		data=c.c.getEdges();
 		n_param=data.size()*c.K*2;
 		this.pool=pool;
+		this.scalePT = scalePT;
+		this.scaleCT = scaleCT;
 		
 		parameters = startingParameters;
 		if (parameters == null)
@@ -73,8 +79,8 @@ public class PhraseContextObjective extends ProjectedObjective
 		newPoint = new double[n_param];
 		gradient = new double[n_param];
 		initP();
-		projectionPhrase = new SimplexProjection(c.scalePT);
-		projectionContext = new SimplexProjection(c.scaleCT);
+		projectionPhrase = new SimplexProjection(scalePT);
+		projectionContext = new SimplexProjection(scaleCT);
 		q=new double [data.size()][c.K];
 		
 		edgeIndex = new HashMap<Edge, Integer>();
@@ -151,7 +157,7 @@ public class PhraseContextObjective extends ProjectedObjective
 		//System.out.println("projectPoint: " + Arrays.toString(point));
 		Arrays.fill(newPoint, 0, newPoint.length, 0);
 		
-		if (c.scalePT > 0)
+		if (scalePT > 0)
 		{
 			// first project using the phrase-tag constraints,
 			// for all p,t: sum_c lambda_ptc < scaleP 
@@ -201,7 +207,7 @@ public class PhraseContextObjective extends ProjectedObjective
 		}
 		//System.out.println("after PT " + Arrays.toString(newPoint));
 	
-		if (c.scaleCT > 1e-6)
+		if (scaleCT > 1e-6)
 		{
 			// now project using the context-tag constraints,
 			// for all c,t: sum_p omega_pct < scaleC
@@ -399,6 +405,6 @@ public class PhraseContextObjective extends ProjectedObjective
 	// L - KL(q||p) - scalePT * l1lmax_phrase - scaleCT * l1lmax_context
 	public double primal()
 	{
-		return loglikelihood() - KL_divergence() - c.scalePT * phrase_l1lmax() - c.scalePT * context_l1lmax();
+		return loglikelihood() - KL_divergence() - scalePT * phrase_l1lmax() - scalePT * context_l1lmax();
 	}
 }

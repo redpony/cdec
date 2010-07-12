@@ -63,7 +63,7 @@ public class PhraseObjective extends ProjectedObjective
 	 */
 	public double llh;
 	
-	public PhraseObjective(PhraseCluster cluster, int phraseIdx){
+	public PhraseObjective(PhraseCluster cluster, int phraseIdx, double scale){
 		phrase=phraseIdx;
 		c=cluster;
 		data=c.c.getEdgesForPhrase(phrase);
@@ -81,7 +81,7 @@ public class PhraseObjective extends ProjectedObjective
 		newPoint  = new double[n_param];
 		gradient = new double[n_param];
 		initP();
-		projection=new SimplexProjection(c.scalePT);
+		projection=new SimplexProjection(scale);
 		q=new double [data.size()][c.K];
 
 		setParameters(parameters);
@@ -220,8 +220,8 @@ public class PhraseObjective extends ProjectedObjective
 		return sum;
 	}
 
-	public double primal()
+	public double primal(double scale)
 	{
-		return loglikelihood() - KL_divergence() - c.scalePT * l1lmax();	
+		return loglikelihood() - KL_divergence() - scale * l1lmax();	
 	}
 }

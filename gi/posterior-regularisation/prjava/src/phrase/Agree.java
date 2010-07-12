@@ -12,8 +12,8 @@ import java.util.List;
 import phrase.Corpus.Edge;
 
 public class Agree {
-	private PhraseCluster model1;
-	private C2F model2;
+	PhraseCluster model1;
+	C2F model2;
 	Corpus c;
 	private int K,n_phrases, n_words, n_contexts, n_positions1,n_positions2;
 	
@@ -32,7 +32,7 @@ public class Agree {
 	 */
 	public Agree(int numCluster, Corpus corpus){
 		
-		model1=new PhraseCluster(numCluster, corpus, 0, 0, 0);
+		model1=new PhraseCluster(numCluster, corpus);
 		model2=new C2F(numCluster,corpus);
 		c=corpus;
 		n_words=c.getNumWords();
