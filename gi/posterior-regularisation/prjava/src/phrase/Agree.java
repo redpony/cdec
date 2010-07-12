@@ -17,8 +17,14 @@ public class Agree {
 	Corpus c;
 	private int K,n_phrases, n_words, n_contexts, n_positions1,n_positions2;
 	
-	private double llh;
-	
+	/**@brief sum of loglikelihood of two
+	 * individual models
+	 */
+	public double llh;
+	/**@brief Bhattacharyya distance
+	 * 
+	 */
+	public double bdist; 
 	/**
 	 * 
 	 * @param numCluster
@@ -60,10 +66,11 @@ public class Agree {
 		
 		Agree agree=new Agree(numCluster, corpus);
 		int iter=20;
-		double llh=0;
 		for(int i=0;i<iter;i++){
-			llh=agree.EM();
-			System.out.println("Iter"+i+", llh: "+llh);
+			agree.EM();
+			System.out.println("Iter"+i+", llh: "+agree.llh+
+					", divergence:"+agree.bdist+
+							" sum: "+(agree.llh+agree.bdist));
 		}
 		
 		File outfile = new File (out);
@@ -90,7 +97,7 @@ public class Agree {
 		double [][]exp_pi2=new double[n_contexts][K];
 		
 		llh=0;
-		
+		bdist=0;
 		//E
 		for(int context=0; context< n_contexts; context++){
 			
@@ -102,7 +109,7 @@ public class Agree {
 				double p[]=posterior(edge);
 				double z = arr.F.l1norm(p);
 				assert z > 0;
-				llh += edge.getCount() * Math.log(z);
+				bdist += edge.getCount() * Math.log(z);
 				arr.F.l1normalize(p);
 				
 				int count = edge.getCount();
@@ -146,7 +153,6 @@ public class Agree {
 		for(double []j:exp_pi2){
 			arr.F.l1normalize(j);
 		}
-		
 		
 		model1.emit=exp_emit1;
 		model1.pi=exp_pi1;
