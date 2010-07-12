@@ -4,6 +4,10 @@ import sys, math, itertools
 
 ginfile = open(sys.argv[1])
 pinfile = open(sys.argv[2])
+if len(sys.argv) >= 4:
+    slash_threshold = int(sys.argv[3])
+else:
+    slash_threshold = 99999
 
 # evaluating: H(G | P) = sum_{g,p} p(g,p) log { p(p) / p(g,p) }
 #                      = sum_{g,p} c(g,p)/N { log c(p) - log N - log c(g,p) + log N }
@@ -24,16 +28,17 @@ for gline, pline in itertools.izip(ginfile, pinfile):
         gtag = gpart.split(':',1)[1]
         ptag = ppart.split(':',1)[1]
 
-        joint_frequencies.setdefault((gtag, ptag), 0)
-        joint_frequencies[gtag,ptag] += 1
+        if gtag.count('/') <= slash_threshold:
+            joint_frequencies.setdefault((gtag, ptag), 0)
+            joint_frequencies[gtag,ptag] += 1
 
-        predict_frequencies.setdefault(ptag, 0)
-        predict_frequencies[ptag] += 1
+            predict_frequencies.setdefault(ptag, 0)
+            predict_frequencies[ptag] += 1
 
-        gold_frequencies.setdefault(gtag, 0)
-        gold_frequencies[gtag] += 1
+            gold_frequencies.setdefault(gtag, 0)
+            gold_frequencies[gtag] += 1
 
-        N += 1
+            N += 1
 
 hg2p = 0
 hp2g = 0

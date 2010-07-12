@@ -60,12 +60,32 @@ def frontier(node, indices):
     else:
         return [node]
 
+def project_heads(node):
+    #print 'project_heads', node
+    is_head = node.data.tag.endswith('-HEAD')
+    if node.children:
+        found = 0
+        for child in node.children:
+            x = project_heads(child)
+            if x:
+                node.data.tag = x
+                found += 1
+        assert found == 1
+    elif is_head:
+        node.data.tag = node.data.tag[:-len('-HEAD')]
+
+    if is_head:
+        return node.data.tag
+    else:
+        return None
+
 for tline, eline in itertools.izip(tinfile, einfile):
     if tline.strip() != '(())':
         if tline.startswith('( '):
             tline = tline[2:-1].strip()
         tr = tree.parse_PST(tline)
         number_leaves(tr)
+        #project_heads(tr) # assumes Bikel-style head annotation for the input trees
     else:
         tr = None
     
