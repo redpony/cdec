@@ -17,6 +17,8 @@ public class Agree {
 	Corpus c;
 	private int K,n_phrases, n_words, n_contexts, n_positions1,n_positions2;
 	
+	private double llh;
+	
 	/**
 	 * 
 	 * @param numCluster
@@ -40,7 +42,8 @@ public class Agree {
 	 * 
 	 */
 	public static void main(String args[]){
-		String in="../pdata/canned.con";
+		//String in="../pdata/canned.con";
+		String in="../pdata/btec.con";
 		String out="../pdata/posterior.out";
 		int numCluster=25;
 		Corpus corpus = null;
@@ -86,7 +89,7 @@ public class Agree {
 		double [][][]exp_emit2=new double [K][n_positions2][n_words];
 		double [][]exp_pi2=new double[n_contexts][K];
 		
-		double loglikelihood=0;
+		llh=0;
 		
 		//E
 		for(int context=0; context< n_contexts; context++){
@@ -99,7 +102,7 @@ public class Agree {
 				double p[]=posterior(edge);
 				double z = arr.F.l1norm(p);
 				assert z > 0;
-				loglikelihood += edge.getCount() * Math.log(z);
+				llh += edge.getCount() * Math.log(z);
 				arr.F.l1normalize(p);
 				
 				int count = edge.getCount();
@@ -134,18 +137,34 @@ public class Agree {
 			arr.F.l1normalize(j);
 		}
 		
+		for(double [][]i:exp_emit2){
+			for(double []j:i){
+				arr.F.l1normalize(j);
+			}
+		}
+		
+		for(double []j:exp_pi2){
+			arr.F.l1normalize(j);
+		}
+		
+		
 		model1.emit=exp_emit1;
 		model1.pi=exp_pi1;
 		model2.emit=exp_emit2;
 		model2.pi=exp_pi2;
 		
-		return loglikelihood;
+		return llh;
 	}
 
 	public double[] posterior(Corpus.Edge edge) 
 	{
 		double[] prob1=model1.posterior(edge);
 		double[] prob2=model2.posterior(edge);
+		
+		llh+=edge.getCount()*Math.log(arr.F.l1norm(prob1));
+		llh+=edge.getCount()*Math.log(arr.F.l1norm(prob2));
+		arr.F.l1normalize(prob1);
+		arr.F.l1normalize(prob2);
 		
 		for(int i=0;i<prob1.length;i++){
 			prob1[i]*=prob2[i];
