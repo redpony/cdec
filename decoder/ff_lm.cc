@@ -465,7 +465,8 @@ LanguageModelImpl *make_lm_impl(int order, string const& f, int load_order)
     return new ReuseLMI(order,ngs.get(f));
   } else {
     LanguageModelImpl *r=new LanguageModelImpl(order,f,load_order);
-    ngs.add(f,r->get_lm());
+    if (!load_order || !ngs.have(f))
+      ngs.add(f,r->get_lm());
     return r;
   }
 }

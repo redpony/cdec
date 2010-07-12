@@ -192,16 +192,23 @@ void Hypergraph::SetPromise(NodeProbs const& inside,NodeProbs const& outside,dou
   if (!nn) return;
   assert(inside.size()==nn);
   assert(outside.size()==nn);
-  double sum; //TODO: prevent underflow by using prob_t?
+  double sum=0; //TODO: prevent underflow by using prob_t?
   if (normalize)
   for (int i=0;i<nn;++i) {
     sum+=(nodes_[i].promise=pow(inside[i]*outside[i],power));
   }
+  double by=nn/sum; // so avg promise is 1
   if (normalize) {
-    double by=nn/sum; // so avg promise is 1
     for (int i=0;i<nn;++i)
       nodes_[i].promise*=by;
   }
+//#define DEBUG_PROMISE
+#ifdef DEBUG_PROMISE
+  cerr << "\n\nPer-node promises:\n";
+  cerr << "promise\tinside\toutside\t(power="<<power<<" normalize="<<normalize<<" sum="<<sum<<" by="<<by<<")"<<endl;
+  for (int i=0;i<nn;++i)
+    cerr <<nodes_[i].promise<<'\t'<<inside[i]<<'\t'<<outside[i]<<endl;
+#endif
 }
 
 
@@ -247,11 +254,11 @@ bool Hypergraph::PruneInsideOutside(double alpha,double density,const EdgeMask* 
   assert(!use_beam||alpha>0);
   assert(!use_density||density>=1);
   assert(!use_sum_prod_semiring||scale>0);
-  int rnum;
+  int rnum=edges_.size();
   if (use_density) {
     const int plen = ViterbiPathLength(*this);
     vector<WordID> bp;
-    rnum = min(static_cast<int>(edges_.size()), static_cast<int>(density * static_cast<double>(plen)));
+    rnum = min(rnum, static_cast<int>(density * static_cast<double>(plen)));
     cerr << "Density pruning: keep "<<rnum<<" of "<<edges_.size()<<" edges (viterbi = "<<plen<<" edges)"<<endl;
     if (rnum == edges_.size()) {
       cerr << "No pruning required: denisty already sufficient\n";
