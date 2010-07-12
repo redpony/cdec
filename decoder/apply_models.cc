@@ -254,7 +254,8 @@ public:
     make_heap(cand.begin(), cand.end(), HeapCandCompare());
     State2Node state2node;   // "buf" in Figure 2
     int pops = 0;
-    while(!cand.empty() && pops < pop_limit_) {
+    int pop_limit_eff=max(1,int(v.promise*pop_limit_));
+    while(!cand.empty() && pops < pop_limit_eff) {
       pop_heap(cand.begin(), cand.end(), HeapCandCompare());
       Candidate* item = cand.back();
       cand.pop_back();

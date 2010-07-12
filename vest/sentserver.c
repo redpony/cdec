@@ -15,7 +15,7 @@
 
 #include "sentserver.h"
 
-#define MAX_CLIENTS 32
+#define MAX_CLIENTS 64
 
 struct clientinfo {
   int s;

@@ -86,7 +86,7 @@ void SourceEdgeCoveragesUsingParseIndices(const Hypergraph& g,
                                           vector<set<int> >* src_cov) {
   src_cov->clear();
   src_cov->resize(g.edges_.size());
-  
+
   for (int i = 0; i < g.edges_.size(); ++i) {
     const Hypergraph::Edge& edge = g.edges_[i];
     set<int>& cov = (*src_cov)[i];
@@ -212,6 +212,7 @@ void TargetEdgeCoveragesUsingTree(const Hypergraph& g,
 }
 
 struct TransitionEventWeightFunction {
+  typedef SparseVector<prob_t> Result;
   inline SparseVector<prob_t> operator()(const Hypergraph::Edge& e) const {
     SparseVector<prob_t> result;
     result.set_value(e.id_, e.edge_prob_);
@@ -261,7 +262,7 @@ void AlignerTools::WriteAlignment(const Lattice& src_lattice,
   if (edges || !map_instead_of_viterbi) {
     for (int i = 0; i < edge_posteriors.size(); ++i)
       edge_posteriors[i] = prob_t::One();
-  } else { 
+  } else {
     SparseVector<prob_t> posts;
     const prob_t z = InsideOutside<prob_t, EdgeProb, SparseVector<prob_t>, TransitionEventWeightFunction>(*g, &posts);
     for (int i = 0; i < edge_posteriors.size(); ++i)

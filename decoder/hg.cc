@@ -41,6 +41,7 @@ double Hypergraph::NumberOfPaths() const {
 }
 
 struct ScaledTransitionEventWeightFunction {
+  typedef SparseVector<prob_t> Result;
   ScaledTransitionEventWeightFunction(double alpha) : scale_(alpha) {}
   inline SparseVector<prob_t> operator()(const Hypergraph::Edge& e) const {
     SparseVector<prob_t> result;
@@ -50,6 +51,7 @@ struct ScaledTransitionEventWeightFunction {
   const double scale_;
 };
 
+// safe to reinterpret a vector of these as a vector of prob_t (plain old data)
 struct TropicalValue {
   TropicalValue() : v_() {}
   explicit TropicalValue(int v) {
@@ -71,12 +73,14 @@ struct TropicalValue {
 };
 
 struct ViterbiWeightFunction {
+  typedef TropicalValue Weight;
   inline TropicalValue operator()(const Hypergraph::Edge& e) const {
     return TropicalValue(e.edge_prob_);
   }
 };
 
 struct ViterbiTransitionEventWeightFunction {
+  typedef SparseVector<TropicalValue> Result;
   inline SparseVector<TropicalValue> operator()(const Hypergraph::Edge& e) const {
     SparseVector<TropicalValue> result;
     result.set_value(e.id_, TropicalValue(e.edge_prob_));
@@ -100,6 +104,7 @@ prob_t Hypergraph::ComputeEdgePosteriors(double scale, vector<prob_t>* posts) co
 }
 
 prob_t Hypergraph::ComputeBestPathThroughEdges(vector<prob_t>* post) const {
+  // I don't like this - explicitly passing around counts of each edge.  It's clever but slow.
   SparseVector<TropicalValue> pv;
   const TropicalValue viterbi_weight = InsideOutside<TropicalValue,
                   ViterbiWeightFunction,
@@ -154,10 +159,6 @@ void Hypergraph::PruneEdges(const EdgeMask& prune_edge, bool run_inside_algorith
 
   if (run_inside_algorithm) {
     const EdgeExistsWeightFunction wf(prune_edge);
-    // use double, not bool since vector<bool> causes problems with the Inside algorithm.
-    // I don't know a good c++ way to resolve this short of template specialization which
-    // I dislike.  If you know of a better way that doesn't involve specialization,
-    // fix this!
     vector<Boolean> reachable;
     bool goal_derivable = Inside/* <Boolean, EdgeExistsWeightFunction> */(*this, &reachable, wf);
     if (!goal_derivable) {
@@ -182,12 +183,32 @@ void Hypergraph::PruneEdges(const EdgeMask& prune_edge, bool run_inside_algorith
       filtered[i] = prune;
     }
   }
-
   TopologicallySortNodesAndEdges(nodes_.size() - 1, &filtered);
 }
 
+void Hypergraph::SetPromise(NodeProbs const& inside,NodeProbs const& outside,double power, bool normalize)
+{
+  int nn=nodes_.size();
+  if (!nn) return;
+  assert(inside.size()==nn);
+  assert(outside.size()==nn);
+  double sum; //TODO: prevent underflow by using prob_t?
+  if (normalize)
+  for (int i=0;i<nn;++i) {
+    sum+=(nodes_[i].promise=pow(inside[i]*outside[i],power));
+  }
+  if (normalize) {
+    double by=nn/sum; // so avg promise is 1
+    for (int i=0;i<nn;++i)
+      nodes_[i].promise*=by;
+  }
+}
+
+
+
 void Hypergraph::MarginPrune(vector<prob_t> const& io,prob_t cutoff,vector<bool> const* preserve_mask,bool safe_inside,bool verbose)
 {
+  assert(io.size()==edges_.size());
   const prob_t BARELY_SMALLER(1e-6,false); // nearly 1; 1-epsilon
   //TODO: //FIXME: if EPSILON is 0, then remnants (useless edges that don't connect to top? or top-connected but not bottom-up buildable referneced?) are left in the hypergraph output that cause mr_vest_map to segfault.  adding EPSILON probably just covers up the symptom by making it far less frequent; I imagine any time threshold is set by DensityPrune, cutoff is exactly equal to the io of several nodes, but because of how it's computed, some round slightly down vs. slightly up.  probably the flaw is in PruneEdges.
   int ne=NumberOfEdges();
@@ -213,53 +234,66 @@ void Hypergraph::MarginPrune(vector<prob_t> const& io,prob_t cutoff,vector<bool>
   PruneEdges(prune,safe_inside); // inside reachability check in case cutoff rounded down too much (probably redundant with EPSILON hack)
 }
 
-void Hypergraph::DensityPruneInsideOutside(const double scale,
-                                           const bool use_sum_prod_semiring,
-                                           const double density,
-                                           const vector<bool>* preserve_mask
-                                           , bool safe_inside
-  )
-{
-  assert(density >= 1.0);
-  const int plen = ViterbiPathLength(*this);
-  vector<WordID> bp;
-  int rnum = min(static_cast<int>(edges_.size()), static_cast<int>(density * static_cast<double>(plen)));
-  cerr << "Density pruning: keep "<<rnum<<" of "<<edges_.size()<<" edges (viterbi = "<<plen<<" edges)"<<endl;
-  if (rnum == edges_.size()) {
-    cerr << "No pruning required: denisty already sufficient";
-    return;
-  }
-  vector<prob_t> io(edges_.size());
-  if (use_sum_prod_semiring) {
-    ComputeEdgePosteriors(scale, &io);
-    assert(scale > 0.0);
-  } else
-    ComputeBestPathThroughEdges(&io);
-  assert(edges_.size() == io.size());
-  vector<prob_t> sorted = io;
-  nth_element(sorted.begin(), sorted.begin() + rnum, sorted.end(), greater<prob_t>());
-  MarginPrune(io,sorted[rnum],preserve_mask,safe_inside);
+template <class V>
+V nth_greatest(int n,vector<V> vs) {
+  nth_element(vs.begin(),vs.begin()+n,vs.end(),greater<V>());
+  return vs[n];
 }
 
-void Hypergraph::BeamPruneInsideOutside(
-    const double scale,
-    const bool use_sum_prod_semiring,
-    const double alpha,
-    const vector<bool>* preserve_mask
-    ,bool safe_inside) {
-  assert(alpha >= 0.0);
-  vector<prob_t> io(edges_.size());
-  if (use_sum_prod_semiring) {
-    ComputeEdgePosteriors(scale, &io);
-    assert(scale > 0.0);
-  } else
-    ComputeBestPathThroughEdges(&io);
-  assert(edges_.size() == io.size());
-  prob_t best;  // initializes to zero
-  for (int i = 0; i < io.size(); ++i)
-    if (io[i] > best) best = io[i];
-  MarginPrune(io,best*prob_t::exp(-alpha),preserve_mask,safe_inside);
+bool Hypergraph::PruneInsideOutside(double alpha,double density,const EdgeMask* preserve_mask,const bool use_sum_prod_semiring, const double scale,double promise_power,bool safe_inside)
+{
+  bool use_density=density!=0;
+  bool use_beam=alpha!=0;
+  assert(!use_beam||alpha>0);
+  assert(!use_density||density>=1);
+  assert(!use_sum_prod_semiring||scale>0);
+  int rnum;
+  if (use_density) {
+    const int plen = ViterbiPathLength(*this);
+    vector<WordID> bp;
+    rnum = min(static_cast<int>(edges_.size()), static_cast<int>(density * static_cast<double>(plen)));
+    cerr << "Density pruning: keep "<<rnum<<" of "<<edges_.size()<<" edges (viterbi = "<<plen<<" edges)"<<endl;
+    if (rnum == edges_.size()) {
+      cerr << "No pruning required: denisty already sufficient\n";
+      if (!use_beam)
+        return false;
+      use_density=false;
+    }
+  }
+  assert(use_density||use_beam);
+  InsideOutsides<prob_t> io;
+  OutsideNormalize<prob_t> norm;
+  if (use_sum_prod_semiring)
+    io.compute(*this,norm,ScaledEdgeProb(scale));
+  else
+    io.compute(*this,norm,ViterbiWeightFunction());  // the storage gets cast to Tropical from prob_t, scary - e.g. w/ specialized static allocator differences it could break.
+  vector<prob_t> mm;
+  io.compute_edge_marginals(*this,mm,EdgeProb()); // should be normalized to 1 for best edges in viterbi.  in sum, best is less than 1.
+
+  prob_t cutoff=prob_t::One(); // we'll destroy everything smaller than this (note: nothing is bigger than 1).  so bigger cutoff = more pruning.
+  bool density_won=false;
+  if (use_density) {
+    cutoff=nth_greatest(rnum,mm);
+    density_won=true;
+  }
+  if (use_beam) {
+    prob_t best=prob_t::One();
+    if (use_sum_prod_semiring) {
+      for (int i = 0; i < mm.size(); ++i)
+        if (mm[i] > best) best = mm[i];
+    }
+    prob_t beam_cut=best*prob_t::exp(-alpha);
+    if (!(use_density&&cutoff>beam_cut)) {
+      density_won=false;
+      cutoff=beam_cut;
+    }
+  }
+  if (promise_power!=0)
+    SetPromise(io.inside,io.outside,promise_power,true);
+  MarginPrune(mm,cutoff,preserve_mask,safe_inside); // we do this last because otherwise indices in mm would be wrong for setting promise.
+  return density_won;
 }
+
 
 void Hypergraph::PrintGraphviz() const {
   int ei = 0;
@@ -378,6 +412,8 @@ struct IdCompare {
   bool operator()(const T& a, const T& b) { return a.id_ < b.id_; }
 };
 
+// this keeps the nodes' edge indices and edges' node indices in sync.  or do nodes not get removed when you prune_edges?  seems like they get reordered.
+//TODO: if you had parallel arrays associating data w/ each node or edge, you'd want access to reloc_node and reloc_edge - expose in stateful object?
 void Hypergraph::TopologicallySortNodesAndEdges(int goal_index,
                                                 const vector<bool>* prune_edges) {
   // figure out which nodes are reachable from the goal

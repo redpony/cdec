@@ -11,7 +11,7 @@
 #include "prob.h"
 
 // if you define this, edges_ will be sorted
-// (normally, just nodes_ are), but this can be quite
+// (normally, just nodes_ are - root must be nodes_.back()), but this can be quite
 // slow
 #undef HG_EDGES_TOPO_SORTED
 
@@ -25,12 +25,14 @@ class Hypergraph {
   typedef SmallVector TailNodeVector;
 
   // TODO get rid of cat_?
+  // TODO keep cat_ and add span and/or state? :)
   struct Node {
-    Node() : id_(), cat_() {}
+    Node() : id_(), cat_(), promise(1) {}
     int id_; // equal to this object's position in the nodes_ vector
     WordID cat_;  // non-terminal category if <0, 0 if not set
     std::vector<int> in_edges_;   // contents refer to positions in edges_
     std::vector<int> out_edges_;  // contents refer to positions in edges_
+    double promise; // set in global pruning; in [0,infty) so that mean is 1.  use: e.g. scale cube poplimit
   };
 
   // TODO get rid of edge_prob_? (can be computed on the fly as the dot
@@ -173,17 +175,30 @@ class Hypergraph {
   // note: if run_inside_algorithm is false, then consumers may be unhappy if you pruned nodes that are built on by nodes that are kept.
   void PruneEdges(const EdgeMask& prune_edge, bool run_inside_algorithm = false);
 
-  // for density>=1.0, keep this many times the edges needed for the 1best derivation
-  // if you don't know, use_sum_prod_semiring should be false
-  void DensityPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double density,const EdgeMask* preserve_mask = NULL,bool safe_inside=false);
-
   /// drop edge i if edge_margin[i] < prune_below, unless preserve_mask[i]
   void MarginPrune(EdgeProbs const& edge_margin,prob_t prune_below,EdgeMask const* preserve_mask=0,bool safe_inside=false,bool verbose=false);
-  // safe_inside: if true, a theoretically redundant (but practically important .001% of the time due to rounding error) inside pruning pass will happen after max-marginal pruning.  if you don't do this, it's possible that the pruned hypergraph will contain outside-reachable (but not inside-buildable) nodes.  that is, a parent will be kept whose children were pruned.  if output, those forests may confuse (crash) e.g. mr_vest_map.  however, if the hyperedges occur in defined-before-use (all edges with head h occur before h is used as a tail) order, then a grace margin for keeping edges that starts leniently and becomes more forbidding will make it impossible for this to occur, i.e. safe_inside=true is not needed.
+  // promise[i]=((max_marginal[i]/viterbi)^power).todouble.  if normalize, ensure that avg promise is 1.
+  typedef EdgeProbs NodeProbs;
+  void SetPromise(NodeProbs const& inside,NodeProbs const& outside, double power=1, bool normalize=true);
 
-  // prunes any edge whose score on the best path taking that edge is more than alpha away
-  // from the score of the global best past (or the highest edge posterior)
-  void BeamPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double alpha,const EdgeMask* preserve_mask = NULL,bool safe_inside=false);
+  // beam_alpha=0 means don't beam prune, otherwise drop things that are e^beam_alpha times worse than best -   // prunes any edge whose prob_t on the best path taking that edge is more than e^alpha times
+  //density=0 means don't density prune:   // for density>=1.0, keep this many times the edges needed for the 1best derivation
+  // worse than the score of the global best past (or the highest edge posterior)
+  // scale is for use_sum_prod_semiring (sharpens distribution?)
+  // promise_power is for a call to SetPromise (no call happens if power=0)
+  // returns true if density pruning was tighter than beam
+  // safe_inside would be a redundant anti-rounding error second bottom-up reachability before actually removing edges, to prevent stranded edges.  shouldn't be needed - if the hyperedges occur in defined-before-use (all edges with head h occur before h is used as a tail) order, then a grace margin for keeping edges that starts leniently and becomes more forbidding will make it impossible for this to occur, i.e. safe_inside=true is not needed.
+  bool PruneInsideOutside(double beam_alpha,double density,const EdgeMask* preserve_mask = NULL,const bool use_sum_prod_semiring=false, const double scale=1,double promise_power=0,bool safe_inside=false);
+
+  // legacy:
+  void DensityPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double density,const EdgeMask* preserve_mask = NULL) {
+    PruneInsideOutside(density,0,preserve_mask,use_sum_prod_semiring,scale);
+  }
+
+  // legacy:
+  void BeamPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double alpha,const EdgeMask* preserve_mask = NULL) {
+    PruneInsideOutside(0,alpha,preserve_mask,use_sum_prod_semiring,scale);
+  }
 
   // report nodes, edges, paths
   std::string stats(std::string const& name="forest") const;
@@ -246,8 +261,9 @@ struct ScaledEdgeProb {
 
 // see Li (2010), Section 3.2.2-- this is 'x_e = p_e*r_e'
 struct EdgeFeaturesAndProbWeightFunction {
-  typedef const SparseVector<prob_t> Weight;
-  inline const SparseVector<prob_t> operator()(const Hypergraph::Edge& e) const {
+  typedef SparseVector<prob_t> Weight;
+  typedef Weight Result; //TODO: change Result->Weight everywhere?
+  inline const Weight operator()(const Hypergraph::Edge& e) const {
     SparseVector<prob_t> res;
     for (SparseVector<double>::const_iterator it = e.feature_values_.begin();
          it != e.feature_values_.end(); ++it)
