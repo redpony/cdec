@@ -127,6 +127,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* confp) {
         ("prelm_beam_prune", po::value<double>(), "Prune paths from -LM forest before LM rescoring, keeping paths within exp(alpha>=0)")
         ("beam_prune", po::value<double>(), "Prune paths from +LM forest, keep paths within exp(alpha>=0)")
     ("scale_prune_srclen", "scale beams by the input length (in # of tokens; may not be what you want for lattices")
+    ("promise_power",po::value<double>()->default_value(0), "Give more beam budget to more promising previous-pass nodes when pruning - but allocate the same average beams.  0 means off, 1 means beam proportional to inside*outside prob, n means nth power (affects just --cubepruning_pop_limit)")
         ("lexalign_use_null", "Support source-side null words in lexical translation")
         ("tagger_tagset,t", po::value<string>(), "(Tagger) file containing tag set")
         ("csplit_output_plf", "(Compound splitter) Output lattice in PLF format")
@@ -337,7 +338,7 @@ void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_featur
 }
 
 void maybe_prune(Hypergraph &forest,po::variables_map const& conf,string nbeam,string ndensity,string forestname,double srclen) {
-    double beam_prune,density_prune;
+    double beam_prune=0,density_prune=0;
     bool use_beam_prune=beam_param(conf,nbeam,&beam_prune,conf.count("scale_prune_srclen"),srclen);
     bool use_density_prune=beam_param(conf,ndensity,&density_prune);
     if (use_beam_prune || use_density_prune) {
@@ -348,10 +349,7 @@ void maybe_prune(Hypergraph &forest,po::variables_map const& conf,string nbeam,s
         preserve_mask[CompoundSplit::GetFullWordEdgeIndex(forest)] = true;
         pm=&preserve_mask;
       }
-      if (use_beam_prune)
-        forest.BeamPruneInsideOutside(1.0, false, beam_prune, pm);
-      if (use_density_prune)
-        forest.DensityPruneInsideOutside(1.0 ,false, density_prune, pm);
+      forest.PruneInsideOutside(beam_prune,density_prune,pm,false,1,conf["promise_power"].as<double>());
       if (!forestname.empty()) forestname=" "+forestname;
       forest_stats(forest,"  Pruned "+forestname+" forest",false,false);
       cerr << "  Pruned "<<forestname<<" forest portion of edges kept: "<<forest.edges_.size()/presize<<endl;
