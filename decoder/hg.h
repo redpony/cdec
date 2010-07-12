@@ -181,6 +181,8 @@ class Hypergraph {
   typedef EdgeProbs NodeProbs;
   void SetPromise(NodeProbs const& inside,NodeProbs const& outside, double power=1, bool normalize=true);
 
+  //TODO: in my opinion, looking at the ratio of logprobs (features \dot weights) rather than the absolute difference generalizes more nicely across sentence lengths and weight vectors that are constant multiples of one another.  at least make that an option.  i worked around this a little in cdec by making "beam alpha per source word" but that's not helping with different tuning runs.  this would also make me more comfortable about allocating promise
+
   // beam_alpha=0 means don't beam prune, otherwise drop things that are e^beam_alpha times worse than best -   // prunes any edge whose prob_t on the best path taking that edge is more than e^alpha times
   //density=0 means don't density prune:   // for density>=1.0, keep this many times the edges needed for the 1best derivation
   // worse than the score of the global best past (or the highest edge posterior)

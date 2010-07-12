@@ -414,8 +414,9 @@ void ApplyModelSet(const Hypergraph& in,
     ma.Apply();
   } else if (config.algorithm == 1) {
     int pl = config.pop_limit;
-    if (pl > 100 && in.nodes_.size() > 80000) {
-      pl = 30;
+    const int max_pl_for_large=50;
+    if (pl > max_pl_for_large && in.nodes_.size() > 80000) {
+      pl = max_pl_for_large;
       cerr << "  Note: reducing pop_limit to " << pl << " for very large forest\n";
     }
     CubePruningRescorer ma(models, smeta, in, pl, out);
