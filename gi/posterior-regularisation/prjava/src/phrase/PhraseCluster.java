@@ -42,6 +42,7 @@ public class PhraseCluster {
 		for(double [][]i:emit)
 			for(double []j:i)
 				arr.F.randomise(j, true);
+
 		for(double []j:pi)
 			arr.F.randomise(j, true);
 	}
@@ -188,6 +189,7 @@ public class PhraseCluster {
 	private double KL_symmetric_dirichlet(double[] q, double alpha)
 	{
 		// assumes that zeros in q are structural & should be skipped
+		// FIXME: asssumption doesn't hold
 		
 		double p0 = alpha;
 		double q0 = 0;

@@ -15,7 +15,7 @@ public class F {
 		double z = 0;
 		for (int i = 0; i < probs.length; ++i)
 		{
-			probs[i] = 3 + rng.nextDouble();
+			probs[i] = 1e2 + rng.nextDouble();
 			if (normalise)
 				z += probs[i];
 		}
@@ -23,6 +23,12 @@ public class F {
 		if (normalise)
 			for (int i = 0; i < probs.length; ++i)
 				probs[i] /= z;
+	}
+	
+	public static void uniform(double probs[])
+	{
+		for (int i = 0; i < probs.length; ++i)
+			probs[i] = 1.0 / probs.length;
 	}
 	
 	public static void l1normalize(double [] a){
