@@ -54,6 +54,7 @@ int main(int argc, char **argv)
       ("freq-cutoff-end", value<int>()->default_value(0), "final frequency cutoff.")
       ("freq-cutoff-interval", value<int>()->default_value(0), "number of iterations between frequency decrement.")
       ("max-threads", value<int>()->default_value(1), "maximum number of simultaneous threads allowed")
+      ("num-jobs", value<int>()->default_value(1), "allows finer control over parallelization")
       ;
 
     cmdline_specific.add(config_options);
@@ -77,10 +78,11 @@ int main(int argc, char **argv)
     cerr << "Please specify a file containing the data." << endl;
     return 1;
   }
-
+  assert(vm["max-threads"].as<int>() > 0);
+  assert(vm["num-jobs"].as<int>() > -1);
   // seed the random number generator: 0 = automatic, specify value otherwise
   unsigned long seed = 0; 
-  PYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"), seed, vm["max-threads"].as<int>());
+  PYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"), seed, vm["max-threads"].as<int>(), vm["num-jobs"].as<int>());
 
   // read the data
   BackoffGenerator* backoff_gen=0;
