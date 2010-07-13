@@ -76,6 +76,7 @@ public class PhraseContextObjective extends ProjectedObjective
 		if (parameters == null)
 			parameters = new double[n_param];
 		
+		System.out.println("Num parameters " + n_param);
 		newPoint = new double[n_param];
 		gradient = new double[n_param];
 		initP();
@@ -112,6 +113,8 @@ public class PhraseContextObjective extends ProjectedObjective
 	{
 		updateCalls++;
 		loglikelihood=0;
+		System.out.print(".");
+		System.out.flush();
 
 		long begin = System.currentTimeMillis();
 		for (int e=0; e<data.size(); e++) 
@@ -153,6 +156,9 @@ public class PhraseContextObjective extends ProjectedObjective
 	{
 		long begin = System.currentTimeMillis();
 		List<Future<?>> tasks = new ArrayList<Future<?>>();
+		
+		System.out.print(",");
+		System.out.flush();
 
 		//System.out.println("\t\tprojectPoint: " + Arrays.toString(point));
 		Arrays.fill(newPoint, 0, newPoint.length, 0);
@@ -337,6 +343,8 @@ public class PhraseContextObjective extends ProjectedObjective
 		updateFunction();
 		boolean success = optimizer.optimize(this,stats,compositeStop);
 //		System.out.println("Ended optimzation Projected Gradient Descent\n" + stats.prettyPrint(1));
+
+		System.out.println();
 		
 		if (success)
 			System.out.print("\toptimization took " + optimizer.getCurrentIteration() + " iterations");
