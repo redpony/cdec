@@ -20,7 +20,7 @@
   <target name="compile" depends="init"
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}">
+    <javac srcdir="${src}" destdir="${build}" includeantruntime="false">
             <classpath refid="classpath"/>
     </javac>
   </target>
@@ -28,7 +28,7 @@
   <target name="dist" depends="compile"
         description="generate the distribution" >
     <jar jarfile="${dist}/prjava-${DSTAMP}.jar" basedir="${build}"/>
-    <symlink link="prjava.jar" resource="${dist}/prjava-${DSTAMP}.jar" overwrite="true"/>
+    <symlink link="./prjava.jar" resource="${dist}/prjava-${DSTAMP}.jar" overwrite="true"/>
   </target>
 
   <target name="clean"
