@@ -371,15 +371,15 @@ struct XFeatures: public FeatureExtractor {
     assert(t_c > 0);
     result->set_value(fid_xfe, log(t_c) - l_r_freq);
     result->set_value(fid_labelledfe, log(t_c) - log(info.counts.value(kCFE)));
-    if (t_c == 1)
-      result->set_value(fid_xesingleton, 1.0);
+//    if (t_c == 1)
+//      result->set_value(fid_xesingleton, 1.0);
 
     const int s_c = source_counts(r.source());
     assert(s_c > 0);
     result->set_value(fid_xef, log(s_c) - l_r_freq);
     result->set_value(fid_labelledef, log(s_c) - log(info.counts.value(kCFE)));
-    if (s_c == 1)
-      result->set_value(fid_xfsingleton, 1.0);
+//    if (s_c == 1)
+//      result->set_value(fid_xfsingleton, 1.0);
   }
 
   void map_rule(RuleTuple& r) const {

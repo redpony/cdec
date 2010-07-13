@@ -11,7 +11,7 @@ my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR 
 my $feat_map = {
   "LogRuleCount" => [ "LogRuleCount", "SingletonRule" ] ,
 #  "XFeatures" => [ "XFE","XEF" ] ,
-  "XFeatures" => [ "XFE","XEF","LabelledEF","LabelledFE","XE_Singleton","XF_Singleton"] ,
+  "XFeatures" => [ "XFE","XEF","LabelledEF","LabelledFE"], # ,"XE_Singleton","XF_Singleton"] ,
   "LabelledRuleConditionals" => [ "LabelledFE","LabelledEF" ] ,
   "LexProb" => [ "LexE2F", "LexF2E" ] ,
   "BackoffRule" => [ "BackoffRule" ] ,
