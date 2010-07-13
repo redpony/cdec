@@ -110,6 +110,7 @@ if (GetOptions(
         "backoff_grammar" => \$bkoffgram,
         "data=s" => \$dataDir,
         "features=s@" => \@features,
+        "out-dir=s" => \$outdir,
 ) == 0 || @ARGV!=2 || $help) {
         print_help();
         exit;
