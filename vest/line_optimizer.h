@@ -37,7 +37,9 @@ struct LineOptimizer {
      const std::vector<int>& primary,
      int additional_random_directions,
      RandomNumberGenerator<boost::mt19937>* rng,
-     std::vector<SparseVector<double> >* dirs);
+     std::vector<SparseVector<double> >* dirs
+     , bool include_primary=true
+    );
 
 };
 

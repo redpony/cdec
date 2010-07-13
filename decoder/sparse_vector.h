@@ -58,7 +58,7 @@ public:
     }
 
     int max_index() const {
-        if (values_.empty()) return 0;
+      if (empty()) return 0;
         typename MapType::const_iterator found =values_.end();
         --found;
         return found->first;
@@ -72,6 +72,18 @@ public:
                 it = values_.begin(); it != values_.end(); ++it)
             sum += it->second;
         return sum;
+    }
+
+    template<typename S>
+    S cosine_sim(const SparseVector<S> &vec) const {
+      return dot(vec)/(l2norm()*vec.l2norm());
+    }
+
+  // if values are binary, gives |A intersect B|/|A union B|
+    template<typename S>
+    S tanimoto_coef(const SparseVector<S> &vec) const {
+      S dp=dot(vec);
+      return dp/(l2norm_sq()*vec.l2norm_sq()-dp);
     }
 
     template<typename S>
@@ -119,12 +131,16 @@ public:
       return sum;
     }
 
-    T l2norm() const {
+  T l2norm_sq() const {
       T sum = 0;
       for (typename MapType::const_iterator
               it = values_.begin(); it != values_.end(); ++it)
         sum += it->second * it->second;
-      return sqrt(sum);
+      return sum;
+  }
+
+    T l2norm() const {
+      return sqrt(l2norm_sq());
     }
 
     SparseVector<T> &operator+=(const SparseVector<T> &other) {
@@ -149,14 +165,14 @@ public:
         return *this;
     }
 
-    SparseVector<T> &operator-=(const double &x) {
+    SparseVector<T> &operator-=(T const& x) {
         for (typename MapType::iterator
                 it = values_.begin(); it != values_.end(); ++it)
             it->second -= x;
         return *this;
     }
 
-    SparseVector<T> &operator+=(const double &x) {
+    SparseVector<T> &operator+=(T const& x) {
         for (typename MapType::iterator
                 it = values_.begin(); it != values_.end(); ++it)
             it->second += x;
@@ -177,17 +193,17 @@ public:
         return *this;
     }
 
-    SparseVector<T> operator+(const double &x) const {
+    SparseVector<T> operator+(T const& x) const {
         SparseVector<T> result = *this;
         return result += x;
     }
 
-    SparseVector<T> operator-(const double &x) const {
+    SparseVector<T> operator-(T const& x) const {
         SparseVector<T> result = *this;
         return result -= x;
     }
 
-    SparseVector<T> operator/(const double &x) const {
+    SparseVector<T> operator/(T const& x) const {
         SparseVector<T> result = *this;
         return result /= x;
     }
