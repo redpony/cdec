@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cstring>
 #include <cassert>
+#include <stack>
 #include "tdict.h"
 #include "fdict.h"
 #include "trule.h"
@@ -45,7 +46,8 @@ int scfglex_nt_sanity[MAX_ARITY];
 int scfglex_src_nts[MAX_ARITY];
 float scfglex_nt_size_means[MAX_ARITY];
 float scfglex_nt_size_vars[MAX_ARITY];
-
+std::stack<TRulePtr> ctf_rule_stack;
+unsigned int ctf_level = 0;
 
 void sanity_check_trg_symbol(WordID nt, int index) {
   if (scfglex_src_nts[index-1] != nt) {
@@ -77,6 +79,34 @@ void scfglex_reset() {
   scfglex_trg_rhs_size = 0;
 }
 
+void check_and_update_ctf_stack(const TRulePtr& rp) {
+  if (ctf_level > ctf_rule_stack.size()){
+    std::cerr << "Found rule at projection level " << ctf_level << " but previous rule was at level " 
+      << ctf_rule_stack.size()-1 << " (cannot exceed previous level by more than one; line " << lex_line << ")" << std::endl;
+    abort();
+  }
+  while (ctf_rule_stack.size() > ctf_level)
+    ctf_rule_stack.pop();
+  // ensure that rule has the same signature as parent (coarse) rule.  Rules may *only*
+  // differ by the rhs nonterminals, not terminals or permutation of nonterminals.
+  if (ctf_rule_stack.size() > 0) {
+    TRulePtr& coarse_rp = ctf_rule_stack.top();
+    if (rp->f_.size() != coarse_rp->f_.size() || rp->e_ != coarse_rp->e_) {
+      std::cerr << "Rule " << (rp->AsString()) << " is not a projection of " <<
+        (coarse_rp->AsString()) << std::endl;
+      abort();
+    }
+    for (int i=0; i<rp->f_.size(); ++i) {
+      if (((rp->f_[i]<0) != (coarse_rp->f_[i]<0)) ||
+          ((rp->f_[i]>0) && (rp->f_[i] != coarse_rp->f_[i]))) {
+        std::cerr << "Rule " << (rp->AsString()) << " is not a projection of " <<
+          (coarse_rp->AsString()) << std::endl;
+        abort();
+      }
+    }
+  }
+}
+
 %}
 
 REAL [\-+]?[0-9]+(\.[0-9]*([eE][-+]*[0-9]+)?)?|inf|[\-+]inf
@@ -85,7 +115,9 @@ NT [\-#$A-Z_:=.",\\][\-#$".A-Z+/=_0-9!:@\\]*
 %x LHS_END SRC TRG FEATS FEATVAL ALIGNS
 %%
 
-<INITIAL>[ \t]	;
+<INITIAL>[ \t]	{ 
+  ctf_level++; 
+  };
 
 <INITIAL>\[{NT}\]   {
 		scfglex_tmp_token.assign(yytext + 1, yyleng - 2);
@@ -182,12 +214,16 @@ NT [\-#$A-Z_:=.",\\][\-#$".A-Z+/=_0-9!:@\\]*
                   abort();
                 }
 		TRulePtr rp(new TRule(scfglex_lhs, scfglex_src_rhs, scfglex_src_rhs_size, scfglex_trg_rhs, scfglex_trg_rhs_size, scfglex_feat_ids, scfglex_feat_vals, scfglex_num_feats, scfglex_src_arity));
-		rule_callback(rp, rule_callback_extra);
+    check_and_update_ctf_stack(rp);
+    TRulePtr coarse_rp = ((ctf_level == 0) ? TRulePtr() : ctf_rule_stack.top());
+		rule_callback(rp, ctf_level, coarse_rp, rule_callback_extra);
+    ctf_rule_stack.push(rp);
 		// std::cerr << rp->AsString() << std::endl;
 		num_rules++;
-                lex_line++;
-                if (num_rules %   50000 == 0) { std::cerr << '.' << std::flush; fl = true; }
-                if (num_rules % 2000000 == 0) { std::cerr << " [" << num_rules << "]\n"; fl = false; }
+    lex_line++;
+    if (num_rules %   50000 == 0) { std::cerr << '.' << std::flush; fl = true; }
+    if (num_rules % 2000000 == 0) { std::cerr << " [" << num_rules << "]\n"; fl = false; }
+    ctf_level = 0;
 		BEGIN(INITIAL);
 		}
 
