@@ -83,7 +83,7 @@ public:
     template<typename S>
     S tanimoto_coef(const SparseVector<S> &vec) const {
       S dp=dot(vec);
-      return dp/(l2norm_sq()*vec.l2norm_sq()-dp);
+      return dp/(l2norm_sq()+vec.l2norm_sq()-dp);
     }
 
     template<typename S>
