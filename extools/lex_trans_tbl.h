@@ -8,6 +8,7 @@
 #ifndef LEX_TRANS_TBL_H_
 #define LEX_TRANS_TBL_H_
 
+#include "wordid.h"
 #include <map>
 
 class LexTranslationTable
