@@ -69,6 +69,7 @@ public class PhraseObjective extends ProjectedObjective
 		c=cluster;
 		data=c.c.getEdgesForPhrase(phrase);
 		n_param=data.size()*c.K;
+		//System.out.println("Num parameters " + n_param + " for phrase #" + phraseIdx);
 		
 		if (lambda==null){
 			lambda=new double[c.c.getNumPhrases()][];
