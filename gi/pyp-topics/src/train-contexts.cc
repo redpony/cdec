@@ -131,14 +131,15 @@ int main(int argc, char **argv)
           //insert_result.first++;
       }
       documents_out << contexts_corpus.key(document_id) << '\t';
-      documents_out << model.max(document_id) << " " << corpusIt->size() << " ||| ";
+      documents_out << model.max(document_id).first << " " << corpusIt->size() << " ||| ";
       for (std::vector<int>::const_iterator termIt=unique_terms.begin();
            termIt != unique_terms.end(); ++termIt) {
         if (termIt != unique_terms.begin())
           documents_out << " ||| ";
        vector<std::string> strings = contexts_corpus.context2string(*termIt);
        copy(strings.begin(), strings.end(),ostream_iterator<std::string>(documents_out, " "));
-        documents_out << "||| C=" << model.max(document_id, *termIt);
+        std::pair<int,PYPTopics::F> maxinfo = model.max(document_id, *termIt);
+        documents_out << "||| C=" << maxinfo.first << " P=" << maxinfo.second;
 
       }
       documents_out <<endl;
@@ -150,7 +151,7 @@ int main(int argc, char **argv)
       default_topics << model.max_topic() <<endl;
       for (std::map<int,int>::const_iterator termIt=all_terms.begin(); termIt != all_terms.end(); ++termIt) {
        vector<std::string> strings = contexts_corpus.context2string(termIt->first);
-        default_topics << model.max(-1, termIt->first) << " ||| " << termIt->second << " ||| ";
+        default_topics << model.max(-1, termIt->first).first << " ||| " << termIt->second << " ||| ";
        copy(strings.begin(), strings.end(),ostream_iterator<std::string>(default_topics, " "));
         default_topics <<endl;
       }

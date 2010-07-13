@@ -344,7 +344,7 @@ int PYPTopics::max_topic() const {
   return current_topic;
 }
 
-int PYPTopics::max(const DocumentId& doc) const {
+std::pair<int,PYPTopics::F> PYPTopics::max(const DocumentId& doc) const {
   //std::cerr << "PYPTopics::max(" << doc << "," << term << ")" << std::endl;
   // collect probs
   F current_max=0.0;
@@ -366,10 +366,11 @@ int PYPTopics::max(const DocumentId& doc) const {
     }
   }
   assert(current_topic >= 0);
-  return current_topic;
+  assert(current_max >= 0);
+  return std::make_pair(current_topic, current_max);
 }
 
-int PYPTopics::max(const DocumentId& doc, const Term& term) const {
+std::pair<int,PYPTopics::F> PYPTopics::max(const DocumentId& doc, const Term& term) const {
   //std::cerr << "PYPTopics::max(" << doc << "," << term << ")" << std::endl;
   // collect probs
   F current_max=0.0;
@@ -392,7 +393,8 @@ int PYPTopics::max(const DocumentId& doc, const Term& term) const {
     }
   }
   assert(current_topic >= 0);
-  return current_topic;
+  assert(current_max >= 0);
+  return std::make_pair(current_topic,current_max);
 }
 
 std::ostream& PYPTopics::print_document_topics(std::ostream& out) const {

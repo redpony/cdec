@@ -99,7 +99,7 @@ int main(int argc, char **argv)
       documents_out << unique_terms.size();
       for (std::vector<int>::const_iterator termIt=unique_terms.begin();
            termIt != unique_terms.end(); ++termIt)
-        documents_out << " " << *termIt << ":" << model.max(document_id, *termIt);
+        documents_out << " " << *termIt << ":" << model.max(document_id, *termIt).first;
       documents_out << std::endl;
     }
     documents_out.close();
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
       int index=0;
       for (DocumentTerms::const_iterator instanceIt=corpusIt->begin();
            instanceIt != corpusIt->end(); ++instanceIt, ++index) {
-        int topic = model.max(instanceIt->doc, instanceIt->term);
+        int topic = model.max(instanceIt->doc, instanceIt->term).first;
         if (index != 0) topics_out << " ";
         topics_out << topic;
       }
