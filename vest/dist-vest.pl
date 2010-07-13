@@ -171,8 +171,10 @@ if ($dryrun){
         open CMD,'>',$cmdfile;
         print CMD "cd ",&getcwd,"\n";
 #        print CMD &escaped_cmdline,"\n"; #buggy - last arg is quoted.
-        print CMD &cmdline,"\n";
+        my $cline=&cmdline."\n";
+        print CMD $cline;
         close CMD;
+        print STDERR $cline;
         chmod(0755,$cmdfile);
 		unless (-e $initialWeights) {
 			print STDERR "Please specify an initial weights file with --initial-weights\n";
