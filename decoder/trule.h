@@ -34,6 +34,9 @@ class TRule {
   TRule(const std::vector<WordID>& e, const std::vector<WordID>& f, const WordID& lhs) :
     e_(e), f_(f), lhs_(lhs), prev_i(-1), prev_j(-1) {}
 
+  TRule(const TRule& other) :
+    e_(other.e_), f_(other.f_), lhs_(other.lhs_), scores_(other.scores_), arity_(other.arity_), prev_i(-1), prev_j(-1) {}
+
   // deprecated - this will be private soon
   explicit TRule(const std::string& text, bool strict = false, bool mono = false) : prev_i(-1), prev_j(-1) {
     ReadFromString(text, strict, mono);
@@ -130,6 +133,8 @@ class TRule {
   SparseVector<double> scores_;
 
   char arity_;
+  
+  // these attributes are application-specific and should probably be refactored 
   TRulePtr parent_rule_;  // usually NULL, except when doing constrained decoding
 
   // this is only used when doing synchronous parsing
@@ -138,6 +143,9 @@ class TRule {
 
   // may be null
   boost::shared_ptr<NTSizeSummaryStatistics> nt_size_summary_;
+
+  // only for coarse-to-fine decoding
+  boost::shared_ptr<std::vector<TRulePtr> > fine_rules_;
 
  private:
   TRule(const WordID& src, const WordID& trg) : e_(1, trg), f_(1, src), lhs_(), arity_(), prev_i(), prev_j() {}

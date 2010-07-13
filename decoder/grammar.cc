@@ -81,8 +81,14 @@ const GrammarIter* TextGrammar::GetRoot() const {
   return &pimpl_->root_;
 }
 
-void TextGrammar::AddRule(const TRulePtr& rule) {
-  if (rule->IsUnary()) {
+void TextGrammar::AddRule(const TRulePtr& rule, const unsigned int ctf_level, const TRulePtr& coarse_rule) {
+  if (ctf_level > 0) {
+    // assume that coarse_rule is already in tree (would be safer to check)
+    if (coarse_rule->fine_rules_ == 0) 
+      coarse_rule->fine_rules_.reset(new std::vector<TRulePtr>());
+    coarse_rule->fine_rules_->push_back(rule);
+    ctf_levels_ = std::max(ctf_levels_, ctf_level);
+  } else if (rule->IsUnary()) {
     rhs2unaries_[rule->f().front()].push_back(rule);
     unaries_.push_back(rule);
   } else {
@@ -95,8 +101,8 @@ void TextGrammar::AddRule(const TRulePtr& rule) {
   }
 }
 
-static void AddRuleHelper(const TRulePtr& new_rule, void* extra) {
-  static_cast<TextGrammar*>(extra)->AddRule(new_rule);
+static void AddRuleHelper(const TRulePtr& new_rule, const unsigned int ctf_level, const TRulePtr& coarse_rule, void* extra) {
+  static_cast<TextGrammar*>(extra)->AddRule(new_rule, ctf_level, coarse_rule);
 }
 
 void TextGrammar::ReadFromFile(const string& filename) {
@@ -110,22 +116,29 @@ bool TextGrammar::HasRuleForSpan(int /* i */, int /* j */, int distance) const {
 
 GlueGrammar::GlueGrammar(const string& file) : TextGrammar(file) {}
 
-GlueGrammar::GlueGrammar(const string& goal_nt, const string& default_nt) {
-  TRulePtr stop_glue(new TRule("[" + goal_nt + "] ||| [" + default_nt + ",1] ||| [" + default_nt + ",1]"));
-  TRulePtr glue(new TRule("[" + goal_nt + "] ||| [" + goal_nt + ",1] ["
-    + default_nt + ",2] ||| [" + goal_nt + ",1] [" + default_nt + ",2] ||| Glue=1"));
+void RefineRule(TRulePtr pt, const unsigned int ctf_level){ 
+  for (unsigned int i=0; i<ctf_level; ++i){
+    TRulePtr r(new TRule(*pt));
+    pt->fine_rules_.reset(new vector<TRulePtr>);
+    pt->fine_rules_->push_back(r);
+    pt = r;
+  }
+}
 
+GlueGrammar::GlueGrammar(const string& goal_nt, const string& default_nt, const unsigned int ctf_level) {
+  TRulePtr stop_glue(new TRule("[" + goal_nt + "] ||| [" + default_nt + ",1] ||| [" + default_nt + ",1]"));
   AddRule(stop_glue);
+  RefineRule(stop_glue, ctf_level);
+  TRulePtr glue(new TRule("[" + goal_nt + "] ||| [" + goal_nt + ",1] ["+ default_nt + ",2] ||| [" + goal_nt + ",1] [" + default_nt + ",2] ||| Glue=1"));
   AddRule(glue);
-  //cerr << "GLUE: " << stop_glue->AsString() << endl;
-  //cerr << "GLUE: " << glue->AsString() << endl;
+  RefineRule(glue, ctf_level);
 }
 
 bool GlueGrammar::HasRuleForSpan(int i, int /* j */, int /* distance */) const {
   return (i == 0);
 }
 
-PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat) :
+PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat, const unsigned int ctf_level) :
     has_rule_(input.size() + 1) {
   for (int i = 0; i < input.size(); ++i) {
     const vector<LatticeArc>& alts = input[i];
@@ -135,7 +148,7 @@ PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat) 
       const string& src = TD::Convert(alts[k].label);
       TRulePtr pt(new TRule("[" + cat + "] ||| " + src + " ||| " + src + " ||| PassThrough=1"));
       AddRule(pt);
-//      cerr << "PT: " << pt->AsString() << endl;
+      RefineRule(pt, ctf_level);
     }
   }
 }

@@ -1,6 +1,7 @@
 #ifndef GRAMMAR_H_
 #define GRAMMAR_H_
 
+#include <algorithm>
 #include <vector>
 #include <map>
 #include <set>
@@ -26,11 +27,13 @@ struct GrammarIter {
 struct Grammar {
   typedef std::map<WordID, std::vector<TRulePtr> > Cat2Rules;
   static const std::vector<TRulePtr> NO_RULES;
-
+  
+  Grammar(): ctf_levels_(0) {}
   virtual ~Grammar();
   virtual const GrammarIter* GetRoot() const = 0;
   virtual bool HasRuleForSpan(int i, int j, int distance) const;
   const std::string GetGrammarName(){return grammar_name_;}
+  unsigned int GetCTFLevels(){ return ctf_levels_; }
   void SetGrammarName(std::string n) {grammar_name_ = n; }
   // cat is the category to be rewritten
   inline const std::vector<TRulePtr>& GetAllUnaryRules() const {
@@ -50,6 +53,7 @@ struct Grammar {
   Cat2Rules rhs2unaries_;     // these must be filled in by subclasses!
   std::vector<TRulePtr> unaries_;
   std::string grammar_name_; 
+  unsigned int ctf_levels_;
 };
 
 typedef boost::shared_ptr<Grammar> GrammarPtr;
@@ -61,7 +65,7 @@ struct TextGrammar : public Grammar {
   void SetMaxSpan(int m) { max_span_ = m; }
   
   virtual const GrammarIter* GetRoot() const;
-  void AddRule(const TRulePtr& rule);
+  void AddRule(const TRulePtr& rule, const unsigned int ctf_level=0, const TRulePtr& coarse_parent=TRulePtr());
   void ReadFromFile(const std::string& filename);
   virtual bool HasRuleForSpan(int i, int j, int distance) const;
   const std::vector<TRulePtr>& GetUnaryRules(const WordID& cat) const;
@@ -75,15 +79,16 @@ struct TextGrammar : public Grammar {
 struct GlueGrammar : public TextGrammar {
   // read glue grammar from file
   explicit GlueGrammar(const std::string& file);
-  GlueGrammar(const std::string& goal_nt, const std::string& default_nt);  // "S", "X"
+  GlueGrammar(const std::string& goal_nt, const std::string& default_nt, const unsigned int ctf_level=0);  // "S", "X"
   virtual bool HasRuleForSpan(int i, int j, int distance) const;
 };
 
 struct PassThroughGrammar : public TextGrammar {
-  PassThroughGrammar(const Lattice& input, const std::string& cat);
+  PassThroughGrammar(const Lattice& input, const std::string& cat, const unsigned int ctf_level=0);
   virtual bool HasRuleForSpan(int i, int j, int distance) const;
  private:
   std::vector<std::set<int> > has_rule_;  // index by [i][j]
 };
 
+void RefineRule(TRulePtr pt, const unsigned int ctf_level);
 #endif

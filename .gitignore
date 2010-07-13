@@ -1,4 +1,8 @@
 *swp
+*.o
+vest/sentserver
+vest/sentclient
+gi/pyp-topics/src/contexts_lexer.cc
 config.guess
 config.sub
 libtool
