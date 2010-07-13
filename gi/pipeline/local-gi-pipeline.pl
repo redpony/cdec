@@ -8,10 +8,13 @@ use Getopt::Long "GetOptions";
 
 my $GZIP = 'gzip';
 my $ZCAT = 'gunzip -c';
+my $SED = 'sed -e';
 my $BASE_PHRASE_MAX_SIZE = 10;
 my $COMPLETE_CACHE = 1;
 my $ITEMS_IN_MEMORY = 10000000;  # cache size in extractors
 my $NUM_TOPICS = 50;
+my $NUM_TOPICS_COARSE = 10;
+my $NUM_TOPICS_FINE = $NUM_TOPICS;
 my $NUM_SAMPLES = 1000;
 my $CONTEXT_SIZE = 1;
 my $BIDIR = 0;
@@ -48,14 +51,17 @@ my $TOPIC_TRAIN = "$PYPTOOLS/pyp-contexts-train";
 assert_exec($PATCH_CORPUS, $SORT_KEYS, $REDUCER, $EXTRACTOR, $PYP_TOPICS_TRAIN, $S2L, $C2D, $TOPIC_TRAIN);
 
 my $BACKOFF_GRAMMAR;
+my $HIER_CAT;
 my $TAGGED_CORPUS;
 
 my $OUTPUT = './giwork';
 usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'backoff_grammar' => \$BACKOFF_GRAMMAR,
+                           'hier_cat' => \$HIER_CAT,
                            'output=s' => \$OUTPUT,
                            'model=s' => \$MODEL,
-                           'topics=i' => \$NUM_TOPICS,
+                           'topics=i' => \$NUM_TOPICS_FINE,
+                           'coarse_topics=i' => \$NUM_TOPICS_COARSE,
                            'trg_context=i' => \$CONTEXT_SIZE,
                            'samples=i' => \$NUM_SAMPLES,
                            'topics-config=s' => \$TOPICS_CONFIG,
@@ -72,6 +78,8 @@ usage() unless scalar @ARGV == 1;
 my $CORPUS = $ARGV[0];
 open F, "<$CORPUS" or die "Can't read $CORPUS: $!"; close F;
 
+$NUM_TOPICS = $NUM_TOPICS_FINE;
+
 print STDERR "   Output: $OUTPUT\n";
 my $DATA_DIR = $OUTPUT . '/corpora';
 my $LEX_NAME = 'corpus.f_e_a.lex';
@@ -80,12 +88,23 @@ my $CORPUS_CLUSTER = $DATA_DIR . '/corpus.f_e_a.cluster'; # corpus used for clus
 
 my $CONTEXT_DIR = $OUTPUT . '/' . context_dir();
 my $CLUSTER_DIR = $OUTPUT . '/' . cluster_dir();
+my $CLUSTER_DIR_C;
+my $CLUSTER_DIR_F;
+if($HIER_CAT) {
+    $CLUSTER_DIR_F = $CLUSTER_DIR;
+    $NUM_TOPICS = $NUM_TOPICS_COARSE;
+    $CLUSTER_DIR_C = $OUTPUT . '/' . cluster_dir();
+    $NUM_TOPICS = $NUM_TOPICS_FINE;
+}
 my $GRAMMAR_DIR = $OUTPUT . '/' . grammar_dir();
 print STDERR "  Context: $CONTEXT_DIR\n  Cluster: $CLUSTER_DIR\n  Grammar: $GRAMMAR_DIR\n";
 safemkdir($OUTPUT) or die "Couldn't create output directory $OUTPUT: $!";
 safemkdir($DATA_DIR) or die "Couldn't create output directory $DATA_DIR: $!";
 safemkdir($CONTEXT_DIR) or die "Couldn't create output directory $CONTEXT_DIR: $!";
 safemkdir($CLUSTER_DIR) or die "Couldn't create output directory $CLUSTER_DIR: $!";
+if($HIER_CAT) {
+    safemkdir($CLUSTER_DIR_C) or die "Couldn't create output directory $CLUSTER_DIR: $!";
+}
 safemkdir($GRAMMAR_DIR) or die "Couldn't create output directory $GRAMMAR_DIR: $!";
 if(-e $TOPICS_CONFIG) {
     copy($TOPICS_CONFIG, $CLUSTER_DIR) or die "Copy failed: $!";
@@ -95,7 +114,16 @@ setup_data();
 
 extract_context();
 if (lc($MODEL) eq "pyp") {
-    topic_train();
+    if($HIER_CAT) {
+        $NUM_TOPICS = $NUM_TOPICS_COARSE;
+        $CLUSTER_DIR = $CLUSTER_DIR_C;
+        topic_train();
+        $NUM_TOPICS = $NUM_TOPICS_FINE;
+        $CLUSTER_DIR = $CLUSTER_DIR_F;
+        topic_train();
+    } else {
+        topic_train();
+    }
 } elsif (lc($MODEL) eq "prem") {
     prem_train();
 } else { die "Unsupported model type: $MODEL. Must be one of PYP or PREM.\n"; }
@@ -146,7 +174,11 @@ sub cluster_dir {
 
 sub grammar_dir {
   # TODO add grammar config options -- adjacent NTs, etc
-  return cluster_dir() . ".grammar";
+  if($HIER_CAT) {
+    return cluster_dir() . ".hier$NUM_TOPICS_COARSE-$NUM_TOPICS_FINE.grammar";
+  } else {
+    return cluster_dir() . ".grammar";
+  }
 }
 
 
@@ -229,8 +261,27 @@ sub label_spans_with_topics {
   }
 }
 
+sub combine_labelled_spans {
+    print STDERR "\n!!!COMBINING SPAN LABELS\n";
+    my $IN_COARSE = "$CLUSTER_DIR_C/labeled_spans.txt";
+    my $OUT_COARSE = "$CLUSTER_DIR_C/labeled_spans_c.txt";
+    my $IN_FINE = "$CLUSTER_DIR_F/labeled_spans.txt";
+    my $OUT_FINE = "$CLUSTER_DIR_F/labeled_spans_f.txt";
+    my $OUT_SPANS = "$CLUSTER_DIR_F/labeled_spans.hier$NUM_TOPICS_COARSE-$NUM_TOPICS_FINE.txt";
+    my $COARSE_EXPR = 's/\(X[0-9][0-9]*\)/\1c/g';
+    my $FINE_EXPR = 's/\(X[0-9][0-9]*\)/\1f/g';
+    if (-e $OUT_SPANS) {
+        print STDERR "$OUT_SPANS exists, reusing...\n";
+    } else {
+        safesystem("$SED $COARSE_EXPR < $IN_COARSE > $OUT_COARSE") or die "Couldn't create coarse labels.";
+        safesystem("$SED $FINE_EXPR < $IN_FINE > $OUT_FINE") or die "Couldn't create fine labels.";
+        safesystem("sed -e 's/||| \(.*\)$/\1/' < $OUT_COARSE | paste -d ' ' $OUT_FINE - > $OUT_SPANS") or die "Couldn't paste coarse and fine labels.";
+        safesystem("paste -d ' ' $CORPUS_LEX $OUT_SPANS > $CLUSTER_DIR_F/corpus.src_trg_al_label.hier") or die "Couldn't paste corpus";
+    }
+}
+
 sub grammar_extract {
-  my $LABELED = "$CLUSTER_DIR/corpus.src_trg_al_label";
+  my $LABELED = ($HIER_CAT ? "$CLUSTER_DIR_F/corpus.src_trg_al_label.hier" : "$CLUSTER_DIR/corpus.src_trg_al_label");
   print STDERR "\n!!!EXTRACTING GRAMMAR\n";
   my $OUTGRAMMAR = "$GRAMMAR_DIR/grammar.gz";
   if (-e $OUTGRAMMAR) {
@@ -244,7 +295,7 @@ sub grammar_extract {
 
 sub grammar_extract_bidir {
 #gzcat ex.output.gz | ./mr_stripe_rule_reduce -p -b | sort -t $'\t' -k 1 | ./mr_stripe_rule_reduce | gzip > phrase-table.gz
-  my $LABELED = "$CLUSTER_DIR/corpus.src_trg_al_label";
+  my $LABELED = ($HIER_CAT ? "$CLUSTER_DIR_F/corpus.src_trg_al_label.hier" : "$CLUSTER_DIR/corpus.src_trg_al_label");
   print STDERR "\n!!!EXTRACTING GRAMMAR\n";
   my $OUTGRAMMAR = "$GRAMMAR_DIR/grammar.bidir.gz";
   if (-e $OUTGRAMMAR) {
