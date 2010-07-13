@@ -64,7 +64,7 @@ if (GetOptions(
 	"decode-nodes=i" => \$decode_nodes,
 	"dont-clean" => \$disable_clean,
 	"dry-run" => \$dryrun,
-	"epsilon" => \$epsilon,
+	"epsilon=s" => \$epsilon,
 	"help" => \$help,
 	"interval" => \$interval,
 	"iteration=i" => \$iteration,
