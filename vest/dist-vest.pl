@@ -1,6 +1,8 @@
 #!/usr/bin/env perl
 
 use strict;
+my @ORIG_ARGV=@ARGV;
+use Cwd qw(getcwd);
 my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
 use Getopt::Long;
 use IPC::Open2;
@@ -146,20 +148,32 @@ my $newIniFile = "$dir/$decoderBase.ini";
 my $inputFileName = "$dir/input";
 my $user = $ENV{"USER"};
 
+
 # process ini file
 -e $iniFile || die "Error: could not open $iniFile for reading\n";
 open(INI, $iniFile);
 
+sub dirsize {
+    opendir ISEMPTY,$_[0];
+    return scalar(readdir(ISEMPTY))-1;
+}
 if ($dryrun){
 	write_config(*STDERR);
 	exit 0;
 } else {
-	if (-e $dir){
+	if (-e $dir && dirsize($dir)>1){ # allow preexisting logfile
 	  die "ERROR: working dir $dir already exists\n\n";
 	} else {
-		mkdir $dir;
+		-e $dir || mkdir $dir;
 		mkdir "$dir/hgs";
     mkdir "$dir/scripts";
+        my $cmdfile="$dir/rerun-vest.sh";
+        open CMD,'>',$cmdfile;
+        print CMD "cd ",&getcwd,"\n";
+#        print CMD &escaped_cmdline,"\n"; #buggy - last arg is quoted.
+        print CMD &cmdline,"\n";
+        close CMD;
+        chmod(0755,$cmdfile);
 		unless (-e $initialWeights) {
 			print STDERR "Please specify an initial weights file with --initial-weights\n";
 			print_help();
@@ -584,3 +598,33 @@ sub convert {
 }
 
 
+
+sub cmdline {
+    return join ' ',($0,@ORIG_ARGV);
+}
+
+#buggy: last arg gets quoted sometimes?
+my $is_shell_special=qr{[ \t\n\\><|&;"'`~*?{}$!()]};
+my $shell_escape_in_quote=qr{[\\"\$`!]};
+
+sub escape_shell {
+    my ($arg)=@_;
+    return undef unless defined $arg;
+    if ($arg =~ /$is_shell_special/) {
+        $arg =~ s/($shell_escape_in_quote)/\\$1/g;
+        return "\"$arg\"";
+    }
+    return $arg;
+}
+
+sub escaped_shell_args {
+    return map {local $_=$_;chomp;escape_shell($_)} @_;
+}
+
+sub escaped_shell_args_str {
+    return join ' ',&escaped_shell_args(@_);
+}
+
+sub escaped_cmdline {
+    return "$0 ".&escaped_shell_args_str(@ORIG_ARGV);
+}
