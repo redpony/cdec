@@ -20,9 +20,10 @@ my $TOPICS_CONFIG = "pyp-topics.conf";
 my $MODEL = "pyp";
 my $NUM_EM_ITERS = 100;
 my $NUM_PR_ITERS = 0;
-my $PR_SCALE_P = 10;
+my $PR_SCALE_P = 1;
 my $PR_SCALE_C = 0;
 my $PR_THREADS = 0;
+my $AGREE;
 
 my $EXTOOLS = "$SCRIPT_DIR/../../extools";
 die "Can't find extools: $EXTOOLS" unless -e $EXTOOLS && -d $EXTOOLS;
@@ -63,6 +64,7 @@ usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'pr-scale-phrase=f' => \$PR_SCALE_P,
                            'pr-scale-context=f' => \$PR_SCALE_C,
                            'pr-threads=i' => \$PR_THREADS,
+                           'pr-agree' => \$AGREE,
                            'tagged_corpus=s' => \$TAGGED_CORPUS,
                           );
 
@@ -132,10 +134,12 @@ sub cluster_dir {
     if (lc($MODEL) eq "pyp") {
         return context_dir() . ".PYP.t$NUM_TOPICS.s$NUM_SAMPLES";
     } elsif (lc($MODEL) eq "prem") {
-        if ($NUM_PR_ITERS == 0) {
-            return context_dir() . ".PREM.t$NUM_TOPICS.ie$NUM_EM_ITERS.ip$NUM_PR_ITERS";
+        if (defined($AGREE)) {
+            return context_dir() . ".AGREE.t$NUM_TOPICS.i$NUM_EM_ITERS";
+	} elsif ($NUM_PR_ITERS == 0) {
+            return context_dir() . ".EM.t$NUM_TOPICS.i$NUM_EM_ITERS";
         } else {
-            return context_dir() . ".PREM.t$NUM_TOPICS.ie$NUM_EM_ITERS.ip$NUM_PR_ITERS.sp$PR_SCALE_P.sc$PR_SCALE_C";
+            return context_dir() . ".PR.t$NUM_TOPICS.ie$NUM_EM_ITERS.ip$NUM_PR_ITERS.sp$PR_SCALE_P.sc$PR_SCALE_C";
         }
     }
 }
@@ -205,7 +209,8 @@ sub prem_train {
   if (-e $OUT_CLUSTERS) {
     print STDERR "$OUT_CLUSTERS exists, reusing...\n";
   } else {
-    safesystem("$PREM_TRAIN --in $IN_CONTEXTS --topics $NUM_TOPICS --out $OUT_CLUSTERS --em $NUM_EM_ITERS --pr $NUM_PR_ITERS --scale-phrase $PR_SCALE_P --scale-context $PR_SCALE_C --threads $PR_THREADS") or die "Topic training failed.\n";
+    my $agree = ($AGREE) ? "--agree" : "";
+    safesystem("$PREM_TRAIN --in $IN_CONTEXTS --topics $NUM_TOPICS --out $OUT_CLUSTERS --em $NUM_EM_ITERS --pr $NUM_PR_ITERS --scale-phrase $PR_SCALE_P --scale-context $PR_SCALE_C --threads $PR_THREADS $agree") or die "Topic training failed.\n";
   }
 }
 
