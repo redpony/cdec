@@ -4,12 +4,16 @@ import sys
 from operator import itemgetter
 
 if len(sys.argv) <= 2:
-  print "Usage: spans2labels.py phrase_context_index [order]"
+  print "Usage: spans2labels.py phrase_context_index [order] [threshold]"
   exit(1)
 
 order=1
+threshold = 0
+cutoff_cat = "<UNK>"
 if len(sys.argv) > 2:
   order = int(sys.argv[2])
+if len(sys.argv) > 3:
+  threshold = float(sys.argv[3])
 
 phrase_context_index = {}
 for line in file(sys.argv[1], 'r'):
@@ -24,9 +28,15 @@ for line in file(sys.argv[1], 'r'):
   if len(contexts) == 1: continue
   assert len(contexts) % 2 == 0
   for i in range(0, len(contexts), 2):
-    category = contexts[i+1].split("=")[1].strip()
-    phrase_context_index[(phrase,contexts[i])] = category
-    #print (phrase,contexts[i]), category
+    #parse contexts[i+1] = " C=1 P=0.8 "
+    features = contexts[i+1].split()
+    category = features[0].split("=")[1].strip()
+    prob = float(features[1].split("=")[1].strip())
+    if prob >= threshold:
+      phrase_context_index[(phrase,contexts[i])] = category
+    else:
+      phrase_context_index[(phrase,contexts[i])] = cutoff_cat
+#      print (phrase,contexts[i]), category, prob
 
 for line in sys.stdin:
   line_segments = line.split('|||')

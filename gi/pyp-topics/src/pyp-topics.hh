@@ -33,8 +33,8 @@ public:
                      int freq_cutoff_interval=0);
 
   int sample(const DocumentId& doc, const Term& term);
-  int max(const DocumentId& doc, const Term& term) const;
-  int max(const DocumentId& doc) const;
+  std::pair<int,F> max(const DocumentId& doc, const Term& term) const;
+  std::pair<int,F> max(const DocumentId& doc) const;
   int max_topic() const;
 
   void set_backoff(const std::string& filename) {
