@@ -373,12 +373,13 @@ public class PhraseCluster {
 		
 		return primal;
 	}
+	
+	double[] lambda;
 
 	public double PREM_phrase_context_constraints(double scalePT, double scaleCT)
 	{	
 		double[][][] exp_emit = new double [K][n_positions][n_words];
 		double[][] exp_pi = new double[n_phrases][K];
-		double[] lambda = null;
 
 		//E step
 		PhraseContextObjective pco = new PhraseContextObjective(this, lambda, pool, scalePT, scaleCT);

@@ -56,11 +56,20 @@ public class F {
 	}
 	
 	public static double l1norm(double a[]){
+		// FIXME: this isn't the l1 norm for a < 0
 		double norm=0;
 		for(int i=0;i<a.length;i++){
 			norm += a[i];
 		}
 		return norm;
+	}
+	
+	public static double l2norm(double a[]){
+		double norm=0;
+		for(int i=0;i<a.length;i++){
+			norm += a[i]*a[i];
+		}
+		return Math.sqrt(norm);
 	}
 	
 	public static int argmax(double probs[])

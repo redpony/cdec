@@ -56,9 +56,10 @@ public abstract class AbstractGradientBaseMethod implements Optimizer{
 		stats.collectInitStats(this, o);
 		direction = new double[o.getNumParameters()];
 		initializeStructures(o, stats, stop);
-		for (currentProjectionIteration = 1; currentProjectionIteration < maxNumberOfIterations; currentProjectionIteration++){		
-//			System.out.println("starting iterations: parameters:" );
-//			o.printParameters();
+		for (currentProjectionIteration = 1; currentProjectionIteration < maxNumberOfIterations; currentProjectionIteration++){
+			//System.out.println("\tgradient descent iteration " + currentProjectionIteration);
+			//System.out.print("\tparameters:" );
+			//o.printParameters();
 			previousValue = currValue;
 			currValue = o.getValue();
 			gradient = o.getGradient();
@@ -76,7 +77,7 @@ public abstract class AbstractGradientBaseMethod implements Optimizer{
 			updateStructuresBeforeStep(o, stats, stop);
 			lso.reset(direction);
 			step = lineSearch.getStepSize(lso);
-//			System.out.println("Leave with step: " + step);
+			//System.out.println("\t\tLeave with step: " + step);
 			if(step==-1){
 				System.out.println("Failed to find step");
 				stats.collectFinalStats(this, o);
