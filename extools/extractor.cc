@@ -16,6 +16,7 @@
 #include "wordid.h"
 #include "array2d.h"
 #include "filelib.h"
+#include "striped_grammar.h"
 
 using namespace std;
 using namespace std::tr1;

@@ -18,6 +18,7 @@
 #include "tdict.h"
 #include "lex_trans_tbl.h"
 #include "filelib.h"
+#include "striped_grammar.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
