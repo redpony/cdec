@@ -32,7 +32,7 @@ public class PhraseContextObjective extends ProjectedObjective
 	
 	private PhraseCluster c;
 	
-	// un-regularized  unnormalized posterior, p[edge][tag]
+	// un-regularized unnormalized posterior, p[edge][tag]
 	// P(tag|edge) \propto P(tag|phrase)P(context|tag)
 	private double p[][];
 
@@ -144,7 +144,7 @@ public class PhraseContextObjective extends ProjectedObjective
 				gradient[ic]=-q[e][tag];
 			}
 		}
-		//System.out.println("objective " + loglikelihood + " gradient: " + Arrays.toString(gradient));		
+		//System.out.println("objective " + loglikelihood + " ||gradient||_2: " + arr.F.l2norm(gradient));		
 		objectiveTime += System.currentTimeMillis() - begin;
 	}
 	
@@ -154,106 +154,100 @@ public class PhraseContextObjective extends ProjectedObjective
 		long begin = System.currentTimeMillis();
 		List<Future<?>> tasks = new ArrayList<Future<?>>();
 
-		//System.out.println("projectPoint: " + Arrays.toString(point));
+		//System.out.println("\t\tprojectPoint: " + Arrays.toString(point));
 		Arrays.fill(newPoint, 0, newPoint.length, 0);
 		
-		if (scalePT > 0)
+		// first project using the phrase-tag constraints,
+		// for all p,t: sum_c lambda_ptc < scaleP 
+		if (pool == null)
 		{
-			// first project using the phrase-tag constraints,
-			// for all p,t: sum_c lambda_ptc < scaleP 
-			if (pool == null)
+			for (int p = 0; p < c.c.getNumPhrases(); ++p)
 			{
-				for (int p = 0; p < c.c.getNumPhrases(); ++p)
+				List<Edge> edges = c.c.getEdgesForPhrase(p);
+				double[] toProject = new double[edges.size()];
+				for(int tag=0;tag<c.K;tag++)
 				{
-					List<Edge> edges = c.c.getEdgesForPhrase(p);
-					double[] toProject = new double[edges.size()];
-					for(int tag=0;tag<c.K;tag++)
-					{
-						for(int e=0; e<edges.size(); e++)
-							toProject[e] = point[index(edges.get(e), tag, true)];
-						long lbegin = System.currentTimeMillis();
-						projectionPhrase.project(toProject);
-						actualProjectionTime += System.currentTimeMillis() - lbegin;
-						for(int e=0; e<edges.size(); e++)
-							newPoint[index(edges.get(e), tag, true)] = toProject[e];
-					}
+					for(int e=0; e<edges.size(); e++)
+						toProject[e] = point[index(edges.get(e), tag, true)];
+					long lbegin = System.currentTimeMillis();
+					projectionPhrase.project(toProject);
+					actualProjectionTime += System.currentTimeMillis() - lbegin;
+					for(int e=0; e<edges.size(); e++)
+						newPoint[index(edges.get(e), tag, true)] = toProject[e];
 				}
 			}
-			else // do above in parallel using thread pool
-			{	
-				for (int p = 0; p < c.c.getNumPhrases(); ++p)
+		}
+		else // do above in parallel using thread pool
+		{	
+			for (int p = 0; p < c.c.getNumPhrases(); ++p)
+			{
+				final int phrase = p;
+				final double[] inPoint = point;
+				Runnable task = new Runnable()
 				{
-					final int phrase = p;
-					final double[] inPoint = point;
-					Runnable task = new Runnable()
+					public void run()
 					{
-						public void run()
+						List<Edge> edges = c.c.getEdgesForPhrase(phrase);
+						double toProject[] = new double[edges.size()];
+						for(int tag=0;tag<c.K;tag++)
 						{
-							List<Edge> edges = c.c.getEdgesForPhrase(phrase);
-							double toProject[] = new double[edges.size()];
-							for(int tag=0;tag<c.K;tag++)
-							{
-								for(int e=0; e<edges.size(); e++)
-									toProject[e] = inPoint[index(edges.get(e), tag, true)];
-								projectionPhrase.project(toProject);
-								for(int e=0; e<edges.size(); e++)
-									newPoint[index(edges.get(e), tag, true)] = toProject[e];
-							}
-						}		
-					};
-					tasks.add(pool.submit(task));
-				}
+							for(int e=0; e<edges.size(); e++)
+								toProject[e] = inPoint[index(edges.get(e), tag, true)];
+							projectionPhrase.project(toProject);
+							for(int e=0; e<edges.size(); e++)
+								newPoint[index(edges.get(e), tag, true)] = toProject[e];
+						}
+					}		
+				};
+				tasks.add(pool.submit(task));
 			}
 		}
 		//System.out.println("after PT " + Arrays.toString(newPoint));
 	
-		if (scaleCT > 1e-6)
+		// now project using the context-tag constraints,
+		// for all c,t: sum_p omega_pct < scaleC
+		if (pool == null)
 		{
-			// now project using the context-tag constraints,
-			// for all c,t: sum_p omega_pct < scaleC
-			if (pool == null)
+			for (int ctx = 0; ctx < c.c.getNumContexts(); ++ctx)
 			{
-				for (int ctx = 0; ctx < c.c.getNumContexts(); ++ctx)
+				List<Edge> edges = c.c.getEdgesForContext(ctx);
+				double toProject[] = new double[edges.size()];
+				for(int tag=0;tag<c.K;tag++)
 				{
-					List<Edge> edges = c.c.getEdgesForContext(ctx);
-					double toProject[] = new double[edges.size()];
-					for(int tag=0;tag<c.K;tag++)
-					{
-						for(int e=0; e<edges.size(); e++)
-							toProject[e] = point[index(edges.get(e), tag, false)];
-						long lbegin = System.currentTimeMillis();
-						projectionContext.project(toProject);
-						actualProjectionTime += System.currentTimeMillis() - lbegin;
-						for(int e=0; e<edges.size(); e++)
-							newPoint[index(edges.get(e), tag, false)] = toProject[e];
-					}
+					for(int e=0; e<edges.size(); e++)
+						toProject[e] = point[index(edges.get(e), tag, false)];
+					long lbegin = System.currentTimeMillis();
+					projectionContext.project(toProject);
+					actualProjectionTime += System.currentTimeMillis() - lbegin;
+					for(int e=0; e<edges.size(); e++)
+						newPoint[index(edges.get(e), tag, false)] = toProject[e];
 				}
 			}
-			else
+		}
+		else
+		{
+			// do above in parallel using thread pool
+			for (int ctx = 0; ctx < c.c.getNumContexts(); ++ctx)
 			{
-				// do above in parallel using thread pool
-				for (int ctx = 0; ctx < c.c.getNumContexts(); ++ctx)
+				final int context = ctx;
+				final double[] inPoint = point;
+				Runnable task = new Runnable()
 				{
-					final int context = ctx;
-					final double[] inPoint = point;
-					Runnable task = new Runnable()
+					public void run()
 					{
-						public void run()
+						List<Edge> edges = c.c.getEdgesForContext(context);
+						double toProject[] = new double[edges.size()];
+						for(int tag=0;tag<c.K;tag++)
 						{
-							List<Edge> edges = c.c.getEdgesForContext(context);
-							double toProject[] = new double[edges.size()];
-							for(int tag=0;tag<c.K;tag++)
-							{
-								for(int e=0; e<edges.size(); e++)
-									toProject[e] = inPoint[index(edges.get(e), tag, false)];
-								projectionContext.project(toProject);
-								for(int e=0; e<edges.size(); e++)
-									newPoint[index(edges.get(e), tag, false)] = toProject[e];
-							}
+							for(int e=0; e<edges.size(); e++)
+								toProject[e] = inPoint[index(edges.get(e), tag, false)];
+							projectionContext.project(toProject);
+							for(int e=0; e<edges.size(); e++)
+								newPoint[index(edges.get(e), tag, false)] = toProject[e];
 						}
-					};
-					tasks.add(pool.submit(task));
-				}
+					}
+				};
+				tasks.add(pool.submit(task));
 			}
 		}
 		
@@ -283,9 +277,8 @@ public class PhraseContextObjective extends ProjectedObjective
 		double[] tmp = newPoint;
 		newPoint = point;
 		projectionTime += System.currentTimeMillis() - begin;
-
 		
-		//System.out.println("\treturning " + Arrays.toString(tmp));
+		//System.out.println("\t\treturning " + Arrays.toString(tmp));
 		return tmp;
 	}
 	
@@ -405,6 +398,6 @@ public class PhraseContextObjective extends ProjectedObjective
 	// L - KL(q||p) - scalePT * l1lmax_phrase - scaleCT * l1lmax_context
 	public double primal()
 	{
-		return loglikelihood() - KL_divergence() - scalePT * phrase_l1lmax() - scalePT * context_l1lmax();
+		return loglikelihood() - KL_divergence() - scalePT * phrase_l1lmax() - scaleCT * context_l1lmax();
 	}
 }

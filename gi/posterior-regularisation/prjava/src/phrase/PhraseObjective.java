@@ -1,5 +1,6 @@
 package phrase;
 
+import java.util.Arrays;
 import java.util.List;
 
 import optimization.gradientBasedMethods.ProjectedGradientDescent;
@@ -155,7 +156,7 @@ public class PhraseObjective extends ProjectedObjective
 
 	@Override
 	public String toString() {
-		return "No need for pointless toString";
+		return Arrays.toString(parameters);
 	}
 
 	public double [][]posterior(){

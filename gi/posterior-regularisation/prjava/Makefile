@@ -1,5 +1,5 @@
 all:
-	ant
+	ant dist
 
 clean:
 	ant clean

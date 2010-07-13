@@ -40,7 +40,7 @@ public class SimplexProjection extends Projection{
 		for (int i = 0; i < ds.length; i++) {
 			currentSum+=ds[i];
 			theta = (currentSum-scale)/(i+1);
-			if(ds[i]-theta <= 0){
+			if(ds[i]-theta < -1e-10){
 				break;
 			}
 			previousTheta = theta;

@@ -146,8 +146,8 @@ $drefs = mydircat($corpdir, $drefs);
 
 my $test = mydircat($corpdir, $tests{$lp});
 my $teval = mydircat($corpdir, $testevals{$lp});
-die "Can't find test: $test\n" unless -f $test;
-assert_exec($teval);
+#die "Can't find test: $test\n" unless -f $test;
+#assert_exec($teval);
 
 `mkdir -p $outdir`;
 
