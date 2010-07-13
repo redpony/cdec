@@ -6,8 +6,6 @@
 #include <map>
 #include <vector>
 #include <utility>
-#include <cstdlib>
-#include <fstream>
 #include <tr1/unordered_map>
 
 #include "suffix_tree.h"
@@ -16,8 +14,8 @@
 #include "extract.h"
 #include "fdict.h"
 #include "tdict.h"
-#include "lex_trans_tbl.h"
 #include "filelib.h"
+#include "striped_grammar.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
@@ -29,8 +27,6 @@ using namespace std::tr1;
 namespace po = boost::program_options;
 
 static const size_t MAX_LINE_LENGTH = 64000000;
-
-typedef unordered_map<vector<WordID>, RuleStatistics, boost::hash<vector<WordID> > > ID2RuleStatistics;
 
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
@@ -51,85 +47,6 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
     exit(1);
   }
 }   
-namespace {
-  inline bool IsWhitespace(char c) { return c == ' ' || c == '\t'; }
-  inline void SkipWhitespace(const char* buf, int* ptr) {
-    while (buf[*ptr] && IsWhitespace(buf[*ptr])) { ++(*ptr); }
-  }
-}
-
-int ReadPhraseUntilDividerOrEnd(const char* buf, const int sstart, const int end, vector<WordID>* p) {
-  static const WordID kDIV = TD::Convert("|||");
-  int ptr = sstart;
-  while(ptr < end) {
-    while(ptr < end && IsWhitespace(buf[ptr])) { ++ptr; }
-    int start = ptr;
-    while(ptr < end && !IsWhitespace(buf[ptr])) { ++ptr; }
-    if (ptr == start) {cerr << "Warning! empty token.\n"; return ptr; }
-    const WordID w = TD::Convert(string(buf, start, ptr - start));
-    if (w == kDIV) return ptr;
-    p->push_back(w);
-  }
-  assert(p->size() > 0);
-  return ptr;
-}
-
-
-void ParseLine(const char* buf, vector<WordID>* cur_key, ID2RuleStatistics* counts) {
-  static const WordID kDIV = TD::Convert("|||");
-  counts->clear();
-  int ptr = 0;
-  while(buf[ptr] != 0 && buf[ptr] != '\t') { ++ptr; }
-  if (buf[ptr] != '\t') {
-    cerr << "Missing tab separator between key and value!\n INPUT=" << buf << endl;
-    exit(1);
-  }
-  cur_key->clear();
-  // key is: "[X] ||| word word word"
-  int tmpp = ReadPhraseUntilDividerOrEnd(buf, 0, ptr, cur_key);
-  cur_key->push_back(kDIV);
-  ReadPhraseUntilDividerOrEnd(buf, tmpp, ptr, cur_key);
-  ++ptr;
-  int start = ptr;
-  int end = ptr;
-  int state = 0; // 0=reading label, 1=reading count
-  vector<WordID> name;
-  while(buf[ptr] != 0) {
-    while(buf[ptr] != 0 && buf[ptr] != '|') { ++ptr; }
-    if (buf[ptr] == '|') {
-      ++ptr;
-      if (buf[ptr] == '|') {
-        ++ptr;
-        if (buf[ptr] == '|') {
-          ++ptr;
-          end = ptr - 3;
-          while (end > start && IsWhitespace(buf[end-1])) { --end; }
-          if (start == end) {
-            cerr << "Got empty token!\n  LINE=" << buf << endl;
-            exit(1);
-          }
-          switch (state) {
-            case 0: ++state; name.clear(); ReadPhraseUntilDividerOrEnd(buf, start, end, &name); break;
-            case 1: --state; (*counts)[name].ParseRuleStatistics(buf, start, end); break;
-            default: cerr << "Can't happen\n"; abort();
-          }
-          SkipWhitespace(buf, &ptr);
-          start = ptr;
-        }
-      }
-    }
-  }
-  end=ptr;
-  while (end > start && IsWhitespace(buf[end-1])) { --end; }
-  if (end > start) {
-    switch (state) {
-      case 0: ++state; name.clear(); ReadPhraseUntilDividerOrEnd(buf, start, end, &name); break;
-      case 1: --state; (*counts)[name].ParseRuleStatistics(buf, start, end); break;
-      default: cerr << "Can't happen\n"; abort();
-    }
-  }
-}
-
 
 struct SourceFilter {
   // return true to keep the rule, otherwise false
@@ -138,8 +55,7 @@ struct SourceFilter {
 };
 
 struct DumbSuffixTreeFilter : SourceFilter {
-  DumbSuffixTreeFilter(const string& corpus) :
-      kDIV(TD::Convert("|||")) {
+  DumbSuffixTreeFilter(const string& corpus) {
     cerr << "Build suffix tree from test set in " << corpus << endl;
     assert(FileExists(corpus));
     ReadFile rfts(corpus);
@@ -163,68 +79,57 @@ struct DumbSuffixTreeFilter : SourceFilter {
     }
     delete[] buf;
   }
-  virtual bool Matches(const vector<WordID>& key) const {
+  virtual bool Matches(const vector<WordID>& src_rhs) const {
     const Node<int>* curnode = &root;
-    const int ks = key.size() - 1;
-    for(int i=0; i < ks; i++) {
-      const string& word = TD::Convert(key[i]);
-      if (key[i] == kDIV || (word[0] == '[' && word[word.size() - 1] == ']')) { // non-terminal
+    for(int i=0; i < src_rhs.size(); i++) {
+      if (src_rhs[i] <= 0) {
         curnode = &root;
       } else if (curnode) {
-        curnode = curnode->Extend(key[i]);
+        curnode = curnode->Extend(src_rhs[i]);
         if (!curnode) return false;
       }
     }
     return true;
   }
-  const WordID kDIV;
   Node<int> root;
 };
+
+boost::shared_ptr<SourceFilter> filter;
+multimap<float, ID2RuleStatistics::const_iterator> options; 
+int kCOUNT;
+int max_options;
+
+void cb(WordID lhs, const vector<WordID>& src_rhs, const ID2RuleStatistics& rules, void*) {
+  options.clear();
+  if (!filter || filter->Matches(src_rhs)) {
+    for (ID2RuleStatistics::const_iterator it = rules.begin(); it != rules.end(); ++it) {
+      options.insert(make_pair(-it->second.counts.value(kCOUNT), it));
+    }
+    int ocount = 0;
+    cout << '[' << TD::Convert(-lhs) << ']' << " ||| ";
+    WriteNamed(src_rhs, &cout);
+    cout << '\t';
+    bool first = true;
+    for (multimap<float,ID2RuleStatistics::const_iterator>::iterator it = options.begin(); it != options.end(); ++it) {
+      if (first) { first = false; } else { cout << " ||| "; }
+      WriteAnonymous(it->second->first, &cout);
+      cout << " ||| " << it->second->second;
+      ++ocount;
+      if (ocount == max_options) break;
+    }
+    cout << endl;
+  }
+}
 
 int main(int argc, char** argv){
   po::variables_map conf;
   InitCommandLine(argc, argv, &conf);
-  const int max_options = conf["top_e_given_f"].as<size_t>();;
+  max_options = conf["top_e_given_f"].as<size_t>();;
+  kCOUNT = FD::Convert("CFE");
   istream& unscored_grammar = cin;
-
   cerr << "Loading test set " << conf["test_set"].as<string>() << "...\n";
-  boost::shared_ptr<SourceFilter> filter;
   filter.reset(new DumbSuffixTreeFilter(conf["test_set"].as<string>()));
-
   cerr << "Filtering...\n";
-  //score unscored grammar
-  char* buf = new char[MAX_LINE_LENGTH];
-
-  ID2RuleStatistics acc, cur_counts;
-  vector<WordID> key, cur_key,temp_key;
-  int line = 0;
-
-  multimap<float, ID2RuleStatistics::const_iterator> options; 
-  const int kCOUNT = FD::Convert("CFE");
-  while(!unscored_grammar.eof())
-    {
-      ++line;
-      options.clear();
-      unscored_grammar.getline(buf, MAX_LINE_LENGTH);
-      if (buf[0] == 0) continue;
-      ParseLine(buf, &cur_key, &cur_counts);
-      if (!filter || filter->Matches(cur_key)) {
-        // sort by counts
-        for (ID2RuleStatistics::const_iterator it = cur_counts.begin(); it != cur_counts.end(); ++it) {
-          options.insert(make_pair(-it->second.counts.value(kCOUNT), it));
-        }
-        int ocount = 0;
-        cout << TD::GetString(cur_key) << '\t';
-
-        bool first = true;
-        for (multimap<float,ID2RuleStatistics::const_iterator>::iterator it = options.begin(); it != options.end(); ++it) {
-          if (first) { first = false; } else { cout << " ||| "; }
-          cout << TD::GetString(it->second->first) << " ||| " << it->second->second;
-          ++ocount;
-          if (ocount == max_options) break;
-        }
-        cout << endl;
-      }
-    }
+  StripedGrammarLexer::ReadStripedGrammar(&unscored_grammar, cb, NULL);
 }
 

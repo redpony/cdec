@@ -21,6 +21,7 @@
 #include "tdict.h"
 #include "lex_trans_tbl.h"
 #include "filelib.h"
+#include "striped_grammar.h"
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
@@ -137,7 +138,6 @@ bool validate_non_terminal(const std::string& s)
 
 namespace {
   inline bool IsWhitespace(char c) { return c == ' ' || c == '\t'; }
-  inline bool IsBracket(char c){return c == '[' || c == ']';}
   inline void SkipWhitespace(const char* buf, int* ptr) {
     while (buf[*ptr] && IsWhitespace(buf[*ptr])) { ++(*ptr); }
   }
@@ -407,7 +407,7 @@ struct BackoffRule : public FeatureExtractor {
                                const RuleStatistics& /*info*/,
                                SparseVector<float>* result) const {
     (void) lhs; (void) src; (void) trg;
-    string lhstr = TD::Convert(lhs);
+    const string& lhstr = TD::Convert(lhs);
     if(lhstr.find('_')!=string::npos)
         result->set_value(fid_, -1);
   }

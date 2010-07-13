@@ -12,6 +12,7 @@
 #include "sentence_pair.h"
 #include "fdict.h"
 #include "extract.h"
+#include "striped_grammar.h"
 
 using namespace std;
 using namespace std::tr1;
