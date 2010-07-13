@@ -11,7 +11,7 @@ my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR 
 my $feat_map = {
   "LogRuleCount" => [ "LogRuleCount", "SingletonRule" ] ,
 #  "XFeatures" => [ "XFE","XEF" ] ,
-  "XFeatures" => [ "XFE","XEF","LabelledEF","LabelledFE"] ,
+  "XFeatures" => [ "XFE","XEF","LabelledEF","LabelledFE","XE_Singleton","XF_Singleton"] ,
   "LabelledRuleConditionals" => [ "LabelledFE","LabelledEF" ] ,
   "LexProb" => [ "LexE2F", "LexF2E" ] ,
   "BackoffRule" => [ "BackoffRule" ] ,
@@ -35,6 +35,8 @@ my %init_weights = qw(
   BackoffRule 0.5
   XFE -0.256706
   XEF -0.256706
+  XF_Singleton -0.05
+  XE_Singleton -0.8
   LabelledFE -0.256706
   LabelledEF -0.256706
   PassThrough -0.9304905

@@ -332,6 +332,8 @@ struct XFeatures: public FeatureExtractor {
     fid_xef(FD::Convert("XEF")),
     fid_labelledfe(FD::Convert("LabelledFE")),
     fid_labelledef(FD::Convert("LabelledEF")),
+    fid_xesingleton(FD::Convert("XE_Singleton")),
+    fid_xfsingleton(FD::Convert("XF_Singleton")),
     kCFE(FD::Convert("CFE")) {}
   virtual void ObserveFilteredRule(const WordID /*lhs*/,
                                    const vector<WordID>& src,
@@ -349,9 +351,11 @@ struct XFeatures: public FeatureExtractor {
                                      const RuleStatistics& info) {
     RuleTuple r(-1, src, trg);
     map_rule(r);
-    rule_counts.inc_if_exists(r, info.counts.value(kCFE));
-    source_counts.inc_if_exists(r.source(), info.counts.value(kCFE));
-    target_counts.inc_if_exists(r.target(), info.counts.value(kCFE));
+    const int count = info.counts.value(kCFE);
+    assert(count > 0);
+    rule_counts.inc_if_exists(r, count);
+    source_counts.inc_if_exists(r.source(), count);
+    target_counts.inc_if_exists(r.target(), count);
   }
 
   virtual void ExtractFeatures(const WordID /*lhs*/,
@@ -363,11 +367,19 @@ struct XFeatures: public FeatureExtractor {
     map_rule(r);
     double l_r_freq = log(rule_counts(r));
 
-    result->set_value(fid_xfe, log(target_counts(r.target())) - l_r_freq);
-    result->set_value(fid_labelledfe, log(target_counts(r.target())) - log(info.counts.value(kCFE)));
+    const int t_c = target_counts(r.target());
+    assert(t_c > 0);
+    result->set_value(fid_xfe, log(t_c) - l_r_freq);
+    result->set_value(fid_labelledfe, log(t_c) - log(info.counts.value(kCFE)));
+    if (t_c == 1)
+      result->set_value(fid_xesingleton, 1.0);
 
-    result->set_value(fid_xef, log(source_counts(r.source())) - l_r_freq);
-    result->set_value(fid_labelledef, log(source_counts(r.source())) - log(info.counts.value(kCFE)));
+    const int s_c = source_counts(r.source());
+    assert(s_c > 0);
+    result->set_value(fid_xef, log(s_c) - l_r_freq);
+    result->set_value(fid_labelledef, log(s_c) - log(info.counts.value(kCFE)));
+    if (s_c == 1)
+      result->set_value(fid_xfsingleton, 1.0);
   }
 
   void map_rule(RuleTuple& r) const {
@@ -384,6 +396,7 @@ struct XFeatures: public FeatureExtractor {
 
   const int fid_xfe, fid_xef;
   const int fid_labelledfe, fid_labelledef;
+  const int fid_xesingleton, fid_xfsingleton;
   const int kCFE;
   RuleFreqCount rule_counts;
   FreqCount< vector<WordID> > source_counts, target_counts;
