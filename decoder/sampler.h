@@ -14,6 +14,7 @@
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/poisson_distribution.hpp>
+#include <boost/random/uniform_int.hpp>
 
 #include "prob.h"
 
@@ -76,6 +77,13 @@ struct RandomNumberGenerator {
     const prob_t a = (p_cur / p_prev) * (q_prev / q_cur);
     if (log(a) >= 0.0) return true;
     return (prob_t(this->next()) < a);
+  }
+
+  RNG &gen() { return m_generator; }
+  typedef boost::variate_generator<RNG&, boost::uniform_int<> > IntRNG;
+  IntRNG inclusive(int low,int high_incl) {
+    assert(high_incl>=low);
+    return IntRNG(m_generator,boost::uniform_int<>(low,high_incl));
   }
 
  private:
