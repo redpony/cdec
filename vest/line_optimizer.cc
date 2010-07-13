@@ -15,7 +15,7 @@ struct IntervalComp {
   bool operator() (const ErrorIter& a, const ErrorIter& b) const {
     return a->x < b->x;
   }
-};	
+};
 
 double LineOptimizer::LineOptimize(
     const vector<ErrorSurface>& surfaces,
@@ -89,15 +89,22 @@ void LineOptimizer::CreateOptimizationDirections(
      const vector<int>& features_to_optimize,
      int additional_random_directions,
      RandomNumberGenerator<boost::mt19937>* rng,
-     vector<SparseVector<double> >* dirs) {
+     vector<SparseVector<double> >* dirs
+     , bool include_orthogonal
+  ) {
   const int num_directions = features_to_optimize.size() + additional_random_directions;
-  dirs->resize(num_directions);
-  for (int i = 0; i < num_directions; ++i) {
-    SparseVector<double>& axis = (*dirs)[i];
-    if (i < features_to_optimize.size())
-      axis.set_value(features_to_optimize[i], 1.0);
-    else
-      RandomUnitVector(features_to_optimize, &axis, rng);
-  }
-  cerr << "Generated " << num_directions << " total axes to optimize along.\n";
+  dirs->clear();
+  typedef SparseVector<double> Dir;
+  vector<Dir> &out=*dirs;
+  int i=0;
+  if (include_orthogonal)
+    for (;i<features_to_optimize.size();++i) {
+      Dir d;
+      d.set_value(features_to_optimize[i],1.);
+      out.push_back(d);
+    }
+  out.resize(i+additional_random_directions);
+  for (;i<out.size();++i)
+     RandomUnitVector(features_to_optimize, &out[i], rng);
+  cerr << "Generated " << out.size() << " total axes to optimize along.\n";
 }

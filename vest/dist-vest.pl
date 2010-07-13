@@ -49,6 +49,11 @@ my $iniFile;
 my $weights;
 my $initialWeights;
 my $decoderOpt;
+my $noprimary;
+my $maxsim=0;
+my $oraclen=0;
+my $oracleb=20;
+my $dirargs='';
 
 # Process command-line options
 Getopt::Long::Configure("no_auto_abbrev");
@@ -66,6 +71,11 @@ if (GetOptions(
 	"normalize=s" => \$normalize,
 	"pmem=s" => \$pmem,
 	"rand-directions=i" => \$rand_directions,
+        "no-primary!" => \$noprimary,
+        "max-similarity=s" => \$maxsim,
+        "oracle-directions=i" => \$oraclen,
+        "oracle-batch=i" => \$oracleb,
+        "directions-args=s" => \$dirargs,
 	"ref-files=s" => \$refFiles,
 	"metric=s" => \$metric,
 	"source-file=s" => \$srcFile,
@@ -234,7 +244,8 @@ while (1){
 		print STDERR "\nGENERATE OPTIMIZATION STRATEGY (OPT-ITERATION $opt_iter/$optimization_iters)\n";
 		print STDERR `date`;
 		$icc++;
-		$cmd="$MAPINPUT -w $inweights -r $dir/hgs -s $devSize -d $rand_directions > $dir/agenda.$im1-$opt_iter";
+        my $nop=$noprimary?"--no_primary":"";
+		$cmd="$MAPINPUT -w $inweights -r $dir/hgs -s $devSize -d $rand_directions --max_similarity=$maxsim --oracle_directions=$oraclen --oracle_batch=$oracleb $dirargs > $dir/agenda.$im1-$opt_iter";
 		print STDERR "COMMAND:\n$cmd\n";
 		$result = system($cmd);
 		unless ($result == 0){

@@ -71,7 +71,7 @@ struct TGImpl {
 };
 
 TextGrammar::TextGrammar() : max_span_(10), pimpl_(new TGImpl) {}
-TextGrammar::TextGrammar(const string& file) : 
+TextGrammar::TextGrammar(const string& file) :
     max_span_(10),
     pimpl_(new TGImpl) {
   ReadFromFile(file);
@@ -104,7 +104,7 @@ void TextGrammar::ReadFromFile(const string& filename) {
   RuleLexer::ReadRules(in.stream(), &AddRuleHelper, this);
 }
 
-bool TextGrammar::HasRuleForSpan(int i, int j, int distance) const {
+bool TextGrammar::HasRuleForSpan(int /* i */, int /* j */, int distance) const {
   return (max_span_ >= distance);
 }
 
@@ -121,8 +121,7 @@ GlueGrammar::GlueGrammar(const string& goal_nt, const string& default_nt) {
   //cerr << "GLUE: " << glue->AsString() << endl;
 }
 
-bool GlueGrammar::HasRuleForSpan(int i, int j, int distance) const {
-  (void) j;
+bool GlueGrammar::HasRuleForSpan(int i, int /* j */, int /* distance */) const {
   return (i == 0);
 }
 
@@ -141,7 +140,7 @@ PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat) 
   }
 }
 
-bool PassThroughGrammar::HasRuleForSpan(int i, int j, int distance) const {
+bool PassThroughGrammar::HasRuleForSpan(int i, int j, int /* distance */) const {
   const set<int>& hr = has_rule_[i];
   if (i == j) { return !hr.empty(); }
   return (hr.find(j) != hr.end());
