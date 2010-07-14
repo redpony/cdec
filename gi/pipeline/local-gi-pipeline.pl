@@ -23,10 +23,9 @@ my $LABEL_THRESHOLD = 0;
 my $MODEL = "pyp";
 my $NUM_EM_ITERS = 100;
 my $NUM_PR_ITERS = 0;
-my $PR_SCALE_P = 1;
+my $PR_SCALE_P = 10;
 my $PR_SCALE_C = 0;
 my $PR_THREADS = 0;
-my $AGREE;
 
 my $EXTOOLS = "$SCRIPT_DIR/../../extools";
 die "Can't find extools: $EXTOOLS" unless -e $EXTOOLS && -d $EXTOOLS;
@@ -71,7 +70,6 @@ usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'pr-scale-phrase=f' => \$PR_SCALE_P,
                            'pr-scale-context=f' => \$PR_SCALE_C,
                            'pr-threads=i' => \$PR_THREADS,
-                           'pr-agree' => \$AGREE,
                            'tagged_corpus=s' => \$TAGGED_CORPUS,
                           );
 
@@ -130,7 +128,17 @@ if (lc($MODEL) eq "pyp") {
 } elsif (lc($MODEL) eq "prem") {
     prem_train();
 } else { die "Unsupported model type: $MODEL. Must be one of PYP or PREM.\n"; }
-label_spans_with_topics();
+if($HIER_CAT) {
+    $NUM_TOPICS = $NUM_TOPICS_COARSE;
+    $CLUSTER_DIR = $CLUSTER_DIR_C;
+    label_spans_with_topics();
+    $NUM_TOPICS = $NUM_TOPICS_FINE;
+    $CLUSTER_DIR = $CLUSTER_DIR_F;
+    label_spans_with_topics();
+    combine_labelled_spans();
+} else {
+    label_spans_with_topics();
+}
 my $res;
 if ($BIDIR) {
   $res = grammar_extract_bidir();
@@ -165,12 +173,10 @@ sub cluster_dir {
     if (lc($MODEL) eq "pyp") {
         return context_dir() . ".PYP.t$NUM_TOPICS.s$NUM_SAMPLES";
     } elsif (lc($MODEL) eq "prem") {
-        if (defined($AGREE)) {
-            return context_dir() . ".AGREE.t$NUM_TOPICS.i$NUM_EM_ITERS";
-	} elsif ($NUM_PR_ITERS == 0) {
-            return context_dir() . ".EM.t$NUM_TOPICS.i$NUM_EM_ITERS";
+        if ($NUM_PR_ITERS == 0) {
+            return context_dir() . ".PREM.t$NUM_TOPICS.ie$NUM_EM_ITERS.ip$NUM_PR_ITERS";
         } else {
-            return context_dir() . ".PR.t$NUM_TOPICS.ie$NUM_EM_ITERS.ip$NUM_PR_ITERS.sp$PR_SCALE_P.sc$PR_SCALE_C";
+            return context_dir() . ".PREM.t$NUM_TOPICS.ie$NUM_EM_ITERS.ip$NUM_PR_ITERS.sp$PR_SCALE_P.sc$PR_SCALE_C";
         }
     }
 }
@@ -252,8 +258,7 @@ sub prem_train {
   if (-e $OUT_CLUSTERS) {
     print STDERR "$OUT_CLUSTERS exists, reusing...\n";
   } else {
-    my $agree = ($AGREE) ? "--agree" : "";
-    safesystem("$PREM_TRAIN --in $IN_CONTEXTS --topics $NUM_TOPICS --out $OUT_CLUSTERS --em $NUM_EM_ITERS --pr $NUM_PR_ITERS --scale-phrase $PR_SCALE_P --scale-context $PR_SCALE_C --threads $PR_THREADS $agree") or die "Topic training failed.\n";
+    safesystem("$PREM_TRAIN --in $IN_CONTEXTS --topics $NUM_TOPICS --out $OUT_CLUSTERS --em $NUM_EM_ITERS --pr $NUM_PR_ITERS --scale-phrase $PR_SCALE_P --scale-context $PR_SCALE_C --threads $PR_THREADS") or die "Topic training failed.\n";
   }
 }
 
@@ -279,16 +284,17 @@ sub combine_labelled_spans {
     my $IN_FINE = "$CLUSTER_DIR_F/labeled_spans.txt";
     my $OUT_FINE = "$CLUSTER_DIR_F/labeled_spans_f.txt";
     my $OUT_SPANS = "$CLUSTER_DIR_F/labeled_spans.hier$NUM_TOPICS_COARSE-$NUM_TOPICS_FINE.txt";
-    my $COARSE_EXPR = 's/\(X[0-9][0-9]*\)/\1c/g';
-    my $FINE_EXPR = 's/\(X[0-9][0-9]*\)/\1f/g';
+    my $COARSE_EXPR = "\'s/\\(X[0-9][0-9]*\\)/\\1c/g\'";
+    my $FINE_EXPR = "\'s/\\(X[0-9][0-9]*\\)/\\1f/g\'";
     if (-e $OUT_SPANS) {
         print STDERR "$OUT_SPANS exists, reusing...\n";
     } else {
         safesystem("$SED $COARSE_EXPR < $IN_COARSE > $OUT_COARSE") or die "Couldn't create coarse labels.";
         safesystem("$SED $FINE_EXPR < $IN_FINE > $OUT_FINE") or die "Couldn't create fine labels.";
-        safesystem("sed -e 's/||| \(.*\)$/\1/' < $OUT_COARSE | paste -d ' ' $OUT_FINE - > $OUT_SPANS") or die "Couldn't paste coarse and fine labels.";
+        safesystem("sed -e 's/||| \\(.*\\)\$/\\1/' < $OUT_COARSE | paste -d ' ' $OUT_FINE - > $OUT_SPANS") or die "Couldn't paste coarse and fine labels.";
         safesystem("paste -d ' ' $CORPUS_LEX $OUT_SPANS > $CLUSTER_DIR_F/corpus.src_trg_al_label.hier") or die "Couldn't paste corpus";
     }
+    $CLUSTER_DIR = $CLUSTER_DIR_F;
 }
 
 sub grammar_extract {
