@@ -12,7 +12,7 @@ struct ContextsLexer {
   struct PhraseContextsType {
     std::string          phrase;
     std::vector<Context> contexts;
-    std::vector<int>     counts;
+    std::vector< std::pair<int,int> >     counts;
   };
 
   typedef void (*ContextsCallback)(const PhraseContextsType& new_contexts, void* extra);

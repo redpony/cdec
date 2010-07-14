@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cstring>
 #include <cassert>
+#include <algorithm>
 
 int lex_line = 0;
 std::istream* contextslex_stream = NULL;
@@ -69,7 +70,7 @@ INT [\-+]?[0-9]+|inf|[\-+]inf
 
 <COUNT>[ \t]+	{ ; }
 <COUNT>C={INT} { 
-		current_contexts.counts.push_back(atoi(yytext+2));
+		current_contexts.counts.push_back(std::make_pair(current_contexts.counts.size(), atoi(yytext+2)));
     BEGIN(COUNT_END);
   }
 <COUNT>.	{ 
@@ -84,6 +85,8 @@ INT [\-+]?[0-9]+|inf|[\-+]inf
 <COUNT_END>\n {
     //std::cerr << "READ:" << current_contexts.phrase << " with " << current_contexts.contexts.size() 
     //  << " contexts, and " << current_contexts.counts.size() << " counts." << std::endl;
+    std::sort(current_contexts.counts.rbegin(), current_contexts.counts.rend()); 
+
 		contexts_callback(current_contexts, contexts_callback_extra);
     current_contexts.phrase.clear();
     current_contexts.contexts.clear();
