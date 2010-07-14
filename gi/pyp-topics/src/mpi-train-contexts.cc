@@ -10,12 +10,12 @@
 #include <boost/scoped_ptr.hpp>
 
 // Local
-#include "pyp-topics.hh"
+#include "mpi-pyp-topics.hh"
 #include "corpus.hh"
 #include "contexts_corpus.hh"
 #include "gzstream.hh"
 
-static const char *REVISION = "$Rev$";
+static const char *REVISION = "$Rev: 170 $";
 
 // Namespaces
 using namespace boost;
@@ -55,7 +55,6 @@ int main(int argc, char **argv)
       ("freq-cutoff-interval", value<int>()->default_value(0), "number of iterations between frequency decrement.")
       ("max-threads", value<int>()->default_value(1), "maximum number of simultaneous threads allowed")
       ("max-contexts-per-document", value<int>()->default_value(0), "Only sample the n most frequent contexts for a document.")
-      ("num-jobs", value<int>()->default_value(1), "allows finer control over parallelization")
       ;
 
     cmdline_specific.add(config_options);
@@ -79,11 +78,10 @@ int main(int argc, char **argv)
     cerr << "Please specify a file containing the data." << endl;
     return 1;
   }
-  assert(vm["max-threads"].as<int>() > 0);
-  assert(vm["num-jobs"].as<int>() > -1);
+
   // seed the random number generator: 0 = automatic, specify value otherwise
   unsigned long seed = 0; 
-  PYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"), seed, vm["max-threads"].as<int>(), vm["num-jobs"].as<int>());
+  PYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"), seed, vm["max-threads"].as<int>());
 
   // read the data
   BackoffGenerator* backoff_gen=0;
@@ -133,15 +131,14 @@ int main(int argc, char **argv)
           //insert_result.first++;
       }
       documents_out << contexts_corpus.key(document_id) << '\t';
-      documents_out << model.max(document_id).first << " " << corpusIt->size() << " ||| ";
+      documents_out << model.max(document_id) << " " << corpusIt->size() << " ||| ";
       for (std::vector<int>::const_iterator termIt=unique_terms.begin();
            termIt != unique_terms.end(); ++termIt) {
         if (termIt != unique_terms.begin())
           documents_out << " ||| ";
        vector<std::string> strings = contexts_corpus.context2string(*termIt);
        copy(strings.begin(), strings.end(),ostream_iterator<std::string>(documents_out, " "));
-        std::pair<int,PYPTopics::F> maxinfo = model.max(document_id, *termIt);
-        documents_out << "||| C=" << maxinfo.first << " P=" << maxinfo.second;
+        documents_out << "||| C=" << model.max(document_id, *termIt);
 
       }
       documents_out <<endl;
@@ -153,7 +150,7 @@ int main(int argc, char **argv)
       default_topics << model.max_topic() <<endl;
       for (std::map<int,int>::const_iterator termIt=all_terms.begin(); termIt != all_terms.end(); ++termIt) {
        vector<std::string> strings = contexts_corpus.context2string(termIt->first);
-        default_topics << model.max(-1, termIt->first).first << " ||| " << termIt->second << " ||| ";
+        default_topics << model.max(-1, termIt->first) << " ||| " << termIt->second << " ||| ";
        copy(strings.begin(), strings.end(),ostream_iterator<std::string>(default_topics, " "));
         default_topics <<endl;
       }

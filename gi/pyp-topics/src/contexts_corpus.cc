@@ -28,9 +28,12 @@ void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* 
   Document* doc(new Document());
 
   //cout << "READ: " << new_contexts.phrase << "\t";
-  for (int i=0; i < new_contexts.contexts.size(); ++i) {
+  for (int i=0; i < new_contexts.counts.size(); ++i) {
     int cache_word_count = corpus_ptr->m_dict.max();
-    string context_str = corpus_ptr->m_dict.toString(new_contexts.contexts[i]);
+
+    //string context_str = corpus_ptr->m_dict.toString(new_contexts.contexts[i]);
+    int context_index = new_contexts.counts.at(i).first;
+    string context_str = corpus_ptr->m_dict.toString(new_contexts.contexts[context_index]);
 
     // filter out singleton contexts
     //if (!counts->empty()) {
@@ -45,7 +48,8 @@ void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* 
       corpus_ptr->m_num_types++;
     }
 
-    int count = new_contexts.counts[i];
+    //int count = new_contexts.counts[i];
+    int count = new_contexts.counts.at(i).second;
     for (int j=0; j<count; ++j)
       doc->push_back(id);
     corpus_ptr->m_num_terms += count;
@@ -54,7 +58,8 @@ void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* 
     if (backoff_gen) {
       int order = 1;
       WordID backoff_id = id;
-      ContextsLexer::Context backedoff_context = new_contexts.contexts[i];
+      //ContextsLexer::Context backedoff_context = new_contexts.contexts[i];
+      ContextsLexer::Context backedoff_context = new_contexts.contexts[context_index];
       while (true) {
         if (!corpus_ptr->m_backoff->has_backoff(backoff_id)) {
           //cerr << "Backing off from " << corpus_ptr->m_dict.Convert(backoff_id) << " to ";
@@ -96,10 +101,13 @@ void filter_callback(const ContextsLexer::PhraseContextsType& new_contexts, void
 
   map<string,int>* context_counts = (static_cast<map<string,int>*>(extra));
 
-  for (int i=0; i < new_contexts.contexts.size(); ++i) {
-    int count = new_contexts.counts[i];
+  for (int i=0; i < new_contexts.counts.size(); ++i) {
+    int context_index = new_contexts.counts.at(i).first;
+    int count = new_contexts.counts.at(i).second;
+    //int count = new_contexts.counts[i];
     pair<map<string,int>::iterator,bool> result 
-      = context_counts->insert(make_pair(Dict::toString(new_contexts.contexts[i]),count));
+      = context_counts->insert(make_pair(Dict::toString(new_contexts.contexts[context_index]),count));
+      //= context_counts->insert(make_pair(Dict::toString(new_contexts.contexts[i]),count));
     if (!result.second)
       result.first->second += count;
   }

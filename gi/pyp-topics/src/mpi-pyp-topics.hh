@@ -9,7 +9,7 @@
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/mersenne_twister.hpp>
 
-#include "pyp.hh"
+#include "mpi-pyp.hh"
 #include "corpus.hh"
 #include "workers.hh"
 
@@ -21,12 +21,12 @@ public:
 
 public:
   PYPTopics(int num_topics, bool use_topic_pyp=false, unsigned long seed = 0,
-        int max_threads = 1, int num_jobs = 1) 
+        int max_threads = 1) 
     : m_num_topics(num_topics), m_word_pyps(1), 
     m_topic_pyp(0.5,1.0,seed), m_use_topic_pyp(use_topic_pyp),
     m_seed(seed),
     uni_dist(0,1), rng(seed == 0 ? (unsigned long)this : seed), 
-    rnd(rng, uni_dist), max_threads(max_threads), num_jobs(num_jobs) {}
+    rnd(rng, uni_dist), max_threads(max_threads) {}
 
   void sample_corpus(const Corpus& corpus, int samples,
                      int freq_cutoff_start=0, int freq_cutoff_end=0, 
@@ -34,8 +34,8 @@ public:
                      int max_contexts_per_document=0);
 
   int sample(const DocumentId& doc, const Term& term);
-  std::pair<int,F> max(const DocumentId& doc, const Term& term) const;
-  std::pair<int,F> max(const DocumentId& doc) const;
+  int max(const DocumentId& doc, const Term& term) const;
+  int max(const DocumentId& doc) const;
   int max_topic() const;
 
   void set_backoff(const std::string& filename) {
@@ -82,13 +82,15 @@ private:
                 //call: rnd() generates uniform on [0,1)
 
   typedef boost::function<F()> JobReturnsF;
+  typedef SimpleWorker<JobReturnsF, F> SimpleResampleWorker;
+  typedef boost::ptr_vector<SimpleResampleWorker> WorkerPtrVect;
 
-  F hresample_docs(int start, int end); //does i in [start, end)
+  F hresample_docs(int num_threads, int thread_id);
 
-  F hresample_topics();
+//  F hresample_topics();
   
   int max_threads;
-  int num_jobs;
+
   TermBackoffPtr m_backoff;
 };
 
