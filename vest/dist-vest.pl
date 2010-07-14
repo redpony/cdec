@@ -211,6 +211,10 @@ my $lastPScore = 0;
 while (1){
 	print STDERR "\n\nITERATION $iteration\n==========\n";
 
+	if ($iteration > $max_iterations){
+		print STDERR "\nREACHED STOPPING CRITERION: Maximum iterations\n";
+		last;
+	}
 	# iteration-specific files
 	my $runFile="$dir/run.raw.$iteration";
 	my $onebestFile="$dir/1best.$iteration";
@@ -218,6 +222,7 @@ while (1){
 	my $decoderLog="$logdir/decoder.sentserver.log.$iteration";
 	my $scorerLog="$logdir/scorer.log.$iteration";
 	`mkdir -p $logdir`;
+
 
 	#decode
 	print STDERR "DECODE\n";
@@ -244,10 +249,6 @@ while (1){
 	`gzip $runFile`;
 	`gzip $decoderLog`;
 
-	if ($iteration > $max_iterations){
-		print STDERR "\nREACHED STOPPING CRITERION: Maximum iterations\n";
-		last;
-	}
 
 	# run optimizer
 	print STDERR `date`;
