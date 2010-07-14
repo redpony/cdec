@@ -74,6 +74,13 @@ libcdec_a_SOURCES = \
   ff_wordalign.cc \
   ff_csplit.cc \
   ff_tagger.cc \
+  ff_bleu.cc \
+  ../vest/scorer.cc \
+  ../vest/ter.cc \
+  ../vest/aer_scorer.cc \
+  ../vest/comb_scorer.cc \
+  ../vest/error_surface.cc \
+  ../vest/viterbi_envelope.cc \
   tromble_loss.cc \
   freqdict.cc \
   lexalign.cc \

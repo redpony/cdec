@@ -8,6 +8,7 @@ class BLEUTERCombinationScorer : public SentenceScorer {
   BLEUTERCombinationScorer(const std::vector<std::vector<WordID> >& refs);
   ~BLEUTERCombinationScorer();
   Score* ScoreCandidate(const std::vector<WordID>& hyp) const;
+  Score* ScoreCCandidate(const std::vector<WordID>& hyp) const;
   static Score* ScoreFromString(const std::string& in);
  private:
   SentenceScorer* bleu_;

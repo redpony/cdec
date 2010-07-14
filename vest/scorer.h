@@ -10,17 +10,21 @@ class ViterbiEnvelope;
 class ErrorSurface;
 class Hypergraph;  // needed for alignment
 
-enum ScoreType { IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, BLEU_minus_TER_over_2, SER, AER };
+enum ScoreType { IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, BLEU_minus_TER_over_2, SER, AER, IBM_BLEU_3 };
 ScoreType ScoreTypeFromString(const std::string& st);
 
 class Score {
  public:
   virtual ~Score();
   virtual float ComputeScore() const = 0;
+  virtual float ComputePartialScore() const =0;
   virtual void ScoreDetails(std::string* details) const = 0;
+  virtual void PlusEquals(const Score& rhs, const float scale) = 0;
   virtual void PlusEquals(const Score& rhs) = 0;
+  virtual void PlusPartialEquals(const Score& rhs, int oracle_e_cover, int oracle_f_cover, int src_len) = 0;
   virtual void Subtract(const Score& rhs, Score* res) const = 0;
   virtual Score* GetZero() const = 0;
+  virtual Score* GetOne() const = 0;
   virtual bool IsAdditiveIdentity() const = 0; // returns true if adding this delta
                                       // to another score results in no score change
 				      // under any circumstances
@@ -32,6 +36,7 @@ class SentenceScorer {
   virtual ~SentenceScorer();
   void ComputeErrorSurface(const ViterbiEnvelope& ve, ErrorSurface* es, const ScoreType type, const Hypergraph& hg) const;
   virtual Score* ScoreCandidate(const std::vector<WordID>& hyp) const = 0;
+  virtual Score* ScoreCCandidate(const std::vector<WordID>& hyp) const =0;
   virtual const std::string* GetSource() const;
   static Score* CreateScoreFromString(const ScoreType type, const std::string& in);
   static SentenceScorer* CreateSentenceScorer(const ScoreType type,

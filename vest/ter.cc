@@ -424,15 +424,24 @@ class TERScore : public Score {
   static const unsigned kDUMMY_LAST_ENTRY = 5;
 
  TERScore() : stats(0,kDUMMY_LAST_ENTRY) {}
+  float ComputePartialScore() const { return 0.0;}
   float ComputeScore() const {
     float edits = static_cast<float>(stats[kINSERTIONS] + stats[kDELETIONS] + stats[kSUBSTITUTIONS] + stats[kSHIFTS]);
     return edits / static_cast<float>(stats[kREF_WORDCOUNT]);
   }
   void ScoreDetails(string* details) const;
+  void PlusPartialEquals(const Score& rhs, int oracle_e_cover, int oracle_f_cover, int src_len){}
+  void PlusEquals(const Score& delta, const float scale) {
+    stats += static_cast<const TERScore&>(delta).stats;
+  }
   void PlusEquals(const Score& delta) {
     stats += static_cast<const TERScore&>(delta).stats;
   }
+
   Score* GetZero() const {
+    return new TERScore;
+  }
+  Score* GetOne() const {
     return new TERScore;
   }
   void Subtract(const Score& rhs, Score* res) const {
@@ -487,6 +496,11 @@ TERScorer::~TERScorer() {
 TERScorer::TERScorer(const vector<vector<WordID> >& refs) : impl_(refs.size()) {
   for (int i = 0; i < refs.size(); ++i)
     impl_[i] = new TERScorerImpl(refs[i]);
+}
+
+Score* TERScorer::ScoreCCandidate(const vector<WordID>& hyp) const {
+  Score* a = NULL;
+  return a;
 }
 
 Score* TERScorer::ScoreCandidate(const std::vector<WordID>& hyp) const {

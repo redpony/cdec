@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include "lattice.h"
+#include "../vest/scorer.h"
 
 struct SentenceMetadata {
   SentenceMetadata(int id, const Lattice& ref) :
@@ -30,10 +31,22 @@ struct SentenceMetadata {
   // this will be empty if the translator accepts non FS input!
   const Lattice& GetSourceLattice() const { return src_lattice_; }
 
+  // access to document level scores for MIRA vector computation
+  void SetScore(Score *s){app_score=s;}
+  void SetDocScorer (const DocScorer *d){ds = d;}
+  void SetDocLen(double dl){doc_len = dl;}
+
+  const Score& GetScore() const { return *app_score; }
+  const DocScorer& GetDocScorer() const { return *ds; }
+  double GetDocLen() const {return doc_len;}
+
  private:
   const int sent_id_;
   // the following should be set, if possible, by the Translator
   int src_len_;
+  double doc_len;
+  const DocScorer* ds;
+  const Score* app_score;
  public:
   Lattice src_lattice_;  // this will only be set if inputs are finite state!
  private:
