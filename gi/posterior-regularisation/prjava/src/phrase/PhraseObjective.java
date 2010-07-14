@@ -25,7 +25,7 @@ public class PhraseObjective extends ProjectedObjective
 	static int ITERATIONS = 100;
 	//private double c1=0.0001; // wolf stuff
 	//private double c2=0.9;
-	private static double lambda[][];
+	//private static double lambda[][];
 	private PhraseCluster c;
 	
 	/**@brief
@@ -64,23 +64,18 @@ public class PhraseObjective extends ProjectedObjective
 	 */
 	public double llh;
 	
-	public PhraseObjective(PhraseCluster cluster, int phraseIdx, double scale){
+	public PhraseObjective(PhraseCluster cluster, int phraseIdx, double scale, double[] lambda){
 		phrase=phraseIdx;
 		c=cluster;
 		data=c.c.getEdgesForPhrase(phrase);
 		n_param=data.size()*c.K;
 		//System.out.println("Num parameters " + n_param + " for phrase #" + phraseIdx);
 		
-		if (lambda==null){
-			lambda=new double[c.c.getNumPhrases()][];
-		}
+		if (lambda==null) 
+			lambda=new double[n_param];
 		
-		if (lambda[phrase]==null){
-			lambda[phrase]=new double[n_param];
-		}
-		
-		parameters=lambda[phrase];
-		newPoint  = new double[n_param];
+		parameters = lambda;
+		newPoint = new double[n_param];
 		gradient = new double[n_param];
 		initP();
 		projection=new SimplexProjection(scale);
@@ -163,8 +158,12 @@ public class PhraseObjective extends ProjectedObjective
 	public double [][]posterior(){
 		return q;
 	}
-		
+	
+	long optimizationTime;
+	
 	public boolean optimizeWithProjectedGradientDescent(){
+		long start = System.currentTimeMillis();
+		
 		LineSearchMethod ls =
 			new ArmijoLineSearchMinimizationAlongProjectionArc
 				(new InterpolationPickFirstStep(INIT_STEP_SIZE));
@@ -188,7 +187,6 @@ public class PhraseObjective extends ProjectedObjective
 		//}else{
 //			System.out.println("Failed to optimize");
 		//}
-		lambda[phrase]=parameters;
 		//	ps.println(Arrays.toString(parameters));
 		
 		//	for(int edge=0;edge<data.getSize();edge++){

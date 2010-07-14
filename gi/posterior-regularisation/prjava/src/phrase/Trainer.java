@@ -31,6 +31,7 @@ public class Trainer
         parser.accepts("alpha-emit").withRequiredArg().ofType(Double.class).defaultsTo(0.1);
         parser.accepts("alpha-pi").withRequiredArg().ofType(Double.class).defaultsTo(0.01);
         parser.accepts("agree");
+        parser.accepts("no-parameter-cache");
         OptionSet options = parser.parse(args);
 
         if (options.has("help") || !options.has("in"))
@@ -96,6 +97,8 @@ public class Trainer
  			cluster = new PhraseCluster(tags, corpus);
  			if (threads > 0) cluster.useThreadPool(threads);
  			if (vb)	cluster.initialiseVB(alphaEmit, alphaPi);
+ 			if (options.has("no-parameter-cache")) 
+ 				cluster.cacheLambda = false;
  		}
 				
 		double last = 0;

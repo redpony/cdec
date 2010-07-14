@@ -318,7 +318,7 @@ public class PhraseContextObjective extends ProjectedObjective
 		return q[edgeIndex];
 	}
 	
-	public double[] optimizeWithProjectedGradientDescent()
+	public boolean optimizeWithProjectedGradientDescent()
 	{
 		projectionTime = 0;
 		actualProjectionTime = 0;
@@ -354,7 +354,7 @@ public class PhraseContextObjective extends ProjectedObjective
 		System.out.println(" and " + total + " ms: projection " + projectionTime + 
 				" actual " + actualProjectionTime + " objective " + objectiveTime);
 
-		return parameters;
+		return success;
 	}
 	
 	double loglikelihood()
