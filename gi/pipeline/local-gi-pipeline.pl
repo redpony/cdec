@@ -19,7 +19,7 @@ my $NUM_SAMPLES = 1000;
 my $CONTEXT_SIZE = 1;
 my $BIDIR = 0;
 my $TOPICS_CONFIG = "pyp-topics.conf";
-
+my $LABEL_THRESHOLD = 0;
 my $MODEL = "pyp";
 my $NUM_EM_ITERS = 100;
 my $NUM_PR_ITERS = 0;
@@ -64,6 +64,7 @@ usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'coarse_topics=i' => \$NUM_TOPICS_COARSE,
                            'trg_context=i' => \$CONTEXT_SIZE,
                            'samples=i' => \$NUM_SAMPLES,
+                           'label_threshold=f' => \$LABEL_THRESHOLD,
                            'topics-config=s' => \$TOPICS_CONFIG,
                            'em-iterations=i' => \$NUM_EM_ITERS,
                            'pr-iterations=i' => \$NUM_PR_ITERS,
@@ -88,6 +89,7 @@ my $CORPUS_CLUSTER = $DATA_DIR . '/corpus.f_e_a.cluster'; # corpus used for clus
 
 my $CONTEXT_DIR = $OUTPUT . '/' . context_dir();
 my $CLUSTER_DIR = $OUTPUT . '/' . cluster_dir();
+my $LABELED_DIR = $OUTPUT . '/' . labeled_dir();
 my $CLUSTER_DIR_C;
 my $CLUSTER_DIR_F;
 if($HIER_CAT) {
@@ -97,7 +99,7 @@ if($HIER_CAT) {
     $NUM_TOPICS = $NUM_TOPICS_FINE;
 }
 my $GRAMMAR_DIR = $OUTPUT . '/' . grammar_dir();
-print STDERR "  Context: $CONTEXT_DIR\n  Cluster: $CLUSTER_DIR\n  Grammar: $GRAMMAR_DIR\n";
+print STDERR "  Context: $CONTEXT_DIR\n  Cluster: $CLUSTER_DIR\n  Labeled: $LABELED_DIR\n  Grammar: $GRAMMAR_DIR\n";
 safemkdir($OUTPUT) or die "Couldn't create output directory $OUTPUT: $!";
 safemkdir($DATA_DIR) or die "Couldn't create output directory $DATA_DIR: $!";
 safemkdir($CONTEXT_DIR) or die "Couldn't create output directory $CONTEXT_DIR: $!";
@@ -105,6 +107,7 @@ safemkdir($CLUSTER_DIR) or die "Couldn't create output directory $CLUSTER_DIR: $
 if($HIER_CAT) {
     safemkdir($CLUSTER_DIR_C) or die "Couldn't create output directory $CLUSTER_DIR: $!";
 }
+safemkdir($LABELED_DIR) or die "Couldn't create output directory $LABELED_DIR: $!";
 safemkdir($GRAMMAR_DIR) or die "Couldn't create output directory $GRAMMAR_DIR: $!";
 if(-e $TOPICS_CONFIG) {
     copy($TOPICS_CONFIG, $CLUSTER_DIR) or die "Copy failed: $!";
@@ -172,12 +175,20 @@ sub cluster_dir {
     }
 }
 
+sub labeled_dir {
+  if (lc($MODEL) eq "pyp" && $LABEL_THRESHOLD != 0) {
+    return cluster_dir() . "-lt$LABEL_THRESHOLD";
+  } else {
+    return cluster_dir();
+  }
+}
+
 sub grammar_dir {
   # TODO add grammar config options -- adjacent NTs, etc
   if($HIER_CAT) {
     return cluster_dir() . ".hier$NUM_TOPICS_COARSE-$NUM_TOPICS_FINE.grammar";
   } else {
-    return cluster_dir() . ".grammar";
+    return labeled_dir() . ".grammar";
   }
 }
 
@@ -250,14 +261,14 @@ sub label_spans_with_topics {
   my ($file) = (@_);
   print STDERR "\n!!!LABEL SPANS\n";
   my $IN_CLUSTERS = "$CLUSTER_DIR/docs.txt.gz";
-  my $OUT_SPANS = "$CLUSTER_DIR/labeled_spans.txt";
+  my $OUT_SPANS = "$LABELED_DIR/labeled_spans.txt";
   if (-e $OUT_SPANS) {
     print STDERR "$OUT_SPANS exists, reusing...\n";
   } else {
     safesystem("$ZCAT $IN_CLUSTERS > $CLUSTER_DIR/clusters.txt") or die "Failed to unzip";
-    safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS_CLUSTER -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $CLUSTER_DIR/clusters.txt $CONTEXT_SIZE > $OUT_SPANS") or die "Failed to label spans";
+    safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS_CLUSTER -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $CLUSTER_DIR/clusters.txt $CONTEXT_SIZE $LABEL_THRESHOLD > $OUT_SPANS") or die "Failed to label spans";
     unlink("$CLUSTER_DIR/clusters.txt") or warn "Failed to remove $CLUSTER_DIR/clusters.txt";
-    safesystem("paste -d ' ' $CORPUS_LEX $OUT_SPANS > $CLUSTER_DIR/corpus.src_trg_al_label") or die "Couldn't paste";
+    safesystem("paste -d ' ' $CORPUS_LEX $OUT_SPANS > $LABELED_DIR/corpus.src_trg_al_label") or die "Couldn't paste";
   }
 }
 
@@ -281,7 +292,7 @@ sub combine_labelled_spans {
 }
 
 sub grammar_extract {
-  my $LABELED = ($HIER_CAT ? "$CLUSTER_DIR_F/corpus.src_trg_al_label.hier" : "$CLUSTER_DIR/corpus.src_trg_al_label");
+  my $LABELED = ($HIER_CAT ? "$CLUSTER_DIR_F/corpus.src_trg_al_label.hier" : "$LABELED_DIR/corpus.src_trg_al_label");
   print STDERR "\n!!!EXTRACTING GRAMMAR\n";
   my $OUTGRAMMAR = "$GRAMMAR_DIR/grammar.gz";
   if (-e $OUTGRAMMAR) {
@@ -295,7 +306,7 @@ sub grammar_extract {
 
 sub grammar_extract_bidir {
 #gzcat ex.output.gz | ./mr_stripe_rule_reduce -p -b | sort -t $'\t' -k 1 | ./mr_stripe_rule_reduce | gzip > phrase-table.gz
-  my $LABELED = ($HIER_CAT ? "$CLUSTER_DIR_F/corpus.src_trg_al_label.hier" : "$CLUSTER_DIR/corpus.src_trg_al_label");
+  my $LABELED = ($HIER_CAT ? "$CLUSTER_DIR_F/corpus.src_trg_al_label.hier" : "$LABELED_DIR/corpus.src_trg_al_label");
   print STDERR "\n!!!EXTRACTING GRAMMAR\n";
   my $OUTGRAMMAR = "$GRAMMAR_DIR/grammar.bidir.gz";
   if (-e $OUTGRAMMAR) {
