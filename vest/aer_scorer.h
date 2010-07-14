@@ -12,6 +12,7 @@ class AERScorer : public SentenceScorer {
   // is necessary.
   AERScorer(const std::vector<std::vector<WordID> >& refs, const std::string& src = "");
   Score* ScoreCandidate(const std::vector<WordID>& hyp) const;
+  Score* ScoreCCandidate(const std::vector<WordID>& hyp) const;
   static Score* ScoreFromString(const std::string& in);
   const std::string* GetSource() const;
  private:

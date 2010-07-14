@@ -8,6 +8,7 @@ class BLEUTERCombinationScore : public Score {
   friend class BLEUTERCombinationScorer;
  public:
   ~BLEUTERCombinationScore();
+  float ComputePartialScore() const { return 0.0;}
   float ComputeScore() const {
     return (bleu->ComputeScore() - ter->ComputeScore()) / 2.0f;
   }
@@ -17,9 +18,24 @@ class BLEUTERCombinationScore : public Score {
       ComputeScore()*100.0f, bleu->ComputeScore()*100.0f, ter->ComputeScore()*100.0f);
     *details = buf;
   }
+  void PlusPartialEquals(const Score& rhs, int oracle_e_cover, int oracle_f_cover, int src_len){}
+
+  void PlusEquals(const Score& delta, const float scale) {
+    bleu->PlusEquals(*static_cast<const BLEUTERCombinationScore&>(delta).bleu, scale);
+    ter->PlusEquals(*static_cast<const BLEUTERCombinationScore&>(delta).ter, scale);
+  }
   void PlusEquals(const Score& delta) {
     bleu->PlusEquals(*static_cast<const BLEUTERCombinationScore&>(delta).bleu);
     ter->PlusEquals(*static_cast<const BLEUTERCombinationScore&>(delta).ter);
+  }
+
+
+
+  Score* GetOne() const {
+    BLEUTERCombinationScore* res = new BLEUTERCombinationScore;
+    res->bleu = bleu->GetOne();
+    res->ter = ter->GetOne();
+    return res;    
   }
   Score* GetZero() const {
     BLEUTERCombinationScore* res = new BLEUTERCombinationScore;
@@ -63,6 +79,11 @@ BLEUTERCombinationScorer::BLEUTERCombinationScorer(const vector<vector<WordID> >
 BLEUTERCombinationScorer::~BLEUTERCombinationScorer() {
   delete bleu_;
   delete ter_;
+}
+
+Score* BLEUTERCombinationScorer::ScoreCCandidate(const vector<WordID>& hyp) const {
+  Score* a = NULL;
+  return a;
 }
 
 Score* BLEUTERCombinationScorer::ScoreCandidate(const std::vector<WordID>& hyp) const {

@@ -15,13 +15,25 @@ class AERScore : public Score {
   AERScore() : num_matches(), num_predicted(), num_in_ref() {}
   AERScore(int m, int p, int r) :
     num_matches(m), num_predicted(p), num_in_ref(r) {}
-  virtual void PlusEquals(const Score& delta) {
+  virtual void PlusPartialEquals(const Score& rhs, int oracle_e_cover, int oracle_f_cover, int src_len){}
+  virtual void PlusEquals(const Score& delta, const float scale) {
     const AERScore& other = static_cast<const AERScore&>(delta);
     num_matches   += other.num_matches;
     num_predicted += other.num_predicted;
     num_in_ref    += other.num_in_ref;
   }
+ virtual void PlusEquals(const Score& delta) {
+    const AERScore& other = static_cast<const AERScore&>(delta);
+    num_matches   += other.num_matches;
+    num_predicted += other.num_predicted;
+    num_in_ref    += other.num_in_ref;
+  }
+
+
   virtual Score* GetZero() const {
+    return new AERScore;
+  }
+  virtual Score* GetOne() const {
     return new AERScore;
   }
   virtual void Subtract(const Score& rhs, Score* out) const {
@@ -37,6 +49,7 @@ class AERScore : public Score {
   float Recall() const {
     return static_cast<float>(num_matches) / num_in_ref;
   }
+  float ComputePartialScore() const { return 0.0;}
   virtual float ComputeScore() const {
     const float prec = Precision();
     const float rec = Recall();
@@ -80,6 +93,11 @@ static inline bool Safe(const Array2D<bool>& a, int i, int j) {
     return a(i,j);
   else
     return false;
+}
+
+Score* AERScorer::ScoreCCandidate(const vector<WordID>& shyp) const {
+  Score* a = NULL;
+  return a;
 }
 
 Score* AERScorer::ScoreCandidate(const vector<WordID>& shyp) const {
