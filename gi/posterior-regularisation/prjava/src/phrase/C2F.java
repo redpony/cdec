@@ -38,10 +38,10 @@ public class C2F {
 		n_contexts=c.getNumContexts();
 		
 		//number of words in a phrase to be considered
-		//currently the first and last word
-		//if the phrase has length 1 
-		//use the same word for two positions
-		n_positions=2;
+		//currently the first and last word in source and target
+		//if the phrase has length 1 in either dimension then
+		//we use the same word for two positions
+		n_positions=c.phraseEdges(c.getEdges().get(0).getPhrase()).size();
 		
 		emit=new double [K][n_positions][n_words];
 		pi=new double[n_contexts][K];
@@ -156,9 +156,13 @@ public class C2F {
 		double[] prob=Arrays.copyOf(pi[edge.getContextId()], K);
 		
 		TIntArrayList phrase = edge.getPhrase();
+		TIntArrayList offsets = c.phraseEdges(phrase);
 		for(int tag=0;tag<K;tag++)
-			prob[tag]*=emit[tag][0][phrase.get(0)]
-			                        *emit[tag][1][phrase.get(phrase.size()-1)];
+		{
+			for (int i=0; i < offsets.size(); ++i)
+				prob[tag]*=emit[tag][i][phrase.get(offsets.get(i))];
+		}
+			
 		return prob;
 	}
 
