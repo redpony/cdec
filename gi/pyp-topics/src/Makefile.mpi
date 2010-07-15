@@ -19,7 +19,7 @@ depend:
 	$(CXX) -MM $(CXXFLAGS) *.cc *.c | sed 's/^\(.*\.o:\)/obj\/\1/' > makefile.depend
 
 clean:
-	rm -f obj/*.o
+	rm -f *.o
 
 #clobber: clean
 #	rm makefile.depend ../bin/${ARCH}/*
