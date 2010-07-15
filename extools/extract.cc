@@ -5,6 +5,7 @@
 #include <utility>
 #include <tr1/unordered_map>
 #include <set>
+#include <boost/tuple/tuple_comparison.hpp>
 
 #include <boost/functional/hash.hpp>
 
@@ -15,6 +16,7 @@
 
 using namespace std;
 using namespace tr1;
+using namespace boost;
 
 namespace {
   inline bool IsWhitespace(char c) { return c == ' ' || c == '\t'; }
@@ -114,27 +116,37 @@ void Extract::LoosenPhraseBounds(const AnnotatedParallelSentence& sentence,
   }
 }
 
+template <typename K, typename V>
+void
+lookup_and_append(const map<K, V> &dict, const K &key, V &output)
+{
+    typename map<K, V>::const_iterator found = dict.find(key);
+    if (found != dict.end())
+        copy(found->second.begin(), found->second.end(), back_inserter(output));
+}
+
 // this uses the TARGET span (i,j) to annotate phrases, will copy
 // phrases if there is more than one annotation.
 // TODO: support source annotation
 void Extract::AnnotatePhrasesWithCategoryTypes(const WordID default_cat,
-                                      const Array2D<vector<WordID> >& types,
+                                      const map< tuple<short,short,short,short>, vector<WordID> > &types,
                                       vector<ParallelSpan>* phrases) {
   const int num_unannotated_phrases = phrases->size();
   // have to use num_unannotated_phrases since we may grow the vector
   for (int i = 0; i < num_unannotated_phrases; ++i) {
     ParallelSpan& phrase = (*phrases)[i];
-    const vector<WordID>* pcats = &types(phrase.j1, phrase.j2);
-    if (pcats->empty() && default_cat != 0) {
-      static vector<WordID> s_default(1, default_cat);
-      pcats = &s_default;
+    vector<WordID> cats;
+    lookup_and_append(types, make_tuple(phrase.i1, phrase.i2, phrase.j1, phrase.j2), cats);
+    lookup_and_append(types, make_tuple((short)-1, (short)-1, phrase.j1, phrase.j2), cats);
+    lookup_and_append(types, make_tuple(phrase.i1, phrase.i2, (short)-1, (short)-1), cats);
+    if (cats.empty() && default_cat != 0) {
+      cats = vector<WordID>(1, default_cat);
     }
-    if (pcats->empty()) {
+    if (cats.empty()) {
       cerr << "ERROR span " << phrase.i1 << "," << phrase.i2 << "-"
            << phrase.j1 << "," << phrase.j2 << " has no type. "
               "Did you forget --default_category?\n";
     }
-    const vector<WordID>& cats = *pcats;
     phrase.cat = cats[0];
     for (int ci = 1; ci < cats.size(); ++ci) {
       ParallelSpan new_phrase = phrase;

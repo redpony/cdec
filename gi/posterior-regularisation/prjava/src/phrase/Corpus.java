@@ -151,7 +151,7 @@ public class Corpus
 		for (int i = 0; i < c.size(); ++i)
 		{
 			if (i > 0) b.append(" ");
-			if (i == c.size() / 2) b.append("<PHRASE> ");
+			//if (i == c.size() / 2) b.append("<PHRASE> ");
 			b.append(wordLexicon.lookup(c.get(i)));
 		}
 		return b.toString();
@@ -198,7 +198,7 @@ public class Corpus
 				while (ctxStrtok.hasMoreTokens())
 				{
 					String token = ctxStrtok.nextToken();
-					if (!token.equals("<PHRASE>"))
+					//if (!token.equals("<PHRASE>"))
 						ctx.add(c.wordLexicon.insert(token));
 				}
 				int contextId = c.contextLexicon.insert(ctx);

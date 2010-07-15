@@ -4,6 +4,7 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <boost/tuple/tuple.hpp>
 #include "array2d.h"
 #include "wordid.h"
 #include "sparse_vector.h"
@@ -74,9 +75,8 @@ struct Extract {
 
   // this uses the TARGET span (i,j) to annotate phrases, will copy
   // phrases if there is more than one annotation.
-  // TODO: support source annotation
   static void AnnotatePhrasesWithCategoryTypes(const WordID default_cat,
-                                      const Array2D<std::vector<WordID> >& types,
+                                      const std::map< boost::tuple<short,short,short,short>, std::vector<WordID> > &types,
                                       std::vector<ParallelSpan>* phrases);
 
   // use the Chiang (2007) extraction logic to extract consistent subphrases

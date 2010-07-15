@@ -19,7 +19,8 @@ my $NUM_SAMPLES = 1000;
 my $CONTEXT_SIZE = 1;
 my $BIDIR = 0;
 my $TOPICS_CONFIG = "pyp-topics.conf";
-my $LABEL_THRESHOLD = 0;
+my $LANGUAGE = "target";
+
 my $MODEL = "pyp";
 my $NUM_EM_ITERS = 100;
 my $NUM_PR_ITERS = 0;
@@ -71,6 +72,7 @@ usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'pr-scale-context=f' => \$PR_SCALE_C,
                            'pr-threads=i' => \$PR_THREADS,
                            'tagged_corpus=s' => \$TAGGED_CORPUS,
+                           'language=s' => \$LANGUAGE,
                           );
 
 usage() unless scalar @ARGV == 1;
@@ -166,7 +168,7 @@ sub setup_data {
 }
 
 sub context_dir {
-  return "ct${CONTEXT_SIZE}s0.L$BASE_PHRASE_MAX_SIZE";
+  return "ct${CONTEXT_SIZE}s0.L$BASE_PHRASE_MAX_SIZE.l$LANGUAGE";
 }
 
 sub cluster_dir {
@@ -231,10 +233,10 @@ sub extract_context {
  if (-e $OUT_CONTEXTS) {
    print STDERR "$OUT_CONTEXTS exists, reusing...\n";
  } else {
-   my $cmd = "$EXTRACTOR -i $CORPUS_CLUSTER -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE | $SORT_KEYS | $REDUCER | $GZIP > $OUT_CONTEXTS";
+   my $cmd = "$EXTRACTOR -i $CORPUS_CLUSTER -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE --phrase_language $LANGUAGE --context_language $LANGUAGE | $SORT_KEYS | $REDUCER | $GZIP > $OUT_CONTEXTS";
    if ($COMPLETE_CACHE) {
      print STDERR "COMPLETE_CACHE is set: removing memory limits on cache.\n";
-     $cmd = "$EXTRACTOR -i $CORPUS_CLUSTER -c 0 -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE | $SORT_KEYS | $GZIP > $OUT_CONTEXTS";
+     $cmd = "$EXTRACTOR -i $CORPUS_CLUSTER -c 0 -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE  --phrase_language $LANGUAGE --context_language $LANGUAGE  | $SORT_KEYS | $GZIP > $OUT_CONTEXTS";
    }
    safesystem($cmd) or die "Failed to extract contexts.";
   }
@@ -270,8 +272,14 @@ sub label_spans_with_topics {
   if (-e $OUT_SPANS) {
     print STDERR "$OUT_SPANS exists, reusing...\n";
   } else {
+    my $l = "tt";
+    if ($LANGUAGE eq "source") {
+        $l = "ss";
+    } elsif ($LANGUAGE eq "both") {
+        $l = "bb";
+    } else { die "Invalid language specifier $LANGUAGE\n" unless $LANGUAGE eq "target" };
     safesystem("$ZCAT $IN_CLUSTERS > $CLUSTER_DIR/clusters.txt") or die "Failed to unzip";
-    safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS_CLUSTER -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $CLUSTER_DIR/clusters.txt $CONTEXT_SIZE $LABEL_THRESHOLD > $OUT_SPANS") or die "Failed to label spans";
+    safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS_CLUSTER -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $CLUSTER_DIR/clusters.txt $CONTEXT_SIZE $LABEL_THRESHOLD $l > $OUT_SPANS") or die "Failed to label spans";
     unlink("$CLUSTER_DIR/clusters.txt") or warn "Failed to remove $CLUSTER_DIR/clusters.txt";
     safesystem("paste -d ' ' $CORPUS_LEX $OUT_SPANS > $LABELED_DIR/corpus.src_trg_al_label") or die "Couldn't paste";
   }
