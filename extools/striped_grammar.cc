@@ -33,7 +33,7 @@ void RuleStatistics::ParseRuleStatistics(const char* buf, int start, int end) {
         while(ptr < end && buf[ptr] != ',' && !IsWhitespace(buf[ptr])) { ++ptr; }
         if (ptr > vstart) {
           short a, b;
-          AnnotatedParallelSentence::ReadAlignmentPoint(buf, vstart, ptr, false, &a, &b);
+          AnnotatedParallelSentence::ReadAlignmentPoint(buf, vstart, ptr, false, &a, &b, 0, 0);
           aligns.push_back(make_pair(a,b));
         }
       }

@@ -1,8 +1,10 @@
 #ifndef _SENTENCE_PAIR_H_
 #define _SENTENCE_PAIR_H_
 
+#include <map>
 #include <utility>
 #include <vector>
+#include <boost/tuple/tuple.hpp>
 #include "wordid.h"
 #include "array2d.h"
 
@@ -22,12 +24,12 @@ struct AnnotatedParallelSentence {
   std::vector<std::vector<std::pair<short, short> > > aligns_by_fword;
 
   // span type information
-  Array2D<std::vector<WordID> > span_types;  // span_types(i,j) is the list of category
-                               // types for a span (i,j) in the TARGET language.
+  std::map< boost::tuple<short,short,short,short>, std::vector<WordID> > span_types;
+  // span_types(i,j,k,l) is the list of category span (i,j) in source and (k,l) in the target language.
 
   int f_len, e_len;
 
-  static int ReadAlignmentPoint(const char* buf, int start, int end, bool permit_col, short* a, short* b);
+  static int ReadAlignmentPoint(const char* buf, int start, int end, bool permit_col, short* a, short* b, short* c, short* d);
 
  private:
   void Reset();

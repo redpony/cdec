@@ -4,7 +4,7 @@ import sys
 from operator import itemgetter
 
 if len(sys.argv) <= 2:
-  print "Usage: spans2labels.py phrase_context_index [order] [threshold]"
+  print "Usage: spans2labels.py phrase_context_index [order] [threshold] [languages={s,t,b}{s,t,b}]"
   exit(1)
 
 order=1
@@ -14,6 +14,11 @@ if len(sys.argv) > 2:
   order = int(sys.argv[2])
 if len(sys.argv) > 3:
   threshold = float(sys.argv[3])
+phr=ctx='t'
+if len(sys.argv) > 4:
+  phr, ctx = sys.argv[4]
+  assert phr in 'stb'
+  assert ctx in 'stb'
 
 phrase_context_index = {}
 for line in file(sys.argv[1], 'r'):
@@ -52,11 +57,35 @@ for line in sys.stdin:
     t1 += order
     t2 += order
 
-    phrase = reduce(lambda x, y: x+y+" ", target[t1:t2], "").strip()
-    left_context = reduce(lambda x, y: x+y+" ", target[t1-order:t1], "")
-    right_context = reduce(lambda x, y: x+y+" ", target[t2:t2+order], "").strip()
-    context = "%s<PHRASE> %s" % (left_context, right_context)
+    phraset = phrases = contextt = contexts = ''
+    if phr in 'tb':
+        phraset = reduce(lambda x, y: x+y+" ", target[t1:t2], "").strip()
+    if phr in 'sb':
+        phrases = reduce(lambda x, y: x+y+" ", source[s1:s2], "").strip()
+
+    if ctx in 'tb':
+        left_context = reduce(lambda x, y: x+y+" ", target[t1-order:t1], "")
+        right_context = reduce(lambda x, y: x+y+" ", target[t2:t2+order], "").strip()
+        contextt = "%s<PHRASE> %s" % (left_context, right_context)
+    if ctx in 'sb':
+        left_context = reduce(lambda x, y: x+y+" ", source[s1-order:s1], "")
+        right_context = reduce(lambda x, y: x+y+" ", source[s2:s2+order], "").strip()
+        contexts = "%s<PHRASE> %s" % (left_context, right_context)
+
+    if phr == 'b':
+        phrase = phraset + ' <SPLIT> ' + phrases
+    elif phr == 's':
+        phrase = phrases
+    else:
+        phrase = phraset
+
+    if ctx == 'b':
+        context = contextt + ' <SPLIT> ' + contexts
+    elif ctx == 's':
+        context = contexts
+    else:
+        context = contextt
 
     label = phrase_context_index.get((phrase,context), "<UNK>")
-    print "%s-%s:X%s" % (t1-order,t2-order,label),
+    print "%d-%d-%d-%d:X%s" % (s1-order,s2-order,t1-order,t2-order,label),
   print
