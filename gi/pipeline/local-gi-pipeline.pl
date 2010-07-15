@@ -20,6 +20,7 @@ my $CONTEXT_SIZE = 1;
 my $BIDIR = 0;
 my $TOPICS_CONFIG = "pyp-topics.conf";
 my $LANGUAGE = "target";
+my $LABEL_THRESHOLD = 0;
 
 my $MODEL = "pyp";
 my $NUM_EM_ITERS = 100;
