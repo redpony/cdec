@@ -8,6 +8,7 @@
 #include <boost/tuple/tuple_comparison.hpp>
 
 #include <boost/functional/hash.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include "sentence_pair.h"
 #include "tdict.h"
@@ -15,8 +16,9 @@
 #include "array2d.h"
 
 using namespace std;
-using namespace tr1;
 using namespace boost;
+using std::tr1::unordered_map;
+using boost::tuple;
 
 namespace {
   inline bool IsWhitespace(char c) { return c == ' ' || c == '\t'; }
