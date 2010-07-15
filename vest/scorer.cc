@@ -6,6 +6,7 @@
 #include <fstream>
 #include <cstdio>
 #include <valarray>
+#include <algorithm>
 
 #include <boost/shared_ptr.hpp>
 
@@ -47,8 +48,37 @@ ScoreType ScoreTypeFromString(const string& st) {
   return IBM_BLEU;
 }
 
+static char const* score_names[]={
+  "IBM_BLEU", "NIST_BLEU", "Koehn_BLEU", "TER", "BLEU_minus_TER_over_2", "SER", "AER", "IBM_BLEU_3"
+};
+
+std::string StringFromScoreType(ScoreType st) {
+  assert(st>=0 && st<sizeof(score_names)/sizeof(score_names[0]));
+  return score_names[(int)st];
+}
+
+
 Score::~Score() {}
 SentenceScorer::~SentenceScorer() {}
+
+struct length_accum {
+  template <class S>
+  float operator()(float sum,S const& ref) const {
+    return sum+ref.size();
+  }
+};
+
+template <class S>
+float avg_reflength(vector<S> refs) {
+  unsigned n=refs.size();
+  return n?accumulate(refs.begin(),refs.end(),0.,length_accum())/n:0.;
+}
+
+
+float SentenceScorer::ComputeRefLength(const Sentence &hyp) const {
+  return hyp.size(); // reasonable default? :)
+}
+
 const std::string* SentenceScorer::GetSource() const { return NULL; }
 
 class SERScore : public Score {
@@ -64,9 +94,9 @@ class SERScore : public Score {
     os << "SER= " << ComputeScore() << " (" << correct << '/' << total << ')';
     *details = os.str();
   }
-  void PlusPartialEquals(const Score& delta, int oracle_e_cover, int oracle_f_cover, int src_len){}
-  
-  void PlusEquals(const Score& delta, const float scale) {
+  void PlusPartialEquals(const Score& /* delta */, int /* oracle_e_cover */, int /* oracle_f_cover */, int /* src_len */){}
+
+  void PlusEquals(const Score& delta, const float /* scale */) {
     correct += static_cast<const SERScore&>(delta).correct;
     total += static_cast<const SERScore&>(delta).total;
   }
@@ -94,7 +124,7 @@ class SERScore : public Score {
 class SERScorer : public SentenceScorer {
  public:
   SERScorer(const vector<vector<WordID> >& references) : refs_(references) {}
-  Score* ScoreCCandidate(const vector<WordID>& hyp) const {
+  Score* ScoreCCandidate(const vector<WordID>& /* hyp */) const {
     Score* a = NULL;
     return a;
   }
@@ -120,7 +150,7 @@ class BLEUScore : public Score {
     hyp_len = 0; }
   BLEUScore(int n, int k) :  correct_ngram_hit_counts(float(k),float(n)), hyp_ngram_counts(float(k),float(n)) {
     ref_len = k;
-    hyp_len = k; }  
+    hyp_len = k; }
   float ComputeScore() const;
   float ComputePartialScore() const;
   void ScoreDetails(string* details) const;
@@ -156,7 +186,6 @@ class BLEUScorerBase : public SentenceScorer {
   Score* ScoreCCandidate(const vector<WordID>& hyp) const;
   static Score* ScoreFromString(const string& in);
 
- protected:
   virtual float ComputeRefLength(const vector<WordID>& hyp) const = 0;
  private:
   struct NGramCompare {
@@ -257,7 +286,6 @@ class IBM_BLEUScorer : public BLEUScorerBase {
    for (int i=0; i < references.size(); ++i)
      lengths_[i] = references[i].size();
  }
- protected:
   float ComputeRefLength(const vector<WordID>& hyp) const {
     if (lengths_.size() == 1) return lengths_[0];
     int bestd = 2000000;
@@ -285,7 +313,6 @@ class NIST_BLEUScorer : public BLEUScorerBase {
      if (references[i].size() < shortest_)
        shortest_ = references[i].size();
  }
- protected:
   float ComputeRefLength(const vector<WordID>& /* hyp */) const {
     return shortest_;
   }
@@ -302,7 +329,6 @@ class Koehn_BLEUScorer : public BLEUScorerBase {
      avg_ += references[i].size();
    avg_ /= references.size();
  }
- protected:
   float ComputeRefLength(const vector<WordID>& /* hyp */) const {
     return avg_;
   }
@@ -520,10 +546,10 @@ void BLEUScore::PlusPartialEquals(const Score& delta, int oracle_e_cover, int or
   correct_ngram_hit_counts += d.correct_ngram_hit_counts;
   hyp_ngram_counts += d.hyp_ngram_counts;
   //scale the reference length according to the size of the input sentence covered by this rule
-  
+
   ref_len *= (float)oracle_f_cover / src_len;
   ref_len += d.ref_len;
-  
+
   hyp_len = oracle_e_cover;
   hyp_len += d.hyp_len;
 }

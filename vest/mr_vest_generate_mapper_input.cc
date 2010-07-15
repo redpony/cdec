@@ -11,6 +11,8 @@
 #include "line_optimizer.h"
 #include "hg.h"
 #include "hg_io.h"
+#include "scorer.h"
+#include "oracle_bleu.h"
 
 using namespace std;
 namespace po = boost::program_options;
@@ -30,16 +32,20 @@ struct oracle_directions {
     return o.str();
   }
 
-  oracle_directions(string forest_repository,unsigned dev_set_size,vector<int> const& fids=vector<int>()): forest_repository(forest_repository),dev_set_size(dev_set_size),fids(fids) {
+  void set_dev_set_size(int i) {
+    dev_set_size=i;
     dirs.resize(dev_set_size);
   }
+
+  oracle_directions(string forest_repository="",unsigned dev_set_sz=0,vector<int> const& fids=vector<int>()): forest_repository(forest_repository),fids(fids) {
+    set_dev_set_size(dev_set_sz);
+  }
+
   Dir const& operator[](unsigned i) {
     Dir &dir=dirs[i];
     if (dir.empty()) {
       ReadFile rf(forest_file(i));
-      Hypergraph hg;
-      HypergraphIO::ReadFromJSON(rf.stream(), &hg);
-      cerr<<"oracle: forest["<<i<<"] loaded: "<<hg.stats()<<endl;
+      FeatureVector fear,hope,best;
       //TODO: get hope/oracle from vlad.  random for now.
       LineOptimizer::RandomUnitVector(fids,&dir,&rng);
     }
@@ -86,6 +92,7 @@ void compress_similar(vector<Dir> &dirs,double min_dist,ostream *log=&cerr,bool 
 
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
+  OracleBleu::AddOptions(&opts);
   opts.add_options()
         ("dev_set_size,s",po::value<unsigned int>(),"[REQD] Development set size (# of parallel sentences)")
         ("forest_repository,r",po::value<string>(),"[REQD] Path to forest repository")

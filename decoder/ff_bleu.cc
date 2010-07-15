@@ -1,10 +1,17 @@
-#include "ff_bleu.h"
+namespace {
+char const* bleu_usage_name="BLEUModel";
+char const* bleu_usage_short="[-o 3|4]";
+char const* bleu_usage_verbose="Uses feature id 0!  Make sure there are no other features whose weights aren't specified or there may be conflicts.  Computes oracle with weighted combination of BLEU and model score (from previous model set, using weights on edges?).  Performs ngram context expansion; expect reference translation info in sentence metadata; if document scorer is IBM_BLEU_3, then use order 3; otherwise use order 4.";
+}
+
 
 #include <sstream>
 #include <unistd.h>
+#include <boost/lexical_cast.hpp>
 
 #include <boost/shared_ptr.hpp>
 
+#include "ff_bleu.h"
 #include "tdict.h"
 #include "Vocab.h"
 #include "Ngram.h"
@@ -26,16 +33,6 @@ class BLEUModelImpl {
       kNONE(-1),
       kSTAR(TD::Convert("<{STAR}>")) {}
 
-  BLEUModelImpl(int order, const string& f) :
-      ngram_(*TD::dict_, order), buffer_(), order_(order), state_size_(OrderToStateSize(order) - 1),
-      floor_(-100.0),
-      kSTART(TD::Convert("<s>")),
-      kSTOP(TD::Convert("</s>")),
-      kUNKNOWN(TD::Convert("<unk>")),
-      kNONE(-1),
-      kSTAR(TD::Convert("<{STAR}>")) {}
-  
-
   virtual ~BLEUModelImpl() {
       }
 
@@ -49,7 +46,7 @@ class BLEUModelImpl {
 
   void GetRefToNgram()
   {}
- 
+
   string DebugStateToString(const void* state) const {
     int len = StateSize(state);
     const int* astate = reinterpret_cast<const int*>(state);
@@ -118,15 +115,15 @@ class BLEUModelImpl {
 	for ( rit=vs.rbegin() ; rit != vs.rend(); ++rit )
 	  cerr << " " << TD::Convert(*rit);
 	cerr << ")\n";}
-    
+
     return vs;
   }
 
 
   double LookupWords(const TRule& rule, const vector<const void*>& ant_states, void* vstate, const SentenceMetadata& smeta) {
-   
+
     int len = rule.ELength() - rule.Arity();
-    
+
     for (int i = 0; i < ant_states.size(); ++i)
       len += StateSize(ant_states[i]);
     buffer_.resize(len + 1);
@@ -168,9 +165,9 @@ class BLEUModelImpl {
       if (buffer_[i] == kSTAR) {
         edge = i;
       } else if (edge-i >= order_) {
-	
+
 	vs = CalcPhrase(buffer_[i],&buffer_[i+1]);
-      
+
       } else if (edge == len && remnant) {
         remnant[j++] = buffer_[i];
       }
@@ -182,7 +179,7 @@ class BLEUModelImpl {
     vector<WordID>::reverse_iterator rit;
     for ( rit=vs.rbegin() ; rit != vs.rend(); ++rit )
       cerr << " " << TD::Convert(*rit);
-    cerr << ")\n"; 
+    cerr << ")\n";
     */
 
     Score *node_score = smeta.GetDocScorer()[smeta.GetSentenceID()]->ScoreCCandidate(vs);
@@ -191,7 +188,7 @@ class BLEUModelImpl {
     const Score *base_score= &smeta.GetScore();
     //cerr << "SWBASE : " << base_score->ComputeScore() << details << " ";
 
-    int src_length = smeta.GetSourceLength();    
+    int src_length = smeta.GetSourceLength();
     node_score->PlusPartialEquals(*base_score, rule.EWords(), rule.FWords(), src_length );
     float oracledoc_factor = (src_length + smeta.GetDocLen())/  src_length;
 
@@ -234,19 +231,27 @@ class BLEUModelImpl {
   const WordID kSTAR;
 };
 
+string BLEUModel::usage(bool param,bool verbose) {
+  return usage_helper(bleu_usage_name,bleu_usage_short,bleu_usage_verbose,param,verbose);
+}
+
 BLEUModel::BLEUModel(const string& param) :
   fid_(0) { //The partial BLEU score is kept in feature id=0
   vector<string> argv;
   int argc = SplitOnWhitespace(param, &argv);
   int order = 3;
-  string filename;
- 
-  //loop over argv and load all references into vector of NgramMaps   
-  if (argc < 1) { cerr << "BLEUModel requires a filename, minimally!\n"; abort(); }
-  
-  
+
+  //loop over argv and load all references into vector of NgramMaps
+  if (argc >= 1) {
+    if (argv[1] != "-o" || argc<2) {
+      cerr<<bleu_usage_name<<" specification should be: "<<bleu_usage_short<<"; you provided: "<<param<<endl<<bleu_usage_verbose<<endl;
+      abort();
+    } else
+      order=boost::lexical_cast<int>(argv[1]);
+  }
+
   SetStateSize(BLEUModelImpl::OrderToStateSize(order));
-  pimpl_ = new BLEUModelImpl(order, filename);
+  pimpl_ = new BLEUModelImpl(order);
 }
 
 BLEUModel::~BLEUModel() {
@@ -261,11 +266,11 @@ void BLEUModel::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                           const Hypergraph::Edge& edge,
                                           const vector<const void*>& ant_states,
                                           SparseVector<double>* features,
-                                          SparseVector<double>* estimated_features,
+                                          SparseVector<double>* /* estimated_features */,
                                           void* state) const {
 
   (void) smeta;
-  /*cerr << "In BM calling set " << endl;  
+  /*cerr << "In BM calling set " << endl;
   const Score *s=  &smeta.GetScore();
   const int dl = smeta.GetDocLen();
   cerr << "SCO " << s->ComputeScore() << endl;
