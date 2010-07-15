@@ -87,4 +87,10 @@ m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
 vest/mbr_kbest
+extools/featurize_grammar
+extools/filter_score_grammar
+gi/posterior-regularisation/prjava/build/
+gi/posterior-regularisation/prjava/lib/prjava-20100713.jar
+gi/posterior-regularisation/prjava/prjava.jar
+gi/pyp-topics/src/pyp-contexts-train
 
