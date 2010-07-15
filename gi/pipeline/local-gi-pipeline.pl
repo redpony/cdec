@@ -52,8 +52,11 @@ my $TOPIC_TRAIN = "$PYPTOOLS/pyp-contexts-train";
 assert_exec($PATCH_CORPUS, $SORT_KEYS, $REDUCER, $EXTRACTOR, $PYP_TOPICS_TRAIN, $S2L, $C2D, $TOPIC_TRAIN);
 
 my $BACKOFF_GRAMMAR;
+my $DEFAULT_CAT;
 my $HIER_CAT;
 my $TAGGED_CORPUS;
+
+my $NAME_SHORTCUT;
 
 my $OUTPUT = './giwork';
 usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
@@ -66,6 +69,7 @@ usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'trg_context=i' => \$CONTEXT_SIZE,
                            'samples=i' => \$NUM_SAMPLES,
                            'label_threshold=f' => \$LABEL_THRESHOLD,
+                           'use_default_cat' => \$DEFAULT_CAT,
                            'topics-config=s' => \$TOPICS_CONFIG,
                            'em-iterations=i' => \$NUM_EM_ITERS,
                            'pr-iterations=i' => \$NUM_PR_ITERS,
@@ -74,8 +78,13 @@ usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'pr-threads=i' => \$PR_THREADS,
                            'tagged_corpus=s' => \$TAGGED_CORPUS,
                            'language=s' => \$LANGUAGE,
+                           'get_name_only' => \$NAME_SHORTCUT,
                           );
-
+if ($NAME_SHORTCUT) {
+  $NUM_TOPICS = $NUM_TOPICS_FINE;
+  print STDERR labeled_dir();
+  exit 0;
+}
 usage() unless scalar @ARGV == 1;
 my $CORPUS = $ARGV[0];
 open F, "<$CORPUS" or die "Can't read $CORPUS: $!"; close F;
@@ -186,7 +195,7 @@ sub cluster_dir {
 
 sub labeled_dir {
   if (lc($MODEL) eq "pyp" && $LABEL_THRESHOLD != 0) {
-    return cluster_dir() . "-lt$LABEL_THRESHOLD";
+    return cluster_dir() . "_lt$LABEL_THRESHOLD";
   } else {
     return cluster_dir();
   }
@@ -314,7 +323,8 @@ sub grammar_extract {
     print STDERR "$OUTGRAMMAR exists, reusing...\n";
   } else {
     my $BACKOFF_ARG = ($BACKOFF_GRAMMAR ? "-g" : "");
-    safesystem("$EXTRACTOR -i $LABELED -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -t $NUM_TOPICS $BACKOFF_ARG | $SORT_KEYS | $REDUCER -p | $GZIP > $OUTGRAMMAR") or die "Couldn't extract grammar";
+    my $DEFAULT_CAT_ARG = ($DEFAULT_CAT ? "-d X" : "");
+    safesystem("$EXTRACTOR -i $LABELED -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -t $NUM_TOPICS $BACKOFF_ARG $DEFAULT_CAT_ARG | $SORT_KEYS | $REDUCER -p | $GZIP > $OUTGRAMMAR") or die "Couldn't extract grammar";
   }
   return $OUTGRAMMAR;
 }
