@@ -3,15 +3,16 @@
 
 #include <vector>
 #include <iostream>
-#include <boost/ptr_container/ptr_vector.hpp>
 
+#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/mersenne_twister.hpp>
+#include <boost/mpi/environment.hpp>
+#include <boost/mpi/communicator.hpp>
 
 #include "mpi-pyp.hh"
 #include "corpus.hh"
-#include "workers.hh"
 
 class PYPTopics {
 public:
@@ -20,13 +21,17 @@ public:
   typedef double F;
 
 public:
-  PYPTopics(int num_topics, bool use_topic_pyp=false, unsigned long seed = 0,
-        int max_threads = 1) 
+  PYPTopics(int num_topics, bool use_topic_pyp=false, unsigned long seed = 0) 
     : m_num_topics(num_topics), m_word_pyps(1), 
-    m_topic_pyp(0.5,1.0,seed), m_use_topic_pyp(use_topic_pyp),
+    m_topic_pyp(0.5,1.0), m_use_topic_pyp(use_topic_pyp),
     m_seed(seed),
     uni_dist(0,1), rng(seed == 0 ? (unsigned long)this : seed), 
-    rnd(rng, uni_dist), max_threads(max_threads) {}
+    rnd(rng, uni_dist), m_mpi_start(-1), m_mpi_end(-1) {
+      boost::mpi::communicator m_world;
+      m_rank = m_world.rank(); 
+      m_size = m_world.size();
+      m_am_root = (m_rank == 0);
+    }
 
   void sample_corpus(const Corpus& corpus, int samples,
                      int freq_cutoff_start=0, int freq_cutoff_end=0, 
@@ -81,17 +86,12 @@ private:
   gen_type rnd; //instantiate: rnd(rng, uni_dist)
                 //call: rnd() generates uniform on [0,1)
 
-  typedef boost::function<F()> JobReturnsF;
-  typedef SimpleWorker<JobReturnsF, F> SimpleResampleWorker;
-  typedef boost::ptr_vector<SimpleResampleWorker> WorkerPtrVect;
-
-  F hresample_docs(int num_threads, int thread_id);
-
-//  F hresample_topics();
-  
-  int max_threads;
-
   TermBackoffPtr m_backoff;
+
+  boost::mpi::communicator m_world;
+  bool m_am_root;
+  int m_rank, m_size;
+  int m_mpi_start, m_mpi_end;
 };
 
 #endif // PYP_TOPICS_HH

@@ -32,7 +32,7 @@ public:
 //  using google::sparse_hash_map<Dish,int>::begin;
 //  using google::sparse_hash_map<Dish,int>::end;
 
-  PYP(double a, double b, unsigned long seed = 0, Hash hash=Hash());
+  PYP(double a, double b, Hash hash=Hash());
 
   int increment(Dish d, double p0);
   int decrement(Dish d);
@@ -153,7 +153,7 @@ private:
 };
 
 template <typename Dish, typename Hash>
-PYP<Dish,Hash>::PYP(double a, double b, unsigned long seed, Hash)
+PYP<Dish,Hash>::PYP(double a, double b, Hash)
 : std::tr1::unordered_map<Dish, int, Hash>(10), _a(a), _b(b), 
 //: google::sparse_hash_map<Dish, int, Hash>(10), _a(a), _b(b), 
   _a_beta_a(1), _a_beta_b(1), _b_gamma_s(1), _b_gamma_c(1),

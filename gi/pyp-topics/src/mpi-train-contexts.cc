@@ -8,6 +8,8 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/mpi/environment.hpp>
+#include <boost/mpi/communicator.hpp>
 
 // Local
 #include "mpi-pyp-topics.hh"
@@ -24,8 +26,12 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
- cout << "Pitman Yor topic models: Copyright 2010 Phil Blunsom\n";
- cout << REVISION << '\n' <<endl;
+  mpi::environment env(argc, argv);
+  mpi::communicator world;
+  bool am_root = (world.rank() == 0);
+  if (am_root) std::cout << "I am process " << world.rank() << " of " << world.size() << "." << std::endl;
+  if (am_root) cout << "Pitman Yor topic models: Copyright 2010 Phil Blunsom\n";
+  if (am_root) cout << REVISION << '\n' <<endl;
 
   ////////////////////////////////////////////////////////////////////////////////////////////
   // Command line processing
@@ -53,7 +59,6 @@ int main(int argc, char **argv)
       ("freq-cutoff-start", value<int>()->default_value(0), "initial frequency cutoff.")
       ("freq-cutoff-end", value<int>()->default_value(0), "final frequency cutoff.")
       ("freq-cutoff-interval", value<int>()->default_value(0), "number of iterations between frequency decrement.")
-      ("max-threads", value<int>()->default_value(1), "maximum number of simultaneous threads allowed")
       ("max-contexts-per-document", value<int>()->default_value(0), "Only sample the n most frequent contexts for a document.")
       ;
 
@@ -81,7 +86,7 @@ int main(int argc, char **argv)
 
   // seed the random number generator: 0 = automatic, specify value otherwise
   unsigned long seed = 0; 
-  PYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"), seed, vm["max-threads"].as<int>());
+  PYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"), seed);
 
   // read the data
   BackoffGenerator* backoff_gen=0;
@@ -112,58 +117,60 @@ int main(int argc, char **argv)
                       vm["freq-cutoff-interval"].as<int>(),
                       vm["max-contexts-per-document"].as<int>());
 
-  if (vm.count("document-topics-out")) {
-    ogzstream documents_out(vm["document-topics-out"].as<string>().c_str());
+  if (world.rank() == 0) {
+    if (vm.count("document-topics-out")) {
+      ogzstream documents_out(vm["document-topics-out"].as<string>().c_str());
 
-    int document_id=0;
-    map<int,int> all_terms;
-    for (Corpus::const_iterator corpusIt=contexts_corpus.begin(); 
-         corpusIt != contexts_corpus.end(); ++corpusIt, ++document_id) {
-      vector<int> unique_terms;
-      for (Document::const_iterator docIt=corpusIt->begin();
-           docIt != corpusIt->end(); ++docIt) {
-        if (unique_terms.empty() || *docIt != unique_terms.back())
-          unique_terms.push_back(*docIt);
-        // increment this terms frequency
-        pair<map<int,int>::iterator,bool> insert_result = all_terms.insert(make_pair(*docIt,1));
-        if (!insert_result.second) 
-          all_terms[*docIt] = all_terms[*docIt] + 1;
+      int document_id=0;
+      map<int,int> all_terms;
+      for (Corpus::const_iterator corpusIt=contexts_corpus.begin(); 
+           corpusIt != contexts_corpus.end(); ++corpusIt, ++document_id) {
+        vector<int> unique_terms;
+        for (Document::const_iterator docIt=corpusIt->begin();
+             docIt != corpusIt->end(); ++docIt) {
+          if (unique_terms.empty() || *docIt != unique_terms.back())
+            unique_terms.push_back(*docIt);
+          // increment this terms frequency
+          pair<map<int,int>::iterator,bool> insert_result = all_terms.insert(make_pair(*docIt,1));
+          if (!insert_result.second) 
+            all_terms[*docIt] = all_terms[*docIt] + 1;
           //insert_result.first++;
-      }
-      documents_out << contexts_corpus.key(document_id) << '\t';
-      documents_out << model.max(document_id) << " " << corpusIt->size() << " ||| ";
-      for (std::vector<int>::const_iterator termIt=unique_terms.begin();
-           termIt != unique_terms.end(); ++termIt) {
-        if (termIt != unique_terms.begin())
-          documents_out << " ||| ";
-       vector<std::string> strings = contexts_corpus.context2string(*termIt);
-       copy(strings.begin(), strings.end(),ostream_iterator<std::string>(documents_out, " "));
-        documents_out << "||| C=" << model.max(document_id, *termIt);
+        }
+        documents_out << contexts_corpus.key(document_id) << '\t';
+        documents_out << model.max(document_id) << " " << corpusIt->size() << " ||| ";
+        for (std::vector<int>::const_iterator termIt=unique_terms.begin();
+             termIt != unique_terms.end(); ++termIt) {
+          if (termIt != unique_terms.begin())
+            documents_out << " ||| ";
+          vector<std::string> strings = contexts_corpus.context2string(*termIt);
+          copy(strings.begin(), strings.end(),ostream_iterator<std::string>(documents_out, " "));
+          documents_out << "||| C=" << model.max(document_id, *termIt);
 
+        }
+        documents_out <<endl;
       }
-      documents_out <<endl;
+      documents_out.close();
+
+      if (vm.count("default-topics-out")) {
+        ofstream default_topics(vm["default-topics-out"].as<string>().c_str());
+        default_topics << model.max_topic() <<endl;
+        for (std::map<int,int>::const_iterator termIt=all_terms.begin(); termIt != all_terms.end(); ++termIt) {
+          vector<std::string> strings = contexts_corpus.context2string(termIt->first);
+          default_topics << model.max(-1, termIt->first) << " ||| " << termIt->second << " ||| ";
+          copy(strings.begin(), strings.end(),ostream_iterator<std::string>(default_topics, " "));
+          default_topics <<endl;
+        }
+      }
     }
-    documents_out.close();
 
-    if (vm.count("default-topics-out")) {
-      ofstream default_topics(vm["default-topics-out"].as<string>().c_str());
-      default_topics << model.max_topic() <<endl;
-      for (std::map<int,int>::const_iterator termIt=all_terms.begin(); termIt != all_terms.end(); ++termIt) {
-       vector<std::string> strings = contexts_corpus.context2string(termIt->first);
-        default_topics << model.max(-1, termIt->first) << " ||| " << termIt->second << " ||| ";
-       copy(strings.begin(), strings.end(),ostream_iterator<std::string>(default_topics, " "));
-        default_topics <<endl;
-      }
+    if (vm.count("topic-words-out")) {
+      ogzstream topics_out(vm["topic-words-out"].as<string>().c_str());
+      model.print_topic_terms(topics_out);
+      topics_out.close();
     }
-  }
 
-  if (vm.count("topic-words-out")) {
-    ogzstream topics_out(vm["topic-words-out"].as<string>().c_str());
-    model.print_topic_terms(topics_out);
-    topics_out.close();
+    cout <<endl;
   }
-
- cout <<endl;
 
   return 0;
 }
