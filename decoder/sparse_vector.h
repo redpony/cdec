@@ -267,6 +267,7 @@ private:
 
 typedef SparseVector<double> FeatureVector;
 typedef std::vector<double> FeatureWeights;
+typedef FeatureWeights WeightVector;
 
 template <typename T>
 SparseVector<T> operator+(const SparseVector<T>& a, const SparseVector<T>& b) {
