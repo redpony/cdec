@@ -15,6 +15,14 @@ public class Corpus
 	private List<Edge> edges = new ArrayList<Edge>();
 	private List<List<Edge>> phraseToContext = new ArrayList<List<Edge>>();
 	private List<List<Edge>> contextToPhrase = new ArrayList<List<Edge>>();
+	public int splitSentinel;
+	public int phraseSentinel;
+	
+	public Corpus()
+	{
+		splitSentinel = wordLexicon.insert("<SPLIT>");
+		phraseSentinel = wordLexicon.insert("<PHRASE>");		
+	}
 	
 	public class Edge
 	{
@@ -157,6 +165,11 @@ public class Corpus
 		return b.toString();
 	}
 	
+	public boolean isSentinel(int wordId)
+	{
+		return wordId == splitSentinel || wordId == phraseSentinel;
+	}
+	
 	static Corpus readFromFile(Reader in) throws IOException
 	{
 		Corpus c = new Corpus();
@@ -217,6 +230,19 @@ public class Corpus
 		}
 		
 		return c;
+	}
+	
+	TIntArrayList phraseEdges(TIntArrayList phrase)
+	{
+		TIntArrayList r = new TIntArrayList(4);
+		for (int p = 0; p < phrase.size(); ++p)
+		{
+			if (p == 0 || phrase.get(p-1) == splitSentinel) 				
+				r.add(p);
+			if (p == phrase.size() - 1 || phrase.get(p+1) == splitSentinel) 
+				r.add(p);
+		}
+		return r;
 	}
 
 	public void printStats(PrintStream out) 
