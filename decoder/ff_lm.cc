@@ -1,6 +1,8 @@
+namespace {
 char const* usage_name="LanguageModel";
 char const* usage_short="srilm.gz [-n FeatureName] [-o StateOrder] [-m LimitLoadOrder]";
 char const* usage_verbose="-n determines the name of the feature (and its weight).  -o defaults to 3.  -m defaults to effectively infinite, otherwise says what order lm probs to use (up to).  you could use -o > -m but that would be wasteful.  -o < -m means some ngrams are scored longer (whenever a word is inserted by a rule next to a variable) than the state would ordinarily allow.  NOTE: multiple LanguageModel features are allowed, but they will wastefully duplicate state, except in the special case of -o 1 (which uses no state).  subsequent references to the same a.lm.gz. unless they specify -m, will reuse the same SRI LM in memory; this means that the -m used in the first load of a.lm.gz will take effect.";
+}
 
 //TODO: backoff wordclasses for named entity xltns, esp. numbers.  e.g. digits -> @.  idealy rule features would specify replacement lm tokens/classes
 
@@ -513,7 +515,7 @@ bool parse_lmspec(std::string const& in, int &order, string &featurename, string
   if (order > 0 && !filename.empty())
     return true;
 usage:
-  cerr<<usage_name<<" specification should be: "<<usage_short<<"; you provided: "<<in<<usage_verbose<<endl;
+  cerr<<usage_name<<" specification should be: "<<usage_short<<"; you provided: "<<in<<endl<<usage_verbose<<endl;
   return false;
 }
 

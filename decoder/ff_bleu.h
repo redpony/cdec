@@ -18,6 +18,7 @@ class BLEUModel : public FeatureFunction {
   virtual void FinalTraversalFeatures(const void* context,
                                       SparseVector<double>* features) const;
   std::string DebugStateToString(const void* state) const;
+  static std::string usage(bool param,bool verbose);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,

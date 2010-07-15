@@ -12,6 +12,7 @@ class Hypergraph;  // needed for alignment
 
 enum ScoreType { IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, BLEU_minus_TER_over_2, SER, AER, IBM_BLEU_3 };
 ScoreType ScoreTypeFromString(const std::string& st);
+std::string StringFromScoreType(ScoreType st);
 
 class Score {
  public:
@@ -33,20 +34,24 @@ class Score {
 
 class SentenceScorer {
  public:
+  typedef std::vector<WordID> Sentence;
+  virtual float ComputeRefLength(const Sentence& hyp) const; // default: avg of refs.length
   virtual ~SentenceScorer();
   void ComputeErrorSurface(const ViterbiEnvelope& ve, ErrorSurface* es, const ScoreType type, const Hypergraph& hg) const;
-  virtual Score* ScoreCandidate(const std::vector<WordID>& hyp) const = 0;
-  virtual Score* ScoreCCandidate(const std::vector<WordID>& hyp) const =0;
+  virtual Score* ScoreCandidate(const Sentence& hyp) const = 0;
+  virtual Score* ScoreCCandidate(const Sentence& hyp) const =0;
   virtual const std::string* GetSource() const;
   static Score* CreateScoreFromString(const ScoreType type, const std::string& in);
   static SentenceScorer* CreateSentenceScorer(const ScoreType type,
-    const std::vector<std::vector<WordID> >& refs,
+    const std::vector<Sentence >& refs,
     const std::string& src = "");
 };
 
+//TODO: should be able to GetOne GetZero without supplying sentence (just type)
 class DocScorer {
  public:
   ~DocScorer();
+  DocScorer() {  }
   DocScorer(
     const ScoreType type,
     const std::vector<std::string>& ref_files,
