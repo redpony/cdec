@@ -281,8 +281,8 @@ sub write_cdec_ini {
 formalism=scfg
 cubepruning_pop_limit=100
 add_pass_through_rules=true
-scfg_extra_glue_grammar=/export/ws10smt/data/glue/glue.scfg.gz
-grammar=/export/ws10smt/data/oov.scfg.gz
+scfg_extra_glue_grammar=/export/ws10smt/jan/glue.scfg.gz
+grammar=/export/ws10smt/jan/oov.scfg.gz
 grammar=$grammar_path
 scfg_default_nt=OOV
 scfg_no_hiero_glue_grammar=true
@@ -291,6 +291,9 @@ feature_function=LanguageModel -o 3 $LANG_MODEL
 EOT
   close CDECINI;
 };
+
+#scfg_extra_glue_grammar=/export/ws10smt/data/glue/glue.scfg.gz
+#grammar=/export/ws10smt/data/oov.scfg.gz
 
 sub print_help {
   print STDERR<<EOT;
