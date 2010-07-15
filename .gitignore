@@ -93,4 +93,6 @@ gi/posterior-regularisation/prjava/build/
 gi/posterior-regularisation/prjava/lib/prjava-20100713.jar
 gi/posterior-regularisation/prjava/prjava.jar
 gi/pyp-topics/src/pyp-contexts-train
+extools/sg_lexer.cc
+gi/posterior-regularisation/prjava/lib/prjava-20100715.jar
 

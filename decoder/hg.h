@@ -194,12 +194,12 @@ class Hypergraph {
 
   // legacy:
   void DensityPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double density,const EdgeMask* preserve_mask = NULL) {
-    PruneInsideOutside(density,0,preserve_mask,use_sum_prod_semiring,scale);
+    PruneInsideOutside(0,density,preserve_mask,use_sum_prod_semiring,scale);
   }
 
   // legacy:
   void BeamPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double alpha,const EdgeMask* preserve_mask = NULL) {
-    PruneInsideOutside(0,alpha,preserve_mask,use_sum_prod_semiring,scale);
+    PruneInsideOutside(alpha,0,preserve_mask,use_sum_prod_semiring,scale);
   }
 
   // report nodes, edges, paths
