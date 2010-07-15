@@ -259,8 +259,8 @@ PYPTopics::F PYPTopics::hresample_topics()
 
 void PYPTopics::decrement(const Term& term, int topic, int level) {
   //std::cerr << "PYPTopics::decrement(" << term << "," << topic << "," << level << ")" << std::endl;
-  m_word_pyps.at(level).at(topic).decrement(term);
-  if (m_backoff.get()) {
+  int table_delta = m_word_pyps.at(level).at(topic).decrement(term);
+  if (table_delta && m_backoff.get()) {
     Term backoff_term = (*m_backoff)[term];
     if (!m_backoff->is_null(backoff_term))
       decrement(backoff_term, topic, level+1);
@@ -269,9 +269,9 @@ void PYPTopics::decrement(const Term& term, int topic, int level) {
 
 void PYPTopics::increment(const Term& term, int topic, int level) {
   //std::cerr << "PYPTopics::increment(" << term << "," << topic << "," << level << ")" << std::endl;
-  m_word_pyps.at(level).at(topic).increment(term, word_pyps_p0(term, topic, level));
+  int table_delta = m_word_pyps.at(level).at(topic).increment(term, word_pyps_p0(term, topic, level));
 
-  if (m_backoff.get()) {
+  if (table_delta && m_backoff.get()) {
     Term backoff_term = (*m_backoff)[term];
     if (!m_backoff->is_null(backoff_term))
       increment(backoff_term, topic, level+1);

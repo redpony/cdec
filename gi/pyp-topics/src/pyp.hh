@@ -34,14 +34,14 @@ public:
 
   PYP(double a, double b, unsigned long seed = 0, Hash hash=Hash());
 
-  int increment(Dish d, double p0);
-  int decrement(Dish d);
+  virtual int increment(Dish d, double p0);
+  virtual int decrement(Dish d);
 
   // lookup functions
   int count(Dish d) const;
   double prob(Dish dish, double p0) const;
   double prob(Dish dish, double dcd, double dca, 
-                   double dtd, double dta, double p0) const;
+              double dtd, double dta, double p0) const;
   double unnormalised_prob(Dish dish, double p0) const;
 
   int num_customers() const { return _total_customers; }
