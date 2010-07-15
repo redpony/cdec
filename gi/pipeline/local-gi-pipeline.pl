@@ -13,7 +13,7 @@ my $BASE_PHRASE_MAX_SIZE = 10;
 my $COMPLETE_CACHE = 1;
 my $ITEMS_IN_MEMORY = 10000000;  # cache size in extractors
 my $NUM_TOPICS = 50;
-my $NUM_TOPICS_COARSE = 10;
+my $NUM_TOPICS_COARSE;
 my $NUM_TOPICS_FINE = $NUM_TOPICS;
 my $NUM_SAMPLES = 1000;
 my $CONTEXT_SIZE = 1;
@@ -54,6 +54,7 @@ assert_exec($PATCH_CORPUS, $SORT_KEYS, $REDUCER, $EXTRACTOR, $PYP_TOPICS_TRAIN, 
 my $BACKOFF_GRAMMAR;
 my $DEFAULT_CAT;
 my $HIER_CAT;
+my %FREQ_HIER = ();
 my $TAGGED_CORPUS;
 
 my $NAME_SHORTCUT;
@@ -61,7 +62,6 @@ my $NAME_SHORTCUT;
 my $OUTPUT = './giwork';
 usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'backoff_grammar' => \$BACKOFF_GRAMMAR,
-                           'hier_cat' => \$HIER_CAT,
                            'output=s' => \$OUTPUT,
                            'model=s' => \$MODEL,
                            'topics=i' => \$NUM_TOPICS_FINE,
@@ -90,6 +90,8 @@ my $CORPUS = $ARGV[0];
 open F, "<$CORPUS" or die "Can't read $CORPUS: $!"; close F;
 
 $NUM_TOPICS = $NUM_TOPICS_FINE;
+
+$HIER_CAT = ( $NUM_TOPICS_COARSE ? 1 : 0 );
 
 print STDERR "   Output: $OUTPUT\n";
 my $DATA_DIR = $OUTPUT . '/corpora';
@@ -147,7 +149,7 @@ if($HIER_CAT) {
     $NUM_TOPICS = $NUM_TOPICS_FINE;
     $CLUSTER_DIR = $CLUSTER_DIR_F;
     label_spans_with_topics();
-    combine_labelled_spans();
+    extract_freqs();
 } else {
     label_spans_with_topics();
 }
@@ -295,28 +297,61 @@ sub label_spans_with_topics {
   }
 }
 
-sub combine_labelled_spans {
-    print STDERR "\n!!!COMBINING SPAN LABELS\n";
+sub extract_freqs {
+    print STDERR "\n!!!EXTRACTING FREQUENCIES\n";
     my $IN_COARSE = "$CLUSTER_DIR_C/labeled_spans.txt";
-    my $OUT_COARSE = "$CLUSTER_DIR_C/labeled_spans_c.txt";
     my $IN_FINE = "$CLUSTER_DIR_F/labeled_spans.txt";
-    my $OUT_FINE = "$CLUSTER_DIR_F/labeled_spans_f.txt";
     my $OUT_SPANS = "$CLUSTER_DIR_F/labeled_spans.hier$NUM_TOPICS_COARSE-$NUM_TOPICS_FINE.txt";
-    my $COARSE_EXPR = "\'s/\\(X[0-9][0-9]*\\)/\\1c/g\'";
-    my $FINE_EXPR = "\'s/\\(X[0-9][0-9]*\\)/\\1f/g\'";
+    my $FREQS = "$CLUSTER_DIR_F/label_freq.hier$NUM_TOPICS_COARSE-$NUM_TOPICS_FINE.txt";
+    my $COARSE_EXPR = "\'s/\\(X[0-9][0-9]*\\)/\\1c/g\'"; #'
+    my $FINE_EXPR = "\'s/\\(X[0-9][0-9]*\\)/\\1f/g\'"; #'
+    my %finehier = ();
     if (-e $OUT_SPANS) {
         print STDERR "$OUT_SPANS exists, reusing...\n";
     } else {
-        safesystem("$SED $COARSE_EXPR < $IN_COARSE > $OUT_COARSE") or die "Couldn't create coarse labels.";
-        safesystem("$SED $FINE_EXPR < $IN_FINE > $OUT_FINE") or die "Couldn't create fine labels.";
-        safesystem("sed -e 's/||| \\(.*\\)\$/\\1/' < $OUT_COARSE | paste -d ' ' $OUT_FINE - > $OUT_SPANS") or die "Couldn't paste coarse and fine labels.";
-        safesystem("paste -d ' ' $CORPUS_LEX $OUT_SPANS > $CLUSTER_DIR_F/corpus.src_trg_al_label.hier") or die "Couldn't paste corpus";
+        safesystem("paste -d ' ' $IN_COARSE $IN_FINE > $OUT_SPANS");
     }
+    open SPANS, $OUT_SPANS or die $!;
+    while (<SPANS>) {
+        my ($tmp, $coarse, $fine) = split /\|\|\|/;
+        my @coarse_spans = $coarse =~ /\d+-\d+:X(\d+)/g;
+        my @fine_spans = $fine =~ /\d+-\d+:X(\d+)/g;
+        
+        foreach my $i (0..(scalar @coarse_spans)-1) {
+            my $coarse_cat = $coarse_spans[$i];
+            my $fine_cat = $fine_spans[$i];
+            
+            $FREQ_HIER{$coarse_cat}{$fine_cat}++;
+        }
+    }
+    close SPANS;
+    foreach (values %FREQ_HIER) {
+        my $coarse_freq = $_;
+        my $total = 0;
+        $total+=$_ for (values %{ $coarse_freq });
+        $coarse_freq->{$_}=log($coarse_freq->{$_}/$total) for (keys %{ $coarse_freq });
+    }
+    open FREQS, ">", $FREQS or die $!;
+    foreach my $coarse_cat (keys %FREQ_HIER) {
+        print FREQS "$coarse_cat |||";
+        foreach my $fine_cat (keys %{$FREQ_HIER{$coarse_cat}}) {
+            my $res = $FREQ_HIER{$coarse_cat}{$fine_cat};
+            print FREQS " $fine_cat:$res";
+            if(! exists $finehier{$fine_cat} || $finehier{$fine_cat} < $res) {
+               $finehier{$fine_cat} = $coarse_cat;
+            }  
+        }
+        print FREQS "\n";
+    }
+    foreach my $fine_cat (keys %finehier) {
+        print FREQS "$fine_cat -> $finehier{$fine_cat}\n";
+    }
+    close FREQS;
     $CLUSTER_DIR = $CLUSTER_DIR_F;
 }
 
 sub grammar_extract {
-  my $LABELED = ($HIER_CAT ? "$CLUSTER_DIR_F/corpus.src_trg_al_label.hier" : "$LABELED_DIR/corpus.src_trg_al_label");
+  my $LABELED = "$LABELED_DIR/corpus.src_trg_al_label";
   print STDERR "\n!!!EXTRACTING GRAMMAR\n";
   my $OUTGRAMMAR = "$GRAMMAR_DIR/grammar.gz";
   if (-e $OUTGRAMMAR) {
