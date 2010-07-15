@@ -144,7 +144,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* confp) {
         ("pb_max_distortion,D", po::value<int>()->default_value(4), "Phrase-based decoder: maximum distortion")
         ("cll_gradient,G","Compute conditional log-likelihood gradient and write to STDOUT (src & ref required)")
         ("crf_uniform_empirical", "If there are multple references use (i.e., lattice) a uniform distribution rather than posterior weighting a la EM")
-    ("get_oracle_forest,OO", "Calculate rescored hypregraph using approximate BLEU scoring of rules")
+    ("get_oracle_forest,o", "Calculate rescored hypregraph using approximate BLEU scoring of rules")
     ("feature_expectations","Write feature expectations for all features in chart (**OBJ** will be the partition)")
     ("references,R", po::value<vector<string> >(), "Translation reference files")    
         ("vector_format",po::value<string>()->default_value("b64"), "Sparse vector serialization format for feature expectations or gradients, includes (text or b64)")
