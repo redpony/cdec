@@ -530,7 +530,7 @@ PYP<Dish,Hash>::resample_prior_b() {
   //std::cerr << "\n## resample_prior_b(), initial a = " << _a << ", b = " << _b << std::endl;
   resample_b_type b_log_prob(_total_customers, _total_tables, _a, _b_gamma_c, _b_gamma_s);
   //_b = slice_sampler1d(b_log_prob, _b, rnd, (double) 0.0, std::numeric_limits<double>::infinity(), 
-  _b = slice_sampler1d(b_log_prob, _b, random, (double) 0.0, std::numeric_limits<double>::infinity(), 
+  _b = slice_sampler1d(b_log_prob, _b, mt_genrand_res53, (double) 0.0, std::numeric_limits<double>::infinity(), 
                        (double) 0.0, niterations, 100*niterations);
   //std::cerr << "\n## resample_prior_b(), final a = " << _a << ", b = " << _b << std::endl;
 }
@@ -545,7 +545,7 @@ PYP<Dish,Hash>::resample_prior_a() {
   //std::cerr << "\n## Initial a = " << _a << ", b = " << _b << std::endl;
   resample_a_type a_log_prob(_total_customers, _total_tables, _b, _a_beta_a, _a_beta_b, _dish_tables);
   //_a = slice_sampler1d(a_log_prob, _a, rnd, std::numeric_limits<double>::min(), 
-  _a = slice_sampler1d(a_log_prob, _a, random, std::numeric_limits<double>::min(), 
+  _a = slice_sampler1d(a_log_prob, _a, mt_genrand_res53, std::numeric_limits<double>::min(), 
                        (double) 1.0, (double) 0.0, niterations, 100*niterations);
 }
 
