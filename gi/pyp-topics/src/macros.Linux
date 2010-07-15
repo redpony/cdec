@@ -1,0 +1,20 @@
+#CC=gcc-4.1
+#CXX=g++-4.1
+#LD=g++-4.1
+#FC=gfortran-4.1
+CC = mpicc
+CXX = mpicxx
+LD = mpicxx
+FC = mpif77
+
+CXXFLAGS = -Wall -I/home/pblunsom/packages/include
+CFLAGS = -Wall -I/home/pblunsom/packages/include
+FFLAGS = -Wall
+LDFLAGS = -lm -lz -L/home/pblunsom/packages/lib \
+	-lboost_program_options -lboost_mpi -lboost_serialization \
+  -lboost_regex -L../../../decoder -lcdec
+
+FFLAGS += -g -O6  -march=native
+CFLAGS += -g -O6  -march=native
+CXXFLAGS += -g -O6  -march=native
+LDFLAGS += -g -O6  -march=native
