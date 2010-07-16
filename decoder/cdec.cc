@@ -323,6 +323,12 @@ void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_featur
     }
 }
 
+void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,DenseWeightVector const& feature_weights) {
+    WeightVector fw(feature_weights);
+    forest_stats(forest,name,show_tree,show_features,&fw);
+}
+
+
 void maybe_prune(Hypergraph &forest,po::variables_map const& conf,string nbeam,string ndensity,string forestname,double srclen) {
     double beam_prune=0,density_prune=0;
     bool use_beam_prune=beam_param(conf,nbeam,&beam_prune,conf.count("scale_prune_srclen"),srclen);
@@ -390,9 +396,9 @@ int main(int argc, char** argv) {
       prelm_w.InitFromFile(plmw);
       prelm_feature_weights.resize(FD::NumFeats());
       prelm_w.InitVector(&prelm_feature_weights);
-//      cerr << "prelm_weights: " << FeatureVector(prelm_feature_weights)<<endl;
+//      cerr << "prelm_weights: " << WeightVector(prelm_feature_weights)<<endl;
     }
-//    cerr << "+LM weights: " << FeatureVector(feature_weights)<<endl;
+//    cerr << "+LM weights: " << WeightVector(feature_weights)<<endl;
   }
   bool warn0=conf.count("warn_0_weight");
   bool freeze=!conf.count("no_freeze_feature_set");
@@ -548,7 +554,7 @@ int main(int argc, char** argv) {
     }
     const bool show_tree_structure=conf.count("show_tree_structure");
     const bool show_features=conf.count("show_features");
-    forest_stats(forest,"  -LM forest",show_tree_structure,show_features,&feature_weights);
+    forest_stats(forest,"  -LM forest",show_tree_structure,show_features,feature_weights);
     if (conf.count("show_expected_length")) {
       const PRPair<double, double> res =
         Inside<PRPair<double, double>,
@@ -574,7 +580,7 @@ int main(int argc, char** argv) {
                     &prelm_forest);
       forest.swap(prelm_forest);
       forest.Reweight(prelm_feature_weights);
-      forest_stats(forest," prelm forest",show_tree_structure,show_features,&prelm_feature_weights);
+      forest_stats(forest," prelm forest",show_tree_structure,show_features,prelm_feature_weights);
     }
 
     maybe_prune(forest,conf,"prelm_beam_prune","prelm_density_prune","-LM",srclen);
@@ -593,7 +599,7 @@ int main(int argc, char** argv) {
                     &lm_forest);
       forest.swap(lm_forest);
       forest.Reweight(feature_weights);
-      forest_stats(forest,"  +LM forest",show_tree_structure,show_features,&feature_weights);
+      forest_stats(forest,"  +LM forest",show_tree_structure,show_features,feature_weights);
     }
 
     maybe_prune(forest,conf,"beam_prune","density_prune","+LM",srclen);
@@ -604,7 +610,7 @@ int main(int argc, char** argv) {
 
     /*Oracle Rescoring*/
     if(get_oracle_forest) {
-      Oracles o=oracles.ComputeOracles(smeta,&forest,feature_weights,&cerr,10,conf["forest_output"].as<std::string>());
+      Oracle o=oracle.ComputeOracle(smeta,&forest,FeatureVector(feature_weights),&cerr,10,conf["forest_output"].as<std::string>());
       cerr << "  +Oracle BLEU forest (nodes/edges): " << forest.nodes_.size() << '/' << forest.edges_.size() << endl;
       cerr << "  +Oracle BLEU (paths): " << forest.NumberOfPaths() << endl;
       o.hope.Print(cerr,"  +Oracle BLEU");
