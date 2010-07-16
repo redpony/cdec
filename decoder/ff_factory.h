@@ -21,8 +21,8 @@ class FFRegistry {
   void DisplayList() const;
   void Register(const std::string& ffname, FFFactoryBase* factory);
   void Register(FFFactoryBase* factory);
- private:
   FFRegistry() {}
+ private:
   std::map<std::string, boost::shared_ptr<FFFactoryBase> > reg_;
 };
 
