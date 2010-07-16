@@ -43,6 +43,7 @@ if ($serial || $snake) {
     my $c1p=open2($R1,$W1,@c1); # Open2 R W backward from Open3.
     my $c2p=open2($R2,$W2,@c2);
     if ($snake) {
+        info("SNAKE mode\n");
         while(<STDIN>) {
             info("IN:",$_);
             lineto($W1,$_);
@@ -57,6 +58,7 @@ if ($serial || $snake) {
             lineto(*STDOUT,$_);
         }
     } else {
+        info("SERIAL mode\n");
         while(<$R1>) {
             info("1:",$_);
             lineto($W2,$_);
@@ -66,6 +68,7 @@ if ($serial || $snake) {
         }
     }
 } else {
+    info("DIRECT mode\n");
     my @rw1=POSIX::pipe();
     my @rw2=POSIX::pipe();
     my $pid=undef;
