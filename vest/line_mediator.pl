@@ -47,12 +47,9 @@ if ($ENV{SERIAL}) {
     my @rw2=POSIX::pipe();
     my $pid=undef;
     $SIG{CHLD} = sub { wait };
-#    close STDIN;
-#    close STDOUT;
     while (not defined ($pid=fork())) {
         sleep 1;
     }
-#    info(STDOUT_FILENO,STDIN_FILENO,"\n");
     POSIX::close(STDOUT_FILENO);
     POSIX::close(STDIN_FILENO);
     if ($pid) {
