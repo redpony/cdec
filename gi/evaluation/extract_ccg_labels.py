@@ -84,8 +84,9 @@ for tline, eline in itertools.izip(tinfile, einfile):
         if tline.startswith('( '):
             tline = tline[2:-1].strip()
         tr = tree.parse_PST(tline)
-        number_leaves(tr)
-        #project_heads(tr) # assumes Bikel-style head annotation for the input trees
+	if tr != None:
+		number_leaves(tr)
+		#project_heads(tr) # assumes Bikel-style head annotation for the input trees
     else:
         tr = None
     
@@ -96,7 +97,11 @@ for tline, eline in itertools.izip(tinfile, einfile):
 
         if tr:
             a = ancestor(tr, range(x,y))
-            fs = frontier(a, range(x,y))
+	    try:
+		fs = frontier(a, range(x,y))
+	    except:
+		print >>sys.stderr, "problem with line", tline.strip(), "--", eline.strip()
+		raise
 
             #print x, y
             #print 'ancestor', a
