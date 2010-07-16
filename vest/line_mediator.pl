@@ -3,6 +3,8 @@
 
 # if you don't know how to fork/exec in a C program, this could be helpful under limited cirmustances (would be ok to liaise with sentserver)
 
+#WARNING: because it waits for the result from command 2 after sending every line, and especially if command 1 does the same, using sentserver as command 2 won't actually buy you any real parallelism.
+
 use strict;
 use IPC::Open2;
 $,=' ';
