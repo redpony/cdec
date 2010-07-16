@@ -64,7 +64,6 @@ public:
     std::vector<std::string> context2string(const WordID& id) const {
       std::vector<std::string> res;
       assert (id >= 0);
-      std::cerr << m_dict.Convert(id) << std::endl;
       m_dict.AsVector(id, &res);
       return res;
     }
