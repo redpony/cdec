@@ -11,6 +11,7 @@
 #include <valarray>
 
 #include "fdict.h"
+#include "small_vector.h"
 
 template <class T>
 inline T & extend_vector(std::vector<T> &v,int i) {
@@ -310,10 +311,20 @@ private:
 // doesn't support fast indexing directly
 template <class T>
 class SparseVectorList {
-  typedef std::vector<const int,T> ListType;
-  typedef typename ListType::value_type pair_type;
-  typedef typename ListType::const_iterator const_iterator;
+  typedef typename std::pair<int,T> Pair;
+  typedef SmallVector<Pair,1> List;
+  typedef typename List::const_iterator const_iterator;
   SparseVectorList() {  }
+  template <class I>
+  SparseVectorList(I i,I const& end) {
+    const T z=T(0);
+    int c=0;
+    for (;i<end;++i,++c) {
+      if (*i!=z)
+        p.push_back(pair_type(c,*i));
+    }
+    p.compact();
+  }
   explicit SparseVectorList(std::vector<T> const& v) {
     const T z=T(0);
     for (unsigned i=0;i<v.size();++i) {
@@ -321,10 +332,10 @@ class SparseVectorList {
       if (t!=z)
         p.push_back(pair_type(i,t));
     }
-    p.resize(p.size());
+    p.compact();
   }
 private:
-  ListType p;
+  List p;
 };
 
 
