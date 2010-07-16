@@ -604,7 +604,7 @@ int main(int argc, char** argv) {
 
     /*Oracle Rescoring*/
     if(get_oracle_forest) {
-      Oracles o=oracles.ComputeOracles(smeta,forest,feature_weights,&cerr,10,conf["forest_output"].as<std::string>());
+      Oracles o=oracles.ComputeOracles(smeta,&forest,feature_weights,&cerr,10,conf["forest_output"].as<std::string>());
       cerr << "  +Oracle BLEU forest (nodes/edges): " << forest.nodes_.size() << '/' << forest.edges_.size() << endl;
       cerr << "  +Oracle BLEU (paths): " << forest.NumberOfPaths() << endl;
       o.hope.Print(cerr,"  +Oracle BLEU");

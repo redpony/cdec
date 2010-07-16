@@ -94,6 +94,7 @@ struct oracle_directions {
       ("oracle_batch,b",po::value<unsigned>(&oracle_batch)->default_value(10),"to produce each oracle direction, sum the 'gradient' over this many sentences")
       ("max_similarity,m",po::value<double>(&max_similarity)->default_value(0),"remove directions that are too similar (Tanimoto coeff. less than (1-this)).  0 means don't filter, 1 means only 1 direction allowed?")
       ("fear_to_hope,f",po::bool_switch(&fear_to_hope),"for each of the oracle_directions, also include a direction from fear to hope (as well as origin to hope)")
+      ("decoder_translations",po::value<string>(&decoder_translations)->default_value(""),"one per line decoder 1best translations for computing document BLEU vs. sentences-seen-so-far BLEU")
       ("help,h", "Help");
     po::options_description dcmdline_options;
     dcmdline_options.add(opts);
@@ -194,7 +195,8 @@ struct oracle_directions {
  }
 
 
-  //TODO: is it worthwhile to get a complete document bleu first?  would take a list of 1best translations one per line from the decoders, rather than loading all the forests (expensive)
+  std::string decoder_translations_file; // one per line
+  //TODO: is it worthwhile to get a complete document bleu first?  would take a list of 1best translations one per line from the decoders, rather than loading all the forests (expensive).  translations are in run.raw.N.gz - new arg
   Oracle const& ComputeOracle(unsigned i) {
     Oracle &o=oracles[i];
     if (o.is_null()) {
@@ -204,7 +206,7 @@ struct oracle_directions {
         Timer t("Loading forest from JSON "+forest_file(i));
         HypergraphIO::ReadFromJSON(rf.stream(), &hg);
       }
-      o=oracle.ComputeOracles(MakeMetadata(hg,i),hg,origin,&cerr);
+      o=oracle.ComputeOracles(MakeMetadata(hg,i),&hg,origin,&cerr);
     }
     return o;
   }
