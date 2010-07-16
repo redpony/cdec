@@ -171,14 +171,13 @@ class SmallVector {
   }
 
  private:
-  uint16_t capacity_;  // only defined when size_ >= __SV_MAX_STATIC
-  uint16_t size_;
   union StorageType {
     int vals[__SV_MAX_STATIC];
     int* ptr;
   };
   StorageType data_;
-
+  uint16_t size_;
+  uint16_t capacity_;  // only defined when size_ >= __SV_MAX_STATIC
 };
 
 inline bool operator!=(const SmallVector& a, const SmallVector& b) {
