@@ -16,7 +16,7 @@ public class F {
 		double z = 0;
 		for (int i = 0; i < probs.length; ++i)
 		{
-			probs[i] = 1e2 + rng.nextDouble();
+			probs[i] = 10 + rng.nextDouble();
 			if (normalise)
 				z += probs[i];
 		}

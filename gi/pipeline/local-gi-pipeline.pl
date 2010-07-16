@@ -23,11 +23,10 @@ my $LANGUAGE = "target";
 my $LABEL_THRESHOLD = 0;
 
 my $MODEL = "pyp";
-my $NUM_EM_ITERS = 100;
-my $NUM_PR_ITERS = 0;
-my $PR_SCALE_P = 10;
+my $NUM_ITERS = 100;
+my $PR_SCALE_P = 0;
 my $PR_SCALE_C = 0;
-my $PR_THREADS = 0;
+my $PR_FLAGS = "";
 
 my $EXTOOLS = "$SCRIPT_DIR/../../extools";
 die "Can't find extools: $EXTOOLS" unless -e $EXTOOLS && -d $EXTOOLS;
@@ -71,11 +70,10 @@ usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'label_threshold=f' => \$LABEL_THRESHOLD,
                            'use_default_cat' => \$DEFAULT_CAT,
                            'topics-config=s' => \$TOPICS_CONFIG,
-                           'em-iterations=i' => \$NUM_EM_ITERS,
-                           'pr-iterations=i' => \$NUM_PR_ITERS,
+                           'iterations=i' => \$NUM_ITERS,
                            'pr-scale-phrase=f' => \$PR_SCALE_P,
                            'pr-scale-context=f' => \$PR_SCALE_C,
-                           'pr-threads=i' => \$PR_THREADS,
+                           'pr-flags=s' => \$PR_FLAGS,
                            'tagged_corpus=s' => \$TAGGED_CORPUS,
                            'language=s' => \$LANGUAGE,
                            'get_name_only' => \$NAME_SHORTCUT,
@@ -187,10 +185,10 @@ sub cluster_dir {
     if (lc($MODEL) eq "pyp") {
         return context_dir() . ".PYP.t$NUM_TOPICS.s$NUM_SAMPLES";
     } elsif (lc($MODEL) eq "prem") {
-        if ($NUM_PR_ITERS == 0) {
-            return context_dir() . ".PREM.t$NUM_TOPICS.ie$NUM_EM_ITERS.ip$NUM_PR_ITERS";
+        if ($PR_SCALE_P == 0 && $PR_SCALE_C == 0) {
+            return context_dir() . ".EM.t$NUM_TOPICS.i$NUM_ITERS";
         } else {
-            return context_dir() . ".PREM.t$NUM_TOPICS.ie$NUM_EM_ITERS.ip$NUM_PR_ITERS.sp$PR_SCALE_P.sc$PR_SCALE_C";
+            return context_dir() . ".PR.t$NUM_TOPICS.i$NUM_ITERS.sp$PR_SCALE_P.sc$PR_SCALE_C";
         }
     }
 }
@@ -272,7 +270,7 @@ sub prem_train {
   if (-e $OUT_CLUSTERS) {
     print STDERR "$OUT_CLUSTERS exists, reusing...\n";
   } else {
-    safesystem("$PREM_TRAIN --in $IN_CONTEXTS --topics $NUM_TOPICS --out $OUT_CLUSTERS --em $NUM_EM_ITERS --pr $NUM_PR_ITERS --scale-phrase $PR_SCALE_P --scale-context $PR_SCALE_C --threads $PR_THREADS") or die "Topic training failed.\n";
+    safesystem("$PREM_TRAIN --in $IN_CONTEXTS --topics $NUM_TOPICS --out $OUT_CLUSTERS --iterations $NUM_ITERS --scale-phrase $PR_SCALE_P --scale-context $PR_SCALE_C $PR_FLAGS") or die "Topic training failed.\n";
   }
 }
 
