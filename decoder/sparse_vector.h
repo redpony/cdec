@@ -12,6 +12,13 @@
 
 #include "fdict.h"
 
+template <class T>
+inline T & extend_vector(std::vector<T> &v,int i) {
+  if (i>=v.size())
+    v.resize(i+1);
+  return v[i];
+}
+
 template <typename T>
 class SparseVector {
 public:
@@ -28,6 +35,17 @@ public:
     }
 
   }
+
+  void init_vector(std::vector<T> *vp) const {
+    init_vector(*vp);
+  }
+
+  void init_vector(std::vector<T> &v) const {
+    v.clear();
+    for (const_iterator i=values_.begin(),e=values_.end();i!=e;++i)
+      extend_vector(v,i->first)=i->second;
+  }
+
 
   void set_new_value(int index, T const& val) {
     assert(values_.find(index)==values_.end());
@@ -312,7 +330,7 @@ private:
 
 typedef SparseVector<double> FeatureVector;
 typedef SparseVector<double> WeightVector;
-
+typedef std::vector<double> DenseWeightVector;
 template <typename T>
 SparseVector<T> operator+(const SparseVector<T>& a, const SparseVector<T>& b) {
   SparseVector<T> result = a;

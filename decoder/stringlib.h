@@ -1,4 +1,5 @@
-#ifndef _STRINGLIB_H_
+#ifndef CDEC_STRINGLIB_H_
+#define CDEC_STRINGLIB_H_
 
 #include <map>
 #include <vector>
@@ -14,7 +15,7 @@ void ParseTranslatorInput(const std::string& line, std::string* input, std::stri
 struct Lattice;
 void ParseTranslatorInputLattice(const std::string& line, std::string* input, Lattice* ref);
 
-inline const std::string Trim(const std::string& str, const std::string& dropChars = " \t") {
+inline std::string Trim(const std::string& str, const std::string& dropChars = " \t") {
   std::string res = str;
   res.erase(str.find_last_not_of(dropChars)+1);
   return res.erase(0, res.find_first_not_of(dropChars));
