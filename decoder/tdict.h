@@ -28,4 +28,12 @@ struct TD {
   static const char* Convert(const WordID& w);
 };
 
+struct ToTD {
+  typedef WordID result_type;
+  result_type operator()(std::string const& t) const {
+    return TD::Convert(t);
+  }
+};
+
+
 #endif
