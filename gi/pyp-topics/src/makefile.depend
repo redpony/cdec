@@ -1,4 +1,4 @@
-obj/contexts_corpus.o: contexts_corpus.cc contexts_corpus.hh \
+contexts_corpus.o: contexts_corpus.cc contexts_corpus.hh \
   /Users/pblunsom/packages/include/boost/ptr_container/ptr_vector.hpp \
   /Users/pblunsom/packages/include/boost/ptr_container/ptr_sequence_adapter.hpp \
   /Users/pblunsom/packages/include/boost/ptr_container/detail/reversible_ptr_container.hpp \
@@ -432,7 +432,7 @@ obj/contexts_corpus.o: contexts_corpus.cc contexts_corpus.hh \
   /Users/pblunsom/packages/include/boost/type_traits/add_cv.hpp \
   /Users/pblunsom/packages/include/boost/type_traits/remove_volatile.hpp \
   /Users/pblunsom/packages/include/boost/type_traits/function_traits.hpp
-obj/contexts_lexer.o: contexts_lexer.cc contexts_lexer.h \
+contexts_lexer.o: contexts_lexer.cc contexts_lexer.h \
   ../../../decoder/dict.h \
   /Users/pblunsom/packages/include/boost/functional/hash.hpp \
   /Users/pblunsom/packages/include/boost/functional/hash/hash.hpp \
@@ -463,7 +463,7 @@ obj/contexts_lexer.o: contexts_lexer.cc contexts_lexer.h \
   /Users/pblunsom/packages/include/boost/detail/container_fwd.hpp \
   ../../../decoder/wordid.h ../../../decoder/filelib.h \
   ../../../decoder/gzstream.h
-obj/corpus.o: corpus.cc corpus.hh \
+corpus.o: corpus.cc corpus.hh \
   /Users/pblunsom/packages/include/boost/shared_ptr.hpp \
   /Users/pblunsom/packages/include/boost/smart_ptr/shared_ptr.hpp \
   /Users/pblunsom/packages/include/boost/config.hpp \
@@ -874,8 +874,8 @@ obj/corpus.o: corpus.cc corpus.hh \
   /Users/pblunsom/packages/include/boost/detail/is_incrementable.hpp \
   /Users/pblunsom/packages/include/boost/ptr_container/detail/void_ptr_iterator.hpp \
   gzstream.hh
-obj/gzstream.o: gzstream.cc gzstream.hh
-obj/mpi-pyp-topics.o: mpi-pyp-topics.cc \
+gzstream.o: gzstream.cc gzstream.hh
+mpi-pyp-topics.o: mpi-pyp-topics.cc \
   /Users/pblunsom/packages/include/boost/mpi/communicator.hpp \
   /Users/pblunsom/packages/include/boost/mpi/config.hpp \
   /Users/pblunsom/packages/include/boost/config.hpp \
@@ -1448,8 +1448,108 @@ obj/mpi-pyp-topics.o: mpi-pyp-topics.cc \
   /Users/pblunsom/packages/include/boost/random/detail/const_mod.hpp \
   /Users/pblunsom/packages/include/boost/random/detail/seed.hpp \
   /Users/pblunsom/packages/include/boost/mpi/environment.hpp mpi-pyp.hh \
-  log_add.h slice-sampler.h mt19937ar.h corpus.hh
-obj/mpi-train-contexts.o: mpi-train-contexts.cc \
+  /Users/pblunsom/packages/include/boost/tuple/tuple.hpp \
+  /Users/pblunsom/packages/include/boost/ref.hpp \
+  /Users/pblunsom/packages/include/boost/tuple/detail/tuple_basic.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/cv_traits.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/add_volatile.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/add_cv.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/remove_volatile.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/function_traits.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/map.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/utility.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/collections_save_imp.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/collections_load_imp.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/detail/stack_constructor.hpp \
+  /Users/pblunsom/packages/include/boost/aligned_storage.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/type_with_alignment.hpp \
+  /Users/pblunsom/packages/include/boost/mpi.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/all_gather.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/vector.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/collection_traits.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/broadcast.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives_fwd.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/gather.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/all_reduce.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/reduce.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/computation_tree.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/operations.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/all_to_all.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/scatter.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/scan.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/graph_communicator.hpp \
+  /Users/pblunsom/packages/include/boost/graph/graph_traits.hpp \
+  /Users/pblunsom/packages/include/boost/pending/property.hpp \
+  /Users/pblunsom/packages/include/boost/pending/detail/property.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/same_traits.hpp \
+  /Users/pblunsom/packages/include/boost/graph/properties.hpp \
+  /Users/pblunsom/packages/include/boost/property_map/property_map.hpp \
+  /Users/pblunsom/packages/include/boost/pending/cstddef.hpp \
+  /Users/pblunsom/packages/include/boost/concept_check.hpp \
+  /Users/pblunsom/packages/include/boost/concept/assert.hpp \
+  /Users/pblunsom/packages/include/boost/concept/detail/general.hpp \
+  /Users/pblunsom/packages/include/boost/concept/detail/has_constraints.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/conversion_traits.hpp \
+  /Users/pblunsom/packages/include/boost/concept/usage.hpp \
+  /Users/pblunsom/packages/include/boost/concept/detail/concept_def.hpp \
+  /Users/pblunsom/packages/include/boost/concept/detail/concept_undef.hpp \
+  /Users/pblunsom/packages/include/boost/concept_archetype.hpp \
+  /Users/pblunsom/packages/include/boost/property_map/vector_property_map.hpp \
+  /Users/pblunsom/packages/include/boost/graph/property_maps/constant_property_map.hpp \
+  /Users/pblunsom/packages/include/boost/graph/property_maps/null_property_map.hpp \
+  /Users/pblunsom/packages/include/boost/iterator/counting_iterator.hpp \
+  /Users/pblunsom/packages/include/boost/detail/numeric_traits.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_nothrow_assign.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_trivial_assign.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_nothrow_constructor.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_trivial_constructor.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_nothrow_copy.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_nothrow_destructor.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_trivial_destructor.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_virtual_destructor.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_signed.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_unsigned.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_compound.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_floating_point.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_member_object_pointer.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_object.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_stateless.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/rank.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/extent.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/remove_all_extents.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/function_traits.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/aligned_storage.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/floating_point_promotion.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/integral_promotion.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/promote.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/integral_promotion.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/floating_point_promotion.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/make_unsigned.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_signed.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_unsigned.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/make_signed.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/decay.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_complex.hpp \
+  /Users/pblunsom/packages/include/boost/detail/select_type.hpp \
+  /Users/pblunsom/packages/include/boost/graph/iteration_macros.hpp \
+  /Users/pblunsom/packages/include/boost/shared_array.hpp \
+  /Users/pblunsom/packages/include/boost/smart_ptr/shared_array.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/group.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/intercommunicator.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/nonblocking.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/skeleton_and_content.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/forward_skeleton_iarchive.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/forward_skeleton_oarchive.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/ignore_iprimitive.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/ignore_oprimitive.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/content_oarchive.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/broadcast_sc.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/communicator_sc.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/timer.hpp pyp.hh \
+  slice-sampler.h log_add.h mt19937ar.h corpus.hh
+mpi-train-contexts.o: mpi-train-contexts.cc \
   /Users/pblunsom/packages/include/boost/program_options/parsers.hpp \
   /Users/pblunsom/packages/include/boost/program_options/config.hpp \
   /Users/pblunsom/packages/include/boost/config.hpp \
@@ -2064,8 +2164,100 @@ obj/mpi-train-contexts.o: mpi-train-contexts.cc \
   /Users/pblunsom/packages/include/boost/random/linear_congruential.hpp \
   /Users/pblunsom/packages/include/boost/random/detail/const_mod.hpp \
   /Users/pblunsom/packages/include/boost/random/detail/seed.hpp \
-  mpi-pyp.hh log_add.h slice-sampler.h mt19937ar.h corpus.hh \
-  contexts_corpus.hh contexts_lexer.h ../../../decoder/dict.h \
+  mpi-pyp.hh /Users/pblunsom/packages/include/boost/tuple/tuple.hpp \
+  /Users/pblunsom/packages/include/boost/tuple/detail/tuple_basic.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/cv_traits.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/add_cv.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/remove_volatile.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/function_traits.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/map.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/utility.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/collections_save_imp.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/collections_load_imp.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/detail/stack_constructor.hpp \
+  /Users/pblunsom/packages/include/boost/aligned_storage.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/type_with_alignment.hpp \
+  /Users/pblunsom/packages/include/boost/mpi.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/all_gather.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/vector.hpp \
+  /Users/pblunsom/packages/include/boost/serialization/collection_traits.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/broadcast.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives_fwd.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/gather.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/all_reduce.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/reduce.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/computation_tree.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/operations.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/all_to_all.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/scatter.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/collectives/scan.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/graph_communicator.hpp \
+  /Users/pblunsom/packages/include/boost/graph/graph_traits.hpp \
+  /Users/pblunsom/packages/include/boost/pending/property.hpp \
+  /Users/pblunsom/packages/include/boost/pending/detail/property.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/same_traits.hpp \
+  /Users/pblunsom/packages/include/boost/graph/properties.hpp \
+  /Users/pblunsom/packages/include/boost/property_map/property_map.hpp \
+  /Users/pblunsom/packages/include/boost/pending/cstddef.hpp \
+  /Users/pblunsom/packages/include/boost/concept_check.hpp \
+  /Users/pblunsom/packages/include/boost/concept/assert.hpp \
+  /Users/pblunsom/packages/include/boost/concept/detail/general.hpp \
+  /Users/pblunsom/packages/include/boost/concept/detail/has_constraints.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/conversion_traits.hpp \
+  /Users/pblunsom/packages/include/boost/concept/usage.hpp \
+  /Users/pblunsom/packages/include/boost/concept/detail/concept_def.hpp \
+  /Users/pblunsom/packages/include/boost/concept/detail/concept_undef.hpp \
+  /Users/pblunsom/packages/include/boost/concept_archetype.hpp \
+  /Users/pblunsom/packages/include/boost/property_map/vector_property_map.hpp \
+  /Users/pblunsom/packages/include/boost/graph/property_maps/constant_property_map.hpp \
+  /Users/pblunsom/packages/include/boost/graph/property_maps/null_property_map.hpp \
+  /Users/pblunsom/packages/include/boost/iterator/counting_iterator.hpp \
+  /Users/pblunsom/packages/include/boost/detail/numeric_traits.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_nothrow_assign.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_trivial_assign.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_nothrow_constructor.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_trivial_constructor.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_nothrow_copy.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_nothrow_destructor.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/has_virtual_destructor.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_compound.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_floating_point.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_member_object_pointer.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_object.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_stateless.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/rank.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/extent.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/remove_all_extents.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/function_traits.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/aligned_storage.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/floating_point_promotion.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/integral_promotion.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/promote.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/integral_promotion.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/floating_point_promotion.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/make_signed.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/decay.hpp \
+  /Users/pblunsom/packages/include/boost/type_traits/is_complex.hpp \
+  /Users/pblunsom/packages/include/boost/detail/select_type.hpp \
+  /Users/pblunsom/packages/include/boost/graph/iteration_macros.hpp \
+  /Users/pblunsom/packages/include/boost/shared_array.hpp \
+  /Users/pblunsom/packages/include/boost/smart_ptr/shared_array.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/group.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/intercommunicator.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/nonblocking.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/skeleton_and_content.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/forward_skeleton_iarchive.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/forward_skeleton_oarchive.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/ignore_iprimitive.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/ignore_oprimitive.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/content_oarchive.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/broadcast_sc.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/detail/communicator_sc.hpp \
+  /Users/pblunsom/packages/include/boost/mpi/timer.hpp pyp.hh \
+  slice-sampler.h log_add.h mt19937ar.h corpus.hh contexts_corpus.hh \
+  contexts_lexer.h ../../../decoder/dict.h \
   /Users/pblunsom/packages/include/boost/functional/hash.hpp \
   /Users/pblunsom/packages/include/boost/functional/hash/hash.hpp \
   /Users/pblunsom/packages/include/boost/functional/hash/hash_fwd.hpp \
@@ -2078,7 +2270,7 @@ obj/mpi-train-contexts.o: mpi-train-contexts.cc \
   /Users/pblunsom/packages/include/boost/functional/hash/extensions.hpp \
   /Users/pblunsom/packages/include/boost/detail/container_fwd.hpp \
   ../../../decoder/wordid.h gzstream.hh
-obj/pyp-topics.o: pyp-topics.cc timing.h clock_gettime_stub.c pyp-topics.hh \
+pyp-topics.o: pyp-topics.cc timing.h clock_gettime_stub.c pyp-topics.hh \
   /Users/pblunsom/packages/include/boost/ptr_container/ptr_vector.hpp \
   /Users/pblunsom/packages/include/boost/ptr_container/ptr_sequence_adapter.hpp \
   /Users/pblunsom/packages/include/boost/ptr_container/detail/reversible_ptr_container.hpp \
@@ -2484,7 +2676,7 @@ obj/pyp-topics.o: pyp-topics.cc timing.h clock_gettime_stub.c pyp-topics.hh \
   /Users/pblunsom/packages/include/boost/random/linear_congruential.hpp \
   /Users/pblunsom/packages/include/boost/random/detail/const_mod.hpp \
   /Users/pblunsom/packages/include/boost/random/detail/seed.hpp pyp.hh \
-  log_add.h slice-sampler.h mt19937ar.h corpus.hh \
+  slice-sampler.h log_add.h mt19937ar.h corpus.hh \
   /Users/pblunsom/packages/include/boost/shared_ptr.hpp \
   /Users/pblunsom/packages/include/boost/smart_ptr/shared_ptr.hpp \
   /Users/pblunsom/packages/include/boost/config/no_tr1/memory.hpp \
@@ -2658,7 +2850,7 @@ obj/pyp-topics.o: pyp-topics.cc timing.h clock_gettime_stub.c pyp-topics.hh \
   /Users/pblunsom/packages/include/boost/smart_ptr/scoped_ptr.hpp \
   /Users/pblunsom/packages/include/boost/type_traits/is_fundamental.hpp \
   /Users/pblunsom/packages/include/boost/thread/condition.hpp
-obj/train-contexts.o: train-contexts.cc \
+train-contexts.o: train-contexts.cc \
   /Users/pblunsom/packages/include/boost/program_options/parsers.hpp \
   /Users/pblunsom/packages/include/boost/program_options/config.hpp \
   /Users/pblunsom/packages/include/boost/config.hpp \
@@ -3140,7 +3332,7 @@ obj/train-contexts.o: train-contexts.cc \
   /Users/pblunsom/packages/include/boost/random/linear_congruential.hpp \
   /Users/pblunsom/packages/include/boost/random/detail/const_mod.hpp \
   /Users/pblunsom/packages/include/boost/random/detail/seed.hpp pyp.hh \
-  log_add.h slice-sampler.h mt19937ar.h corpus.hh workers.hh \
+  slice-sampler.h log_add.h mt19937ar.h corpus.hh workers.hh \
   /Users/pblunsom/packages/include/boost/bind.hpp \
   /Users/pblunsom/packages/include/boost/bind/bind.hpp \
   /Users/pblunsom/packages/include/boost/is_placeholder.hpp \
@@ -3275,7 +3467,7 @@ obj/train-contexts.o: train-contexts.cc \
   /Users/pblunsom/packages/include/boost/functional/hash/extensions.hpp \
   /Users/pblunsom/packages/include/boost/detail/container_fwd.hpp \
   ../../../decoder/wordid.h gzstream.hh
-obj/train.o: train.cc \
+train.o: train.cc \
   /Users/pblunsom/packages/include/boost/program_options/parsers.hpp \
   /Users/pblunsom/packages/include/boost/program_options/config.hpp \
   /Users/pblunsom/packages/include/boost/config.hpp \
@@ -3757,7 +3949,7 @@ obj/train.o: train.cc \
   /Users/pblunsom/packages/include/boost/random/linear_congruential.hpp \
   /Users/pblunsom/packages/include/boost/random/detail/const_mod.hpp \
   /Users/pblunsom/packages/include/boost/random/detail/seed.hpp pyp.hh \
-  log_add.h slice-sampler.h mt19937ar.h corpus.hh workers.hh \
+  slice-sampler.h log_add.h mt19937ar.h corpus.hh workers.hh \
   /Users/pblunsom/packages/include/boost/bind.hpp \
   /Users/pblunsom/packages/include/boost/bind/bind.hpp \
   /Users/pblunsom/packages/include/boost/is_placeholder.hpp \
@@ -3892,6 +4084,6 @@ obj/train.o: train.cc \
   /Users/pblunsom/packages/include/boost/functional/hash/extensions.hpp \
   /Users/pblunsom/packages/include/boost/detail/container_fwd.hpp \
   ../../../decoder/wordid.h gzstream.hh
-obj/clock_gettime_stub.o: clock_gettime_stub.c
-obj/gammadist.o: gammadist.c gammadist.h mt19937ar.h
-obj/mt19937ar.o: mt19937ar.c mt19937ar.h
+clock_gettime_stub.o: clock_gettime_stub.c
+gammadist.o: gammadist.c gammadist.h mt19937ar.h
+mt19937ar.o: mt19937ar.c mt19937ar.h

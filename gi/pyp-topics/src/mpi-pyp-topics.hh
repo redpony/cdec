@@ -1,5 +1,5 @@
-#ifndef PYP_TOPICS_HH
-#define PYP_TOPICS_HH
+#ifndef MPI_PYP_TOPICS_HH
+#define MPI_PYP_TOPICS_HH
 
 #include <vector>
 #include <iostream>
@@ -14,14 +14,14 @@
 #include "mpi-pyp.hh"
 #include "corpus.hh"
 
-class PYPTopics {
+class MPIPYPTopics {
 public:
   typedef std::vector<int> DocumentTopics;
   typedef std::vector<DocumentTopics> CorpusTopics;
   typedef double F;
 
 public:
-  PYPTopics(int num_topics, bool use_topic_pyp=false, unsigned long seed = 0) 
+  MPIPYPTopics(int num_topics, bool use_topic_pyp=false, unsigned long seed = 0) 
     : m_num_topics(num_topics), m_word_pyps(1), 
     m_topic_pyp(0.5,1.0), m_use_topic_pyp(use_topic_pyp),
     m_seed(seed),
@@ -47,12 +47,12 @@ public:
     m_backoff.reset(new TermBackoff);
     m_backoff->read(filename);
     m_word_pyps.clear();
-    m_word_pyps.resize(m_backoff->order(), PYPs());
+    m_word_pyps.resize(m_backoff->order(), MPIPYPs());
   }
   void set_backoff(TermBackoffPtr backoff) {
     m_backoff = backoff;
     m_word_pyps.clear();
-    m_word_pyps.resize(m_backoff->order(), PYPs());
+    m_word_pyps.resize(m_backoff->order(), MPIPYPs());
   }
 
   F prob(const Term& term, int topic, int level=0) const;
@@ -70,9 +70,10 @@ private:
 
   CorpusTopics m_corpus_topics;
   typedef boost::ptr_vector< PYP<int> > PYPs;
+  typedef boost::ptr_vector< MPIPYP<int> > MPIPYPs;
   PYPs m_document_pyps;
-  std::vector<PYPs> m_word_pyps;
-  PYP<int> m_topic_pyp;
+  std::vector<MPIPYPs> m_word_pyps;
+  MPIPYP<int> m_topic_pyp;
   bool m_use_topic_pyp;
 
   unsigned long m_seed;

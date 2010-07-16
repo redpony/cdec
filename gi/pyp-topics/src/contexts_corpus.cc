@@ -28,7 +28,7 @@ void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* 
   Document* doc(new Document());
 
   //cout << "READ: " << new_contexts.phrase << "\t";
-  for (int i=0; i < new_contexts.counts.size(); ++i) {
+  for (int i=0; i < (int)new_contexts.counts.size(); ++i) {
     int cache_word_count = corpus_ptr->m_dict.max();
 
     //string context_str = corpus_ptr->m_dict.toString(new_contexts.contexts[i]);
@@ -101,7 +101,7 @@ void filter_callback(const ContextsLexer::PhraseContextsType& new_contexts, void
 
   map<string,int>* context_counts = (static_cast<map<string,int>*>(extra));
 
-  for (int i=0; i < new_contexts.counts.size(); ++i) {
+  for (int i=0; i < (int)new_contexts.counts.size(); ++i) {
     int context_index = new_contexts.counts.at(i).first;
     int count = new_contexts.counts.at(i).second;
     //int count = new_contexts.counts[i];

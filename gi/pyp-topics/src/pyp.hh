@@ -1,6 +1,7 @@
 #ifndef _pyp_hh
 #define _pyp_hh
 
+#include "slice-sampler.h"
 #include <math.h>
 #include <map>
 #include <tr1/unordered_map>
@@ -11,7 +12,6 @@
 #include <boost/random/mersenne_twister.hpp>
 
 #include "log_add.h"
-#include "slice-sampler.h"
 #include "mt19937ar.h"
 
 //
@@ -63,7 +63,7 @@ public:
   double b() const { return _b; }
   void set_b(double b) { _b = b; }
 
-  void clear();
+  virtual void clear();
   std::ostream& debug_info(std::ostream& os) const;
 
   double log_restaurant_prob() const;
@@ -75,13 +75,12 @@ public:
   void resample_prior_a();
   void resample_prior_b();
 
-private:
+protected:
   double _a, _b; // parameters of the Pitman-Yor distribution
   double _a_beta_a, _a_beta_b; // parameters of Beta prior on a
   double _b_gamma_s, _b_gamma_c; // parameters of Gamma prior on b
 
-  struct TableCounter
-  {
+  struct TableCounter {
     TableCounter() : tables(0) {};
     int tables;
     std::map<int, int> table_histogram; // num customers at table -> number tables
