@@ -8,13 +8,25 @@
 use strict;
 use IPC::Open2;
 use POSIX qw(pipe dup2 STDIN_FILENO STDOUT_FILENO);
-#use IO::Handle;
-$,=' ';
+
 my $quiet=!$ENV{DEBUG};
 $quiet=1 if $ENV{QUIET};
 sub info {
+    local $,=' ';
     print STDERR @_ unless $quiet;
 }
+
+my $mode='CROSS';
+my $ser='DIRECT';
+$mode='PIPE' if $ENV{PIPE};
+$mode='SNAKE' if $ENV{SNAKE};
+$mode='CROSS' if $ENV{CROSS};
+$ser='SERIAL' if $ENV{SERIAL};
+$ser='DIRECT' if $ENV{DIRECT};
+$ser='SERIAL' if $mode eq 'SNAKE';
+info("mode: $mode\n");
+info("connection: $ser\n");
+
 
 my @c1;
 if (scalar @ARGV) {
@@ -25,7 +37,16 @@ if (scalar @ARGV) {
 pop @c1;
 my @c2=@ARGV;
 @ARGV=();
-(scalar @c1 && scalar @c2) || die qq{usage: $0 cmd1 args -- cmd2 args; all options are environment variables.  CROSS=1 hooks up two processes, 2nd of which has one line of output per line of input, expected by the first, which starts off the communication.  crosses stdin/stderr of cmd1 and cmd2 line by line (both must flush on newline and output.  cmd1 initiates the conversation (sends the first line).  DEBUG=1 env var enables debugging output.  default: attempts to cross stdin/stdout of c1 and c2 directly (via two unidirectional posix pipes created before fork).  env SERIAL=1: (no parallelism possible) but lines exchanged are logged if DEBUG.  if SNAKE then stdin -> c1 -> c2 -> c1 -> stdout.  if PIPE then stdin -> c1 -> c2 -> stdout (same as shell c1|c2, but with SERIAL you can see the intermediate in real time; you could do similar with c1 | tee /dev/fd/2 |c2.  DIRECT=1 (default) will override SERIAL=1.  CROSS=1 (default) will override SNAKE or PIPE.
+(scalar @c1 && scalar @c2) || die qq{
+usage: $0 cmd1 args -- cmd2 args
+all options are environment variables.
+DEBUG=1 env var enables debugging output.
+CROSS=1 hooks up two processes, 2nd of which has one line of output per line of input, expected by the first, which starts off the communication.  crosses stdin/stderr of cmd1 and cmd2 line by line (both must flush on newline and output.  cmd1 initiates the conversation (sends the first line).    default: attempts to cross stdin/stdout of c1 and c2 directly (via two unidirectional posix pipes created before fork).
+SERIAL=1: (no parallelism possible) but lines exchanged are logged if DEBUG.
+if SNAKE then stdin -> c1 -> c2 -> c1 -> stdout.
+if PIPE then stdin -> c1 -> c2 -> stdout (same as shell c1|c2, but with SERIAL you can see the intermediate in real time; you could do similar with c1 | tee /dev/fd/2 |c2.
+DIRECT=1 (default) will override SERIAL=1.
+CROSS=1 (default) will override SNAKE or PIPE.
 };
 
 info("1 cmd:",@c1,"\n");
@@ -37,16 +58,6 @@ sub lineto {
     shift;
     print @_;
 }
-my $mode='CROSS';
-my $ser='DIRECT';
-$mode='PIPE' if $ENV{PIPE};
-$mode='SNAKE' if $ENV{SNAKE};
-$mode='CROSS' if $ENV{CROSS};
-$ser='SERIAL' if $ENV{SERIAL};
-$ser='DIRECT' if $ENV{DIRECT};
-$ser='SERIAL' if $mode eq 'SNAKE';
-info("mode: $mode\n");
-info("connection: $ser\n");
 
 if ($ser eq 'SERIAL') {
     my ($R1,$W1,$R2,$W2);
