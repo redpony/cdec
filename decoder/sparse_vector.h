@@ -20,9 +20,20 @@ public:
   SparseVector() {}
   explicit SparseVector(std::vector<T> const& v) {
     typename MapType::iterator p=values_.begin();
-    for (unsigned i=0;i<v.size();++i)
-      p=values_.insert(p,typename MapType::value_type(i,v[i])); //faster
+    const T z=T(0);
+    for (unsigned i=0;i<v.size();++i) {
+      T const& t=v[i];
+      if (t!=z)
+        p=values_.insert(p,typename MapType::value_type(i,t)); //hint makes insertion faster
+    }
+
   }
+
+  void set_new_value(int index, T const& val) {
+    assert(values_.find(index)==values_.end());
+    values_[index]=val;
+  }
+
 
   const T operator[](int index) const {
     typename MapType::const_iterator found = values_.find(index);
@@ -265,9 +276,29 @@ private:
   MapType values_;
 };
 
+// doesn't support fast indexing directly
+template <class T>
+class SparseVectorList {
+  typedef std::vector<const int,T> ListType;
+  typedef typename ListType::value_type pair_type;
+  typedef typename ListType::const_iterator const_iterator;
+  SparseVectorList() {  }
+  explicit SparseVectorList(std::vector<T> const& v) {
+    const T z=T(0);
+    for (unsigned i=0;i<v.size();++i) {
+      T const& t=v[i];
+      if (t!=z)
+        p.push_back(pair_type(i,t));
+    }
+    p.resize(p.size());
+  }
+private:
+  ListType p;
+};
+
+
 typedef SparseVector<double> FeatureVector;
-typedef std::vector<double> FeatureWeights;
-typedef FeatureWeights WeightVector;
+typedef SparseVector<double> WeightVector;
 
 template <typename T>
 SparseVector<T> operator+(const SparseVector<T>& a, const SparseVector<T>& b) {

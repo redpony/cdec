@@ -1,9 +1,14 @@
 #ifndef FF_FSA_H
 #define FF_FSA_H
 
+#include <stdint.h> //C99
 #include <string>
 #include "ff.h"
 #include "sparse_vector.h"
+#include "value_array.h"
+
+typedef ValueArray<uint8_t> Bytes;
+
 /*
 
  */

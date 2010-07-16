@@ -58,6 +58,12 @@ class LogVal {
     return *this += b;
   }
 
+  // LogVal(fabs(log(x)),x.s_)
+  friend LogVal abslog(LogVal x) {
+    if (x.v_<0) x.v_=-x.v_;
+    return x;
+  }
+
   LogVal& poweq(const T& power) {
 #if LOGVAL_CHECK_NEG
     if (s_) {

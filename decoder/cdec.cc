@@ -308,7 +308,7 @@ bool prelm_weights_string(po::variables_map const& conf,string &s)
 }
 
 
-void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,FeatureWeights *weights=0) {
+void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,WeightVector *weights=0) {
     cerr << viterbi_stats(forest,name,true,show_tree);
     if (show_features) {
       cerr << name<<"     features: ";
@@ -601,33 +601,14 @@ int main(int argc, char** argv) {
     vector<WordID> trans;
     ViterbiESentence(forest, &trans);
 
+
     /*Oracle Rescoring*/
     if(get_oracle_forest) {
-      Timer t("Forest Oracle rescoring:");
-
-      oracle.DumpKBest(conf,"model",sent_id, forest, 10, true);
-
-      Translation best(forest);
-      {
-        Hypergraph oracle_forest;
-        oracle.Rescore(smeta,forest,&oracle_forest,feature_weights,1.0);
-        forest.swap(oracle_forest);
-      }
-      Translation oracle_trans(forest);
-
+      Oracles o=oracles.ComputeOracles(smeta,forest,feature_weights,&cerr,10,conf["forest_output"].as<std::string>());
       cerr << "  +Oracle BLEU forest (nodes/edges): " << forest.nodes_.size() << '/' << forest.edges_.size() << endl;
       cerr << "  +Oracle BLEU (paths): " << forest.NumberOfPaths() << endl;
-      oracle_trans.Print(cerr,"  +Oracle BLEU");
-      //compute kbest for oracle
-      oracle.DumpKBest(conf,"oracle",sent_id, forest, 10, true);
-
-      //reweight the model with -1 for the BLEU feature to compute k-best list for negative examples
-      oracle.ReweightBleu(&forest,-1.0);
-      Translation neg_trans(forest);
-      neg_trans.Print(cerr,"  -Oracle BLEU");
-      //compute kbest for negative
-      oracle.DumpKBest(conf,"negative",sent_id, forest, 10, true);
-
+      o.hope.Print(cerr,"  +Oracle BLEU");
+      o.fear.Print(cerr,"  -Oracle BLEU");
       //Add 1-best translation (trans) to psuedo-doc vectors
       oracle.IncludeLastScore(&cerr);
     }
