@@ -19,7 +19,7 @@ using namespace std::tr1;
 namespace Hack {
 
 struct Candidate;
-typedef SmallVector JVector;
+typedef SmallVectorInt JVector;
 typedef vector<Candidate*> CandidateHeap;
 typedef vector<Candidate*> CandidateList;
 
@@ -188,7 +188,7 @@ public:
     new_edge->edge_prob_ = item->out_edge_.edge_prob_;
     Candidate*& o_item = (*s2n)[item->state_];
     if (!o_item) o_item = item;
-    
+
     int& node_id = o_item->node_index_;
     if (node_id < 0) {
       Hypergraph::Node* new_node = out.AddNode(in.nodes_[item->in_edge_->head_node_].cat_);

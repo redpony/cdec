@@ -49,7 +49,7 @@ namespace KBest {
 
     struct Derivation {
       Derivation(const Hypergraph::Edge& e,
-                 const SmallVector& jv,
+                 const SmallVectorInt& jv,
                  const WeightType& w,
                  const SparseVector<double>& f) :
         edge(&e),
@@ -59,11 +59,11 @@ namespace KBest {
 
       // dummy constructor, just for query
       Derivation(const Hypergraph::Edge& e,
-                 const SmallVector& jv) : edge(&e), j(jv) {}
+                 const SmallVectorInt& jv) : edge(&e), j(jv) {}
 
       T yield;
       const Hypergraph::Edge* const edge;
-      const SmallVector j;
+      const SmallVectorInt j;
       const WeightType score;
       const SparseVector<double> feature_values;
     };
@@ -141,7 +141,7 @@ namespace KBest {
     // the yield is computed in LazyKthBest before the derivation is added to D
     // returns NULL if j refers to derivation numbers larger than the
     // antecedent structure define
-    Derivation* CreateDerivation(const Hypergraph::Edge& e, const SmallVector& j) {
+    Derivation* CreateDerivation(const Hypergraph::Edge& e, const SmallVectorInt& j) {
       WeightType score = w(e);
       SparseVector<double> feats = e.feature_values_;
       for (int i = 0; i < e.Arity(); ++i) {
@@ -161,7 +161,7 @@ namespace KBest {
       const Hypergraph::Node& node = g.nodes_[v];
       for (int i = 0; i < node.in_edges_.size(); ++i) {
         const Hypergraph::Edge& edge = g.edges_[node.in_edges_[i]];
-        SmallVector jv(edge.Arity(), 0);
+        SmallVectorInt jv(edge.Arity(), 0);
         Derivation* d = CreateDerivation(edge, jv);
         assert(d);
         s.cand.push_back(d);
@@ -178,7 +178,7 @@ namespace KBest {
 
     void LazyNext(const Derivation* d, CandidateHeap* cand, UniqueDerivationSet* ds) {
       for (int i = 0; i < d->j.size(); ++i) {
-        SmallVector j = d->j;
+        SmallVectorInt j = d->j;
         ++j[i];
         const Derivation* ant = LazyKthBest(d->edge->tail_nodes_[i], j[i]);
         if (ant) {

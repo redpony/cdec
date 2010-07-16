@@ -27,7 +27,7 @@ struct HGReader : public JSONParser {
       hg.ConnectEdgeToHeadNode(&hg.edges_[in_edges[i]], node);
     }
   }
-  void CreateEdge(const TRulePtr& rule, SparseVector<double>* feats, const SmallVector& tail) {
+  void CreateEdge(const TRulePtr& rule, FeatureVector* feats, const SmallVectorInt& tail) {
     Hypergraph::Edge* edge = hg.AddEdge(rule, tail);
     feats->swap(edge->feature_values_);
     edge->i_ = spans[0];
@@ -228,7 +228,7 @@ struct HGReader : public JSONParser {
   }
   string rp;
   string cat;
-  SmallVector tail;
+  SmallVectorInt tail;
   vector<int> in_edges;
   TRulePtr cur_rule;
   map<int, TRulePtr> rules;
@@ -524,7 +524,7 @@ void ReadPLFNode(const std::string& in, int &c, int cur_node, int line, Hypergra
   }
 }
 
-} // namespace PLF 
+} // namespace PLF
 
 void HypergraphIO::ReadFromPLF(const std::string& in, Hypergraph* hg, int line) {
   hg->clear();
@@ -644,7 +644,7 @@ void b64encode(const char* data, const size_t size, ostream* out) {
   }
 }
 
-static void decodeblock(const unsigned char* in, unsigned char* out) {   
+static void decodeblock(const unsigned char* in, unsigned char* out) {
   out[0] = (unsigned char ) (in[0] << 2 | in[1] >> 4);
   out[1] = (unsigned char ) (in[1] << 4 | in[2] >> 2);
   out[2] = (unsigned char ) (((in[2] << 6) & 0xc0) | in[3]);

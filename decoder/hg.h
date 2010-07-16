@@ -22,7 +22,7 @@ class Hypergraph {
   Hypergraph() : is_linear_chain_(false) {}
 
   // SmallVector is a fast, small vector<int> implementation for sizes <= 2
-  typedef SmallVector TailNodeVector;
+  typedef SmallVectorInt TailNodeVector;
 
   // TODO get rid of cat_?
   // TODO keep cat_ and add span and/or state? :)
