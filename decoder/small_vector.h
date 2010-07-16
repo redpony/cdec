@@ -3,6 +3,7 @@
 #include <streambuf>  // std::max - where to get this?
 #include <cstring>
 #include <cassert>
+#include <limits.h>
 
 #define __SV_MAX_STATIC 2
 
@@ -77,10 +78,10 @@ class SmallVector {
   bool empty() const { return size_ == 0; }
   size_t size() const { return size_; }
 
-  inline void ensure_capacity(unsigned char min_size) {
+  inline void ensure_capacity(uint16_t min_size) {
     assert(min_size > __SV_MAX_STATIC);
     if (min_size < capacity_) return;
-    unsigned char new_cap = std::max(static_cast<unsigned char>(capacity_ << 1), min_size);
+    uint16_t new_cap = std::max(static_cast<uint16_t>(capacity_ << 1), min_size);
     int* tmp = new int[new_cap];
     std::memcpy(tmp, data_.ptr, capacity_ * sizeof(int));
     delete[] data_.ptr;
@@ -170,8 +171,8 @@ class SmallVector {
   }
 
  private:
-  unsigned char capacity_;  // only defined when size_ >= __SV_MAX_STATIC
-  unsigned char size_;
+  uint16_t capacity_;  // only defined when size_ >= __SV_MAX_STATIC
+  uint16_t size_;
   union StorageType {
     int vals[__SV_MAX_STATIC];
     int* ptr;
