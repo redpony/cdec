@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 
   // seed the random number generator: 0 = automatic, specify value otherwise
   unsigned long seed = 0; 
-  PYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"), seed);
+  MPIPYPTopics model(vm["topics"].as<int>(), vm.count("hierarchical-topics"), seed);
 
   // read the data
   BackoffGenerator* backoff_gen=0;

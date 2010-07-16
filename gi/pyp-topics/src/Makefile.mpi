@@ -16,7 +16,8 @@ mpi-pyp-contexts-train: mpi-train-contexts.o $(local_objs)
 
 .PHONY: depend echo
 depend:
-	$(CXX) -MM $(CXXFLAGS) *.cc *.c | sed 's/^\(.*\.o:\)/obj\/\1/' > makefile.depend
+#$(CXX) -MM $(CXXFLAGS) *.cc *.c | sed 's/^\(.*\.o:\)/obj\/\1/' > makefile.depend
+	$(CXX) -MM $(CXXFLAGS) *.cc *.c > makefile.depend
 
 clean:
 	rm -f *.o
