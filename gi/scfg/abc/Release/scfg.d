@@ -1,8 +1,4 @@
-scfg.d scfg.o: ../scfg.cpp /home/tnguyen/ws10smt/decoder/lattice.h \
- /home/tnguyen/ws10smt/decoder/wordid.h \
- /home/tnguyen/ws10smt/decoder/array2d.h \
- /home/tnguyen/ws10smt/decoder/tdict.h ../agrammar.h \
- /home/tnguyen/ws10smt/decoder/grammar.h \
+scfg.d scfg.o: ../scfg.cpp \
  /export/ws10smt/software/include/boost/shared_ptr.hpp \
  /export/ws10smt/software/include/boost/smart_ptr/shared_ptr.hpp \
  /export/ws10smt/software/include/boost/config.hpp \
@@ -38,6 +34,12 @@ scfg.d scfg.o: ../scfg.cpp /home/tnguyen/ws10smt/decoder/lattice.h \
  /export/ws10smt/software/include/boost/smart_ptr/detail/yield_k.hpp \
  /export/ws10smt/software/include/boost/memory_order.hpp \
  /export/ws10smt/software/include/boost/smart_ptr/detail/operator_bool.hpp \
+ /export/ws10smt/software/include/boost/pointer_cast.hpp \
+ /home/tnguyen/ws10smt/decoder/lattice.h \
+ /home/tnguyen/ws10smt/decoder/wordid.h \
+ /home/tnguyen/ws10smt/decoder/array2d.h \
+ /home/tnguyen/ws10smt/decoder/tdict.h ../agrammar.h \
+ /home/tnguyen/ws10smt/decoder/grammar.h \
  /home/tnguyen/ws10smt/decoder/lattice.h \
  /home/tnguyen/ws10smt/decoder/trule.h \
  /home/tnguyen/ws10smt/decoder/sparse_vector.h \
@@ -57,26 +59,14 @@ scfg.d scfg.o: ../scfg.cpp /home/tnguyen/ws10smt/decoder/lattice.h \
  /export/ws10smt/software/include/boost/functional/hash/detail/hash_float_generic.hpp \
  /export/ws10smt/software/include/boost/functional/hash/extensions.hpp \
  /export/ws10smt/software/include/boost/detail/container_fwd.hpp \
- /home/tnguyen/ws10smt/decoder/bottom_up_parser.h \
- /home/tnguyen/ws10smt/decoder/grammar.h \
  /home/tnguyen/ws10smt/decoder/hg.h \
  /home/tnguyen/ws10smt/decoder/small_vector.h \
  /home/tnguyen/ws10smt/decoder/prob.h \
  /home/tnguyen/ws10smt/decoder/logval.h \
+ /home/tnguyen/ws10smt/decoder/bottom_up_parser.h \
+ /home/tnguyen/ws10smt/decoder/grammar.h \
  /home/tnguyen/ws10smt/decoder/hg_intersect.h ../../utils/ParamsArray.h \
  ../../utils/Util.h ../../utils/UtfConverter.h ../../utils/ConvertUTF.h
-
-/home/tnguyen/ws10smt/decoder/lattice.h:
-
-/home/tnguyen/ws10smt/decoder/wordid.h:
-
-/home/tnguyen/ws10smt/decoder/array2d.h:
-
-/home/tnguyen/ws10smt/decoder/tdict.h:
-
-../agrammar.h:
-
-/home/tnguyen/ws10smt/decoder/grammar.h:
 
 /export/ws10smt/software/include/boost/shared_ptr.hpp:
 
@@ -148,6 +138,20 @@ scfg.d scfg.o: ../scfg.cpp /home/tnguyen/ws10smt/decoder/lattice.h \
 
 /export/ws10smt/software/include/boost/smart_ptr/detail/operator_bool.hpp:
 
+/export/ws10smt/software/include/boost/pointer_cast.hpp:
+
+/home/tnguyen/ws10smt/decoder/lattice.h:
+
+/home/tnguyen/ws10smt/decoder/wordid.h:
+
+/home/tnguyen/ws10smt/decoder/array2d.h:
+
+/home/tnguyen/ws10smt/decoder/tdict.h:
+
+../agrammar.h:
+
+/home/tnguyen/ws10smt/decoder/grammar.h:
+
 /home/tnguyen/ws10smt/decoder/lattice.h:
 
 /home/tnguyen/ws10smt/decoder/trule.h:
@@ -186,10 +190,6 @@ scfg.d scfg.o: ../scfg.cpp /home/tnguyen/ws10smt/decoder/lattice.h \
 
 /export/ws10smt/software/include/boost/detail/container_fwd.hpp:
 
-/home/tnguyen/ws10smt/decoder/bottom_up_parser.h:
-
-/home/tnguyen/ws10smt/decoder/grammar.h:
-
 /home/tnguyen/ws10smt/decoder/hg.h:
 
 /home/tnguyen/ws10smt/decoder/small_vector.h:
@@ -197,6 +197,10 @@ scfg.d scfg.o: ../scfg.cpp /home/tnguyen/ws10smt/decoder/lattice.h \
 /home/tnguyen/ws10smt/decoder/prob.h:
 
 /home/tnguyen/ws10smt/decoder/logval.h:
+
+/home/tnguyen/ws10smt/decoder/bottom_up_parser.h:
+
+/home/tnguyen/ws10smt/decoder/grammar.h:
 
 /home/tnguyen/ws10smt/decoder/hg_intersect.h:
 
