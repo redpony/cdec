@@ -19,7 +19,7 @@ my @c1;
 if (scalar @ARGV) {
     do {
         push @c1,shift
-    } while $c1[$#c1] ne '--';
+    } while scalar @ARGV && $c1[$#c1] ne '--';
 }
 pop @c1;
 my @c2=@ARGV;
@@ -54,12 +54,10 @@ if ($serial || $snake) {
     } else {
         while(<$R1>) {
             info("1:",$_);
-            select $W2;
-            $|=1;
-            print $_;
+            lineto($W2,$_);
             last unless defined ($_=<$R2>);
             info("2:",$_);
-            print $W1 $_;
+            lineto($W1,$_);
         }
     }
 } else {
