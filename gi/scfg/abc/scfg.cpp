@@ -145,6 +145,7 @@ int main(int argc, char** argv){
   }
   cerr<<"get parametters\n\n\n";
 
+
   string grammar_file = params.asString("grammar_file", "./grammar.pr");
 
   string input_file = params.asString("input_file", "parallel_corpora");
@@ -186,6 +187,7 @@ int main(int argc, char** argv){
   Hypergraph hg;
 
   int data_size = src_corpus.size();
+  int cnt_unparsed =0;
   for (int i =0; i <split_iters; i++){
     
     cerr<<"Split Nonterminals, iteration "<<(i+1)<<endl;
@@ -208,13 +210,17 @@ int main(int argc, char** argv){
 	if (! parseSentencePair(goal_sym, src, tgt, g, hg) ){
 	  cerr<<"target sentence is not parsed by the grammar!\n";
 	  //return 1;
+	  cnt_unparsed++;
 	  continue;
 
 	} 
+
 	cerr<<"update edge posterior prob"<<endl;
 	boost::static_pointer_cast<aGrammar>(g)->UpdateHgProsteriorProb(hg);
 	hg.clear();
+	if (k%1000 ==0 ) cerr<<"sentences "<<k<<endl;
       }
+      cerr<<"cnt_unparased="<<cnt_unparsed<<endl;
       boost::static_pointer_cast<aGrammar>(g)->UpdateScore();
     }
     boost::static_pointer_cast<aGrammar>(g)->PrintAllRules(output_file+".e" + itos(i+1));

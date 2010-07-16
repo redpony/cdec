@@ -9,7 +9,7 @@ using namespace std;
 
 class aTRule: public TRule{
  public:
- aTRuleTRule : TRule(){ResetScore(0.00000001); }
+ aTRule() : TRule(){ResetScore(0.00000001); }
   aTRule(TRulePtr rule_);
 
   void ResetScore(double initscore){//cerr<<"Reset Score "<<this->AsString()<<endl;
