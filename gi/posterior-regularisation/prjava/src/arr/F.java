@@ -1,5 +1,6 @@
 package arr;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class F {
@@ -36,11 +37,13 @@ public class F {
 		for(int i=0;i<a.length;i++){
 			sum+=a[i];
 		}
-		if(sum==0){
-			return ;
-		}
-		for(int i=0;i<a.length;i++){
-			a[i]/=sum;
+		if(sum==0)
+			Arrays.fill(a, 1.0/a.length);
+		else
+		{
+			for(int i=0;i<a.length;i++){
+				a[i]/=sum;
+			}
 		}
 	}
 	
