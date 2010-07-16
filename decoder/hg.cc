@@ -213,23 +213,23 @@ void Hypergraph::SetPromise(NodeProbs const& inside,NodeProbs const& outside,dou
 
 
 
+// drop edges w/ max marginal prob less than cutoff.  this means that bigger cutoff is stricter.
 void Hypergraph::MarginPrune(vector<prob_t> const& io,prob_t cutoff,vector<bool> const* preserve_mask,bool safe_inside,bool verbose)
 {
   assert(io.size()==edges_.size());
-  const prob_t BARELY_SMALLER(1e-6,false); // nearly 1; 1-epsilon
-  //TODO: //FIXME: if EPSILON is 0, then remnants (useless edges that don't connect to top? or top-connected but not bottom-up buildable referneced?) are left in the hypergraph output that cause mr_vest_map to segfault.  adding EPSILON probably just covers up the symptom by making it far less frequent; I imagine any time threshold is set by DensityPrune, cutoff is exactly equal to the io of several nodes, but because of how it's computed, some round slightly down vs. slightly up.  probably the flaw is in PruneEdges.
-  int ne=NumberOfEdges();
-  cutoff*=BARELY_SMALLER;
-  prob_t creep=BARELY_SMALLER.root(-(ne+1)); // start more permissive, then become less generous.  this is barely more than 1.  we want to do this because it's a disaster if something lower in a derivation tree is deleted, but the higher thing remains (unless safe_inside)
 
-  vector<bool> prune(ne);
+  //TODO: //FIXME: if EPSILON is 0, then remnants (useless edges that don't connect to top? or top-connected but not bottom-up buildable referenced?) are left in the hypergraph output that cause mr_vest_map to segfault.  adding EPSILON probably just covers up the symptom by making it far less frequent; I imagine any time threshold is set by DensityPrune, cutoff is exactly equal to the io of several nodes, but because of how it's computed, some round slightly down vs. slightly up.  probably the flaw is in PruneEdges.
+
+  const prob_t creep=abslog(cutoff).pow(1e-6); // some barely >1 (small positive log) ratio.  linear in logspace of course // start more permissive, then become less generous.  this is barely more than 1.  we want to do this because it's a disaster if something lower in a derivation tree is deleted, but the higher thing remains (unless safe_inside)
+
+  vector<bool> prune(edges_.size());
   if (verbose) {
     if (preserve_mask) cerr << preserve_mask->size() << " " << prune.size() << endl;
     cerr<<"Finishing prune for "<<prune.size()<<" edges; CUTOFF=" << cutoff << endl;
   }
   unsigned pc = 0;
   for (int i = 0; i < io.size(); ++i) {
-    cutoff*=creep;
+    cutoff*=creep; // start more permissive, then become less generous.  this is barely more than 1.  we want to do this because it's a disaster if something lower in a derivation tree is deleted, but the higher thing remains (unless safe_inside)
     const bool prune_edge = (io[i] < cutoff);
     if (prune_edge) {
       ++pc;
