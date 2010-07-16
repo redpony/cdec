@@ -18,7 +18,7 @@ using namespace std;
 using namespace std::tr1;
 
 struct Candidate;
-typedef SmallVector JVector;
+typedef SmallVectorInt JVector;
 typedef vector<Candidate*> CandidateHeap;
 typedef vector<Candidate*> CandidateList;
 
