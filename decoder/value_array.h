@@ -1,12 +1,12 @@
 #ifndef VALUE_ARRAY_H
 #define VALUE_ARRAY_H
 
-# include <cstdlib>
-# include <algorithm>
-# include <new>
-# include <boost/range.hpp>
-# include <boost/utility/enable_if.hpp>
-# include <boost/type_traits.hpp>
+#include <cstdlib>
+#include <algorithm>
+#include <new>
+#include <boost/range.hpp>
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits.hpp>
 #ifdef USE_BOOST_SERIALIZE
 # include <boost/serialization/split_member.hpp>
 # include <boost/serialization/access.hpp>
