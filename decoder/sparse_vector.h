@@ -176,6 +176,17 @@ public:
         return *this;
     }
 
+  friend SparseVector<T> operator -(SparseVector<T> x,SparseVector<T> const& y) {
+    x-=y;
+    return x;
+  }
+  friend SparseVector<T> operator +(SparseVector<T> x,SparseVector<T> const& y) {
+    x+=y;
+    return x;
+  }
+
+private:
+  // DEPRECATED: becuase 0 values are dropped from the map, this doesn't even make sense if you have a fully populated (not really sparse re: what you'll ever use) vector
     SparseVector<T> &operator-=(T const& x) {
         for (typename MapType::iterator
                 it = values_.begin(); it != values_.end(); ++it)
@@ -189,7 +200,7 @@ public:
             it->second += x;
         return *this;
     }
-
+public:
     SparseVector<T> &operator/=(const T &x) {
         for (typename MapType::iterator
                 it = values_.begin(); it != values_.end(); ++it)
