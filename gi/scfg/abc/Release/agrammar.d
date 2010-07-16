@@ -59,7 +59,11 @@ agrammar.d agrammar.o: ../agrammar.cc \
  /home/tnguyen/ws10smt/decoder/tdict.h ../agrammar.h \
  /home/tnguyen/ws10smt/decoder/grammar.h \
  /home/tnguyen/ws10smt/decoder/lattice.h \
- /home/tnguyen/ws10smt/decoder/array2d.h ../../utils/Util.h \
+ /home/tnguyen/ws10smt/decoder/array2d.h \
+ /home/tnguyen/ws10smt/decoder/hg.h \
+ /home/tnguyen/ws10smt/decoder/small_vector.h \
+ /home/tnguyen/ws10smt/decoder/prob.h \
+ /home/tnguyen/ws10smt/decoder/logval.h ../../utils/Util.h \
  ../../utils/UtfConverter.h ../../utils/ConvertUTF.h
 
 /home/tnguyen/ws10smt/decoder/rule_lexer.h:
@@ -185,6 +189,14 @@ agrammar.d agrammar.o: ../agrammar.cc \
 /home/tnguyen/ws10smt/decoder/lattice.h:
 
 /home/tnguyen/ws10smt/decoder/array2d.h:
+
+/home/tnguyen/ws10smt/decoder/hg.h:
+
+/home/tnguyen/ws10smt/decoder/small_vector.h:
+
+/home/tnguyen/ws10smt/decoder/prob.h:
+
+/home/tnguyen/ws10smt/decoder/logval.h:
 
 ../../utils/Util.h:
 
