@@ -23,7 +23,7 @@ mbr_kbest_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
 fast_score_SOURCES = fast_score.cc ter.cc comb_scorer.cc aer_scorer.cc scorer.cc viterbi_envelope.cc
 fast_score_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
 
-mr_vest_generate_mapper_input_SOURCES = mr_vest_generate_mapper_input.cc line_optimizer.cc timing_stats.cc
+mr_vest_generate_mapper_input_SOURCES = mr_vest_generate_mapper_input.cc line_optimizer.cc $(top_srcdir)/decoder/timing_stats.cc
 mr_vest_generate_mapper_input_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
 
 mr_vest_map_SOURCES = viterbi_envelope.cc error_surface.cc aer_scorer.cc mr_vest_map.cc scorer.cc ter.cc comb_scorer.cc line_optimizer.cc
