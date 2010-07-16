@@ -23,24 +23,44 @@ if (scalar @ARGV) {
 }
 pop @c1;
 my @c2=@ARGV;
-(scalar @c1 && scalar @c2) || die "usage: $0 cmd1 args -- cmd2 args; hooks up two processes, 2nd of which has one line of output per line of input, expected by the first, which starts off the communication.  crosses stdin/stderr of cmd1 and cmd2 line by line (both must flush on newline and output.  cmd1 initiates the conversation (sends the first line).  QUIET=1 env var suppresses debugging output.  default: attempts to cross stdin/stdout of c1 and c2 directly (via two unidirectional posix pipes created before fork).  env SERIAL=1: (no parallelism possible) but lines exchanged are logged unless QUIET.";
+@ARGV=();
+(scalar @c1 && scalar @c2) || die "usage: $0 cmd1 args -- cmd2 args; hooks up two processes, 2nd of which has one line of output per line of input, expected by the first, which starts off the communication.  crosses stdin/stderr of cmd1 and cmd2 line by line (both must flush on newline and output.  cmd1 initiates the conversation (sends the first line).  QUIET=1 env var suppresses debugging output.  default: attempts to cross stdin/stdout of c1 and c2 directly (via two unidirectional posix pipes created before fork).  env SERIAL=1: (no parallelism possible) but lines exchanged are logged unless QUIET.  if SNAKE then stdin -> c1 -> c2 -> c1 -> stdout";
 
 info("1 cmd:",@c1,"\n");
 info("2 cmd:",@c2,"\n");
 
-if ($ENV{SERIAL}) {
+sub lineto {
+    select $_[0];
+    $|=1;
+    shift;
+    print @_;
+}
+my $snake=$ENV{SNAKE};
+my $serial=$ENV{SERIAL};
+if ($serial || $snake) {
     my ($R1,$W1,$R2,$W2);
     my $c1p=open2($R1,$W1,@c1); # Open2 R W backward from Open3.
     my $c2p=open2($R2,$W2,@c2);
-    select $W2;
-    $|=1;
-    while(<$R1>) {
-        info("1:",$_);
-        print $_;
-        $_=<$R2>;
-        last unless defined $_;
-        info("2:",$_);
-        print $W1 $_;
+    if ($snake) {
+        while(<STDIN>) {
+            lineto($W1,$_);
+            last unless defined ($_=<$R1>);
+            lineto($W2,$_);
+            last unless defined ($_=<$R2>);
+            lineto($W1,$_);
+            last unless defined ($_=<$R1>);
+            lineto(*STDOUT,$_);
+        }
+    } else {
+        while(<$R1>) {
+            info("1:",$_);
+            select $W2;
+            $|=1;
+            print $_;
+            last unless defined ($_=<$R2>);
+            info("2:",$_);
+            print $W1 $_;
+        }
     }
 } else {
     my @rw1=POSIX::pipe();
