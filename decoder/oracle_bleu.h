@@ -195,7 +195,6 @@ struct OracleBleu {
     std::ostringstream kbest_string_stream;
     kbest_string_stream << conf["forest_output"].as<std::string>() << "/kbest_"<<suffix<< "." << sent_id;
     DumpKBest(sent_id, forest, k, unique, kbest_string_stream.str());
-
   }
 
 };

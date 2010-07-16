@@ -21,7 +21,7 @@ void register_feature_functions() {
   global_ff_registry->Register(new FFFactory<WordPenalty>);
   global_ff_registry->Register(new FFFactory<SourceWordPenalty>);
   global_ff_registry->Register(new FFFactory<ArityPenalty>);
-  global_ff_registry->Register("BLEUModel", new FFFactory<BLEUModel>);
+  global_ff_registry->Register(new FFFactory<BLEUModel>);
   global_ff_registry->Register("RuleShape", new FFFactory<RuleShapeFeatures>);
   global_ff_registry->Register("RelativeSentencePosition", new FFFactory<RelativeSentencePosition>);
   global_ff_registry->Register("Model2BinaryFeatures", new FFFactory<Model2BinaryFeatures>);

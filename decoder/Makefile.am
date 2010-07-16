@@ -13,7 +13,7 @@ noinst_PROGRAMS = \
   small_vector_test
 endif
 
-cdec_SOURCES = cdec.cc forest_writer.cc maxtrans_blunsom.cc cdec_ff.cc ff_factory.cc timing_stats.cc
+cdec_SOURCES = cdec.cc forest_writer.cc maxtrans_blunsom.cc cdec_ff.cc timing_stats.cc
 small_vector_test_SOURCES = small_vector_test.cc
 small_vector_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 parser_test_SOURCES = parser_test.cc
@@ -75,6 +75,7 @@ libcdec_a_SOURCES = \
   ff_csplit.cc \
   ff_tagger.cc \
   ff_bleu.cc \
+  ff_factory.cc \
   ../vest/scorer.cc \
   ../vest/ter.cc \
   ../vest/aer_scorer.cc \
