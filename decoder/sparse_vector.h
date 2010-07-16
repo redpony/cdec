@@ -255,6 +255,8 @@ public:
         return values_.size() < other.values_.size();
     }
 
+  int size() const { return values_.size(); }
+
     int num_active() const { return values_.size(); }
     bool empty() const { return values_.empty(); }
 

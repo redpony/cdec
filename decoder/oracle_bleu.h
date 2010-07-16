@@ -38,7 +38,7 @@ struct Translation {
     out<<pre<<"features: "<<features<<std::endl;
   }
   bool is_null() {
-    return features.size()==0 /* && sentence.size()==0 */;
+    return features.empty() /* && sentence.empty() */;
   }
 
 };
