@@ -78,7 +78,7 @@ struct oracle_directions {
 
   void AddOptions(po::options_description *opts) {
     oracle.AddOptions(opts);
-    opts-?add_options()
+    opts->add_options()
       ("dev_set_size,s",po::value<unsigned>(&dev_set_size),"[REQD] Development set size (# of parallel sentences)")
       ("forest_repository,r",po::value<string>(&forest_repository),"[REQD] Path to forest repository")
       ("weights,w",po::value<string>(&weights_file),"[REQD] Current feature weights file")
