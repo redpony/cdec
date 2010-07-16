@@ -10,7 +10,8 @@ use IPC::Open2;
 use POSIX qw(pipe dup2 STDIN_FILENO STDOUT_FILENO);
 #use IO::Handle;
 $,=' ';
-my $quiet=$ENV{QUIET};
+my $quiet=!$ENV{DEBUG};
+$quiet=1 if $ENV{QUIET};
 sub info {
     print STDERR @_ unless $quiet;
 }
@@ -24,7 +25,7 @@ if (scalar @ARGV) {
 pop @c1;
 my @c2=@ARGV;
 @ARGV=();
-(scalar @c1 && scalar @c2) || die "usage: $0 cmd1 args -- cmd2 args; hooks up two processes, 2nd of which has one line of output per line of input, expected by the first, which starts off the communication.  crosses stdin/stderr of cmd1 and cmd2 line by line (both must flush on newline and output.  cmd1 initiates the conversation (sends the first line).  QUIET=1 env var suppresses debugging output.  default: attempts to cross stdin/stdout of c1 and c2 directly (via two unidirectional posix pipes created before fork).  env SERIAL=1: (no parallelism possible) but lines exchanged are logged unless QUIET.  if SNAKE then stdin -> c1 -> c2 -> c1 -> stdout";
+(scalar @c1 && scalar @c2) || die "usage: $0 cmd1 args -- cmd2 args; hooks up two processes, 2nd of which has one line of output per line of input, expected by the first, which starts off the communication.  crosses stdin/stderr of cmd1 and cmd2 line by line (both must flush on newline and output.  cmd1 initiates the conversation (sends the first line).  DEBUG=1 env var enables debugging output.  default: attempts to cross stdin/stdout of c1 and c2 directly (via two unidirectional posix pipes created before fork).  env SERIAL=1: (no parallelism possible) but lines exchanged are logged if DEBUG.  if SNAKE then stdin -> c1 -> c2 -> c1 -> stdout";
 
 info("1 cmd:",@c1,"\n");
 info("2 cmd:",@c2,"\n");
@@ -43,12 +44,16 @@ if ($serial || $snake) {
     my $c2p=open2($R2,$W2,@c2);
     if ($snake) {
         while(<STDIN>) {
+            info("IN:",$_);
             lineto($W1,$_);
             last unless defined ($_=<$R1>);
+            info("IN|1:",$_);
             lineto($W2,$_);
             last unless defined ($_=<$R2>);
+            info("IN|1|2:",$_);
             lineto($W1,$_);
             last unless defined ($_=<$R1>);
+            info("IN|1|2|1:",$_);
             lineto(*STDOUT,$_);
         }
     } else {
