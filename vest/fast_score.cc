@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
   while(in) {
     string line;
     getline(in, line);
-    if (line.empty()) continue;
+    if (line.empty() && !in) break;
     vector<WordID> sent;
     TD::ConvertSentence(line, &sent);
     Score* sentscore = ds[lc]->ScoreCandidate(sent);

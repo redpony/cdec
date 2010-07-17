@@ -118,6 +118,10 @@ struct oracle_directions {
       cerr << dcmdline_options << endl;
       exit(1);
     }
+    dev_set_size = (*conf)["dev_set_size"].as<unsigned>();
+    forest_repository = (*conf)["forest_repository"].as<string>();
+    weights_file = (*conf)["weights"].as<string>();
+    n_random = (*conf)["random_directions"].as<unsigned>();
   }
 
   int main(int argc, char *argv[]) {
@@ -130,8 +134,8 @@ struct oracle_directions {
 
   void Run() {
     AddPrimaryAndRandomDirections();
-    AddOracleDirections();
-    compress_similar(directions,max_similarity);
+    //AddOracleDirections();
+    //compress_similar(directions,max_similarity);
     Print();
   }
 
@@ -139,6 +143,7 @@ struct oracle_directions {
   Point origin; // old weights that gave model 1best.
   vector<string> optimize_features;
   void UseConf(po::variables_map const& conf) {
+#if 0
     oracle.UseConf(conf);
 
     include_primary=!conf.count("no_primary");
@@ -156,7 +161,7 @@ struct oracle_directions {
 //    oracle_batch=conf["oracle_batch"].as<unsigned>();
 //    max_similarity=conf["max_similarity"].as<double>();
 //    weights_file=conf["weights"].as<string>();
-
+#endif
     Init();
   }
 
@@ -184,6 +189,7 @@ struct oracle_directions {
       //TODO: compute doc bleu stats for each sentence, then when getting oracle temporarily exclude stats for that sentence (skip regular score updating)
     }
     start_random=false;
+    cerr << "Forest repo: " << forest_repository << endl;
     assert(DirectoryExists(forest_repository));
     vector<string> features;
     weights.InitFromFile(weights_file, &features);
