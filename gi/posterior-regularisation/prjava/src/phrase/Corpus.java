@@ -18,7 +18,9 @@ public class Corpus
 	public int splitSentinel;
 	public int phraseSentinel;
 	public int rareSentinel;
-	private boolean[] wordIsRare;
+	private boolean[] rareWords;
+	private boolean[] rarePhrases;
+	private boolean[] rareContexts;
 
 	public Corpus()
 	{
@@ -62,7 +64,8 @@ public class Corpus
 		public TIntArrayList getRawContext()
 		{
 			return Corpus.this.getRawContext(contextId);
-		}		public String getContextString(boolean insertPhraseSentinel)
+		}		
+		public String getContextString(boolean insertPhraseSentinel)
 		{
 			return Corpus.this.getContextString(contextId, insertPhraseSentinel);
 		}
@@ -143,12 +146,12 @@ public class Corpus
 	public TIntArrayList getPhrase(int phraseId)
 	{
 		TIntArrayList phrase = phraseLexicon.lookup(phraseId);
-		if (wordIsRare != null)
+		if (rareWords != null)
 		{
 			boolean first = true;
 			for (int i = 0; i < phrase.size(); ++i)
 			{
-				if (wordIsRare[phrase.get(i)])
+				if (rareWords[phrase.get(i)])
 				{
 					if (first)
 					{
@@ -182,12 +185,12 @@ public class Corpus
 	public TIntArrayList getContext(int contextId)
 	{
 		TIntArrayList context = contextLexicon.lookup(contextId);
-		if (wordIsRare != null)
+		if (rareWords != null)
 		{
 			boolean first = true;
 			for (int i = 0; i < context.size(); ++i)
 			{
-				if (wordIsRare[context.get(i)])
+				if (rareWords[context.get(i)])
 				{
 					if (first)
 					{
@@ -319,8 +322,71 @@ public class Corpus
 				counts[context.get(i)] += e.getCount();
 		}
 
-		wordIsRare = new boolean[wordLexicon.size()];
+		int count = 0;
+		rareWords = new boolean[wordLexicon.size()];
 		for (int i = 0; i < wordLexicon.size(); ++i)
-			wordIsRare[i] = counts[i] < wordThreshold;
+		{
+			rareWords[i] = counts[i] < wordThreshold;
+			if (rareWords[i])
+				count++;
+		}
+		System.err.println("There are " + count + " rare words");
+	}
+	
+	public void applyPhraseThreshold(int threshold) 
+	{
+		rarePhrases = new boolean[phraseLexicon.size()];
+
+		int n = 0;
+		for (int i = 0; i < phraseLexicon.size(); ++i)
+		{
+			List<Edge> contexts = phraseToContext.get(i);
+			int count = 0;
+			for (Edge edge: contexts)
+			{
+				count += edge.getCount();
+				if (count >= threshold)
+					break;
+			}
+			
+			if (count < threshold)
+			{
+				rarePhrases[i] = true;
+				n++;
+			}
+		}
+		System.err.println("There are " + n + " rare phrases");
+	}
+	
+	public void applyContextThreshold(int threshold) 
+	{
+		rareContexts = new boolean[contextLexicon.size()];
+
+		int n = 0;
+		for (int i = 0; i < contextLexicon.size(); ++i)
+		{
+			List<Edge> phrases = contextToPhrase.get(i);
+			int count = 0;
+			for (Edge edge: phrases)
+			{
+				count += edge.getCount();
+				if (count >= threshold)
+					break;
+			}
+			
+			if (count < threshold)
+			{
+				rareContexts[i] = true;
+				n++;
+			}
+		}
+		System.err.println("There are " + n + " rare contexts");
+	}
+	
+	boolean isRare(Edge edge)
+	{
+		if (rarePhrases != null && rarePhrases[edge.getPhraseId()] == true) return true;
+		if (rareContexts != null && rareContexts[edge.getContextId()] == true) return true;
+		return false;
 	}
 }
