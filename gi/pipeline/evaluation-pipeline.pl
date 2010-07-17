@@ -6,6 +6,8 @@ my $CWD = getcwd;
 
 my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
 
+my $JOBS = 15;
+
 # featurize_grammar may add multiple features from a single feature extractor
 # the key in this map is the extractor name, the value is a list of the extracted features
 my $feat_map = {
@@ -89,6 +91,7 @@ my %devs;
 my %devrefs;
 my %tests;
 my %testevals;
+my $datadir;
 print STDERR "       LANGUAGE PAIRS:";
 while(<CONF>) {
   chomp;
@@ -96,6 +99,7 @@ while(<CONF>) {
   next if /^\s*$/;
   s/^\s+//;
   s/\s+$//;
+  if (! defined $datadir) { $datadir = $_; next; }
   my ($name, $path, $corpus, $lm, $dev, $devref, @xtests) = split /\s+/;
   $paths{$name} = $path;
   $corpora{$name} = $corpus;
@@ -116,15 +120,19 @@ my $FEATURIZER_OPTS = '';
 my $dataDir = '/export/ws10smt/data';
 my @features;
 my $bkoffgram;
+my $usefork;
 if (GetOptions(
         "backoff_grammar" => \$bkoffgram,
         "data=s" => \$dataDir,
         "features=s@" => \@features,
+        "use-fork" => \$usefork,
+        "jobs=i" => \$JOBS,
         "out-dir=s" => \$outdir,
 ) == 0 || @ARGV!=2 || $help) {
         print_help();
         exit;
 }
+if ($usefork) { $usefork="--use-fork"; } else { $usefork = ''; }
 my @fkeys = keys %$feat_map;
 push(@features, "BackoffRule") if $bkoffgram;
 die "You must specify one or more features with -f. Known features: @fkeys\n" unless scalar @features > 0;
@@ -200,7 +208,7 @@ my $tuned_weights = mydircat($outdir, 'weights.tuned');
 if (-f $tuned_weights) {
   print STDERR "TUNED WEIGHTS $tuned_weights EXISTS: REUSING\n";
 } else {
-  my $cmd = "$DISTVEST --ref-files=$drefs --source-file=$dev --weights $weights $devini";
+  my $cmd = "$DISTVEST $usefork --decode-nodes $JOBS --ref-files=$drefs --source-file=$dev --weights $weights $devini";
   print STDERR "MERT COMMAND: $cmd\n";
   `rm -rf $outdir/vest 2> /dev/null`;
   chdir $outdir or die "Can't chdir to $outdir: $!";
@@ -216,7 +224,7 @@ if (-f $tuned_weights) {
 print STDERR "\nDECODE TEST SET\n";
 my $decolog = mydircat($outdir, "test-decode.log");
 my $testtrans = mydircat($outdir, "test.trans");
-my $cmd = "cat $test | $PARALLELIZE -j 20 -e $decolog -- $CDEC -c $testini -w $tuned_weights > $testtrans";
+my $cmd = "cat $test | $PARALLELIZE $usefork -j $JOBS -e $decolog -- $CDEC -c $testini -w $tuned_weights > $testtrans";
 safesystem($testtrans, $cmd) or die "Failed to decode test set!";
 
 
@@ -292,8 +300,8 @@ sub write_cdec_ini {
 formalism=scfg
 cubepruning_pop_limit=100
 add_pass_through_rules=true
-scfg_extra_glue_grammar=/export/ws10smt/data/glue/glue.scfg.gz
-grammar=/export/ws10smt/data/oov.scfg.gz
+scfg_extra_glue_grammar=$datadir/glue/glue.scfg.gz
+grammar=$datadir/oov.scfg.gz
 grammar=$grammar_path
 scfg_default_nt=OOV
 scfg_no_hiero_glue_grammar=true
