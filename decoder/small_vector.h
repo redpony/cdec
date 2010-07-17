@@ -13,6 +13,7 @@
 #include <cassert>
 #include <limits.h>
 #include <new>
+#include <stdint.h>
 //sizeof(T)/sizeof(T*)>1?sizeof(T)/sizeof(T*):1
 
 template <class T,int SV_MAX=2>
