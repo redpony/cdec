@@ -74,7 +74,7 @@ public class PhraseCorpus
 			
 		}
 		try{
-		r.close();
+			r.close();
 		}catch(IOException ioe){
 			ioe.printStackTrace();
 		}

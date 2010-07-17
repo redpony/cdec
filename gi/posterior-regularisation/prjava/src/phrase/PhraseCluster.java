@@ -103,7 +103,7 @@ public class PhraseCluster {
 			for (int ctx=0; ctx<contexts.size(); ctx++)
 			{
 				Edge edge = contexts.get(ctx);
-				if (edge.getCount() < edge_threshold) 
+				if (edge.getCount() < edge_threshold || c.isRare(edge)) 
 					continue;
 				
 				double p[]=posterior(edge);

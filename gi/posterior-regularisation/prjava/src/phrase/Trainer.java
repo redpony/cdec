@@ -36,6 +36,8 @@ public class Trainer
         parser.accepts("skip-large-phrases").withRequiredArg().ofType(Integer.class).defaultsTo(5);
         parser.accepts("rare-word").withRequiredArg().ofType(Integer.class).defaultsTo(0);
         parser.accepts("rare-edge").withRequiredArg().ofType(Integer.class).defaultsTo(0);
+        parser.accepts("rare-phrase").withRequiredArg().ofType(Integer.class).defaultsTo(0);
+        parser.accepts("rare-context").withRequiredArg().ofType(Integer.class).defaultsTo(0);
         OptionSet options = parser.parse(args);
 
         if (options.has("help") || !options.has("in"))
@@ -61,6 +63,8 @@ public class Trainer
 		int skip = (Integer) options.valueOf("skip-large-phrases");
 		int wordThreshold = (Integer) options.valueOf("rare-word");
 		int edgeThreshold = (Integer) options.valueOf("rare-edge");
+		int phraseThreshold = (Integer) options.valueOf("rare-phrase");
+		int contextThreshold = (Integer) options.valueOf("rare-context");
 		
 		if (options.has("seed"))
 			F.rng = new Random((Long) options.valueOf("seed"));
@@ -83,8 +87,12 @@ public class Trainer
 			System.exit(1);
 		}
 		
-		if (wordThreshold > 0)
+		if (wordThreshold > 1)
 			corpus.applyWordThreshold(wordThreshold);
+		if (phraseThreshold > 1)
+			corpus.applyPhraseThreshold(phraseThreshold);
+		if (contextThreshold > 1)
+			corpus.applyContextThreshold(contextThreshold);
 		
 		if (!options.has("agree"))
 			System.out.println("Running with " + tags + " tags " +
