@@ -34,10 +34,10 @@ public class Trainer
         parser.accepts("agree");
         parser.accepts("no-parameter-cache");
         parser.accepts("skip-large-phrases").withRequiredArg().ofType(Integer.class).defaultsTo(5);
-        parser.accepts("rare-word").withRequiredArg().ofType(Integer.class).defaultsTo(0);
-        parser.accepts("rare-edge").withRequiredArg().ofType(Integer.class).defaultsTo(0);
-        parser.accepts("rare-phrase").withRequiredArg().ofType(Integer.class).defaultsTo(0);
-        parser.accepts("rare-context").withRequiredArg().ofType(Integer.class).defaultsTo(0);
+        parser.accepts("rare-word").withRequiredArg().ofType(Integer.class).defaultsTo(10);
+        parser.accepts("rare-edge").withRequiredArg().ofType(Integer.class).defaultsTo(1);
+        parser.accepts("rare-phrase").withRequiredArg().ofType(Integer.class).defaultsTo(2);
+        parser.accepts("rare-context").withRequiredArg().ofType(Integer.class).defaultsTo(2);
         OptionSet options = parser.parse(args);
 
         if (options.has("help") || !options.has("in"))

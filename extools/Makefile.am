@@ -4,7 +4,8 @@ bin_PROGRAMS = \
   build_lexical_translation \
   filter_grammar \
   featurize_grammar \
-  filter_score_grammar
+  filter_score_grammar \
+  extractor_monolingual
 
 noinst_PROGRAMS =
 
@@ -34,6 +35,10 @@ mr_stripe_rule_reduce_LDFLAGS = -all-static
 extractor_SOURCES = sentence_pair.cc extract.cc extractor.cc striped_grammar.cc
 extractor_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
 extractor_LDFLAGS = -all-static
+
+extractor_monolingual_SOURCES = extractor_monolingual.cc
+extractor_monolingual_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
+extractor_monolingual_LDFLAGS = -all-static
 
 AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I$(top_srcdir)/decoder
 
