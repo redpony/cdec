@@ -91,7 +91,7 @@ void print_options(std::ostream &out,po::options_description const& opts) {
 }
 
 
-void InitCommandLine(int argc, char** argv, po::variables_map* confp) {
+void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* confp) {
   po::variables_map &conf=*confp;
   po::options_description opts("Configuration options");
   opts.add_options()
@@ -151,7 +151,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* confp) {
         ("combine_size,C",po::value<int>()->default_value(1), "When option -G is used, process this many sentence pairs before writing the gradient (1=emit after every sentence pair)")
         ("forest_output,O",po::value<string>(),"Directory to write forests to")
         ("minimal_forests,m","Write minimal forests (excludes Rule information). Such forests can be used for ML/MAP training, but not rescoring, etc.");
-  OracleBleu::AddOptions(&opts);
+  ob.AddOptions(&opts);
   po::options_description clo("Command line options");
   clo.add_options()
         ("config,c", po::value<string>(), "Configuration file")
@@ -206,6 +206,8 @@ void InitCommandLine(int argc, char** argv, po::variables_map* confp) {
     cerr << dcmdline_options << endl;
     exit(1);
   }
+  po::notify(conf);
+
 }
 
 // TODO move out of cdec into some sampling decoder file
@@ -358,7 +360,9 @@ int main(int argc, char** argv) {
   global_ff_registry.reset(new FFRegistry);
   register_feature_functions();
   po::variables_map conf;
-  InitCommandLine(argc, argv, &conf);
+  OracleBleu oracle;
+
+  InitCommandLine(argc, argv, oracle, &conf);
   const bool write_gradient = conf.count("cll_gradient");
   const bool feature_expectations = conf.count("feature_expectations");
   if (write_gradient && feature_expectations) {
@@ -488,7 +492,6 @@ int main(int argc, char** argv) {
   const bool crf_uniform_empirical = conf.count("crf_uniform_empirical");
   const bool get_oracle_forest = conf.count("get_oracle_forest");
 
-  OracleBleu oracle;
   if (get_oracle_forest)
     oracle.UseConf(conf);
 

@@ -243,8 +243,8 @@ BLEUModel::BLEUModel(const string& param) :
 
   //loop over argv and load all references into vector of NgramMaps
   if (argc >= 1) {
-    if (argv[1] != "-o" || argc<2) {
-      cerr<<bleu_usage_name<<" specification should be: "<<bleu_usage_short<<"; you provided: "<<param<<endl<<bleu_usage_verbose<<endl;
+    if (argv[0] != "-o" || argc<2) {
+      cerr<<bleu_usage_name<<" specification should be: "<<bleu_usage_short<<"; you provided: "<<param<<endl<<argv[0]<<endl<<bleu_usage_verbose<<endl;
       abort();
     } else
       order=boost::lexical_cast<int>(argv[1]);

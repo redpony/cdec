@@ -33,13 +33,16 @@ typedef SparseVector<double> Dir;
 typedef Dir Point;
 
 
-void compress_similar(vector<Dir> &dirs,double min_dist,ostream *log=&cerr,bool avg=true) {
+void compress_similar(vector<Dir> &dirs,double min_dist,ostream *log=&cerr,bool avg=true,bool verbose=true) {
+  //  return; //TODO: debug
   if (min_dist<=0) return;
   double max_s=1.-min_dist;
+  if (log&&verbose) *log<<"max allowed S="<<max_s<<' ';
   unsigned N=dirs.size();
   for (int i=0;i<N;++i) {
     for (int j=i+1;j<N;++j) {
       double s=dirs[i].tanimoto_coef(dirs[j]);
+      if (log&&verbose) *log<<"S["<<i<<","<<j<<"]="<<s<<' ';
       if (s>max_s) {
         if (log) *log << "Collapsing similar directions (T="<<s<<" > "<<max_s<<").  dirs["<<i<<"]="<<dirs[i]<<" dirs["<<j<<"]";
         if (avg) {
@@ -51,6 +54,8 @@ void compress_similar(vector<Dir> &dirs,double min_dist,ostream *log=&cerr,bool 
         swap(dirs[j],dirs[--N]);
       }
     }
+    if (log&&verbose) *log<<endl;
+
   }
   dirs.resize(N);
 }
@@ -118,10 +123,14 @@ struct oracle_directions {
       cerr << dcmdline_options << endl;
       exit(1);
     }
+    po::notify(*conf);
+
+    if (0) {
     dev_set_size = (*conf)["dev_set_size"].as<unsigned>();
     forest_repository = (*conf)["forest_repository"].as<string>();
     weights_file = (*conf)["weights"].as<string>();
     n_random = (*conf)["random_directions"].as<unsigned>();
+    }
   }
 
   int main(int argc, char *argv[]) {
@@ -134,8 +143,8 @@ struct oracle_directions {
 
   void Run() {
     AddPrimaryAndRandomDirections();
-    //AddOracleDirections();
-    //compress_similar(directions,max_similarity);
+    AddOracleDirections();
+    compress_similar(directions,max_similarity);
     Print();
   }
 
@@ -143,25 +152,21 @@ struct oracle_directions {
   Point origin; // old weights that gave model 1best.
   vector<string> optimize_features;
   void UseConf(po::variables_map const& conf) {
-#if 0
     oracle.UseConf(conf);
-
+      // po::value<X>(&var) takes care of below:
+      //    fear_to_hope=conf.count("fear_to_hope");
+      //    n_random=conf["random_directions"].as<unsigned int>();
+      //    forest_repository=conf["forest_repository"].as<string>();
+      //    dev_set_size=conf["dev_set_size"].as<unsigned int>();
+      //    n_oracle=conf["oracle_directions"].as<unsigned>();
+      //    oracle_batch=conf["oracle_batch"].as<unsigned>();
+      //    max_similarity=conf["max_similarity"].as<double>();
+      //    weights_file=conf["weights"].as<string>();
     include_primary=!conf.count("no_primary");
     old_to_hope=!conf.count("no_old_to_hope");
 
     if (conf.count("optimize_feature") > 0)
       optimize_features=conf["optimize_feature"].as<vector<string> >();
-
-    // po::value<X>(&var) takes care of below:
-//    fear_to_hope=conf.count("fear_to_hope");
-//    n_random=conf["random_directions"].as<unsigned int>();
-//    forest_repository=conf["forest_repository"].as<string>();
-//    dev_set_size=conf["dev_set_size"].as<unsigned int>();
-//    n_oracle=conf["oracle_directions"].as<unsigned>();
-//    oracle_batch=conf["oracle_batch"].as<unsigned>();
-//    max_similarity=conf["max_similarity"].as<double>();
-//    weights_file=conf["weights"].as<string>();
-#endif
     Init();
   }
 
