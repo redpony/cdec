@@ -20,6 +20,7 @@ if len(sys.argv) > 4:
   assert phr in 'stb'
   assert ctx in 'stb'
 
+print >>sys.stderr, "Loading phrase index"
 phrase_context_index = {}
 for line in file(sys.argv[1], 'r'):
   phrase,tail= line.split('\t')
@@ -37,16 +38,19 @@ for line in file(sys.argv[1], 'r'):
     features=dict([ keyval.split('=') for keyval in contexts[i+1].split()])
     category = features['C']    
     if features.has_key('P') and float(features['P']) < threshold:
-        category = cutoff_cat
+	category = cutoff_cat
     
     phrase_context_index[(phrase,contexts[i])] = category 
-#   print (phrase,contexts[i]), category, prob
+    #print (phrase,contexts[i]), category
 
+print >>sys.stderr, "Labelling spans"
 for line in sys.stdin:
   line_segments = line.split('|||')
   source = ['<s>' for x in range(order)] + line_segments[0].split() + ['</s>' for x in range(order)]
   target = ['<s>' for x in range(order)] + line_segments[1].split() + ['</s>' for x in range(order)]
   phrases = [ [int(i) for i in x.split('-')] for x in line_segments[2].split()]
+
+  #print >>sys.stderr, "line", source, '---', target, 'phrases', phrases
 
   print "|||",
 
@@ -85,7 +89,8 @@ for line in sys.stdin:
     else:
         context = contextt
 
-    label = phrase_context_index.get((phrase,context), "<UNK>")
+    #print "%d-%d-%d-%d looking up" % (s1-order,s2-order,t1-order,t2-order), (phrase, context)
+    label = phrase_context_index.get((phrase,context), cutoff_cat)
     if label != cutoff_cat: #cutoff'd spans are left unlabelled
       print "%d-%d-%d-%d:X%s" % (s1-order,s2-order,t1-order,t2-order,label),
   print
