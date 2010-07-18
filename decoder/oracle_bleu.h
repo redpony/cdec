@@ -73,13 +73,13 @@ struct OracleBleu {
   WeightVector feature_weights_;
   DocScorer ds;
 
-  static void AddOptions(boost::program_options::options_description *opts) {
+  void AddOptions(boost::program_options::options_description *opts) {
     using namespace boost::program_options;
     using namespace std;
     opts->add_options()
-      ("references,R", value<Refs >(), "Translation reference files")
-      ("oracle_loss", value<string>(), "IBM_BLEU_3 (default), IBM_BLEU etc")
-      ("bleu_weight", value<double>()->default_value(1.), "weight to give the hope/fear loss function vs. model score")
+      ("references,R", value<Refs >(&refs), "Translation reference files")
+      ("oracle_loss", value<string>(&loss_name)->default_value("IBM_BLEU_3"), "IBM_BLEU_3 (default), IBM_BLEU etc")
+      ("bleu_weight", value<double>(&bleu_weight)->default_value(1.), "weight to give the hope/fear loss function vs. model score")
       ;
   }
   int order;
@@ -110,28 +110,41 @@ struct OracleBleu {
   }
 
   double bleu_weight;
-  void UseConf(boost::program_options::variables_map const& conf) {
+  // you have to call notify(conf) yourself, once, in main or similar
+  void UseConf(boost::program_options::variables_map const& /* conf */) {
     using namespace std;
-    bleu_weight=conf["bleu_weight"].as<double>();
-    set_loss(conf["oracle_loss"].as<string>());
-    set_refs(conf["references"].as<Refs>());
+    //    bleu_weight=conf["bleu_weight"].as<double>();
+    //set_loss(conf["oracle_loss"].as<string>());
+    //set_refs(conf["references"].as<Refs>());
+    init_loss();
+    init_refs();
   }
 
   ScoreType loss;
-//  std::string loss_name;
+  std::string loss_name;
   boost::shared_ptr<FeatureFunction> pff;
 
-  void set_loss(std::string const& lossd="IBM_BLEU_3") {
-//    loss_name=lossd;
-    loss=ScoreTypeFromString(lossd);
+  void set_loss(std::string const& lossd) {
+    loss_name=lossd;
+    init_loss();
+  }
+  void init_loss() {
+    loss=ScoreTypeFromString(loss_name);
     order=(loss==IBM_BLEU_3)?3:4;
     std::ostringstream param;
     param<<"-o "<<order;
     pff=global_ff_registry->Create("BLEUModel",param.str());
   }
 
+  bool is_null() const {
+    return refs.empty();
+  }
   void set_refs(Refs const& r) {
     refs=r;
+    init_refs();
+  }
+  void init_refs() {
+    if (is_null()) return;
     assert(refs.size());
     ds=DocScorer(loss,refs);
     doc_score.reset();

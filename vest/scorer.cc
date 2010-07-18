@@ -44,7 +44,7 @@ ScoreType ScoreTypeFromString(const string& st) {
     return Koehn_BLEU;
   if (sl == "combi")
     return BLEU_minus_TER_over_2;
-  cerr << "Don't understand score type '" << sl << "', defaulting to ibm_bleu.\n";
+  cerr << "Don't understand score type '" << st << "', defaulting to ibm_bleu.\n";
   return IBM_BLEU;
 }
 
