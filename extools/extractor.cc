@@ -396,6 +396,7 @@ int main(int argc, char** argv) {
     ++line;
     in.getline(buf, MAX_LINE_LENGTH);
     if (buf[0] == 0) continue;
+    //cerr << "line #" << line << " = " << buf << endl;
     if (!silent) {
       if (line % 200 == 0) cerr << '.';
       if (line % 8000 == 0) cerr << " [" << line << "]\n" << flush;
