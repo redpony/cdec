@@ -1,0 +1,98 @@
+\documentclass[11pt]{report} 
+\usepackage{graphicx}
+\usepackage{index}
+\usepackage{varioref}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{theorem} % for examples
+\usepackage{alltt}
+\usepackage{ulem}
+\usepackage{epic,eepic}
+\usepackage{boxedminipage}
+\usepackage{fancybox}
+\usepackage[square]{natbib}
+\usepackage{epsfig}
+\usepackage{subfig}
+\oddsidemargin 0mm
+\evensidemargin 5mm
+\topmargin -20mm
+\textheight 240mm
+\textwidth 160mm
+
+
+
+\newcommand{\bold}{\it}
+\renewcommand{\emph}{\it}
+
+\makeindex
+\theoremstyle{plain}
+
+\begin{document}
+\title{\vspace{-15mm}\LARGE {\bf Final Report}\\[2mm]
+of the\\[2mm]
+2010 Language Engineering Workshop\\[15mm]
+{\huge \bf Models for\\
+Synchronous Grammar Induction\\[2mm]
+{\tt \Large http://www.clsp.jhu.edu/workshops/ws10/groups/msgismt/}\\[15mm]
+Johns Hopkins University\\[2mm]
+Center for Speech and Language Processing}}
+\author{\large Phil Blunsom,
+Chris Callison-Burch,
+Trevor Cohn,
+Chris Dyer,
+Adam Lopez,\\
+\large 
+Jonathan Graehl,
+Jonathan Weese,
+Jan Botha,
+ThuyLinh Nguyen,
+Ziyuan Wang, \\
+\large Olivia Buzek, Desai Chen}
+\normalsize
+
+\maketitle
+ 
+\section*{Abstract}
+The last decade of research in Statistical Machine Translation (SMT) has seen rapid progress. The most successful methods have been based on synchronous context free grammars (SCFGs), which encode translational equivalences and license reordering between tokens in the source and target languages. Yet, while closely related language pairs can be translated with a high degree of precision now, the result for distant pairs is far from acceptable. In theory, however, the ``right'' SCFG is capable of handling most, if not all, structurally divergent language pairs. The 2010 Language Engineering Workshop {\emph Models of Synchronous Grammar Induction for SMT} had the goal to focus on the crucial practical aspects of acquiring such SCFGs from bilingual text. We started with existing algorithms for inducing unlabeled SCFGs (e.g. the popular Hiero model) and then used state-of-the-art unsupervised learning methods to refine the syntactic constituents used in the translation rules of the grammar.
+
+\phantom{.}
+
+
+\newpage
+\section*{Acknowledgments}
+The participants at the workshop would like to thank everybody at Johns Hopkins University who made the summer workshop such a memorable --- and in our view very successful --- event. The JHU Summer Workshop is a great venue to bring together researchers from various backgrounds and focus their minds on a problem, leading to intense collaboration that would not have been possible otherwise.
+
+We especially would like to thank Fred Jelinek for heading the Summer School effort and Desir\'ee Cleves for her superhuman ability to keep things running smoothly.
+
+\phantom{.}
+
+\newpage
+\section*{Team Members}
+
+\begin{itemize}
+\item Phil Blunsom, Team Leader, University of Oxford
+\item Chris Callison-Burch, Senior Researcher, Johns Hopkins University
+\item Trevor Cohn, Senior Researcher, University of Sheffield
+\item Chris Dyer, Senior Researcher, Carnegie Mellon University
+\item Adam Lopez, Senior Researcher, University of Edinburgh
+\item Jonathan Graehl, Senior Research, Information Sciences Institute, USC
+\item Jan Botha, Graduate Student, University of Oxford
+\item Vladimir Eidelman, Graduate Student, University of Maryland
+\item Thuylinh Nguyen, Graduate Student, Carnegie Mellon University
+\item Jonathan Weese, Graduate Student, Johns Hopkins University
+\item Ziyuan Wang, Graduate Student, Johns Hopkins University
+\item Olivia Buzek, Undergraduate Student, University of Maryland
+\item Desai Chen, Undergraduate Student, Carnegie Mellon University
+\end{itemize}
+\tableofcontents
+
+\chapter{Introduction}
+
+Blah blah blah, LDA \citep{blei:2003}. Blah blah blah, posterior regularization \citep{ganchev:penn:2009}.
+
+\bibliographystyle{apalike}
+\bibliography{biblio}
+
+\printindex
+
+\end{document}
