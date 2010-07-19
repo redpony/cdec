@@ -1,3 +1,4 @@
+//TODO: debug segfault when references supplied, null shared_ptr when oracle
 #include <iostream>
 #include <vector>
 #include <sstream>
@@ -14,6 +15,8 @@
 #include "scorer.h"
 #include "oracle_bleu.h"
 #include "ff_bleu.h"
+
+const bool DEBUG_ORACLE=true;
 
 boost::shared_ptr<FFRegistry> global_ff_registry;
 namespace {
@@ -32,19 +35,18 @@ namespace po = boost::program_options;
 typedef SparseVector<double> Dir;
 typedef Dir Point;
 
-
 void compress_similar(vector<Dir> &dirs,double min_dist,ostream *log=&cerr,bool avg=true,bool verbose=true) {
   //  return; //TODO: debug
   if (min_dist<=0) return;
   double max_s=1.-min_dist;
-  if (log&&verbose) *log<<"max allowed S="<<max_s<<' ';
+  if (log&&verbose) *log<<"max allowed S="<<max_s<<endl;
   unsigned N=dirs.size();
   for (int i=0;i<N;++i) {
     for (int j=i+1;j<N;++j) {
       double s=dirs[i].tanimoto_coef(dirs[j]);
       if (log&&verbose) *log<<"S["<<i<<","<<j<<"]="<<s<<' ';
       if (s>max_s) {
-        if (log) *log << "Collapsing similar directions (T="<<s<<" > "<<max_s<<").  dirs["<<i<<"]="<<dirs[i]<<" dirs["<<j<<"]";
+        if (log) *log << "Collapsing similar directions (T="<<s<<" > "<<max_s<<").  dirs["<<i<<"]="<<dirs[i]<<" dirs["<<j<<"]"<<endl;
         if (avg) {
           dirs[i]+=dirs[j];
           dirs[i]/=2.;
@@ -96,7 +98,9 @@ struct oracle_directions {
       ("max_similarity,m",po::value<double>(&max_similarity)->default_value(0),"remove directions that are too similar (Tanimoto coeff. less than (1-this)).  0 means don't filter, 1 means only 1 direction allowed?")
       ("fear_to_hope,f",po::bool_switch(&fear_to_hope),"for each of the oracle_directions, also include a direction from fear to hope (as well as origin to hope)")
       ("no_old_to_hope,n","don't emit the usual old -> hope oracle")
-      ("decoder_translations",po::value<string>(&decoder_translations_file)->default_value(""),"one per line decoder 1best translations for computing document BLEU vs. sentences-seen-so-far BLEU");
+      ("decoder_translations",po::value<string>(&decoder_translations_file)->default_value(""),"one per line decoder 1best translations for computing document BLEU vs. sentences-seen-so-far BLEU")
+      ("verbose",po::bool_switch(&verbose),"detailed logs")
+      ;
   }
   void InitCommandLine(int argc, char *argv[], po::variables_map *conf) {
     po::options_description opts("Configuration options");
@@ -140,11 +144,11 @@ struct oracle_directions {
     Run();
     return 0;
   }
-
+  bool verbose;
   void Run() {
     AddPrimaryAndRandomDirections();
     AddOracleDirections();
-    compress_similar(directions,max_similarity);
+    compress_similar(directions,max_similarity,&cerr,true,verbose);
     Print();
   }
 
@@ -186,11 +190,20 @@ struct oracle_directions {
   oracle_directions() { }
 
   Sentences model_hyps;
+
+  vector<OracleBleu::ScoreP> model_scores;
   bool have_doc;
   void Init() {
     have_doc=!decoder_translations_file.empty();
     if (have_doc) {
       model_hyps.Load(decoder_translations_file);
+      model_scores.resize(model_hyps.size());
+      for (int i=0;i<model_hyps.size();++i) {
+        //FIXME: what is scoreccand? with / without clipping? do without for consistency w/ oracle
+        Score *s=oracle.ds[i]->ScoreCandidate(model_hyps[i]);
+        model_scores[i].reset(s);
+        oracle.doc_score->PlusEquals(*s);
+      }
       //TODO: compute doc bleu stats for each sentence, then when getting oracle temporarily exclude stats for that sentence (skip regular score updating)
     }
     start_random=false;
@@ -217,11 +230,20 @@ struct oracle_directions {
 
   std::string decoder_translations_file; // one per line
   //TODO: is it worthwhile to get a complete document bleu first?  would take a list of 1best translations one per line from the decoders, rather than loading all the forests (expensive).  translations are in run.raw.N.gz - new arg
+  void adjust_doc(unsigned i,double scale=1.) {
+    oracle.doc_score->PlusEquals(*model_scores[i],scale);
+  }
+
+  Score &ds() {
+    return *oracle.doc_score;
+  }
+
   Oracle const& ComputeOracle(unsigned i) {
     Oracle &o=oracles[i];
     if (o.is_null()) {
       if (have_doc) {
-        //TODO:
+        if (verbose) cerr<<"Before removing i="<<i<<" "<<ds().ScoreDetails()<<"\n";
+        adjust_doc(i,-1);
       }
       ReadFile rf(forest_file(i));
       Hypergraph hg;
@@ -229,9 +251,18 @@ struct oracle_directions {
         Timer t("Loading forest from JSON "+forest_file(i));
         HypergraphIO::ReadFromJSON(rf.stream(), &hg);
       }
+      if (verbose) cerr<<"Before oracle["<<i<<"]: "<<ds().ScoreDetails();
       o=oracle.ComputeOracle(oracle.MakeMetadata(hg,i),&hg,origin,&cerr);
+      if (verbose) {
+        cerr << o;
+        cerr<<" ; after: "<<ds().ScoreDetails()
+            <<" oracle="<<oracle.GetScore(o.hope.sentence,i)->ScoreDetails()
+            <<" model="<<oracle.GetScore(o.model.sentence,i)->ScoreDetails()<<endl;
+        if (have_doc)
+          cerr<<" doc (should = model): "<<model_scores[i]->ScoreDetails()<<endl;
+      }
       if (have_doc) {
-        //TODO:
+        adjust_doc(i,1);
       } else
         oracle.IncludeLastScore();
     }
