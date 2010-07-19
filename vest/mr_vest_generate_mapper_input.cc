@@ -97,7 +97,7 @@ struct oracle_directions {
       ("oracle_batch,b",po::value<unsigned>(&oracle_batch)->default_value(10),"to produce each oracle direction, sum the 'gradient' over this many sentences")
       ("max_similarity,m",po::value<double>(&max_similarity)->default_value(0),"remove directions that are too similar (Tanimoto coeff. less than (1-this)).  0 means don't filter, 1 means only 1 direction allowed?")
       ("fear_to_hope,f",po::bool_switch(&fear_to_hope),"for each of the oracle_directions, also include a direction from fear to hope (as well as origin to hope)")
-      ("no_old_to_hope,n","don't emit the usual old -> hope oracle")
+      ("no_old_to_hope","don't emit the usual old -> hope oracle")
       ("decoder_translations",po::value<string>(&decoder_translations_file)->default_value(""),"one per line decoder 1best translations for computing document BLEU vs. sentences-seen-so-far BLEU")
       ("verbose",po::bool_switch(&verbose),"detailed logs")
       ;
