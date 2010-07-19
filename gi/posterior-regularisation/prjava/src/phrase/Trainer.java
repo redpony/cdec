@@ -21,6 +21,7 @@ public class Trainer
         OptionParser parser = new OptionParser();
         parser.accepts("help");
         parser.accepts("in").withRequiredArg().ofType(File.class);
+        parser.accepts("test").withRequiredArg().ofType(File.class);
         parser.accepts("out").withRequiredArg().ofType(File.class);
         parser.accepts("start").withRequiredArg().ofType(File.class);
         parser.accepts("parameters").withRequiredArg().ofType(File.class);
@@ -163,10 +164,10 @@ public class Trainer
 			try {
 				PrintStream ps = FileUtil.printstream(outfile);
 				List<Edge> test;
-				if (!options.has("test"))
+				if (!options.has("test")) // just use the training
 					test = corpus.getEdges();
 				else
-				{
+				{	// if --test supplied, load up the file
 					infile = (File) options.valueOf("test");
 					System.out.println("Reading testing concordance from " + infile);
 					test = corpus.readEdges(FileUtil.reader(infile));
