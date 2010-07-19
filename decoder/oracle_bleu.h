@@ -35,7 +35,7 @@ struct Translation {
     ViterbiESentence(hg,&sentence);
     features=ViterbiFeatures(hg,feature_weights,true);
   }
-  void Print(std::ostream &out,std::string pre="   +Oracle BLEU ") {
+  void Print(std::ostream &out,std::string pre="   +Oracle BLEU ") const {
     out<<pre<<"Viterbi: "<<TD::GetString(sentence)<<"\n";
     out<<pre<<"features: "<<features<<std::endl;
   }
@@ -46,11 +46,10 @@ struct Translation {
 };
 
 struct Oracle {
+  Translation model,fear,hope;
   bool is_null() {
     return model.is_null() /* && fear.is_null() && hope.is_null() */;
   }
-
-  Translation model,fear,hope;
   // feature 0 will be the error rate in fear and hope
   // move toward hope
   FeatureVector ModelHopeGradient() const {
@@ -64,6 +63,16 @@ struct Oracle {
     r.set_value(0,0);
     return r;
   }
+  void Print(std::ostream &out) const {
+    hope.Print(out,"hope ");
+    model.Print(out,"model ");
+    fear.Print(out,"fear ");
+  }
+  friend inline std::ostream & operator<<(std::ostream &out,Oracle const& o) {
+    o.Print(out);
+    return out;
+  }
+
 };
 
 

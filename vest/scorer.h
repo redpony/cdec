@@ -20,6 +20,11 @@ class Score {
   virtual float ComputeScore() const = 0;
   virtual float ComputePartialScore() const =0;
   virtual void ScoreDetails(std::string* details) const = 0;
+  std::string ScoreDetails() {
+    std::string d;
+    ScoreDetails(&d);
+    return d;
+  }
   virtual void PlusEquals(const Score& rhs, const float scale) = 0;
   virtual void PlusEquals(const Score& rhs) = 0;
   virtual void PlusPartialEquals(const Score& rhs, int oracle_e_cover, int oracle_f_cover, int src_len) = 0;

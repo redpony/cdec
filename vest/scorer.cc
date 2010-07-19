@@ -96,9 +96,9 @@ class SERScore : public Score {
   }
   void PlusPartialEquals(const Score& /* delta */, int /* oracle_e_cover */, int /* oracle_f_cover */, int /* src_len */){}
 
-  void PlusEquals(const Score& delta, const float /* scale */) {
-    correct += static_cast<const SERScore&>(delta).correct;
-    total += static_cast<const SERScore&>(delta).total;
+  void PlusEquals(const Score& delta, const float scale) {
+    correct += scale*static_cast<const SERScore&>(delta).correct;
+    total += scale*static_cast<const SERScore&>(delta).total;
   }
   void PlusEquals(const Score& delta) {
     correct += static_cast<const SERScore&>(delta).correct;
@@ -538,7 +538,6 @@ void BLEUScore::PlusEquals(const Score& delta, const float scale) {
   hyp_ngram_counts = ( hyp_ngram_counts + d.hyp_ngram_counts) * scale;
   ref_len = (ref_len + d.ref_len) * scale;
   hyp_len = ( hyp_len + d.hyp_len) * scale;
-
 }
 
 void BLEUScore::PlusPartialEquals(const Score& delta, int oracle_e_cover, int oracle_f_cover, int src_len){
