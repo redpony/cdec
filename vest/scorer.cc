@@ -150,10 +150,10 @@ class SERScorer : public SentenceScorer {
 class BLEUScore : public Score {
   friend class BLEUScorerBase;
  public:
-  BLEUScore(int n) : correct_ngram_hit_counts(float(0),float(n)), hyp_ngram_counts(float(0),float(n)) {
+  BLEUScore(int n) : correct_ngram_hit_counts(float(0),n), hyp_ngram_counts(float(0),n) {
     ref_len = 0;
     hyp_len = 0; }
-  BLEUScore(int n, int k) :  correct_ngram_hit_counts(float(k),float(n)), hyp_ngram_counts(float(k),float(n)) {
+  BLEUScore(int n, int k) :  correct_ngram_hit_counts(float(k),n), hyp_ngram_counts(float(k),n) {
     ref_len = k;
     hyp_len = k; }
   float ComputeScore() const;
@@ -174,6 +174,9 @@ class BLEUScore : public Score {
     return true;
   }
  private:
+  int N() const {
+    return hyp_ngram_counts.size();
+  }
   float ComputeScore(vector<float>* precs, float* bp) const;
   float ComputePartialScore(vector<float>* prec, float* bp) const;
   valarray<float> correct_ngram_hit_counts;
@@ -475,10 +478,13 @@ void SentenceScorer::ComputeErrorSurface(const ViterbiEnvelope& ve, ErrorSurface
 
 void BLEUScore::ScoreDetails(string* details) const {
   char buf[2000];
-  vector<float> precs(4);
+  vector<float> precs(min(N(),4));
   float bp;
   float bleu = ComputeScore(&precs, &bp);
-  sprintf(buf, "BLEU = %.2f, %.1f|%.1f|%.1f|%.1f (brev=%.3f)",
+  for (int i=N();i<4;++i)
+    precs[i]=0.;
+  char *bufn;
+  bufn=buf+sprintf(buf, "BLEU = %.2f, %.1f|%.1f|%.1f|%.1f (brev=%.3f)",
        bleu*100.0,
        precs[0]*100.0,
        precs[1]*100.0,
@@ -492,7 +498,7 @@ float BLEUScore::ComputeScore(vector<float>* precs, float* bp) const {
   float log_bleu = 0;
   if (precs) precs->clear();
   int count = 0;
-  for (int i = 0; i < hyp_ngram_counts.size(); ++i) {
+  for (int i = 0; i < N(); ++i) {
     if (hyp_ngram_counts[i] > 0) {
       float lprec = log(correct_ngram_hit_counts[i]) - log(hyp_ngram_counts[i]);
       if (precs) precs->push_back(exp(lprec));
@@ -516,7 +522,7 @@ float BLEUScore::ComputePartialScore(vector<float>* precs, float* bp) const {
   float log_bleu = 0;
   if (precs) precs->clear();
   int count = 0;
-  for (int i = 0; i < hyp_ngram_counts.size(); ++i) {
+  for (int i = 0; i < N(); ++i) {
     //  cerr << "In CPS " << hyp_ngram_counts[i] << " " << correct_ngram_hit_counts[i] << endl;
     if (hyp_ngram_counts[i] > 0) {
       float lprec = log(correct_ngram_hit_counts[i]) - log(hyp_ngram_counts[i]);
@@ -562,10 +568,10 @@ void BLEUScore::PlusEquals(const Score& delta) {
 
 void BLEUScore::PlusEquals(const Score& delta, const float scale) {
   const BLEUScore& d = static_cast<const BLEUScore&>(delta);
-  correct_ngram_hit_counts = (correct_ngram_hit_counts + d.correct_ngram_hit_counts) * scale;
-  hyp_ngram_counts = ( hyp_ngram_counts + d.hyp_ngram_counts) * scale;
-  ref_len = (ref_len + d.ref_len) * scale;
-  hyp_len = ( hyp_len + d.hyp_len) * scale;
+  correct_ngram_hit_counts = correct_ngram_hit_counts + (d.correct_ngram_hit_counts * scale);
+  hyp_ngram_counts = hyp_ngram_counts + (d.hyp_ngram_counts * scale);
+  ref_len = ref_len + (d.ref_len * scale);
+  hyp_len = hyp_len + (d.hyp_len * scale);
 }
 
 void BLEUScore::PlusPartialEquals(const Score& delta, int oracle_e_cover, int oracle_f_cover, int src_len){
@@ -583,11 +589,11 @@ void BLEUScore::PlusPartialEquals(const Score& delta, int oracle_e_cover, int or
 
 
 ScoreP BLEUScore::GetZero() const {
-  return ScoreP(new BLEUScore(hyp_ngram_counts.size()));
+  return ScoreP(new BLEUScore(N()));
 }
 
 ScoreP BLEUScore::GetOne() const {
-  return ScoreP(new BLEUScore(hyp_ngram_counts.size(),1));
+  return ScoreP(new BLEUScore(N(),1));
 }
 
 

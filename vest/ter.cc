@@ -9,7 +9,7 @@
 #include <set>
 #include <valarray>
 #include <boost/functional/hash.hpp>
-
+#include <stdexcept>
 #include "tdict.h"
 
 const bool ter_use_average_ref_len = true;
@@ -432,8 +432,12 @@ class TERScore : public Score {
   void ScoreDetails(string* details) const;
   void PlusPartialEquals(const Score& rhs, int oracle_e_cover, int oracle_f_cover, int src_len){}
   void PlusEquals(const Score& delta, const float scale) {
-    stats += static_cast<const TERScore&>(delta).stats;
-  }
+    if (scale==1)
+      stats += static_cast<const TERScore&>(delta).stats;
+    if (scale==-1)
+      stats -= static_cast<const TERScore&>(delta).stats;
+    throw std::runtime_error("TERScore::PlusEquals with scale != +-1");
+ }
   void PlusEquals(const Score& delta) {
     stats += static_cast<const TERScore&>(delta).stats;
   }

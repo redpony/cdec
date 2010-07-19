@@ -18,9 +18,9 @@ class AERScore : public Score {
   virtual void PlusPartialEquals(const Score& rhs, int oracle_e_cover, int oracle_f_cover, int src_len){}
   virtual void PlusEquals(const Score& delta, const float scale) {
     const AERScore& other = static_cast<const AERScore&>(delta);
-    num_matches   += other.num_matches;
-    num_predicted += other.num_predicted;
-    num_in_ref    += other.num_in_ref;
+    num_matches   += scale*other.num_matches;
+    num_predicted += scale*other.num_predicted;
+    num_in_ref    += scale*other.num_in_ref;
   }
  virtual void PlusEquals(const Score& delta) {
     const AERScore& other = static_cast<const AERScore&>(delta);
