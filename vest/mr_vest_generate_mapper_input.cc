@@ -99,7 +99,6 @@ struct oracle_directions {
       ("fear_to_hope,f",po::bool_switch(&fear_to_hope),"for each of the oracle_directions, also include a direction from fear to hope (as well as origin to hope)")
       ("no_old_to_hope","don't emit the usual old -> hope oracle")
       ("decoder_translations",po::value<string>(&decoder_translations_file)->default_value(""),"one per line decoder 1best translations for computing document BLEU vs. sentences-seen-so-far BLEU")
-      ("verbose",po::bool_switch(&verbose),"detailed logs")
       ;
   }
   void InitCommandLine(int argc, char *argv[], po::variables_map *conf) {
@@ -133,6 +132,7 @@ struct oracle_directions {
     }
 
     UseConf(*conf);
+    verbose=oracle.verbose;
     return;
     bad_cmdline:
       cerr << dcmdline_options << endl;
@@ -158,15 +158,6 @@ struct oracle_directions {
   vector<string> optimize_features;
   void UseConf(po::variables_map const& conf) {
     oracle.UseConf(conf);
-      // po::value<X>(&var) takes care of below:
-      //    fear_to_hope=conf.count("fear_to_hope");
-      //    n_random=conf["random_directions"].as<unsigned int>();
-      //    forest_repository=conf["forest_repository"].as<string>();
-      //    dev_set_size=conf["dev_set_size"].as<unsigned int>();
-      //    n_oracle=conf["oracle_directions"].as<unsigned>();
-      //    oracle_batch=conf["oracle_batch"].as<unsigned>();
-      //    max_similarity=conf["max_similarity"].as<double>();
-      //    weights_file=conf["weights"].as<string>();
     include_primary=!conf.count("no_primary");
     old_to_hope=!conf.count("no_old_to_hope");
 
@@ -201,9 +192,11 @@ struct oracle_directions {
       model_scores.resize(model_hyps.size());
       for (int i=0;i<model_hyps.size();++i) {
         //FIXME: what is scoreccand? with / without clipping? do without for consistency w/ oracle
-        Score *s=oracle.ds[i]->ScoreCandidate(model_hyps[i]);
-        model_scores[i].reset(s);
-        oracle.doc_score->PlusEquals(*s);
+        model_scores[i]=oracle.ds[i]->ScoreCandidate(model_hyps[i]);
+      if (verbose) cerr<<"Before model["<<i<<"]: "<<ds().ScoreDetails()<<endl;
+      if (verbose) cerr<<"model["<<i<<"]: "<<model_scores[i]->ScoreDetails()<<endl;
+      oracle.doc_score->PlusEquals(*model_scores[i]);
+      if (verbose) cerr<<"After model["<<i<<"]: "<<ds().ScoreDetails()<<endl;
       }
       //TODO: compute doc bleu stats for each sentence, then when getting oracle temporarily exclude stats for that sentence (skip regular score updating)
     }
@@ -252,12 +245,12 @@ struct oracle_directions {
         Timer t("Loading forest from JSON "+forest_file(i));
         HypergraphIO::ReadFromJSON(rf.stream(), &hg);
       }
-      if (verbose) cerr<<"Before oracle["<<i<<"]: "<<ds().ScoreDetails();
-      o=oracle.ComputeOracle(oracle.MakeMetadata(hg,i),&hg,origin,&cerr);
+      if (verbose) cerr<<"Before oracle["<<i<<"]: "<<ds().ScoreDetails()<<endl;
+      o=oracle.ComputeOracle(oracle.MakeMetadata(hg,i),&hg,origin);
       if (verbose) {
         cerr << o;
-        cerr<<" ; after: "<<ds().ScoreDetails()
-            <<" oracle="<<oracle.GetScore(o.hope.sentence,i)->ScoreDetails()
+        cerr<<"After oracle: "<<ds().ScoreDetails()<<endl
+            <<" oracle="<<oracle.GetScore(o.hope.sentence,i)->ScoreDetails()<<endl
             <<" model="<<oracle.GetScore(o.model.sentence,i)->ScoreDetails()<<endl;
         if (have_doc)
           cerr<<" doc (should = model): "<<model_scores[i]->ScoreDetails()<<endl;

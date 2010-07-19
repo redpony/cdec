@@ -14,7 +14,7 @@ class BLEUTERCombinationScore : public Score {
   }
   void ScoreDetails(string* details) const {
     char buf[160];
-    sprintf(buf, "Combi = %.2f, BLEU = %.2f, TER = %.2f", 
+    sprintf(buf, "Combi = %.2f, BLEU = %.2f, TER = %.2f",
       ComputeScore()*100.0f, bleu->ComputeScore()*100.0f, ter->ComputeScore()*100.0f);
     *details = buf;
   }
@@ -31,23 +31,23 @@ class BLEUTERCombinationScore : public Score {
 
 
 
-  Score* GetOne() const {
+  ScoreP GetOne() const {
     BLEUTERCombinationScore* res = new BLEUTERCombinationScore;
     res->bleu = bleu->GetOne();
     res->ter = ter->GetOne();
-    return res;    
+    return ScoreP(res);
   }
-  Score* GetZero() const {
+  ScoreP GetZero() const {
     BLEUTERCombinationScore* res = new BLEUTERCombinationScore;
     res->bleu = bleu->GetZero();
     res->ter = ter->GetZero();
-    return res;
+    return ScoreP(res);
   }
   void Subtract(const Score& rhs, Score* res) const {
     bleu->Subtract(*static_cast<const BLEUTERCombinationScore&>(rhs).bleu,
-                   static_cast<BLEUTERCombinationScore*>(res)->bleu);
+                   static_cast<BLEUTERCombinationScore*>(res)->bleu.get());
     ter->Subtract(*static_cast<const BLEUTERCombinationScore&>(rhs).ter,
-                   static_cast<BLEUTERCombinationScore*>(res)->ter);
+                  static_cast<BLEUTERCombinationScore*>(res)->ter.get());
   }
   void Encode(std::string* out) const {
     string bs, ts;
@@ -62,13 +62,11 @@ class BLEUTERCombinationScore : public Score {
     return bleu->IsAdditiveIdentity() && ter->IsAdditiveIdentity();
   }
  private:
-  Score* bleu;
-  Score* ter;
+  ScoreP bleu;
+  ScoreP ter;
 };
 
 BLEUTERCombinationScore::~BLEUTERCombinationScore() {
-  delete bleu;
-  delete ter;
 }
 
 BLEUTERCombinationScorer::BLEUTERCombinationScorer(const vector<vector<WordID> >& refs) {
@@ -77,26 +75,23 @@ BLEUTERCombinationScorer::BLEUTERCombinationScorer(const vector<vector<WordID> >
 }
 
 BLEUTERCombinationScorer::~BLEUTERCombinationScorer() {
-  delete bleu_;
-  delete ter_;
 }
 
-Score* BLEUTERCombinationScorer::ScoreCCandidate(const vector<WordID>& hyp) const {
-  Score* a = NULL;
-  return a;
+ScoreP BLEUTERCombinationScorer::ScoreCCandidate(const vector<WordID>& hyp) const {
+  return ScoreP();
 }
 
-Score* BLEUTERCombinationScorer::ScoreCandidate(const std::vector<WordID>& hyp) const {
+ScoreP BLEUTERCombinationScorer::ScoreCandidate(const std::vector<WordID>& hyp) const {
   BLEUTERCombinationScore* res = new BLEUTERCombinationScore;
   res->bleu = bleu_->ScoreCandidate(hyp);
   res->ter = ter_->ScoreCandidate(hyp);
-  return res;
+  return ScoreP(res);
 }
 
-Score* BLEUTERCombinationScorer::ScoreFromString(const std::string& in) {
+ScoreP BLEUTERCombinationScorer::ScoreFromString(const std::string& in) {
   int bss = in[0];
   BLEUTERCombinationScore* r = new BLEUTERCombinationScore;
   r->bleu = SentenceScorer::CreateScoreFromString(IBM_BLEU, in.substr(1, bss));
   r->ter = SentenceScorer::CreateScoreFromString(TER, in.substr(1 + bss));
-  return r;
+  return ScoreP(r);
 }

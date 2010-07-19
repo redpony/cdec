@@ -11,9 +11,9 @@ class AERScorer : public SentenceScorer {
   // when constructing alignment strings from a hypergraph, the source
   // is necessary.
   AERScorer(const std::vector<std::vector<WordID> >& refs, const std::string& src = "");
-  Score* ScoreCandidate(const std::vector<WordID>& hyp) const;
-  Score* ScoreCCandidate(const std::vector<WordID>& hyp) const;
-  static Score* ScoreFromString(const std::string& in);
+  ScoreP ScoreCandidate(const std::vector<WordID>& hyp) const;
+  ScoreP ScoreCCandidate(const std::vector<WordID>& hyp) const;
+  static ScoreP ScoreFromString(const std::string& in);
   const std::string* GetSource() const;
  private:
   std::string src_;

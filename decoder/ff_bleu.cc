@@ -182,7 +182,8 @@ class BLEUModelImpl {
     cerr << ")\n";
     */
 
-    Score *node_score = smeta.GetDocScorer()[smeta.GetSentenceID()]->ScoreCCandidate(vs);
+    ScoreP node_score_p = smeta.GetDocScorer()[smeta.GetSentenceID()]->ScoreCCandidate(vs);
+    Score *node_score=node_score_p.get();
     string details;
     node_score->ScoreDetails(&details);
     const Score *base_score= &smeta.GetScore();
@@ -194,6 +195,7 @@ class BLEUModelImpl {
 
     //how it seems to be done in code
     //TODO: might need to reverse the -1/+1 of the oracle/neg examples
+    //TO VLADIMIR: the polarity would be reversed if you switched error (1-BLEU) for BLEU.
     approx_bleu = ( rule.FWords() * oracledoc_factor  ) * node_score->ComputeScore();
     //how I thought it was done from the paper
     //approx_bleu = ( rule.FWords()+ smeta.GetDocLen() ) * node_score->ComputeScore();
@@ -277,7 +279,7 @@ void BLEUModel::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   const DocScorer *ds = &smeta.GetDocScorer();
   */
 
-  cerr<< "Loading sentence " << smeta.GetSentenceID() << endl;
+//  cerr<< "ff_bleu loading sentence " << smeta.GetSentenceID() << endl;
       //}
   features->set_value(fid_, pimpl_->LookupWords(*edge.rule_, ant_states, state, smeta));
   //cerr << "FID" << fid_ << " " << DebugStateToString(state) << endl;

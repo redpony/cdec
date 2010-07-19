@@ -6,9 +6,6 @@
 using namespace std;
 
 ErrorSurface::~ErrorSurface() {
-  for (ErrorSurface::iterator i = begin(); i != end(); ++i)
-    //delete i->delta;
-    ;
 }
 
 void ErrorSurface::Serialize(std::string* out) const {
@@ -29,7 +26,7 @@ void ErrorSurface::Serialize(std::string* out) const {
 }
 
 void ErrorSurface::Deserialize(ScoreType type, const std::string& in) {
-  istringstream is(in, ios::binary); 
+  istringstream is(in, ios::binary);
   int segments;
   is.read((char*)&segments, sizeof(segments));
   this->resize(segments);

@@ -30,11 +30,11 @@ class AERScore : public Score {
   }
 
 
-  virtual Score* GetZero() const {
-    return new AERScore;
+  virtual ScoreP GetZero() const {
+    return ScoreP(new AERScore);
   }
-  virtual Score* GetOne() const {
-    return new AERScore;
+  virtual ScoreP GetOne() const {
+    return ScoreP(new AERScore);
   }
   virtual void Subtract(const Score& rhs, Score* out) const {
     AERScore* res = static_cast<AERScore*>(out);
@@ -95,12 +95,11 @@ static inline bool Safe(const Array2D<bool>& a, int i, int j) {
     return false;
 }
 
-Score* AERScorer::ScoreCCandidate(const vector<WordID>& shyp) const {
-  Score* a = NULL;
-  return a;
+ScoreP AERScorer::ScoreCCandidate(const vector<WordID>& shyp) const {
+  return ScoreP();
 }
 
-Score* AERScorer::ScoreCandidate(const vector<WordID>& shyp) const {
+ScoreP AERScorer::ScoreCandidate(const vector<WordID>& shyp) const {
   boost::shared_ptr<Array2D<bool> > hyp =
     AlignerTools::ReadPharaohAlignmentGrid(TD::GetString(shyp));
 
@@ -121,15 +120,15 @@ Score* AERScorer::ScoreCandidate(const vector<WordID>& shyp) const {
     for (int j = 0; j < hyp->height(); ++j)
       if ((*hyp)(i,j)) ++p;
 
-  return new AERScore(m,p,r);
+  return ScoreP(new AERScore(m,p,r));
 }
 
-Score* AERScorer::ScoreFromString(const string& in) {
+ScoreP AERScorer::ScoreFromString(const string& in) {
   AERScore* res = new AERScore;
   res->num_matches   = *(const int *)&in[sizeof(int) * 0];
   res->num_predicted = *(const int *)&in[sizeof(int) * 1];
   res->num_in_ref    = *(const int *)&in[sizeof(int) * 2];
-  return res;
+  return ScoreP(res);
 }
 
 const std::string* AERScorer::GetSource() const { return &src_; }

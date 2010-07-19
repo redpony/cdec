@@ -7,12 +7,11 @@ class BLEUTERCombinationScorer : public SentenceScorer {
  public:
   BLEUTERCombinationScorer(const std::vector<std::vector<WordID> >& refs);
   ~BLEUTERCombinationScorer();
-  Score* ScoreCandidate(const std::vector<WordID>& hyp) const;
-  Score* ScoreCCandidate(const std::vector<WordID>& hyp) const;
-  static Score* ScoreFromString(const std::string& in);
+  ScoreP ScoreCandidate(const std::vector<WordID>& hyp) const;
+  ScoreP ScoreCCandidate(const std::vector<WordID>& hyp) const;
+  static ScoreP ScoreFromString(const std::string& in);
  private:
-  SentenceScorer* bleu_;
-  SentenceScorer* ter_;
+  ScorerP bleu_,ter_;
 };
 
 #endif
