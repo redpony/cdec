@@ -27,6 +27,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("input,i", po::value<string>()->default_value("-"), "Input file")
         ("phrases,p", po::value<string>(), "File contatining phrases of interest")
         ("phrase_context_size,S", po::value<int>()->default_value(2), "Use this many words of context on left and write when writing base phrase contexts")
+        ("combiner_size,c", po::value<size_t>()->default_value(800000), "Number of unique items to store in cache before writing rule counts. Set to 1 to disable cache. Set to 0 for no limit.")
         ("silent", "Write nothing to stderr except errors")
         ("help,h", "Print this help message and exit");
   po::options_description clo("Command line options");
@@ -90,20 +91,62 @@ struct TrieNode
   unordered_map<int, TrieNode*> next;
 };
 
-void WriteContext(const vector<int>& sentence, int start, int end, int ctx_size) 
-{
-  for (int i = start; i < end; ++i)
-  {
-    if (i != start) cout << " ";
-    cout << sentence[i];
+struct CountCombiner {
+  CountCombiner(const size_t& csize) : combiner_size(csize) {
+    if (csize == 0) { cerr << "Using unlimited combiner cache.\n"; }
   }
-  cout << '\t';
+  ~CountCombiner() {
+    if (!cache.empty()) WriteAndClearCache();
+  }
+
+  void Count(const vector<WordID>& key,
+             const vector<WordID>& val,
+             const int count_type)
+  {
+    if (combiner_size != 1) {
+      cache[key][val] += count_type;
+      if (combiner_size > 1 && cache.size() > combiner_size)
+        WriteAndClearCache();
+    } else {
+      cout << TD::GetString(key) << '\t' << TD::GetString(val) << " ||| C=" << count_type << "\n";
+    }
+  }
+
+ private:
+  void WriteAndClearCache() {
+    for (unordered_map<vector<WordID>, Vec2PhraseCount, boost::hash<vector<WordID> > >::iterator it = cache.begin();
+         it != cache.end(); ++it) {
+      cout << TD::GetString(it->first) << '\t';
+      const Vec2PhraseCount& vals = it->second;
+      bool needdiv = false;
+      for (Vec2PhraseCount::const_iterator vi = vals.begin(); vi != vals.end(); ++vi) {
+        if (needdiv) cout << " ||| "; else needdiv = true;
+        cout << TD::GetString(vi->first) << " ||| C=" << vi->second;
+      }
+      cout << '\n';
+    }
+    cout << flush;
+    cache.clear();
+  }
+
+  const size_t combiner_size;
+  typedef unordered_map<vector<WordID>, int, boost::hash<vector<WordID> > > Vec2PhraseCount;
+  unordered_map<vector<WordID>, Vec2PhraseCount, boost::hash<vector<WordID> > > cache;
+};
+
+void WriteContext(const vector<int>& sentence, int start, int end, int ctx_size, CountCombiner &combiner) 
+{
+  vector<WordID> phrase, context;
+  for (int i = start; i < end; ++i)
+      phrase.push_back(sentence[i]);
+
   for (int i = ctx_size; i > 0; --i)
-    cout << TD::Convert(sentence[start-i]) << " ";
-  cout << " " << TD::Convert(kGAP);
+    context.push_back(sentence[start-i]);
+  context.push_back(kGAP);
   for (int i = 0; i < ctx_size; ++i)
-    cout << " " << TD::Convert(sentence[end+i]);
-  cout << "\n";
+    context.push_back(sentence[end+i]);
+
+  combiner.Count(phrase, context, 1);
 }
 
 inline bool IsWhitespace(char c) { 
@@ -151,6 +194,7 @@ int main(int argc, char** argv)
 
   bool silent = conf.count("silent") > 0;
   const int ctx_size = conf["phrase_context_size"].as<int>();
+  CountCombiner cc(conf["combiner_size"].as<size_t>());
 
   char buf[MAX_LINE_LENGTH];
   TrieNode phrase_trie(0);
@@ -167,6 +211,7 @@ int main(int argc, char** argv)
   while (iin) {
     ++line;
     iin.getline(buf, MAX_LINE_LENGTH);
+    //cout << "line: " << line << " '" << buf << "'" << endl;
     if (buf[0] == 0) continue;
     if (!silent) {
       if (line % 200 == 0) cerr << '.';
@@ -174,22 +219,27 @@ int main(int argc, char** argv)
     }
 
     vector<int> sentence = ReadSentence(buf, ctx_size);
-    vector<TrieNode*> tries(1, &phrase_trie);
+    //cout << "sentence: " << TD::GetString(sentence) << endl;
+    vector<TrieNode*> tries;
     for (int i = ctx_size; i < (int)sentence.size() - ctx_size; ++i)
     {
-      vector<TrieNode*> tries_prime(1, &phrase_trie);
+      //cout << "i: " << i << " token: " << TD::Convert(sentence[i]) << " tries: " << tries.size() << endl;
+      vector<TrieNode*> tries_prime;
+      tries.push_back(&phrase_trie);
       for (vector<TrieNode*>::iterator tit = tries.begin(); tit != tries.end(); ++tit)
       {
         TrieNode* next = (*tit)->follow(sentence[i]);
         if (next != 0)
         {
+          //cout << "\tfollowed edge: " << next->finish << endl;
           if (next->finish)
-            WriteContext(sentence, i - next->length, i, ctx_size);
+            WriteContext(sentence, i + 1 - next->length, i + 1, ctx_size, cc);
           tries_prime.push_back(next);
         }
       }
       swap(tries, tries_prime);
     }
+    //cout << "/sentence" << endl;
   }
   if (!silent) cerr << endl;
   return 0;
