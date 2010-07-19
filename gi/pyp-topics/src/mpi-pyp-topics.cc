@@ -264,6 +264,19 @@ void MPIPYPTopics::synchronise() {
       //if (m_am_root) boost::mpi::communicator().barrier();
     }
 //  }
+    // Synchronise the hierarchical topic pyp
+    MPIPYP<int>::dish_delta_type topic_delta;
+    m_topic_pyp.synchronise(&topic_delta);
+    for (MPIPYP<int>::dish_delta_type::const_iterator it=topic_delta.begin(); it != topic_delta.end(); ++it) {
+      int count = it->second;
+      if (count > 0)
+        for (int i=0; i < count; ++i) 
+          m_topic_pyp.increment(it->first, m_topic_p0, rnd);
+      if (count < 0)
+        for (int i=0; i > count; --i) 
+          m_topic_pyp.decrement(it->first, rnd);
+    }
+    m_topic_pyp.reset_deltas();
 }
 
 void MPIPYPTopics::decrement(const Term& term, int topic, int level) {
