@@ -39,7 +39,7 @@ class Dict {
     std::string word= "";
     for (std::vector<std::string>::const_iterator it=words.begin();
          it != words.end(); ++it) {
-      if (it != words.begin()) word += "|||";
+      if (it != words.begin()) word += " ||| ";
       word += *it;
     }
     return word;
@@ -47,7 +47,7 @@ class Dict {
 
   inline const std::string& Convert(const WordID& id) const {
     if (id == 0) return b0_;
-    assert(id <= words_.size());
+    assert(id <= (int)words_.size());
     return words_[id-1];
   }
 
