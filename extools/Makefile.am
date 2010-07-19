@@ -28,7 +28,7 @@ build_lexical_translation_SOURCES = build_lexical_translation.cc extract.cc sent
 build_lexical_translation_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
 build_lexical_translation_LDFLAGS = -all-static
 
-mr_stripe_rule_reduce_SOURCES = mr_stripe_rule_reduce.cc extract.cc sentence_pair.cc striped_grammar.cc
+mr_stripe_rule_reduce_SOURCES = mr_stripe_rule_reduce.cc extract.cc sentence_pair.cc striped_grammar.cc sg_lexer.cc
 mr_stripe_rule_reduce_LDADD = $(top_srcdir)/decoder/libcdec.a -lz
 mr_stripe_rule_reduce_LDFLAGS = -all-static
 

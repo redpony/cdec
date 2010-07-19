@@ -12,9 +12,12 @@
 #include "striped_grammar.h"
 
 int lex_line = 0;
+int read_contexts = 0;
 std::istream* sglex_stream = NULL;
 StripedGrammarLexer::GrammarCallback grammar_callback = NULL;
+StripedGrammarLexer::ContextCallback context_callback = NULL;
 void* grammar_callback_extra = NULL;
+void* context_callback_extra = NULL;
 
 #undef YY_INPUT
 #define YY_INPUT(buf, result, max_size) (result = sglex_stream->read(buf, max_size).gcount())
@@ -83,12 +86,39 @@ ALIGN [0-9]+-[0-9]+
 %%
 
 <INITIAL>[ ]	;
+<INITIAL>[\t]	{
+		if (read_contexts) {
+			cur_options.clear();
+			BEGIN(TRG);
+		} else {
+			std::cerr << "Unexpected tab while reading striped grammar\n";
+			exit(1);
+		}
+		}
 
 <INITIAL>\[{NT}\]   {
-		sglex_tmp_token.assign(yytext + 1, yyleng - 2);
-		sglex_lhs = -TD::Convert(sglex_tmp_token);
-		// std::cerr << sglex_tmp_token << "\n";
-  		BEGIN(LHS_END);
+		if (read_contexts) {
+			sglex_tmp_token.assign(yytext, yyleng);
+			sglex_src_rhs[sglex_src_rhs_size] = TD::Convert(sglex_tmp_token);
+			++sglex_src_rhs_size;
+		} else {
+			sglex_tmp_token.assign(yytext + 1, yyleng - 2);
+			sglex_lhs = -TD::Convert(sglex_tmp_token);
+			// std::cerr << sglex_tmp_token << "\n";
+  			BEGIN(LHS_END);
+			}
+		}
+
+<INITIAL>[^ \t]+ {
+		if (read_contexts) {
+			// std::cerr << "Context: " << yytext << std::endl;
+			sglex_tmp_token.assign(yytext, yyleng);
+			sglex_src_rhs[sglex_src_rhs_size] = TD::Convert(sglex_tmp_token);
+			++sglex_src_rhs_size;
+		} else {
+			std::cerr << "Unexpected input: " << yytext << " when NT expected\n";
+			exit(1);
+		}
 		}
 
 <SRC>\[{NT}\]   {
@@ -103,7 +133,8 @@ ALIGN [0-9]+-[0-9]+
 		sglex_reset();
 		BEGIN(SRC);
 		}
-<INITIAL,LHS_END>.	{
+
+<LHS_END>.	{
 		std::cerr << "Line " << lex_line << ": unexpected input in LHS: " << yytext << std::endl;
 		exit(1);
 		}
@@ -136,21 +167,27 @@ ALIGN [0-9]+-[0-9]+
 		//std::cerr << "LHS=" << TD::Convert(-sglex_lhs) << " ";
 		//std::cerr << "  src_size: " << sglex_src_rhs_size << std::endl;
 		//std::cerr << "  src_arity: " << sglex_src_arity << std::endl;
-		memset(sglex_nt_sanity, 0, sglex_src_arity * sizeof(int));
 		cur_options.clear();
+		memset(sglex_nt_sanity, 0, sglex_src_arity * sizeof(int));
 		sglex_trg_rhs_size = 0;
 		BEGIN(TRG);
 		}
 
 <TRG>\[[1-9][0-9]?\]   {
-		int index = yytext[yyleng - 2] - '0';
-		if (yyleng == 4) {
-		  index += 10 * (yytext[yyleng - 3] - '0');
+		if (read_contexts) {
+			sglex_tmp_token.assign(yytext, yyleng);
+			sglex_trg_rhs[sglex_trg_rhs_size] = TD::Convert(sglex_tmp_token);
+			++sglex_trg_rhs_size;
+		} else {
+			int index = yytext[yyleng - 2] - '0';
+			if (yyleng == 4) {
+			  index += 10 * (yytext[yyleng - 3] - '0');
+			}
+			++sglex_trg_arity;
+			sanity_check_trg_index(index);
+			sglex_trg_rhs[sglex_trg_rhs_size] = 1 - index;
+			++sglex_trg_rhs_size;
 		}
-		++sglex_trg_arity;
-		sanity_check_trg_index(index);
-		sglex_trg_rhs[sglex_trg_rhs_size] = 1 - index;
-		++sglex_trg_rhs_size;
 }
 
 <TRG>\|\|\|	{
@@ -171,13 +208,18 @@ ALIGN [0-9]+-[0-9]+
 <TRG>[ ]+	{ ; }
 
 <FEATS>\n	{
-		assert(sglex_lhs < 0);
 		assert(sglex_src_rhs_size > 0);
 		cur_src_rhs.resize(sglex_src_rhs_size);
 		for (int i = 0; i < sglex_src_rhs_size; ++i)
 			cur_src_rhs[i] = sglex_src_rhs[i];
-		grammar_callback(sglex_lhs, cur_src_rhs, cur_options, grammar_callback_extra);
+		if (read_contexts) {
+			context_callback(cur_src_rhs, cur_options, context_callback_extra);
+		} else {
+			assert(sglex_lhs < 0);
+			grammar_callback(sglex_lhs, cur_src_rhs, cur_options, grammar_callback_extra);
+		}
 		cur_options.clear();
+		sglex_reset();
 		BEGIN(INITIAL);
 		}
 <FEATS>[ ]+	{ ; }
@@ -233,10 +275,21 @@ ALIGN [0-9]+-[0-9]+
 #include "filelib.h"
 
 void StripedGrammarLexer::ReadStripedGrammar(std::istream* in, GrammarCallback func, void* extra) {
+  read_contexts = 0;
   lex_line = 1;
   sglex_stream = in;
   grammar_callback_extra = extra;
   grammar_callback = func;
   yylex();
 }
+
+void StripedGrammarLexer::ReadContexts(std::istream* in, ContextCallback func, void* extra) {
+  read_contexts = 1;
+  lex_line = 1;
+  sglex_stream = in;
+  context_callback_extra = extra;
+  context_callback = func;
+  yylex();
+}
+
 
