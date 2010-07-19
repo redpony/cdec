@@ -1,8 +1,8 @@
 #ifndef SCORER_H_
 #define SCORER_H_
-
 #include <vector>
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 #include "wordid.h"
 
@@ -16,6 +16,7 @@ std::string StringFromScoreType(ScoreType st);
 
 class Score {
  public:
+  typedef boost::shared_ptr<Score> ScoreP;
   virtual ~Score();
   virtual float ComputeScore() const = 0;
   virtual float ComputePartialScore() const =0;
@@ -35,13 +36,24 @@ class Score {
                                       // to another score results in no score change
 				      // under any circumstances
   virtual void Encode(std::string* out) const = 0;
+  static Score* GetZero(ScoreType type);
+  static Score* GetOne(ScoreType type);
 };
 
 class SentenceScorer {
  public:
+  typedef boost::shared_ptr<Score> ScoreP;
+  typedef boost::shared_ptr<SentenceScorer> ScorerP;
   typedef std::vector<WordID> Sentence;
+  typedef std::vector<Sentence> Sentences;
+  std::string desc;
+  Sentences refs;
+  SentenceScorer(std::string desc="SentenceScorer_unknown", Sentences const& refs=Sentences()) : desc(desc),refs(refs) {  }
+  std::string verbose_desc() const;
   virtual float ComputeRefLength(const Sentence& hyp) const; // default: avg of refs.length
   virtual ~SentenceScorer();
+  virtual Score* GetOne() const;
+  virtual Score* GetZero() const;
   void ComputeErrorSurface(const ViterbiEnvelope& ve, ErrorSurface* es, const ScoreType type, const Hypergraph& hg) const;
   virtual Score* ScoreCandidate(const Sentence& hyp) const = 0;
   virtual Score* ScoreCCandidate(const Sentence& hyp) const =0;
@@ -57,14 +69,21 @@ class DocScorer {
  public:
   ~DocScorer();
   DocScorer() {  }
-  DocScorer(
-    const ScoreType type,
-    const std::vector<std::string>& ref_files,
-    const std::string& src_file = "");
+  void Init(const ScoreType type,
+            const std::vector<std::string>& ref_files,
+            const std::string& src_file = "");
+  DocScorer(const ScoreType type,
+            const std::vector<std::string>& ref_files,
+            const std::string& src_file = "")
+  {
+    Init(type,ref_files,src_file);
+  }
+
   int size() const { return scorers_.size(); }
-  const SentenceScorer* operator[](size_t i) const { return scorers_[i]; }
+  typedef boost::shared_ptr<SentenceScorer> ScorerP;
+  ScorerP operator[](size_t i) const { return scorers_[i]; }
  private:
-  std::vector<SentenceScorer*> scorers_;
+  std::vector<ScorerP> scorers_;
 };
 
 #endif
