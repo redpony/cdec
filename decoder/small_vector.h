@@ -11,7 +11,7 @@
 #include <streambuf>  // std::max - where to get this?
 #include <cstring>
 #include <cassert>
-#include <limits.h>
+#include <stdint.h>
 #include <new>
 #include <stdint.h>
 //sizeof(T)/sizeof(T*)>1?sizeof(T)/sizeof(T*):1

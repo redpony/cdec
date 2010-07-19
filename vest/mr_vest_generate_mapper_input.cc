@@ -110,37 +110,38 @@ struct oracle_directions {
     po::options_description dcmdline_options;
     dcmdline_options.add(opts);
     po::store(parse_command_line(argc, argv, dcmdline_options), *conf);
-    bool flag = false;
+    po::notify(*conf);
     if (conf->count("dev_set_size") == 0) {
       cerr << "Please specify the size of the development set using -d N\n";
-      flag = true;
+      goto bad_cmdline;
     }
     if (conf->count("weights") == 0) {
       cerr << "Please specify the starting-point weights using -w <weightfile.txt>\n";
-      flag = true;
+      goto bad_cmdline;
     }
     if (conf->count("forest_repository") == 0) {
       cerr << "Please specify the forest repository location using -r <DIR>\n";
-      flag = true;
+      goto bad_cmdline;
     }
-    if (flag || conf->count("help")) {
+    if (n_oracle && oracle.refs.empty()) {
+      cerr<<"Specify references when using oracle directions\n";
+      goto bad_cmdline;
+    }
+    if (conf->count("help")) {
+      cout << dcmdline_options << endl;
+      exit(0);
+    }
+
+    UseConf(*conf);
+    return;
+    bad_cmdline:
       cerr << dcmdline_options << endl;
       exit(1);
-    }
-    po::notify(*conf);
-
-    if (0) {
-    dev_set_size = (*conf)["dev_set_size"].as<unsigned>();
-    forest_repository = (*conf)["forest_repository"].as<string>();
-    weights_file = (*conf)["weights"].as<string>();
-    n_random = (*conf)["random_directions"].as<unsigned>();
-    }
   }
 
   int main(int argc, char *argv[]) {
     po::variables_map conf;
     InitCommandLine(argc,argv,&conf);
-    UseConf(conf);
     Run();
     return 0;
   }

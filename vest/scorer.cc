@@ -1,5 +1,8 @@
 #include "scorer.h"
+#define DEBUG_SCORER
 
+
+#include <boost/lexical_cast.hpp>
 #include <map>
 #include <sstream>
 #include <iostream>
@@ -121,9 +124,13 @@ class SERScore : public Score {
   int correct, total;
 };
 
+std::string SentenceScorer::verbose_desc() const {
+  return desc+",ref0={ "+TD::GetString(refs[0])+" }";
+}
+
 class SERScorer : public SentenceScorer {
  public:
-  SERScorer(const vector<vector<WordID> >& references) : refs_(references) {}
+  SERScorer(const vector<vector<WordID> >& references) : SentenceScorer("SERScorer",references),refs_(references) {}
   Score* ScoreCCandidate(const vector<WordID>& /* hyp */) const {
     Score* a = NULL;
     return a;
@@ -180,7 +187,7 @@ class BLEUScore : public Score {
 class BLEUScorerBase : public SentenceScorer {
  public:
   BLEUScorerBase(const vector<vector<WordID> >& references,
-             int n
+                 int n
              );
   Score* ScoreCandidate(const vector<WordID>& hyp) const;
   Score* ScoreCCandidate(const vector<WordID>& hyp) const;
@@ -352,6 +359,33 @@ SentenceScorer* SentenceScorer::CreateSentenceScorer(const ScoreType type,
       assert(!"Not implemented!");
   }
 }
+
+Score* SentenceScorer::GetOne() const {
+  Sentence s;
+  return ScoreCCandidate(s)->GetOne();
+}
+
+Score* SentenceScorer::GetZero() const {
+  Sentence s;
+  return ScoreCCandidate(s)->GetZero();
+}
+
+Score* Score::GetOne(ScoreType type) {
+  std::vector<SentenceScorer::Sentence > refs;
+  SentenceScorer *ps=SentenceScorer::CreateSentenceScorer(type,refs);
+  Score *s=ps->GetOne();
+  delete ps;
+  return s;
+}
+
+Score* Score::GetZero(ScoreType type) {
+  std::vector<SentenceScorer::Sentence > refs;
+  SentenceScorer *ps=SentenceScorer::CreateSentenceScorer(type,refs);
+  Score *s=ps->GetZero();
+  delete ps;
+  return s;
+}
+
 
 Score* SentenceScorer::CreateScoreFromString(const ScoreType type, const string& in) {
   switch (type) {
@@ -562,6 +596,7 @@ Score* BLEUScore::GetOne() const {
   return new BLEUScore(hyp_ngram_counts.size(),1);
 }
 
+
 void BLEUScore::Encode(string* out) const {
   ostringstream os;
   const int n = correct_ngram_hit_counts.size();
@@ -572,7 +607,7 @@ void BLEUScore::Encode(string* out) const {
 }
 
 BLEUScorerBase::BLEUScorerBase(const vector<vector<WordID> >& references,
-                       int n) : n_(n) {
+                               int n) : SentenceScorer("BLEU"+boost::lexical_cast<string>(n),references),n_(n) {
   for (vector<vector<WordID> >::const_iterator ci = references.begin();
        ci != references.end(); ++ci) {
     lengths_.push_back(ci->size());
@@ -603,42 +638,40 @@ Score* BLEUScorerBase::ScoreCCandidate(const vector<WordID>& hyp) const {
 
 
 DocScorer::~DocScorer() {
-  for (int i=0; i < scorers_.size(); ++i)
-    delete scorers_[i];
 }
 
-DocScorer::DocScorer(
+void DocScorer::Init(
       const ScoreType type,
       const vector<string>& ref_files,
       const string& src_file) {
+  scorers_.clear();
   // TODO stop using valarray, start using ReadFile
   cerr << "Loading references (" << ref_files.size() << " files)\n";
-  shared_ptr<ReadFile> srcrf;
+  ReadFile srcrf;
   if (type == AER && src_file.size() > 0) {
     cerr << "  (source=" << src_file << ")\n";
-    srcrf.reset(new ReadFile(src_file));
+    srcrf.Init(src_file);
   }
-  valarray<ifstream> ifs(ref_files.size());
-  for (int i=0; i < ref_files.size(); ++i) {
-     ifs[i].open(ref_files[i].c_str());
-     assert(ifs[i].good());
-  }
+  std::vector<ReadFile> ifs(ref_files.begin(),ref_files.end());
+  for (int i=0; i < ref_files.size(); ++i) ifs[i].Init(ref_files[i]);
   char buf[64000];
   bool expect_eof = false;
-  while (!ifs[0].eof()) {
+  int line=0;
+  while (ifs[0].get()) {
     vector<vector<WordID> > refs(ref_files.size());
     for (int i=0; i < ref_files.size(); ++i) {
-      if (ifs[i].eof()) break;
-      ifs[i].getline(buf, 64000);
+      istream &in=ifs[i].get();
+      if (in.eof()) break;
+      in.getline(buf, 64000);
       refs[i].clear();
       if (strlen(buf) == 0) {
-        if (ifs[i].eof()) {
-	  if (!expect_eof) {
-	    assert(i == 0);
-	    expect_eof = true;
-	  }
+        if (in.eof()) {
+          if (!expect_eof) {
+            assert(i == 0);
+            expect_eof = true;
+          }
           break;
-	}
+        }
       } else {
         TD::ConvertSentence(buf, &refs[i]);
         assert(!refs[i].empty());
@@ -648,11 +681,15 @@ DocScorer::DocScorer(
     if (!expect_eof) {
       string src_line;
       if (srcrf) {
-        getline(*srcrf->stream(), src_line);
+        getline(srcrf.get(), src_line);
         map<string,string> dummy;
         ProcessAndStripSGML(&src_line, &dummy);
       }
-      scorers_.push_back(SentenceScorer::CreateSentenceScorer(type, refs, src_line));
+      scorers_.push_back(ScorerP(SentenceScorer::CreateSentenceScorer(type, refs, src_line)));
+#ifdef DEBUG_SCORER
+      cerr<<"doc_scorer["<<line<<"] = "<<scorers_.back()->verbose_desc()<<endl;
+#endif
+      ++line;
     }
   }
   cerr << "Loaded reference translations for " << scorers_.size() << " sentences.\n";
