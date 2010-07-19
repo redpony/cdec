@@ -18,9 +18,6 @@ public class Corpus
 	public int splitSentinel;
 	public int phraseSentinel;
 	public int rareSentinel;
-	private boolean[] rareWords;
-	private boolean[] rarePhrases;
-	private boolean[] rareContexts;
 
 	public Corpus()
 	{
@@ -45,10 +42,6 @@ public class Corpus
 		{
 			return Corpus.this.getPhrase(phraseId);
 		}
-		public TIntArrayList getRawPhrase()
-		{
-			return Corpus.this.getRawPhrase(phraseId);
-		}
 		public String getPhraseString()
 		{
 			return Corpus.this.getPhraseString(phraseId);
@@ -61,10 +54,6 @@ public class Corpus
 		{
 			return Corpus.this.getContext(contextId);
 		}
-		public TIntArrayList getRawContext()
-		{
-			return Corpus.this.getRawContext(contextId);
-		}		
 		public String getContextString(boolean insertPhraseSentinel)
 		{
 			return Corpus.this.getContextString(contextId, insertPhraseSentinel);
@@ -145,35 +134,13 @@ public class Corpus
 	
 	public TIntArrayList getPhrase(int phraseId)
 	{
-		TIntArrayList phrase = phraseLexicon.lookup(phraseId);
-		if (rareWords != null)
-		{
-			boolean first = true;
-			for (int i = 0; i < phrase.size(); ++i)
-			{
-				if (rareWords[phrase.get(i)])
-				{
-					if (first)
-					{
-						phrase = (TIntArrayList) phrase.clone();
-						first = false;
-					}
-					phrase.set(i, rareSentinel);
-				}
-			}
-		}
-		return phrase;
-	}
-	
-	public TIntArrayList getRawPhrase(int phraseId)
-	{
 		return phraseLexicon.lookup(phraseId);
 	}
 	
 	public String getPhraseString(int phraseId)
 	{
 		StringBuffer b = new StringBuffer();
-		for (int tid: getRawPhrase(phraseId).toNativeArray())
+		for (int tid: getPhrase(phraseId).toNativeArray())
 		{
 			if (b.length() > 0)
 				b.append(" ");
@@ -184,35 +151,13 @@ public class Corpus
 	
 	public TIntArrayList getContext(int contextId)
 	{
-		TIntArrayList context = contextLexicon.lookup(contextId);
-		if (rareWords != null)
-		{
-			boolean first = true;
-			for (int i = 0; i < context.size(); ++i)
-			{
-				if (rareWords[context.get(i)])
-				{
-					if (first)
-					{
-						context = (TIntArrayList) context.clone();
-						first = false;
-					}
-					context.set(i, rareSentinel);
-				}
-			}
-		}
-		return context;
-	}
-	
-	public TIntArrayList getRawContext(int contextId)
-	{
 		return contextLexicon.lookup(contextId);
 	}
 	
 	public String getContextString(int contextId, boolean insertPhraseSentinel)
 	{
 		StringBuffer b = new StringBuffer();
-		TIntArrayList c = getRawContext(contextId);
+		TIntArrayList c = getContext(contextId);
 		for (int i = 0; i < c.size(); ++i)
 		{
 			if (i > 0) b.append(" ");
@@ -227,15 +172,14 @@ public class Corpus
 		return wordId == splitSentinel || wordId == phraseSentinel;
 	}
 	
-	static Corpus readFromFile(Reader in) throws IOException
-	{
-		Corpus c = new Corpus();
-		
+	List<Edge> readEdges(Reader in) throws IOException
+	{	
 		// read in line-by-line
 		BufferedReader bin = new BufferedReader(in);
 		String line;
 		Pattern separator = Pattern.compile(" \\|\\|\\| ");
-
+		
+		List<Edge> edges = new ArrayList<Edge>();
 		while ((line = bin.readLine()) != null)
 		{
 			// split into phrase and contexts
@@ -250,10 +194,8 @@ public class Corpus
 			st = new StringTokenizer(phraseToks, " ");
 			TIntArrayList ptoks = new TIntArrayList();
 			while (st.hasMoreTokens())
-				ptoks.add(c.wordLexicon.insert(st.nextToken()));
-			int phraseId = c.phraseLexicon.insert(ptoks);
-			if (phraseId == c.phraseToContext.size())
-				c.phraseToContext.add(new ArrayList<Edge>());
+				ptoks.add(wordLexicon.insert(st.nextToken()));
+			int phraseId = phraseLexicon.insert(ptoks);
 			
 			// process contexts
 			String[] parts = separator.split(rest);
@@ -261,34 +203,45 @@ public class Corpus
 			for (int i = 0; i < parts.length; i += 2)
 			{
 				// process pairs of strings - context and count
-				TIntArrayList ctx = new TIntArrayList();
 				String ctxString = parts[i];
 				String countString = parts[i + 1];
+
+				assert (countString.startsWith("C="));
+				int count = Integer.parseInt(countString.substring(2).trim());
+				
+				TIntArrayList ctx = new TIntArrayList();
 				StringTokenizer ctxStrtok = new StringTokenizer(ctxString, " ");
 				while (ctxStrtok.hasMoreTokens())
 				{
 					String token = ctxStrtok.nextToken();
-					//if (!token.equals("<PHRASE>"))
-						ctx.add(c.wordLexicon.insert(token));
+					ctx.add(wordLexicon.insert(token));
 				}
-				int contextId = c.contextLexicon.insert(ctx);
-				if (contextId == c.contextToPhrase.size())
-					c.contextToPhrase.add(new ArrayList<Edge>());
+				int contextId = contextLexicon.insert(ctx);
 
-				assert (countString.startsWith("C="));
-				Edge e = c.new Edge(phraseId, contextId, 
-						Integer.parseInt(countString.substring(2).trim()));
-				c.edges.add(e);
-				
-				// index the edge for fast phrase, context lookup
-				c.phraseToContext.get(phraseId).add(e);
-				c.contextToPhrase.get(contextId).add(e);
+				edges.add(new Edge(phraseId, contextId, count));
 			}
 		}
-		
-		return c;
+		return edges;
 	}
 	
+	static Corpus readFromFile(Reader in) throws IOException
+	{	
+		Corpus c = new Corpus();
+		c.edges = c.readEdges(in);
+		for (Edge edge: c.edges)
+		{
+			while (edge.getPhraseId() >= c.phraseToContext.size())
+				c.phraseToContext.add(new ArrayList<Edge>());
+			while (edge.getContextId() >= c.contextToPhrase.size())
+				c.contextToPhrase.add(new ArrayList<Edge>());
+			
+			// index the edge for fast phrase, context lookup
+			c.phraseToContext.get(edge.getPhraseId()).add(edge);
+			c.contextToPhrase.get(edge.getContextId()).add(edge);
+		}
+		return c;
+	}
+		
 	TIntArrayList phraseEdges(TIntArrayList phrase)
 	{
 		TIntArrayList r = new TIntArrayList(4);
@@ -306,87 +259,5 @@ public class Corpus
 	{
 		out.println("Corpus has " + edges.size() + " edges " + phraseLexicon.size() + " phrases " 
 				+ contextLexicon.size() + " contexts and " + wordLexicon.size() + " word types");
-	}
-
-	public void applyWordThreshold(int wordThreshold) 
-	{
-		int[] counts = new int[wordLexicon.size()];
-		for (Edge e: edges)
-		{
-			TIntArrayList phrase = e.getPhrase();
-			for (int i = 0; i < phrase.size(); ++i)
-				counts[phrase.get(i)] += e.getCount();
-			
-			TIntArrayList context = e.getContext();
-			for (int i = 0; i < context.size(); ++i)
-				counts[context.get(i)] += e.getCount();
-		}
-
-		int count = 0;
-		rareWords = new boolean[wordLexicon.size()];
-		for (int i = 0; i < wordLexicon.size(); ++i)
-		{
-			rareWords[i] = counts[i] < wordThreshold;
-			if (rareWords[i])
-				count++;
-		}
-		System.err.println("There are " + count + " rare words");
-	}
-	
-	public void applyPhraseThreshold(int threshold) 
-	{
-		rarePhrases = new boolean[phraseLexicon.size()];
-
-		int n = 0;
-		for (int i = 0; i < phraseLexicon.size(); ++i)
-		{
-			List<Edge> contexts = phraseToContext.get(i);
-			int count = 0;
-			for (Edge edge: contexts)
-			{
-				count += edge.getCount();
-				if (count >= threshold)
-					break;
-			}
-			
-			if (count < threshold)
-			{
-				rarePhrases[i] = true;
-				n++;
-			}
-		}
-		System.err.println("There are " + n + " rare phrases");
-	}
-	
-	public void applyContextThreshold(int threshold) 
-	{
-		rareContexts = new boolean[contextLexicon.size()];
-
-		int n = 0;
-		for (int i = 0; i < contextLexicon.size(); ++i)
-		{
-			List<Edge> phrases = contextToPhrase.get(i);
-			int count = 0;
-			for (Edge edge: phrases)
-			{
-				count += edge.getCount();
-				if (count >= threshold)
-					break;
-			}
-			
-			if (count < threshold)
-			{
-				rareContexts[i] = true;
-				n++;
-			}
-		}
-		System.err.println("There are " + n + " rare contexts");
-	}
-	
-	boolean isRare(Edge edge)
-	{
-		if (rarePhrases != null && rarePhrases[edge.getPhraseId()] == true) return true;
-		if (rareContexts != null && rareContexts[edge.getContextId()] == true) return true;
-		return false;
 	}
 }
