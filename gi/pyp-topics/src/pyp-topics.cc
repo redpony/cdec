@@ -200,7 +200,7 @@ void PYPTopics::sample_corpus(const Corpus& corpus, int samples,
       }
 
       if (m_use_topic_pyp) {
-        m_topic_pyp.resample_prior();
+        m_topic_pyp.resample_prior(rnd);
         log_p += m_topic_pyp.log_restaurant_prob();
       }
 
@@ -233,7 +233,7 @@ PYPTopics::F PYPTopics::hresample_docs(int start, int end)
   assert(start <= end);
   for (int i=start; i < end; ++i)
   {
-    m_document_pyps[i].resample_prior();
+    m_document_pyps[i].resample_prior(rnd);
     log_p += m_document_pyps[i].log_restaurant_prob();
     if (resample_counter++ % 5000 == 0) {
       std::cerr << "."; std::cerr.flush();
@@ -250,7 +250,7 @@ PYPTopics::F PYPTopics::hresample_topics()
     for (PYPs::iterator pypIt=levelIt->begin();
         pypIt != levelIt->end(); ++pypIt) {
 
-      pypIt->resample_prior();
+      pypIt->resample_prior(rnd);
       log_p += pypIt->log_restaurant_prob();
     }
   }

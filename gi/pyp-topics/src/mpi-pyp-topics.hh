@@ -8,8 +8,12 @@
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/mersenne_twister.hpp>
+#include <boost/random/inversive_congruential.hpp>
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/lagged_fibonacci.hpp>
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
+
 
 #include "mpi-pyp.hh"
 #include "corpus.hh"
@@ -62,6 +66,8 @@ public:
   std::ostream& print_document_topics(std::ostream& out) const;
   std::ostream& print_topic_terms(std::ostream& out) const;
 
+  void synchronise();
+
 private:
   F word_pyps_p0(const Term& term, int topic, int level) const;
 
@@ -78,7 +84,9 @@ private:
 
   unsigned long m_seed;
 
-  typedef boost::mt19937 base_generator_type;
+  //typedef boost::mt19937 base_generator_type;
+  //typedef boost::hellekalek1995 base_generator_type;
+  typedef boost::lagged_fibonacci607 base_generator_type;
   typedef boost::uniform_real<> uni_dist_type;
   typedef boost::variate_generator<base_generator_type&, uni_dist_type> gen_type;
 
