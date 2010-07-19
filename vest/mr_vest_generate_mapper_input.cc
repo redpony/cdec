@@ -183,20 +183,27 @@ struct oracle_directions {
 
   Sentences model_hyps;
 
-  vector<OracleBleu::ScoreP> model_scores;
+  vector<ScoreP> model_scores;
   bool have_doc;
   void Init() {
     have_doc=!decoder_translations_file.empty();
     if (have_doc) {
       model_hyps.Load(decoder_translations_file);
+      if (verbose) model_hyps.Print(cerr,5);
       model_scores.resize(model_hyps.size());
+      if (dev_set_size!=model_hyps.size()) {
+        cerr<<"You supplied decoder_translations with a different number of lines ("<<model_hyps.size()<<") than dev_set_size ("<<dev_set_size<<")"<<endl;
+        abort();
+      }
+      cerr << "Scoring model translations " << model_hyps << endl;
       for (int i=0;i<model_hyps.size();++i) {
-        //FIXME: what is scoreccand? with / without clipping? do without for consistency w/ oracle
+        //TODO: what is scoreCcand? without clipping? do without for consistency w/ oracle
         model_scores[i]=oracle.ds[i]->ScoreCandidate(model_hyps[i]);
-      if (verbose) cerr<<"Before model["<<i<<"]: "<<ds().ScoreDetails()<<endl;
-      if (verbose) cerr<<"model["<<i<<"]: "<<model_scores[i]->ScoreDetails()<<endl;
-      oracle.doc_score->PlusEquals(*model_scores[i]);
-      if (verbose) cerr<<"After model["<<i<<"]: "<<ds().ScoreDetails()<<endl;
+        assert(model_scores[i]);
+        if (verbose) cerr<<"Before model["<<i<<"]: "<<ds().ScoreDetails()<<endl;
+        if (verbose) cerr<<"model["<<i<<"]: "<<model_scores[i]->ScoreDetails()<<endl;
+        oracle.doc_score->PlusEquals(*model_scores[i]);
+        if (verbose) cerr<<"After model["<<i<<"]: "<<ds().ScoreDetails()<<endl;
       }
       //TODO: compute doc bleu stats for each sentence, then when getting oracle temporarily exclude stats for that sentence (skip regular score updating)
     }
@@ -249,8 +256,12 @@ struct oracle_directions {
       o=oracle.ComputeOracle(oracle.MakeMetadata(hg,i),&hg,origin);
       if (verbose) {
         cerr << o;
-        cerr<<"After oracle: "<<ds().ScoreDetails()<<endl
-            <<" oracle="<<oracle.GetScore(o.hope.sentence,i)->ScoreDetails()<<endl
+        ScoreP hopesc=oracle.GetScore(o.hope.sentence,i);
+        oracle.doc_score->PlusEquals(*hopesc,1);
+        cerr<<"With hope: "<<ds().ScoreDetails()<<endl;
+        oracle.doc_score->PlusEquals(*hopesc,-1);
+        cerr<<"Without hope: "<<ds().ScoreDetails()<<endl;
+        cerr<<" oracle="<<oracle.GetScore(o.hope.sentence,i)->ScoreDetails()<<endl
             <<" model="<<oracle.GetScore(o.model.sentence,i)->ScoreDetails()<<endl;
         if (have_doc)
           cerr<<" doc (should = model): "<<model_scores[i]->ScoreDetails()<<endl;

@@ -9,6 +9,10 @@
 #include "stringlib.h"
 typedef std::vector<WordID> Sentence;
 
+inline std::ostream & operator<<(std::ostream &out,Sentence const& s) {
+  return out<<TD::GetString(s);
+}
+
 inline void StringToSentence(std::string const& str,Sentence &s) {
   using namespace std;
   vector<string> ss=SplitOnWhitespace(str);
@@ -38,14 +42,34 @@ public:
   Sentences() {  }
   Sentences(unsigned n,Sentence const& sentence) : VS(n,sentence) {  }
   Sentences(unsigned n,std::string const& sentence) : VS(n,StringToSentence(sentence)) {  }
+  std::string filename;
   void Load(std::string file) {
     ReadFile r(file);
-    Load(*r.stream());
+    Load(r.get(),file);
   }
-  void Load(std::istream &in) {
-    this->push_back(Sentence());
-    while(in>>this->back()) ;
+  void Load(std::istream &in,std::string filen="-") {
+    filename=filen;
+    do {
+      this->push_back(Sentence());
+    } while(in>>this->back());
     this->pop_back();
+  }
+  void Print(std::ostream &out,int headn=0) const {
+    out << "[" << size()<< " sentences from "<<filename<<"]";
+    if (headn!=0) {
+      int i=0,e=this->size();
+      if (headn>0&&headn<e) {
+        e=headn;
+        out << " (first "<<headn<<")";
+      }
+      out << " :\n";
+      for (;i<e;++i)
+        out<<(*this)[i] << "\n";
+    }
+  }
+  friend inline std::ostream& operator<<(std::ostream &out,Sentences const& s) {
+    s.Print(out);
+    return out;
   }
 };
 

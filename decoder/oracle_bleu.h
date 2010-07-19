@@ -115,7 +115,6 @@ struct OracleBleu {
     set_oracle_doc_size(doc_size);
   }
 
-  typedef boost::shared_ptr<Score> ScoreP;
   ScoreP doc_score,sentscore; // made from factory, so we delete them
   ScoreP GetScore(Sentence const& sentence,int sent_id) {
     return ScoreP(ds[sent_id]->ScoreCandidate(sentence));
@@ -185,6 +184,7 @@ struct OracleBleu {
   }
 
   // destroys forest (replaces it w/ rescored oracle one)
+  // sets sentscore
   Oracle ComputeOracle(SentenceMetadata const& smeta,Hypergraph *forest_in_out,WeightVector const& feature_weights,unsigned kbest=0,std::string const& forest_output="") {
     Hypergraph &forest=*forest_in_out;
     Oracle r;
