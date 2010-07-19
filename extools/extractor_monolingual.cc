@@ -28,6 +28,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("phrases,p", po::value<string>(), "File contatining phrases of interest")
         ("phrase_context_size,S", po::value<int>()->default_value(2), "Use this many words of context on left and write when writing base phrase contexts")
         ("combiner_size,c", po::value<size_t>()->default_value(800000), "Number of unique items to store in cache before writing rule counts. Set to 1 to disable cache. Set to 0 for no limit.")
+        ("prune", po::value<size_t>()->default_value(0), "Prune items with count less than threshold; applies each time the cache is dumped.")
         ("silent", "Write nothing to stderr except errors")
         ("help,h", "Print this help message and exit");
   po::options_description clo("Command line options");
@@ -92,7 +93,7 @@ struct TrieNode
 };
 
 struct CountCombiner {
-  CountCombiner(const size_t& csize) : combiner_size(csize) {
+  CountCombiner(const size_t& csize, const size_t& prune) : combiner_size(csize), threshold(prune) {
     if (csize == 0) { cerr << "Using unlimited combiner cache.\n"; }
   }
   ~CountCombiner() {
@@ -116,20 +117,29 @@ struct CountCombiner {
   void WriteAndClearCache() {
     for (unordered_map<vector<WordID>, Vec2PhraseCount, boost::hash<vector<WordID> > >::iterator it = cache.begin();
          it != cache.end(); ++it) {
-      cout << TD::GetString(it->first) << '\t';
       const Vec2PhraseCount& vals = it->second;
-      bool needdiv = false;
-      for (Vec2PhraseCount::const_iterator vi = vals.begin(); vi != vals.end(); ++vi) {
-        if (needdiv) cout << " ||| "; else needdiv = true;
+      bool first = true;
+      for (Vec2PhraseCount::const_iterator vi = vals.begin(); vi != vals.end(); ++vi) 
+      {
+        if (threshold > 1 && combiner_size != 1 && vi->second < threshold)
+            continue;
+
+        if (!first) cout << " ||| "; 
+        else 
+        {
+            cout << TD::GetString(it->first) << '\t';
+            first = false;
+        }
         cout << TD::GetString(vi->first) << " ||| C=" << vi->second;
-      }
-      cout << '\n';
+       }
+      if (!first)
+          cout << '\n';
     }
     cout << flush;
     cache.clear();
   }
 
-  const size_t combiner_size;
+  const size_t combiner_size, threshold;
   typedef unordered_map<vector<WordID>, int, boost::hash<vector<WordID> > > Vec2PhraseCount;
   unordered_map<vector<WordID>, Vec2PhraseCount, boost::hash<vector<WordID> > > cache;
 };
@@ -194,7 +204,7 @@ int main(int argc, char** argv)
 
   bool silent = conf.count("silent") > 0;
   const int ctx_size = conf["phrase_context_size"].as<int>();
-  CountCombiner cc(conf["combiner_size"].as<size_t>());
+  CountCombiner cc(conf["combiner_size"].as<size_t>(), conf["prune"].as<size_t>());
 
   char buf[MAX_LINE_LENGTH];
   TrieNode phrase_trie(0);
