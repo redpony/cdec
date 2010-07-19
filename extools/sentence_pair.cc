@@ -72,8 +72,8 @@ int AnnotatedParallelSentence::ReadAlignmentPoint(const char* buf,
   }
   (*b) = 0;
   while(ch < end && (c == 0 && (!permit_col || (permit_col && buf[ch] != ':')) || c != 0 && buf[ch] != '-')) {
-    if (buf[ch] < '0' || buf[ch] > '9') {
-      cerr << "Alignment point badly formed 4: " << string(buf, start, end-start) << endl << buf << endl;
+    if ((buf[ch] < '0') || (buf[ch] > '9')) {
+      cerr << "Alignment point badly formed 4: " << string(buf, start, end-start) << endl << buf << endl << buf[ch] << endl;
       exit(1);
     }
     (*b) *= 10;
