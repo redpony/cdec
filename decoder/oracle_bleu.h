@@ -37,9 +37,12 @@ struct Translation {
     ViterbiESentence(hg,&sentence);
     features=ViterbiFeatures(hg,feature_weights,true);
   }
-  void Print(std::ostream &out,std::string pre="   +Oracle BLEU ") const {
+  void Print(std::ostream &out,std::string pre="   +Oracle BLEU ",bool include_0_fid=true) const {
     out<<pre<<"Viterbi: "<<TD::GetString(sentence)<<"\n";
-    out<<pre<<"features: "<<features<<std::endl;
+    out<<pre<<"features: "<<features;
+    if (include_0_fid && features.nonzero(0))
+      out<< " dummy-feature(0)="<<features[0];
+    out<<std::endl;
   }
   bool is_null() {
     return features.empty() /* && sentence.empty() */;
@@ -91,6 +94,7 @@ struct OracleBleu {
       ("references,R", value<Refs >(&refs), "Translation reference files")
       ("oracle_loss", value<string>(&loss_name)->default_value("IBM_BLEU_3"), "IBM_BLEU_3 (default), IBM_BLEU etc")
       ("bleu_weight", value<double>(&bleu_weight)->default_value(1.), "weight to give the hope/fear loss function vs. model score")
+      ("verbose",bool_switch(&verbose),"detailed logs")
       ;
   }
   int order;
@@ -122,6 +126,7 @@ struct OracleBleu {
 
   double bleu_weight;
   // you have to call notify(conf) yourself, once, in main or similar
+  bool verbose;
   void UseConf(boost::program_options::variables_map const& /* conf */) {
     using namespace std;
     //    bleu_weight=conf["bleu_weight"].as<double>();
@@ -162,12 +167,12 @@ struct OracleBleu {
       return;
     }
     assert(refs.size());
-    ds.Init(loss,refs);
+    ds.Init(loss,refs,"",verbose);
     ensure_doc_score();
-//    doc_score.reset();
     std::cerr << "Loaded " << ds.size() << " references for scoring with " << StringFromScoreType(loss) << std::endl;
   }
 
+  // metadata has plain pointer, not shared, so we need to exist as long as it does
   SentenceMetadata MakeMetadata(Hypergraph const& forest,int sent_id) {
     std::vector<WordID> srcsent;
     ViterbiFSentence(forest,&srcsent);
@@ -180,7 +185,7 @@ struct OracleBleu {
   }
 
   // destroys forest (replaces it w/ rescored oracle one)
-  Oracle ComputeOracle(SentenceMetadata const& smeta,Hypergraph *forest_in_out,WeightVector const& feature_weights,std::ostream *log=0,unsigned kbest=0,std::string const& forest_output="") {
+  Oracle ComputeOracle(SentenceMetadata const& smeta,Hypergraph *forest_in_out,WeightVector const& feature_weights,unsigned kbest=0,std::string const& forest_output="") {
     Hypergraph &forest=*forest_in_out;
     Oracle r;
     int sent_id=smeta.GetSentenceID();
@@ -189,7 +194,7 @@ struct OracleBleu {
     {
       Timer t("Forest Oracle rescoring:");
       Hypergraph oracle_forest;
-      Rescore(smeta,forest,&oracle_forest,feature_weights,bleu_weight,log);
+      Rescore(smeta,forest,&oracle_forest,feature_weights,bleu_weight);
       forest.swap(oracle_forest);
     }
     r.hope=Translation(forest);
@@ -202,10 +207,10 @@ struct OracleBleu {
 
   // if doc_score wasn't init, add 1 counts to ngram acc.
   void ensure_doc_score() {
-	if (!doc_score) { doc_score.reset(Score::GetOne(loss)); }
+	if (!doc_score) { doc_score=Score::GetOne(loss); }
   }
 
-  void Rescore(SentenceMetadata const& smeta,Hypergraph const& forest,Hypergraph *dest_forest,WeightVector const& feature_weights,double bleu_weight=1.0,std::ostream *log=&std::cerr) {
+  void Rescore(SentenceMetadata const& smeta,Hypergraph const& forest,Hypergraph *dest_forest,WeightVector const& feature_weights,double bleu_weight=1.0) {
     // the sentence bleu stats will get added to doc only if you call IncludeLastScore
     ensure_doc_score();
     sentscore=GetScore(forest,smeta.GetSentenceID());
@@ -216,7 +221,6 @@ struct OracleBleu {
     feature_weights_.set_value(0,bleu_weight);
     feature_weights.init_vector(&w);
     ModelSet oracle_models(w,vector<FeatureFunction const*>(1,pff.get()));
-	if (log) *log << "Going to call Apply Model " << endl;
 	ApplyModelSet(forest,
                   smeta,
                   oracle_models,

@@ -1,5 +1,7 @@
 #ifndef _SPARSE_VECTOR_H_
 #define _SPARSE_VECTOR_H_
+/* hack: index 0 never gets printed because cdyer is creative and efficient. features which have no weight got feature dict id 0, see, and the models all clobered that value.  nobody wants to see it.  except that vlad is also creative and efficient and stored the oracle bleu there. */
+
 
 // this is a modified version of code originally written
 // by Phil Blunsom
@@ -51,6 +53,12 @@ public:
   void set_new_value(int index, T const& val) {
     assert(values_.find(index)==values_.end());
     values_[index]=val;
+  }
+
+
+  // warning: exploits the fact that 0 values are always removed from map.  change this if you change that.
+  bool nonzero(int index) const {
+    return values_.find(index) != values_.end();
   }
 
 

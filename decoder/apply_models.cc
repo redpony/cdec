@@ -409,7 +409,8 @@ void ApplyModelSet(const Hypergraph& in,
                    const ModelSet& models,
                    const IntersectionConfiguration& config,
                    Hypergraph* out) {
-  if (models.stateless() && config.algorithm == 0) {
+  //force exhaustive if there's no state req. for model
+  if (models.stateless() || config.algorithm == 0) {
     NoPruningRescorer ma(models, smeta, in, out); // avoid overhead of best-first when no state
     ma.Apply();
   } else if (config.algorithm == 1) {

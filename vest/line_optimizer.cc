@@ -32,7 +32,8 @@ double LineOptimizer::LineOptimize(
   }
   sort(all_ints.begin(), all_ints.end(), IntervalComp());
   double last_boundary = all_ints.front()->x;
-  Score* acc = all_ints.front()->delta->GetZero();
+  ScoreP accp = all_ints.front()->delta->GetZero();
+  Score *acc=accp.get();
   float& cur_best_score = *best_score;
   cur_best_score = (type == MAXIMIZE_SCORE ?
     -numeric_limits<float>::max() : numeric_limits<float>::max());
@@ -72,7 +73,6 @@ double LineOptimizer::LineOptimize(
       pos = last_boundary + 1000.0;
     }
   }
-  delete acc;
   return pos;
 }
 
@@ -92,7 +92,6 @@ void LineOptimizer::CreateOptimizationDirections(
      vector<SparseVector<double> >* dirs
      , bool include_orthogonal
   ) {
-  const int num_directions = features_to_optimize.size() + additional_random_directions;
   dirs->clear();
   typedef SparseVector<double> Dir;
   vector<Dir> &out=*dirs;

@@ -1,6 +1,4 @@
 #include "scorer.h"
-#define DEBUG_SCORER
-
 
 #include <boost/lexical_cast.hpp>
 #include <map>
@@ -23,6 +21,7 @@
 #include "tdict.h"
 #include "stringlib.h"
 #include "lattice.h"
+
 
 using boost::shared_ptr;
 using namespace std;
@@ -107,8 +106,8 @@ class SERScore : public Score {
     correct += static_cast<const SERScore&>(delta).correct;
     total += static_cast<const SERScore&>(delta).total;
     }
-  Score* GetZero() const { return new SERScore; }
-  Score* GetOne() const { return new SERScore; }
+  ScoreP GetZero() const { return ScoreP(new SERScore); }
+  ScoreP GetOne() const { return ScoreP(new SERScore); }
   void Subtract(const Score& rhs, Score* res) const {
     SERScore* r = static_cast<SERScore*>(res);
     r->correct = correct - static_cast<const SERScore&>(rhs).correct;
@@ -131,18 +130,17 @@ std::string SentenceScorer::verbose_desc() const {
 class SERScorer : public SentenceScorer {
  public:
   SERScorer(const vector<vector<WordID> >& references) : SentenceScorer("SERScorer",references),refs_(references) {}
-  Score* ScoreCCandidate(const vector<WordID>& /* hyp */) const {
-    Score* a = NULL;
-    return a;
+  ScoreP ScoreCCandidate(const vector<WordID>& /* hyp */) const {
+    return ScoreP();
   }
-  Score* ScoreCandidate(const vector<WordID>& hyp) const {
+  ScoreP ScoreCandidate(const vector<WordID>& hyp) const {
     SERScore* res = new SERScore;
     res->total = 1;
     for (int i = 0; i < refs_.size(); ++i)
       if (refs_[i] == hyp) res->correct = 1;
-    return res;
+    return ScoreP(res);
   }
-  static Score* ScoreFromString(const string& data) {
+  static ScoreP ScoreFromString(const string& data) {
     assert(!"Not implemented");
   }
  private:
@@ -164,8 +162,8 @@ class BLEUScore : public Score {
   void PlusEquals(const Score& delta);
   void PlusEquals(const Score& delta, const float scale);
   void PlusPartialEquals(const Score& delta, int oracle_e_cover, int oracle_f_cover, int src_len);
-  Score* GetZero() const;
-  Score* GetOne() const;
+  ScoreP GetZero() const;
+  ScoreP GetOne() const;
   void Subtract(const Score& rhs, Score* res) const;
   void Encode(string* out) const;
   bool IsAdditiveIdentity() const {
@@ -189,9 +187,9 @@ class BLEUScorerBase : public SentenceScorer {
   BLEUScorerBase(const vector<vector<WordID> >& references,
                  int n
              );
-  Score* ScoreCandidate(const vector<WordID>& hyp) const;
-  Score* ScoreCCandidate(const vector<WordID>& hyp) const;
-  static Score* ScoreFromString(const string& in);
+  ScoreP ScoreCandidate(const vector<WordID>& hyp) const;
+  ScoreP ScoreCCandidate(const vector<WordID>& hyp) const;
+  static ScoreP ScoreFromString(const string& in);
 
   virtual float ComputeRefLength(const vector<WordID>& hyp) const = 0;
  private:
@@ -272,7 +270,7 @@ class BLEUScorerBase : public SentenceScorer {
   vector<int> lengths_;
 };
 
-Score* BLEUScorerBase::ScoreFromString(const string& in) {
+ScoreP BLEUScorerBase::ScoreFromString(const string& in) {
   istringstream is(in);
   int n;
   is >> n;
@@ -283,7 +281,7 @@ Score* BLEUScorerBase::ScoreFromString(const string& in) {
     is >> r->correct_ngram_hit_counts[i];
     is >> r->hyp_ngram_counts[i];
   }
-  return r;
+  return ScoreP(r);
 }
 
 class IBM_BLEUScorer : public BLEUScorerBase {
@@ -343,51 +341,48 @@ class Koehn_BLEUScorer : public BLEUScorerBase {
   float avg_;
 };
 
-SentenceScorer* SentenceScorer::CreateSentenceScorer(const ScoreType type,
+ScorerP SentenceScorer::CreateSentenceScorer(const ScoreType type,
       const vector<vector<WordID> >& refs,
-      const string& src) {
+      const string& src)
+{
+  SentenceScorer *r=0;
   switch (type) {
-  case IBM_BLEU: return new IBM_BLEUScorer(refs, 4);
-  case IBM_BLEU_3 : return new IBM_BLEUScorer(refs,3);
-    case NIST_BLEU: return new NIST_BLEUScorer(refs, 4);
-    case Koehn_BLEU: return new Koehn_BLEUScorer(refs, 4);
-    case AER: return new AERScorer(refs, src);
-    case TER: return new TERScorer(refs);
-    case SER: return new SERScorer(refs);
-    case BLEU_minus_TER_over_2: return new BLEUTERCombinationScorer(refs);
+  case IBM_BLEU: r = new IBM_BLEUScorer(refs, 4);break;
+  case IBM_BLEU_3 : r = new IBM_BLEUScorer(refs,3);break;
+    case NIST_BLEU: r = new NIST_BLEUScorer(refs, 4);break;
+    case Koehn_BLEU: r = new Koehn_BLEUScorer(refs, 4);break;
+    case AER: r = new AERScorer(refs, src);break;
+    case TER: r = new TERScorer(refs);break;
+    case SER: r = new SERScorer(refs);break;
+    case BLEU_minus_TER_over_2: r = new BLEUTERCombinationScorer(refs);break;
     default:
       assert(!"Not implemented!");
   }
+  return ScorerP(r);
 }
 
-Score* SentenceScorer::GetOne() const {
+ScoreP SentenceScorer::GetOne() const {
   Sentence s;
   return ScoreCCandidate(s)->GetOne();
 }
 
-Score* SentenceScorer::GetZero() const {
+ScoreP SentenceScorer::GetZero() const {
   Sentence s;
   return ScoreCCandidate(s)->GetZero();
 }
 
-Score* Score::GetOne(ScoreType type) {
+ScoreP Score::GetOne(ScoreType type) {
   std::vector<SentenceScorer::Sentence > refs;
-  SentenceScorer *ps=SentenceScorer::CreateSentenceScorer(type,refs);
-  Score *s=ps->GetOne();
-  delete ps;
-  return s;
+  return SentenceScorer::CreateSentenceScorer(type,refs)->GetOne();
 }
 
-Score* Score::GetZero(ScoreType type) {
+ScoreP Score::GetZero(ScoreType type) {
   std::vector<SentenceScorer::Sentence > refs;
-  SentenceScorer *ps=SentenceScorer::CreateSentenceScorer(type,refs);
-  Score *s=ps->GetZero();
-  delete ps;
-  return s;
+  return SentenceScorer::CreateSentenceScorer(type,refs)->GetZero();
 }
 
 
-Score* SentenceScorer::CreateScoreFromString(const ScoreType type, const string& in) {
+ScoreP SentenceScorer::CreateScoreFromString(const ScoreType type, const string& in) {
   switch (type) {
     case IBM_BLEU:
   case IBM_BLEU_3:
@@ -411,7 +406,7 @@ void SentenceScorer::ComputeErrorSurface(const ViterbiEnvelope& ve, ErrorSurface
   vector<WordID> prev_trans;
   const vector<shared_ptr<Segment> >& ienv = ve.GetSortedSegs();
   env->resize(ienv.size());
-  Score* prev_score = NULL;
+  ScoreP prev_score;
   int j = 0;
   for (int i = 0; i < ienv.size(); ++i) {
     const Segment& seg = *ienv[i];
@@ -453,26 +448,25 @@ void SentenceScorer::ComputeErrorSurface(const ViterbiEnvelope& ve, ErrorSurface
       }
       // cerr << "Identical translation, skipping scoring\n";
     } else {
-      Score* score = ScoreCandidate(trans);
+      ScoreP score = ScoreCandidate(trans);
       // cerr << "score= " << score->ComputeScore() << "\n";
-      Score* cur_delta = score->GetZero();
+      ScoreP cur_delta_p = score->GetZero();
+      Score* cur_delta = cur_delta_p.get();
       // just record the score diffs
       if (!prev_score)
         prev_score = score->GetZero();
 
       score->Subtract(*prev_score, cur_delta);
-      delete prev_score;
       prev_trans.swap(trans);
       prev_score = score;
       if ((!minimize_segments) || (!cur_delta->IsAdditiveIdentity())) {
         ErrorSegment& out = (*env)[j];
-	out.delta = cur_delta;
+        out.delta = cur_delta_p;
         out.x = seg.x;
-	++j;
+        ++j;
       }
     }
   }
-  delete prev_score;
   // cerr << " In segments: " << ienv.size() << endl;
   // cerr << "Out segments: " << j << endl;
   assert(j > 0);
@@ -588,12 +582,12 @@ void BLEUScore::PlusPartialEquals(const Score& delta, int oracle_e_cover, int or
 }
 
 
-Score* BLEUScore::GetZero() const {
-  return new BLEUScore(hyp_ngram_counts.size());
+ScoreP BLEUScore::GetZero() const {
+  return ScoreP(new BLEUScore(hyp_ngram_counts.size()));
 }
 
-Score* BLEUScore::GetOne() const {
-  return new BLEUScore(hyp_ngram_counts.size(),1);
+ScoreP BLEUScore::GetOne() const {
+  return ScoreP(new BLEUScore(hyp_ngram_counts.size(),1));
 }
 
 
@@ -615,17 +609,17 @@ BLEUScorerBase::BLEUScorerBase(const vector<vector<WordID> >& references,
   }
 }
 
-Score* BLEUScorerBase::ScoreCandidate(const vector<WordID>& hyp) const {
+ScoreP BLEUScorerBase::ScoreCandidate(const vector<WordID>& hyp) const {
   BLEUScore* bs = new BLEUScore(n_);
   for (NGramCountMap::iterator i=ngrams_.begin(); i != ngrams_.end(); ++i)
     i->second.second = 0;
   ComputeNgramStats(hyp, &bs->correct_ngram_hit_counts, &bs->hyp_ngram_counts, true);
   bs->ref_len = ComputeRefLength(hyp);
   bs->hyp_len = hyp.size();
-  return bs;
+  return ScoreP(bs);
 }
 
-Score* BLEUScorerBase::ScoreCCandidate(const vector<WordID>& hyp) const {
+ScoreP BLEUScorerBase::ScoreCCandidate(const vector<WordID>& hyp) const {
   BLEUScore* bs = new BLEUScore(n_);
   for (NGramCountMap::iterator i=ngrams_.begin(); i != ngrams_.end(); ++i)
     i->second.second = 0;
@@ -633,7 +627,7 @@ Score* BLEUScorerBase::ScoreCCandidate(const vector<WordID>& hyp) const {
   ComputeNgramStats(hyp, &bs->correct_ngram_hit_counts, &bs->hyp_ngram_counts,clip);
   bs->ref_len = ComputeRefLength(hyp);
   bs->hyp_len = hyp.size();
-  return bs;
+  return ScoreP(bs);
 }
 
 
@@ -643,7 +637,7 @@ DocScorer::~DocScorer() {
 void DocScorer::Init(
       const ScoreType type,
       const vector<string>& ref_files,
-      const string& src_file) {
+      const string& src_file, bool verbose) {
   scorers_.clear();
   // TODO stop using valarray, start using ReadFile
   cerr << "Loading references (" << ref_files.size() << " files)\n";
@@ -686,9 +680,8 @@ void DocScorer::Init(
         ProcessAndStripSGML(&src_line, &dummy);
       }
       scorers_.push_back(ScorerP(SentenceScorer::CreateSentenceScorer(type, refs, src_line)));
-#ifdef DEBUG_SCORER
-      cerr<<"doc_scorer["<<line<<"] = "<<scorers_.back()->verbose_desc()<<endl;
-#endif
+      if (verbose)
+        cerr<<"doc_scorer["<<line<<"] = "<<scorers_.back()->verbose_desc()<<endl;
       ++line;
     }
   }

@@ -91,7 +91,7 @@ class TERScorerImpl {
 
   typedef unordered_map<vector<WordID>, set<int>, boost::hash<vector<WordID> > > NgramToIntsMap;
   mutable NgramToIntsMap nmap_;
- 
+
   static float MinimumEditDistance(
       const vector<WordID>& hyp,
       const vector<WordID>& ref,
@@ -128,7 +128,7 @@ class TERScorerImpl {
         }
       }
     }
-    
+
     // trace back along the best path and record the transition types
     path->clear();
     int i = hyp.size();
@@ -220,7 +220,7 @@ class TERScorerImpl {
       cerr << "in=" << TD::GetString(in) << endl;
       cerr << "out=" << TD::GetString(*out) << endl;
     }
-    assert(out->size() == in.size()); 
+    assert(out->size() == in.size());
     // cerr << "ps: " << TD::GetString(*out) << endl;
   }
 
@@ -338,7 +338,7 @@ class TERScorerImpl {
     *newerr = curerr;
     vector<TransType> cur_best_path;
     vector<WordID> cur_best_hyp;
-    
+
     bool res = false;
     for (int i = shifts.size() - 1; i >=0; --i) {
       float curfix = curerr - (cur_best_shift_cost + *newerr);
@@ -438,11 +438,11 @@ class TERScore : public Score {
     stats += static_cast<const TERScore&>(delta).stats;
   }
 
-  Score* GetZero() const {
-    return new TERScore;
+  ScoreP GetZero() const {
+    return ScoreP(new TERScore);
   }
-  Score* GetOne() const {
-    return new TERScore;
+  ScoreP GetOne() const {
+    return ScoreP(new TERScore);
   }
   void Subtract(const Score& rhs, Score* res) const {
     static_cast<TERScore*>(res)->stats = stats - static_cast<const TERScore&>(rhs).stats;
@@ -465,7 +465,7 @@ class TERScore : public Score {
   valarray<int> stats;
 };
 
-Score* TERScorer::ScoreFromString(const std::string& data) {
+ScoreP TERScorer::ScoreFromString(const std::string& data) {
   istringstream is(data);
   TERScore* r = new TERScore;
   is >> r->stats[TERScore::kINSERTIONS]
@@ -473,13 +473,13 @@ Score* TERScorer::ScoreFromString(const std::string& data) {
      >> r->stats[TERScore::kSUBSTITUTIONS]
      >> r->stats[TERScore::kSHIFTS]
      >> r->stats[TERScore::kREF_WORDCOUNT];
-  return r;
+  return ScoreP(r);
 }
 
 void TERScore::ScoreDetails(std::string* details) const {
   char buf[200];
   sprintf(buf, "TER = %.2f, %3d|%3d|%3d|%3d (len=%d)",
-     ComputeScore() * 100.0f,  
+     ComputeScore() * 100.0f,
      stats[kINSERTIONS],
      stats[kDELETIONS],
      stats[kSUBSTITUTIONS],
@@ -498,12 +498,11 @@ TERScorer::TERScorer(const vector<vector<WordID> >& refs) : impl_(refs.size()) {
     impl_[i] = new TERScorerImpl(refs[i]);
 }
 
-Score* TERScorer::ScoreCCandidate(const vector<WordID>& hyp) const {
-  Score* a = NULL;
-  return a;
+ScoreP TERScorer::ScoreCCandidate(const vector<WordID>& hyp) const {
+  return ScoreP();
 }
 
-Score* TERScorer::ScoreCandidate(const std::vector<WordID>& hyp) const {
+ScoreP TERScorer::ScoreCandidate(const std::vector<WordID>& hyp) const {
   float best_score = numeric_limits<float>::max();
   TERScore* res = new TERScore;
   int avg_len = 0;
@@ -528,5 +527,5 @@ Score* TERScorer::ScoreCandidate(const std::vector<WordID>& hyp) const {
       best_score = score;
     }
   }
-  return res;
+  return ScoreP(res);
 }
