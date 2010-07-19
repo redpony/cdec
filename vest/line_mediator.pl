@@ -89,7 +89,6 @@ if ($ser eq 'SERIAL') {
             lineto(*STDOUT,$_);
         }
     }
-    }
 } else {
     info("DIRECT mode\n");
     my @rw1=POSIX::pipe();
