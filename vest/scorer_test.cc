@@ -44,11 +44,11 @@ TEST_F(ScorerTest, TestCreateFromFiles) {
 }
 
 TEST_F(ScorerTest, TestBLEUScorer) {
-  SentenceScorer* s1 = SentenceScorer::CreateSentenceScorer(IBM_BLEU, refs0);
-  SentenceScorer* s2 = SentenceScorer::CreateSentenceScorer(IBM_BLEU, refs1);
-  Score* b1 = s1->ScoreCandidate(hyp1);
+  ScorerP s1 = SentenceScorer::CreateSentenceScorer(IBM_BLEU, refs0);
+  ScorerP s2 = SentenceScorer::CreateSentenceScorer(IBM_BLEU, refs1);
+  ScoreP b1 = s1->ScoreCandidate(hyp1);
   EXPECT_FLOAT_EQ(0.23185077, b1->ComputeScore());
-  Score* b2 = s2->ScoreCandidate(hyp2);
+  ScoreP b2 = s2->ScoreCandidate(hyp2);
   EXPECT_FLOAT_EQ(0.38101241, b2->ComputeScore());
   b1->PlusEquals(*b2);
   EXPECT_FLOAT_EQ(0.348854, b1->ComputeScore());
@@ -59,31 +59,26 @@ TEST_F(ScorerTest, TestBLEUScorer) {
   cerr << details << endl;
   string enc;
   b1->Encode(&enc);
-  Score* b3 = SentenceScorer::CreateScoreFromString(IBM_BLEU, enc);
+  ScoreP b3 = SentenceScorer::CreateScoreFromString(IBM_BLEU, enc);
   details.clear();
   cerr << "Encoded BLEU score size: " << enc.size() << endl;
   b3->ScoreDetails(&details);
   cerr << details << endl;
   EXPECT_FALSE(b3->IsAdditiveIdentity());
   EXPECT_EQ("BLEU = 34.89, 81.5|50.8|29.5|18.6 (brev=0.898)", details);
-  Score* bz = b3->GetZero();
+  ScoreP bz = b3->GetZero();
   EXPECT_TRUE(bz->IsAdditiveIdentity());
-  delete bz;
-  delete b1;
-  delete s1;
-  delete b2;
-  delete s2;
 }
 
 TEST_F(ScorerTest, TestTERScorer) {
-  SentenceScorer* s1 = SentenceScorer::CreateSentenceScorer(TER, refs0);
-  SentenceScorer* s2 = SentenceScorer::CreateSentenceScorer(TER, refs1);
+  ScorerP s1 = SentenceScorer::CreateSentenceScorer(TER, refs0);
+  ScorerP s2 = SentenceScorer::CreateSentenceScorer(TER, refs1);
   string details;
-  Score* t1 = s1->ScoreCandidate(hyp1);
+  ScoreP t1 = s1->ScoreCandidate(hyp1);
   t1->ScoreDetails(&details);
   cerr << "DETAILS: " << details << endl;
   cerr << t1->ComputeScore() << endl;
-  Score* t2 = s2->ScoreCandidate(hyp2);
+  ScoreP t2 = s2->ScoreCandidate(hyp2);
   t2->ScoreDetails(&details);
   cerr << "DETAILS: " << details << endl;
   cerr << t2->ComputeScore() << endl;
@@ -94,19 +89,13 @@ TEST_F(ScorerTest, TestTERScorer) {
   EXPECT_EQ("TER = 44.16,   4|  8| 16|  6 (len=77)", details);
   string enc;
   t1->Encode(&enc);
-  Score* t3 = SentenceScorer::CreateScoreFromString(TER, enc);
+  ScoreP t3 = SentenceScorer::CreateScoreFromString(TER, enc);
   details.clear();
   t3->ScoreDetails(&details);
   EXPECT_EQ("TER = 44.16,   4|  8| 16|  6 (len=77)", details);
   EXPECT_FALSE(t3->IsAdditiveIdentity());
-  Score* tz = t3->GetZero();
+  ScoreP tz = t3->GetZero();
   EXPECT_TRUE(tz->IsAdditiveIdentity());
-  delete tz;
-  delete t3;
-  delete t1;
-  delete s1;
-  delete t2;
-  delete s2;
 }
 
 TEST_F(ScorerTest, TestTERScorerSimple) {
@@ -114,13 +103,11 @@ TEST_F(ScorerTest, TestTERScorerSimple) {
   TD::ConvertSentence("1 2 3 A B", &ref[0]);
   vector<WordID> hyp;
   TD::ConvertSentence("A B 1 2 3", &hyp);
-  SentenceScorer* s1 = SentenceScorer::CreateSentenceScorer(TER, ref);
+  ScorerP s1 = SentenceScorer::CreateSentenceScorer(TER, ref);
   string details;
-  Score* t1 = s1->ScoreCandidate(hyp);
+  ScoreP t1 = s1->ScoreCandidate(hyp);
   t1->ScoreDetails(&details);
   cerr << "DETAILS: " << details << endl;
-  delete t1;
-  delete s1;
 }
 
 TEST_F(ScorerTest, TestSERScorerSimple) {
@@ -130,46 +117,40 @@ TEST_F(ScorerTest, TestSERScorerSimple) {
   TD::ConvertSentence("A B C", &hyp1);
   vector<WordID> hyp2;
   TD::ConvertSentence("A B C D", &hyp2);
-  SentenceScorer* s1 = SentenceScorer::CreateSentenceScorer(SER, ref);
+  ScorerP s1 = SentenceScorer::CreateSentenceScorer(SER, ref);
   string details;
-  Score* t1 = s1->ScoreCandidate(hyp1);
+  ScoreP t1 = s1->ScoreCandidate(hyp1);
   t1->ScoreDetails(&details);
   cerr << "DETAILS: " << details << endl;
-  Score* t2 = s1->ScoreCandidate(hyp2);
+  ScoreP t2 = s1->ScoreCandidate(hyp2);
   t2->ScoreDetails(&details);
   cerr << "DETAILS: " << details << endl;
   t2->PlusEquals(*t1);
   t2->ScoreDetails(&details);
   cerr << "DETAILS: " << details << endl;
-  delete t1;
-  delete t2;
-  delete s1;
 }
 
 TEST_F(ScorerTest, TestCombiScorer) {
-  SentenceScorer* s1 = SentenceScorer::CreateSentenceScorer(BLEU_minus_TER_over_2, refs0);
+  ScorerP s1 = SentenceScorer::CreateSentenceScorer(BLEU_minus_TER_over_2, refs0);
   string details;
-  Score* t1 = s1->ScoreCandidate(hyp1);
+  ScoreP t1 = s1->ScoreCandidate(hyp1);
   t1->ScoreDetails(&details);
   cerr << "DETAILS: " << details << endl;
   cerr << t1->ComputeScore() << endl;
   string enc;
   t1->Encode(&enc);
-  Score* t2 = SentenceScorer::CreateScoreFromString(BLEU_minus_TER_over_2, enc);
+  ScoreP t2 = SentenceScorer::CreateScoreFromString(BLEU_minus_TER_over_2, enc);
   details.clear();
   t2->ScoreDetails(&details);
   cerr << "DETAILS: " << details << endl;
-  Score* cz = t2->GetZero();
+  ScoreP cz = t2->GetZero();
   EXPECT_FALSE(t2->IsAdditiveIdentity());
   EXPECT_TRUE(cz->IsAdditiveIdentity());
   cz->PlusEquals(*t2);
   EXPECT_FALSE(cz->IsAdditiveIdentity());
   string d2;
   cz->ScoreDetails(&d2);
-  EXPECT_EQ(d2, details); 
-  delete cz;
-  delete t2;
-  delete t1;
+  EXPECT_EQ(d2, details);
 }
 
 TEST_F(ScorerTest, AERTest) {
@@ -179,20 +160,18 @@ TEST_F(ScorerTest, AERTest) {
   vector<WordID> hyp;
   TD::ConvertSentence("0-0 1-1", &hyp);
   AERScorer* as = new AERScorer(refs0);
-  Score* x = as->ScoreCandidate(hyp);
+  ScoreP x = as->ScoreCandidate(hyp);
   string details;
   x->ScoreDetails(&details);
   cerr << details << endl;
   string enc;
   x->Encode(&enc);
-  delete x;
   delete as;
   cerr << "ENC size: " << enc.size() << endl;
-  Score* y = SentenceScorer::CreateScoreFromString(AER, enc);
+  ScoreP y = SentenceScorer::CreateScoreFromString(AER, enc);
   string d2;
   y->ScoreDetails(&d2);
   cerr << d2 << endl;
-  delete y;
   EXPECT_EQ(d2, details);
 }
 
