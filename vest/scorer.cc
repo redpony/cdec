@@ -28,6 +28,10 @@ using namespace std;
 
 const bool minimize_segments = true;    // if adjacent segments have equal scores, merge them
 
+void Score::TimesEquals(float scale) {
+  cerr<<"UNIMPLEMENTED except for BLEU (for MIRA): Score::TimesEquals"<<endl;abort();
+}
+
 ScoreType ScoreTypeFromString(const string& st) {
   const string sl = LowercaseString(st);
   if (sl == "ser")
@@ -159,6 +163,7 @@ class BLEUScore : public Score {
   float ComputeScore() const;
   float ComputePartialScore() const;
   void ScoreDetails(string* details) const;
+  void TimesEquals(float scale);
   void PlusEquals(const Score& delta);
   void PlusEquals(const Score& delta, const float scale);
   void PlusPartialEquals(const Score& delta, int oracle_e_cover, int oracle_f_cover, int src_len);
@@ -564,6 +569,13 @@ void BLEUScore::PlusEquals(const Score& delta) {
   hyp_ngram_counts += d.hyp_ngram_counts;
   ref_len += d.ref_len;
   hyp_len += d.hyp_len;
+}
+
+void BLEUScore::TimesEquals(float scale) {
+  correct_ngram_hit_counts *= scale;
+  hyp_ngram_counts *= scale;
+  ref_len *= scale;
+  hyp_len *= scale;
 }
 
 void BLEUScore::PlusEquals(const Score& delta, const float scale) {

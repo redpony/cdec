@@ -5,21 +5,23 @@
 #include <boost/shared_ptr.hpp>
 //TODO: use intrusive shared_ptr in Score (because there are many of them on ErrorSurfaces)
 #include "wordid.h"
+#include "intrusive_refcount.hpp"
 
 class Score;
 class SentenceScorer;
-typedef boost::shared_ptr<Score> ScoreP;
+typedef boost::intrusive_ptr<Score> ScoreP;
 typedef boost::shared_ptr<SentenceScorer> ScorerP;
 
 class ViterbiEnvelope;
 class ErrorSurface;
 class Hypergraph;  // needed for alignment
 
+//TODO: BLEU N (N separate arg, not part of enum)?
 enum ScoreType { IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, BLEU_minus_TER_over_2, SER, AER, IBM_BLEU_3 };
 ScoreType ScoreTypeFromString(const std::string& st);
 std::string StringFromScoreType(ScoreType st);
 
-class Score {
+class Score : public boost::intrusive_refcount<Score> {
  public:
   virtual ~Score();
   virtual float ComputeScore() const = 0;
@@ -30,6 +32,8 @@ class Score {
     ScoreDetails(&d);
     return d;
   }
+  virtual void TimesEquals(float scale); // only for bleu; for mira oracle
+  /// same as rhs.TimesEquals(scale);PlusEquals(rhs) except doesn't modify rhs.
   virtual void PlusEquals(const Score& rhs, const float scale) = 0;
   virtual void PlusEquals(const Score& rhs) = 0;
   virtual void PlusPartialEquals(const Score& rhs, int oracle_e_cover, int oracle_f_cover, int src_len) = 0;

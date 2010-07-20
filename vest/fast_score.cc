@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
   cerr << "Loaded " << ds.size() << " references for scoring with " << loss_function << endl;
 
   ReadFile rf(conf["in_file"].as<string>());
-  Score* acc = NULL;
+  ScoreP acc;
   istream& in = *rf.stream();
   int lc = 0;
   while(in) {
@@ -50,10 +50,9 @@ int main(int argc, char** argv) {
     if (line.empty() && !in) break;
     vector<WordID> sent;
     TD::ConvertSentence(line, &sent);
-    Score* sentscore = ds[lc]->ScoreCandidate(sent);
+    ScoreP sentscore = ds[lc]->ScoreCandidate(sent);
     if (!acc) { acc = sentscore->GetZero(); }
     acc->PlusEquals(*sentscore);
-    delete sentscore;
     ++lc;
   }
   assert(lc > 0);
@@ -67,7 +66,6 @@ int main(int argc, char** argv) {
   float score = acc->ComputeScore();
   string details;
   acc->ScoreDetails(&details);
-  delete acc;
   cerr << details << endl;
   cout << score << endl;
   return 0;
