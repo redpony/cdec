@@ -1,6 +1,13 @@
 #ifndef CDEC_STRINGLIB_H_
 #define CDEC_STRINGLIB_H_
 
+#ifdef STRINGLIB_DEBUG
+#include <iostream>
+#define SLIBDBG(x) do { std::cerr<<"DBG(stringlib): "<<x<<std::endl; } while(0)
+#else
+#define SLIBDBG(x)
+#endif
+
 #include <map>
 #include <vector>
 #include <cctype>
@@ -112,20 +119,26 @@ inline bool IsWordSep(char c) {
 template <class F>
 // *end must be 0 (i.e. [p,end] is valid storage, which will be written to with 0 to separate c string tokens
 void VisitTokens(char *p,char *const end,F f) {
+  SLIBDBG("VisitTokens. p="<<p<<" Nleft="<<end-p);
   if (p==end) return;
   char *last; // 0 terminated already.  this is ok to mutilate because s is a copy of the string passed in.  well, barring copy on write i guess.
   while(IsWordSep(*p)) { ++p;if (p==end) return; } // skip init whitespace
   last=p; // first non-ws char
   for(;;) {
-    ++p;
-    // now last is a non-ws char, and p is one past it.
+    SLIBDBG("Start of word. last="<<last<<" *p="<<*p<<" Nleft="<<end-p);
+    // last==p, pointing at first non-ws char not yet translated into f(word) call
     for(;;) {// p to end of word
-      if (p==end) { f(last); return; }
-      if (!IsWordSep(*p)) break;
       ++p;
+      if (p==end) {
+        f(last);
+        SLIBDBG("Returning. word="<<last<<" *p="<<*p<<" Nleft="<<end-p);
+        return;
+      }
+      if (IsWordSep(*p)) break;
     }
     *p=0;
     f(last);
+    SLIBDBG("End of word. word="<<last<<" rest="<<p+1<<" Nleft="<<end-p);
     for(;;) { // again skip extra whitespace
       ++p;
       if (p==end) return;
@@ -136,14 +149,23 @@ void VisitTokens(char *p,char *const end,F f) {
 }
 
 template <class F>
+void VisitTokens(char *p,F f) {
+  VisitTokens(p,p+std::strlen(p),f);
+}
+
+
+template <class F>
 void VisitTokens(std::string const& s,F f) {
+  if (0) {
   std::vector<std::string> ss=SplitOnWhitespace(s);
   for (int i=0;i<ss.size();++i)
     f(ss[i]);
   return;
+  }
   //FIXME:
   if (s.empty()) return;
   mutable_c_str mp(s);
+  SLIBDBG("mp="<<mp.p);
   VisitTokens(mp.p,mp.p+s.size(),f);
 }
 

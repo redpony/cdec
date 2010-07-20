@@ -17,6 +17,8 @@ template <class T, class A = std::allocator<T> >
 class ValueArray : A // private inheritance so stateless allocator adds no size.
 {
 public:
+  const int SV_MAX=sizeof(T)/sizeof(T*)>1?sizeof(T)/sizeof(T*):1;
+  //space optimization: SV_MAX T will fit inside what would otherwise be a pointer to heap data.  todo in the far future if bored.
   typedef T value_type;
   typedef T& reference;
   typedef T const& const_reference;
