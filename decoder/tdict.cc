@@ -50,7 +50,11 @@ struct add_wordids {
   typedef std::vector<WordID> Ws;
   Ws *ids;
   explicit add_wordids(Ws *i) : ids(i) {  }
+  add_wordids(const add_wordids& o) : ids(o.ids) {  }
   void operator()(char const* s) {
+    ids->push_back(TD::Convert(s));
+  }
+  void operator()(std::string const& s) {
     ids->push_back(TD::Convert(s));
   }
 };
