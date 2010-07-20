@@ -30,7 +30,7 @@ int main(int argc, char **argv)
   mpi::environment env(argc, argv);
   mpi::communicator world;
   int rank = world.rank();
-  bool am_root = rank;
+  bool am_root = (rank==0);
   if (am_root) cout << "Pitman Yor topic models: Copyright 2010 Phil Blunsom\n";
   if (am_root) std::cout << "I am process " << world.rank() << " of " << world.size() << "." << std::endl;
   if (am_root) cout << REVISION << '\n' <<endl;
@@ -154,6 +154,7 @@ int main(int argc, char **argv)
       documents_out <<endl;
     }
     documents_out.close();
+    world.barrier();
 
     if (am_root) {
       ogzstream root_documents_out(vm["document-topics-out"].as<string>().c_str());
