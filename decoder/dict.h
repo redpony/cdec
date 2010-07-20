@@ -3,7 +3,11 @@
 
 #include <cassert>
 #include <cstring>
-#include <tr1/unordered_map>
+#ifdef HAVE_SPARSEHASH
+# include <google/dense_hash_map>
+#else
+# include <tr1/unordered_map>
+#endif
 #include <string>
 #include <vector>
 
@@ -12,10 +16,22 @@
 #include "wordid.h"
 
 class Dict {
- typedef std::tr1::unordered_map<std::string, WordID, boost::hash<std::string> > Map;
+ typedef
+#ifdef HAVE_SPARSEHASH
+ std::tr1::unordered_map
+#else
+ google::dense_hash_map
+#endif
+ <std::string, WordID, boost::hash<std::string> > Map;
 
  public:
-  Dict() : b0_("<bad0>") { words_.reserve(1000); }
+  Dict() : b0_("<bad0>") {
+#ifdef HAVE_SPARSEHASH
+    d_.set_empty_key("<bad1>");
+    d_.set_deleted_key("<bad2>");
+#endif
+    words_.reserve(1000);
+  }
 
   inline int max() const { return words_.size(); }
 
@@ -32,7 +48,7 @@ class Dict {
     }
   }
 
-  inline WordID Convert(const std::vector<std::string>& words, bool frozen = false) 
+  inline WordID Convert(const std::vector<std::string>& words, bool frozen = false)
   { return Convert(toString(words), frozen); }
 
   static inline std::string toString(const std::vector<std::string>& words) {

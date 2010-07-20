@@ -8,7 +8,7 @@
 class Vocab;
 
 struct TD {
-  static Vocab* dict_;
+  static Vocab dict_;
   static void ConvertSentence(const std::string& sent, std::vector<WordID>* ids);
   static void GetWordIDs(const std::vector<std::string>& strings, std::vector<WordID>* ids);
   static std::string GetString(const std::vector<WordID>& str);

@@ -17,6 +17,9 @@ LIBS="$LIBS $BOOST_PROGRAM_OPTIONS_LIBS $BOOST_REGEX_LIBS $BOOST_THREAD_LIBS"
 AC_CHECK_HEADER(boost/math/special_functions/digamma.hpp,
                [AC_DEFINE([HAVE_BOOST_DIGAMMA], [], [flag for boost::math::digamma])])
 
+AC_CHECK_HEADER(google/dense_hash_map,
+               [AC_DEFINE([HAVE_SPARSEHASH], [], [flag for google::dense_hash_map])])
+
 AC_PROG_INSTALL
 GTEST_LIB_CHECK
 
