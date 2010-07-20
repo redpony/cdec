@@ -9,7 +9,7 @@ class Vocab;
 
 struct TD {
   static Vocab dict_;
-  static void ConvertSentence(const std::string& sent, std::vector<WordID>* ids);
+  static void ConvertSentence(std::string const& sent, std::vector<WordID>* ids);
   static void GetWordIDs(const std::vector<std::string>& strings, std::vector<WordID>* ids);
   static std::string GetString(const std::vector<WordID>& str);
   static int AppendString(const WordID& w, int pos, int bufsize, char* buffer) {
@@ -25,6 +25,7 @@ struct TD {
   }
   static unsigned int NumWords();
   static WordID Convert(const std::string& s);
+  static WordID Convert(char const* s);
   static const char* Convert(const WordID& w);
 };
 
