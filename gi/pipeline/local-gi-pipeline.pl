@@ -102,10 +102,14 @@ my $CLUSTER_DIR = $OUTPUT . '/' . cluster_dir();
 my $LABELED_DIR = $OUTPUT . '/' . labeled_dir();
 my $CLUSTER_DIR_C;
 my $CLUSTER_DIR_F;
+my $LABELED_DIR_C;
+my $LABELED_DIR_F;
 if($HIER_CAT) {
     $CLUSTER_DIR_F = $CLUSTER_DIR;
+    $LABELED_DIR_F = $LABELED_DIR;
     $NUM_TOPICS = $NUM_TOPICS_COARSE;
     $CLUSTER_DIR_C = $OUTPUT . '/' . cluster_dir();
+    $LABELED_DIR_C = $OUTPUT . '/' . labeled_dir();
     $NUM_TOPICS = $NUM_TOPICS_FINE;
 }
 my $GRAMMAR_DIR = $OUTPUT . '/' . grammar_dir();
@@ -115,7 +119,8 @@ safemkdir($DATA_DIR) or die "Couldn't create output directory $DATA_DIR: $!";
 safemkdir($CONTEXT_DIR) or die "Couldn't create output directory $CONTEXT_DIR: $!";
 safemkdir($CLUSTER_DIR) or die "Couldn't create output directory $CLUSTER_DIR: $!";
 if($HIER_CAT) {
-    safemkdir($CLUSTER_DIR_C) or die "Couldn't create output directory $CLUSTER_DIR: $!";
+    safemkdir($CLUSTER_DIR_C) or die "Couldn't create output directory $CLUSTER_DIR_C: $!";
+    safemkdir($LABELED_DIR_C) or die "Couldn't create output directory $LABELED_DIR_C: $!";
 }
 safemkdir($LABELED_DIR) or die "Couldn't create output directory $LABELED_DIR: $!";
 safemkdir($GRAMMAR_DIR) or die "Couldn't create output directory $GRAMMAR_DIR: $!";
@@ -143,9 +148,11 @@ if (lc($MODEL) eq "pyp") {
 if($HIER_CAT) {
     $NUM_TOPICS = $NUM_TOPICS_COARSE;
     $CLUSTER_DIR = $CLUSTER_DIR_C;
+    $LABELED_DIR = $LABELED_DIR_C;
     label_spans_with_topics();
     $NUM_TOPICS = $NUM_TOPICS_FINE;
     $CLUSTER_DIR = $CLUSTER_DIR_F;
+    $LABELED_DIR = $LABELED_DIR_F;
     label_spans_with_topics();
     extract_freqs();
 } else {
@@ -297,10 +304,10 @@ sub label_spans_with_topics {
 
 sub extract_freqs {
     print STDERR "\n!!!EXTRACTING FREQUENCIES\n";
-    my $IN_COARSE = "$CLUSTER_DIR_C/labeled_spans.txt";
-    my $IN_FINE = "$CLUSTER_DIR_F/labeled_spans.txt";
-    my $OUT_SPANS = "$CLUSTER_DIR_F/labeled_spans.hier$NUM_TOPICS_COARSE-$NUM_TOPICS_FINE.txt";
-    my $FREQS = "$CLUSTER_DIR_F/label_freq.hier$NUM_TOPICS_COARSE-$NUM_TOPICS_FINE.txt";
+    my $IN_COARSE = "$LABELED_DIR_C/labeled_spans.txt";
+    my $IN_FINE = "$LABELED_DIR_F/labeled_spans.txt";
+    my $OUT_SPANS = "$LABELED_DIR_F/labeled_spans.hier$NUM_TOPICS_COARSE-$NUM_TOPICS_FINE.txt";
+    my $FREQS = "$LABELED_DIR_F/label_freq.hier$NUM_TOPICS_COARSE-$NUM_TOPICS_FINE.txt";
     my $COARSE_EXPR = "\'s/\\(X[0-9][0-9]*\\)/\\1c/g\'"; #'
     my $FINE_EXPR = "\'s/\\(X[0-9][0-9]*\\)/\\1f/g\'"; #'
     my %finehier = ();
@@ -341,9 +348,9 @@ sub extract_freqs {
         }
         print FREQS "\n";
     }
-    foreach my $fine_cat (keys %finehier) {
-        print FREQS "$fine_cat -> $finehier{$fine_cat}\n";
-    }
+#    foreach my $fine_cat (keys %finehier) {
+#        print FREQS "$fine_cat -> $finehier{$fine_cat}\n";
+#    }
     close FREQS;
     $CLUSTER_DIR = $CLUSTER_DIR_F;
 }
@@ -364,7 +371,7 @@ sub grammar_extract {
 
 sub grammar_extract_bidir {
 #gzcat ex.output.gz | ./mr_stripe_rule_reduce -p -b | sort -t $'\t' -k 1 | ./mr_stripe_rule_reduce | gzip > phrase-table.gz
-  my $LABELED = ($HIER_CAT ? "$CLUSTER_DIR_F/corpus.src_trg_al_label.hier" : "$LABELED_DIR/corpus.src_trg_al_label");
+  my $LABELED = "$LABELED_DIR/corpus.src_trg_al_label";
   print STDERR "\n!!!EXTRACTING GRAMMAR\n";
   my $OUTGRAMMAR = "$GRAMMAR_DIR/grammar.bidir.gz";
   if (-e $OUTGRAMMAR) {

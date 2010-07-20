@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+sub m#!/usr/bin/perl -w
 use strict;
 use Getopt::Long;
 use Cwd;
@@ -120,9 +120,11 @@ my $FEATURIZER_OPTS = '';
 my $dataDir = '/export/ws10smt/data';
 my @features;
 my $bkoffgram;
+my $gluegram;
 my $usefork;
 if (GetOptions(
-        "backoff_grammar" => \$bkoffgram,
+        "backoff_grammar=s" => \$bkoffgram,
+        "glue_grammar=s" => \$gluegram,
         "data=s" => \$dataDir,
         "features=s@" => \@features,
         "use-fork" => \$usefork,
@@ -178,13 +180,21 @@ print STDERR "\nCREATING INITIAL WEIGHTS FILE: weights.init\n";
 my $weights = mydircat($outdir, "weights.init");
 write_random_weights_file($weights, @xfeats);
 
+my $bkoff_grmr;
+my $glue_grmr;
+if($bkoffgram) {
+    $bkoff_grmr = mydircat($outdir, "backoff.scfg.gz");
+    safesystem("cp $bkoffgram $bkoff_grmr");
+}
+if($gluegram) {
+    $glue_grmr = mydircat($outdir, "glue.bo.scfg.gz");
+    safesystem("cp $gluegram $glue_grmr");
+}
+
 # MAKE DEV
 print STDERR "\nFILTERING FOR dev...\n";
 print STDERR "DEV: $dev (REFS=$drefs)\n";
 my $devgrammar = filter($grammar, $dev, 'dev', $outdir);
-if($bkoffgram) {
-  $devgrammar = add_backoff($devgrammar, $numtopics, 'dev', $outdir);
-}
 my $devini = mydircat($outdir, "cdec-dev.ini");
 write_cdec_ini($devini, $devgrammar);
 
@@ -194,9 +204,6 @@ print STDERR "\nFILTERING FOR test...\n";
 print STDERR "TEST: $test (EVAL=$teval)\n";
 `mkdir -p $outdir`;
 my $testgrammar = filter($grammar, $test, 'test', $outdir);
-if($bkoffgram) {
-  $testgrammar = add_backoff($testgrammar, $numtopics, 'test', $outdir);
-}
 my $testini = mydircat($outdir, "cdec-test.ini");
 write_cdec_ini($testini, $testgrammar);
 
@@ -296,11 +303,12 @@ sub mydircat {
 sub write_cdec_ini {
   my ($filename, $grammar_path) = (@_);
   open CDECINI, ">$filename" or die "Can't write $filename: $!";
+  my $glue = ($gluegram ? "$glue_grmr" : "$datadir/glue/glue.scfg.gz");
   print CDECINI <<EOT;
 formalism=scfg
 cubepruning_pop_limit=100
 add_pass_through_rules=true
-scfg_extra_glue_grammar=$datadir/glue/glue.scfg.gz
+scfg_extra_glue_grammar=$glue
 grammar=$datadir/oov.scfg.gz
 grammar=$grammar_path
 scfg_default_nt=OOV
@@ -308,6 +316,7 @@ scfg_no_hiero_glue_grammar=true
 feature_function=WordPenalty
 feature_function=LanguageModel -o 3 $LANG_MODEL
 EOT
+  print CDECINI "grammar=$bkoff_grmr\n" if $bkoffgram;
   close CDECINI;
 };
 
