@@ -1,37 +1,21 @@
 #ifndef DICT_H_
 #define DICT_H_
 
-#include "config.h"
 
 #include <cassert>
 #include <cstring>
 
-#ifdef HAVE_SPARSEHASH
-# include <google/dense_hash_map>
-#else
-# include <tr1/unordered_map>
-#endif
 #include <string>
 #include <vector>
-#include <boost/functional/hash.hpp>
-
+#include "hash.h"
 #include "wordid.h"
 
 class Dict {
  typedef
-#ifdef HAVE_SPARSEHASH
- google::dense_hash_map
-#else
- std::tr1::unordered_map
-#endif
- <std::string, WordID, boost::hash<std::string> > Map;
-
+ HASH_MAP<std::string, WordID, boost::hash<std::string> > Map;
  public:
   Dict() : b0_("<bad0>") {
-#ifdef HAVE_SPARSEHASH
-    d_.set_empty_key("<bad1>");
-    d_.set_deleted_key("<bad2>");
-#endif
+    HASH_MAP_EMPTY(d_,"<bad1>");
     words_.reserve(1000);
   }
 

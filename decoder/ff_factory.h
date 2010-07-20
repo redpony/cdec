@@ -1,6 +1,8 @@
 #ifndef _FF_FACTORY_H_
 #define _FF_FACTORY_H_
 
+//TODO: use http://www.boost.org/doc/libs/1_43_0/libs/functional/factory/doc/html/index.html?
+
 #include <iostream>
 #include <string>
 #include <map>
