@@ -6,7 +6,7 @@ def usage():
     print >>sys.stderr, 'Usage:', sys.argv[0], '[-s slash_threshold] [-p output] [-m] input-1 input-2'
     sys.exit(0)
 
-optlist, args = getopt.getopt(sys.argv[1:], 'hs:')
+optlist, args = getopt.getopt(sys.argv[1:], 'hs:mp:')
 slash_threshold = None
 output_fname = None
 show_matrix = False
@@ -91,8 +91,8 @@ if output_fname:
     #hsl(hue, saturation%, lightness%)
 
     # re-sort preds to get a better diagonal
+    ptags=[]
     if False:
-        ptags = []
         remaining = set(predict_frequencies.keys())
         for y, (gtag, gcount) in enumerate(gtags):
             best = (None, 0)
