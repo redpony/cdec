@@ -192,7 +192,7 @@ class LanguageModelImpl {
   }
 
  public:
-  explicit LanguageModelImpl(int order) : ngram_(*TD::dict_, order)
+  explicit LanguageModelImpl(int order) : ngram_(TD::dict_, order)
   {
     init(order);
   }
@@ -200,7 +200,7 @@ class LanguageModelImpl {
 
 //TODO: show that unigram special case (0 state) computes what it should.
   LanguageModelImpl(int order, const string& f, int load_order=0) :
-    ngram_(*TD::dict_, load_order ? load_order : order)
+    ngram_(TD::dict_, load_order ? load_order : order)
   {
     init(order);
     File file(f.c_str(), "r", 0);

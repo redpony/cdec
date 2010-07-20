@@ -5,22 +5,24 @@
 
 using namespace std;
 
-Vocab* TD::dict_ = new Vocab;
+//FIXME: valgrind errors (static init order?)
+Vocab TD::dict_;
+
+unsigned int TD::NumWords() {
+  return dict_.numWords();
+}
+
+WordID TD::Convert(const std::string& s) {
+  return dict_.addWord((VocabString)s.c_str());
+}
+
+const char* TD::Convert(const WordID& w) {
+  return dict_.getWord((VocabIndex)w);
+}
 
 static const string empty;
 static const string space = " ";
 
-unsigned int TD::NumWords() {
-  return dict_->numWords();
-}
-
-WordID TD::Convert(const std::string& s) {
-  return dict_->addWord((VocabString)s.c_str());
-}
-
-const char* TD::Convert(const WordID& w) {
-  return dict_->getWord((VocabIndex)w);
-}
 
 void TD::GetWordIDs(const std::vector<std::string>& strings, std::vector<WordID>* ids) {
   ids->clear();

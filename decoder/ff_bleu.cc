@@ -25,7 +25,7 @@ using namespace std;
 class BLEUModelImpl {
  public:
   explicit BLEUModelImpl(int order) :
-      ngram_(*TD::dict_, order), buffer_(), order_(order), state_size_(OrderToStateSize(order) - 1),
+      ngram_(TD::dict_, order), buffer_(), order_(order), state_size_(OrderToStateSize(order) - 1),
       floor_(-100.0),
       kSTART(TD::Convert("<s>")),
       kSTOP(TD::Convert("</s>")),

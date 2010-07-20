@@ -149,7 +149,7 @@ void BasicCSplitFeatures::TraversalFeaturesImpl(
 struct ReverseCharLMCSplitFeatureImpl {
   ReverseCharLMCSplitFeatureImpl(const string& param) :
       order_(5),
-      vocab_(*TD::dict_),
+      vocab_(TD::dict_),
       ngram_(vocab_, order_) {
     kBOS = vocab_.getIndex("<s>");
     kEOS = vocab_.getIndex("</s>");
