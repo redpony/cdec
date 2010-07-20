@@ -118,7 +118,7 @@ public class C2F {
 				loglikelihood += edge.getCount() * Math.log(z);
 				arr.F.l1normalize(p);
 				
-				int count = edge.getCount();
+				double count = edge.getCount();
 				//increment expected count
 				TIntArrayList phrase= edge.getPhrase();
 				for(int tag=0;tag<K;tag++){

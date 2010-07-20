@@ -112,7 +112,7 @@ public class Agree {
 				bdist += edge.getCount() * Math.log(z);
 				arr.F.l1normalize(p);
 				
-				int count = edge.getCount();
+				double count = edge.getCount();
 				//increment expected count
 				TIntArrayList phraseToks = edge.getPhrase();
 				TIntArrayList contextToks = edge.getContext();

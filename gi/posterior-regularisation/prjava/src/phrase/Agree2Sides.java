@@ -106,7 +106,7 @@ public class Agree2Sides {
 			assert z > 0;
 			bdist += edge1.getCount() * Math.log(z);
 			arr.F.l1normalize(p);
-			int count = edge1.getCount();
+			double count = edge1.getCount();
 				//increment expected count
 			TIntArrayList contextToks1 = edge1.getContext();
 			TIntArrayList contextToks2 = edge2.getContext();
