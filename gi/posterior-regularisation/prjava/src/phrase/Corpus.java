@@ -28,7 +28,7 @@ public class Corpus
 	
 	public class Edge
 	{
-		Edge(int phraseId, int contextId, int count)
+		Edge(int phraseId, int contextId, double count)
 		{
 			this.phraseId = phraseId;
 			this.contextId = contextId;
@@ -58,7 +58,7 @@ public class Corpus
 		{
 			return Corpus.this.getContextString(contextId, insertPhraseSentinel);
 		}
-		public int getCount()
+		public double getCount()
 		{
 			return count;
 		}
@@ -84,7 +84,7 @@ public class Corpus
 		
 		private int phraseId;
 		private int contextId;
-		private int count;
+		private double count;
 	}
 
 	List<Edge> getEdges()
@@ -207,7 +207,7 @@ public class Corpus
 				String countString = parts[i + 1];
 
 				assert (countString.startsWith("C="));
-				int count = Integer.parseInt(countString.substring(2).trim());
+				double count = Double.parseDouble(countString.substring(2).trim());
 				
 				TIntArrayList ctx = new TIntArrayList();
 				StringTokenizer ctxStrtok = new StringTokenizer(ctxString, " ");

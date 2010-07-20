@@ -109,7 +109,7 @@ public class PhraseCluster {
 				loglikelihood += edge.getCount() * Math.log(z);
 				arr.F.l1normalize(p);
 				
-				int count = edge.getCount();
+				double count = edge.getCount();
 				//increment expected count
 				TIntArrayList context = edge.getContext();
 				for(int tag=0;tag<K;tag++)
@@ -158,7 +158,7 @@ public class PhraseCluster {
 				loglikelihood += edge.getCount() * Math.log(z);
 				arr.F.l1normalize(p);
 				
-				int count = edge.getCount();
+				double count = edge.getCount();
 				//increment expected count
 				TIntArrayList context = edge.getContext();
 				for(int tag=0;tag<K;tag++)
@@ -292,7 +292,7 @@ public class PhraseCluster {
 			for(int edge=0;edge<q.length;edge++){
 				Edge e = edges.get(edge);
 				TIntArrayList context = e.getContext();
-				int contextCnt = e.getCount();
+				double contextCnt = e.getCount();
 				//increment expected count
 				for(int tag=0;tag<K;tag++){
 					for(int pos=0;pos<n_positions;pos++){
@@ -404,7 +404,7 @@ public class PhraseCluster {
 				for(int edge=0;edge<q.length;edge++){
 					Edge e = edges.get(edge);
 					TIntArrayList context = e.getContext();
-					int contextCnt = e.getCount();
+					double contextCnt = e.getCount();
 					//increment expected count
 					for(int tag=0;tag<K;tag++){
 						for(int pos=0;pos<n_positions;pos++){
@@ -460,7 +460,7 @@ public class PhraseCluster {
 			Corpus.Edge edge = edges.get(e);
 
 			TIntArrayList context = edge.getContext();
-			int contextCnt = edge.getCount();
+			double contextCnt = edge.getCount();
 			//increment expected count
 			for(int tag=0;tag<K;tag++)
 			{
