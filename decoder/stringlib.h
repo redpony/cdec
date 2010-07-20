@@ -137,6 +137,11 @@ void VisitTokens(char *p,char *const end,F f) {
 
 template <class F>
 void VisitTokens(std::string const& s,F f) {
+  std::vector<std::string> ss=SplitOnWhitespace(s);
+  for (int i=0;i<ss.size();++i)
+    f(ss[i]);
+  return;
+  //FIXME:
   if (s.empty()) return;
   mutable_c_str mp(s);
   VisitTokens(mp.p,mp.p+s.size(),f);

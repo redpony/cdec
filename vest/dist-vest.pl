@@ -78,6 +78,7 @@ if (GetOptions(
         "no-primary!" => \$noprimary,
         "max-similarity=s" => \$maxsim,
         "oracle-directions=i" => \$oraclen,
+        "n-oracle=i" => \$oraclen,
         "oracle-batch=i" => \$oracleb,
         "directions-args=s" => \$dirargs,
 	"ref-files=s" => \$refFiles,
@@ -266,7 +267,8 @@ while (1){
 		print STDERR `date`;
 		$icc++;
         my $nop=$noprimary?"--no_primary":"";
-		$cmd="$MAPINPUT -w $inweights -r $dir/hgs -s $devSize -d $rand_directions --max_similarity=$maxsim --oracle_directions=$oraclen --oracle_batch=$oracleb $dirargs > $dir/agenda.$im1-$opt_iter";
+        my $targs=$oraclen ? "--decoder_translations='$runFile'":"";
+		$cmd="$MAPINPUT -w $inweights -r $dir/hgs -s $devSize -d $rand_directions --max_similarity=$maxsim --oracle_directions=$oraclen --oracle_batch=$oracleb $targs $dirargs > $dir/agenda.$im1-$opt_iter";
 		print STDERR "COMMAND:\n$cmd\n";
 		$result = system($cmd);
 		unless ($result == 0){
