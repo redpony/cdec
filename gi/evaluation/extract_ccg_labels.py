@@ -90,10 +90,13 @@ for tline, eline in itertools.izip(tinfile, einfile):
     else:
         tr = None
     
-    zh, en, spans = eline.strip().split(" ||| ")
+    parts = eline.strip().split(" ||| ")
+    zh, en = parts[:2]
+    spans = parts[-1]
     print '|||',
     for span in spans.split():
-        i, j, x, y = map(int, span.split("-"))
+        sps = span.split(":")
+        i, j, x, y = map(int, sps[0].split("-"))
 
         if tr:
             a = ancestor(tr, range(x,y))
@@ -113,7 +116,8 @@ for tline, eline in itertools.izip(tinfile, einfile):
                     cat += '\\' + f.data.tag
                 else:
                     break
-            for f in reversed(fs):
+            fs.reverse()
+            for f in fs:
                 if f.left >= y:
                     cat += '/' + f.data.tag
                 else:

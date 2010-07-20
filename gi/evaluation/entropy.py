@@ -26,8 +26,8 @@ for line in infile:
         tag = part.split(':',1)[1]
 
         if slash_threshold == None or tag.count('/') + tag.count('\\') <= slash_threshold:
-            frequencies.setdefault(gtag, 0)
-            frequencies[gtag] += 1
+            frequencies.setdefault(tag, 0)
+            frequencies[tag] += 1
             N += 1
 
 h = 0
