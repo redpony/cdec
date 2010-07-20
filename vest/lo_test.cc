@@ -98,7 +98,7 @@ TEST_F(OptTest,TestViterbiEnvelopeInside) {
   }
 }
 
-TEST_F(OptTest, TestS1) { 
+TEST_F(OptTest, TestS1) {
   int fPhraseModel_0 = FD::Convert("PhraseModel_0");
   int fPhraseModel_1 = FD::Convert("PhraseModel_1");
   int fPhraseModel_2 = FD::Convert("PhraseModel_2");
@@ -141,10 +141,10 @@ TEST_F(OptTest, TestS1) {
   TD::ConvertSentence(ref32, &refs2[2]);
   TD::ConvertSentence(ref42, &refs2[3]);
   ScoreType type = ScoreTypeFromString("ibm_bleu");
-  SentenceScorer* scorer1 = SentenceScorer::CreateSentenceScorer(type, refs1);
-  SentenceScorer* scorer2 = SentenceScorer::CreateSentenceScorer(type, refs2);
+  ScorerP scorer1 = SentenceScorer::CreateSentenceScorer(type, refs1);
+  ScorerP scorer2 = SentenceScorer::CreateSentenceScorer(type, refs2);
   vector<ViterbiEnvelope> envs(2);
-  
+
   RandomNumberGenerator<boost::mt19937> rng;
 
   vector<SparseVector<double> > axes; // directions to search
@@ -190,8 +190,6 @@ TEST_F(OptTest, TestS1) {
   ViterbiESentence(hg2, &t2);
   cerr << TD::GetString(t1) << endl;
   cerr << TD::GetString(t2) << endl;
-  delete scorer1;
-  delete scorer2;
 }
 
 int main(int argc, char **argv) {
