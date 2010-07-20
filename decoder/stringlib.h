@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <cctype>
+#include <cstring>
 #include <string>
 
 // read line in the form of either:
@@ -86,6 +87,59 @@ inline std::vector<std::string> SplitOnWhitespace(std::string const& in)
   std::vector<std::string> r;
   SplitOnWhitespace(in,&r);
   return r;
+}
+
+
+struct mutable_c_str {
+  // because making a copy of a string might not copy its storage, so modifying a c_str() could screw up original (nobody uses cow nowadays because it needs locking under threading)
+  char *p;
+  mutable_c_str(std::string const& s) : p((char *)::operator new(s.size()+1)) {
+    std::memcpy(p,s.data(),s.size());
+    p[s.size()]=0;
+  }
+  ~mutable_c_str() { ::operator delete(p); }
+private:
+  mutable_c_str(mutable_c_str const&);
+};
+
+// ' ' '\t' tokens hardcoded
+//NOTE: you should have stripped endline chars out first.
+inline bool IsWordSep(char c) {
+  return c==' '||c=='\t';
+}
+
+
+template <class F>
+// *end must be 0 (i.e. [p,end] is valid storage, which will be written to with 0 to separate c string tokens
+void VisitTokens(char *p,char *const end,F f) {
+  if (p==end) return;
+  char *last; // 0 terminated already.  this is ok to mutilate because s is a copy of the string passed in.  well, barring copy on write i guess.
+  while(IsWordSep(*p)) { ++p;if (p==end) return; } // skip init whitespace
+  last=p; // first non-ws char
+  for(;;) {
+    ++p;
+    // now last is a non-ws char, and p is one past it.
+    for(;;) {// p to end of word
+      if (p==end) { f(last); return; }
+      if (!IsWordSep(*p)) break;
+      ++p;
+    }
+    *p=0;
+    f(last);
+    for(;;) { // again skip extra whitespace
+      ++p;
+      if (p==end) return;
+      if (!IsWordSep(*p)) break;
+    }
+    last=p;
+  }
+}
+
+template <class F>
+void VisitTokens(std::string const& s,F f) {
+  if (s.empty()) return;
+  mutable_c_str mp(s);
+  VisitTokens(mp.p,mp.p+s.size(),f);
 }
 
 inline void SplitCommandAndParam(const std::string& in, std::string* cmd, std::string* param) {

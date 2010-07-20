@@ -1,7 +1,9 @@
+#include <sstream>
 #include "Ngram.h"
 #include "dict.h"
 #include "tdict.h"
 #include "Vocab.h"
+#include "stringlib.h"
 
 using namespace std;
 
@@ -14,6 +16,10 @@ unsigned int TD::NumWords() {
 
 WordID TD::Convert(const std::string& s) {
   return dict_.addWord((VocabString)s.c_str());
+}
+
+WordID TD::Convert(char const* s) {
+  return dict_.addWord((VocabString)s);
 }
 
 const char* TD::Convert(const WordID& w) {
@@ -31,25 +37,27 @@ void TD::GetWordIDs(const std::vector<std::string>& strings, std::vector<WordID>
 }
 
 std::string TD::GetString(const std::vector<WordID>& str) {
-  string res;
-  for (vector<WordID>::const_iterator i = str.begin(); i != str.end(); ++i)
-    res += (i == str.begin() ? empty : space) + TD::Convert(*i);
-  return res;
+  ostringstream o;
+  for (int i=0;i<str.size();++i) {
+    if (i) o << ' ';
+    o << TD::Convert(str[i]);
+  }
+  return o.str();
 }
 
-void TD::ConvertSentence(const std::string& sent, std::vector<WordID>* ids) {
-  string s = sent;
-  int last = 0;
+namespace {
+struct add_wordids {
+  typedef std::vector<WordID> Ws;
+  Ws *ids;
+  explicit add_wordids(Ws *i) : ids(i) {  }
+  void operator()(char const* s) {
+    ids->push_back(TD::Convert(s));
+  }
+};
+
+}
+
+void TD::ConvertSentence(std::string const& s, std::vector<WordID>* ids) {
   ids->clear();
-  for (int i=0; i < s.size(); ++i)
-    if (s[i] == 32 || s[i] == '\t') {
-      s[i]=0;
-      if (last != i) {
-        ids->push_back(Convert(&s[last]));
-      }
-      last = i + 1;
-    }
-  if (last != s.size())
-    ids->push_back(Convert(&s[last]));
+  VisitTokens(s,add_wordids(ids));
 }
-
