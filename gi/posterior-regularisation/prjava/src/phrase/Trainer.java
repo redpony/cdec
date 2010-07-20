@@ -82,8 +82,10 @@ public class Trainer
 			System.out.println("Reading concordance from " + infile);
 			corpus = Corpus.readFromFile(FileUtil.reader(infile));
 			corpus.printStats(System.out);
-			corpus1 = Corpus.readFromFile(FileUtil.reader(infile1));
-			corpus1.printStats(System.out);
+			if(options.has("in1")){
+				corpus1 = Corpus.readFromFile(FileUtil.reader(infile1));
+				corpus1.printStats(System.out);
+			}
 		} catch (IOException e) {
 			System.err.println("Failed to open input file: " + infile);
 			e.printStackTrace();
