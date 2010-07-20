@@ -9,7 +9,6 @@ void MPIPYPTopics::sample_corpus(const Corpus& corpus, int samples,
                               int freq_cutoff_interval,
                               int max_contexts_per_document) {
   Timer timer;
-  std::cout << m_am_root << std::endl;
 
   int documents = corpus.num_documents();
   m_mpi_start = 0;

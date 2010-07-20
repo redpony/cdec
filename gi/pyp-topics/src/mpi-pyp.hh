@@ -352,6 +352,8 @@ struct triple {
   }
 };
 
+BOOST_IS_BITWISE_SERIALIZABLE(MPIPYP<int>::dish_delta_type)
+BOOST_CLASS_TRACKING(MPIPYP<int>::dish_delta_type,track_never)
 
 template <typename Dish, typename Hash>
 void 
