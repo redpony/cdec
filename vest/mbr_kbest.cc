@@ -101,14 +101,13 @@ int main(int argc, char** argv) {
     for (int i = 0 ; i < list.size(); ++i) {
       vector<vector<WordID> > refs(1, list[i].first);
       //cerr << i << ": " << list[i].second <<"\t" << TD::GetString(list[i].first) << endl;
-      SentenceScorer* scorer = SentenceScorer::CreateSentenceScorer(type, refs);
+      ScorerP scorer = SentenceScorer::CreateSentenceScorer(type, refs);
       double wl_acc = 0;
       for (int j = 0; j < list.size(); ++j) {
         if (i != j) {
-          Score* s = scorer->ScoreCandidate(list[j].first);
+          ScoreP s = scorer->ScoreCandidate(list[j].first);
           double loss = 1.0 - s->ComputeScore();
           if (type == TER || type == AER) loss = 1.0 - loss;
-          delete s;
           double weighted_loss = loss * (joints[j] / marginal);
           wl_acc += weighted_loss;
           if ((!output_list) && wl_acc > mbr_loss) break;
@@ -119,7 +118,6 @@ int main(int argc, char** argv) {
         mbr_loss = wl_acc;
         mbr_idx = i;
       }
-      delete scorer;
     }
     // cerr << "ML translation: " << TD::GetString(list[0].first) << endl;
     cerr << "MBR Best idx: " << mbr_idx << endl;

@@ -231,7 +231,8 @@ struct OracleBleu {
 
   void IncludeLastScore(std::ostream *out=0) {
     double bleu_scale_ = doc_src_length * doc_score->ComputeScore();
-    doc_score->PlusEquals(*sentscore, scale_oracle);
+    doc_score->PlusEquals(*sentscore);
+    doc_score->TimesEquals(scale_oracle);
 	sentscore.reset();
     doc_src_length = (doc_src_length + tmp_src_length) * scale_oracle;
     if (out) {
