@@ -190,7 +190,7 @@ void ModelSet::AddFeaturesToEdge(const SentenceMetadata& smeta,
                                  string* context,
                                  prob_t* combination_cost_estimate) const {
   context->resize(state_size_);
-  memset(&(*context)[0], 0, state_size_);
+  memset(&(*context)[0], 0, state_size_); //FIXME: only context.data() is required to be contiguous, and it become sinvalid after next string operation.  use SmallVector<char>?  ValueArray? (higher performance perhaps, fixed size)
   SparseVector<double> est_vals;  // only computed if combination_cost_estimate is non-NULL
   if (combination_cost_estimate) *combination_cost_estimate = prob_t::One();
   for (int i = 0; i < models_.size(); ++i) {
