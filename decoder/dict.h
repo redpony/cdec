@@ -1,8 +1,11 @@
 #ifndef DICT_H_
 #define DICT_H_
 
+#include "config.h"
+
 #include <cassert>
 #include <cstring>
+
 #ifdef HAVE_SPARSEHASH
 # include <google/dense_hash_map>
 #else
@@ -10,7 +13,6 @@
 #endif
 #include <string>
 #include <vector>
-
 #include <boost/functional/hash.hpp>
 
 #include "wordid.h"
@@ -18,9 +20,9 @@
 class Dict {
  typedef
 #ifdef HAVE_SPARSEHASH
- std::tr1::unordered_map
-#else
  google::dense_hash_map
+#else
+ std::tr1::unordered_map
 #endif
  <std::string, WordID, boost::hash<std::string> > Map;
 
