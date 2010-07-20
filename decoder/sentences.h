@@ -15,9 +15,12 @@ inline std::ostream & operator<<(std::ostream &out,Sentence const& s) {
 
 inline void StringToSentence(std::string const& str,Sentence &s) {
   using namespace std;
-  vector<string> ss=SplitOnWhitespace(str);
   s.clear();
+  TD::ConvertSentence(str,&s);
+/*  vector<string> ss=SplitOnWhitespace(str);
   transform(ss.begin(),ss.end(),back_inserter(s),ToTD());
+*/
+
 }
 
 inline Sentence StringToSentence(std::string const& str) {
