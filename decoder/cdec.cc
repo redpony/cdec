@@ -206,7 +206,6 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
     cerr << dcmdline_options << endl;
     exit(1);
   }
-  po::notify(conf);
 
 }
 
