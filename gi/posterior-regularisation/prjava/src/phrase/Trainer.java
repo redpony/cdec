@@ -18,9 +18,11 @@ public class Trainer
 {
 	public static void main(String[] args) 
 	{
+
         OptionParser parser = new OptionParser();
         parser.accepts("help");
         parser.accepts("in").withRequiredArg().ofType(File.class);
+        parser.accepts("in1").withRequiredArg().ofType(File.class);
         parser.accepts("test").withRequiredArg().ofType(File.class);
         parser.accepts("out").withRequiredArg().ofType(File.class);
         parser.accepts("start").withRequiredArg().ofType(File.class);
@@ -35,7 +37,8 @@ public class Trainer
         parser.accepts("variational-bayes");
         parser.accepts("alpha-emit").withRequiredArg().ofType(Double.class).defaultsTo(0.1);
         parser.accepts("alpha-pi").withRequiredArg().ofType(Double.class).defaultsTo(0.01);
-        parser.accepts("agree");
+        parser.accepts("agree-direction");
+        parser.accepts("agree-language");
         parser.accepts("no-parameter-cache");
         parser.accepts("skip-large-phrases").withRequiredArg().ofType(Integer.class).defaultsTo(5);
         OptionSet options = parser.parse(args);
@@ -73,17 +76,21 @@ public class Trainer
 		
 		Corpus corpus = null;
 		File infile = (File) options.valueOf("in");
+		Corpus corpus1 = null;
+		File infile1 = (File) options.valueOf("in1");
 		try {
 			System.out.println("Reading concordance from " + infile);
 			corpus = Corpus.readFromFile(FileUtil.reader(infile));
 			corpus.printStats(System.out);
+			corpus1 = Corpus.readFromFile(FileUtil.reader(infile1));
+			corpus1.printStats(System.out);
 		} catch (IOException e) {
 			System.err.println("Failed to open input file: " + infile);
 			e.printStackTrace();
 			System.exit(1);
 		}
 				
-		if (!options.has("agree"))
+		if (!(options.has("agree-direction")||options.has("agree-language")))
 			System.out.println("Running with " + tags + " tags " +
 					"for " + iterations + " iterations " +
 					((skip > 0) ? "skipping large phrases for first " + skip + " iterations " : "") +
@@ -96,8 +103,11 @@ public class Trainer
 	 	System.out.println();
 		
  		PhraseCluster cluster = null;
- 		Agree agree = null;
- 		if (options.has("agree"))
+ 		Agree2Sides agree2sides = null;
+ 		Agree agree= null;
+ 		if (options.has("agree-language"))
+ 			agree2sides = new Agree2Sides(tags, corpus,corpus1);
+ 		else if (options.has("agree-direction"))
  			agree = new Agree(tags, corpus);
  		else
  		{
@@ -124,6 +134,9 @@ public class Trainer
 			double o;
 			if (agree != null)
 				o = agree.EM();
+			else if(agree2sides!=null){
+				o = agree2sides.EM();
+			}
 			else
 			{
 				if (i < skip)
