@@ -5,9 +5,9 @@ use Getopt::Long "GetOptions";
 
 my @grammars;
 my $OUTPUTPREFIX = './giwork/bo.hier.grammar';
+safemkdir($OUTPUTPREFIX);
 my $backoff_levels = 1;
 my $glue_levels = 1;
-my %FREQ_HIER = ();
 
 usage() unless &GetOptions('grmr=s@' => \ @grammars,
                            'outprefix=s' => \ $OUTPUTPREFIX,
@@ -16,18 +16,22 @@ usage() unless &GetOptions('grmr=s@' => \ @grammars,
 );
                            
 my $OUTDIR = $OUTPUTPREFIX . '/hier';
+print STDERR "@grammars\n";
+
 
 my %grmr = ();
 foreach my $grammar (@grammars) {
-    $grammar =~ m/\/[^\/]*\.t(\d+)\.[^\/]*$/;
-    my $grains = $1;
-    $grmr{$grains} = $grammar;
+    $grammar =~ m/\/[^\/]*\.t(\d+)\.[^\/]*/;
+    $grmr{$1} = $grammar;
 }
 
 my @index = sort keys %grmr;
 $OUTDIR = $OUTDIR . join('-',@index);
-my $BACKOFF_GRMR = $OUTDIR . '/backoff.gz';
-my $GLUE_GRMR = $OUTDIR . '/glue.gz';
+safemkdir($OUTDIR);
+my $BACKOFF_GRMR = $OUTDIR . '/backoff.hier.gz';
+safesystem("echo \"\" | gzip > $BACKOFF_GRMR");
+my $GLUE_GRMR = $OUTDIR . '/glue.hier.gz';
+safesystem("echo \"\" | gzip > $GLUE_GRMR");
 my $joinedgrammars = $OUTDIR . '/grammar.hier.gz';
 
 join_grammars();
@@ -56,6 +60,12 @@ EOT
   exit 1;
 };
 
+sub safemkdir {
+  my $dir = shift;
+  if (-d $dir) { return 1; }
+  return mkdir($dir);
+}
+
 
 sub safesystem {
   print STDERR "Executing: @_\n";
@@ -78,11 +88,17 @@ sub safesystem {
 
 
 sub join_grammars {
+    print STDERR "\n!!! JOINING GRAMMARS\n";
+    if(-e $joinedgrammars) {
+        print STDERR "$joinedgrammars exists, reusing...\n";
+        return;
+    }
     safesystem("echo \"\" | gzip > $joinedgrammars");
     foreach my $i (@index) {
         my $g = $grmr{$i};
-        safesystem("zcat $g | sed -r -e 's/(X[0-9]+)/\\1-$i/g' - | gzip > $g");
-        safesystem("zcat $joinedgrammars $g | gzip > $joinedgrammars");
+        safesystem("zcat $g | sed -r -e 's/X([0-9]+)/X$i\\1/g' - | gzip > $g.2.gz");
+        safesystem("zcat $joinedgrammars $g.2.gz | gzip > $joinedgrammars.2.gz");
+        safesystem("mv $joinedgrammars.2.gz $joinedgrammars");
     }
 }
 
@@ -90,16 +106,21 @@ sub join_grammars {
 sub extract_freqs {
     my($grmr1,$grmr2) = @_;
     print STDERR "\n!!!EXTRACTING FREQUENCIES: $grmr1->$grmr2\n";
-    my $IN_COARSE = substr($grammars{$grmr1},0,index($grammars{$grmr1},".grammar/")) . "/labeled_spans.txt";
-    my $IN_FINE = substr($grammars{$grmr2},0,index($grammars{$grmr2},".grammar/")) . "/labeled_spans.txt";
-    my $OUT_SPANS = "$OUTDIR/labeled_spans.hier$NUM_TOPICS_COARSE-$NUM_TOPICS_FINE.txt";
-    my $FREQS = "$OUTDIR/label_freq.hier$NUM_TOPICS_COARSE-$NUM_TOPICS_FINE.txt";
-    my %finehier = ();
-    if (-e $OUT_SPANS) {
+    my $IN_COARSE = substr($grmr{$grmr1},0,index($grmr{$grmr1},".grammar/")) . "/labeled_spans.txt";
+    my $IN_FINE = substr($grmr{$grmr2},0,index($grmr{$grmr2},".grammar/")) . "/labeled_spans.txt";
+    my $OUT_SPANS = "$OUTDIR/labeled_spans.hier$grmr1-$grmr2.txt";
+    my $FREQS = "$OUTDIR/label_freq.hier$grmr1-$grmr2.txt";
+    if(-e $OUT_SPANS && -e $FREQS) {
         print STDERR "$OUT_SPANS exists, reusing...\n";
-    } else {
-        safesystem("paste -d ' ' $IN_COARSE $IN_FINE > $OUT_SPANS");
+        print STDERR "$FREQS exists, reusing...\n";
+        return $FREQS;
     }
+    
+    safesystem("paste -d ' ' $IN_COARSE $IN_FINE > $OUT_SPANS");
+    
+    my %FREQ_HIER = ();
+    my %finehier = ();
+    
     open SPANS, $OUT_SPANS or die $!;
     while (<SPANS>) {
         my ($tmp, $coarse, $fine) = split /\|\|\|/;
@@ -141,38 +162,54 @@ sub extract_freqs {
 
 
 sub create_backoff_rules {
+    print STDERR "\n!!! CREATING BACKOFF RULES\n";
     my ($grmr1, $grmr2, $freq) = @_;
-    open FREQS, $freqs or die $!;
-    open TMP, ">", "tmp" or die $!;
+    my $OUTFILE = "$OUTDIR/backoff.hier$grmr1-$grmr2.txt";
+    if(-e $OUTFILE) {
+        print STDERR "$OUTFILE exists, reusing...\n";
+        return;
+    }
+    open FREQS, $freq or die $!;
+    open TMP, ">", $OUTFILE or die $!;
     while (<FREQS>) {
-        my $coarse = m/^(\d+) \|\|\|/;
-        if ($coarse == $grmr1) {
-            my @finefreq = m/(\d+):(-?\d+\.?\d*)/g;
-            for(my $i = 0; $i < scalar @finefreq; $i+=2) {
-                my $finecat = @finefreq[$i];
-                my $finefreq = @finefreq[$i+1];
-                print TMP "[X$coarse-$grmr1] ||| [X$finecat-$grmr2,1]\t[1] ||| BackoffRule=$finefreq\n";
-            }
+        my $line = $_;
+        $line = m/^(\d+) \|\|\| (.+)$/;
+        my $coarse = $1;
+        $line = $2;
+        my @finefreq = $line =~ m/(\d+):(\S+)/g;
+        for(my $i = 0; $i < scalar @finefreq; $i+=2) {
+            my $finecat = $finefreq[$i];
+            my $finefreq = $finefreq[$i+1];
+            print TMP "[X$grmr1$coarse] ||| [X$grmr2$finecat,1]\t[1] ||| BackoffRule=$finefreq\n";
         }
     }
     close TMP;
     close FREQS;
-    safesystem('zcat $BACKOFF_GRMR | cat - tmp | gzip > $BACKOFF_GRMR');
+    safesystem("zcat $BACKOFF_GRMR | cat - $OUTFILE | gzip > $BACKOFF_GRMR.2.gz");
+    safesystem("mv $BACKOFF_GRMR.2.gz $BACKOFF_GRMR");
 }
 
 sub add_glue_rules {
+    print STDERR "\n!!! CREATING GLUE RULES\n";
     my ($grmr) = @_;
-    open TMP, ">", "tmp" or die $!;
+    my $OUTFILE = "$OUTDIR/glue.$grmr.gz";
+    if (-e $OUTFILE) {
+        print STDERR "$OUTFILE exists, reusing...\n";
+        return;
+    }
+    open TMP, ">", $OUTFILE or die $!;
     for my $i (0..($grmr-1)) {
-        print TMP "[S] ||| [S,1] [X$i-$grmr,2] ||| [1] [2] ||| Glue=1\n";
-        print TMP "[S] ||| [X$i-$grmr,1] ||| [1] ||| GlueTop=1\n";
+        print TMP "[S] ||| [S,1] [X$grmr$i,2] ||| [1] [2] ||| Glue=1\n";
+        print TMP "[S] ||| [X$grmr$i,1] ||| [1] ||| GlueTop=1\n";
     }
     close TMP;
-    safesystem('zcat $GLUE_GRMR | cat - tmp | gzip > $GLUE_GRMR');
+    safesystem("zcat $GLUE_GRMR | cat - $OUTFILE | gzip > $GLUE_GRMR.2.gz");
+    safesystem("mv $GLUE_GRMR.2.gz $GLUE_GRMR");
 }
 
 sub output_grammar_info {
+    print STDERR "\n!!! GRAMMAR INFORMATION\n";
     print STDOUT "GRAMMAR: \t$joinedgrammars\n";
     print STDOUT "GLUE: \t$GLUE_GRMR\n";
-    print STDOUT "BACKOFF: \t$BACKOFF_GRAMMAR\n";
+    print STDOUT "BACKOFF: \t$BACKOFF_GRMR\n";
 }

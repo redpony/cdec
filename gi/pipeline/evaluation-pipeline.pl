@@ -1,4 +1,4 @@
-sub m#!/usr/bin/perl -w
+#!/usr/bin/perl -w
 use strict;
 use Getopt::Long;
 use Cwd;
@@ -123,8 +123,8 @@ my $bkoffgram;
 my $gluegram;
 my $usefork;
 if (GetOptions(
-        "backoff_grammar=s" => \$bkoffgram,
-        "glue_grammar=s" => \$gluegram,
+        "backoff-grammar=s" => \$bkoffgram,
+        "glue-grammar=s" => \$gluegram,
         "data=s" => \$dataDir,
         "features=s@" => \@features,
         "use-fork" => \$usefork,
@@ -136,7 +136,6 @@ if (GetOptions(
 }
 if ($usefork) { $usefork="--use-fork"; } else { $usefork = ''; }
 my @fkeys = keys %$feat_map;
-push(@features, "BackoffRule") if $bkoffgram;
 die "You must specify one or more features with -f. Known features: @fkeys\n" unless scalar @features > 0;
 my @xfeats;
 for my $feat (@features) {
@@ -183,12 +182,16 @@ write_random_weights_file($weights, @xfeats);
 my $bkoff_grmr;
 my $glue_grmr;
 if($bkoffgram) {
+    print STDERR "Placing backoff grammar…\n";
     $bkoff_grmr = mydircat($outdir, "backoff.scfg.gz");
-    safesystem("cp $bkoffgram $bkoff_grmr");
+    print STDERR "cp $bkoffgram $bkoff_grmr\n";
+    safesystem(undef,"cp $bkoffgram $bkoff_grmr");
 }
 if($gluegram) {
+    print STDERR "Placing glue grammar…\n";
     $glue_grmr = mydircat($outdir, "glue.bo.scfg.gz");
-    safesystem("cp $gluegram $glue_grmr");
+    print STDERR "cp $gluegram $glue_grmr\n";
+    safesystem(undef,"cp $gluegram $glue_grmr");
 }
 
 # MAKE DEV
@@ -267,30 +270,7 @@ sub filter {
     safesystem($outgrammar, $cmd) or die "Featurizing failed";
   }
   return $outgrammar;
-}
-
-sub add_backoff {
-  my ($grammar, $topics, $name, $outdir) = @_;
-  my $out = mydircat($outdir, "backoff.$name.scfg");
-  my $outgrammar = mydircat($outdir, "$name.scfg.gz");
-  my $cmd = "zcat $grammar > $out";
-  safesystem($out,$cmd) or die "Adding backoff rules failed.";
-  for(my $tpcnum=0;$tpcnum<$topics;$tpcnum++) {
-    for(my $tpc2=0;$tpc2<$topics;$tpc2++) {
-      my $bkoff = "1";
-      if($tpc2 == $tpcnum) {
-        $bkoff = "0";
-      }
-      my $rule = "[X$tpcnum\_] ||| [X$tpc2,1] ||| [1] ||| BackoffRule=$bkoff";
-      $cmd = "echo '$rule' >> $out";
-      safesystem($out,$cmd) or die "Adding backoff rules failed.";
-    }
-  }
-  $cmd = "cat $out | gzip > $outgrammar";
-  safesystem($outgrammar, $cmd) or die "Adding backoff rules failed.";
-  return $outgrammar;
-}
-  
+}  
 
 sub mydircat {
  my ($base, $suffix) = @_;
