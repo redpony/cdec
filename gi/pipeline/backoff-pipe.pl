@@ -180,7 +180,7 @@ sub create_backoff_rules {
         for(my $i = 0; $i < scalar @finefreq; $i+=2) {
             my $finecat = $finefreq[$i];
             my $finefreq = $finefreq[$i+1];
-            print TMP "[X$grmr1$coarse] ||| [X$grmr2$finecat,1]\t[1] ||| BackoffRule=$finefreq\n";
+            print TMP "[X$grmr1$coarse] ||| [X$grmr2$finecat,1]\t[1] ||| BackoffRule=$finefreq A=0-0\n";
         }
     }
     close TMP;
