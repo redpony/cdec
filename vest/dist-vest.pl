@@ -75,6 +75,7 @@ if (GetOptions(
 	"normalize=s" => \$normalize,
 	"pmem=s" => \$pmem,
 	"rand-directions=i" => \$rand_directions,
+	"random_directions=i" => \$rand_directions,
         "no-primary!" => \$noprimary,
         "max-similarity=s" => \$maxsim,
         "oracle-directions=i" => \$oraclen,
