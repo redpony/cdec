@@ -500,7 +500,7 @@ int main(int argc, char** argv) {
 
   int combine_size = conf["combine_size"].as<int>();
   if (combine_size < 1) combine_size = 1;
-    const string input = str("input",conf);
+  const string input = str("input",conf);
   cerr << "Reading input from " << ((input == "-") ? "STDIN" : input.c_str()) << endl;
   ReadFile in_read(input);
   istream *in = in_read.stream();
