@@ -166,8 +166,10 @@ public class Trainer
 			last = o;
 		}
 		
-		if (cluster == null)
+		if (cluster == null && agree != null)
 			cluster = agree.model1;
+		else if (cluster == null && agree2sides != null)
+			cluster = agree2sides.model1;
 
 		double pl1lmax = cluster.phrase_l1lmax();
 		double cl1lmax = cluster.context_l1lmax();
@@ -183,11 +185,23 @@ public class Trainer
 					test = corpus.getEdges();
 				else
 				{	// if --test supplied, load up the file
-					infile = (File) options.valueOf("test");
-					System.out.println("Reading testing concordance from " + infile);
-					test = corpus.readEdges(FileUtil.reader(infile));
+					if (agree == null && agree2sides == null)
+					{
+						infile = (File) options.valueOf("test");
+						System.out.println("Reading testing concordance from " + infile);
+						test = corpus.readEdges(FileUtil.reader(infile));
+					}
+					else
+						System.err.println("Can't run agreement models on different test data cf training (yet); --test ignored.");
 				}
-				cluster.displayPosterior(ps, test);
+				
+				if (agree != null)
+					agree.displayPosterior(ps);
+				else if (agree2sides != null)
+					agree2sides.displayPosterior(ps);
+				else
+					cluster.displayPosterior(ps, test);
+					
 				ps.close();
 			} catch (IOException e) {
 				System.err.println("Failed to open either testing file or output file");

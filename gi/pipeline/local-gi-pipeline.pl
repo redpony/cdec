@@ -39,8 +39,8 @@ die "Can't find posterior-regularisation: $PRTOOLS" unless -e $PRTOOLS && -d $PR
 my $REDUCER = "$EXTOOLS/mr_stripe_rule_reduce";
 my $C2D = "$PYPSCRIPTS/contexts2documents.py";
 my $S2L = "$PYPSCRIPTS/spans2labels.py";
+my $SPLIT = "$SCRIPT_DIR/../posterior-regularisation/split-languages.py";
 
-my $PYP_TOPICS_TRAIN="$PYPTOOLS/pyp-contexts-train";
 my $PREM_TRAIN="$PRTOOLS/prjava/train-PR-cluster.sh";
 
 my $SORT_KEYS = "$SCRIPT_DIR/scripts/sort-by-key.sh";
@@ -48,9 +48,8 @@ my $PATCH_CORPUS = "$SCRIPT_DIR/scripts/patch-corpus.pl";
 my $EXTRACTOR = "$EXTOOLS/extractor";
 my $TOPIC_TRAIN = "$PYPTOOLS/pyp-contexts-train";
 
-assert_exec($PATCH_CORPUS, $SORT_KEYS, $REDUCER, $EXTRACTOR, #$PYP_TOPICS_TRAIN, 
-            $S2L, $C2D #, $TOPIC_TRAIN
-           );
+assert_exec($PATCH_CORPUS, $SORT_KEYS, $REDUCER, $EXTRACTOR,
+            $S2L, $C2D, $TOPIC_TRAIN, $SPLIT);
 
 my $BACKOFF_GRAMMAR;
 my $DEFAULT_CAT;
@@ -78,7 +77,7 @@ usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'pr-flags=s' => \$PR_FLAGS,
                            'tagged_corpus=s' => \$TAGGED_CORPUS,
                            'language=s' => \$LANGUAGE,
-                           'get_name_only' => \$NAME_SHORTCUT,
+                           'get_name_only' => \$NAME_SHORTCUT
                           );
 if ($NAME_SHORTCUT) {
   $NUM_TOPICS = $NUM_TOPICS_FINE;
@@ -132,7 +131,12 @@ if(-e $TOPICS_CONFIG) {
 
 setup_data();
 
-extract_context();
+if (lc($MODEL) eq "blagree") {
+    extract_bilingual_context();
+} else {
+    extract_context();
+}
+
 if (lc($MODEL) eq "pyp") {
     if($HIER_CAT) {
         $NUM_TOPICS = $NUM_TOPICS_COARSE;
@@ -199,6 +203,8 @@ sub cluster_dir {
         return context_dir() . ".PR.t$NUM_TOPICS.i$NUM_ITERS.sp$PR_SCALE_P.sc$PR_SCALE_C";
     } elsif (lc($MODEL) eq "agree") {
         return context_dir() . ".AGREE.t$NUM_TOPICS.i$NUM_ITERS";
+    } elsif (lc($MODEL) eq "blagree") {
+        return context_dir() . ".BLAGREE.t$NUM_TOPICS.i$NUM_ITERS";
     }
 }
 
@@ -261,6 +267,29 @@ sub extract_context {
   }
 }
 
+sub extract_bilingual_context {
+ print STDERR "\n!!!CONTEXT EXTRACTION\n"; 
+ my $OUT_SRC_CONTEXTS = "$CONTEXT_DIR/context.source";
+ my $OUT_TGT_CONTEXTS = "$CONTEXT_DIR/context.target";
+
+ if (-e $OUT_SRC_CONTEXTS . ".gz" and -e $OUT_TGT_CONTEXTS . ".gz") {
+   print STDERR "$OUT_SRC_CONTEXTS.gz and $OUT_TGT_CONTEXTS.gz exist, reusing...\n";
+ } else {
+   my $OUT_BI_CONTEXTS = "$CONTEXT_DIR/context.bilingual.txt.gz";
+   my $cmd = "$EXTRACTOR -i $CORPUS_CLUSTER -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE --phrase_language both --context_language both | $SORT_KEYS | $REDUCER | $GZIP > $OUT_BI_CONTEXTS";
+   if ($COMPLETE_CACHE) {
+     print STDERR "COMPLETE_CACHE is set: removing memory limits on cache.\n";
+     $cmd = "$EXTRACTOR -i $CORPUS_CLUSTER -c 0 -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE  --phrase_language both --context_language both  | $SORT_KEYS | $GZIP > $OUT_BI_CONTEXTS";
+   }
+   safesystem($cmd) or die "Failed to extract contexts.";
+
+   safesystem("$ZCAT $OUT_BI_CONTEXTS | $SPLIT $OUT_SRC_CONTEXTS $OUT_TGT_CONTEXTS") or die "Failed to split contexts.\n";
+   safesystem("$GZIP -f $OUT_SRC_CONTEXTS") or die "Failed to zip output contexts.\n";
+   safesystem("$GZIP -f $OUT_TGT_CONTEXTS") or die "Failed to zip output contexts.\n";
+ }
+}
+
+
 sub topic_train {
   print STDERR "\n!!!TRAIN PYP TOPICS\n";
   my $IN_CONTEXTS = "$CONTEXT_DIR/context.txt.gz";
@@ -274,18 +303,21 @@ sub topic_train {
 
 sub prem_train {
   print STDERR "\n!!!TRAIN PR/EM model\n";
-  my $IN_CONTEXTS = "$CONTEXT_DIR/context.txt.gz";
   my $OUT_CLUSTERS = "$CLUSTER_DIR/docs.txt.gz";
   if (-e $OUT_CLUSTERS) {
     print STDERR "$OUT_CLUSTERS exists, reusing...\n";
   } else {
+    my $in = "--in $CONTEXT_DIR/context.txt.gz";
     my $opts = "";
     if (lc($MODEL) eq "pr") {
         $opts = "--scale-phrase $PR_SCALE_P --scale-context $PR_SCALE_C";
     } elsif (lc($MODEL) eq "agree") {
         $opts = "--agree-direction";
+    } elsif (lc($MODEL) eq "blagree") {
+        $in = "--in $CONTEXT_DIR/context.source.gz --in1 $CONTEXT_DIR/context.target.gz";
+        $opts = "--agree-language";
     }
-    safesystem("$PREM_TRAIN --in $IN_CONTEXTS --topics $NUM_TOPICS --out $OUT_CLUSTERS --iterations $NUM_ITERS $opts $PR_FLAGS") or die "Topic training failed.\n";
+    safesystem("$PREM_TRAIN $in --topics $NUM_TOPICS --out $OUT_CLUSTERS --iterations $NUM_ITERS $opts $PR_FLAGS") or die "Topic training failed.\n";
   }
 }
 

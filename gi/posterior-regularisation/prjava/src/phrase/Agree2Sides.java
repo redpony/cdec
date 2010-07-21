@@ -157,13 +157,16 @@ public class Agree2Sides {
 
 	public double[] posterior(int edgeIdx) 
 	{
-		Edge edge1=c1.getEdges().get(edgeIdx);
-		Edge edge2=c2.getEdges().get(edgeIdx);
-		double[] prob1=model1.posterior(edge1);
-		double[] prob2=model2.posterior(edge2);
+		return posterior(c1.getEdges().get(edgeIdx), c2.getEdges().get(edgeIdx));
+	}
+	
+	public double[] posterior(Edge e1, Edge e2) 
+	{
+		double[] prob1=model1.posterior(e1);
+		double[] prob2=model2.posterior(e2);
 		
-		llh+=edge1.getCount()*Math.log(arr.F.l1norm(prob1));
-		llh+=edge2.getCount()*Math.log(arr.F.l1norm(prob2));
+		llh+=e1.getCount()*Math.log(arr.F.l1norm(prob1));
+		llh+=e2.getCount()*Math.log(arr.F.l1norm(prob2));
 		arr.F.l1normalize(prob1);
 		arr.F.l1normalize(prob2);
 		
@@ -177,7 +180,6 @@ public class Agree2Sides {
 	
 	public void displayPosterior(PrintStream ps)
 	{	
-		
 		for (int i=0;i<c1.getEdges().size();i++)
 		{
 			Edge edge=c1.getEdges().get(i);
@@ -192,5 +194,4 @@ public class Agree2Sides {
 			ps.println(" ||| C=" + t);
 		}
 	}
-	
 }
