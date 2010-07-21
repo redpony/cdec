@@ -144,7 +144,7 @@ if (lc($MODEL) eq "pyp") {
     } else {
         topic_train();
     }
-} elsif (lc($MODEL) =~ /pr|em|agree/)
+} elsif (lc($MODEL) =~ /pr|em|agree/) {
     prem_train();
 } else { die "Unsupported model type: $MODEL. Must be one of PYP or PREM.\n"; }
 if($HIER_CAT) {
