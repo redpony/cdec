@@ -483,7 +483,7 @@ void SentenceScorer::ComputeErrorSurface(const ViterbiEnvelope& ve, ErrorSurface
 
 void BLEUScore::ScoreDetails(string* details) const {
   char buf[2000];
-  vector<float> precs(min(N(),4));
+  vector<float> precs(max(N(),4));
   float bp;
   float bleu = ComputeScore(&precs, &bp);
   for (int i=N();i<4;++i)

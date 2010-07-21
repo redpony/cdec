@@ -132,7 +132,6 @@ struct oracle_directions {
     }
 
     UseConf(*conf);
-    verbose=oracle.verbose;
     return;
     bad_cmdline:
       cerr << dcmdline_options << endl;
@@ -145,11 +144,11 @@ struct oracle_directions {
     Run();
     return 0;
   }
-  bool verbose;
+  bool verbose() const { return oracle.verbose; }
   void Run() {
     AddPrimaryAndRandomDirections();
     AddOracleDirections();
-    compress_similar(directions,max_similarity,&cerr,true,verbose);
+    compress_similar(directions,max_similarity,&cerr,true,verbose());
     Print();
   }
 
@@ -189,7 +188,7 @@ struct oracle_directions {
     have_doc=!decoder_translations_file.empty();
     if (have_doc) {
       model_hyps.Load(decoder_translations_file);
-      if (verbose) model_hyps.Print(cerr,5);
+      if (verbose()) model_hyps.Print(cerr,5);
       model_scores.resize(model_hyps.size());
       if (dev_set_size!=model_hyps.size()) {
         cerr<<"You supplied decoder_translations with a different number of lines ("<<model_hyps.size()<<") than dev_set_size ("<<dev_set_size<<")"<<endl;
@@ -200,10 +199,10 @@ struct oracle_directions {
         //TODO: what is scoreCcand? without clipping? do without for consistency w/ oracle
         model_scores[i]=oracle.ds[i]->ScoreCandidate(model_hyps[i]);
         assert(model_scores[i]);
-        if (verbose) cerr<<"Before model["<<i<<"]: "<<ds().ScoreDetails()<<endl;
-        if (verbose) cerr<<"model["<<i<<"]: "<<model_scores[i]->ScoreDetails()<<endl;
+        if (verbose()) cerr<<"Before model["<<i<<"]: "<<ds().ScoreDetails()<<endl;
+        if (verbose()) cerr<<"model["<<i<<"]: "<<model_scores[i]->ScoreDetails()<<endl;
         oracle.doc_score->PlusEquals(*model_scores[i]);
-        if (verbose) cerr<<"After model["<<i<<"]: "<<ds().ScoreDetails()<<endl;
+        if (verbose()) cerr<<"After model["<<i<<"]: "<<ds().ScoreDetails()<<endl;
       }
       //TODO: compute doc bleu stats for each sentence, then when getting oracle temporarily exclude stats for that sentence (skip regular score updating)
     }
@@ -243,7 +242,7 @@ struct oracle_directions {
     Oracle &o=oracles[i];
     if (o.is_null()) {
       if (have_doc) {
-        if (verbose) cerr<<"Before removing i="<<i<<" "<<ds().ScoreDetails()<<"\n";
+        if (verbose()) cerr<<"Before removing i="<<i<<" "<<ds().ScoreDetails()<<"\n";
         adjust_doc(i,-1);
       }
       ReadFile rf(forest_file(i));
@@ -252,9 +251,9 @@ struct oracle_directions {
         Timer t("Loading forest from JSON "+forest_file(i));
         HypergraphIO::ReadFromJSON(rf.stream(), &hg);
       }
-      if (verbose) cerr<<"Before oracle["<<i<<"]: "<<ds().ScoreDetails()<<endl;
+      if (verbose()) cerr<<"Before oracle["<<i<<"]: "<<ds().ScoreDetails()<<endl;
       o=oracle.ComputeOracle(oracle.MakeMetadata(hg,i),&hg,origin);
-      if (verbose) {
+      if (verbose()) {
         cerr << o;
         ScoreP hopesc=oracle.GetScore(o.hope.sentence,i);
         oracle.doc_score->PlusEquals(*hopesc,1);
