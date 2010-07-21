@@ -87,7 +87,7 @@ float SentenceScorer::ComputeRefLength(const Sentence &hyp) const {
 
 const std::string* SentenceScorer::GetSource() const { return NULL; }
 
-class SERScore : public Score {
+class SERScore : public ScoreBase<SERScore> {
   friend class SERScorer;
  public:
   SERScore() : correct(0), total(0) {}
@@ -151,7 +151,7 @@ class SERScorer : public SentenceScorer {
   vector<vector<WordID> > refs_;
 };
 
-class BLEUScore : public Score {
+class BLEUScore : public ScoreBase<BLEUScore> {
   friend class BLEUScorerBase;
  public:
   BLEUScore(int n) : correct_ngram_hit_counts(float(0),n), hyp_ngram_counts(float(0),n) {
