@@ -182,7 +182,12 @@ public class Agree {
 	
 	public void displayPosterior(PrintStream ps)
 	{	
-		for (Edge edge : c.getEdges())
+		displayPosterior(ps, c.getEdges());
+	}
+	
+	public void displayPosterior(PrintStream ps, List<Edge> test)
+	{	
+		for (Edge edge : test)
 		{
 			double probs[] = posterior(edge);
 			arr.F.l1normalize(probs);

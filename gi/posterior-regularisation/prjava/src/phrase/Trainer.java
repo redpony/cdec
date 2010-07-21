@@ -180,23 +180,21 @@ public class Trainer
 			File outfile = (File) options.valueOf("out");
 			try {
 				PrintStream ps = FileUtil.printstream(outfile);
-				List<Edge> test;
-				if (!options.has("test")) // just use the training
-					test = corpus.getEdges();
-				else
+				List<Edge> test = corpus.getEdges();
+				if (options.has("test")) // just use the training
 				{	// if --test supplied, load up the file
-					if (agree == null && agree2sides == null)
+					if (agree2sides == null)
 					{
 						infile = (File) options.valueOf("test");
 						System.out.println("Reading testing concordance from " + infile);
 						test = corpus.readEdges(FileUtil.reader(infile));
 					}
 					else
-						System.err.println("Can't run agreement models on different test data cf training (yet); --test ignored.");
+						System.err.println("Can't run bilingual agreement model on different test data cf training (yet); --test ignored.");
 				}
 				
 				if (agree != null)
-					agree.displayPosterior(ps);
+					agree.displayPosterior(ps, test);
 				else if (agree2sides != null)
 					agree2sides.displayPosterior(ps);
 				else
