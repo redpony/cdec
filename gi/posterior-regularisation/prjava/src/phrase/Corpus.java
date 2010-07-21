@@ -222,7 +222,10 @@ public class Corpus
 				String countString = parts[i + 1];
 
 				assert (countString.startsWith("C="));
-				double count = Double.parseDouble(countString.substring(2).trim());
+
+				String []countToks=countString.split(" ");
+				
+				double count = Double.parseDouble(countToks[0].substring(2).trim());
 				
 				TIntArrayList ctx = new TIntArrayList();
 				StringTokenizer ctxStrtok = new StringTokenizer(ctxString, " ");
@@ -233,12 +236,12 @@ public class Corpus
 				}
 				int contextId = contextLexicon.insert(ctx);
 
-				String []countToks=countString.split(" ");
+
 				if(countToks.length<2){
 					edges.add(new Edge(phraseId, contextId, count));
 				}
 				else{
-					int tag=Integer.parseInt(countToks[1]);
+					int tag=Integer.parseInt(countToks[1].substring(2));
 					edges.add(new Edge(phraseId, contextId, count,tag));
 				}
 			}
