@@ -27,7 +27,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("input,i", po::value<string>()->default_value("-"), "Input file")
         ("phrases,p", po::value<string>(), "File contatining phrases of interest")
         ("phrase_context_size,S", po::value<int>()->default_value(2), "Use this many words of context on left and write when writing base phrase contexts")
-        ("combiner_size,c", po::value<size_t>()->default_value(800000), "Number of unique items to store in cache before writing rule counts. Set to 1 to disable cache. Set to 0 for no limit.")
+        ("combiner_size,c", po::value<size_t>()->default_value(30000), "Number of unique items to store in cache before writing rule counts. Set to 1 to disable cache. Set to 0 for no limit.")
         ("prune", po::value<size_t>()->default_value(0), "Prune items with count less than threshold; applies each time the cache is dumped.")
         ("silent", "Write nothing to stderr except errors")
         ("help,h", "Print this help message and exit");

@@ -90,10 +90,7 @@ public class PhraseCluster {
 		for(int phrase=0; phrase < n_phrases; phrase++)
 		{
 			if (phraseSizeLimit >= 1 && c.getPhrase(phrase).size() > phraseSizeLimit)
-			{
-			//	System.arraycopy(pi[phrase], 0, exp_pi[phrase], 0, K);
 				continue;
-			}	
 
 			Arrays.fill(exp_pi, 1e-10);
 			
@@ -119,8 +116,8 @@ public class PhraseCluster {
 					exp_pi[tag]+=p[tag]*count;
 				}
 			}
-			arr.F.l1norm(exp_pi);
-			pi[phrase]=exp_pi;
+			arr.F.l1normalize(exp_pi);
+			System.arraycopy(exp_pi, 0, pi[phrase], 0, K);
 		}
 
 		//M
