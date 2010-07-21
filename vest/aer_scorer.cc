@@ -9,7 +9,7 @@
 
 using namespace std;
 
-class AERScore : public Score {
+class AERScore : public ScoreBase<AERScore> {
   friend class AERScorer;
  public:
   AERScore() : num_matches(), num_predicted(), num_in_ref() {}

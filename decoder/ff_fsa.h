@@ -32,7 +32,8 @@ struct FsaFeatureFunction {
 
 // regular bottom up scorer from Fsa feature
 template <class Impl>
-struct FeatureFunctionFromFsa {
+struct FeatureFunctionFromFsa : public FeatureFunction,Impl {
+  FeatureFunctionFromFsa(
 };
 
 

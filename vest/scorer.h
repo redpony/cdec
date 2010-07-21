@@ -46,6 +46,18 @@ class Score : public boost::intrusive_refcount<Score> {
   virtual void Encode(std::string* out) const = 0;
   static ScoreP GetZero(ScoreType type);
   static ScoreP GetOne(ScoreType type);
+  virtual ScoreP Clone() const = 0;
+protected:
+  Score() {  } // we define these explicitly because refcount is noncopyable
+  Score(Score const& o) {  }
+};
+
+//TODO: make sure default copy ctors for score types do what we want.
+template <class Derived>
+struct ScoreBase : public Score {
+  ScoreP Clone() const  {
+    return ScoreP(new Derived(dynamic_cast<Derived const&>(*this)));
+  }
 };
 
 class SentenceScorer {

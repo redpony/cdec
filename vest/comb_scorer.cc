@@ -4,7 +4,7 @@
 
 using namespace std;
 
-class BLEUTERCombinationScore : public Score {
+class BLEUTERCombinationScore : public ScoreBase<BLEUTERCombinationScore> {
   friend class BLEUTERCombinationScorer;
  public:
   ~BLEUTERCombinationScore();

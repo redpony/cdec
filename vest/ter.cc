@@ -412,7 +412,7 @@ class TERScorerImpl {
   }
 };
 
-class TERScore : public Score {
+class TERScore : public ScoreBase<TERScore> {
   friend class TERScorer;
 
  public:

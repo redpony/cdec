@@ -154,7 +154,7 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
   ob.AddOptions(&opts);
   po::options_description clo("Command line options");
   clo.add_options()
-        ("config,c", po::value<string>(), "Configuration file")
+    ("config,c", po::value<vector<string> >(), "Configuration file(s) - latest has priority")
         ("help,h", "Print this help message and exit")
     ("usage,u", po::value<string>(), "Describe a feature function type")
     ("compgen", "Print just option names suitable for bash command line completion builtin 'compgen'")
@@ -172,10 +172,14 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
   }
   ShowBanner();
   if (conf.count("config")) {
-    const string cfg = str("config",conf);
-    cerr << "Configuration file: " << cfg << endl;
-    ifstream config(cfg.c_str());
-    po::store(po::parse_config_file(config, dconfig_options), conf);
+    typedef vector<string> Cs;
+    Cs cs=conf["config"].as<Cs>();
+    for (int i=0;i<cs.size();++i) {
+      string cfg=cs[i];
+      cerr << "Configuration file: " << cfg << endl;
+      ifstream config(cfg.c_str());
+      po::store(po::parse_config_file(config, dconfig_options), conf);
+    }
   }
   po::notify(conf);
 

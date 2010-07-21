@@ -1,5 +1,8 @@
 #ifndef _SPARSE_VECTOR_H_
 #define _SPARSE_VECTOR_H_
+/* TODO: use dense_hash_map for sparsevector
+   use SparseVectorList (pair smallvector) for feat funcs / hypergraphs (you rarely need random access; just append a feature to the list)
+*/
 /* hack: index 0 never gets printed because cdyer is creative and efficient. features which have no weight got feature dict id 0, see, and the models all clobered that value.  nobody wants to see it.  except that vlad is also creative and efficient and stored the oracle bleu there. */
 
 
