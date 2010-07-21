@@ -9,8 +9,8 @@ struct print {
   }
 };
 
+char p[]=" 1 are u 2 serious?";
 int main(int argc, char *argv[]) {
-  char *p=" 1 are u 2 serious?";
   std::string const& w="verylongword";
   VisitTokens(p,print());
   VisitTokens(w,print());

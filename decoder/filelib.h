@@ -58,9 +58,10 @@ class ReadFile : public BaseFile<std::istream> {
         std::cerr << "File does not exist: " << filename << std::endl;
         abort();
       }
+      char const* file=filename_.c_str(); // just in case the gzstream keeps using the filename for longer than the constructor, e.g. inflateReset2.  warning in valgrind that I'm hoping will disappear - it makes no sense.
       ps_.reset(EndsWith(filename, ".gz") ?
-                static_cast<std::istream*>(new igzstream(filename.c_str())) :
-                static_cast<std::istream*>(new std::ifstream(filename.c_str())));
+                static_cast<std::istream*>(new igzstream(file)) :
+                static_cast<std::istream*>(new std::ifstream(file)));
       if (!*ps_) {
         std::cerr << "Failed to open " << filename << std::endl;
         abort();
@@ -79,9 +80,10 @@ class WriteFile : public BaseFile<std::ostream> {
     if (is_std()) {
       ps_=PS(&std::cout,file_null_deleter());
     } else {
+      char const* file=filename_.c_str(); // just in case the gzstream keeps using the filename for longer than the constructor, e.g. inflateReset2.  warning in valgrind that I'm hoping will disappear - it makes no sense.
       ps_.reset(EndsWith(filename, ".gz") ?
-                static_cast<std::ostream*>(new ogzstream(filename.c_str())) :
-                static_cast<std::ostream*>(new std::ofstream(filename.c_str())));
+                static_cast<std::ostream*>(new ogzstream(file)) :
+                static_cast<std::ostream*>(new std::ofstream(file)));
       if (!*ps_) {
         std::cerr << "Failed to open " << filename << std::endl;
         abort();
