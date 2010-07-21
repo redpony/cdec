@@ -78,13 +78,11 @@ public class PhraseCluster {
 	public double EM(int phraseSizeLimit)
 	{
 		double [][][]exp_emit=new double [K][n_positions][n_words];
-		double [][]exp_pi=new double[n_phrases][K];
+		double []exp_pi=new double[K];
 		
 		for(double [][]i:exp_emit)
 			for(double []j:i)
 				Arrays.fill(j, 1e-10);
-		for(double []j:pi)
-			Arrays.fill(j, 1e-10);
 		
 		double loglikelihood=0;
 		
@@ -93,10 +91,12 @@ public class PhraseCluster {
 		{
 			if (phraseSizeLimit >= 1 && c.getPhrase(phrase).size() > phraseSizeLimit)
 			{
-				System.arraycopy(pi[phrase], 0, exp_pi[phrase], 0, K);
+			//	System.arraycopy(pi[phrase], 0, exp_pi[phrase], 0, K);
 				continue;
 			}	
 
+			Arrays.fill(exp_pi, 1e-10);
+			
 			List<Edge> contexts = c.getEdgesForPhrase(phrase);
 
 			for (int ctx=0; ctx<contexts.size(); ctx++)
@@ -116,21 +116,19 @@ public class PhraseCluster {
 				{
 					for(int pos=0;pos<n_positions;pos++)
 						exp_emit[tag][pos][context.get(pos)]+=p[tag]*count;		
-					exp_pi[phrase][tag]+=p[tag]*count;
+					exp_pi[tag]+=p[tag]*count;
 				}
 			}
+			arr.F.l1norm(exp_pi);
+			pi[phrase]=exp_pi;
 		}
 
 		//M
 		for(double [][]i:exp_emit)
 			for(double []j:i)
 				arr.F.l1normalize(j);
-		
-		for(double []j:exp_pi)
-			arr.F.l1normalize(j);
 			
 		emit=exp_emit;
-		pi=exp_pi;
 
 		return loglikelihood;
 	}
@@ -258,7 +256,7 @@ public class PhraseCluster {
 		for(double [][]i:exp_emit)
 			for(double []j:i)
 				Arrays.fill(j, 1e-10);
-		for(double []j:pi)
+		for(double []j:exp_pi)
 			Arrays.fill(j, 1e-10);
 
 		if (lambdaPT == null && cacheLambda)
@@ -338,7 +336,7 @@ public class PhraseCluster {
 		for(double [][]i:exp_emit)
 			for(double []j:i)
 				Arrays.fill(j, 1e-10);
-		for(double []j:pi)
+		for(double []j:exp_pi)
 			Arrays.fill(j, 1e-10);
 		
 		double loglikelihood=0, kl=0, l1lmax=0, primal=0;
@@ -496,6 +494,13 @@ public class PhraseCluster {
 	public double[] posterior(Corpus.Edge edge) 
 	{
 		double[] prob;
+		
+		if(edge.getTag()>=0){
+			prob=new double[K];
+			prob[edge.getTag()]=1;
+			return prob;
+		}
+		
 		if (edge.getPhraseId() < n_phrases)
 			prob = Arrays.copyOf(pi[edge.getPhraseId()], K);
 		else
