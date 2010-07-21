@@ -28,12 +28,26 @@ public class Corpus
 	
 	public class Edge
 	{
+		
+		Edge(int phraseId, int contextId, double count,int tag)
+		{
+			this.phraseId = phraseId;
+			this.contextId = contextId;
+			this.count = count;
+			fixTag=tag;
+		}
+		
 		Edge(int phraseId, int contextId, double count)
 		{
 			this.phraseId = phraseId;
 			this.contextId = contextId;
 			this.count = count;
+			fixTag=-1;
 		}
+		public int getTag(){
+			return fixTag;
+		}
+		
 		public int getPhraseId()
 		{
 			return phraseId;
@@ -85,6 +99,7 @@ public class Corpus
 		private int phraseId;
 		private int contextId;
 		private double count;
+		private int fixTag;
 	}
 
 	List<Edge> getEdges()
@@ -218,7 +233,14 @@ public class Corpus
 				}
 				int contextId = contextLexicon.insert(ctx);
 
-				edges.add(new Edge(phraseId, contextId, count));
+				String []countToks=countString.split(" ");
+				if(countToks.length<2){
+					edges.add(new Edge(phraseId, contextId, count));
+				}
+				else{
+					int tag=Integer.parseInt(countToks[1]);
+					edges.add(new Edge(phraseId, contextId, count,tag));
+				}
 			}
 		}
 		return edges;
