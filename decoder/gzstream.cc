@@ -18,17 +18,17 @@
 // ============================================================================
 //
 // File          : gzstream.C
-// Revision      : $Revision: 1.1 $
-// Revision_date : $Date: 2006/03/30 04:05:52 $
+// Revision      : $Revision: 1.7 $
+// Revision_date : $Date: 2003/01/08 14:41:27 $
 // Author(s)     : Deepak Bandyopadhyay, Lutz Kettner
 //
 // Standard streambuf implementation following Nicolai Josuttis, "The
 // Standard C++ Library".
 // ============================================================================
 
-#include "gzstream.h"
+#include <gzstream.h>
 #include <iostream>
-#include <cstring>
+#include <cstring>  // for memcpy
 #include <stdexcept>
 
 #ifdef GZSTREAM_NAMESPACE
@@ -96,7 +96,7 @@ int gzstreambuf::underflow() { // used for input buffer only
     int n_putback = gptr() - eback();
     if ( n_putback > 4)
         n_putback = 4;
-    memcpy( buffer + (4 - n_putback), gptr() - n_putback, n_putback);
+    std::memcpy( buffer + (4 - n_putback), gptr() - n_putback, n_putback);
 
     int num = gzread( file, buffer+4, bufferSize-4);
     if (num <= 0) // ERROR or EOF
