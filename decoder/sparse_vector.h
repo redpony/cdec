@@ -332,7 +332,7 @@ class SparseVectorList {
     int c=0;
     for (;i<end;++i,++c) {
       if (*i!=z)
-        p.push_back(pair_type(c,*i));
+        p.push_back(Pair(c,*i));
     }
     p.compact();
   }
@@ -341,9 +341,26 @@ class SparseVectorList {
     for (unsigned i=0;i<v.size();++i) {
       T const& t=v[i];
       if (t!=z)
-        p.push_back(pair_type(i,t));
+        p.push_back(Pair(i,t));
     }
     p.compact();
+  }
+  // unlike SparseVector, this doesn't overwrite - but conversion to SparseVector will use last value, which is the same
+  void set_value(int i,T const& val) {
+    p.push_back(Pair(i,val));
+  }
+  void overlay(SparseVector<T> *to) const {
+    for (int i=0;i<p.size();++i)
+      to->set_value(p[i].first,p[i].second);
+  }
+  void copy_to(SparseVector<T> *to) const {
+    to->clear();
+    overlay(to);
+  }
+  SparseVector<T> sparse() const {
+    SparseVector<T> r;
+    copy_to(r);
+    return r;
   }
 private:
   List p;

@@ -46,8 +46,8 @@ public:
   inline void TraversalFeatures(const SentenceMetadata& smeta,
                                 const Hypergraph::Edge& edge,
                                 const std::vector<const void*>& ant_contexts,
-                                SparseVector<double>* features,
-                                SparseVector<double>* estimated_features,
+                                FeatureVector* features,
+                                FeatureVector* estimated_features,
                                 void* out_state) const {
     TraversalFeaturesImpl(smeta, edge, ant_contexts,
                           features, estimated_features, out_state);
@@ -62,7 +62,7 @@ public:
   // it here.  For example, the language model computes the cost of adding
   // <s> and </s>.
   virtual void FinalTraversalFeatures(const void* residual_state,
-                                      SparseVector<double>* final_features) const;
+                                      FeatureVector* final_features) const;
 
  protected:
   // context is a pointer to a buffer of size NumBytesContext() that the
@@ -75,15 +75,15 @@ public:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
-                                     SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
+                                     FeatureVector* features,
+                                     FeatureVector* estimated_features,
                                      void* context) const = 0;
 
   // !!! ONLY call this from subclass *CONSTRUCTORS* !!!
   void SetStateSize(size_t state_size) {
     state_size_ = state_size;
   }
-
+  int StateSize() const { return state_size_; }
  private:
   int state_size_;
 };
@@ -102,8 +102,8 @@ class WordPenalty : public FeatureFunction {
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
-                                     SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
+                                     FeatureVector* features,
+                                     FeatureVector* estimated_features,
                                      void* context) const;
  private:
   const int fid_;
@@ -122,8 +122,8 @@ class SourceWordPenalty : public FeatureFunction {
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
-                                     SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
+                                     FeatureVector* features,
+                                     FeatureVector* estimated_features,
                                      void* context) const;
  private:
   const int fid_;
@@ -148,8 +148,8 @@ class ArityPenalty : public FeatureFunction {
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
-                                     SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
+                                     FeatureVector* features,
+                                     FeatureVector* estimated_features,
                                      void* context) const;
  private:
   std::vector<WordID> fids_;
