@@ -4,25 +4,32 @@
 #include <string>
 #include <vector>
 #include "wordid.h"
+#include <assert.h>
 
 class Vocab;
 
 struct TD {
+  static const int reserved_begin=10; // allow room for SRI special tokens e.g. unk ss se pause.  tokens until this get "<FILLERi>"
+  static const int n_reserved=10; // 0...n_reserved-1 get token '<RESERVEDi>'
+  static inline WordID reserved(int i) {
+    assert(i>=0 && i<n_reserved);
+    return (WordID)(reserved_begin+i);
+  }
+  static const WordID max_wordid=0x7fffffff;
+  static const WordID none=(WordID)-1; // Vocab_None
+  static char const* const ss_str;  //="<s>";
+  static char const* const se_str;  //="</s>";
+  static char const* const unk_str; //="<unk>";
+  static WordID ss,se,unk; // x=Convert(x_str)
+  static inline WordID begin() {
+    return reserved(n_reserved);
+  }
+  static WordID end(); // next id to be assigned; [begin,end) give the non-reserved tokens seen so far
   static Vocab dict_;
   static void ConvertSentence(std::string const& sent, std::vector<WordID>* ids);
   static void GetWordIDs(const std::vector<std::string>& strings, std::vector<WordID>* ids);
   static std::string GetString(const std::vector<WordID>& str);
-  static int AppendString(const WordID& w, int pos, int bufsize, char* buffer) {
-    const char* word = TD::Convert(w);
-    const char* const end_buf = buffer + bufsize;
-    char* dest = buffer + pos;
-    while(dest < end_buf && *word) {
-      *dest = *word;
-      ++dest;
-      ++word;
-    }
-    return (dest - buffer);
-  }
+  static int AppendString(const WordID& w, int pos, int bufsize, char* buffer);
   static unsigned int NumWords();
   static WordID Convert(const std::string& s);
   static WordID Convert(char const* s);

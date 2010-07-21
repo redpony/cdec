@@ -187,7 +187,7 @@ class LanguageModelImpl {
     kSTART = TD::Convert("<s>");
     kSTOP = TD::Convert("</s>");
     kUNKNOWN = TD::Convert("<unk>");
-    kNONE = -1;
+    kNONE = TD::none;
     kSTAR = TD::Convert("<{STAR}>");
   }
 
@@ -289,7 +289,7 @@ class LanguageModelImpl {
 
   //TODO: use stateless_cost instead of ProbNoRemnant, check left words only.  for items w/ fewer words than ctx len, how are they represented?  kNONE padded?
 
-  //TODO: make sure that Vocab_None is set to kNONE in srilm (-1), or that SRILM otherwise interprets -1 as a terminator and not a word
+  //Vocab_None is (unsigned)-1 in srilm, same as kNONE. in srilm (-1), or that SRILM otherwise interprets -1 as a terminator and not a word
   double EstimateProb(const void* state) {
     if (unigram) return 0.;
     int len = StateSize(state);

@@ -8,10 +8,50 @@
 using namespace std;
 
 //FIXME: valgrind errors (static init order?)
-Vocab TD::dict_;
+Vocab TD::dict_(0,TD::max_wordid);
+WordID TD::ss=dict_.ssIndex();
+WordID TD::se=dict_.seIndex();
+WordID TD::unk=dict_.unkIndex();
+char const*const TD::ss_str=Vocab_SentStart;
+char const*const TD::se_str=Vocab_SentEnd;
+char const*const TD::unk_str=Vocab_Unknown;
+
+// pre+(i-base)+">" for i in [base,e)
+inline void pad(std::string const& pre,int base,int e) {
+  assert(base<=e);
+  ostringstream o;
+  for (int i=base;i<e;++i) {
+    o.str(pre);
+    o<<(i-base)<<'>';
+    WordID id=TD::Convert(o.str());
+    assert(id==i);
+  }
+}
+
+
+namespace {
+struct TD_init {
+  TD_init() {
+    assert(TD::Convert(TD::ss_str)==TD::ss);
+    assert(TD::Convert(TD::se_str)==TD::se);
+    assert(TD::Convert(TD::unk_str)==TD::unk);
+    assert(TD::none==Vocab_None);
+    pad("<FILLER",TD::end(),TD::reserved_begin);
+    assert(TD::end()==TD::reserved_begin);
+    int reserved_end=TD::begin();
+    pad("<RESERVED",TD::end(),reserved_end);
+    assert(TD::end()==reserved_end);
+  }
+};
+
+TD_init td_init;
+}
 
 unsigned int TD::NumWords() {
   return dict_.numWords();
+}
+WordID TD::end() {
+  return dict_.highIndex();
 }
 
 WordID TD::Convert(const std::string& s) {
@@ -25,9 +65,6 @@ WordID TD::Convert(char const* s) {
 const char* TD::Convert(const WordID& w) {
   return dict_.getWord((VocabIndex)w);
 }
-
-static const string empty;
-static const string space = " ";
 
 
 void TD::GetWordIDs(const std::vector<std::string>& strings, std::vector<WordID>* ids) {
@@ -44,6 +81,20 @@ std::string TD::GetString(const std::vector<WordID>& str) {
   }
   return o.str();
 }
+
+int TD::AppendString(const WordID& w, int pos, int bufsize, char* buffer)
+{
+  const char* word = TD::Convert(w);
+  const char* const end_buf = buffer + bufsize;
+  char* dest = buffer + pos;
+  while(dest < end_buf && *word) {
+    *dest = *word;
+    ++dest;
+    ++word;
+  }
+  return (dest - buffer);
+}
+
 
 namespace {
 struct add_wordids {
