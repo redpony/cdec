@@ -48,7 +48,9 @@ my $PATCH_CORPUS = "$SCRIPT_DIR/scripts/patch-corpus.pl";
 my $EXTRACTOR = "$EXTOOLS/extractor";
 my $TOPIC_TRAIN = "$PYPTOOLS/pyp-contexts-train";
 
-assert_exec($PATCH_CORPUS, $SORT_KEYS, $REDUCER, $EXTRACTOR, $PYP_TOPICS_TRAIN, $S2L, $C2D, $TOPIC_TRAIN);
+assert_exec($PATCH_CORPUS, $SORT_KEYS, $REDUCER, $EXTRACTOR, #$PYP_TOPICS_TRAIN, 
+            $S2L, $C2D #, $TOPIC_TRAIN
+           );
 
 my $BACKOFF_GRAMMAR;
 my $DEFAULT_CAT;
@@ -142,7 +144,7 @@ if (lc($MODEL) eq "pyp") {
     } else {
         topic_train();
     }
-} elsif (lc($MODEL) eq "prem") {
+} elsif (lc($MODEL) =~ /pr|em|agree/)
     prem_train();
 } else { die "Unsupported model type: $MODEL. Must be one of PYP or PREM.\n"; }
 if($HIER_CAT) {
@@ -191,12 +193,12 @@ sub context_dir {
 sub cluster_dir {
     if (lc($MODEL) eq "pyp") {
         return context_dir() . ".PYP.t$NUM_TOPICS.s$NUM_SAMPLES";
-    } elsif (lc($MODEL) eq "prem") {
-        if ($PR_SCALE_P == 0 && $PR_SCALE_C == 0) {
-            return context_dir() . ".EM.t$NUM_TOPICS.i$NUM_ITERS";
-        } else {
-            return context_dir() . ".PR.t$NUM_TOPICS.i$NUM_ITERS.sp$PR_SCALE_P.sc$PR_SCALE_C";
-        }
+    } elsif (lc($MODEL) eq "em") {
+        return context_dir() . ".EM.t$NUM_TOPICS.i$NUM_ITERS";
+    } elsif (lc($MODEL) eq "pr") {
+        return context_dir() . ".PR.t$NUM_TOPICS.i$NUM_ITERS.sp$PR_SCALE_P.sc$PR_SCALE_C";
+    } elsif (lc($MODEL) eq "agree") {
+        return context_dir() . ".AGREE.t$NUM_TOPICS.i$NUM_ITERS";
     }
 }
 
@@ -277,7 +279,13 @@ sub prem_train {
   if (-e $OUT_CLUSTERS) {
     print STDERR "$OUT_CLUSTERS exists, reusing...\n";
   } else {
-    safesystem("$PREM_TRAIN --in $IN_CONTEXTS --topics $NUM_TOPICS --out $OUT_CLUSTERS --iterations $NUM_ITERS --scale-phrase $PR_SCALE_P --scale-context $PR_SCALE_C $PR_FLAGS") or die "Topic training failed.\n";
+    my $opts = "";
+    if (lc($MODEL) eq "pr") {
+        $opts = "--scale-phrase $PR_SCALE_P --scale-context $PR_SCALE_C";
+    } elsif (lc($MODEL) eq "agree") {
+        $opts = "--agree-direction";
+    }
+    safesystem("$PREM_TRAIN --in $IN_CONTEXTS --topics $NUM_TOPICS --out $OUT_CLUSTERS --iterations $NUM_ITERS $opts $PR_FLAGS") or die "Topic training failed.\n";
   }
 }
 
