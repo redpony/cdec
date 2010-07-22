@@ -183,7 +183,9 @@ sub setup_data {
   copy($CORPUS, $CORPUS_LEX);
   if ($TAGGED_CORPUS) {
     die "Can't find $TAGGED_CORPUS" unless -f $TAGGED_CORPUS;
-    my $cmd="$PATCH_CORPUS $TAGGED_CORPUS $CORPUS_LEX > $CORPUS_CLUSTER";
+    my $opt="";
+    $opt = "-s" if ($LANGUAGE eq "source");
+    my $cmd="$PATCH_CORPUS $opt $TAGGED_CORPUS $CORPUS_LEX > $CORPUS_CLUSTER";
     safesystem($cmd) or die "Failed to extract contexts.";
   } else {
     symlink($LEX_NAME, $CORPUS_CLUSTER);

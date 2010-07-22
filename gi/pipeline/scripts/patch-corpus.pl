@@ -2,7 +2,13 @@
 use strict;
 
 my $PATCH = shift @ARGV;
-die "Usage: $0 tagged.en[_fr] < lexical.en_fr_al[_...]\n" unless $PATCH;
+my $TGT = 1;
+if ($PATCH eq "-s") {
+    undef $TGT;
+    $PATCH = shift @ARGV;
+}
+
+die "Usage: $0 [-s] tagged.en[_fr] < lexical.en_fr_al[_...]\n" unless $PATCH;
 
 open P, "<$PATCH" or die "Can't read tagged corpus $PATCH: $!";
 my $first=<P>; close P;
@@ -24,9 +30,15 @@ while(my $pline = <P>) {
   chomp $line;
   @fields = split / \|\|\| /, $line;
   my @pwords = split /\s+/, $pline;
-  my @lwords = split /\s+/, $fields[1];
-  die "Length mismatch in line $line!\n" unless (scalar @pwords == scalar @lwords);
-  $fields[1] = $pline;
+  if ($TGT) {
+      my @lwords = split /\s+/, $fields[1];
+      die "Length mismatch in line $line!\n" unless (scalar @pwords == scalar @lwords);
+      $fields[1] = $pline;
+  } else {
+      my @lwords = split /\s+/, $fields[0];
+      die "Length mismatch in line $line!\n" unless (scalar @pwords == scalar @lwords);
+      $fields[0] = $pline;
+  }
   print join ' ||| ', @fields;
   print "\n";
 }
