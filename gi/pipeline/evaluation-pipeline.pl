@@ -143,7 +143,7 @@ for my $feat (@features) {
   if (!defined $rs) { die "DON'T KNOW ABOUT FEATURE $feat\n"; }
   my @xfs = @$rs;
   @xfeats = (@xfeats, @xfs);
-  $FEATURIZER_OPTS .= " -f $feat" unless $feat=="BackoffRule";
+  $FEATURIZER_OPTS .= " -f $feat" unless $feat eq "BackoffRule";
 }
 print STDERR "X-FEATS: @xfeats\n";
 
