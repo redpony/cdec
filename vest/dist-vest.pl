@@ -56,6 +56,7 @@ my $maxsim=0;
 my $oraclen=0;
 my $oracleb=20;
 my $dirargs='';
+my $density_prune;
 my $usefork;
 
 # Process command-line options
@@ -63,6 +64,7 @@ Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
 	"decoder=s" => \$decoderOpt,
 	"decode-nodes=i" => \$decode_nodes,
+  "density-prune=f" => \$density_prune,
 	"dont-clean" => \$disable_clean,
         "use-fork" => \$usefork,
 	"dry-run" => \$dryrun,
@@ -91,6 +93,10 @@ if (GetOptions(
 ) == 0 || @ARGV!=1 || $help) {
 	print_help();
 	exit;
+}
+
+if (defined $density_prune) {
+  die "--density_prune n: n must be greater than 1.0\n" unless $density_prune > 1.0;
 }
 
 if ($usefork) { $usefork = "--use-fork"; } else { $usefork = ''; }
@@ -236,9 +242,12 @@ while (1){
 	my $im1 = $iteration - 1;
 	my $weightsFile="$dir/weights.$im1";
 	my $decoder_cmd = "$decoder -c $iniFile -w $weightsFile -O $dir/hgs";
+  if ($density_prune) {
+    $decoder_cmd .= " --density_prune $density_prune";
+  }
 	my $pcmd = "cat $srcFile | $parallelize $usefork -p $pmem -e $logdir -j $decode_nodes -- ";
-        if ($run_local) { $pcmd = "cat $srcFile |"; }
-        my $cmd = $pcmd . "$decoder_cmd 2> $decoderLog 1> $runFile";
+  if ($run_local) { $pcmd = "cat $srcFile |"; }
+  my $cmd = $pcmd . "$decoder_cmd 2> $decoderLog 1> $runFile";
 	print STDERR "COMMAND:\n$cmd\n";
 	my $result = 0;
 	$result = system($cmd);
@@ -546,6 +555,10 @@ Options:
 
 	--decoder <decoder path>
 		Decoder binary to use.
+
+  --density-prune <N>
+    Limit the density of the hypergraph on each iteration to N times
+    the number of edges on the Viterbi path.
 
 	--help
 		Print this message and exit.

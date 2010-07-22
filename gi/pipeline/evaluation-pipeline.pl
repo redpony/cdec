@@ -7,6 +7,7 @@ my $CWD = getcwd;
 my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
 
 my $JOBS = 15;
+my $PMEM = "9G";
 
 # featurize_grammar may add multiple features from a single feature extractor
 # the key in this map is the extractor name, the value is a list of the extracted features
@@ -58,6 +59,7 @@ my @DEFAULT_FEATS = qw( PassThrough Glue GlueTop LanguageModel WordPenalty );
 
 
 
+my $FILTERBYF = "$SCRIPT_DIR/scripts/filter-by-f.pl";
 my $CDEC = "$SCRIPT_DIR/../../decoder/cdec";
 my $PARALLELIZE = "$SCRIPT_DIR/../../vest/parallelize.pl";
 my $EXTOOLS = "$SCRIPT_DIR/../../extools";
@@ -67,7 +69,7 @@ die "Can't find vest: $VEST" unless -e $VEST && -d $VEST;
 my $DISTVEST = "$VEST/dist-vest.pl";
 my $FILTER = "$EXTOOLS/filter_grammar";
 my $FEATURIZE = "$EXTOOLS/featurize_grammar";
-assert_exec($CDEC, $PARALLELIZE, $FILTER, $FEATURIZE, $DISTVEST);
+assert_exec($CDEC, $PARALLELIZE, $FILTER, $FEATURIZE, $DISTVEST, $FILTERBYF);
 
 my $numtopics = 25;
 
@@ -126,6 +128,7 @@ if (GetOptions(
         "backoff-grammar=s" => \$bkoffgram,
         "glue-grammar=s" => \$gluegram,
         "data=s" => \$dataDir,
+        "pmem=s" => \$PMEM,
         "features=s@" => \@features,
         "use-fork" => \$usefork,
         "jobs=i" => \$JOBS,
@@ -218,7 +221,7 @@ my $tuned_weights = mydircat($outdir, 'weights.tuned');
 if (-f $tuned_weights) {
   print STDERR "TUNED WEIGHTS $tuned_weights EXISTS: REUSING\n";
 } else {
-  my $cmd = "$DISTVEST $usefork --decode-nodes $JOBS --ref-files=$drefs --source-file=$dev --weights $weights $devini";
+  my $cmd = "$DISTVEST $usefork --decode-nodes $JOBS --pmem=$PMEM --ref-files=$drefs --source-file=$dev --weights $weights $devini";
   print STDERR "MERT COMMAND: $cmd\n";
   `rm -rf $outdir/vest 2> /dev/null`;
   chdir $outdir or die "Can't chdir to $outdir: $!";
@@ -248,6 +251,10 @@ exit 0;
 
 sub write_random_weights_file {
   my ($file, @extras) = @_;
+  if (-f $file) {
+    print STDERR "$file exists - REUSING!\n";
+    return;
+  }
   open F, ">$file" or die "Can't write $file: $!";
   my @feats = (@DEFAULT_FEATS, @extras);
   for my $feat (@feats) {
@@ -262,12 +269,15 @@ sub write_random_weights_file {
 sub filter {
   my ($grammar, $set, $name, $outdir) = @_;
   my $out1 = mydircat($outdir, "$name.filt.gz");
+  my $out2 = mydircat($outdir, "$name.f_feat.gz");
   my $outgrammar = mydircat($outdir, "$name.scfg.gz");
   if (-f $outgrammar) { print STDERR "$outgrammar exists - REUSING!\n"; } else {
     my $cmd = "gunzip -c $grammar | $FILTER -t $set | gzip > $out1";
     safesystem($out1, $cmd) or die "Filtering failed.";
-    $cmd = "gunzip -c $out1 | $FEATURIZE $FEATURIZER_OPTS -g $out1 -c $CORPUS | gzip > $outgrammar";
-    safesystem($outgrammar, $cmd) or die "Featurizing failed";
+    $cmd = "gunzip -c $out1 | $FEATURIZE $FEATURIZER_OPTS -g $out1 -c $CORPUS | gzip > $out2";
+    safesystem($out2, $cmd) or die "Featurizing failed";
+    $cmd = "$FILTERBYF $out2 $outgrammar";
+    safesystem($outgrammar, $cmd) or die "Secondary filtering failed";
   }
   return $outgrammar;
 }  
