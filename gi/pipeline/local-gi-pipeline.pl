@@ -94,9 +94,9 @@ $HIER_CAT = ( $NUM_TOPICS_COARSE ? 1 : 0 );
 
 print STDERR "   Output: $OUTPUT\n";
 my $DATA_DIR = $OUTPUT . '/corpora';
-my $LEX_NAME = 'corpus.f_e_a.lex';
+my $LEX_NAME = 'corpus.f_e_a.$LANGUAGE.lex';
 my $CORPUS_LEX = $DATA_DIR . '/' . $LEX_NAME;  # corpus used to extract rules
-my $CORPUS_CLUSTER = $DATA_DIR . '/corpus.f_e_a.cluster'; # corpus used for clustering (often identical)
+my $CORPUS_CLUSTER = $DATA_DIR . '/corpus.f_e_a.$LANGUAGE.cluster'; # corpus used for clustering (often identical)
 
 my $CONTEXT_DIR = $OUTPUT . '/' . context_dir();
 my $CLUSTER_DIR = $OUTPUT . '/' . cluster_dir();
