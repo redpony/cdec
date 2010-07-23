@@ -123,16 +123,20 @@ my $dataDir = '/export/ws10smt/data';
 my @features;
 my $bkoffgram;
 my $gluegram;
+my $oovgram;
 my $usefork;
+my $lmorder = 3;
 if (GetOptions(
         "backoff-grammar=s" => \$bkoffgram,
         "glue-grammar=s" => \$gluegram,
+        "oov-grammar=s" => \$oovgram,
         "data=s" => \$dataDir,
         "pmem=s" => \$PMEM,
         "features=s@" => \@features,
         "use-fork" => \$usefork,
         "jobs=i" => \$JOBS,
         "out-dir=s" => \$outdir,
+        "lmorder=i" => \$lmorder,
 ) == 0 || @ARGV!=2 || $help) {
         print_help();
         exit;
@@ -214,7 +218,6 @@ my $testini = mydircat($outdir, "cdec-test.ini");
 write_cdec_ini($testini, $testgrammar);
 
 
-
 # VEST
 print STDERR "\nMINIMUM ERROR TRAINING\n";
 my $tuned_weights = mydircat($outdir, 'weights.tuned');
@@ -294,17 +297,18 @@ sub write_cdec_ini {
   my ($filename, $grammar_path) = (@_);
   open CDECINI, ">$filename" or die "Can't write $filename: $!";
   my $glue = ($gluegram ? "$glue_grmr" : "$datadir/glue/glue.scfg.gz");
+  my $oov = ($oovgram ? "$oovgram" : "$datadir/oov.scfg.gz");
   print CDECINI <<EOT;
 formalism=scfg
 cubepruning_pop_limit=100
 add_pass_through_rules=true
 scfg_extra_glue_grammar=$glue
-grammar=$datadir/oov.scfg.gz
+grammar=$oov
 grammar=$grammar_path
 scfg_default_nt=OOV
 scfg_no_hiero_glue_grammar=true
 feature_function=WordPenalty
-feature_function=LanguageModel -o 3 $LANG_MODEL
+feature_function=LanguageModel -o $lmorder $LANG_MODEL
 EOT
   print CDECINI "grammar=$bkoff_grmr\n" if $bkoffgram;
   close CDECINI;
