@@ -28,6 +28,7 @@ class FeatureFunctionFromFsa : public FeatureFunction {
   typedef WordID const* WP;
 public:
   FeatureFunctionFromFsa(std::string const& param) : ff(param) {
+    FSAFFDBG(ff.name()<<" params="<<param<<" calling Init: ");
     Init();
   }
 
@@ -137,6 +138,7 @@ public:
     return o.str();
   }
 
+  //FIXME: it's assumed that the final rule is just a unary no-target-terminal rewrite (same as ff_lm)
   virtual void FinalTraversalFeatures(const SentenceMetadata& smeta,
                                       const void* residual_state,
                                       FeatureVector* final_features) const
@@ -189,12 +191,14 @@ private:
     M=ff.markov_order();
     ssz=ff.state_bytes();
     state_offset=sizeof(WordID)*M;
-    SetStateSize(ff.state_bytes()+state_offset);
+    SetStateSize(ssz+state_offset);
+    assert(!ssz == !M); // no fsa state <=> markov order 0
+    FSAFFDBG("order="<<M<<" fsa_state_offset="<<state_offset<<" fsa_state_bytes="<<ssz<<" ff_state_bytes="<<StateSize()<<'\n');
   }
   int M; // markov order (ctx len)
   FeatureFunctionFromFsa(); // not allowed.
 
-  int state_offset; // store left-words first, then fsa state
+  int state_offset; // NOTE: in bytes (add to char* only). store left-words first, then fsa state
   int ssz; // bytes in fsa state
   /*
     state layout: left WordIds, followed by fsa state

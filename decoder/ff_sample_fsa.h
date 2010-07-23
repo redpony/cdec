@@ -29,7 +29,7 @@ struct WordPenaltyFsa : public FsaFeatureFunctionBase<WordPenaltyFsa> {
 typedef FeatureFunctionFromFsa<WordPenaltyFsa> WordPenaltyFromFsa;
 
 
-//
+// appears to be buggy right now: give it a bonus weight (-) and it overstates how many
 struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
   typedef FsaFeatureFunctionBase<LongerThanPrev> Base;
   static std::string usage(bool param,bool verbose) {
@@ -40,11 +40,11 @@ struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
       param,verbose);
   }
 
-  static inline int &wordlen(void *state) {
-    return *(int*)state;
+  static inline int &state(void *st) {
+    return *(int*)st;
   }
-  static inline int wordlen(void const* state) {
-    return *(int const*)state;
+  static inline int state(void const* st) {
+    return *(int const*)st;
   }
   static inline int wordlen(WordID w) {
     return std::strlen(TD::Convert(w));
@@ -62,23 +62,23 @@ struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
       to_state(h_start.begin(),&ss,1);
     }
 
-    wordlen(start.begin())=3;
-    wordlen(h_start.begin())=4; // estimate: anything >4 chars is usually longer than previous
+    state(start.begin())=3;
+    state(h_start.begin())=4; // estimate: anything >4 chars is usually longer than previous
 
   }
 
   static const float val_per_target_word=-1;
-  void Scan(SentenceMetadata const& smeta,WordID w,void const* state,void *next_state,FeatureVector *features) const {
-    int prevlen=wordlen(state);
+  void Scan(SentenceMetadata const& smeta,WordID w,void const* from,void *next_state,FeatureVector *features) const {
+    int prevlen=state(from);
     int len=wordlen(w);
-    wordlen(next_state)=len;
     if (len>prevlen)
       features->add_value(fid_,val_per_target_word);
+    state(next_state)=len;
   }
-
 };
 
 // similar example feature; base type exposes stateful type, defines markov_order 1, state size = sizeof(State)
+// also buggy right now: give it a bonus weight (-) and it overstates how many
 struct ShorterThanPrev : FsaTypedBase<int,ShorterThanPrev> {
   typedef FsaTypedBase<int,ShorterThanPrev> Base;
   static std::string usage(bool param,bool verbose) {
