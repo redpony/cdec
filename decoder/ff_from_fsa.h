@@ -153,7 +153,7 @@ public:
     FSAFFDBG("(FromFsa) Final "<<name);
     if (lend==rst) { // implying we have an fsa state
       AccumFeatures(ff,smeta,l,lend,final_features,ss); // e.g. <s> score(full left unscored phrase)
-      FSAFFDBG(" left: "<<Sentence(l,lend));
+      FSAFFDBG(" left: "<<ff.describe_state(ss)<<" -> "<<Sentence(l,lend));
       AccumFeatures(ff,smeta,begin(ends),end(ends),final_features,rst); // e.g. [ctx for last M words] score("</s>")
       FSAFFDBG(" right: "<<ff.describe_state(rst)<<" -> "<<ends);
     } else { // all we have is a single short phrase < M words before adding ends
