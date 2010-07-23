@@ -53,9 +53,9 @@ public:
     ContextsCorpus() : m_backoff(new TermBackoff) {}
     virtual ~ContextsCorpus() {}
 
-    unsigned read_contexts(const std::string &filename, 
-                           BackoffGenerator* backoff_gen=0,
-                           bool filter_singeltons=false);
+    virtual unsigned read_contexts(const std::string &filename, 
+                                   BackoffGenerator* backoff_gen=0,
+                                   bool filter_singeltons=false);
 
     TermBackoffPtr backoff_index() {
       return m_backoff;
@@ -77,7 +77,7 @@ public:
       return m_keys.at(i);
     }
 
-private:
+protected:
     TermBackoffPtr m_backoff;
     Dict m_dict;
     std::vector<std::string> m_keys;

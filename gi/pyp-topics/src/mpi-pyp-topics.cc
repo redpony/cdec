@@ -4,13 +4,14 @@
 #include "mpi-pyp-topics.hh"
 
 //#include <boost/date_time/posix_time/posix_time_types.hpp>
-void MPIPYPTopics::sample_corpus(const Corpus& corpus, int samples,
+void MPIPYPTopics::sample_corpus(const MPICorpus& corpus, int samples,
                               int freq_cutoff_start, int freq_cutoff_end,
                               int freq_cutoff_interval,
                               int max_contexts_per_document) {
   Timer timer;
 
-  int documents = corpus.num_documents();
+  //int documents = corpus.num_documents();
+  /*
   m_mpi_start = 0;
   m_mpi_end = documents;
   if (m_size != 1) {
@@ -19,6 +20,8 @@ void MPIPYPTopics::sample_corpus(const Corpus& corpus, int samples,
       if (m_rank == m_size-1) m_mpi_end = documents;
       else m_mpi_end = (documents / m_size)*(m_rank+1);
   }
+  */
+  corpus.bounds(&m_mpi_start, &m_mpi_end);
   int local_documents = m_mpi_end - m_mpi_start;
 
   if (!m_backoff.get()) {
@@ -74,7 +77,8 @@ void MPIPYPTopics::sample_corpus(const Corpus& corpus, int samples,
       int new_topic = -1;
       if (freq > frequency_cutoff
           && (!max_contexts_per_document || term_index < max_contexts_per_document)) {
-        new_topic = document_id % m_num_topics;
+        new_topic = sample(document_id, term);
+        //new_topic = document_id % m_num_topics;
 
         // add the new topic to the PYPs
         increment(term, new_topic);
@@ -336,7 +340,8 @@ MPIPYPTopics::F MPIPYPTopics::word_pyps_p0(const Term& term, int topic, int leve
     Term backoff_term = (*m_backoff)[term];
     if (!m_backoff->is_null(backoff_term)) {
       assert (level < m_backoff->order());
-      p0 = (1.0/(double)m_backoff->terms_at_level(level))*prob(backoff_term, topic, level+1);
+      //p0 = (1.0/(double)m_backoff->terms_at_level(level))*prob(backoff_term, topic, level+1);
+      p0 = prob(backoff_term, topic, level+1);
     }
     else
       p0 = m_term_p0;
@@ -373,10 +378,11 @@ int MPIPYPTopics::max_topic() const {
     }
   }
   assert(current_topic >= 0);
-  return current_topic;
+  assert(current_max >= 0);
+  return current_max;
 }
 
-int MPIPYPTopics::max(const DocumentId& true_doc) const {
+std::pair<int,MPIPYPTopics::F> MPIPYPTopics::max(const DocumentId& true_doc) const {
   //std::cerr << "MPIPYPTopics::max(" << doc << "," << term << ")" << std::endl;
   // collect probs
   F current_max=0.0;
@@ -399,10 +405,11 @@ int MPIPYPTopics::max(const DocumentId& true_doc) const {
     }
   }
   assert(current_topic >= 0);
-  return current_topic;
+  assert(current_max >= 0);
+  return std::make_pair(current_topic, current_max);
 }
 
-int MPIPYPTopics::max(const DocumentId& true_doc, const Term& term) const {
+std::pair<int,MPIPYPTopics::F> MPIPYPTopics::max(const DocumentId& true_doc, const Term& term) const {
   //std::cerr << "MPIPYPTopics::max(" << doc << "," << term << ")" << std::endl;
   // collect probs
   F current_max=0.0;
@@ -426,7 +433,8 @@ int MPIPYPTopics::max(const DocumentId& true_doc, const Term& term) const {
     }
   }
   assert(current_topic >= 0);
-  return current_topic;
+  assert(current_max >= 0);
+  return std::make_pair(current_topic, current_max);
 }
 
 std::ostream& MPIPYPTopics::print_document_topics(std::ostream& out) const {
