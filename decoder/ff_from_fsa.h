@@ -187,7 +187,6 @@ private:
 
 };
 
-typedef FeatureFunctionFromFsa<WordPenaltyFsa> WordPenaltyFromFsa;
 
 
 #endif
