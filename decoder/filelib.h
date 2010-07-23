@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <boost/shared_ptr.hpp>
+#include <stdexcept>
 #include "gzstream.h"
 
 bool FileExists(const std::string& file_name);
@@ -37,6 +38,10 @@ struct BaseFile {
   }
   std::string filename_;
 protected:
+  void error(std::string const& reason,std::string const& filename) {
+    throw std::runtime_error("File "+filename+" - "+reason);
+  }
+
   PS ps_;
   static bool EndsWith(const std::string& f, const std::string& suf) {
     return (f.size() > suf.size()) && (f.rfind(suf) == f.size() - suf.size());
@@ -56,6 +61,7 @@ class ReadFile : public BaseFile<std::istream> {
     } else {
       if (!FileExists(filename)) {
         std::cerr << "File does not exist: " << filename << std::endl;
+        error(filename," couldn't read nonexistant file.");
         abort();
       }
       char const* file=filename_.c_str(); // just in case the gzstream keeps using the filename for longer than the constructor, e.g. inflateReset2.  warning in valgrind that I'm hoping will disappear - it makes no sense.
@@ -64,6 +70,7 @@ class ReadFile : public BaseFile<std::istream> {
              static_cast<std::istream*>(new std::ifstream(file)));
       if (!*ps_) {
         std::cerr << "Failed to open " << filename << std::endl;
+        error(filename," open for reading failed.");
         abort();
       }
     }
@@ -86,6 +93,7 @@ class WriteFile : public BaseFile<std::ostream> {
                 static_cast<std::ostream*>(new std::ofstream(file)));
       if (!*ps_) {
         std::cerr << "Failed to open " << filename << std::endl;
+        error(filename," open for writing failed.");
         abort();
       }
     }
