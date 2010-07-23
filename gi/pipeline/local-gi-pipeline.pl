@@ -20,7 +20,7 @@ my $CONTEXT_SIZE = 1;
 my $BIDIR = 0;
 my $TOPICS_CONFIG = "pyp-topics.conf";
 my $LANGUAGE = "target";
-my $LABEL_THRESHOLD = 0;
+my $LABEL_THRESHOLD = "0";
 my $PRESERVE_PHRASES;
 
 my $MODEL = "pyp";
@@ -28,6 +28,7 @@ my $NUM_ITERS = 100;
 my $PR_SCALE_P = 0;
 my $PR_SCALE_C = 0;
 my $PR_FLAGS = "";
+my $MORFMARK = "";
 
 my $EXTOOLS = "$SCRIPT_DIR/../../extools";
 die "Can't find extools: $EXTOOLS" unless -e $EXTOOLS && -d $EXTOOLS;
@@ -50,9 +51,10 @@ my $REMOVE_TAGS_CORPUS = "$SCRIPT_DIR/scripts/remove-tags-from-corpus.pl";
 my $REMOVE_TAGS_CONTEXT = "$SCRIPT_DIR/scripts/remove-tags-from-contexts.pl";
 my $EXTRACTOR = "$EXTOOLS/extractor";
 my $TOPIC_TRAIN = "$PYPTOOLS/pyp-contexts-train";
+my $MORF_DOC_FILTER = "$SCRIPT_DIR/../morf-segmentation/filter_docs.pl";
 
 assert_exec($PATCH_CORPUS, $SORT_KEYS, $REDUCER, $EXTRACTOR,
-            $S2L, $C2D, $TOPIC_TRAIN, $SPLIT, $REMOVE_TAGS_CONTEXT, $REMOVE_TAGS_CORPUS);
+            $S2L, $C2D, $TOPIC_TRAIN, $SPLIT, $REMOVE_TAGS_CONTEXT, $REMOVE_TAGS_CORPUS, $MORF_DOC_FILTER);
 
 my $BACKOFF_GRAMMAR;
 my $DEFAULT_CAT;
@@ -82,6 +84,7 @@ usage() unless &GetOptions('base_phrase_max_size=i' => \$BASE_PHRASE_MAX_SIZE,
                            'language=s' => \$LANGUAGE,
                            'get_name_only' => \$NAME_SHORTCUT,
                            'preserve_phrases' => \$PRESERVE_PHRASES,
+                           'morf=s' => \$MORFMARK,
                           );
 if ($NAME_SHORTCUT) {
   $NUM_TOPICS = $NUM_TOPICS_FINE;
@@ -216,7 +219,7 @@ sub cluster_dir {
 }
 
 sub labeled_dir {
-  if (lc($MODEL) eq "pyp" && $LABEL_THRESHOLD != 0) {
+  if (lc($MODEL) eq "pyp" && $LABEL_THRESHOLD ne "0") {
     return cluster_dir() . "_lt$LABEL_THRESHOLD";
   } else {
     return cluster_dir();
@@ -272,7 +275,12 @@ sub extract_context {
      $ccopt = "-c 0";
      $postsort = "" unless ($PRESERVE_PHRASES);
    }
+
    my $presort = ($PRESERVE_PHRASES ? "| $REMOVE_TAGS_CONTEXT --phrase=tok --context=tag " : "");
+
+   if ($MORFMARK ne "") { 
+     $presort = $presort . "| $MORF_DOC_FILTER \"$MORFMARK\" "; 
+   }
 
    my $cmd = "$EXTRACTOR -i $CORPUS_CLUSTER $ccopt -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE --phrase_language $LANGUAGE --context_language $LANGUAGE $presort | $SORT_KEYS $postsort | $GZIP > $OUT_CONTEXTS";
    safesystem($cmd) or die "Failed to extract contexts.";
@@ -351,7 +359,7 @@ sub label_spans_with_topics {
     safesystem("$ZCAT $IN_CLUSTERS > $CLUSTER_DIR/clusters.txt") or die "Failed to unzip";
     safesystem("$EXTRACTOR --base_phrase_spans -i $CORPUS_CLUSTER -c $ITEMS_IN_MEMORY -L $BASE_PHRASE_MAX_SIZE -S $CONTEXT_SIZE | $S2L $CLUSTER_DIR/clusters.txt $CONTEXT_SIZE $LABEL_THRESHOLD $extra > $OUT_SPANS") or die "Failed to label spans";
     unlink("$CLUSTER_DIR/clusters.txt") or warn "Failed to remove $CLUSTER_DIR/clusters.txt";
-    safesystem("paste -d ' ' $CORPUS_LEX $OUT_SPANS > $LABELED_DIR/corpus.src_trg_al_label") or die "Couldn't paste";
+    safesystem("paste -d ' ' $CORPUS_LEX $OUT_SPANS | sed 's/ *||| *\$//'  > $LABELED_DIR/corpus.src_trg_al_label") or die "Couldn't paste";
   }
 }
 
