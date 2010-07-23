@@ -266,18 +266,15 @@ sub extract_context {
    print STDERR "$OUT_CONTEXTS exists, reusing...\n";
  } else {
    my $ccopt = "-c $ITEMS_IN_MEMORY";
-   my $pipe = "| $REDUCER ";
+   my $postsort = "| $REDUCER ";
    if ($COMPLETE_CACHE) {
      print STDERR "COMPLETE_CACHE is set: removing memory limits on cache.\n";
      $ccopt = "-c 0";
-     $pipe = "";
+     $postsort = "" unless ($PRESERVE_PHRASES);
    }
+   my $presort = ($PRESERVE_PHRASES ? "| $REMOVE_TAGS_CONTEXT --phrase=tok --context=tag " : "");
 
-   if ($PRESERVE_PHRASES) {
-    $pipe = "| $REMOVE_TAGS_CONTEXT --phrase=tok --context=tag " . $pipe;
-   }
-
-   my $cmd = "$EXTRACTOR -i $CORPUS_CLUSTER $ccopt -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE --phrase_language $LANGUAGE --context_language $LANGUAGE | $SORT_KEYS $pipe | $GZIP > $OUT_CONTEXTS";
+   my $cmd = "$EXTRACTOR -i $CORPUS_CLUSTER $ccopt -L $BASE_PHRASE_MAX_SIZE -C -S $CONTEXT_SIZE --phrase_language $LANGUAGE --context_language $LANGUAGE $presort | $SORT_KEYS $postsort | $GZIP > $OUT_CONTEXTS";
    safesystem($cmd) or die "Failed to extract contexts.";
   }
 }
