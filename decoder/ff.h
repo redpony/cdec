@@ -175,7 +175,7 @@ class ModelSet {
 
   // sets edge->feature_values_ and edge->edge_prob_
   // NOTE: edge must not necessarily be in hg.edges_ but its TAIL nodes
-  // must be.
+  // must be.  edge features are supposed to be overwritten, not added to (possibly because rule features aren't in ModelSet so need to be left alone
   void AddFeaturesToEdge(const SentenceMetadata& smeta,
                          const Hypergraph& hg,
                          const std::vector<std::string>& node_states,

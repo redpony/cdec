@@ -87,7 +87,7 @@ void DoPhraseMarginals(const vector<WordID>& key, const bool bidir, ID2RuleStati
     it->second.counts.set_value(cur_marginal_id, tot);
 
     // prevent double counting of the joint
-    if (cur_marginal_id == kCE) it->second.counts.clear_value(kCFE);
+    if (cur_marginal_id == kCE) it->second.counts.erase(kCFE);
   }
 }
 

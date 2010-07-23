@@ -1,6 +1,17 @@
 #ifndef _SPARSE_VECTOR_H_
 #define _SPARSE_VECTOR_H_
-/* TODO: use dense_hash_map for sparsevector
+
+#define SPARSE_VECTOR_HASH
+
+#ifdef SPARSE_VECTOR_HASH
+#include "hash.h"
+# define SPARSE_VECTOR_MAP HASH_MAP
+# define SPARSE_VECTOR_MAP_RESERVED(h,empty,deleted) HASH_MAP_RESERVED(h,empty,deleted)
+#else
+# define SPARSE_VECTOR_MAP std::map
+# define SPARSE_VECTOR_MAP_RESERVED(h,empty,deleted)
+#endif
+/*
    use SparseVectorList (pair smallvector) for feat funcs / hypergraphs (you rarely need random access; just append a feature to the list)
 */
 /* hack: index 0 never gets printed because cdyer is creative and efficient. features which have no weight got feature dict id 0, see, and the models all clobered that value.  nobody wants to see it.  except that vlad is also creative and efficient and stored the oracle bleu there. */
@@ -27,20 +38,27 @@ inline T & extend_vector(std::vector<T> &v,int i) {
 
 template <typename T>
 class SparseVector {
+  void init_reserved() {
+    SPARSE_VECTOR_MAP_RESERVED(values_,-1,-2);
+  }
 public:
-  typedef std::map<int, T> MapType;
-  typedef typename std::map<int, T>::const_iterator const_iterator;
-  SparseVector() {}
+  typedef SparseVector<T> Self;
+  typedef SPARSE_VECTOR_MAP<int, T> MapType;
+  typedef typename MapType::const_iterator const_iterator;
+  SparseVector() {
+    init_reserved();
+  }
   explicit SparseVector(std::vector<T> const& v) {
+    init_reserved();
     typename MapType::iterator p=values_.begin();
-    const T z=T(0);
+    const T z=0;
     for (unsigned i=0;i<v.size();++i) {
       T const& t=v[i];
       if (t!=z)
         p=values_.insert(p,typename MapType::value_type(i,t)); //hint makes insertion faster
     }
-
   }
+
 
   void init_vector(std::vector<T> *vp) const {
     init_vector(*vp);
@@ -51,7 +69,6 @@ public:
     for (const_iterator i=values_.begin(),e=values_.end();i!=e;++i)
       extend_vector(v,i->first)=i->second;
   }
-
 
   void set_new_value(int index, T const& val) {
     assert(values_.find(index)==values_.end());
@@ -65,10 +82,10 @@ public:
   }
 
 
-  const T operator[](int index) const {
+  T operator[](int index) const {
     typename MapType::const_iterator found = values_.find(index);
     if (found == values_.end())
-      return T(0);
+      return 0;
     else
       return found->second;
   }
@@ -77,8 +94,11 @@ public:
     values_[index] = value;
   }
 
-    T add_value(int index, const T &value) {
-        return values_[index] += value;
+    T const& add_value(int index, const T &value) {
+      std::pair<typename MapType::iterator,bool> art=values_.insert(std::make_pair(index,value));
+      T &val=art.first->second;
+      if (!art.second) val += value; // already existed
+      return val;
     }
 
     T value(int index) const {
@@ -86,7 +106,7 @@ public:
         if (found != values_.end())
             return found->second;
         else
-            return T(0);
+            return 0;
     }
 
     void store(std::valarray<T>* target) const {
@@ -184,13 +204,20 @@ public:
       return sqrt(l2norm_sq());
     }
 
+  void erase(int key) {
+    values_.erase(key);
+/*    typename MapType::iterator found = values_.find(key);
+    if (found!=values_end())
+    values_.erase(found);*/
+  }
+
     SparseVector<T> &operator+=(const SparseVector<T> &other) {
         for (typename MapType::const_iterator
                 it = other.values_.begin(); it != other.values_.end(); ++it)
         {
-            T v = (values_[it->first] += it->second);
-            if (v == T())
-                values_.erase(it->first);
+//            T v =
+              (values_[it->first] += it->second);
+//            if (v == 0) values_.erase(it->first);
         }
         return *this;
     }
@@ -199,9 +226,9 @@ public:
         for (typename MapType::const_iterator
                 it = other.values_.begin(); it != other.values_.end(); ++it)
         {
-            T v = (values_[it->first] -= it->second);
-            if (v == T(0))
-                values_.erase(it->first);
+//            T v =
+          (values_[it->first] -= it->second);
+//            if (v == 0) values_.erase(it->first);
         }
         return *this;
     }
@@ -282,6 +309,35 @@ public:
         }
     }
 
+  bool operator==(Self const & other) const {
+    return size()==other.size() && contains_keys_of(other) && other.contains_i(*this);
+  }
+
+  bool contains(Self const &o) const {
+    return size()>o.size() && contains(o);
+  }
+
+  bool at_equals(int i,T const& val) const {
+    const_iterator it=values_.find(i);
+    if (it==values_.end()) return val==0;
+    return it->second==val;
+  }
+
+  bool contains_i(Self const& o) const {
+    for (typename MapType::const_iterator i=o.begin(),e=o.end();i!=e;++i)
+      if (!at_equals(i->first,i->second))
+        return false;
+    return true;
+  }
+
+  bool contains_keys_of(Self const& o) const {
+    for (typename MapType::const_iterator i=o.begin(),e=o.end();i!=e;++i)
+      if (values_.find(i)==values_.end())
+        return false;
+    return true;
+  }
+
+#ifndef SPARSE_VECTOR_HASH
     bool operator<(const SparseVector<T> &other) const {
         typename MapType::const_iterator it = values_.begin();
         typename MapType::const_iterator other_it = other.values_.begin();
@@ -295,6 +351,7 @@ public:
         }
         return values_.size() < other.values_.size();
     }
+#endif
 
   int size() const { return values_.size(); }
 
@@ -306,9 +363,6 @@ public:
 
     void clear() {
         values_.clear();
-    }
-    void clear_value(int index) {
-      values_.erase(index);
     }
 
     void swap(SparseVector<T>& other) {
@@ -328,7 +382,7 @@ class SparseVectorList {
   SparseVectorList() {  }
   template <class I>
   SparseVectorList(I i,I const& end) {
-    const T z=T(0);
+    const T z=0;
     int c=0;
     for (;i<end;++i,++c) {
       if (*i!=z)
@@ -337,7 +391,7 @@ class SparseVectorList {
     p.compact();
   }
   explicit SparseVectorList(std::vector<T> const& v) {
-    const T z=T(0);
+    const T z=0;
     for (unsigned i=0;i<v.size();++i) {
       T const& t=v[i];
       if (t!=z)

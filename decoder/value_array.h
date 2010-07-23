@@ -61,7 +61,7 @@ public:
 protected:
   inline void init(size_type s, const_reference t = T()) {
     sz=s;
-    array=A::allocate(s);
+    array=s ? A::allocate(s) : 0;
     for (size_type i = 0; i != sz; ++i) { A::construct(array + i,t); }
   }
 public:
