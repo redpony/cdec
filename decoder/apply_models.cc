@@ -96,7 +96,7 @@ struct Candidate {
     if (is_goal) {
       assert(tail.size() == 1);
       const string& ant_state = node_states[tail.front()];
-      models.AddFinalFeatures(ant_state, &out_edge_);
+      models.AddFinalFeatures(ant_state, &out_edge_, smeta);
     } else {
       models.AddFeaturesToEdge(smeta, out_hg, node_states, &out_edge_, &state_, &edge_estimate);
     }
@@ -344,7 +344,7 @@ struct NoPruningRescorer {
       if (is_goal) {
         assert(tail.size() == 1);
         const string& ant_state = node_states_[tail.front()];
-        models.AddFinalFeatures(ant_state, new_edge);
+        models.AddFinalFeatures(ant_state, new_edge,smeta);
       } else {
         prob_t edge_estimate; // this is a full intersection, so we disregard this
         models.AddFeaturesToEdge(smeta, out, node_states_, new_edge, &head_state, &edge_estimate);

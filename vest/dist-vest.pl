@@ -173,7 +173,7 @@ if ($dryrun){
 	write_config(*STDERR);
 	exit 0;
 } else {
-	if (-e $dir && dirsize($dir)>1){ # allow preexisting logfile
+	if (-e $dir && dirsize($dir)>1 && -e "$dir/hgs" ){ # allow preexisting logfile, binaries, but not dist-vest.pl outputs
 	  die "ERROR: working dir $dir already exists\n\n";
 	} else {
 		-e $dir || mkdir $dir;

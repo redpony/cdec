@@ -8,6 +8,8 @@
 class SentenceMetadata;
 class FeatureFunction;  // see definition below
 
+typedef std::vector<WordID> Features; // set of features ids
+
 // if you want to develop a new feature, inherit from this class and
 // override TraversalFeaturesImpl(...).  If it's a feature that returns /
 // depends on context, you may also need to implement
@@ -23,12 +25,8 @@ class FeatureFunction {
   static std::string usage(bool show_params,bool show_details) {
     return usage_helper("FIXME_feature_needs_name","[no parameters]","[no documentation yet]",show_params,show_details);
   }
-
-  typedef std::vector<WordID> Features; // set of features ids
-
-protected:
   static std::string usage_helper(std::string const& name,std::string const& params,std::string const& details,bool show_params,bool show_details);
-  static Features single_feature(WordID feat);
+  static Features single_feature(int feat);
 public:
   // stateless feature that doesn't depend on source span: override and return true.  then your feature can be precomputed over rules.
   virtual bool rule_feature() const { return false; }
@@ -61,8 +59,17 @@ public:
   // if there's some state left when you transition to the goal state, score
   // it here.  For example, the language model computes the cost of adding
   // <s> and </s>.
+protected:
   virtual void FinalTraversalFeatures(const void* residual_state,
                                       FeatureVector* final_features) const;
+public:
+  //override either this or above. (no need to do both)
+  virtual void FinalTraversalFeatures(const SentenceMetadata& smeta,
+                                      const void* residual_state,
+                                      FeatureVector* final_features) const {
+    FinalTraversalFeatures(residual_state,final_features);
+  }
+
 
  protected:
   // context is a pointer to a buffer of size NumBytesContext() that the
@@ -87,6 +94,7 @@ public:
  private:
   int state_size_;
 };
+
 
 // word penalty feature, for each word on the E side of a rule,
 // add value_
@@ -176,12 +184,13 @@ class ModelSet {
                          prob_t* combination_cost_estimate = NULL) const;
 
   void AddFinalFeatures(const std::string& residual_context,
-                        Hypergraph::Edge* edge) const;
+                        Hypergraph::Edge* edge,
+                        SentenceMetadata const& smeta) const;
 
   bool empty() const { return models_.empty(); }
 
   bool stateless() const { return !state_size_; }
-  FeatureFunction::Features all_features(std::ostream *warnings=0,bool warn_fid_zero=false); // this will warn about duplicate features as well (one function overwrites the feature of another).  also resizes weights_ so it is large enough to hold the (0) weight for the largest reported feature id.  since 0 is a NULL feature id, it's never included.  if warn_fid_zero, then even the first 0 id is
+  Features all_features(std::ostream *warnings=0,bool warn_fid_zero=false); // this will warn about duplicate features as well (one function overwrites the feature of another).  also resizes weights_ so it is large enough to hold the (0) weight for the largest reported feature id.  since 0 is a NULL feature id, it's never included.  if warn_fid_zero, then even the first 0 id is
   void show_features(std::ostream &out,std::ostream &warn,bool warn_zero_wt=true); //show features and weights
  private:
   std::vector<const FeatureFunction*> models_;

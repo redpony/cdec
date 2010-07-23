@@ -7,7 +7,29 @@
 #include "filelib.h"
 #include "tdict.h"
 #include "stringlib.h"
+#include <cstring>
 typedef std::vector<WordID> Sentence;
+
+// these "iterators" are invalidated if s is modified.  note: this is allowed by std.
+inline WordID const* begin(Sentence const& s) {
+  return &*s.begin();
+}
+inline WordID const* end(Sentence const& s) {
+  return &*s.end();
+}
+inline WordID * begin(Sentence & s) {
+  return &*s.begin();
+}
+inline WordID * end(Sentence & s) {
+  return &*s.end();
+}
+inline void wordcpy(WordID *dest,WordID const* src,int n) {
+  std::memcpy(dest,src,n*sizeof(*dest));
+}
+inline void wordcpy(WordID *dest,WordID const* src,WordID const* src_end) {
+  wordcpy(dest,src,src_end-src);
+}
+
 
 inline std::ostream & operator<<(std::ostream &out,Sentence const& s) {
   return out<<TD::GetString(s);
