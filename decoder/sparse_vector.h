@@ -1,7 +1,7 @@
 #ifndef _SPARSE_VECTOR_H_
 #define _SPARSE_VECTOR_H_
 
-#define SPARSE_VECTOR_HASH
+//#define SPARSE_VECTOR_HASH
 
 #ifdef SPARSE_VECTOR_HASH
 #include "hash.h"

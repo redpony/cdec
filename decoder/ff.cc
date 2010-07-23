@@ -1,6 +1,6 @@
-//TODO: actually score rule_feature()==true features once only, hash keyed on rule or modify TRule directly?  need to keep clear in forest which features come from models vs. rules; then rescoring could drop all the old models features at once
+//TODO: non-sparse vector for all feature functions?  modelset applymodels keeps track of who has what features?  it's nice having FF that could generate a handful out of 10000 possible feats, though.
 
-//TODO: 0 size state != rule-local feature, i.e. still may depend on source span loc/context.  identify truly rule-local features so if we want they can be added to grammar rules (minor speedup)
+//TODO: actually score rule_feature()==true features once only, hash keyed on rule or modify TRule directly?  need to keep clear in forest which features come from models vs. rules; then rescoring could drop all the old models features at once
 
 #include <boost/lexical_cast.hpp>
 #include "ff.h"
