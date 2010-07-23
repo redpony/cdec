@@ -3,51 +3,42 @@ use strict;
 
 use Getopt::Long "GetOptions";
 
-my $PHRASE = 'tok';
-my $CONTEXT = 'tag';
-
-die "Usage: $0 [--phrase=tok|tag] [--context=tok|tag] < corpus" 
-    unless &GetOptions('phrase=s' => \$PHRASE, 'context=s' => \$CONTEXT);
+my $LANGUAGE = shift @ARGV;
+$LANGUAGE = 'target' unless ($LANGUAGE);
 
 my $lno = 0;
 while(my $line = <>) {
     $lno++;
     chomp $line;
-    my @top = split /\t/, $line;
-    die unless (scalar @top == 2); 
 
-    my @pwords = split /\s+/, $top[0];
-    foreach my $token (@pwords) {
-        #print $token . "\n";
-        my @parts = split /_(?!_)/, $token;
-        die unless (scalar @parts == 2); 
-        if ($PHRASE eq "tok") {
-            $token = $parts[0]
-        } elsif ($PHRASE eq "tag") {
-            $token = $parts[1]
-        }
-    }
+    my @fields = split / \|\|\| /, $line;
 
-    my @fields = split / \|\|\| /, $top[1];
-    foreach my $i (0..((scalar @fields) / 2 - 1)) {
-        #print $i . ": " . $fields[2*$i] . " of " . (scalar @fields) . "\n";
-        my @cwords = split /\s+/, $fields[2*$i];
+    if ($LANGUAGE eq "source" or $LANGUAGE eq "both") {
+        my @cwords = split /\s+/, $fields[0];
         foreach my $token (@cwords) {
-            #print $i . ": " . $token . "\n";
-            my @parts = split /_/, $token;
+            my @parts = split /_(?!.*_)/, $token;
             if (scalar @parts == 2) {
-                if ($CONTEXT eq "tok") {
-                    $token = $parts[0]
-                } elsif ($CONTEXT eq "tag") {
-                    $token = $parts[1]
-                }
+                $token = $parts[0]
+            } else {
+                print STDERR "WARNING: invalid tagged token $token\n";
             }
         }
-        $fields[2*$i] = join ' ', @cwords;
+        $fields[0] = join ' ', @cwords;
     }
 
-    print join ' ', @pwords;
-    print "\t";
+    if ($LANGUAGE eq "target" or $LANGUAGE eq "both") {
+        my @cwords = split /\s+/, $fields[1];
+        foreach my $token (@cwords) {
+            my @parts = split /_(?!.*_)/, $token;
+            if (scalar @parts == 2) {
+                $token = $parts[1]
+            } else {
+                print STDERR "WARNING: invalid tagged token $token\n";
+            }
+        }
+        $fields[0] = join ' ', @cwords;
+    }
+
     print join ' ||| ', @fields;
     print "\n";
 }
