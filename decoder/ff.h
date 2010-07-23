@@ -184,6 +184,7 @@ class ModelSet {
                          std::string* residual_context,
                          prob_t* combination_cost_estimate = NULL) const;
 
+  //this is called INSTEAD of above when result of edge is goal (must be a unary rule - i.e. one variable, but typically it's assumed that there are no target terminals either (e.g. for LM))
   void AddFinalFeatures(const std::string& residual_context,
                         Hypergraph::Edge* edge,
                         SentenceMetadata const& smeta) const;
