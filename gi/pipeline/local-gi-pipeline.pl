@@ -189,7 +189,7 @@ sub setup_data {
     die "Can't find $TAGGED_CORPUS" unless -f $TAGGED_CORPUS;
     my $opt="";
     $opt = "-s" if ($LANGUAGE eq "source");
-    $opt = "-a" if ($PRESERVE_PHRASES);
+    $opt = $opt . " -a" if ($PRESERVE_PHRASES);
     my $cmd="$PATCH_CORPUS $opt $TAGGED_CORPUS $CORPUS_LEX > $CORPUS_CLUSTER";
     safesystem($cmd) or die "Failed to extract contexts.";
   } else {
