@@ -14,6 +14,31 @@
 #include <cstring>
 #include <string>
 
+template <class Istr, class Isubstr> inline
+bool match_begin(Istr bstr,Istr estr,Isubstr bsub,Isubstr esub)
+{
+  while (bsub != esub) {
+    if (bstr == estr)
+      return false;
+    if (*bsub++ != *bstr++)
+      return false;
+  }
+  return true;
+}
+
+template <class Istr, class Prefix> inline
+bool match_begin(Istr bstr,Istr estr,Prefix prefix)
+{
+  return match_begin(bstr,estr,prefix.begin(),prefix.end());
+}
+
+template <class Str, class Prefix> inline
+bool match_begin(Str const& str,Prefix const& prefix)
+{
+  return match_begin(str.begin(),str.end(),prefix.begin(),prefix.end());
+}
+
+
 // read line in the form of either:
 //   source
 //   source ||| target

@@ -420,7 +420,7 @@ private:
   List p;
 };
 
-
+typedef SparseVectorList<double> FeatureVectorList;
 typedef SparseVector<double> FeatureVector;
 typedef SparseVector<double> WeightVector;
 typedef std::vector<double> DenseWeightVector;

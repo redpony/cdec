@@ -1,3 +1,5 @@
+//TODO: actually score rule_feature()==true features once only, hash keyed on rule or modify TRule directly?  need to keep clear in forest which features come from models vs. rules; then rescoring could drop all the old models features at once
+
 //TODO: 0 size state != rule-local feature, i.e. still may depend on source span loc/context.  identify truly rule-local features so if we want they can be added to grammar rules (minor speedup)
 
 #include <boost/lexical_cast.hpp>

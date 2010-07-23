@@ -4,7 +4,7 @@
 #include "ff_from_fsa.h"
 
 // example: feature val = -1 * # of target words
-struct WordPenaltyFsa : public FsaFeatureFunctionBase {
+struct WordPenaltyFsa : public FsaFeatureFunctionBase<WordPenaltyFsa> {
   static std::string usage(bool param,bool verbose) {
     return FeatureFunction::usage_helper(
       "WordPenaltyFsa","","-1 per target word"
@@ -12,7 +12,7 @@ struct WordPenaltyFsa : public FsaFeatureFunctionBase {
   }
 
   WordPenaltyFsa(std::string const& param) {
-    init_fid(usage(false,false));
+    Init();
     return;
     //below are all defaults:
     set_state_bytes(0);
@@ -30,7 +30,7 @@ typedef FeatureFunctionFromFsa<WordPenaltyFsa> WordPenaltyFromFsa;
 
 
 //
-struct LongerThanPrev : public FsaFeatureFunctionBase {
+struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
   static std::string usage(bool param,bool verbose) {
     return FeatureFunction::usage_helper(
       "LongerThanPrev",
@@ -50,7 +50,7 @@ struct LongerThanPrev : public FsaFeatureFunctionBase {
   }
   int markov_order() const { return 1; }
   LongerThanPrev(std::string const& param) {
-    init_fid(usage(false,false));
+    Init();
     set_state_bytes(sizeof(int));
 //    start.resize(state_bytes()); // this is done by set_state_bytes already.
 //    h_start.resize(state_bytes());
@@ -73,7 +73,8 @@ struct LongerThanPrev : public FsaFeatureFunctionBase {
 };
 
 // similar example feature; base type exposes stateful type, defines markov_order 1, state size = sizeof(State)
-struct ShorterThanPrev : FsaTypedScan<int,ShorterThanPrev> {
+struct ShorterThanPrev : FsaTypedBase<int,ShorterThanPrev> {
+  typedef FsaTypedBase<int,ShorterThanPrev> Base;
   static std::string usage(bool param,bool verbose) {
     return FeatureFunction::usage_helper(
       "ShorterThanPrev",
@@ -85,10 +86,12 @@ struct ShorterThanPrev : FsaTypedScan<int,ShorterThanPrev> {
   static inline int wordlen(WordID w) {
     return std::strlen(TD::Convert(w));
   }
-  ShorterThanPrev(std::string const& param) {
-    init_fid(usage(false,false));
-//    end_phrase_.push_back(TD::Convert("")); // this triggers end of sentence firing
-    set_starts(-1,4); // estimate: anything <4 chars is usually shorter than previous
+  ShorterThanPrev(std::string const& param)
+  : Base(-1,4,Sentence(1,TD::Convert("")))
+    // start, h_start, end_phrase
+    // estimate: anything <4 chars is usually shorter than previous
+  {
+    Init();
   }
 
   static const float val_per_target_word=-1;

@@ -3,14 +3,17 @@
 
 //SEE ALSO: ff_fsa_dynamic.h, ff_from_fsa.h
 
-#define FSA_DEBUG
+//#define FSA_DEBUG
+
 #ifdef FSA_DEBUG
 # include <iostream>
-# define FSADBG(x) do { std::cerr << x; } while(0)
+# define FSADBG(x) do { if (d().debug()) { std::cerr << x; } } while(0)
 #else
 # define FSADBG(x)
 #endif
 
+#include <boost/lexical_cast.hpp>
+#include <sstream>
 #include <stdint.h> //C99
 #include <string>
 #include "ff.h"
@@ -30,20 +33,28 @@ typedef ValueArray<uint8_t> Bytes;
 */
 
 // it's not necessary to inherit from this, but you probably should to save yourself some boilerplate.  defaults to no-state
+
+// usage:
+// struct FsaFeat : public FsaTypedBase<int,FsaFeat>
+// i.e. Impl is a CRTP
+template <class Impl>
 struct FsaFeatureFunctionBase {
+  Impl const& d() const { return static_cast<Impl const&>(*this); }
+  Impl & d()  { return static_cast<Impl &>(*this); }
 protected:
+  int state_bytes_; // don't forget to set this. default 0 (it may depend on params of course)
   Bytes start,h_start; // start state and estimated-features (heuristic) start state.  set these.  default empty.
   Sentence end_phrase_; // words appended for final traversal (final state cost is assessed using Scan) e.g. "</s>" for lm.
-  int state_bytes_; // don't forget to set this. default 0 (it may depend on params of course)
   void set_state_bytes(int sb=0) {
     if (start.size()!=sb) start.resize(sb);
     if (h_start.size()!=sb) h_start.resize(sb);
     state_bytes_=sb;
   }
   int fid_; // you can have more than 1 feature of course.
-  void init_fid(std::string const& name) { // call this, though, if you have a single feature
-    fid_=FD::Convert(name);
+  void Init() { // CALL THIS MANUALLY (because feature name(s) may depend on param
+    fid_=FD::Convert(d().name());
   }
+
   inline void static to_state(void *state,char const* begin,char const* end) {
     std::memcpy(state,begin,end-begin);
   }
@@ -58,7 +69,34 @@ protected:
   inline void static to_state(void *state,T const* begin,T const* end) {
     to_state(state,(char const*)begin,(char const*)end);
   }
+  inline static char hexdigit(int i) {
+    return '0'+i;
+  }
+  inline static void print_hex_byte(std::ostream &o,unsigned c) {
+      o<<hexdigit(c>>4);
+      o<<hexdigit(c&0x0f);
+  }
+
 public:
+  bool debug() const { return true; }
+  int fid() const { return fid_; } // return the one most important feature (for debugging)
+  std::string name() const {
+    return Impl::usage(false,false);
+  }
+
+  void print_state(std::ostream &o,void const*state) const {
+    char const* i=(char const*)state;
+    char const* e=i+state_bytes_;
+    for (;i!=e;++i)
+      print_hex_byte(o,*i);
+  }
+
+  std::string describe_state(void const* state) const {
+    std::ostringstream o;
+    d().print_state(o,state);
+    return o.str();
+  }
+
   //edges may have old features on them.  override if you have more than 1 fid.  we need to call this explicitly because edges may have old feature values already, and I chose to use add_value (+=) to simplify scanning a phrase, rather than set_value (=) for fsa ffs.  could revisit this and use set_value and therefore sum
   void init_features(FeatureVector *fv) const {
     fv->set_value(fid_,0);
@@ -93,7 +131,7 @@ public:
   }
 
   // don't set state-bytes etc. in ctor because it may depend on parsing param string
-  FsaFeatureFunctionBase(int statesz=0) : start(statesz),h_start(statesz),state_bytes_(statesz) {  }
+  FsaFeatureFunctionBase(int statesz=0,Sentence const& end_sentence_phrase=Sentence()) : state_bytes_(statesz),start(statesz),h_start(statesz),end_phrase_(end_sentence_phrase) {}
 
 };
 
@@ -160,9 +198,15 @@ void AccumFeatures(FF const& ff,SentenceMetadata const& smeta,WordID const* i, W
 }
 
 // if State is pod.  sets state size and allocs start, h_start
-template <class St>
-struct FsaTypedBase : public FsaFeatureFunctionBase {
+// usage:
+// struct ShorterThanPrev : public FsaTypedBase<int,ShorterThanPrev>
+// i.e. Impl is a CRTP
+template <class St,class Impl>
+struct FsaTypedBase : public FsaFeatureFunctionBase<Impl> {
+  Impl const& d() const { return static_cast<Impl const&>(*this); }
+  Impl & d()  { return static_cast<Impl &>(*this); }
 protected:
+  typedef FsaFeatureFunctionBase<Impl> Base;
   typedef St State;
   static inline State & state(void *state) {
     return *(State*)state;
@@ -172,32 +216,33 @@ protected:
   }
   void set_starts(State const& s,State const& heuristic_s) {
     if (0) { // already in ctor
-      start.resize(sizeof(State));
-      h_start.resize(sizeof(State));
+      Base::start.resize(sizeof(State));
+      Base::h_start.resize(sizeof(State));
     }
-    state(start.begin())=s;
-    state(h_start.begin())=heuristic_s;
+    state(Base::start.begin())=s;
+    state(Base::h_start.begin())=heuristic_s;
   }
-  void set_h_start(State const& s) {
+  FsaTypedBase(St const& start_st=St()
+               ,St const& h_start_st=St()
+               ,Sentence const& end_sentence_phrase=Sentence())
+    : Base(sizeof(State),end_sentence_phrase) {
+    set_starts(start_st,h_start_st);
   }
 public:
+  void print_state(std::ostream &o,void const*st) const {
+    o<<state(st);
+  }
   int markov_order() const { return 1; }
-  FsaTypedBase() : FsaFeatureFunctionBase(sizeof(State)) {
-  }
-};
-
-
-// usage (if you're lazy):
-// struct ShorterThanPrev : public FsaTypedBase<int>,FsaTypedScan<ShorterThanPrev>
-template <class St,class Impl>
-struct FsaTypedScan : public FsaTypedBase<St> {
   void Scan(SentenceMetadata const& smeta,WordID w,void const* st,void *next_state,FeatureVector *features) const {
-    Impl const* impl=static_cast<Impl const*>(this);
-    FSADBG("Scan "<<(*features)[impl->fid_]<<" = "<<impl->state(st)<<" ->"<<TD::Convert(w)<<" ");
-    impl->ScanTyped(smeta,w,impl->state(st),impl->state(next_state),features);
-    FSADBG(impl->state(next_state)<<" = "<<(*features)[impl->fid_]<<std::endl);
+    Impl const& im=d();
+    FSADBG("Scan "<<FD::Convert(im.fid_)<<" = "<<(*features)[im.fid_]<<" "<<im.state(st)<<" ->"<<TD::Convert(w)<<" ");
+    im.ScanTyped(smeta,w,im.state(st),im.state(next_state),features);
+    FSADBG(im.state(next_state)<<" = "<<(*features)[im.fid_]<<std::endl);
   }
+
 };
+
+
 
 
 
