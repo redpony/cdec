@@ -90,6 +90,10 @@ public:
       return found->second;
   }
 
+  T value(int index) const {
+    return (*this)[index];
+  }
+
   void set_value(int index, const T &value) {
     values_[index] = value;
   }
@@ -101,13 +105,6 @@ public:
       return val;
     }
 
-    T value(int index) const {
-        typename MapType::const_iterator found = values_.find(index);
-        if (found != values_.end())
-            return found->second;
-        else
-            return 0;
-    }
 
     void store(std::valarray<T>* target) const {
       (*target) *= 0;

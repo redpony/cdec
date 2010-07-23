@@ -77,21 +77,21 @@ public:
         WP al=(WP)a;
         WP ale=left_end(a);
         // scan(al,le) these - the same as below else.  macro for now; pull into closure object later?
-        int nw=ale-al;
-        if (left_out+nw<left_full) { // nothing to score
+        int nw=ale-al; // this many new words
+        if (left_out+nw<left_full) { // nothing to score after adding
           wordcpy(left_out,al,nw);
           left_out+=nw;
-        } else if (left_out<left_full) { // something to score AND left context to fill
+        } else if (left_out<left_full) { // something to score AND newly full left context to fill
           int ntofill=left_full-left_out;
+          assert(ntofill==M-(left_out-left_begin));
           wordcpy(left_out,al,ntofill);
           left_out=(W)left_full;
           // heuristic known now
           fsa.reset(h_start);
           fsa.scan(left_begin,left_full,estimated_features); // save heuristic (happens once only)
+          fsa.scan(al+ntofill,ale,features);
           al+=ntofill; // we used up the first ntofill words of al to end up in some known state via exactly M words total (M-ntofill were there beforehand).  now we can scan the remaining al words of this child
-          goto scan;
-        } else { // more to score / state to update
-        scan:
+        } else { // more to score / state to update (left already full)
           fsa.scan(al,ale,features);
         }
         if (nw>M) // child had full state already (had a "gap"); if nw==M then we already reached the same state via left word heuristic scan above
@@ -111,11 +111,11 @@ public:
       }
     }
 
-    if (left_out<left_full) { // finally: partial heuristic fo runfilled items
+    if (left_out<left_full) { // finally: partial heuristic foru nfilled items
       fsa.reset(h_start);
-      fsa.scan(left_begin,left_out,estimated_features); // save heuristic (happens once)
+      fsa.scan(left_begin,left_out,estimated_features);
       clear_fsa_state(out_state); // 0 bytes so we compare / hash correctly. don't know state yet
-      while(left_out<left_full) *left_out++=TD::none; // mark as partial left word seq
+      do { *left_out++=TD::none; } while(left_out<left_full); // none-terminate so left_end(out_state) will know how many words
     } else // or else store final right-state.  heuristic was already assigned
       fstatecpy(out_state,fsa.cs);
     FSAFFDBG(" = " << describe_state(out_state)<<" "<<(*features)[ff.fid()]<<" h="<<(*estimated_features)[ff.fid()]<<'\n');
