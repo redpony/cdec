@@ -111,10 +111,14 @@ public:
                                       const void* residual_state,
                                       FeatureVector* final_features) const
   {
+    Sentence const& ends=ff.end_phrase();
+    SP ss=ff.start_state();
+    if (!ssz) {
+      AccumFeatures(ff,smeta,begin(ends),end(ends),final_features,ss);
+      return;
+    }
     WP l=(WP)residual_state,lend=left_end(residual_state);
     SP rst=fsa_state(residual_state);
-    SP ss=ff.start_state();
-    Sentence const& ends=ff.end_phrase();
     if (lend==rst) { // implying we have an fsa state
       AccumFeatures(ff,smeta,l,lend,final_features,ss); // e.g. <s> score(full left unscored phrase)
       AccumFeatures(ff,smeta,begin(ends),end(ends),final_features,rst); // e.g. [ctx for last M words] score("</s>")
@@ -154,10 +158,10 @@ private:
   */
 
   static inline WordID const* left_end(WordID const* left, WordID const* e) {
-    while (e>left)
-      if (*--e!=TD::none) break;
+    for (;e>left;--e)
+      if (e[-1]!=TD::none) break;
     //post: [left,e] are the seen left words
-    return e+1;
+    return e;
   }
   inline WP left_end(SP ant) const {
     return left_end((WP)ant,(WP)fsa_state(ant));
