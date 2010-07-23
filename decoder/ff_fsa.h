@@ -102,20 +102,19 @@ template <class FsaFF>
 void *FsaScan(FsaFF const& ff,SentenceMetadata const& smeta,WordID const* i, WordID const* end,FeatureVector *features, void *cs,void *ns) {
   // extra code - IT'S FOR EFFICIENCY, MAN!  IT'S OK!  definitely no bugs here.
   void *os,*es;
-  WordID const* e=end-1; // boundcheck 1 earlier because in loop below we use i+1 before rechecking
   if ((end-i)&1) { // odd # of words
     os=cs;
     es=ns;
-    i-=1;
     goto odd;
   } else {
+    i+=1;
     es=cs;
     os=ns;
   }
-  for (;i<e;i+=2) {
-    ff.Scan(smeta,*i,es,os,features); // e->o
+  for (;i<end;i+=2) {
+    ff.Scan(smeta,i[-1],es,os,features); // e->o
   odd:
-    ff.Scan(smeta,*(i+1),os,es,features); // o->e
+    ff.Scan(smeta,i[0],os,es,features); // o->e
   }
   return es;
 }
@@ -194,8 +193,9 @@ template <class St,class Impl>
 struct FsaTypedScan : public FsaTypedBase<St> {
   void Scan(SentenceMetadata const& smeta,WordID w,void const* st,void *next_state,FeatureVector *features) const {
     Impl const* impl=static_cast<Impl const*>(this);
+    FSADBG("Scan "<<(*features)[impl->fid_]<<" = "<<impl->state(st)<<" ->"<<TD::Convert(w)<<" ");
     impl->ScanTyped(smeta,w,impl->state(st),impl->state(next_state),features);
-    FSADBG("Scan "<<impl->state(st)<<" ->"<<TD::Convert(w)<<" "<<impl->state(next_state)<<" = "<<(*features)[impl->fid_]<<std::endl);
+    FSADBG(impl->state(next_state)<<" = "<<(*features)[impl->fid_]<<std::endl);
   }
 };
 
