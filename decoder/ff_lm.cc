@@ -303,6 +303,7 @@ class LanguageModelImpl {
     return ProbNoRemnant(len - 1, len);
   }
 
+  //FIXME: this assumes no target words on final unary -> goal rule.  is that ok?
   // for <s> (n-1 left words) and (n-1 right words) </s>
   double FinalTraversalCost(const void* state) {
     if (unigram) return 0.;
