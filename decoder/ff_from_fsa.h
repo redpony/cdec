@@ -3,6 +3,13 @@
 
 #include "ff_fsa.h"
 
+#define FSA_FF_DEBUG
+#ifdef FSA_FF_DEBUG
+# define FSAFFDBG(x) do { if (debug) { std::cerr << x; }  } while(0)
+#else
+# define FSAFFDBG(x)
+#endif
+
 /* regular bottom up scorer from Fsa feature
    uses guarantee about markov order=N to score ASAP
    encoding of state: if less than N-1 (ctxlen) words
@@ -39,6 +46,7 @@ public:
                              FeatureVector* estimated_features,
                              void* out_state) const
   {
+    FSAFFDBG("(FromFsa) "<<name);
     ff.init_features(features); // estimated_features is fresh
     if (!ssz) {
       TRule const& rule=*edge.rule_;
@@ -47,9 +55,11 @@ public:
         if (e[j] < 1) { // variable
         } else {
           WordID ew=e[j];
+          FSAFFDBG(' '<<TD::Convert(ew));
           ff.Scan(smeta,ew,0,0,features);
         }
       }
+      FSAFFDBG('\n');
       return;
     }
 
@@ -63,6 +73,7 @@ public:
     for (int j = 0; j < e.size(); ++j) { // items in target side of rule
       if (e[j] < 1) { // variable
         SP a = ant_contexts[-e[j]];
+        FSAFFDBG(' '<<describe_state(a));
         WP al=(WP)a;
         WP ale=left_end(a);
         // scan(al,le) these - the same as below else.  macro for now; pull into closure object later?
@@ -87,6 +98,7 @@ public:
           fsa.reset(fsa_state(a));
       } else { // single word
         WordID ew=e[j];
+        FSAFFDBG(' '<<TD::Convert(ew));
         // some redundancy: non-vectorized version of above handling of left words of child item
         if (left_out<left_full) {
           *left_out++=ew;
@@ -105,13 +117,31 @@ public:
       clear_fsa_state(out_state); // 0 bytes so we compare / hash correctly. don't know state yet
       while(left_out<left_full) *left_out++=TD::none; // mark as partial left word seq
     } else // or else store final right-state.  heuristic was already assigned
-      fstatecpy(fsa_state(out_state),fsa.cs);
+      fstatecpy(out_state,fsa.cs);
+    FSAFFDBG(" = " << describe_state(out_state)<<" "<<(*features)[ff.fid()]<<" h="<<(*estimated_features)[ff.fid()]<<'\n');
+  }
+
+  void print_state(std::ostream &o,void const*ant) const {
+    WP l=(WP)ant,le=left_end(ant),lf=left_end_full(ant);
+    o<<'['<<Sentence(l,le);
+    if (le==lf) {
+      o<<" : ";
+      ff.print_state(o,lf);
+    }
+    o << ']';
+  }
+
+  std::string describe_state(void const*ant) const {
+    std::ostringstream o;
+    print_state(o,ant);
+    return o.str();
   }
 
   virtual void FinalTraversalFeatures(const SentenceMetadata& smeta,
                                       const void* residual_state,
                                       FeatureVector* final_features) const
   {
+    ff.init_features(final_features); // estimated_features is fresh
     Sentence const& ends=ff.end_phrase();
     if (!ssz) {
       AccumFeatures(ff,smeta,begin(ends),end(ends),final_features,0);
@@ -132,6 +162,7 @@ public:
       // whole = left-words + end-phrase
       AccumFeatures(ff,smeta,w,end(whole),final_features,ss);
     }
+    FSAFFDBG("Final "<<name<<" = "<<*final_features<<'\n');
   }
 
   bool rule_feature() const {
@@ -190,8 +221,8 @@ private:
     std::memset(fsa_state(ant),0,ssz);
   }
 
-  inline void fstatecpy(void *dest,void const* src) const {
-    std::memcpy(dest,src,ssz);
+  inline void fstatecpy(void *ant,void const* src) const {
+    std::memcpy(fsa_state(ant),src,ssz);
   }
 };
 
@@ -201,6 +232,7 @@ private:
 # include "ff_sample_fsa.h"
 int main() {
   std::cerr<<"Testing left_end...\n";
+  std::cerr<<"sizeof(FeatureVector)="<<sizeof(FeatureVector)<<"\nsizeof(FeatureVectorList)="<<sizeof(FeatureVectorList)<<"\n";
   WordPenaltyFromFsa::test();
   return 0;
 }

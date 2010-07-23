@@ -1,6 +1,7 @@
 #include "ff_factory.h"
 
 #include "ff.h"
+#include "stringlib.h"
 
 using boost::shared_ptr;
 using namespace std;
@@ -21,14 +22,27 @@ string FFRegistry::usage(string const& ffname,bool params,bool verbose) const {
     : it->second->usage(params,verbose);
 }
 
+namespace {
+std::string const& debug_pre="debug";
+}
+
 shared_ptr<FeatureFunction> FFRegistry::Create(const string& ffname, const string& param) const {
   map<string, shared_ptr<FFFactoryBase> >::const_iterator it = reg_.find(ffname);
   shared_ptr<FeatureFunction> res;
   if (it == reg_.end()) {
     cerr << "I don't know how to create feature " << ffname << endl;
   } else {
-    res = it->second->Create(param);
+    int pl=debug_pre.size();
+    bool space=false;
+    std::string p=param;
+    bool debug=match_begin(p,debug_pre)&&(p.size()==pl||(space=p[pl]==' '));
+    if (debug) {
+      p.erase(0,debug_pre.size()+space);
+      cerr<<"debug enabled for "<<ffname<< " - rest of param='"<<p<<"'\n";
+    }
+    res = it->second->Create(p);
     res->name=ffname;
+    res->debug=debug;
   }
   return res;
 }

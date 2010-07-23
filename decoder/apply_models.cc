@@ -1,3 +1,5 @@
+////TODO: keep model state in forest?
+
 //TODO: (for many nonterminals, or multi-rescoring pass) either global
 //best-first, or group by (NT,span) - use prev forest outside as a (admissable,
 //if models are a subset and weights are same) heuristic
