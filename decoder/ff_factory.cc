@@ -39,7 +39,7 @@ shared_ptr<FeatureFunction> FFRegistry::Create(const string& ffname, const strin
       (p.size()==pl || (space=(p[pl]==' ')));
     if (debug) {
       p.erase(0,debug_pre.size()+space);
-      cerr<<"debug enabled for "<<ffname<< " - rest of param='"<<p<<"'\n";
+      cerr<<"debug enabled for "<<ffname<< " - remaining options: '"<<p<<"'\n";
     }
     res = it->second->Create(p);
     res->name=ffname;

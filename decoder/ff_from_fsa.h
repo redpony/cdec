@@ -28,6 +28,7 @@ class FeatureFunctionFromFsa : public FeatureFunction {
   typedef WordID const* WP;
 public:
   FeatureFunctionFromFsa(std::string const& param) : ff(param) {
+    debug=true; // because factory won't set until after we construct.
     FSAFFDBG(ff.name()<<" params="<<param<<" calling Init: ");
     Init();
   }
