@@ -36,7 +36,7 @@ public class Trainer
         parser.accepts("convergence-threshold").withRequiredArg().ofType(Double.class).defaultsTo(1e-6);
         parser.accepts("variational-bayes");
         parser.accepts("alpha-emit").withRequiredArg().ofType(Double.class).defaultsTo(0.1);
-        parser.accepts("alpha-pi").withRequiredArg().ofType(Double.class).defaultsTo(0.01);
+        parser.accepts("alpha-pi").withRequiredArg().ofType(Double.class).defaultsTo(0.0001);
         parser.accepts("agree-direction");
         parser.accepts("agree-language");
         parser.accepts("no-parameter-cache");
@@ -120,6 +120,8 @@ public class Trainer
  			if (vb)	{
  				//cluster.initialiseVB(alphaEmit, alphaPi);
  				vbModel=new VB(tags,corpus);
+ 				vbModel.alpha=alphaPi;
+ 				vbModel.lambda=alphaEmit;
  			}
  			if (options.has("no-parameter-cache")) 
  				cluster.cacheLambda = false;
