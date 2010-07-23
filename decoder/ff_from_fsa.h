@@ -141,7 +141,7 @@ public:
                                       const void* residual_state,
                                       FeatureVector* final_features) const
   {
-    ff.init_features(final_features); // estimated_features is fresh
+    ff.init_features(final_features);
     Sentence const& ends=ff.end_phrase();
     if (!ssz) {
       AccumFeatures(ff,smeta,begin(ends),end(ends),final_features,0);
@@ -150,19 +150,23 @@ public:
     SP ss=ff.start_state();
     WP l=(WP)residual_state,lend=left_end(residual_state);
     SP rst=fsa_state(residual_state);
+    FSAFFDBG("(FromFsa) Final "<<name);
     if (lend==rst) { // implying we have an fsa state
       AccumFeatures(ff,smeta,l,lend,final_features,ss); // e.g. <s> score(full left unscored phrase)
+      FSAFFDBG(" left: "<<Sentence(l,lend));
       AccumFeatures(ff,smeta,begin(ends),end(ends),final_features,rst); // e.g. [ctx for last M words] score("</s>")
+      FSAFFDBG(" right: "<<ff.describe_state(rst)<<" -> "<<ends);
     } else { // all we have is a single short phrase < M words before adding ends
       int nl=lend-l;
       Sentence whole(ends.size()+nl);
       WordID *w=begin(whole);
       wordcpy(w,l,nl);
       wordcpy(w+nl,begin(ends),ends.size());
+      FSAFFDBG(" score whole sentence: "<<whole);
       // whole = left-words + end-phrase
       AccumFeatures(ff,smeta,w,end(whole),final_features,ss);
     }
-    FSAFFDBG("Final "<<name<<" = "<<*final_features<<'\n');
+    FSAFFDBG(" = "<<*final_features<<'\n');
   }
 
   bool rule_feature() const {
