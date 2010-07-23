@@ -277,7 +277,10 @@ public class PhraseContextObjective extends ProjectedObjective
 			}
 			// rethrow the exception
 			if (failure != null)
+			{
+				pool.shutdownNow();
 				throw new RuntimeException(failure);
+			}
 		}
 		
 		double[] tmp = newPoint;

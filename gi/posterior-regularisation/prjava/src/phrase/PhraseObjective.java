@@ -192,7 +192,7 @@ public class PhraseObjective extends ProjectedObjective
 		//	for(int edge=0;edge<data.getSize();edge++){
 		//	ps.println(Arrays.toString(q[edge]));
 		//	}
-		
+
 		return success;
 	}
 	
