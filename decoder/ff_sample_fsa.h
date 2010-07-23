@@ -31,11 +31,12 @@ typedef FeatureFunctionFromFsa<WordPenaltyFsa> WordPenaltyFromFsa;
 
 //
 struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
+  typedef FsaFeatureFunctionBase<LongerThanPrev> Base;
   static std::string usage(bool param,bool verbose) {
     return FeatureFunction::usage_helper(
       "LongerThanPrev",
       "",
-      "stupid example stateful (bigram) feature: -1 per target word that's longer than the previous word (always fires for first word of sentence)",
+      "stupid example stateful (bigram) feature: -1 per target word that's longer than the previous word (<s> sentence begin considered 3 chars long, </s> is sentence end.)",
       param,verbose);
   }
 
@@ -49,16 +50,21 @@ struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
     return std::strlen(TD::Convert(w));
   }
   int markov_order() const { return 1; }
-  LongerThanPrev(std::string const& param) {
+  LongerThanPrev(std::string const& param) : Base(sizeof(int),singleton_sentence(TD::se)) {
     Init();
-    set_state_bytes(sizeof(int));
-//    start.resize(state_bytes()); // this is done by set_state_bytes already.
-//    h_start.resize(state_bytes());
-//    int ss=-1;
-//    wordcpy((WordID*)start.begin(),&ss,&ss+1);
-    //to_state(start.begin(),&ss,1);
-    wordlen(start.begin())=-1;
+    if (0) { // all this is done in constructor already
+      set_state_bytes(sizeof(int));
+      start.resize(state_bytes()); // this is done by set_state_bytes already.
+      h_start.resize(state_bytes());
+      int ss=3;
+      to_state(start.begin(),&ss,1);
+      ss=4;
+      to_state(h_start.begin(),&ss,1);
+    }
+
+    wordlen(start.begin())=3;
     wordlen(h_start.begin())=4; // estimate: anything >4 chars is usually longer than previous
+
   }
 
   static const float val_per_target_word=-1;
@@ -79,7 +85,7 @@ struct ShorterThanPrev : FsaTypedBase<int,ShorterThanPrev> {
     return FeatureFunction::usage_helper(
       "ShorterThanPrev",
       "",
-      "stupid example stateful (bigram) feature: -1 per target word that's shorter than the previous word (always fires for end of sentence)",
+      "stupid example stateful (bigram) feature: -1 per target word that's shorter than the previous word (end of sentence considered '</s>')",
       param,verbose);
   }
 
@@ -87,7 +93,7 @@ struct ShorterThanPrev : FsaTypedBase<int,ShorterThanPrev> {
     return std::strlen(TD::Convert(w));
   }
   ShorterThanPrev(std::string const& param)
-  : Base(-1,4,Sentence(1,TD::Convert("")))
+  : Base(3,4,singleton_sentence(TD::se))
     // start, h_start, end_phrase
     // estimate: anything <4 chars is usually shorter than previous
   {

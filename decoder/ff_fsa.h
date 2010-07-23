@@ -62,8 +62,8 @@ protected:
     std::memcpy(state,begin,n);
   }
   template <class T>
-  inline void static to_state(void *state,T const* begin,int n) {
-    to_state(state,(char const*)begin,n);
+  inline void static to_state(void *state,T const* begin,int n=1) {
+    to_state(state,(char const*)begin,n*sizeof(T));
   }
   template <class T>
   inline void static to_state(void *state,T const* begin,T const* end) {

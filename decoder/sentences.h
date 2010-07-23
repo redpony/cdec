@@ -30,6 +30,14 @@ inline void wordcpy(WordID *dest,WordID const* src,WordID const* src_end) {
   wordcpy(dest,src,src_end-src);
 }
 
+inline Sentence singleton_sentence(WordID t) {
+  return Sentence(1,t);
+}
+
+inline Sentence singleton_sentence(std::string const& s) {
+  return singleton_sentence(TD::Convert(s));
+}
+
 
 inline std::ostream & operator<<(std::ostream &out,Sentence const& s) {
   return out<<TD::GetString(s);
