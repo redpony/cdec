@@ -16,7 +16,7 @@
 
 
 #include "mpi-pyp.hh"
-#include "corpus.hh"
+#include "mpi-corpus.hh"
 
 class MPIPYPTopics {
 public:
@@ -37,14 +37,14 @@ public:
       m_am_root = (m_rank == 0);
     }
 
-  void sample_corpus(const Corpus& corpus, int samples,
+  void sample_corpus(const MPICorpus& corpus, int samples,
                      int freq_cutoff_start=0, int freq_cutoff_end=0, 
                      int freq_cutoff_interval=0,
                      int max_contexts_per_document=0);
 
   int sample(const DocumentId& doc, const Term& term);
-  int max(const DocumentId& doc, const Term& term) const;
-  int max(const DocumentId& doc) const;
+  std::pair<int,F> max(const DocumentId& doc, const Term& term) const;
+  std::pair<int,F> max(const DocumentId& doc) const;
   int max_topic() const;
 
   void set_backoff(const std::string& filename) {

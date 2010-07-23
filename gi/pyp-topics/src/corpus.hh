@@ -25,7 +25,7 @@ public:
     Corpus();
     virtual ~Corpus() {}
 
-    unsigned read(const std::string &filename);
+    virtual unsigned read(const std::string &filename);
 
     const_iterator begin() const { return m_documents.begin(); }
     const_iterator end() const { return m_documents.end(); }
