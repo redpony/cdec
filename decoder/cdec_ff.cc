@@ -8,13 +8,15 @@
 #include "ff_factory.h"
 #include "ff_ruleshape.h"
 #include "ff_bleu.h"
-#include "ff_from_fsa.h"
+#include "ff_sample_fsa.h"
 
 boost::shared_ptr<FFRegistry> global_ff_registry;
 
 void register_feature_functions() {
   global_ff_registry->Register(new FFFactory<LanguageModel>);
   global_ff_registry->Register(new FFFactory<WordPenaltyFromFsa>); // same as WordPenalty, but implemented using ff_fsa
+  global_ff_registry->Register(new FFFactory<FeatureFunctionFromFsa<LongerThanPrev> >);
+  global_ff_registry->Register(new FFFactory<FeatureFunctionFromFsa<ShorterThanPrev> >);
   //TODO: use for all features the new Register which requires usage(...)
 #ifdef HAVE_RANDLM
   global_ff_registry->Register("RandLM", new FFFactory<LanguageModelRandLM>);

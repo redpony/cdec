@@ -30,6 +30,8 @@ protected:
   Sentence end_phrase_; // words appended for final traversal (final state cost is assessed using Scan) e.g. "</s>" for lm.
   int state_bytes_; // don't forget to set this. default 0 (it may depend on params of course)
   void set_state_bytes(int sb=0) {
+    if (start.size()!=sb) start.resize(sb);
+    if (h_start.size()!=sb) h_start.resize(sb);
     state_bytes_=sb;
   }
 
@@ -37,8 +39,21 @@ protected:
   void init_fid(std::string const& name) { // call this, though, if you have a single feature
     fid_=FD::Convert(name);
   }
+  inline void static to_state(void *state,char const* begin,char const* end) {
+    std::memcpy(state,begin,end-begin);
+  }
+  inline void static to_state(void *state,char const* begin,int n) {
+    std::memcpy(state,begin,n);
+  }
+  template <class T>
+  inline void static to_state(void *state,T const* begin,int n) {
+    to_state(state,(char const*)begin,n);
+  }
+  template <class T>
+  inline void static to_state(void *state,T const* begin,T const* end) {
+    to_state(state,(char const*)begin,(char const*)end);
+  }
 public:
-
   // return m: all strings x with the same final m+1 letters must end in this state
   /* markov chain of order m: P(xn|xn-1...x1)=P(xn|xn-1...xn-m) */
   int markov_order() const { return 0; } // override if you use state.  order 0 implies state_bytes()==0 as well, as far as scoring/splitting is concerned (you can still track state, though)
@@ -64,12 +79,49 @@ public:
   //TODO: decide if we want to require you to support dest same as src, since that's how we use it most often in ff_from_fsa bottom-up wrapper (in l->r scoring, however, distinct copies will be the rule), and it probably wouldn't be too hard for most people to support.  however, it's good to hide the complexity here, once (see overly clever FsaScan loop that swaps src/dest addresses repeatedly to scan a sequence by effectively swapping)
 
   // NOTE: if you want to e.g. track statistics, cache, whatever, cast const away or use mutable members
-  void Scan(SentenceMetadata const& smeta,WordID x,void const* state,void *next_state,FeatureVector *features) const {
+  void Scan(SentenceMetadata const& smeta,WordID w,void const* state,void *next_state,FeatureVector *features) const {
   }
 
   // don't set state-bytes etc. in ctor because it may depend on parsing param string
-  FsaFeatureFunctionBase() : start(0),h_start(0),state_bytes_(0) {  }
+  FsaFeatureFunctionBase(int statesz=0) : start(statesz),h_start(statesz),state_bytes_(statesz) {  }
 
+};
+
+// if State is pod.  sets state size and allocs start, h_start
+template <class St>
+struct FsaTypedBase : public FsaFeatureFunctionBase {
+protected:
+  typedef St State;
+  static inline State & state(void *state) {
+    return *(State*)state;
+  }
+  static inline State const& state(void const* state) {
+    return *(State const*)state;
+  }
+  void set_starts(State const& s,State const& heuristic_s) {
+    if (0) { // already in ctor
+      start.resize(sizeof(State));
+      h_start.resize(sizeof(State));
+    }
+    state(start.begin())=s;
+    state(h_start.begin())=heuristic_s;
+  }
+  void set_h_start(State const& s) {
+  }
+public:
+  int markov_order() const { return 1; }
+  FsaTypedBase() : FsaFeatureFunctionBase(sizeof(State)) {
+  }
+};
+
+// usage (if you're lazy):
+// struct ShorterThanPrev : public FsaTypedBase<int>,FsaTypedScan<ShorterThanPrev>
+template <class Impl>
+struct FsaTypedScan  {
+  void Scan(SentenceMetadata const& smeta,WordID w,void const* st,void *next_state,FeatureVector *features) const {
+    Impl const* impl=static_cast<Impl const*>(this);
+    impl->Scan(smeta,w,impl->state(st),impl->state(next_state),features);
+  }
 };
 
 
@@ -169,26 +221,7 @@ void AccumFeatures(FF const& ff,SentenceMetadata const& smeta,WordID const* i, W
 
 //TODO: combine 2 FsaFeatures typelist style (can recurse for more)
 
-// example: feature val = -1 * # of target words
-struct WordPenaltyFsa : public FsaFeatureFunctionBase {
-  WordPenaltyFsa(std::string const& param) {
-    init_fid(usage(false,false));
-    return;
-    //below are all defaults:
-    set_state_bytes(0);
-    start.clear();
-    h_start.clear();
-  }
-  static const float val_per_target_word=-1;
-  // move from state to next_state after seeing word x, while emitting features->add_value(fid,val) possibly with duplicates.  state and next_state may be same memory.
-  void Scan(SentenceMetadata const& smeta,WordID x,void const* state,void *next_state,FeatureVector *features) const {
-    features->add_value(fid_,val_per_target_word);
-  }
-  static std::string usage(bool param,bool verbose) {
-    return FeatureFunction::usage_helper("WordPenaltyFsa","","-1 per target word",param,verbose);
-  }
 
-};
 
 
 #endif
