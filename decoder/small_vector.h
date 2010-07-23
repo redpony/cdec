@@ -254,4 +254,9 @@ public:
 
 typedef SmallVector<int,2> SmallVectorInt;
 
+template <class T,int N>
+void memcpy(void *out,SmallVector<T,N> const& v) {
+  std::memcpy(out,v.begin(),v.size()*sizeof(T));
+}
+
 #endif

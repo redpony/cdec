@@ -1,12 +1,15 @@
 #ifndef VALUE_ARRAY_H
 #define VALUE_ARRAY_H
 
+//TODO: option for non-constructed version (type_traits pod?), option for small array optimization (if sz < N, store inline in union, see small_vector.h)
+
 #include <cstdlib>
 #include <algorithm>
 #include <new>
 #include <boost/range.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits.hpp>
+#include <cstring>
 #ifdef USE_BOOST_SERIALIZE
 # include <boost/serialization/split_member.hpp>
 # include <boost/serialization/access.hpp>
@@ -17,7 +20,7 @@ template <class T, class A = std::allocator<T> >
 class ValueArray : A // private inheritance so stateless allocator adds no size.
 {
 public:
-  const int SV_MAX=sizeof(T)/sizeof(T*)>1?sizeof(T)/sizeof(T*):1;
+  static const int SV_MAX=sizeof(T)/sizeof(T*)>1?sizeof(T)/sizeof(T*):1;
   //space optimization: SV_MAX T will fit inside what would otherwise be a pointer to heap data.  todo in the far future if bored.
   typedef T value_type;
   typedef T& reference;
@@ -51,10 +54,20 @@ public:
   ValueArray() : sz(0), array(NULL) {}
 
   explicit ValueArray(size_type s, const_reference t = T())
-    : sz(s)
-    , array(A::allocate(s))
   {
+    init(s,t);
+  }
+
+protected:
+  inline void init(size_type s, const_reference t = T()) {
+    sz=s;
+    array=A::allocate(s);
     for (size_type i = 0; i != sz; ++i) { A::construct(array + i,t); }
+  }
+public:
+  void resize(size_type s, const_reference t = T()) {
+    clear();
+    init(s,t);
   }
 
   template <class I>
@@ -65,7 +78,11 @@ public:
     copy_construct(itr,end,array);
   }
 
-  ~ValueArray()
+  ~ValueArray() {
+    clear();
+  }
+
+  void clear()
   {
     for (size_type i = sz; i != 0; --i) {
       A::destroy(array + (i - 1));
@@ -160,6 +177,10 @@ bool operator< (ValueArray<T,A> const& v1, ValueArray<T,A> const& v2)
                                        , v2.end() );
 }
 
+template <class T,class A>
+void memcpy(void *out,ValueArray<T,A> const& v) {
+  std::memcpy(out,v.begin(),v.size()*sizeof(T));
+}
 
 
 #endif

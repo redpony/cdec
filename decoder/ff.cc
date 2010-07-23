@@ -30,12 +30,12 @@ string FeatureFunction::usage_helper(std::string const& name,std::string const& 
   return r;
 }
 
-FeatureFunction::Features FeatureFunction::single_feature(WordID feat) {
+Features FeatureFunction::single_feature(WordID feat) {
   return Features(1,feat);
 }
 
-FeatureFunction::Features ModelSet::all_features(std::ostream *warn,bool warn0) {
-  typedef FeatureFunction::Features FFS;
+Features ModelSet::all_features(std::ostream *warn,bool warn0) {
+  typedef Features FFS;
   FFS ffs;
 #define WARNFF(x) do { if (warn) { *warn << "WARNING: "<< x ; *warn<<endl; } } while(0)
   typedef std::map<WordID,string> FFM;
@@ -74,7 +74,7 @@ FeatureFunction::Features ModelSet::all_features(std::ostream *warn,bool warn0) 
 
 void ModelSet::show_features(std::ostream &out,std::ostream &warn,bool warn_zero_wt)
 {
-  typedef FeatureFunction::Features FFS;
+  typedef Features FFS;
   FFS ffs=all_features(&warn,warn_zero_wt);
   out << "Weight  Feature\n";
   for (unsigned i=0;i<ffs.size();++i) {
@@ -90,7 +90,7 @@ void ModelSet::show_features(std::ostream &out,std::ostream &warn,bool warn_zero
 
 // Hiero and Joshua use log_10(e) as the value, so I do to
 WordPenalty::WordPenalty(const string& param) :
-    fid_(FD::Convert("WordPenalty")),
+  fid_(FD::Convert("WordPenalty")),
     value_(-1.0 / log(10)) {
   if (!param.empty()) {
     cerr << "Warning WordPenalty ignoring parameter: " << param << endl;
@@ -118,11 +118,11 @@ SourceWordPenalty::SourceWordPenalty(const string& param) :
   }
 }
 
-FeatureFunction::Features SourceWordPenalty::features() const {
+Features SourceWordPenalty::features() const {
   return single_feature(fid_);
 }
 
-FeatureFunction::Features WordPenalty::features() const {
+Features WordPenalty::features() const {
   return single_feature(fid_);
 }
 
@@ -154,7 +154,7 @@ ArityPenalty::ArityPenalty(const std::string& param) :
   while (!fids_.empty() && fids_.back()==0) fids_.pop_back(); // pretty up features vector in case FD was frozen.  doesn't change anything
 }
 
-FeatureFunction::Features ArityPenalty::features() const {
+Features ArityPenalty::features() const {
   return Features(fids_.begin(),fids_.end());
 }
 
@@ -212,7 +212,7 @@ void ModelSet::AddFeaturesToEdge(const SentenceMetadata& smeta,
   edge->edge_prob_.logeq(edge->feature_values_.dot(weights_));
 }
 
-void ModelSet::AddFinalFeatures(const std::string& state, Hypergraph::Edge* edge) const {
+void ModelSet::AddFinalFeatures(const std::string& state, Hypergraph::Edge* edge,SentenceMetadata const& smeta) const {
   assert(1 == edge->rule_->Arity());
 
   for (int i = 0; i < models_.size(); ++i) {
@@ -223,7 +223,7 @@ void ModelSet::AddFinalFeatures(const std::string& state, Hypergraph::Edge* edge
       int spos = model_state_pos_[i];
       ant_state = &state[spos];
     }
-    ff.FinalTraversalFeatures(ant_state, &edge->feature_values_);
+    ff.FinalTraversalFeatures(smeta, ant_state, &edge->feature_values_);
   }
   edge->edge_prob_.logeq(edge->feature_values_.dot(weights_));
 }
