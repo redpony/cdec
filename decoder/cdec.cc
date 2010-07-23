@@ -749,7 +749,7 @@ int main(int argc, char** argv) {
         }
 
         if (output_training_vector) {
-          acc_vec.clear_value(0);
+          acc_vec.erase(0);
           ++g_count;
           if (g_count % combine_size == 0) {
             if (encode_b64) {

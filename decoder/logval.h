@@ -13,6 +13,8 @@ class LogVal {
  public:
   LogVal() : s_(), v_(-std::numeric_limits<T>::infinity()) {}
   explicit LogVal(double x) : s_(std::signbit(x)), v_(s_ ? std::log(-x) : std::log(x)) {}
+  LogVal(int x) : s_(x<0), v_(s_ ? std::log(-x) : std::log(x)) {}
+  LogVal(unsigned x) : s_(0), v_(std::log(x)) { }
   LogVal(double lnx,bool sign) : s_(sign),v_(lnx) {}
   static LogVal<T> exp(T lnx) { return LogVal(lnx,false); }
 

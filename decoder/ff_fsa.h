@@ -3,7 +3,13 @@
 
 //SEE ALSO: ff_fsa_dynamic.h, ff_from_fsa.h
 
-//TODO: actually compile this; probably full of syntax errors.
+#define FSA_DEBUG
+#ifdef FSA_DEBUG
+# include <iostream>
+# define FSADBG(x) do { std::cerr << x; } while(0)
+#else
+# define FSADBG(x)
+#endif
 
 #include <stdint.h> //C99
 #include <string>
@@ -34,7 +40,6 @@ protected:
     if (h_start.size()!=sb) h_start.resize(sb);
     state_bytes_=sb;
   }
-
   int fid_; // you can have more than 1 feature of course.
   void init_fid(std::string const& name) { // call this, though, if you have a single feature
     fid_=FD::Convert(name);
@@ -54,6 +59,11 @@ protected:
     to_state(state,(char const*)begin,(char const*)end);
   }
 public:
+  //edges may have old features on them.  override if you have more than 1 fid.  we need to call this explicitly because edges may have old feature values already, and I chose to use add_value (+=) to simplify scanning a phrase, rather than set_value (=) for fsa ffs.  could revisit this and use set_value and therefore sum
+  void init_features(FeatureVector *fv) const {
+    fv->set_value(fid_,0);
+    //erase(fid_)
+  }
   // return m: all strings x with the same final m+1 letters must end in this state
   /* markov chain of order m: P(xn|xn-1...x1)=P(xn|xn-1...xn-m) */
   int markov_order() const { return 0; } // override if you use state.  order 0 implies state_bytes()==0 as well, as far as scoring/splitting is concerned (you can still track state, though)
@@ -87,6 +97,69 @@ public:
 
 };
 
+// init state is in cs; overwrite cs, ns repeatedly (alternatively).  return resulting state
+template <class FsaFF>
+void *FsaScan(FsaFF const& ff,SentenceMetadata const& smeta,WordID const* i, WordID const* end,FeatureVector *features, void *cs,void *ns) {
+  // extra code - IT'S FOR EFFICIENCY, MAN!  IT'S OK!  definitely no bugs here.
+  void *os,*es;
+  WordID const* e=end-1; // boundcheck 1 earlier because in loop below we use i+1 before rechecking
+  if ((end-i)&1) { // odd # of words
+    os=cs;
+    es=ns;
+    i-=1;
+    goto odd;
+  } else {
+    es=cs;
+    os=ns;
+  }
+  for (;i<e;i+=2) {
+    ff.Scan(smeta,*i,es,os,features); // e->o
+  odd:
+    ff.Scan(smeta,*(i+1),os,es,features); // o->e
+  }
+  return es;
+}
+
+// if you have a more efficient implementation for scanning a phrase than one word at a time (e.g. LM context using sliding window buffer rather than rotating through a fixed state size), you can override this
+template <class FsaFF>
+void Scan(FsaFF const& ff,SentenceMetadata const& smeta,WordID const* i,WordID const* e,void const* state,void *next_state,FeatureVector *features) {
+  int ssz=ff.state_bytes();
+  if (!ssz) {
+    for (;i<e;++i)
+      ff.Scan(smeta,*i,0,0,features);
+    return;
+  }
+  Bytes tstate(ssz);
+  void *tst=tstate.begin();
+  bool odd=(e-i)&1;
+  void *cs,*ns;
+  if (odd) {
+    cs=tst;
+    ns=next_state;
+  } else {
+    cs=next_state;
+    ns=tst;
+  }
+  std::memcpy(cs,state,ssz);
+  void *est=FsaScan(ff,smeta,i,end,features,cs,ns);
+  assert(est==next_state);
+}
+
+
+// like above Scan, but don't bother storing final state (for FinalTraversalFeatures)
+template <class FF>
+void AccumFeatures(FF const& ff,SentenceMetadata const& smeta,WordID const* i, WordID const* end,FeatureVector *h_features,void const* start_state) {
+  int ssz=ff.state_bytes();
+  if (ssz) {
+    Bytes state(ssz),state2(ssz);
+    void *cs=state.begin(),*ns=state2.begin();
+    memcpy(cs,start_state,ff.state_bytes());
+    FsaScan(ff,smeta,i,end,h_features,cs,ns);
+  } else
+    for (;i<end;++i)
+      ff.Scan(smeta,*i,0,0,h_features);
+}
+
 // if State is pod.  sets state size and allocs start, h_start
 template <class St>
 struct FsaTypedBase : public FsaFeatureFunctionBase {
@@ -114,40 +187,19 @@ public:
   }
 };
 
+
 // usage (if you're lazy):
 // struct ShorterThanPrev : public FsaTypedBase<int>,FsaTypedScan<ShorterThanPrev>
-template <class Impl>
-struct FsaTypedScan  {
+template <class St,class Impl>
+struct FsaTypedScan : public FsaTypedBase<St> {
   void Scan(SentenceMetadata const& smeta,WordID w,void const* st,void *next_state,FeatureVector *features) const {
     Impl const* impl=static_cast<Impl const*>(this);
-    impl->Scan(smeta,w,impl->state(st),impl->state(next_state),features);
+    impl->ScanTyped(smeta,w,impl->state(st),impl->state(next_state),features);
+    FSADBG("Scan "<<impl->state(st)<<" ->"<<TD::Convert(w)<<" "<<impl->state(next_state)<<" = "<<(*features)[impl->fid_]<<std::endl);
   }
 };
 
 
-
-// init state is in cs; overwrite cs, ns repeatedly (alternatively).  return resulting state
-template <class FsaFF>
-void *FsaScan(FsaFF const& ff,SentenceMetadata const& smeta,WordID const* i, WordID const* end,FeatureVector *h_features, void *cs,void *ns) {
-  // extra code - IT'S FOR EFFICIENCY, MAN!  IT'S OK!  definitely no bugs here.
-  void *os,*es;
-  WordID const* e=end-1; // boundcheck 1 earlier because in loop below we use i+1 before rechecking
-  if ((end-i)&1) { // odd # of words
-    os=cs;
-    es=ns;
-    i-=1;
-    goto odd;
-  } else {
-    es=cs;
-    os=ns;
-  }
-  for (;i<e;i+=2) {
-    ff.Scan(smeta,*i,es,os,h_features); // e->o
-  odd:
-    ff.Scan(smeta,*(i+1),os,es,h_features); // o->e
-  }
-  return es;
-}
 
 // do not use if state size is 0, please.
 const bool optimize_FsaScanner_zerostate=false;
@@ -203,20 +255,6 @@ struct FsaScanner {
 #endif
   }
 };
-
-
-template <class FF>
-void AccumFeatures(FF const& ff,SentenceMetadata const& smeta,WordID const* i, WordID const* end,FeatureVector *h_features,void const* start_state) {
-  int ssz=ff.state_bytes();
-  if (ssz) {
-    Bytes state(ssz),state2(ssz);
-    void *cs=state.begin(),*ns=state2.begin();
-    memcpy(cs,start_state,ff.state_bytes());
-    FsaScan(ff,smeta,i,end,h_features,cs,ns);
-  } else
-    for (;i<end;++i)
-      ff.Scan(smeta,*i,0,0,h_features);
-}
 
 
 //TODO: combine 2 FsaFeatures typelist style (can recurse for more)

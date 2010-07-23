@@ -54,12 +54,13 @@ struct ScaledTransitionEventWeightFunction {
 // safe to reinterpret a vector of these as a vector of prob_t (plain old data)
 struct TropicalValue {
   TropicalValue() : v_() {}
-  explicit TropicalValue(int v) {
+  TropicalValue(int v) {
     if (v == 0) v_ = prob_t::Zero();
     else if (v == 1) v_ = prob_t::One();
     else { cerr << "Bad value in TropicalValue(int).\n"; abort(); }
   }
-  explicit TropicalValue(const prob_t& v) : v_(v) {}
+  TropicalValue(unsigned v) : v_(v) {}
+  TropicalValue(const prob_t& v) : v_(v) {}
   inline TropicalValue& operator+=(const TropicalValue& o) {
     if (v_ < o.v_) v_ = o.v_;
     return *this;

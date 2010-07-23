@@ -39,6 +39,7 @@ public:
                              FeatureVector* estimated_features,
                              void* out_state) const
   {
+    ff.init_features(features); // estimated_features is fresh
     if (!ssz) {
       TRule const& rule=*edge.rule_;
       Sentence const& e = rule.e();
@@ -112,11 +113,11 @@ public:
                                       FeatureVector* final_features) const
   {
     Sentence const& ends=ff.end_phrase();
-    SP ss=ff.start_state();
     if (!ssz) {
-      AccumFeatures(ff,smeta,begin(ends),end(ends),final_features,ss);
+      AccumFeatures(ff,smeta,begin(ends),end(ends),final_features,0);
       return;
     }
+    SP ss=ff.start_state();
     WP l=(WP)residual_state,lend=left_end(residual_state);
     SP rst=fsa_state(residual_state);
     if (lend==rst) { // implying we have an fsa state
@@ -137,6 +138,15 @@ public:
     return StateSize()==0; // Fsa features don't get info about span
   }
 
+  static void test() {
+    WordID w1[1],w1b[1],w2[2];
+    w1[0]=w2[0]=TD::Convert("hi");
+    w2[1]=w1b[0]=TD::none;
+    assert(left_end(w1,w1+1)==w1+1);
+    assert(left_end(w1b,w1b+1)==w1b);
+    assert(left_end(w2,w2+2)==w2+1);
+  }
+
 private:
   Impl ff;
   void Init() {
@@ -147,8 +157,8 @@ private:
     SetStateSize(ff.state_bytes()+state_offset);
   }
   int M; // markov order (ctx len)
-  FeatureFunctionFromFsa() {  }
-  // call this explicitly in constructor body:
+  FeatureFunctionFromFsa(); // not allowed.
+
   int state_offset; // store left-words first, then fsa state
   int ssz; // bytes in fsa state
   /*
@@ -183,10 +193,17 @@ private:
   inline void fstatecpy(void *dest,void const* src) const {
     std::memcpy(dest,src,ssz);
   }
-
-
 };
 
 
+#ifdef TEST_FSA
+# include "tdict.cc"
+# include "ff_sample_fsa.h"
+int main() {
+  std::cerr<<"Testing left_end...\n";
+  WordPenaltyFromFsa::test();
+  return 0;
+}
+#endif
 
 #endif

@@ -57,7 +57,7 @@ struct LongerThanPrev : public FsaFeatureFunctionBase {
 //    int ss=-1;
 //    wordcpy((WordID*)start.begin(),&ss,&ss+1);
     //to_state(start.begin(),&ss,1);
-    wordlen(start.begin())=-1; // same as above.
+    wordlen(start.begin())=-1;
     wordlen(h_start.begin())=4; // estimate: anything >4 chars is usually longer than previous
   }
 
@@ -73,8 +73,7 @@ struct LongerThanPrev : public FsaFeatureFunctionBase {
 };
 
 // similar example feature; base type exposes stateful type, defines markov_order 1, state size = sizeof(State)
-struct ShorterThanPrev : public FsaTypedBase<int>,FsaTypedScan<ShorterThanPrev> {
-  typedef int State; // defines # of bytes in state and return type of state(void *)
+struct ShorterThanPrev : FsaTypedScan<int,ShorterThanPrev> {
   static std::string usage(bool param,bool verbose) {
     return FeatureFunction::usage_helper(
       "ShorterThanPrev",
@@ -88,22 +87,22 @@ struct ShorterThanPrev : public FsaTypedBase<int>,FsaTypedScan<ShorterThanPrev> 
   }
   ShorterThanPrev(std::string const& param) {
     init_fid(usage(false,false));
-    end_phrase_.push_back(TD::Convert("")); // this triggers end of sentence firing
+//    end_phrase_.push_back(TD::Convert("")); // this triggers end of sentence firing
     set_starts(-1,4); // estimate: anything <4 chars is usually shorter than previous
   }
 
   static const float val_per_target_word=-1;
   // evil anti-google int & len out-param:
-  void Scan(SentenceMetadata const& smeta,WordID w,int prevlen,int &len,FeatureVector *features) const {
+  void ScanTyped(SentenceMetadata const& smeta,WordID w,int prevlen,int &len,FeatureVector *features) const {
     len=wordlen(w);
     if (len<prevlen)
       features->add_value(fid_,val_per_target_word);
   }
 
   // already provided by FsaTypedScan<ShorterThanPrev>
-  void Scan(SentenceMetadata const& smeta,WordID w,void const* st,void *next_state,FeatureVector *features) const {
-    Scan(smeta,w,state(st),state(next_state),features);
-  }
+/*  void Scan(SentenceMetadata const& smeta,WordID w,void const* st,void *next_state,FeatureVector *features) const {
+    ScanTyped(smeta,w,state(st),state(next_state),features);
+    } */
 
 };
 
