@@ -35,7 +35,8 @@ shared_ptr<FeatureFunction> FFRegistry::Create(const string& ffname, const strin
     int pl=debug_pre.size();
     bool space=false;
     std::string p=param;
-    bool debug=match_begin(p,debug_pre)&&(p.size()==pl||(space=(p[pl]==' '));
+    bool debug=match_begin(p,debug_pre)&&
+      (p.size()==pl || (space=(p[pl]==' ')));
     if (debug) {
       p.erase(0,debug_pre.size()+space);
       cerr<<"debug enabled for "<<ffname<< " - rest of param='"<<p<<"'\n";
