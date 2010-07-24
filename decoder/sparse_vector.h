@@ -370,10 +370,26 @@ private:
   MapType values_;
 };
 
+//like a pair but can live in a union, because it lacks default+copy ctors, dtor.
+template <class T>
+struct feature_val {
+  int fid;
+  T val;
+};
+
+template <class T>
+inline feature_val<T> featval(int fid,T const &val) {
+  feature_val<T> f;
+  f.fid=fid;
+  f.val=val;
+  return f;
+}
+
+
 // doesn't support fast indexing directly
 template <class T>
 class SparseVectorList {
-  typedef typename std::pair<int,T> Pair;
+  typedef feature_val<T> Pair;
   typedef SmallVector<Pair,1> List;
   typedef typename List::const_iterator const_iterator;
   SparseVectorList() {  }
@@ -383,7 +399,7 @@ class SparseVectorList {
     int c=0;
     for (;i<end;++i,++c) {
       if (*i!=z)
-        p.push_back(Pair(c,*i));
+        p.push_back(featval(c,*i));
     }
     p.compact();
   }
@@ -392,7 +408,7 @@ class SparseVectorList {
     for (unsigned i=0;i<v.size();++i) {
       T const& t=v[i];
       if (t!=z)
-        p.push_back(Pair(i,t));
+        p.push_back(featval(i,t));
     }
     p.compact();
   }
@@ -402,7 +418,7 @@ class SparseVectorList {
   }
   void overlay(SparseVector<T> *to) const {
     for (int i=0;i<p.size();++i)
-      to->set_value(p[i].first,p[i].second);
+      to->set_value(p[i].fid,p[i].val);
   }
   void copy_to(SparseVector<T> *to) const {
     to->clear();
