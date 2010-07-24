@@ -41,7 +41,7 @@ struct Translation {
     out<<pre<<"Viterbi: "<<TD::GetString(sentence)<<"\n";
     out<<pre<<"features: "<<features;
     if (include_0_fid && features.nonzero(0))
-      out<< " dummy-feature(0)="<<features[0];
+      out<< " dummy-feature(0)="<<features.get(0);
     out<<std::endl;
   }
   bool is_null() {

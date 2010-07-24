@@ -19,10 +19,9 @@ struct WordPenaltyFsa : public FsaFeatureFunctionBase<WordPenaltyFsa> {
     start.clear();
     h_start.clear();
   }
-  static const float val_per_target_word=-1;
   // move from state to next_state after seeing word x, while emitting features->add_value(fid,val) possibly with duplicates.  state and next_state may be same memory.
-  void Scan(SentenceMetadata const& smeta,WordID w,void const* state,void *next_state,FeatureVector *features) const {
-    features->add_value(fid_,val_per_target_word);
+  Featval Scan1(WordID w,void const* state,void *next_state) const {
+    return -1;
   }
 };
 
@@ -67,13 +66,11 @@ struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
 
   }
 
-  static const float val_per_target_word=-1;
-  void Scan(SentenceMetadata const& smeta,WordID w,void const* from,void *next_state,FeatureVector *features) const {
+  Featval Scan1(WordID w,void const* from,void *next_state) const {
     int prevlen=state(from);
     int len=wordlen(w);
-    if (len>prevlen)
-      features->add_value(fid_,val_per_target_word);
     state(next_state)=len;
+    return len>prevlen ? -1 : 0;
   }
 };
 
@@ -100,18 +97,17 @@ struct ShorterThanPrev : FsaTypedBase<int,ShorterThanPrev> {
     Init();
   }
 
-  static const float val_per_target_word=-1;
+
+/*  Featval ScanT1(WordID w,int prevlen,int &len) const;
+    // alternative to below:
+    */
+
   // evil anti-google int & len out-param:
-  void ScanTyped(SentenceMetadata const& smeta,WordID w,int prevlen,int &len,FeatureVector *features) const {
+  void ScanT(SentenceMetadata const& /* smeta */,const Hypergraph::Edge& /* edge */,WordID w,int prevlen,int &len,FeatureVector *features) const {
     len=wordlen(w);
     if (len<prevlen)
-      features->add_value(fid_,val_per_target_word);
+      features->add_value(fid_,-1);
   }
-
-  // already provided by FsaTypedScan<ShorterThanPrev>
-/*  void Scan(SentenceMetadata const& smeta,WordID w,void const* st,void *next_state,FeatureVector *features) const {
-    ScanTyped(smeta,w,state(st),state(next_state),features);
-    } */
 
 };
 

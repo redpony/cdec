@@ -1,6 +1,8 @@
 #ifndef CDEC_HASH_H
 #define CDEC_HASH_H
 
+#include "murmur_hash.h"
+
 #include "config.h"
 #ifdef HAVE_SPARSEHASH
 # include <google/dense_hash_map>
@@ -13,7 +15,40 @@
 # define HASH_MAP_RESERVED(h,empty,deleted)
 # define HASH_MAP_EMPTY(h,empty)
 #endif
+
 #include <boost/functional/hash.hpp>
 
+// assumes C is POD
+template <class C>
+struct murmur_hash
+{
+  typedef MurmurInt return_type;
+  typedef C /*const&*/ argument_type;
+  return_type operator()(argument_type const& c) const {
+    return MurmurHash((void*)&c,sizeof(c));
+  }
+};
+
+// murmur_hash_array isn't std guaranteed safe (you need to use string::data())
+template <>
+struct murmur_hash<std::string>
+{
+  typedef MurmurInt return_type;
+  typedef std::string /*const&*/ argument_type;
+  return_type operator()(argument_type const& c) const {
+    return MurmurHash(c.data(),c.size());
+  }
+};
+
+// uses begin(),size() assuming contiguous layout and POD
+template <class C>
+struct murmur_hash_array
+{
+  typedef MurmurInt return_type;
+  typedef C /*const&*/ argument_type;
+  return_type operator()(argument_type const& c) const {
+    return MurmurHash(&*c.begin(),c.size()*sizeof(*c.begin()));
+  }
+};
 
 #endif

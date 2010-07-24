@@ -64,8 +64,9 @@ protected:
   virtual void FinalTraversalFeatures(const void* residual_state,
                                       FeatureVector* final_features) const;
 public:
-  //override either this or above. (no need to do both)
-  virtual void FinalTraversalFeatures(const SentenceMetadata& smeta,
+  //override either this or one of above.
+  virtual void FinalTraversalFeatures(const SentenceMetadata& /* smeta */,
+                                      const Hypergraph::Edge& /* edge */,
                                       const void* residual_state,
                                       FeatureVector* final_features) const {
     FinalTraversalFeatures(residual_state,final_features);

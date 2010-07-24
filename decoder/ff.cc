@@ -13,10 +13,8 @@ using namespace std;
 FeatureFunction::~FeatureFunction() {}
 
 
-void FeatureFunction::FinalTraversalFeatures(const void* ant_state,
-                                             SparseVector<double>* features) const {
-  (void) ant_state;
-  (void) features;
+void FeatureFunction::FinalTraversalFeatures(const void* /* ant_state */,
+                                             SparseVector<double>* /* features */) const {
 }
 
 string FeatureFunction::usage_helper(std::string const& name,std::string const& params,std::string const& details,bool sp,bool sd) {
@@ -225,7 +223,7 @@ void ModelSet::AddFinalFeatures(const std::string& state, Hypergraph::Edge* edge
       int spos = model_state_pos_[i];
       ant_state = &state[spos];
     }
-    ff.FinalTraversalFeatures(smeta, ant_state, &edge->feature_values_);
+    ff.FinalTraversalFeatures(smeta, *edge, ant_state, &edge->feature_values_);
   }
   edge->edge_prob_.logeq(edge->feature_values_.dot(weights_));
 }

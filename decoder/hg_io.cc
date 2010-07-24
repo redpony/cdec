@@ -556,6 +556,7 @@ void HypergraphIO::PLFtoLattice(const string& plf, Lattice* pl) {
   ReadFromPLF(plf, &g, 0);
   const int num_nodes = g.nodes_.size() - 1;
   l.resize(num_nodes);
+  int fid0=FD::Convert("Feature_0");
   for (int i = 0; i < num_nodes; ++i) {
     vector<LatticeArc>& alts = l[i];
     const Hypergraph::Node& node = g.nodes_[i];
@@ -564,7 +565,7 @@ void HypergraphIO::PLFtoLattice(const string& plf, Lattice* pl) {
     for (int j = 0; j < num_alts; ++j) {
       const Hypergraph::Edge& edge = g.edges_[node.out_edges_[j]];
       alts[j].label = edge.rule_->e_[1];
-      alts[j].cost = edge.feature_values_.value(FD::Convert("Feature_0"));
+      alts[j].cost = edge.feature_values_.get(fid0);
       alts[j].dist2next = edge.head_node_ - node.id_;
     }
   }
