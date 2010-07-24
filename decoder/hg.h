@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "feature_vector.h"
 #include "small_vector.h"
-#include "sparse_vector.h"
 #include "wordid.h"
 #include "trule.h"
 #include "prob.h"

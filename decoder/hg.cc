@@ -100,7 +100,7 @@ prob_t Hypergraph::ComputeEdgePosteriors(double scale, vector<prob_t>* posts) co
                   ScaledTransitionEventWeightFunction>(*this, &pv, weight, w2);
   posts->resize(edges_.size());
   for (int i = 0; i < edges_.size(); ++i)
-    (*posts)[i] = prob_t(pv.value(i));
+    (*posts)[i] = prob_t(pv.get(i));
   return prob_t(inside);
 }
 
@@ -113,7 +113,7 @@ prob_t Hypergraph::ComputeBestPathThroughEdges(vector<prob_t>* post) const {
                   ViterbiTransitionEventWeightFunction>(*this, &pv);
   post->resize(edges_.size());
   for (int i = 0; i < edges_.size(); ++i)
-    (*post)[i] = pv.value(i).v_;
+    (*post)[i] = pv.get(i).v_;
   return viterbi_weight.v_;
 }
 

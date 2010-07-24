@@ -2,10 +2,10 @@
 
 //TODO: grammar heuristic (min cost of reachable rule set) for binarizations (active edges) if we wish to prune those also
 
+#include "hash.h"
 #include "translator.h"
 #include <algorithm>
 #include <vector>
-#include <tr1/unordered_map>
 #include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
 #include "hg.h"
@@ -169,13 +169,15 @@ struct SCFGTranslatorImpl {
 
   typedef std::pair<int, WordID> StateSplit;
   typedef std::pair<StateSplit, int> StateSplitPair;
-  typedef std::tr1::unordered_map<StateSplit, int, boost::hash<StateSplit> > Split2Node;
-  typedef std::tr1::unordered_map<int, vector<WordID> > Splits;
+  typedef HASH_MAP<StateSplit, int, boost::hash<StateSplit> > Split2Node;
+  typedef HASH_MAP<int, vector<WordID> > Splits;
 
   bool RefineForest(Hypergraph* forest) {
     Hypergraph refined_forest;
     Split2Node s2n;
+    HASH_MAP_RESERVED(s2n,StateSplit(-1,-1),StateSplit(-2,-2));
     Splits splits;
+    HASH_MAP_RESERVED(splits,-1,-2);
     Hypergraph::Node& coarse_goal_node = *(forest->nodes_.end()-1);
     bool refined_goal_node = false;
     foreach(Hypergraph::Node& node, forest->nodes_){

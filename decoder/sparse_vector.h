@@ -15,7 +15,25 @@
    use SparseVectorList (pair smallvector) for feat funcs / hypergraphs (you rarely need random access; just append a feature to the list)
 */
 /* hack: index 0 never gets printed because cdyer is creative and efficient. features which have no weight got feature dict id 0, see, and the models all clobered that value.  nobody wants to see it.  except that vlad is also creative and efficient and stored the oracle bleu there. */
+/* NOTE: zero vals may or may not be dropped from map (sparse, but not guaranteed to be so).
 
+   I rely on !v the same as !((bool)v) the same as v==0 and v() same as v(0).
+
+   one exception:
+
+   a local:
+   T sum = 0;
+   is used instead of
+   T sum;
+
+   because T may be a primitive type, and
+
+   T sum();
+
+   is parsed as a function decl :(
+
+   the alternative T sum=T() is also be reasonable.  i've switched to that.
+*/
 
 // this is a modified version of code originally written
 // by Phil Blunsom
@@ -78,31 +96,35 @@ public:
 
   // warning: exploits the fact that 0 values are always removed from map.  change this if you change that.
   bool nonzero(int index) const {
-    return values_.find(index) != values_.end();
-  }
-
-
-  T operator[](int index) const {
     typename MapType::const_iterator found = values_.find(index);
-    if (found == values_.end())
-      return 0;
-    else
-      return found->second;
+    return found==values_.end() || !found->second;
   }
 
-  T value(int index) const {
-    return (*this)[index];
+
+  T get(int index) const {
+    typename MapType::const_iterator found = values_.find(index);
+    return found==values_.end()?T():found->second;
+  }
+
+  // same as above but may add a 0 entry.  TODO: check that people relying on no entry use get
+  T & operator[](int index){
+    return values_[index];
   }
 
   void set_value(int index, const T &value) {
     values_[index] = value;
   }
 
-    T const& add_value(int index, const T &value) {
+    void add_value(int index, const T &value) {
+      if (!value) return;
+#if 1
+      values_[index]+=value;
+#else
+      // this is not really going to be any faster, and we already rely on default init = 0 init
       std::pair<typename MapType::iterator,bool> art=values_.insert(std::make_pair(index,value));
       T &val=art.first->second;
       if (!art.second) val += value; // already existed
-      return val;
+#endif
     }
 
 
@@ -125,7 +147,7 @@ public:
     // dot product with a unit vector of the same length
     // as the sparse vector
     T dot() const {
-        T sum = 0;
+        T sum = T();
         for (typename MapType::const_iterator
                 it = values_.begin(); it != values_.end(); ++it)
             sum += it->second;
@@ -146,7 +168,7 @@ public:
 
     template<typename S>
     S dot(const SparseVector<S> &vec) const {
-        S sum = 0;
+        S sum = S();
         for (typename MapType::const_iterator
                 it = values_.begin(); it != values_.end(); ++it)
         {
@@ -160,7 +182,7 @@ public:
 
     template<typename S>
     S dot(const std::vector<S> &vec) const {
-        S sum = 0;
+      S sum = S();
         for (typename MapType::const_iterator
                 it = values_.begin(); it != values_.end(); ++it)
         {
@@ -173,7 +195,7 @@ public:
     template<typename S>
     S dot(const S *vec) const {
         // this is not range checked!
-        S sum = 0;
+        S sum = S();
         for (typename MapType::const_iterator
                 it = values_.begin(); it != values_.end(); ++it)
             sum += it->second * vec[it->first];
@@ -182,7 +204,7 @@ public:
     }
 
     T l1norm() const {
-      T sum = 0;
+      T sum = T();
       for (typename MapType::const_iterator
               it = values_.begin(); it != values_.end(); ++it)
         sum += fabs(it->second);
@@ -190,7 +212,7 @@ public:
     }
 
   T l2norm_sq() const {
-      T sum = 0;
+      T sum = T();
       for (typename MapType::const_iterator
               it = values_.begin(); it != values_.end(); ++it)
         sum += it->second * it->second;
@@ -214,7 +236,7 @@ public:
         {
 //            T v =
               (values_[it->first] += it->second);
-//            if (v == 0) values_.erase(it->first);
+//            if (!v) values_.erase(it->first);
         }
         return *this;
     }
@@ -225,7 +247,7 @@ public:
         {
 //            T v =
           (values_[it->first] -= it->second);
-//            if (v == 0) values_.erase(it->first);
+//            if (!v) values_.erase(it->first);
         }
         return *this;
     }
@@ -294,7 +316,7 @@ public:
         for (typename MapType::const_iterator
                 it = values_.begin(); it != values_.end(); ++it) {
           // by definition feature id 0 is a dummy value
-          if (it->first == 0) continue;
+          if (!it->first) continue;
           if (with_semi) {
             (*os) << (first ? "" : ";")
 	         << FD::Convert(it->first) << '=' << it->second;
@@ -316,7 +338,7 @@ public:
 
   bool at_equals(int i,T const& val) const {
     const_iterator it=values_.find(i);
-    if (it==values_.end()) return val==0;
+    if (it==values_.end()) return !val;
     return it->second==val;
   }
 
@@ -395,19 +417,17 @@ class SparseVectorList {
   SparseVectorList() {  }
   template <class I>
   SparseVectorList(I i,I const& end) {
-    const T z=0;
     int c=0;
     for (;i<end;++i,++c) {
-      if (*i!=z)
+      if (*i)
         p.push_back(featval(c,*i));
     }
     p.compact();
   }
   explicit SparseVectorList(std::vector<T> const& v) {
-    const T z=0;
     for (unsigned i=0;i<v.size();++i) {
       T const& t=v[i];
-      if (t!=z)
+      if (t)
         p.push_back(featval(i,t));
     }
     p.compact();
@@ -433,10 +453,6 @@ private:
   List p;
 };
 
-typedef SparseVectorList<double> FeatureVectorList;
-typedef SparseVector<double> FeatureVector;
-typedef SparseVector<double> WeightVector;
-typedef std::vector<double> DenseWeightVector;
 template <typename T>
 SparseVector<T> operator+(const SparseVector<T>& a, const SparseVector<T>& b) {
   SparseVector<T> result = a;

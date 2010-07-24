@@ -121,7 +121,7 @@ class TRule {
   int Arity() const { return arity_; }
   bool IsUnary() const { return (Arity() == 1) && (f_.size() == 1); }
   const SparseVector<double>& GetFeatureValues() const { return scores_; }
-  double Score(int i) const { return scores_[i]; }
+  double Score(int i) const { return scores_.get(i); }
   WordID GetLHS() const { return lhs_; }
   void ComputeArity();
 
@@ -133,8 +133,8 @@ class TRule {
   SparseVector<double> scores_;
 
   char arity_;
-  
-  // these attributes are application-specific and should probably be refactored 
+
+  // these attributes are application-specific and should probably be refactored
   TRulePtr parent_rule_;  // usually NULL, except when doing constrained decoding
 
   // this is only used when doing synchronous parsing

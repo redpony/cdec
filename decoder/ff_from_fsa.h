@@ -58,7 +58,7 @@ public:
         } else {
           WordID ew=e[j];
           FSAFFDBG(' '<<TD::Convert(ew));
-          ff.Scan(smeta,ew,0,0,features);
+          ff.Scan(smeta,edge,ew,0,0,features);
         }
       }
       FSAFFDBG('\n');
@@ -69,7 +69,7 @@ public:
     W left_begin=(W)out_state;
     W left_out=left_begin; // [left,fsa_state) = left ctx words.  if left words aren't full, then null wordid
     WP left_full=left_end_full(out_state);
-    FsaScanner<Impl> fsa(ff,smeta);
+    FsaScanner<Impl> fsa(ff,smeta,edge);
     TRule const& rule=*edge.rule_;
     Sentence const& e = rule.e();
     for (int j = 0; j < e.size(); ++j) { // items in target side of rule
@@ -141,23 +141,24 @@ public:
 
   //FIXME: it's assumed that the final rule is just a unary no-target-terminal rewrite (same as ff_lm)
   virtual void FinalTraversalFeatures(const SentenceMetadata& smeta,
+                                      const Hypergraph::Edge& edge,
                                       const void* residual_state,
                                       FeatureVector* final_features) const
   {
     ff.init_features(final_features);
     Sentence const& ends=ff.end_phrase();
     if (!ssz) {
-      AccumFeatures(ff,smeta,begin(ends),end(ends),final_features,0);
+      AccumFeatures(ff,smeta,edge,begin(ends),end(ends),final_features,0);
       return;
     }
     SP ss=ff.start_state();
     WP l=(WP)residual_state,lend=left_end(residual_state);
     SP rst=fsa_state(residual_state);
-    FSAFFDBG("(FromFsa) Final "<<name);
+    FSAFFDBG("(FromFsa) Final "<<name<< " before="<<*final_features);
     if (lend==rst) { // implying we have an fsa state
-      AccumFeatures(ff,smeta,l,lend,final_features,ss); // e.g. <s> score(full left unscored phrase)
+      AccumFeatures(ff,smeta,edge,l,lend,final_features,ss); // e.g. <s> score(full left unscored phrase)
       FSAFFDBG(" left: "<<ff.describe_state(ss)<<" -> "<<Sentence(l,lend));
-      AccumFeatures(ff,smeta,begin(ends),end(ends),final_features,rst); // e.g. [ctx for last M words] score("</s>")
+      AccumFeatures(ff,smeta,edge,begin(ends),end(ends),final_features,rst); // e.g. [ctx for last M words] score("</s>")
       FSAFFDBG(" right: "<<ff.describe_state(rst)<<" -> "<<ends);
     } else { // all we have is a single short phrase < M words before adding ends
       int nl=lend-l;
@@ -167,7 +168,7 @@ public:
       wordcpy(w+nl,begin(ends),ends.size());
       FSAFFDBG(" score whole sentence: "<<whole);
       // whole = left-words + end-phrase
-      AccumFeatures(ff,smeta,w,end(whole),final_features,ss);
+      AccumFeatures(ff,smeta,edge,w,end(whole),final_features,ss);
     }
     FSAFFDBG(" = "<<*final_features<<'\n');
   }

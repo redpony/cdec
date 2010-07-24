@@ -1,7 +1,16 @@
 #ifndef FF_FSA_H
 #define FF_FSA_H
 
+/*
+  features whose score is just some PFSA over target string.  however, PFSA can use edge and smeta info (e.g. spans on edge) - not usually useful.
+
+  state is some fixed width byte array.  could actually be a void *, WordID sequence, whatever.
+
+*/
+
 //SEE ALSO: ff_fsa_dynamic.h, ff_from_fsa.h
+
+//TODO: decide whether to use init_features / add_value vs. summing elsewhere + set_value once (or inefficient for from_fsa: sum distinct feature_vectors.  but L->R if we only scan 1 word at a time, that's fine
 
 //#define FSA_DEBUG
 
@@ -24,13 +33,6 @@
 #include "sentences.h"
 
 typedef ValueArray<uint8_t> Bytes;
-
-/*
-  features whose score is just some PFSA over target string.  TODO: could decide to give access to source span of scanned words as well if someone devises a feature that can use it
-
-  state is some fixed width byte array.  could actually be a void *, WordID sequence, whatever.
-
-*/
 
 // it's not necessary to inherit from this, but you probably should to save yourself some boilerplate.  defaults to no-state
 
@@ -70,7 +72,8 @@ protected:
     to_state(state,(char const*)begin,(char const*)end);
   }
   inline static char hexdigit(int i) {
-    return '0'+i;
+    int j=i-10;
+    return j>=0?'a'+j:'0'+i;
   }
   inline static void print_hex_byte(std::ostream &o,unsigned c) {
       o<<hexdigit(c>>4);
@@ -126,8 +129,14 @@ public:
   // move from state to next_state after seeing word x, while emitting features->add_value(fid,val) possibly with duplicates.  state and next_state will never be the same memory.
   //TODO: decide if we want to require you to support dest same as src, since that's how we use it most often in ff_from_fsa bottom-up wrapper (in l->r scoring, however, distinct copies will be the rule), and it probably wouldn't be too hard for most people to support.  however, it's good to hide the complexity here, once (see overly clever FsaScan loop that swaps src/dest addresses repeatedly to scan a sequence by effectively swapping)
 
+  // different name because of inheritance method hiding; simple/common case; 1 fid
+  Featval Scan1(WordID w,void const* state,void *next_state) const {
+    return 0;
+  }
+
   // NOTE: if you want to e.g. track statistics, cache, whatever, cast const away or use mutable members
-  void Scan(SentenceMetadata const& smeta,WordID w,void const* state,void *next_state,FeatureVector *features) const {
+  inline void Scan(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,void const* state,void *next_state,FeatureVector *features) const {
+    features->add_value(fid_,Scan1(w,state,next_state));
   }
 
   // don't set state-bytes etc. in ctor because it may depend on parsing param string
@@ -137,7 +146,7 @@ public:
 
 // init state is in cs; overwrite cs, ns repeatedly (alternatively).  return resulting state
 template <class FsaFF>
-void *FsaScan(FsaFF const& ff,SentenceMetadata const& smeta,WordID const* i, WordID const* end,FeatureVector *features, void *cs,void *ns) {
+void *FsaScan(FsaFF const& ff,SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID const* i, WordID const* end,FeatureVector *features, void *cs,void *ns) {
   // extra code - IT'S FOR EFFICIENCY, MAN!  IT'S OK!  definitely no bugs here.
   void *os,*es;
   if ((end-i)&1) { // odd # of words
@@ -150,20 +159,20 @@ void *FsaScan(FsaFF const& ff,SentenceMetadata const& smeta,WordID const* i, Wor
     os=ns;
   }
   for (;i<end;i+=2) {
-    ff.Scan(smeta,i[-1],es,os,features); // e->o
+    ff.Scan(smeta,edge,i[-1],es,os,features); // e->o
   odd:
-    ff.Scan(smeta,i[0],os,es,features); // o->e
+    ff.Scan(smeta,edge,i[0],os,es,features); // o->e
   }
   return es;
 }
 
 // if you have a more efficient implementation for scanning a phrase than one word at a time (e.g. LM context using sliding window buffer rather than rotating through a fixed state size), you can override this
 template <class FsaFF>
-void Scan(FsaFF const& ff,SentenceMetadata const& smeta,WordID const* i,WordID const* e,void const* state,void *next_state,FeatureVector *features) {
+void Scan(FsaFF const& ff,SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID const* i,WordID const* e,void const* state,void *next_state,FeatureVector *features) {
   int ssz=ff.state_bytes();
   if (!ssz) {
     for (;i<e;++i)
-      ff.Scan(smeta,*i,0,0,features);
+      ff.Scan(smeta,edge,*i,0,0,features);
     return;
   }
   Bytes tstate(ssz);
@@ -178,23 +187,23 @@ void Scan(FsaFF const& ff,SentenceMetadata const& smeta,WordID const* i,WordID c
     ns=tst;
   }
   std::memcpy(cs,state,ssz);
-  void *est=FsaScan(ff,smeta,i,end,features,cs,ns);
+  void *est=FsaScan(ff,smeta,edge,i,end,features,cs,ns);
   assert(est==next_state);
 }
 
 
 // like above Scan, but don't bother storing final state (for FinalTraversalFeatures)
 template <class FF>
-void AccumFeatures(FF const& ff,SentenceMetadata const& smeta,WordID const* i, WordID const* end,FeatureVector *h_features,void const* start_state) {
+void AccumFeatures(FF const& ff,SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID const* i, WordID const* end,FeatureVector *h_features,void const* start_state) {
   int ssz=ff.state_bytes();
   if (ssz) {
     Bytes state(ssz),state2(ssz);
     void *cs=state.begin(),*ns=state2.begin();
     memcpy(cs,start_state,ff.state_bytes());
-    FsaScan(ff,smeta,i,end,h_features,cs,ns);
+    FsaScan(ff,smeta,edge,i,end,h_features,cs,ns);
   } else
     for (;i<end;++i)
-      ff.Scan(smeta,*i,0,0,h_features);
+      ff.Scan(smeta,edge,*i,0,0,h_features);
 }
 
 // if State is pod.  sets state size and allocs start, h_start
@@ -233,10 +242,15 @@ public:
     o<<state(st);
   }
   int markov_order() const { return 1; }
-  void Scan(SentenceMetadata const& smeta,WordID w,void const* st,void *next_state,FeatureVector *features) const {
+  Featval ScanT1(WordID w,int prevlen,int &len) const { return 0; }
+  inline void ScanT(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,int prevlen,int &len,FeatureVector *features) const {
+    features->add_value(d().fid_,d().ScanT1(w,prevlen,len));
+  }
+
+  inline void Scan(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,void const* st,void *next_state,FeatureVector *features) const {
     Impl const& im=d();
     FSADBG("Scan "<<FD::Convert(im.fid_)<<" = "<<(*features)[im.fid_]<<" "<<im.state(st)<<" ->"<<TD::Convert(w)<<" ");
-    im.ScanTyped(smeta,w,im.state(st),im.state(next_state),features);
+    im.ScanT(smeta,edge,w,im.state(st),im.state(next_state),features);
     FSADBG(im.state(next_state)<<" = "<<(*features)[im.fid_]<<std::endl);
   }
 
@@ -263,7 +277,8 @@ struct FsaScanner {
   inline void *nexts() const {
     return (cs==st0)?st1:st0;
   }
-  FsaScanner(FF const& ff,SentenceMetadata const& smeta) : ff(ff),smeta(smeta)
+  const Hypergraph::Edge& edge;
+  FsaScanner(FF const& ff,SentenceMetadata const& smeta,const Hypergraph::Edge& edge) : ff(ff),smeta(smeta),edge(edge)
   {
     ssz=ff.state_bytes();
     int stride=((ssz+ALIGN-1)/ALIGN)*ALIGN; // round up to multiple of ALIGN
@@ -278,11 +293,11 @@ struct FsaScanner {
   }
   void scan(WordID w,FeatureVector *feat) {
     if (optimize_FsaScanner_zerostate && !ssz) {
-      ff.Scan(smeta,w,0,0,feat);
+      ff.Scan(smeta,edge,w,0,0,feat);
       return;
     }
     void *ns=nexts();
-    ff.Scan(smeta,w,cs,ns,feat);
+    ff.Scan(smeta,edge,w,cs,ns,feat);
     cs=ns;
   }
 
@@ -291,9 +306,9 @@ struct FsaScanner {
     // faster.
     if (optimize_FsaScanner_zerostate && !ssz)
       for (;i<end;++i)
-        ff.Scan(smeta,*i,0,0,feat);
+        ff.Scan(smeta,edge,*i,0,0,feat);
     else
-      cs=FsaScan(ff,smeta,i,end,feat,cs,nexts());
+      cs=FsaScan(ff,smeta,edge,i,end,feat,cs,nexts());
 #else
     for (;i<end;++i)
       scan(*i,feat);
