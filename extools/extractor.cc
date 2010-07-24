@@ -84,7 +84,7 @@ void WriteBasePhraseSpans(const AnnotatedParallelSentence& sentence,
   cout << TD::GetString(sentence.f) << " ||| " << TD::GetString(sentence.e) << " |||";
   for (int it = 0; it < phrases.size(); ++it) {
     const ParallelSpan& phrase = phrases[it];
-    cout << " " << phrase.i1 << "-" << phrase.i2 
+    cout << " " << phrase.i1 << "-" << phrase.i2
       << "-" << phrase.j1 << "-" << phrase.j2;
   }
   cout << endl;
@@ -146,12 +146,12 @@ void WritePhraseContexts(const AnnotatedParallelSentence& sentence,
                          bool context_s, bool context_t,
                          CountCombiner* o) {
   vector<WordID> context, context_f;
-  if (context_t) 
+  if (context_t)
   {
-      context.resize(ctx_size * 2 + 1); 
+      context.resize(ctx_size * 2 + 1);
       context[ctx_size] = kGAP;
   }
-  if (context_s) 
+  if (context_s)
   {
       context_f.resize(ctx_size * 2 + 1);
       context_f[ctx_size] = kGAP;
@@ -169,7 +169,7 @@ void WritePhraseContexts(const AnnotatedParallelSentence& sentence,
 
     if (context_t)
     {
-        context.resize(ctx_size * 2 + 1); 
+        context.resize(ctx_size * 2 + 1);
         for (int i = 0; i < ctx_size && context_t; ++i) {
           int epos = phrase.j1 - 1 - i;
           const WordID left_ctx = (epos < 0) ? kBOS : sentence.e[epos];
@@ -385,12 +385,12 @@ int main(int argc, char** argv) {
 
   assert(phrase_s || phrase_t);
   assert(context_s || context_t);
-  
+
   if(backoff) {
     for (int i=0;i < num_categories;++i)
         all_cats.push_back(TD::Convert("X"+boost::lexical_cast<string>(i)));
   }
-  
+
   //SimpleRuleWriter o;
   while(in) {
     ++line;
