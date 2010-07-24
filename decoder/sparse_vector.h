@@ -115,15 +115,19 @@ public:
     values_[index] = value;
   }
 
-    void add_value(int index, const T &value) {
-      if (!value) return;
+  inline void maybe_add(int index, const T& value) {
+    if (value) add_value(index,value);
+  }
+
+    T& add_value(int index, const T &value) {
 #if 1
-      values_[index]+=value;
+      return values_[index]+=value;
 #else
       // this is not really going to be any faster, and we already rely on default init = 0 init
       std::pair<typename MapType::iterator,bool> art=values_.insert(std::make_pair(index,value));
       T &val=art.first->second;
       if (!art.second) val += value; // already existed
+      return val;
 #endif
     }
 
