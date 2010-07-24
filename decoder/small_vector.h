@@ -168,7 +168,6 @@ public:
       ptr_to_small();
   }
 
-
   void compact() {
     compact(size_);
   }
