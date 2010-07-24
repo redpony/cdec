@@ -136,7 +136,7 @@ public:
 
   // NOTE: if you want to e.g. track statistics, cache, whatever, cast const away or use mutable members
   inline void Scan(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,void const* state,void *next_state,FeatureVector *features) const {
-    features->add_value(fid_,Scan1(w,state,next_state));
+    features->maybe_add(fid_,Scan1(w,state,next_state));
   }
 
   // don't set state-bytes etc. in ctor because it may depend on parsing param string
@@ -244,7 +244,7 @@ public:
   int markov_order() const { return 1; }
   Featval ScanT1(WordID w,int prevlen,int &len) const { return 0; }
   inline void ScanT(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,int prevlen,int &len,FeatureVector *features) const {
-    features->add_value(d().fid_,d().ScanT1(w,prevlen,len));
+    features->maybe_add(d().fid_,d().ScanT1(w,prevlen,len));
   }
 
   inline void Scan(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,void const* st,void *next_state,FeatureVector *features) const {
