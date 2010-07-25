@@ -19,7 +19,6 @@ std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool es
   if (etree) {
     o<<name<<"          tree: "<<ViterbiETree(hg)<<endl;
   }
-  //FIXME: this doesn't work.
   if (show_derivation) {
     o<<name<<"          derivation: ";
     o << hg.show_viterbi_tree(false); // last item should be goal (or at least depend on prev items).  TODO: this doesn't actually reorder the nodes in hg.

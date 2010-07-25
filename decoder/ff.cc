@@ -3,6 +3,7 @@
 //TODO: actually score rule_feature()==true features once only, hash keyed on rule or modify TRule directly?  need to keep clear in forest which features come from models vs. rules; then rescoring could drop all the old models features at once
 
 #include <boost/lexical_cast.hpp>
+#include <stdexcept>
 #include "ff.h"
 
 #include "tdict.h"
@@ -97,6 +98,17 @@ WordPenalty::WordPenalty(const string& param) :
   }
 }
 
+void FeatureFunction::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                        const Hypergraph::Edge& edge,
+                                        const std::vector<const void*>& ant_states,
+                                        SparseVector<double>* features,
+                                        SparseVector<double>* estimated_features,
+                                        void* state) const {
+  throw std::runtime_error("TraversalFeaturesImpl not implemented - override it or TraversalFeaturesLog.\n");
+  abort();
+}
+
+
 void WordPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                         const Hypergraph::Edge& edge,
                                         const std::vector<const void*>& ant_states,
@@ -189,8 +201,9 @@ void ModelSet::AddFeaturesToEdge(const SentenceMetadata& smeta,
                                  Hypergraph::Edge* edge,
                                  string* context,
                                  prob_t* combination_cost_estimate) const {
+  edge->reset_info();
   context->resize(state_size_);
-  memset(&(*context)[0], 0, state_size_); //FIXME: only context.data() is required to be contiguous, and it become sinvalid after next string operation.  use SmallVector<char>?  ValueArray? (higher performance perhaps, fixed size)
+  memset(&(*context)[0], 0, state_size_); //FIXME: only context.data() is required to be contiguous, and it becomes invalid after next string operation.  use SmallVector<char>?  ValueArray? (higher performance perhaps, fixed size)
   SparseVector<double> est_vals;  // only computed if combination_cost_estimate is non-NULL
   if (combination_cost_estimate) *combination_cost_estimate = prob_t::One();
   for (int i = 0; i < models_.size(); ++i) {
@@ -214,7 +227,7 @@ void ModelSet::AddFeaturesToEdge(const SentenceMetadata& smeta,
 
 void ModelSet::AddFinalFeatures(const std::string& state, Hypergraph::Edge* edge,SentenceMetadata const& smeta) const {
   assert(1 == edge->rule_->Arity());
-
+  edge->reset_info();
   for (int i = 0; i < models_.size(); ++i) {
     const FeatureFunction& ff = *models_[i];
     const void* ant_state = NULL;

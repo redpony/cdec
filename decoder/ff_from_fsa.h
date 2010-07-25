@@ -43,8 +43,8 @@ public:
 
   //TODO: add source span to Fsa FF interface, pass along
   //TODO: read/debug VERY CAREFULLY
-  void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                             const Hypergraph::Edge& edge,
+  void TraversalFeaturesLog(const SentenceMetadata& smeta,
+                             Hypergraph::Edge& edge,
                              const std::vector<const void*>& ant_contexts,
                              FeatureVector* features,
                              FeatureVector* estimated_features,
@@ -144,7 +144,7 @@ public:
 
   //FIXME: it's assumed that the final rule is just a unary no-target-terminal rewrite (same as ff_lm)
   virtual void FinalTraversalFeatures(const SentenceMetadata& smeta,
-                                      const Hypergraph::Edge& edge,
+                                      Hypergraph::Edge& edge,
                                       const void* residual_state,
                                       FeatureVector* final_features) const
   {

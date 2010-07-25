@@ -6,8 +6,8 @@
 #define USE_INFO_EDGE 1
 #if USE_INFO_EDGE
 # include <sstream>
-# define INFO_EDGE(e,msg) do { std::ostringstream &o=const_cast<std::ostringstream &>(e.info_);o<<msg; } while(0)
-# define INFO_EDGEw(e,msg) do { std::ostringstream &o=const_cast<std::ostringstream &>(e.info_);if (o.empty()) o<<' ';o<<msg; } while(0)
+# define INFO_EDGE(e,msg) do { std::ostringstream &o=(e.info_);o<<msg; } while(0)
+# define INFO_EDGEw(e,msg) do { std::ostringstream &o(e.info_);if (o.empty()) o<<' ';o<<msg; } while(0)
 #else
 # define INFO_EDGE(e,msg)
 # define INFO_EDGEw(e,msg)
@@ -60,8 +60,8 @@ public:
     void copy_reindex(Node const& o,indices_after const& n2,indices_after const& e2) {
       copy_fixed(o);
       id_=n2[id_];
-      e2.copy_to(in_edges_,o.in_edges_);
-      e2.copy_to(out_edges_,o.out_edges_);
+      e2.reindex_push_back(o.in_edges_,in_edges_);
+      e2.reindex_push_back(o.out_edges_,out_edges_);
     }
 
   };
@@ -104,19 +104,21 @@ public:
       copy_fixed(o);
       head_node_=n2[o.head_node_];
       id_=e2[o.id_];
-      n2.copy_to(tail_nodes_,o.tail_nodes_);
+      n2.reindex_push_back(o.tail_nodes_,tail_nodes_);
     }
 
 #if USE_INFO_EDGE
-    mutable std::ostringstream info_;
+    std::ostringstream info_;
 
     Edge(Edge const& o) : head_node_(o.head_node_),tail_nodes_(o.tail_nodes_),rule_(o.rule_),feature_values_(o.feature_values_),edge_prob_(o.edge_prob_),id_(o.id_),i_(o.i_),j_(o.j_),prev_i_(o.prev_i_),prev_j_(o.prev_j_), info_(o.info_.str()) {  }
     void operator=(Edge const& o) {
       head_node_ = o.head_node_; tail_nodes_ = o.tail_nodes_; rule_ = o.rule_; feature_values_ = o.feature_values_; edge_prob_ = o.edge_prob_; id_ = o.id_; i_ = o.i_; j_ = o.j_; prev_i_ = o.prev_i_; prev_j_ = o.prev_j_;  info_.str(o.info_.str());
     }
     std::string info() const { return info_.str(); }
+    void reset_info() { info_.str(""); info_.clear(); }
 #else
     std::string info() const { return std::string(); }
+    void reset_info() {  }
 #endif
     void show(std::ostream &o,unsigned mask=SPAN|RULE) const {
       o<<'{';
@@ -387,7 +389,7 @@ public:
                                       const EdgeMask* prune_edges = NULL);
 
   void set_ids(); // resync edge,node .id_
-  void check_ids(); // assert that .id_ have been kept in sync
+  void check_ids() const; // assert that .id_ have been kept in sync
 
 private:
   Hypergraph(int num_nodes, int num_edges, bool is_lc) : is_linear_chain_(is_lc), nodes_(num_nodes), edges_(num_edges) {}

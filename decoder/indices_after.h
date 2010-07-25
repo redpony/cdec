@@ -3,6 +3,7 @@
 
 #include <boost/config.hpp> // STATIC_CONSTANT
 #include <algorithm> //swap
+#include <iterator>
 
 // iterator wrapper.  inverts boolean value.
 template <class AB>
@@ -47,7 +48,8 @@ unsigned new_indices(KEEP keep,O out) {
   return new_indices(keep.begin(),keep.end(),out);
 }
 
-// given a vector and a parallel sequence of bools where true means keep, keep only the marked elements while maintaining order
+// given a vector and a parallel sequence of bools where true means keep, keep only the marked elements while maintaining order.
+// this is done with a parallel sequence to the input, marked with positions the kept items would map into in a destination array, with removed items marked with the index -1.  the reverse would be more compact (parallel to destination array, index of input item that goes into it) but would require the input sequence be random access.
 struct indices_after
 {
   BOOST_STATIC_CONSTANT(unsigned,REMOVED=(unsigned)-1);
@@ -140,6 +142,21 @@ struct indices_after
     for (unsigned i=0;i<n_mapped;++i)
       if (keeping(i))
         to[map[i]]=v[i];
+  }
+
+  //transform collection of indices into what we're remapping.  (input/output iterators)
+  template <class IndexI,class IndexO>
+  void reindex(IndexI i,IndexI const end,IndexO o) const {
+    for(;i<end;++i) {
+      unsigned m=map[*i];
+      if (m!=REMOVED)
+        *o++=m;
+    }
+  }
+
+  template <class VecI,class VecO>
+  void reindex_push_back(VecI const& i,VecO &o) const {
+    reindex(i.begin(),i.end(),std::back_inserter(o));
   }
 
 private:
