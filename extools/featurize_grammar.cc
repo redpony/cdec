@@ -36,12 +36,12 @@ static const size_t MAX_LINE_LENGTH = 64000000;
 // Data structures for indexing and counting rules
 //typedef boost::tuple< WordID, vector<WordID>, vector<WordID> > RuleTuple;
 struct RuleTuple {
-  RuleTuple(const WordID& lhs, const vector<WordID>& s, const vector<WordID>& t) 
+  RuleTuple(const WordID& lhs, const vector<WordID>& s, const vector<WordID>& t)
   : m_lhs(lhs), m_source(s), m_target(t) {
     hash_value();
     m_dirty = false;
   }
-  
+
   size_t hash_value() const {
 //    if (m_dirty) {
       size_t hash = 0;
@@ -99,17 +99,17 @@ struct FreqCount {
   Counts counts;
 
   int inc(const Key& r, int c=1) {
-    pair<typename Counts::iterator,bool> itb 
+    pair<typename Counts::iterator,bool> itb
       = counts.insert(make_pair(r,c));
-    if (!itb.second) 
-      itb.first->second += c; 
+    if (!itb.second)
+      itb.first->second += c;
     return itb.first->second;
   }
 
   int inc_if_exists(const Key& r, int c=1) {
     typename Counts::iterator it = counts.find(r);
-    if (it != counts.end()) 
-      it->second += c; 
+    if (it != counts.end())
+      it->second += c;
     return it->second;
   }
 
@@ -284,9 +284,9 @@ struct LogRuleCount : public FeatureExtractor {
                                const RuleStatistics& info,
                                SparseVector<float>* result) const {
     (void) lhs; (void) src; (void) trg;
-    //result->set_value(fid_, log(info.counts.value(kCFE)));
-    result->set_value(fid_, log(info.counts.value(kCFE)));
-    if (IsZero(info.counts.value(kCFE)))
+    //result->set_value(fid_, log(info.counts.get(kCFE)));
+    result->set_value(fid_, log(info.counts.get(kCFE)));
+    if (IsZero(info.counts.get(kCFE)))
       result->set_value(sfid_, 1);
   }
   const int fid_;
@@ -300,14 +300,14 @@ struct RulePenalty : public FeatureExtractor {
                                const vector<WordID>& /*src*/,
                                const vector<WordID>& /*trg*/,
                                const RuleStatistics& /*info*/,
-                               SparseVector<float>* result) const 
+                               SparseVector<float>* result) const
   { result->set_value(fid_, 1); }
 
   const int fid_;
 };
 
-// The negative log of the condition rule probs 
-// ignoring the identities of the  non-terminals. 
+// The negative log of the condition rule probs
+// ignoring the identities of the  non-terminals.
 // i.e. the prob Hiero would assign.
 // Also extracts Labelled features.
 struct XFeatures: public FeatureExtractor {
@@ -335,7 +335,7 @@ struct XFeatures: public FeatureExtractor {
                                      const RuleStatistics& info) {
     RuleTuple r(-1, src, trg);
     map_rule(r);
-    const int count = info.counts.value(kCFE);
+    const int count = info.counts.get(kCFE);
     assert(count > 0);
     rule_counts.inc_if_exists(r, count);
     source_counts.inc_if_exists(r.source(), count);
@@ -354,14 +354,14 @@ struct XFeatures: public FeatureExtractor {
     const int t_c = target_counts(r.target());
     assert(t_c > 0);
     result->set_value(fid_xfe, log(t_c) - l_r_freq);
-    result->set_value(fid_labelledfe, log(t_c) - log(info.counts.value(kCFE)));
+    result->set_value(fid_labelledfe, log(t_c) - log(info.counts.get(kCFE)));
 //    if (t_c == 1)
 //      result->set_value(fid_xesingleton, 1.0);
 
     const int s_c = source_counts(r.source());
     assert(s_c > 0);
     result->set_value(fid_xef, log(s_c) - l_r_freq);
-    result->set_value(fid_labelledef, log(s_c) - log(info.counts.value(kCFE)));
+    result->set_value(fid_labelledef, log(s_c) - log(info.counts.get(kCFE)));
 //    if (s_c == 1)
 //      result->set_value(fid_xfsingleton, 1.0);
   }
@@ -407,10 +407,10 @@ struct LabelledRuleConditionals: public FeatureExtractor {
                                      const vector<WordID>& trg,
                                      const RuleStatistics& info) {
     RuleTuple r(lhs, src, trg);
-    rule_counts.inc_if_exists(r, info.counts.value(kCFE));
-    source_counts.inc_if_exists(r.source(), info.counts.value(kCFE));
+    rule_counts.inc_if_exists(r, info.counts.get(kCFE));
+    source_counts.inc_if_exists(r.source(), info.counts.get(kCFE));
 
-    target_counts.inc_if_exists(r.target(), info.counts.value(kCFE));
+    target_counts.inc_if_exists(r.target(), info.counts.get(kCFE));
   }
 
   virtual void ExtractFeatures(const WordID lhs,
@@ -436,10 +436,10 @@ struct LHSProb: public FeatureExtractor {
   virtual void ObserveUnfilteredRule(const WordID lhs,
                                      const vector<WordID>& /*src*/,
                                      const vector<WordID>& /*trg*/,
-                                     const RuleStatistics& info) { 
-    int count = info.counts.value(kCFE);
+                                     const RuleStatistics& info) {
+    int count = info.counts.get(kCFE);
     total_count += count;
-    lhs_counts.inc(lhs, count); 
+    lhs_counts.inc(lhs, count);
   }
 
   virtual void ExtractFeatures(const WordID lhs,
@@ -459,22 +459,22 @@ struct LHSProb: public FeatureExtractor {
 
 // Proper rule generative probability: p( s,t | lhs)
 struct GenerativeProb: public FeatureExtractor {
-  GenerativeProb() : 
+  GenerativeProb() :
     fid_(FD::Convert("GenerativeProb")),
     kCFE(FD::Convert("CFE")) {}
 
   virtual void ObserveUnfilteredRule(const WordID lhs,
                                      const vector<WordID>& /*src*/,
                                      const vector<WordID>& /*trg*/,
-                                     const RuleStatistics& info) 
-  { lhs_counts.inc(lhs, info.counts.value(kCFE)); }
+                                     const RuleStatistics& info)
+  { lhs_counts.inc(lhs, info.counts.get(kCFE)); }
 
   virtual void ExtractFeatures(const WordID lhs,
                                const vector<WordID>& /*src*/,
                                const vector<WordID>& /*trg*/,
                                const RuleStatistics& info,
                                SparseVector<float>* result) const {
-    double log_prob = log(lhs_counts(lhs)) - log(info.counts.value(kCFE));
+    double log_prob = log(lhs_counts(lhs)) - log(info.counts.get(kCFE));
     result->set_value(fid_, log_prob);
   }
 
@@ -502,8 +502,8 @@ struct LabellingShape: public FeatureExtractor {
                                      const RuleStatistics& info) {
     RuleTuple r(-1, src, trg);
     map_rule(r);
-    rule_counts.inc_if_exists(r, info.counts.value(kCFE));
-    source_counts.inc_if_exists(r.source(), info.counts.value(kCFE));
+    rule_counts.inc_if_exists(r, info.counts.get(kCFE));
+    source_counts.inc_if_exists(r.source(), info.counts.get(kCFE));
   }
 
   virtual void ExtractFeatures(const WordID /*lhs*/,
@@ -519,9 +519,9 @@ struct LabellingShape: public FeatureExtractor {
 
   // Replace all terminals with generic -1
   void map_rule(RuleTuple& r) const {
-    for (vector<WordID>::iterator it = r.target().begin(); it != r.target().end(); ++it) 
+    for (vector<WordID>::iterator it = r.target().begin(); it != r.target().end(); ++it)
       if (*it <= 0) *it = -1;
-    for (vector<WordID>::iterator it = r.source().begin(); it != r.source().end(); ++it) 
+    for (vector<WordID>::iterator it = r.source().begin(); it != r.source().end(); ++it)
       if (*it <= 0) *it = -1;
   }
 

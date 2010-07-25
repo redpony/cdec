@@ -82,7 +82,7 @@ void DoPhraseMarginals(const vector<WordID>& key, const bool bidir, ID2RuleStati
   }
   double tot = 0;
   for (ID2RuleStatistics::iterator it = val->begin(); it != val->end(); ++it)
-    tot += it->second.counts.value(kCFE);
+    tot += it->second.counts.get(kCFE);
   for (ID2RuleStatistics::iterator it = val->begin(); it != val->end(); ++it) {
     it->second.counts.set_value(cur_marginal_id, tot);
 
