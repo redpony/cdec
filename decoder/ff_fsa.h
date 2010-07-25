@@ -14,7 +14,13 @@
 //TODO: decide whether to use init_features / add_value vs. summing elsewhere + set_value once (or inefficient for from_fsa: sum distinct feature_vectors.  but L->R if we only scan 1 word at a time, that's fine
 
 //#define FSA_DEBUG
+
+#ifdef USE_INFO_EDGE
 #define FSA_DEBUG_CERR 0
+#else
+#define FSA_DEBUG_CERR 1
+#endif
+
 #define FSA_DEBUG_DEBUG 0
 # define FSADBGif(i,e,x) do { if (i) { if (FSA_DEBUG_CERR){std::cerr<<x;}  INFO_EDGE(e,x); if (FSA_DEBUG_DEBUG){std::cerr<<"FSADBGif edge.info "<<&e<<" = "<<e.info()<<std::endl;}} } while(0)
 # define FSADBGif_nl(i,e) do { if (i) { if (FSA_DEBUG_CERR) std::cerr<<std::endl; INFO_EDGE(e,"; "); } } while(0)

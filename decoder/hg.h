@@ -7,7 +7,6 @@
 // define USE_INFO_EDGE 1 if you want lots of debug info shown with --show_derivations - otherwise it adds quite a bit of overhead if ffs have their logging enabled (e.g. ff_from_fsa)
 #define USE_INFO_EDGE 0
 #if USE_INFO_EDGE
-# include <sstream>
 # define INFO_EDGE(e,msg) do { std::ostringstream &o=(e.info_);o<<msg; } while(0)
 # define INFO_EDGEw(e,msg) do { std::ostringstream &o(e.info_);if (o.empty()) o<<' ';o<<msg; } while(0)
 #else
@@ -16,6 +15,7 @@
 #endif
 #define INFO_EDGEln(e,msg) INFO_EDGE(e,msg<<'\n')
 
+#include <sstream>
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
