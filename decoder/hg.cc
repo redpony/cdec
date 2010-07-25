@@ -626,11 +626,10 @@ struct EdgeWeightSorter {
 
 std::string Hypergraph::show_viterbi_tree(bool indent,int show_mask,int maxdepth,int depth) const {
   HypergraphP v=CreateViterbiHypergraph();
-  //FIXME: remove dbg print, fix.
-  cerr<<viterbi_stats(*this,"debug show_viterbi_tree",true,true,false)<<endl;
+//  cerr<<viterbi_stats(*v,"debug show_viterbi_tree",true,true,false)<<endl;
   if (v->NumberOfEdges()) {
     Edge const* beste=&v->edges_.back();   //FIXME: this doesn't work. check CreateViterbiHypergraph ?
-    return beste->derivation_tree(*this,beste,indent,show_mask,maxdepth,depth);
+    return beste->derivation_tree(*v,beste,indent,show_mask,maxdepth,depth);
   }
   return std::string();
 }
@@ -638,6 +637,30 @@ std::string Hypergraph::show_viterbi_tree(bool indent,int show_mask,int maxdepth
 HypergraphP Hypergraph::CreateEdgeSubset(EdgeMask &keep_edges) const {
   NodeMask kn;
   return CreateEdgeSubset(keep_edges,kn);
+}
+
+HypergraphP Hypergraph::CreateEdgeSubset(EdgeMask &keep_edges,NodeMask &kn) const {
+  kn.clear();
+  kn.resize(nodes_.size());
+  for (int n=0;n<nodes_.size();++n) { // this nested iteration gives us edges in topo order too
+    EdgesVector const& es=nodes_[n].in_edges_;
+    for (int i=0;i<es.size();++i) {
+      int ei=es[i];
+      if (keep_edges[ei]) {
+        const Edge& e = edges_[ei];
+        TailNodeVector const& tails=e.tail_nodes_;
+        for (int j=0;j<e.tail_nodes_.size();++j) {
+          if (!kn[tails[j]]) {
+            keep_edges[ei]=false;
+            goto next_edge;
+          }
+        }
+        kn[e.head_node_]=true;
+      }
+    next_edge: ;
+    }
+  }
+  return CreateNodeEdgeSubset(kn,keep_edges);
 }
 
 HypergraphP Hypergraph::CreateNodeEdgeSubset(NodeMask const& keep_nodes,EdgeMask const&keep_edges) const {
@@ -672,28 +695,6 @@ void Hypergraph::TightenEdgeMask(EdgeMask &ke,NodeMask const& kn) const
   }
 }
 
-HypergraphP Hypergraph::CreateEdgeSubset(EdgeMask &keep_edges,NodeMask &kn) const {
-  kn.clear();
-  kn.resize(nodes_.size());
-  for (int n=0;n<nodes_.size();++n) { // this nested iteration gives us edges in topo order too
-    EdgesVector const& es=nodes_[n].in_edges_;
-    for (int i=0;i<es.size();++i) {
-      int ei=es[i];
-      const Edge& e = edges_[ei];
-      TailNodeVector const& tails=e.tail_nodes_;
-      for (int j=0;j<e.tail_nodes_.size();++j) {
-        if (!kn[tails[j]]) {
-          keep_edges[ei]=false;
-          goto next_edge;
-        }
-      }
-      kn[e.head_node_]=true;
-    next_edge: ;
-    }
-  }
-  return CreateNodeEdgeSubset(kn,keep_edges);
-}
-
 void Hypergraph::set_ids() {
   for (int i = 0; i < edges_.size(); ++i)
     edges_[i].id_=i;
@@ -701,7 +702,8 @@ void Hypergraph::set_ids() {
     nodes_[i].id_=i;
 }
 
-void Hypergraph::check_ids() {
+void Hypergraph::check_ids() const
+{
   for (int i = 0; i < edges_.size(); ++i)
     assert(edges_[i].id_==i);
   for (int i = 0; i < nodes_.size(); ++i)
@@ -717,16 +719,16 @@ HypergraphP Hypergraph::CreateViterbiHypergraph(const vector<bool>* edges) const
   } else {
     Viterbi(*this, &vit_edges, ViterbiPathTraversal() ,EdgeProb());
   }
-#if 0
+#if 1
 # if 1
-    check_ids();
+  check_ids();
 # else
-    set_ids();
+  set_ids();
 # endif
-    EdgeMask used(edges_.size());
-    for (int i = 0; i < vit_edges.size(); ++i)
-      used[vit_edges[i]->id_]=true;
-    return CreateEdgeSubset(used);
+  EdgeMask used(edges_.size());
+  for (int i = 0; i < vit_edges.size(); ++i)
+    used[vit_edges[i]->id_]=true;
+  return CreateEdgeSubset(used);
 #else
   map<int, int> old2new_node;
   int num_new_nodes = 0;
@@ -762,7 +764,7 @@ HypergraphP Hypergraph::CreateViterbiHypergraph(const vector<bool>* edges) const
       out->nodes_[new_tail_node].out_edges_.push_back(i);
     }
   }
-#endif
   return ret;
+#endif
 }
 

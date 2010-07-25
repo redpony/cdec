@@ -1,6 +1,10 @@
 #ifndef CDEC_STRINGLIB_H_
 #define CDEC_STRINGLIB_H_
 
+//usage: string s=MAKESTRE(1<<" "<<c);
+#define MAKESTR(expr) ((dynamic_cast<ostringstream &>(ostringstream()<<std::dec<<expr)).str())
+// std::dec (or seekp, or another manip) is needed to convert to std::ostream reference.
+
 #ifdef STRINGLIB_DEBUG
 #include <iostream>
 #define SLIBDBG(x) do { std::cerr<<"DBG(stringlib): "<<x<<std::endl; } while(0)
@@ -13,6 +17,7 @@
 #include <cctype>
 #include <cstring>
 #include <string>
+#include <sstream>
 
 template <class Istr, class Isubstr> inline
 bool match_begin(Istr bstr,Istr estr,Isubstr bsub,Isubstr esub)

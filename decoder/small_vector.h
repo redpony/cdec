@@ -25,11 +25,14 @@ class SmallVector {
 
   typedef T const* const_iterator;
   typedef T* iterator;
+  typedef T value_type;
+  typedef T &reference;
+  typedef T const& const_reference;
+
   T *begin() { return size_>SV_MAX?data_.ptr:data_.vals; }
   T const* begin() const { return const_cast<Self*>(this)->begin(); }
   T *end() { return begin()+size_; }
   T const* end() const { return begin()+size_; }
-
 
   explicit SmallVector(size_t s) : size_(s) {
     assert(s < 0xA000);

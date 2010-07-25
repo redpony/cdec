@@ -43,12 +43,12 @@ public:
   // Compute the feature values and (if this applies) the estimates of the
   // feature values when this edge is used incorporated into a larger context
   inline void TraversalFeatures(const SentenceMetadata& smeta,
-                                const Hypergraph::Edge& edge,
+                                Hypergraph::Edge& edge,
                                 const std::vector<const void*>& ant_contexts,
                                 FeatureVector* features,
                                 FeatureVector* estimated_features,
                                 void* out_state) const {
-    TraversalFeaturesImpl(smeta, edge, ant_contexts,
+    TraversalFeaturesLog(smeta, edge, ant_contexts,
                           features, estimated_features, out_state);
     // TODO it's easy for careless feature function developers to overwrite
     // the end of their state and clobber someone else's memory.  These bugs
@@ -66,7 +66,7 @@ protected:
 public:
   //override either this or one of above.
   virtual void FinalTraversalFeatures(const SentenceMetadata& /* smeta */,
-                                      const Hypergraph::Edge& /* edge */,
+                                      Hypergraph::Edge& /* edge */, // so you can log()
                                       const void* residual_state,
                                       FeatureVector* final_features) const {
     FinalTraversalFeatures(residual_state,final_features);
@@ -81,12 +81,22 @@ public:
   // of the particular FeatureFunction class.  There is one exception:
   // equality of the contents (i.e., memcmp) is required to determine whether
   // two states can be combined.
-  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+  virtual void TraversalFeaturesLog(const SentenceMetadata& smeta,
+                                    Hypergraph::Edge& edge, // this is writable only so you can use log()
                                      const std::vector<const void*>& ant_contexts,
                                      FeatureVector* features,
                                      FeatureVector* estimated_features,
-                                     void* context) const = 0;
+                                     void* context) const {
+    TraversalFeaturesImpl(smeta,edge,ant_contexts,features,estimated_features,context);
+  }
+
+  // override above or below.
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     Hypergraph::Edge const& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     FeatureVector* features,
+                                     FeatureVector* estimated_features,
+                                     void* context) const;
 
   // !!! ONLY call this from subclass *CONSTRUCTORS* !!!
   void SetStateSize(size_t state_size) {
