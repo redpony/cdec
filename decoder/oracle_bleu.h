@@ -281,7 +281,7 @@ struct OracleBleu {
   void DumpKBest(const int sent_id, const Hypergraph& forest, const int k, const bool unique, std::string const &kbest_out_filename_) {
 
     WriteFile ko(kbest_out_filename_);
-    std::cerr << "Output kbest to " << kbest_out_filename_;
+    std::cerr << "Output kbest to " << kbest_out_filename_<<std::endl;
 
     if (unique)
       kbest<KBest::NoFilter>(sent_id,forest,k,ko.get(),std::cerr);

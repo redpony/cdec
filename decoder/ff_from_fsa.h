@@ -5,9 +5,8 @@
 
 #define FSA_FF_DEBUG
 #ifdef FSA_FF_DEBUG
-# define FSAFFDBG(e,x) do { if (debug) { FSADBGae(e,x) }  } while(0)
-# define FSAFFDBGnl(e) do { if (debug) { std::cerr<<std::endl; INFO_EDGE(e,"; "); } } while(0)
-
+# define FSAFFDBG(e,x) FSADBGif(debug,e,x)
+# define FSAFFDBGnl(e) FSADBGif_nl(debug,e)
 #else
 # define FSAFFDBG(e,x)
 # define FSAFFDBGnl(e)

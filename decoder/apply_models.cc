@@ -336,7 +336,7 @@ struct NoPruningRescorer {
       Hypergraph::TailNodeVector tail(arity);
       for (int i = 0; i < arity; ++i)
         tail[i] = nodemap[in_edge.tail_nodes_[i]][tail_iter[i]];
-      Hypergraph::Edge* new_edge = out.AddEdge(in_edge.rule_, tail);
+      Hypergraph::Edge* new_edge = out.AddEdge(in_edge, tail);
       new_edge->feature_values_ = in_edge.feature_values_;
       new_edge->i_ = in_edge.i_;
       new_edge->j_ = in_edge.j_;

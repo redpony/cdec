@@ -70,6 +70,9 @@ public:
   // product of the weight vector and the feature values)
   struct Edge {
     Edge() : i_(-1), j_(-1), prev_i_(-1), prev_j_(-1) {}
+    Edge(int id,Edge const& copy_add_from) : id_(id) { copy_add(copy_add_from); }
+    Edge(int id,Edge const& copy_add_from,TailNodeVector const& tail)
+      : tail_nodes_(tail),id_(id) { copy_add(copy_add_from); }
     inline int Arity() const { return tail_nodes_.size(); }
     int head_node_;               // refers to a position in nodes_
     TailNodeVector tail_nodes_;   // contents refer to positions in nodes_
@@ -91,14 +94,17 @@ public:
     short int prev_i_;
     short int prev_j_;
 
-    void copy_fixed(Edge const& o) {
+    void copy_add(Edge const& o) {
       rule_=o.rule_;
       feature_values_ = o.feature_values_;
-      edge_prob_ = o.edge_prob_;
       i_ = o.i_; j_ = o.j_; prev_i_ = o.prev_i_; prev_j_ = o.prev_j_;
 #if USE_INFO_EDGE
-      info_.str(o.info_.str());
+      set_info(o.info_.str());
 #endif
+    }
+    void copy_fixed(Edge const& o) {
+      copy_add(o);
+      edge_prob_ = o.edge_prob_;
     }
     void copy_reindex(Edge const& o,indices_after const& n2,indices_after const& e2) {
       copy_fixed(o);
@@ -109,16 +115,23 @@ public:
 
 #if USE_INFO_EDGE
     std::ostringstream info_;
-
-    Edge(Edge const& o) : head_node_(o.head_node_),tail_nodes_(o.tail_nodes_),rule_(o.rule_),feature_values_(o.feature_values_),edge_prob_(o.edge_prob_),id_(o.id_),i_(o.i_),j_(o.j_),prev_i_(o.prev_i_),prev_j_(o.prev_j_), info_(o.info_.str()) {  }
+    void set_info(std::string const& s) {
+      info_.str(s);
+      info_.seekp(0,std::ios_base::end);
+    }
+    Edge(Edge const& o) : head_node_(o.head_node_),tail_nodes_(o.tail_nodes_),rule_(o.rule_),feature_values_(o.feature_values_),edge_prob_(o.edge_prob_),id_(o.id_),i_(o.i_),j_(o.j_),prev_i_(o.prev_i_),prev_j_(o.prev_j_), info_(o.info_.str(),std::ios_base::ate) {
+//      info_.seekp(0,std::ios_base::end);
+ }
     void operator=(Edge const& o) {
-      head_node_ = o.head_node_; tail_nodes_ = o.tail_nodes_; rule_ = o.rule_; feature_values_ = o.feature_values_; edge_prob_ = o.edge_prob_; id_ = o.id_; i_ = o.i_; j_ = o.j_; prev_i_ = o.prev_i_; prev_j_ = o.prev_j_;  info_.str(o.info_.str());
+      head_node_ = o.head_node_; tail_nodes_ = o.tail_nodes_; rule_ = o.rule_; feature_values_ = o.feature_values_; edge_prob_ = o.edge_prob_; id_ = o.id_; i_ = o.i_; j_ = o.j_; prev_i_ = o.prev_i_; prev_j_ = o.prev_j_;
+      set_info(o.info_.str());
     }
     std::string info() const { return info_.str(); }
     void reset_info() { info_.str(""); info_.clear(); }
 #else
     std::string info() const { return std::string(); }
     void reset_info() {  }
+    void set_info(std::string const& s) {  }
 #endif
     void show(std::ostream &o,unsigned mask=SPAN|RULE) const {
       o<<'{';
@@ -215,12 +228,40 @@ public:
     if (e) edges_.reserve(e);
   }
 
+private:
+  void index_tails(Edge const& edge) {
+    for (int i = 0; i < edge.tail_nodes_.size(); ++i)
+      nodes_[edge.tail_nodes_[i]].out_edges_.push_back(edge.id_);
+  }
+public:
+  // the below AddEdge all are used mostly for apply_models scoring and so do not set prob_
+
+  // tails are already set, copy_add members are already set.
+  Edge* AddEdge(Edge const& nedge) {
+    int eid=edges_.size();
+    edges_.push_back(nedge);
+    Edge* edge = &edges_.back();
+    edge->id_ = eid;
+    index_tails(*edge);
+    return edge;
+  }
+
+  Edge* AddEdge(Edge const& in_edge, const TailNodeVector& tail) {
+    edges_.push_back(Edge(edges_.size(),in_edge));
+    Edge* edge = &edges_.back();
+    edge->tail_nodes_ = tail; // possibly faster than copying to Edge() constructed above then copying via push_back.  perhaps optimized it's the same.
+    index_tails(*edge);
+    return edge;
+  }
+
+  // oldest method in use - requires much manual assignment from source edge:
   Edge* AddEdge(const TRulePtr& rule, const TailNodeVector& tail) {
+    int eid=edges_.size();
     edges_.push_back(Edge());
     Edge* edge = &edges_.back();
     edge->rule_ = rule;
     edge->tail_nodes_ = tail;
-    edge->id_ = edges_.size() - 1;
+    edge->id_ = eid;
     for (int i = 0; i < edge->tail_nodes_.size(); ++i)
       nodes_[edge->tail_nodes_[i]].out_edges_.push_back(edge->id_);
     return edge;

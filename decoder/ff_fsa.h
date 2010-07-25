@@ -6,6 +6,7 @@
 
   state is some fixed width byte array.  could actually be a void *, WordID sequence, whatever.
 
+  TODO: fsa feature aggregator that presents itself as a single fsa; benefit: when wrapped in ff_from_fsa, only one set of left words is stored.
 */
 
 //SEE ALSO: ff_fsa_dynamic.h, ff_from_fsa.h
@@ -13,12 +14,14 @@
 //TODO: decide whether to use init_features / add_value vs. summing elsewhere + set_value once (or inefficient for from_fsa: sum distinct feature_vectors.  but L->R if we only scan 1 word at a time, that's fine
 
 //#define FSA_DEBUG
-
-# define FSADBGae(e,x) std::cerr << x; INFO_EDGE(e,x);
+#define FSA_DEBUG_CERR 0
+#define FSA_DEBUG_DEBUG 0
+# define FSADBGif(i,e,x) do { if (i) { if (FSA_DEBUG_CERR){std::cerr<<x;}  INFO_EDGE(e,x); if (FSA_DEBUG_DEBUG){std::cerr<<"FSADBGif edge.info "<<&e<<" = "<<e.info()<<std::endl;}} } while(0)
+# define FSADBGif_nl(i,e) do { if (i) { if (FSA_DEBUG_CERR) std::cerr<<std::endl; INFO_EDGE(e,"; "); } } while(0)
 #ifdef FSA_DEBUG
 # include <iostream>
-# define FSADBG(e,x) do { if (d().debug()) { FSADBGae(e,x) } } while(0)
-# define FSADBGnl(e) do { if (d().debug) { std::cerr<<std::endl; INFO_EDGE(e,"; "); } } while(0)
+# define FSADBG(e,x) FSADBGif(d().debug(),e,x)
+# define FSADBGnl(e) FSADBGif_nl(d().debug(),e,x)
 #else
 # define FSADBG(e,x)
 # define FSADBGnl(e)
