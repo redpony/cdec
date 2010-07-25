@@ -15,6 +15,8 @@ using namespace std;
 // ContextsCorpus
 //////////////////////////////////////////////////
 
+bool read_callback_binary_contexts = false;
+
 void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* extra) {
   assert(new_contexts.contexts.size() == new_contexts.counts.size());
 
@@ -50,9 +52,15 @@ void read_callback(const ContextsLexer::PhraseContextsType& new_contexts, void* 
 
     //int count = new_contexts.counts[i];
     int count = new_contexts.counts.at(i).second;
-    for (int j=0; j<count; ++j)
+    if (read_callback_binary_contexts) {
       doc->push_back(id);
-    corpus_ptr->m_num_terms += count;
+      corpus_ptr->m_num_terms++;
+    }
+    else {
+      for (int j=0; j<count; ++j)
+        doc->push_back(id);
+      corpus_ptr->m_num_terms += count;
+    }
 
     // generate the backoff map
     if (backoff_gen) {
@@ -104,6 +112,7 @@ void filter_callback(const ContextsLexer::PhraseContextsType& new_contexts, void
   for (int i=0; i < (int)new_contexts.counts.size(); ++i) {
     int context_index = new_contexts.counts.at(i).first;
     int count = new_contexts.counts.at(i).second;
+    //if (read_callback_binary_contexts) count = 1;
     //int count = new_contexts.counts[i];
     pair<map<string,int>::iterator,bool> result 
       = context_counts->insert(make_pair(Dict::toString(new_contexts.contexts[context_index]),count));
@@ -116,7 +125,10 @@ void filter_callback(const ContextsLexer::PhraseContextsType& new_contexts, void
 
 unsigned ContextsCorpus::read_contexts(const string &filename, 
                                        BackoffGenerator* backoff_gen_ptr,
-                                       bool /*filter_singeltons*/) {
+                                       bool /*filter_singeltons*/,
+                                       bool binary_contexts) {
+  read_callback_binary_contexts = binary_contexts;
+
   map<string,int> counts;
   //if (filter_singeltons) 
   {

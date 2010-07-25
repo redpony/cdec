@@ -58,6 +58,7 @@ int main(int argc, char **argv)
       ("backoff-type", value<string>(), "backoff type: none|simple")
 //      ("filter-singleton-contexts", "filter singleton contexts")
       ("hierarchical-topics", "Use a backoff hierarchical PYP as the P0 for the document topics distribution.")
+      ("binary-counts,b", "Use binary rather than integer counts for contexts.")
       ("freq-cutoff-start", value<int>()->default_value(0), "initial frequency cutoff.")
       ("freq-cutoff-end", value<int>()->default_value(0), "final frequency cutoff.")
       ("freq-cutoff-interval", value<int>()->default_value(0), "number of iterations between frequency decrement.")
@@ -107,7 +108,7 @@ int main(int argc, char **argv)
 
   //ContextsCorpus contexts_corpus;
   MPICorpus contexts_corpus;
-  contexts_corpus.read_contexts(vm["data"].as<string>(), backoff_gen, /*vm.count("filter-singleton-contexts")*/ false);
+  contexts_corpus.read_contexts(vm["data"].as<string>(), backoff_gen, /*vm.count("filter-singleton-contexts")*/ false, vm.count("binary-counts"));
   int mpi_start = 0, mpi_end = 0;
   contexts_corpus.bounds(&mpi_start, &mpi_end);
   std::cerr << "\tProcess " << rank << " has documents " << mpi_start << " -> " << mpi_end << "." << std::endl;
