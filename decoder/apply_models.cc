@@ -204,13 +204,8 @@ public:
   }
 
   void IncorporateIntoPlusLMForest(Candidate* item, State2Node* s2n, CandidateList* freelist) {
-    Hypergraph::Edge* new_edge = out.AddEdge(item->out_edge_.rule_, item->out_edge_.tail_nodes_);
-    new_edge->feature_values_ = item->out_edge_.feature_values_;
+    Hypergraph::Edge* new_edge = out.AddEdge(item->out_edge_);
     new_edge->edge_prob_ = item->out_edge_.edge_prob_;
-    new_edge->i_ = item->out_edge_.i_;
-    new_edge->j_ = item->out_edge_.j_;
-    new_edge->prev_i_ = item->out_edge_.prev_i_;
-    new_edge->prev_j_ = item->out_edge_.prev_j_;
     Candidate*& o_item = (*s2n)[item->state_];
     if (!o_item) o_item = item;
 
@@ -220,9 +215,12 @@ public:
       node_states_.push_back(item->state_);
       node_id = new_node->id_;
     }
+#if 0
     Hypergraph::Node* node = &out.nodes_[node_id];
     out.ConnectEdgeToHeadNode(new_edge, node);
-
+#else
+    out.ConnectEdgeToHeadNode(new_edge, node_id);
+#endif
     // update candidate if we have a better derivation
     // note: the difference between the vit score and the estimated
     // score is the same for all items with a common residual DP
@@ -337,11 +335,6 @@ struct NoPruningRescorer {
       for (int i = 0; i < arity; ++i)
         tail[i] = nodemap[in_edge.tail_nodes_[i]][tail_iter[i]];
       Hypergraph::Edge* new_edge = out.AddEdge(in_edge, tail);
-      new_edge->feature_values_ = in_edge.feature_values_;
-      new_edge->i_ = in_edge.i_;
-      new_edge->j_ = in_edge.j_;
-      new_edge->prev_i_ = in_edge.prev_i_;
-      new_edge->prev_j_ = in_edge.prev_j_;
       string head_state;
       if (is_goal) {
         assert(tail.size() == 1);

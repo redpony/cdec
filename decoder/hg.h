@@ -3,7 +3,9 @@
 
 
 //FIXME: is the edge given to ffs the coarse (previous forest) edge?  if so, then INFO_EDGE is effectively not working.  supposed to have logging associated with each edge and see how it fits together in kbest afterwards.
-#define USE_INFO_EDGE 1
+
+// define USE_INFO_EDGE 1 if you want lots of debug info shown with --show_derivations - otherwise it adds quite a bit of overhead if ffs have their logging enabled (e.g. ff_from_fsa)
+#define USE_INFO_EDGE 0
 #if USE_INFO_EDGE
 # include <sstream>
 # define INFO_EDGE(e,msg) do { std::ostringstream &o=(e.info_);o<<msg; } while(0)
@@ -70,9 +72,9 @@ public:
   // product of the weight vector and the feature values)
   struct Edge {
     Edge() : i_(-1), j_(-1), prev_i_(-1), prev_j_(-1) {}
-    Edge(int id,Edge const& copy_add_from) : id_(id) { copy_add(copy_add_from); }
-    Edge(int id,Edge const& copy_add_from,TailNodeVector const& tail)
-      : tail_nodes_(tail),id_(id) { copy_add(copy_add_from); }
+    Edge(int id,Edge const& copy_pod_from) : id_(id) { copy_pod(copy_pod_from); } // call copy_features yourself later.
+    Edge(int id,Edge const& copy_from,TailNodeVector const& tail) // fully inits - probably more expensive when push_back(Edge(...)) than setting after
+      : tail_nodes_(tail),id_(id) { copy_pod(copy_from);copy_features(copy_from); }
     inline int Arity() const { return tail_nodes_.size(); }
     int head_node_;               // refers to a position in nodes_
     TailNodeVector tail_nodes_;   // contents refer to positions in nodes_
@@ -94,16 +96,22 @@ public:
     short int prev_i_;
     short int prev_j_;
 
-    void copy_add(Edge const& o) {
-      rule_=o.rule_;
-      feature_values_ = o.feature_values_;
-      i_ = o.i_; j_ = o.j_; prev_i_ = o.prev_i_; prev_j_ = o.prev_j_;
+    void copy_info(Edge const& o) {
 #if USE_INFO_EDGE
       set_info(o.info_.str());
 #endif
     }
+    void copy_pod(Edge const& o) {
+      rule_=o.rule_;
+      i_ = o.i_; j_ = o.j_; prev_i_ = o.prev_i_; prev_j_ = o.prev_j_;
+    }
+    void copy_features(Edge const& o) {
+      feature_values_=o.feature_values_;
+      copy_info(o);
+    }
     void copy_fixed(Edge const& o) {
-      copy_add(o);
+      copy_pod(o);
+      copy_features(o);
       edge_prob_ = o.edge_prob_;
     }
     void copy_reindex(Edge const& o,indices_after const& n2,indices_after const& e2) {
@@ -148,8 +156,8 @@ public:
       if (mask&RULE)
         o<<rule_->AsString(mask&RULE_LHS);
       if (USE_INFO_EDGE) {
-        if (mask) o << ' ';
-        o<<info();
+        std::string const& i=info();
+        if (mask&&!i.empty()) o << " ||| "<<i;
       }
       o<<'}';
     }
@@ -234,9 +242,9 @@ private:
       nodes_[edge.tail_nodes_[i]].out_edges_.push_back(edge.id_);
   }
 public:
-  // the below AddEdge all are used mostly for apply_models scoring and so do not set prob_
+  // the below AddEdge all are used mostly for apply_models scoring and so do not set prob_ ; also, you will need to ConnectEdgeToHeadNode yourself (since head may be new)
 
-  // tails are already set, copy_add members are already set.
+  // tails are already set, copy_fixed members are already set.  all we need to do is set id and add to out_edges of tails
   Edge* AddEdge(Edge const& nedge) {
     int eid=edges_.size();
     edges_.push_back(nedge);
@@ -246,15 +254,17 @@ public:
     return edge;
   }
 
+  // also copies feature vector
   Edge* AddEdge(Edge const& in_edge, const TailNodeVector& tail) {
     edges_.push_back(Edge(edges_.size(),in_edge));
     Edge* edge = &edges_.back();
+    edge->copy_features(in_edge);
     edge->tail_nodes_ = tail; // possibly faster than copying to Edge() constructed above then copying via push_back.  perhaps optimized it's the same.
     index_tails(*edge);
     return edge;
   }
 
-  // oldest method in use - requires much manual assignment from source edge:
+  // oldest method in use - should use in parsing (no models) only, in rescoring requires much manual assignment from source edge; favor the previous instead
   Edge* AddEdge(const TRulePtr& rule, const TailNodeVector& tail) {
     int eid=edges_.size();
     edges_.push_back(Edge());
@@ -274,15 +284,20 @@ public:
     return &nodes_.back();
   }
 
+  //TODO: use indices everywhere?  bottom two are a bit redundant.
   void ConnectEdgeToHeadNode(const int edge_id, const int head_id) {
     edges_[edge_id].head_node_ = head_id;
     nodes_[head_id].in_edges_.push_back(edge_id);
   }
 
-  // TODO remove this - use the version that takes indices
   void ConnectEdgeToHeadNode(Edge* edge, Node* head) {
     edge->head_node_ = head->id_;
     head->in_edges_.push_back(edge->id_);
+  }
+
+  void ConnectEdgeToHeadNode(Edge* edge, int head_id) {
+    edge->head_node_ = head_id;
+    nodes_[head_id].in_edges_.push_back(edge->id_);
   }
 
   // merge the goal node from other with this goal node
