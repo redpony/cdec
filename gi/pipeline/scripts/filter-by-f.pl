@@ -8,13 +8,16 @@ my $REFILTER="$SCRIPT_DIR/refilter.pl";
 my $SORT="$SCRIPT_DIR/sort-by-key.sh";
 assert_exec($REKEY, $REFILTER, $SORT);
 
-die "Usage: $0 ingrammar.gz outgrammar.gz\n" unless scalar @ARGV == 2;
+
+die "Usage: $0 NUM-TRANSLATIONS ingrammar.gz outgrammar.gz\n" unless scalar @ARGV == 3;
+my $translations = shift @ARGV;
+die "Need number: $translations" unless $translations > 0;
 die unless $ARGV[0] =~ /\.gz$/;
 die unless $ARGV[1] =~ /\.gz$/;
 die if $ARGV[0] eq $ARGV[1];
 die "Can't find $ARGV[0]" unless -f $ARGV[0];
 
-my $cmd = "gunzip -c $ARGV[0] | $REKEY | $SORT | $REFILTER | gzip > $ARGV[1]";
+my $cmd = "gunzip -c $ARGV[0] | $REKEY | $SORT | $REFILTER $translations | gzip > $ARGV[1]";
 safesystem($ARGV[1], $cmd) or die "Filtering failed";
 exit 0;
 

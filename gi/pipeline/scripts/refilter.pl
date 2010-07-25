@@ -1,7 +1,10 @@
 #!/usr/bin/perl -w
 use strict;
 
-my $NUM_TRANSLATIONS = 30;
+my $NUM_TRANSLATIONS = shift @ARGV;
+unless ($NUM_TRANSLATIONS) { $NUM_TRANSLATIONS=30; }
+print STDERR "KEEPING $NUM_TRANSLATIONS TRANSLATIONS FOR SOURCE\n";
+
 my $pk = '';
 my %dict;
 while(<>) {
