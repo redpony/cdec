@@ -37,7 +37,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description clo("Command line options");
   po::options_description dcmdline_options;
   dcmdline_options.add(opts);
-  
+
   po::store(parse_command_line(argc, argv, dcmdline_options), *conf);
   po::notify(*conf);
 
@@ -46,7 +46,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
     cerr << dcmdline_options << endl;
     exit(1);
   }
-}   
+}
 
 struct SourceFilter {
   // return true to keep the rule, otherwise false
@@ -95,7 +95,7 @@ struct DumbSuffixTreeFilter : SourceFilter {
 };
 
 boost::shared_ptr<SourceFilter> filter;
-multimap<float, ID2RuleStatistics::const_iterator> options; 
+multimap<float, ID2RuleStatistics::const_iterator> options;
 int kCOUNT;
 int max_options;
 
@@ -103,7 +103,7 @@ void cb(WordID lhs, const vector<WordID>& src_rhs, const ID2RuleStatistics& rule
   options.clear();
   if (!filter || filter->Matches(src_rhs)) {
     for (ID2RuleStatistics::const_iterator it = rules.begin(); it != rules.end(); ++it) {
-      options.insert(make_pair(-it->second.counts.value(kCOUNT), it));
+      options.insert(make_pair(-it->second.counts.get(kCOUNT), it));
     }
     int ocount = 0;
     cout << '[' << TD::Convert(-lhs) << ']' << " ||| ";

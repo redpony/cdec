@@ -45,7 +45,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description clo("Command line options");
   po::options_description dcmdline_options;
   dcmdline_options.add(opts);
-  
+
   po::store(parse_command_line(argc, argv, dcmdline_options), *conf);
   po::notify(*conf);
 
@@ -54,7 +54,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
     cerr << dcmdline_options << endl;
     exit(1);
   }
-}   
+}
 namespace {
   inline bool IsWhitespace(char c) { return c == ' ' || c == '\t'; }
   inline bool IsBracket(char c){return c == '[' || c == ']';}
@@ -143,9 +143,9 @@ void ParseLine(const char* buf, vector<WordID>* cur_key, ID2RuleStatistics* coun
 void LexTranslationTable::createTTable(const char* buf){
   AnnotatedParallelSentence sent;
   sent.ParseInputLine(buf);
-      
+
   //iterate over the alignment to compute aligned words
-  
+
   for(int i =0;i<sent.aligned.width();i++)
     {
       for (int j=0;j<sent.aligned.height();j++)
@@ -162,7 +162,7 @@ void LexTranslationTable::createTTable(const char* buf){
       if (DEBUG)  cerr << endl;
     }
   if (DEBUG) cerr << endl;
-  
+
   const WordID NULL_ = TD::Convert("NULL");
   //handle unaligned words - align them to null
   for (int j =0; j < sent.e_len; j++) {
@@ -171,7 +171,7 @@ void LexTranslationTable::createTTable(const char* buf){
     ++total_foreign[NULL_];
     ++total_english[sent.e[j]];
   }
-  
+
   for (int i =0; i < sent.f_len; i++) {
     if (sent.f_aligned[i]) continue;
     ++word_translation[pair<WordID,WordID> (sent.f[i], NULL_)];
@@ -261,8 +261,8 @@ struct LogRuleCount : public FeatureExtractor {
                                const RuleStatistics& info,
                                SparseVector<float>* result) const {
     (void) lhs_src; (void) trg;
-    result->set_value(fid_, log(info.counts.value(kCFE)));
-    if (IsZero(info.counts.value(kCFE)))
+    result->set_value(fid_, log(info.counts.get(kCFE)));
+    if (IsZero(info.counts.get(kCFE)))
       result->set_value(sfid_, 1);
   }
   const int fid_;
@@ -280,9 +280,9 @@ struct LogECount : public FeatureExtractor {
                                const RuleStatistics& info,
                                SparseVector<float>* result) const {
     (void) lhs_src; (void) trg;
-    assert(info.counts.value(kCE) > 0);
-    result->set_value(fid_, log(info.counts.value(kCE)));
-    if (IsZero(info.counts.value(kCE)))
+    assert(info.counts.get(kCE) > 0);
+    result->set_value(fid_, log(info.counts.get(kCE)));
+    if (IsZero(info.counts.get(kCE)))
       result->set_value(sfid_, 1);
   }
   const int sfid_;
@@ -300,9 +300,9 @@ struct LogFCount : public FeatureExtractor {
                                const RuleStatistics& info,
                                SparseVector<float>* result) const {
     (void) lhs_src; (void) trg;
-    assert(info.counts.value(kCF) > 0);
-    result->set_value(fid_, log(info.counts.value(kCF)));
-    if (IsZero(info.counts.value(kCF)))
+    assert(info.counts.get(kCF) > 0);
+    result->set_value(fid_, log(info.counts.get(kCF)));
+    if (IsZero(info.counts.get(kCF)))
       result->set_value(sfid_, 1);
   }
   const int sfid_;
@@ -319,8 +319,8 @@ struct EGivenFExtractor : public FeatureExtractor {
                                const RuleStatistics& info,
                                SparseVector<float>* result) const {
     (void) lhs_src; (void) trg;
-    assert(info.counts.value(kCF) > 0.0f);
-    result->set_value(fid_, safenlog(info.counts.value(kCFE) / info.counts.value(kCF)));
+    assert(info.counts.get(kCF) > 0.0f);
+    result->set_value(fid_, safenlog(info.counts.get(kCFE) / info.counts.get(kCF)));
   }
   const int fid_, kCF, kCFE;
 };
@@ -334,8 +334,8 @@ struct FGivenEExtractor : public FeatureExtractor {
                                const RuleStatistics& info,
                                SparseVector<float>* result) const {
     (void) lhs_src; (void) trg;
-    assert(info.counts.value(kCE) > 0.0f);
-    result->set_value(fid_, safenlog(info.counts.value(kCFE) / info.counts.value(kCE)));
+    assert(info.counts.get(kCE) > 0.0f);
+    result->set_value(fid_, safenlog(info.counts.get(kCFE) / info.counts.get(kCE)));
   }
   const int fid_, kCE, kCFE;
 };
@@ -353,7 +353,7 @@ struct LexProbExtractor : public FeatureExtractor {
     while(alignment) {
       alignment.getline(buf, MAX_LINE_LENGTH);
       if (buf[0] == 0) continue;
-      table.createTTable(buf);              
+      table.createTTable(buf);
     }
     delete[] buf;
 #if 0
@@ -363,7 +363,7 @@ struct LexProbExtractor : public FeatureExtractor {
       trans_table.open("lex_trans_table.out");
       for(map < pair<WordID,WordID>,int >::iterator it = table.word_translation.begin(); it != table.word_translation.end(); ++it) {
         trans_table <<  TD::Convert(trg.first) <<  "|||" << TD::Convert(trg.second) << "==" << it->second << "//" << table.total_foreign[trg.first] << "//" << table.total_english[trg.second] << endl;
-      } 
+      }
       trans_table.close();
     }
 #endif
@@ -393,7 +393,7 @@ struct LexProbExtractor : public FeatureExtractor {
             if ( table.total_english[trg[ita->second]] !=0 )
               e2f = (float) temp / table.total_english[trg[ita->second]];
             if (DEBUG) printf (" %d %E %E\n", temp, f2e, e2f);
-              
+
             //local counts to keep track of which things haven't been aligned, to later compute their null alignment
             if (foreign_aligned.count(lhs_src[ita->first+2])) {
               foreign_aligned[ lhs_src[ita->first+2] ].first++;
@@ -401,7 +401,7 @@ struct LexProbExtractor : public FeatureExtractor {
             } else {
               foreign_aligned[ lhs_src[ita->first+2] ] = pair<int,float> (1,e2f);
             }
-  
+
             if (english_aligned.count( trg[ ita->second] )) {
                english_aligned[ trg[ ita->second] ].first++;
                english_aligned[ trg[ ita->second] ].second += f2e;
@@ -416,8 +416,8 @@ struct LexProbExtractor : public FeatureExtractor {
           //compute lexical weight P(F|E) and include unaligned foreign words
            for(int i=0;i<lhs_src.size(); i++) {
                if (!table.total_foreign.count(lhs_src[i])) continue;      //if we dont have it in the translation table, we won't know its lexical weight
-               
-               if (foreign_aligned.count(lhs_src[i])) 
+
+               if (foreign_aligned.count(lhs_src[i]))
                  {
                    pair<int, float> temp_lex_prob = foreign_aligned[lhs_src[i]];
                    final_lex_e2f *= temp_lex_prob.second / temp_lex_prob.first;
@@ -427,14 +427,14 @@ struct LexProbExtractor : public FeatureExtractor {
                    int temp_count = table.word_translation[pair<WordID,WordID> (lhs_src[i],NULL_)];
                    float temp_e2f = (float) temp_count / table.total_english[NULL_];
                    final_lex_e2f *= temp_e2f;
-                 }                              
+                 }
 
              }
 
            //compute P(E|F) unaligned english words
            for(int j=0; j< trg.size(); j++) {
                if (!table.total_english.count(trg[j])) continue;
-               
+
                if (english_aligned.count(trg[j]))
                  {
                    pair<int, float> temp_lex_prob = english_aligned[trg[j]];
@@ -490,7 +490,7 @@ int main(int argc, char** argv){
   int line = 0;
 
   const int kLogRuleCount = FD::Convert("LogRuleCount");
-  multimap<float, string> options; 
+  multimap<float, string> options;
   while(!unscored_grammar.eof())
     {
       ++line;
@@ -510,7 +510,7 @@ int main(int argc, char** argv){
            os << TD::GetString(cur_key)
               << ' ' << TD::GetString(it->first) << " ||| ";
            feats.Write(false, &os);
-           options.insert(make_pair(-feats.value(kLogRuleCount), os.str()));
+           options.insert(make_pair(-feats.get(kLogRuleCount), os.str()));
         }
         int ocount = 0;
         for (multimap<float,string>::iterator it = options.begin(); it != options.end(); ++it) {
