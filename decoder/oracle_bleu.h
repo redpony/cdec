@@ -246,7 +246,6 @@ struct OracleBleu {
   void ReweightBleu(Hypergraph *dest_forest,double bleu_weight=-1.) {
     feature_weights_.set_value(0,bleu_weight);
 	dest_forest->Reweight(feature_weights_);
-//	dest_forest->SortInEdgesByEdgeWeights();
   }
 
   bool show_derivation;
@@ -272,7 +271,7 @@ struct OracleBleu {
       kbest_out<<endl<<flush;
       if (show_derivation) {
         deriv_out<<"\nsent_id="<<sent_id<<"\n";
-        forest.show_tree(cerr,*d->edge);
+        deriv_out<<kbest.derivation_tree(*d,true);
         deriv_out<<flush;
       }
     }

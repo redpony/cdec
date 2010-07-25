@@ -1,11 +1,13 @@
 #ifndef _HG_H_
 #define _HG_H_
 
+
+//FIXME: is the edge given to ffs the coarse (previous forest) edge?  if so, then INFO_EDGE is effectively not working.  supposed to have logging associated with each edge and see how it fits together in kbest afterwards.
 #define USE_INFO_EDGE 1
 #if USE_INFO_EDGE
 # include <sstream>
-# define INFO_EDGE(e,msg) do { std::ostringstream &o=e.info_;o<<msg; } while(0)
-# define INFO_EDGEw(e,msg) do { std::ostringstream &o=e.info_;if (o.empty()) o<<' ';o<<msg; } while(0)
+# define INFO_EDGE(e,msg) do { std::ostringstream &o=const_cast<std::ostringstream &>(e.info_);o<<msg; } while(0)
+# define INFO_EDGEw(e,msg) do { std::ostringstream &o=const_cast<std::ostringstream &>(e.info_);if (o.empty()) o<<' ';o<<msg; } while(0)
 #else
 # define INFO_EDGE(e,msg)
 # define INFO_EDGEw(e,msg)
@@ -14,6 +16,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 #include "feature_vector.h"
 #include "small_vector.h"
@@ -21,16 +24,20 @@
 #include "tdict.h"
 #include "trule.h"
 #include "prob.h"
+#include "indices_after.h"
 
 // if you define this, edges_ will be sorted
 // (normally, just nodes_ are - root must be nodes_.back()), but this can be quite
 // slow
 #undef HG_EDGES_TOPO_SORTED
 
+class Hypergraph;
+typedef boost::shared_ptr<Hypergraph> HypergraphP;
+
 // class representing an acyclic hypergraph
 //  - edges have 1 head, 0..n tails
 class Hypergraph {
- public:
+public:
   Hypergraph() : is_linear_chain_(false) {}
 
   // SmallVector is a fast, small vector<int> implementation for sizes <= 2
@@ -43,9 +50,20 @@ class Hypergraph {
     Node() : id_(), cat_(), promise(1) {}
     int id_; // equal to this object's position in the nodes_ vector
     WordID cat_;  // non-terminal category if <0, 0 if not set
-    std::vector<int> in_edges_;   // contents refer to positions in edges_
-    std::vector<int> out_edges_;  // contents refer to positions in edges_
+    EdgesVector in_edges_;   // contents refer to positions in edges_
+    EdgesVector out_edges_;  // contents refer to positions in edges_
     double promise; // set in global pruning; in [0,infty) so that mean is 1.  use: e.g. scale cube poplimit
+    void copy_fixed(Node const& o) { // nonstructural fields only - structural ones are managed by sorting/pruning/subsetting
+      cat_=o.cat_;
+      promise=o.promise;
+    }
+    void copy_reindex(Node const& o,indices_after const& n2,indices_after const& e2) {
+      copy_fixed(o);
+      id_=n2[id_];
+      e2.copy_to(in_edges_,o.in_edges_);
+      e2.copy_to(out_edges_,o.out_edges_);
+    }
+
   };
 
   // TODO get rid of edge_prob_? (can be computed on the fly as the dot
@@ -72,14 +90,30 @@ class Hypergraph {
     short int j_;
     short int prev_i_;
     short int prev_j_;
+
+    void copy_fixed(Edge const& o) {
+      rule_=o.rule_;
+      feature_values_ = o.feature_values_;
+      edge_prob_ = o.edge_prob_;
+      i_ = o.i_; j_ = o.j_; prev_i_ = o.prev_i_; prev_j_ = o.prev_j_;
 #if USE_INFO_EDGE
- private:
-    std::ostringstream info_;
- public:
+      info_.str(o.info_.str());
+#endif
+    }
+    void copy_reindex(Edge const& o,indices_after const& n2,indices_after const& e2) {
+      copy_fixed(o);
+      head_node_=n2[o.head_node_];
+      id_=e2[o.id_];
+      n2.copy_to(tail_nodes_,o.tail_nodes_);
+    }
+
+#if USE_INFO_EDGE
+    mutable std::ostringstream info_;
+
     Edge(Edge const& o) : head_node_(o.head_node_),tail_nodes_(o.tail_nodes_),rule_(o.rule_),feature_values_(o.feature_values_),edge_prob_(o.edge_prob_),id_(o.id_),i_(o.i_),j_(o.j_),prev_i_(o.prev_i_),prev_j_(o.prev_j_), info_(o.info_.str()) {  }
     void operator=(Edge const& o) {
       head_node_ = o.head_node_; tail_nodes_ = o.tail_nodes_; rule_ = o.rule_; feature_values_ = o.feature_values_; edge_prob_ = o.edge_prob_; id_ = o.id_; i_ = o.i_; j_ = o.j_; prev_i_ = o.prev_i_; prev_j_ = o.prev_j_;  info_.str(o.info_.str());
-        }
+    }
     std::string info() const { return info_.str(); }
 #else
     std::string info() const { return std::string(); }
@@ -109,9 +143,47 @@ class Hypergraph {
       show(o,mask);
       return o.str();
     }
+    /* generic recursion re: child_handle=re(tail_nodes_[i],i,parent_handle)
+
+       FIXME: make kbest create a simple derivation-tree structure (could be a
+       hg), and replace the list-of-edges viterbi.h with a tree-structured one.
+       CreateViterbiHypergraph can do for 1best, though.
+    */
+    template <class EdgeRecurse,class EdgeHandle>
+    std::string derivation_tree(EdgeRecurse const& re,EdgeHandle const& eh,bool indent=true,int show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
+      std::ostringstream o;
+      derivation_tree_stream(re,eh,o,indent,show_mask,maxdepth,depth);
+      return o.str();
+    }
+    template <class EdgeRecurse,class EdgeHandle>
+    void derivation_tree_stream(EdgeRecurse const& re,EdgeHandle const& eh,std::ostream &o,bool indent=true,int show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
+      if (depth>maxdepth) return;
+      if (indent) for (int i=0;i<depth;++i) o<<' ';
+      o<<'(';
+      show(o,show_mask);
+      if (indent) o<<'\n';
+      for (int i=0;i<tail_nodes_.size();++i) {
+        EdgeHandle c=re(tail_nodes_[i],i,eh);
+        Edge const* cp=c;
+        if (cp) {
+          cp->derivation_tree_stream(re,c,o,indent,show_mask,maxdepth,depth+1);
+          if (!indent) o<<' ';
+        }
+      }
+      if (indent) for (int i=0;i<depth;++i) o<<' ';
+      o<<")";
+      if (indent) o<<"\n";
+    }
   };
 
-  Edge const* viterbi_edge(int node) const { // assumes sorting has best edge as first.  FIXME: check.  SortInEdgesByEdgeWeights appears to accomplish this
+  std::string show_viterbi_tree(bool indent=true,int show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const;
+
+  typedef Edge const* EdgeHandle;
+  EdgeHandle operator()(int tailn,int /*taili*/,EdgeHandle /*parent*/) const {
+    return viterbi_edge(tailn);
+  }
+
+  Edge const* viterbi_edge(int node) const { // even if edges are sorted by edgeweights, this doesn't give viterbi
     EdgesVector const& v=nodes_[node].in_edges_;
     return v.empty() ? 0 : &edges_[v.front()];
   }
@@ -119,28 +191,6 @@ class Hypergraph {
   enum {
     NONE=0,CATEGORY=1,SPAN=2,PROB=4,FEATURES=8,RULE=16,RULE_LHS=32,PREV_SPAN=64,ALL=0xFFFFFFFF
   };
-  std::string show_tree(Edge const& e, bool indent=true,unsigned show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
-    std::ostringstream o;
-    show_tree(o,e,show_mask,indent,maxdepth,depth);
-    return o.str();
-  }
-  void show_tree(std::ostream &o,Edge const& e,bool indent=true,unsigned show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
-    if (depth>maxdepth) return;
-    if (indent) for(int i=0;i<depth;++i) o<<' ';
-    o<<'(';
-    e.show(o,show_mask);
-    if (indent) o<<'\n';
-    for (int i=0;i<e.tail_nodes_.size();++i) {
-      Edge const *c=viterbi_edge(e.tail_nodes_[i]);
-      if (!c) continue;
-      assert(c); // leaf?
-      show_tree(o,*c,indent,show_mask,maxdepth,depth+1);
-      if (!indent) o<<' ';
-    }
-    if (indent) for(int i=0;i<depth;++i) o<<' ';
-    o<<")";
-    if (indent) o<<"\n";
-  }
 
   // returns edge with rule_.IsGoal, returns 0 if none found.  otherwise gives best edge_prob_ - note: I don't think edge_prob_ is viterbi cumulative, so this would just be the best local probability.
   Edge const* ViterbiGoalEdge() const;
@@ -220,6 +270,7 @@ class Hypergraph {
 
   typedef std::vector<prob_t> EdgeProbs;
   typedef std::vector<bool> EdgeMask;
+  typedef std::vector<bool> NodeMask;
 
   // computes inside and outside scores for each
   // edge in the hypergraph
@@ -231,10 +282,33 @@ class Hypergraph {
   // find the score of the very best path passing through each edge
   prob_t ComputeBestPathThroughEdges(EdgeProbs* posts) const;
 
+
+  /* for all of the below subsets, the hg Nodes must be topo sorted already*/
+
+  // keep_nodes is an output-only param, keep_edges is in-out (more may be pruned than you asked for if the tails can't be built)
+  HypergraphP CreateEdgeSubset(EdgeMask & keep_edges_in_out,NodeMask &keep_nodes_out) const;
+  HypergraphP CreateEdgeSubset(EdgeMask & keep_edges) const;
+  // node keeping is final (const), edge keeping is an additional constraint which will sometimes be made stricter (and output back to you) by the absence of nodes.  you may end up with some empty nodes.  that is, kept edges will be made consistent with kept nodes first (but empty nodes are allowed)
+  HypergraphP CreateNodeSubset(NodeMask const& keep_nodes,EdgeMask &keep_edges_in_out) const {
+    TightenEdgeMask(keep_edges_in_out,keep_nodes);
+    return CreateNodeEdgeSubset(keep_nodes,keep_edges_in_out);
+  }
+  HypergraphP CreateNodeSubset(NodeMask const& keep_nodes) const {
+    EdgeMask ke(edges_.size(),true);
+    return CreateNodeSubset(keep_nodes,ke);
+  }
+
+  void TightenEdgeMask(EdgeMask &ke,NodeMask const& kn) const;
+  // kept edges are consistent with kept nodes already:
+  HypergraphP CreateNodeEdgeSubset(NodeMask const& keep_nodes,EdgeMask const&keep_edges_in_out) const;
+  HypergraphP CreateNodeEdgeSubset(NodeMask const& keep_nodes) const;
+
+
   // create a new hypergraph consisting only of the nodes / edges
   // in the Viterbi derivation of this hypergraph
   // if edges is set, use the EdgeSelectEdgeWeightFunction
-  Hypergraph* CreateViterbiHypergraph(const EdgeMask* edges = NULL) const;
+  // NOTE: last edge/node index are goal
+  HypergraphP CreateViterbiHypergraph(const EdgeMask* edges = NULL) const;
 
   // move weights as near to the source as possible, resulting in a
   // stochastic automaton.  ONLY FUNCTIONAL FOR *LATTICES*.
@@ -246,7 +320,7 @@ class Hypergraph {
   // not just lattices
   void PushWeightsToGoal(double scale = 1.0);
 
-  void SortInEdgesByEdgeWeights();
+//  void SortInEdgesByEdgeWeights(); // local sort only - pretty useless
 
   void PruneUnreachable(int goal_node_id); // DEPRECATED
 
@@ -301,20 +375,27 @@ class Hypergraph {
   bool is_linear_chain_;
 
   // nodes_ is sorted in topological order
-  std::vector<Node> nodes_;
+  typedef std::vector<Node> Nodes;
+  Nodes nodes_;
   // edges_ is not guaranteed to be in any particular order
-  std::vector<Edge> edges_;
+  typedef std::vector<Edge> Edges;
+  Edges edges_;
 
   // reorder nodes_ so they are in topological order
   // source nodes at 0 sink nodes at size-1
   void TopologicallySortNodesAndEdges(int goal_idx,
                                       const EdgeMask* prune_edges = NULL);
- private:
+
+  void set_ids(); // resync edge,node .id_
+  void check_ids(); // assert that .id_ have been kept in sync
+
+private:
   Hypergraph(int num_nodes, int num_edges, bool is_lc) : is_linear_chain_(is_lc), nodes_(num_nodes), edges_(num_edges) {}
 
   static TRulePtr kEPSRule;
   static TRulePtr kUnaryRule;
 };
+
 
 // common WeightFunctions, map an edge -> WeightType
 // for generic Viterbi/Inside algorithms
@@ -331,7 +412,7 @@ struct EdgeSelectEdgeWeightFunction {
     if (v_[e.id_]) return prob_t::One();
     else return prob_t::Zero();
   }
- private:
+private:
   const EdgeMask& v_;
 };
 

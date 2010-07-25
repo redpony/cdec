@@ -231,6 +231,7 @@ void AlignerTools::WriteAlignment(const Lattice& src_lattice,
                                   const vector<bool>* edges) {
   bool fix_up_src_spans = false;
   const Hypergraph* g = &in_g;
+  HypergraphP new_hg;
   if (!src_lattice.IsSentence() ||
       !trg_lattice.IsSentence()) {
     if (map_instead_of_viterbi) {
@@ -240,10 +241,10 @@ void AlignerTools::WriteAlignment(const Lattice& src_lattice,
     fix_up_src_spans = !src_lattice.IsSentence();
   }
   if (!map_instead_of_viterbi || edges) {
-    Hypergraph* new_hg = in_g.CreateViterbiHypergraph(edges);
+    new_hg = in_g.CreateViterbiHypergraph(edges);
     for (int i = 0; i < new_hg->edges_.size(); ++i)
       new_hg->edges_[i].edge_prob_ = prob_t::One();
-    g = new_hg;
+    g = new_hg.get();
   }
 
   vector<prob_t> edge_posteriors(g->edges_.size(), prob_t::Zero());
@@ -293,7 +294,8 @@ void AlignerTools::WriteAlignment(const Lattice& src_lattice,
       }
     }
   }
-  if (g != &in_g) { delete g; g = NULL; }
+  new_hg.reset();
+  //if (g != &in_g) { g.reset(); }
 
   prob_t threshold(0.9);
   const bool use_soft_threshold = true; // TODO configure
