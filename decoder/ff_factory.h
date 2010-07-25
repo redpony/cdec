@@ -1,7 +1,14 @@
 #ifndef _FF_FACTORY_H_
 #define _FF_FACTORY_H_
 
-//TODO: use http://www.boost.org/doc/libs/1_43_0/libs/functional/factory/doc/html/index.html?
+/*TODO: register state identity separately from feature function identity?  as
+ * in: string registry for name of state somewhere, assert that same result is
+ * computed by all users?  or, we can just require that ff sharing same state
+ * all be mashed into a single ffunc, which can just emit all the fid scores at
+ * once.  that's fine.
+ */
+
+//TODO: use http://www.boost.org/doc/libs/1_43_0/libs/functional/factory/doc/html/index.html ?
 
 #include <iostream>
 #include <string>

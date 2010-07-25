@@ -1,6 +1,8 @@
 #ifndef FF_LM_FSA_H
 #define FF_LM_FSA_H
 
+//TODO: use SRI LM::contextBOW, LM::contextID to shorten state
+
 #include "ff_lm.h"
 #include "ff_from_fsa.h"
 

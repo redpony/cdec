@@ -1,12 +1,24 @@
 #ifndef _HG_H_
 #define _HG_H_
 
+#define USE_INFO_EDGE 1
+#if USE_INFO_EDGE
+# include <sstream>
+# define INFO_EDGE(e,msg) do { std::ostringstream &o=e.info_;o<<msg; } while(0)
+# define INFO_EDGEw(e,msg) do { std::ostringstream &o=e.info_;if (o.empty()) o<<' ';o<<msg; } while(0)
+#else
+# define INFO_EDGE(e,msg)
+# define INFO_EDGEw(e,msg)
+#endif
+#define INFO_EDGEln(e,msg) INFO_EDGE(e,msg<<'\n')
+
 #include <string>
 #include <vector>
 
 #include "feature_vector.h"
 #include "small_vector.h"
 #include "wordid.h"
+#include "tdict.h"
 #include "trule.h"
 #include "prob.h"
 
@@ -23,6 +35,7 @@ class Hypergraph {
 
   // SmallVector is a fast, small vector<int> implementation for sizes <= 2
   typedef SmallVectorInt TailNodeVector;
+  typedef std::vector<int> EdgesVector;
 
   // TODO get rid of cat_?
   // TODO keep cat_ and add span and/or state? :)
@@ -59,7 +72,75 @@ class Hypergraph {
     short int j_;
     short int prev_i_;
     short int prev_j_;
+#if USE_INFO_EDGE
+ private:
+    std::ostringstream info_;
+ public:
+    Edge(Edge const& o) : head_node_(o.head_node_),tail_nodes_(o.tail_nodes_),rule_(o.rule_),feature_values_(o.feature_values_),edge_prob_(o.edge_prob_),id_(o.id_),i_(o.i_),j_(o.j_),prev_i_(o.prev_i_),prev_j_(o.prev_j_), info_(o.info_.str()) {  }
+    void operator=(Edge const& o) {
+      head_node_ = o.head_node_; tail_nodes_ = o.tail_nodes_; rule_ = o.rule_; feature_values_ = o.feature_values_; edge_prob_ = o.edge_prob_; id_ = o.id_; i_ = o.i_; j_ = o.j_; prev_i_ = o.prev_i_; prev_j_ = o.prev_j_;  info_.str(o.info_.str());
+        }
+    std::string info() const { return info_.str(); }
+#else
+    std::string info() const { return std::string(); }
+#endif
+    void show(std::ostream &o,unsigned mask=SPAN|RULE) const {
+      o<<'{';
+      if (mask&CATEGORY)
+        o<<TD::Convert(rule_->GetLHS());
+      if (mask&PREV_SPAN)
+        o<<'<'<<prev_i_<<','<<prev_j_<<'>';
+      if (mask&SPAN)
+        o<<'<'<<i_<<','<<j_<<'>';
+      if (mask&PROB)
+        o<<" p="<<edge_prob_;
+      if (mask&FEATURES)
+        o<<" "<<feature_values_;
+      if (mask&RULE)
+        o<<rule_->AsString(mask&RULE_LHS);
+      if (USE_INFO_EDGE) {
+        if (mask) o << ' ';
+        o<<info();
+      }
+      o<<'}';
+    }
+    std::string show(unsigned mask=SPAN|RULE) const {
+      std::ostringstream o;
+      show(o,mask);
+      return o.str();
+    }
   };
+
+  Edge const* viterbi_edge(int node) const { // assumes sorting has best edge as first.  FIXME: check.  SortInEdgesByEdgeWeights appears to accomplish this
+    EdgesVector const& v=nodes_[node].in_edges_;
+    return v.empty() ? 0 : &edges_[v.front()];
+  }
+
+  enum {
+    NONE=0,CATEGORY=1,SPAN=2,PROB=4,FEATURES=8,RULE=16,RULE_LHS=32,PREV_SPAN=64,ALL=0xFFFFFFFF
+  };
+  std::string show_tree(Edge const& e, bool indent=true,unsigned show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
+    std::ostringstream o;
+    show_tree(o,e,show_mask,indent,maxdepth,depth);
+    return o.str();
+  }
+  void show_tree(std::ostream &o,Edge const& e,bool indent=true,unsigned show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
+    if (depth>maxdepth) return;
+    if (indent) for(int i=0;i<depth;++i) o<<' ';
+    o<<'(';
+    e.show(o,show_mask);
+    if (indent) o<<'\n';
+    for (int i=0;i<e.tail_nodes_.size();++i) {
+      Edge const *c=viterbi_edge(e.tail_nodes_[i]);
+      if (!c) continue;
+      assert(c); // leaf?
+      show_tree(o,*c,indent,show_mask,maxdepth,depth+1);
+      if (!indent) o<<' ';
+    }
+    if (indent) for(int i=0;i<depth;++i) o<<' ';
+    o<<")";
+    if (indent) o<<"\n";
+  }
 
   // returns edge with rule_.IsGoal, returns 0 if none found.  otherwise gives best edge_prob_ - note: I don't think edge_prob_ is viterbi cumulative, so this would just be the best local probability.
   Edge const* ViterbiGoalEdge() const;

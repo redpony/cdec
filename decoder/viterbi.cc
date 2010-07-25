@@ -6,7 +6,7 @@
 
 using namespace std;
 
-std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool estring, bool etree)
+std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool estring, bool etree,bool show_derivation)
 {
   ostringstream o;
   o << hg.stats(name);
@@ -19,6 +19,17 @@ std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool es
   if (etree) {
     o<<name<<"          tree: "<<ViterbiETree(hg)<<endl;
   }
+  if (show_derivation) {
+    o<<name<<"          derivation: ";
+    ViterbiPathTraversal::Result d;
+    Viterbi<ViterbiPathTraversal>(hg, &d);
+    if (d.empty())
+      o<<"(empty viterbi hyperpath - no translation)";
+    else
+      hg.show_tree(o,*d.back(),false); // last item should be goal (or at least depend on prev items).  TODO: this doesn't actually reorder the nodes in hg.
+    o<<endl;
+  }
+
   return o.str();
 }
 
