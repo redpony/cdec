@@ -106,6 +106,8 @@ public:
     return found==values_.end()?T():found->second;
   }
 
+  T value(int i) const { return get(i); }
+
   // same as above but may add a 0 entry.  TODO: check that people relying on no entry use get
   T & operator[](int index){
     return values_[index];
