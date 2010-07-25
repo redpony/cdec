@@ -77,7 +77,7 @@ void MPIPYPTopics::sample_corpus(const MPICorpus& corpus, int samples,
       int new_topic = -1;
       if (freq > frequency_cutoff
           && (!max_contexts_per_document || term_index < max_contexts_per_document)) {
-        new_topic = sample(document_id, term);
+        new_topic = sample(i, term);
         //new_topic = document_id % m_num_topics;
 
         // add the new topic to the PYPs

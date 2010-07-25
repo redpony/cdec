@@ -55,7 +55,8 @@ public:
 
     virtual unsigned read_contexts(const std::string &filename, 
                                    BackoffGenerator* backoff_gen=0,
-                                   bool filter_singeltons=false);
+                                   bool filter_singeltons=false,
+                                   bool binary_contexts=false);
 
     TermBackoffPtr backoff_index() {
       return m_backoff;
