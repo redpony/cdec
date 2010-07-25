@@ -313,8 +313,8 @@ bool prelm_weights_string(po::variables_map const& conf,string &s)
 }
 
 
-void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,WeightVector *weights=0) {
-    cerr << viterbi_stats(forest,name,true,show_tree);
+void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,WeightVector *weights=0,bool show_deriv=false) {
+  cerr << viterbi_stats(forest,name,true,show_tree,show_deriv);
     if (show_features) {
       cerr << name<<"     features: ";
 /*      Hypergraph::Edge const* best=forest.ViterbiGoalEdge();
@@ -328,9 +328,9 @@ void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_featur
     }
 }
 
-void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,DenseWeightVector const& feature_weights) {
+void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,DenseWeightVector const& feature_weights,bool sd=false) {
     WeightVector fw(feature_weights);
-    forest_stats(forest,name,show_tree,show_features,&fw);
+    forest_stats(forest,name,show_tree,show_features,&fw,sd);
 }
 
 
@@ -348,7 +348,7 @@ void maybe_prune(Hypergraph &forest,po::variables_map const& conf,string nbeam,s
       }
       forest.PruneInsideOutside(beam_prune,density_prune,pm,false,1,conf["promise_power"].as<double>());
       if (!forestname.empty()) forestname=" "+forestname;
-      forest_stats(forest,"  Pruned "+forestname+" forest",false,false);
+      forest_stats(forest,"  Pruned "+forestname+" forest",false,false,false);
       cerr << "  Pruned "<<forestname<<" forest portion of edges kept: "<<forest.edges_.size()/presize<<endl;
     }
 }
@@ -560,7 +560,7 @@ int main(int argc, char** argv) {
     }
     const bool show_tree_structure=conf.count("show_tree_structure");
     const bool show_features=conf.count("show_features");
-    forest_stats(forest,"  -LM forest",show_tree_structure,show_features,feature_weights);
+    forest_stats(forest,"  -LM forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
     if (conf.count("show_expected_length")) {
       const PRPair<double, double> res =
         Inside<PRPair<double, double>,
@@ -586,7 +586,7 @@ int main(int argc, char** argv) {
                     &prelm_forest);
       forest.swap(prelm_forest);
       forest.Reweight(prelm_feature_weights);
-      forest_stats(forest," prelm forest",show_tree_structure,show_features,prelm_feature_weights);
+      forest_stats(forest," prelm forest",show_tree_structure,show_features,prelm_feature_weights,oracle.show_derivation);
     }
 
     maybe_prune(forest,conf,"prelm_beam_prune","prelm_density_prune","-LM",srclen);
@@ -605,7 +605,7 @@ int main(int argc, char** argv) {
                     &lm_forest);
       forest.swap(lm_forest);
       forest.Reweight(feature_weights);
-      forest_stats(forest,"  +LM forest",show_tree_structure,show_features,feature_weights);
+      forest_stats(forest,"  +LM forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
     }
 
     maybe_prune(forest,conf,"beam_prune","density_prune","+LM",srclen);
@@ -650,7 +650,7 @@ int main(int argc, char** argv) {
     } else {
       if (kbest) {
         //TODO: does this work properly?
-        oracle.DumpKBest(sent_id, forest, conf["k_best"].as<int>(), unique_kbest,"");
+        oracle.DumpKBest(sent_id, forest, conf["k_best"].as<int>(), unique_kbest,"-");
       } else if (csplit_output_plf) {
         cout << HypergraphIO::AsPLF(forest, false) << endl;
       } else {
