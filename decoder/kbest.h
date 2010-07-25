@@ -77,6 +77,24 @@ namespace KBest {
         return a->score > b->score;
       }
     };
+
+    struct EdgeHandle {
+      Derivation const* d;
+      explicit EdgeHandle(Derivation const* d) : d(d) {  }
+//      operator bool() const { return d->edge; }
+      operator Hypergraph::Edge const* () const { return d->edge; }
+//      const Hypergraph::Edge* operator ->() const { return d->edge; }
+    };
+
+//    typedef Derivation EdgeHandle; // will cause copying, below but not performance critical; change to actual handle if you want
+    EdgeHandle operator()(int t,int taili,EdgeHandle const& parent) const {
+      return EdgeHandle(nds[t].D[parent.d->j[taili]]);
+    }
+
+    std::string derivation_tree(Derivation const& d,bool indent=true,int show_mask=Hypergraph::SPAN|Hypergraph::RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
+      return d.edge->derivation_tree(*this,EdgeHandle(&d),indent,show_mask,maxdepth,depth);
+    }
+
     struct DerivationUniquenessHash {
       size_t operator()(const Derivation* d) const {
         size_t x = 5381;

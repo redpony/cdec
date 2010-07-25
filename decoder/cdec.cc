@@ -102,7 +102,7 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
     ("prelm_weights",po::value<string>(),"Feature weights file for prelm_beam_prune.  Requires --weights.")
     ("prelm_copy_weights","use --weights as value for --prelm_weights.")
     ("prelm_feature_function",po::value<vector<string> >()->composing(),"Additional feature functions for prelm pass only (in addition to the 0-state subset of feature_function")
-    ("keep_prelm_cube_order","when forest rescoring with final models, use the edge ordering from the prelm pruning features*weights.  only meaningful if --prelm_weights given.  UNTESTED but assume that cube pruning gives a sensible result, and that 'good' (as tuned for bleu w/ prelm features) edges come first.")
+    ("keep_prelm_cube_order","DEPRECATED (always enabled).  when forest rescoring with final models, use the edge ordering from the prelm pruning features*weights.  only meaningful if --prelm_weights given.  UNTESTED but assume that cube pruning gives a sensible result, and that 'good' (as tuned for bleu w/ prelm features) edges come first.")
     ("warn_0_weight","Warn about any feature id that has a 0 weight (this is perfectly safe if you intend 0 weight, though)")
         ("no_freeze_feature_set,Z", "Do not freeze feature set after reading feature weights file")
         ("feature_function,F",po::value<vector<string> >()->composing(), "Additional feature function(s) (-L for list)")
@@ -577,7 +577,6 @@ int main(int argc, char** argv) {
     if (has_prelm_models) {
       Timer t("prelm rescoring");
       forest.Reweight(prelm_feature_weights);
-      forest.SortInEdgesByEdgeWeights();
       Hypergraph prelm_forest;
       ApplyModelSet(forest,
                     smeta,
@@ -595,8 +594,6 @@ int main(int argc, char** argv) {
     if (has_late_models) {
       Timer t("Forest rescoring:");
       forest.Reweight(feature_weights);
-      if (!has_prelm_models || conf.count("keep_prelm_cube_order"))
-        forest.SortInEdgesByEdgeWeights();
       Hypergraph lm_forest;
       ApplyModelSet(forest,
                     smeta,

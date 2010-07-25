@@ -14,11 +14,14 @@
 
 //#define FSA_DEBUG
 
+# define FSADBGae(e,x) std::cerr << x; INFO_EDGE(e,x);
 #ifdef FSA_DEBUG
 # include <iostream>
-# define FSADBG(x) do { if (d().debug()) { std::cerr << x; } } while(0)
+# define FSADBG(e,x) do { if (d().debug()) { FSADBGae(e,x) } } while(0)
+# define FSADBGnl(e) do { if (d().debug) { std::cerr<<std::endl; INFO_EDGE(e,"; "); } } while(0)
 #else
-# define FSADBG(x)
+# define FSADBG(e,x)
+# define FSADBGnl(e)
 #endif
 
 #include <boost/lexical_cast.hpp>
@@ -249,9 +252,10 @@ public:
 
   inline void Scan(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,void const* st,void *next_state,FeatureVector *features) const {
     Impl const& im=d();
-    FSADBG("Scan "<<FD::Convert(im.fid_)<<" = "<<(*features)[im.fid_]<<" "<<im.state(st)<<" ->"<<TD::Convert(w)<<" ");
+    FSADBG(edge,"Scan "<<FD::Convert(im.fid_)<<" = "<<(*features)[im.fid_]<<" "<<im.state(st)<<" ->"<<TD::Convert(w)<<" ");
     im.ScanT(smeta,edge,w,im.state(st),im.state(next_state),features);
-    FSADBG(im.state(next_state)<<" = "<<(*features)[im.fid_]<<std::endl);
+    FSADBG(edge,im.state(next_state)<<" = "<<(*features)[im.fid_]);
+    FSADBGnl(edge);
   }
 
 };

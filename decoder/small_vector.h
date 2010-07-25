@@ -57,7 +57,8 @@ class SmallVector {
 
   SmallVector(const Self& o) : size_(o.size_) {
     if (size_ <= SV_MAX) {
-      for (int i = 0; i < SV_MAX; ++i) data_.vals[i] = o.data_.vals[i];
+      std::memcpy(data_.vals,o.data_.vals,size_*sizeof(T));
+//      for (int i = 0; i < size_; ++i) data_.vals[i] = o.data_.vals[i];
     } else {
       capacity_ = size_ = o.size_;
       data_.ptr = new T[capacity_];

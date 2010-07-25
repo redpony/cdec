@@ -5,9 +5,12 @@
 
 #define FSA_FF_DEBUG
 #ifdef FSA_FF_DEBUG
-# define FSAFFDBG(x) do { if (debug) { std::cerr << x; }  } while(0)
+# define FSAFFDBG(e,x) do { if (debug) { FSADBGae(e,x) }  } while(0)
+# define FSAFFDBGnl(e) do { if (debug) { std::cerr<<std::endl; INFO_EDGE(e,"; "); } } while(0)
+
 #else
-# define FSAFFDBG(x)
+# define FSAFFDBG(e,x)
+# define FSAFFDBGnl(e)
 #endif
 
 /* regular bottom up scorer from Fsa feature
@@ -29,7 +32,6 @@ class FeatureFunctionFromFsa : public FeatureFunction {
 public:
   FeatureFunctionFromFsa(std::string const& param) : ff(param) {
     debug=true; // because factory won't set until after we construct.
-    FSAFFDBG(ff.name()<<" params="<<param<<" calling Init: ");
     Init();
   }
 
@@ -48,7 +50,7 @@ public:
                              FeatureVector* estimated_features,
                              void* out_state) const
   {
-    FSAFFDBG("(FromFsa) "<<name);
+    FSAFFDBG(edge,"(FromFsa) "<<name);
     ff.init_features(features); // estimated_features is fresh
     if (!ssz) {
       TRule const& rule=*edge.rule_;
@@ -57,11 +59,11 @@ public:
         if (e[j] < 1) { // variable
         } else {
           WordID ew=e[j];
-          FSAFFDBG(' '<<TD::Convert(ew));
+          FSAFFDBG(edge,' '<<TD::Convert(ew));
           ff.Scan(smeta,edge,ew,0,0,features);
         }
       }
-      FSAFFDBG('\n');
+      FSAFFDBGnl(edge);
       return;
     }
 
@@ -75,7 +77,7 @@ public:
     for (int j = 0; j < e.size(); ++j) { // items in target side of rule
       if (e[j] < 1) { // variable
         SP a = ant_contexts[-e[j]];
-        FSAFFDBG(' '<<describe_state(a));
+        FSAFFDBG(edge,' '<<describe_state(a));
         WP al=(WP)a;
         WP ale=left_end(a);
         // scan(al,le) these - the same as below else.  macro for now; pull into closure object later?
@@ -100,7 +102,7 @@ public:
           fsa.reset(fsa_state(a));
       } else { // single word
         WordID ew=e[j];
-        FSAFFDBG(' '<<TD::Convert(ew));
+        FSAFFDBG(edge,' '<<TD::Convert(ew));
         // some redundancy: non-vectorized version of above handling of left words of child item
         if (left_out<left_full) {
           *left_out++=ew;
@@ -120,7 +122,8 @@ public:
       do { *left_out++=TD::none; } while(left_out<left_full); // none-terminate so left_end(out_state) will know how many words
     } else // or else store final right-state.  heuristic was already assigned
       fstatecpy(out_state,fsa.cs);
-    FSAFFDBG(" = " << describe_state(out_state)<<" "<<(*features)[ff.fid()]<<" h="<<(*estimated_features)[ff.fid()]<<'\n');
+    FSAFFDBG(edge," = " << describe_state(out_state)<<" "<<(*features)[ff.fid()]<<" h="<<(*estimated_features)[ff.fid()]);
+    FSAFFDBGnl(edge);
   }
 
   void print_state(std::ostream &o,void const*ant) const {
@@ -154,23 +157,24 @@ public:
     SP ss=ff.start_state();
     WP l=(WP)residual_state,lend=left_end(residual_state);
     SP rst=fsa_state(residual_state);
-    FSAFFDBG("(FromFsa) Final "<<name<< " before="<<*final_features);
+    FSAFFDBG(edge,"(FromFsa) Final "<<name<< " before="<<*final_features);
     if (lend==rst) { // implying we have an fsa state
       AccumFeatures(ff,smeta,edge,l,lend,final_features,ss); // e.g. <s> score(full left unscored phrase)
-      FSAFFDBG(" left: "<<ff.describe_state(ss)<<" -> "<<Sentence(l,lend));
+      FSAFFDBG(edge," left: "<<ff.describe_state(ss)<<" -> "<<Sentence(l,lend));
       AccumFeatures(ff,smeta,edge,begin(ends),end(ends),final_features,rst); // e.g. [ctx for last M words] score("</s>")
-      FSAFFDBG(" right: "<<ff.describe_state(rst)<<" -> "<<ends);
+      FSAFFDBG(edge," right: "<<ff.describe_state(rst)<<" -> "<<ends);
     } else { // all we have is a single short phrase < M words before adding ends
       int nl=lend-l;
       Sentence whole(ends.size()+nl);
       WordID *w=begin(whole);
       wordcpy(w,l,nl);
       wordcpy(w+nl,begin(ends),ends.size());
-      FSAFFDBG(" score whole sentence: "<<whole);
+      FSAFFDBG(edge," score whole sentence: "<<whole);
       // whole = left-words + end-phrase
       AccumFeatures(ff,smeta,edge,w,end(whole),final_features,ss);
     }
-    FSAFFDBG(" = "<<*final_features<<'\n');
+    FSAFFDBG(edge," = "<<*final_features);
+    FSAFFDBGnl(edge);
   }
 
   bool rule_feature() const {
@@ -195,7 +199,6 @@ private:
     state_offset=sizeof(WordID)*M;
     SetStateSize(ssz+state_offset);
     assert(!ssz == !M); // no fsa state <=> markov order 0
-    FSAFFDBG("order="<<M<<" fsa_state_offset="<<state_offset<<" fsa_state_bytes="<<ssz<<" ff_state_bytes="<<StateSize()<<'\n');
   }
   int M; // markov order (ctx len)
   FeatureFunctionFromFsa(); // not allowed.

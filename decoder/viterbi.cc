@@ -13,20 +13,16 @@ std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool es
   if (estring) {
     vector<WordID> trans;
     const prob_t vs = ViterbiESentence(hg, &trans);
-    o<<name<<"       Viterbi: "<<log(vs)<<endl;
+    o<<name<<"  Viterbi logp: "<<log(vs)<<endl;
     o<<name<<"       Viterbi: "<<TD::GetString(trans)<<endl;
   }
   if (etree) {
     o<<name<<"          tree: "<<ViterbiETree(hg)<<endl;
   }
+  //FIXME: this doesn't work.
   if (show_derivation) {
     o<<name<<"          derivation: ";
-    ViterbiPathTraversal::Result d;
-    Viterbi<ViterbiPathTraversal>(hg, &d);
-    if (d.empty())
-      o<<"(empty viterbi hyperpath - no translation)";
-    else
-      hg.show_tree(o,*d.back(),false); // last item should be goal (or at least depend on prev items).  TODO: this doesn't actually reorder the nodes in hg.
+    o << hg.show_viterbi_tree(false); // last item should be goal (or at least depend on prev items).  TODO: this doesn't actually reorder the nodes in hg.
     o<<endl;
   }
 
