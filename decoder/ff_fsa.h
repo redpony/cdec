@@ -136,7 +136,7 @@ public:
 
   // NOTE: if you want to e.g. track statistics, cache, whatever, cast const away or use mutable members
   inline void Scan(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,void const* state,void *next_state,FeatureVector *features) const {
-    features->maybe_add(fid_,Scan1(w,state,next_state));
+    features->maybe_add(fid_,d().Scan1(w,state,next_state));
   }
 
   // don't set state-bytes etc. in ctor because it may depend on parsing param string
