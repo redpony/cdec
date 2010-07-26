@@ -3,8 +3,8 @@
 
 #include "ff_fsa.h"
 
-#define FSA_FF_DEBUG
-#ifdef FSA_FF_DEBUG
+#define FSA_FF_DEBUG 0
+#if FSA_FF_DEBUG
 # define FSAFFDBG(e,x) FSADBGif(debug,e,x)
 # define FSAFFDBGnl(e) FSADBGif_nl(debug,e)
 #else
@@ -49,7 +49,6 @@ public:
                              FeatureVector* estimated_features,
                              void* out_state) const
   {
-    FSAFFDBG(edge,"(FromFsa) "<<name);
     ff.init_features(features); // estimated_features is fresh
     if (!ssz) {
       TRule const& rule=*edge.rule_;
@@ -97,8 +96,9 @@ public:
         } else { // more to score / state to update (left already full)
           fsa.scan(al,ale,features);
         }
-        if (nw>M) // child had full state already (had a "gap"); if nw==M then we already reached the same state via left word heuristic scan above
+        if (nw==M) // child had full state already
           fsa.reset(fsa_state(a));
+        assert(nw<=M);
       } else { // single word
         WordID ew=e[j];
         FSAFFDBG(edge,' '<<TD::Convert(ew));
@@ -121,7 +121,7 @@ public:
       do { *left_out++=TD::none; } while(left_out<left_full); // none-terminate so left_end(out_state) will know how many words
     } else // or else store final right-state.  heuristic was already assigned
       fstatecpy(out_state,fsa.cs);
-    FSAFFDBG(edge," = " << describe_state(out_state)<<" "<<(*features)[ff.fid()]<<" h="<<(*estimated_features)[ff.fid()]);
+    FSAFFDBG(edge," = " << describe_state(out_state)<<" "<<name<<"="<<ff.describe_features(*features)<<" h="<<ff.describe_features(*estimated_features)<<")");
     FSAFFDBGnl(edge);
   }
 
@@ -156,23 +156,24 @@ public:
     SP ss=ff.start_state();
     WP l=(WP)residual_state,lend=left_end(residual_state);
     SP rst=fsa_state(residual_state);
-    FSAFFDBG(edge,"(FromFsa) Final "<<name<< " before="<<*final_features);
+    FSAFFDBG(edge," (final");// "<<name);//<< " before="<<*final_features);
+
     if (lend==rst) { // implying we have an fsa state
       AccumFeatures(ff,smeta,edge,l,lend,final_features,ss); // e.g. <s> score(full left unscored phrase)
-      FSAFFDBG(edge," left: "<<ff.describe_state(ss)<<" -> "<<Sentence(l,lend));
+      FSAFFDBG(edge," start="<<ff.describe_state(ss)<<"->{"<<Sentence(l,lend)<<"}");
       AccumFeatures(ff,smeta,edge,begin(ends),end(ends),final_features,rst); // e.g. [ctx for last M words] score("</s>")
-      FSAFFDBG(edge," right: "<<ff.describe_state(rst)<<" -> "<<ends);
+      FSAFFDBG(edge," end="<<ff.describe_state(rst)<<"->{"<<ends<<"}");
     } else { // all we have is a single short phrase < M words before adding ends
       int nl=lend-l;
       Sentence whole(ends.size()+nl);
       WordID *w=begin(whole);
       wordcpy(w,l,nl);
       wordcpy(w+nl,begin(ends),ends.size());
-      FSAFFDBG(edge," score whole sentence: "<<whole);
+      FSAFFDBG(edge," whole={"<<whole<<"}");
       // whole = left-words + end-phrase
       AccumFeatures(ff,smeta,edge,w,end(whole),final_features,ss);
     }
-    FSAFFDBG(edge," = "<<*final_features);
+    FSAFFDBG(edge,' '<<name<<"="<<ff.describe_features(*final_features));
     FSAFFDBGnl(edge);
   }
 
