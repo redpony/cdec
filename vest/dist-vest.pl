@@ -166,6 +166,7 @@ my $user = $ENV{"USER"};
 -e $iniFile || die "Error: could not open $iniFile for reading\n";
 open(INI, $iniFile);
 
+use File::Basename qw(basename);
 #pass bindir, refs to vars holding bin
 sub modbin {
     local $_;
@@ -173,8 +174,7 @@ sub modbin {
     `mkdir -p $bindir`;
     for (@_) {
         my $src=$$_;
-        $$_="$bindir/".`basename $src`;
-        chomp $$_;
+        $$_="$bindir/".basename($src);
         `cp $src $$_`;
         die "cp $src $$_ failed: $!" unless $? == 0;
     }
