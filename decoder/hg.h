@@ -169,21 +169,21 @@ public:
        hg), and replace the list-of-edges viterbi.h with a tree-structured one.
        CreateViterbiHypergraph can do for 1best, though.
     */
-    template <class EdgeRecurse,class EdgeHandle>
-    std::string derivation_tree(EdgeRecurse const& re,EdgeHandle const& eh,bool indent=true,int show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
+    template <class EdgeRecurse,class TEdgeHandle>
+    std::string derivation_tree(EdgeRecurse const& re,TEdgeHandle const& eh,bool indent=true,int show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
       std::ostringstream o;
       derivation_tree_stream(re,eh,o,indent,show_mask,maxdepth,depth);
       return o.str();
     }
-    template <class EdgeRecurse,class EdgeHandle>
-    void derivation_tree_stream(EdgeRecurse const& re,EdgeHandle const& eh,std::ostream &o,bool indent=true,int show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
+    template <class EdgeRecurse,class TEdgeHandle>
+    void derivation_tree_stream(EdgeRecurse const& re,TEdgeHandle const& eh,std::ostream &o,bool indent=true,int show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
       if (depth>maxdepth) return;
       if (indent) for (int i=0;i<depth;++i) o<<' ';
       o<<'(';
       show(o,show_mask);
       if (indent) o<<'\n';
       for (int i=0;i<tail_nodes_.size();++i) {
-        EdgeHandle c=re(tail_nodes_[i],i,eh);
+        TEdgeHandle c=re(tail_nodes_[i],i,eh);
         Edge const* cp=c;
         if (cp) {
           cp->derivation_tree_stream(re,c,o,indent,show_mask,maxdepth,depth+1);
