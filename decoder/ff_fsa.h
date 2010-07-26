@@ -8,6 +8,7 @@
 
   state is some fixed width byte array.  could actually be a void *, WordID sequence, whatever.
 
+  TODO: fsa ff scores phrases not just words
   TODO: fsa feature aggregator that presents itself as a single fsa; benefit: when wrapped in ff_from_fsa, only one set of left words is stored.  downside: compared to separate ff, the inside portion of lower-order models is incorporated later.  however, the full heuristic is already available and exact for those words.  so don't sweat it.
 
   TODO: state (+ possibly span-specific) custom heuristic, e.g. in "longer than previous word" model, you can expect a higher outside if your state is a word of 2 letters.  this is on top of the nice heuristic for the unscored words, of course.  in ngrams, the avg prob will be about the same, but if the words possible for a source span are summarized, maybe it's possible to predict.  probably not worth the effort.
@@ -118,8 +119,11 @@ protected:
   }
 
 public:
-  void state_cpy(void *to,void const*from) const {
+  void state_copy(void *to,void const*from) const {
     std::memcpy(to,from,state_bytes_);
+  }
+  void state_zero(void *st) const { // you should call this if you don't know the state yet and want it to be hashed/compared properly
+    std::memset(st,0,state_bytes_);
   }
 
   // can override to different return type, e.g. just return feats:
@@ -325,7 +329,7 @@ struct FsaScanner {
   Bytes states; // first is at begin, second is at (char*)begin+stride
   void *st0; // states
   void *st1; // states+stride
-  void *cs;
+  void *cs; // initially st0, alternates between st0 and st1
   inline void *nexts() const {
     return (cs==st0)?st1:st0;
   }

@@ -1,9 +1,6 @@
 #ifndef _HG_H_
 #define _HG_H_
 
-
-//FIXME: is the edge given to ffs the coarse (previous forest) edge?  if so, then INFO_EDGE is effectively not working.  supposed to have logging associated with each edge and see how it fits together in kbest afterwards.
-
 // define USE_INFO_EDGE 1 if you want lots of debug info shown with --show_derivations - otherwise it adds quite a bit of overhead if ffs have their logging enabled (e.g. ff_from_fsa)
 #define USE_INFO_EDGE 0
 #if USE_INFO_EDGE

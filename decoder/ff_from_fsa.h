@@ -40,8 +40,7 @@ public:
 
   Features features() const { return ff.features(); }
 
-  //TODO: add source span to Fsa FF interface, pass along
-  //TODO: read/debug VERY CAREFULLY
+  // Log because it
   void TraversalFeaturesLog(const SentenceMetadata& smeta,
                              Hypergraph::Edge& edge,
                              const std::vector<const void*>& ant_contexts,
@@ -64,25 +63,27 @@ public:
       FSAFFDBGnl(edge);
       return;
     }
-
+//why do we compute heuristic in so many places?  well, because that's how we know what state we should score words in once we're full on our left context (because of markov order bound, we know the score will be the same no matter what came before that left context)
     SP h_start=ff.heuristic_start_state();
+    // these left_* refer to our output (out_state):
     W left_begin=(W)out_state;
     W left_out=left_begin; // [left,fsa_state) = left ctx words.  if left words aren't full, then null wordid
     WP left_full=left_end_full(out_state);
-    FsaScanner<Impl> fsa(ff,smeta,edge);
+    FsaScanner<Impl> fsa(ff,smeta,edge); // this holds our current state and eventuallybecomes our right state if we saw enough words
     TRule const& rule=*edge.rule_;
     Sentence const& e = rule.e();
     for (int j = 0; j < e.size(); ++j) { // items in target side of rule
       if (e[j] < 1) { // variable
-        SP a = ant_contexts[-e[j]];
+        SP a = ant_contexts[-e[j]]; // variables a* are referring to this child derivation state.
         FSAFFDBG(edge,' '<<describe_state(a));
         WP al=(WP)a;
         WP ale=left_end(a);
         // scan(al,le) these - the same as below else.  macro for now; pull into closure object later?
-        int nw=ale-al; // this many new words
-        if (left_out+nw<left_full) { // nothing to score after adding
-          wordcpy(left_out,al,nw);
-          left_out+=nw;
+        int anw=ale-al;
+// anw left words in child.  full if == M.  we will use them to fill our left words, and then score the rest fully, knowing what state we're in based on h_state -> our left words -> any number of interior words which are scored then hidden
+        if (left_out+anw<left_full) { // nothing to score after adding
+          wordcpy(left_out,al,anw);
+          left_out+=anw;
         } else if (left_out<left_full) { // something to score AND newly full left context to fill
           int ntofill=left_full-left_out;
           assert(ntofill==M-(left_out-left_begin));
@@ -91,14 +92,14 @@ public:
           // heuristic known now
           fsa.reset(h_start);
           fsa.scan(left_begin,left_full,estimated_features); // save heuristic (happens once only)
-          fsa.scan(al+ntofill,ale,features);
+          fsa.scan(al+ntofill,ale,features); // because of markov order, fully filled left words scored starting at h_start put us in the right state to score the extra words (which are forgotten)
           al+=ntofill; // we used up the first ntofill words of al to end up in some known state via exactly M words total (M-ntofill were there beforehand).  now we can scan the remaining al words of this child
         } else { // more to score / state to update (left already full)
           fsa.scan(al,ale,features);
         }
-        if (nw==M) // child had full state already
+        if (anw==M) // child had full state already
           fsa.reset(fsa_state(a));
-        assert(nw<=M);
+        assert(anw<=M);
       } else { // single word
         WordID ew=e[j];
         FSAFFDBG(edge,' '<<TD::Convert(ew));
@@ -114,13 +115,14 @@ public:
       }
     }
 
-    if (left_out<left_full) { // finally: partial heuristic foru nfilled items
+    void *out_fsa_state=fsa_state(out_state);
+    if (left_out<left_full) { // finally: partial heuristic for unfilled items
       fsa.reset(h_start);
       fsa.scan(left_begin,left_out,estimated_features);
-      clear_fsa_state(out_state); // 0 bytes so we compare / hash correctly. don't know state yet
       do { *left_out++=TD::none; } while(left_out<left_full); // none-terminate so left_end(out_state) will know how many words
+      ff.state_zero(out_fsa_state); // so we compare / hash correctly. don't know state yet because left context isn't full
     } else // or else store final right-state.  heuristic was already assigned
-      fstatecpy(out_state,fsa.cs);
+      ff.state_copy(out_fsa_state,fsa.cs);
     FSAFFDBG(edge," = " << describe_state(out_state)<<" "<<name<<"="<<ff.describe_features(*features)<<" h="<<ff.describe_features(*estimated_features)<<")");
     FSAFFDBGnl(edge);
   }
@@ -228,14 +230,6 @@ private:
   }
   inline void *fsa_state(void * ant) const {
     return ((char *)ant+state_offset);
-  }
-
-  void clear_fsa_state(void *ant) const { // when state is unknown
-    std::memset(fsa_state(ant),0,ssz);
-  }
-
-  inline void fstatecpy(void *ant,void const* src) const {
-    std::memcpy(fsa_state(ant),src,ssz);
   }
 };
 
