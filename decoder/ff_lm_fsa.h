@@ -1,7 +1,8 @@
 #ifndef FF_LM_FSA_H
 #define FF_LM_FSA_H
 
-//TODO: use SRI LM::contextBOW, LM::contextID to shorten state
+//TODO: use SRI LM::contextID to shorten state
+//TODO: expose ScanPhrase interface to achieve > ngram probs (e.g. unigram) with higher order lm - but that wouldn't apply to L->R maximal hook/sharing decoding
 
 #include "ff_lm.h"
 #include "ff_from_fsa.h"

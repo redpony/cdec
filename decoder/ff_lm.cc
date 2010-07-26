@@ -1,3 +1,6 @@
+#define LM_FSA_SHORTEN_CONTEXT 1
+// seems to work great - just not sure if it actually speeds anything up
+
 namespace {
 char const* usage_name="LanguageModel";
 char const* usage_short="srilm.gz [-n FeatureName] [-o StateOrder] [-m LimitLoadOrder]";
@@ -235,6 +238,21 @@ class LanguageModelImpl {
     return ngram_.wordProb(word, (VocabIndex*)context);
   }
 
+  // may be shorter than actual null-terminated length.  context must be null terminated.  len is just to save effort for subclasses that don't support contextID
+  virtual int ContextSize(WordID const* context,int len) {
+    unsigned ret;
+    ngram_.contextID((VocabIndex*)context,ret);
+    return ret;
+  }
+
+  void ShortenContext(WordID * context,int len) {
+    int slen=ContextSize(context,len);
+    while (len>slen) {
+      --len;
+      context[len]=TD::none;
+    }
+  }
+
   /// NOT a negative logp, i.e. should be worse prob = more negative.  that's what SRI wordProb returns, fortunately.
   inline double clamp(double logp) const {
     return logp < floor_ ? floor_ : logp;
@@ -448,7 +466,9 @@ struct ClientLMI : public LanguageModelImpl
   virtual double WordProb(int word, WordID const* context) {
     return client_.wordProb(word, context);
   }
-
+  virtual int ContextSize(WordID const* const, int len) {
+    return len;
+  }
 protected:
   LMClient client_;
 };
@@ -459,6 +479,11 @@ struct ReuseLMI : public LanguageModelImpl
   {}
   double WordProb(int word, WordID const* context) {
     return ng->wordProb(word, (VocabIndex*)context);
+  }
+  virtual int ContextSize(WordID const* context, int len) {
+    unsigned ret;
+    ng->contextID((VocabIndex*)context,ret);
+    return ret;
   }
 protected:
   Ngram *ng;
@@ -553,10 +578,11 @@ void LanguageModelFsa::set_ngram_order(int i) {
   ngram_order_=i;
   ctxlen_=i-1;
   set_state_bytes(ctxlen_*sizeof(WordID));
-  set_end_phrase(TD::se); //TODO: pretty boring in unigram case, just adds constant prob - bu  WordID *ss=(WordID*)start.begin();
+  WordID *ss=(WordID*)start.begin();
   WordID *hs=(WordID*)h_start.begin();
-t for compat. with non-fsa version, leave it
   if (ctxlen_) { // avoid segfault in case of unigram lm (0 state)
+    set_end_phrase(TD::se);
+// se is pretty boring in unigram case, just adds constant prob.  check that this is what we want
     ss[0]=TD::ss; // start-sentence context (length 1)
     hs[0]=TD::none; // empty context
     for (int i=1;i<ctxlen_;++i) {
@@ -589,6 +615,9 @@ void LanguageModelFsa::Scan(SentenceMetadata const& /* smeta */,const Hypergraph
     WordID *nst=(WordID *)new_st;
     nst[0]=w; // new most recent word
     to_state(nst+1,ctx,ctxlen_-1); // rotate old words right
+#if LM_FSA_SHORTEN_CONTEXT
+    pimpl_->ShortenContext(nst,ctxlen_);
+#endif
   } else {
     p=pimpl_->WordProb(w,&empty_context);
   }
