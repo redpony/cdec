@@ -22,6 +22,7 @@ my $MAPINPUT = "$bin_dir/mr_vest_generate_mapper_input";
 my $MAPPER = "$bin_dir/mr_vest_map";
 my $REDUCER = "$bin_dir/mr_vest_reduce";
 my $parallelize = "$bin_dir/parallelize.pl";
+my $sentserver = "$bin_dir/sentserver";
 my $SCORER = $FAST_SCORE;
 die "Can't find $MAPPER" unless -x $MAPPER;
 my $cdec = "$bin_dir/../decoder/cdec";
@@ -192,7 +193,7 @@ if ($dryrun){
 	} else {
 		-e $dir || mkdir $dir;
 		mkdir "$dir/hgs";
-        modbin("$dir/bin",\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize) if $cpbin;
+        modbin("$dir/bin",\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize,\$sentserver) if $cpbin;
     mkdir "$dir/scripts";
         my $cmdfile="$dir/rerun-vest.sh";
         open CMD,'>',$cmdfile;
