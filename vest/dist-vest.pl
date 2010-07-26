@@ -58,7 +58,7 @@ my $oracleb=20;
 my $dirargs='';
 my $density_prune;
 my $usefork;
-my $cpbin=1;
+my $cpbin=0;
 # Process command-line options
 Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
@@ -174,6 +174,7 @@ sub modbin {
     for (@_) {
         my $src=$$_;
         $$_="$bindir/".`basename $src`;
+        chomp $$_;
         `cp $src $$_`;
         die "cp $src $$_ failed: $!" unless $? == 0;
     }
