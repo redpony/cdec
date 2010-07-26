@@ -174,7 +174,7 @@ sub modbin {
         my $src=$$_;
         $$_="$bindir/".`basename $src`;
         `cp $src $$_`;
-        die ""cp $src $$_" failed: $!" unless $? == 0;
+        die "cp $src $$_ failed: $!" unless $? == 0;
     }
 }
 sub dirsize {
@@ -190,7 +190,7 @@ if ($dryrun){
 	} else {
 		-e $dir || mkdir $dir;
 		mkdir "$dir/hgs";
-        modbin($bindir,\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize) if $cpbin;
+        modbin("$dir/bin",\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize) if $cpbin;
     mkdir "$dir/scripts";
         my $cmdfile="$dir/rerun-vest.sh";
         open CMD,'>',$cmdfile;
