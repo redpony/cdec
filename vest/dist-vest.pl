@@ -58,7 +58,7 @@ my $oracleb=20;
 my $dirargs='';
 my $density_prune;
 my $usefork;
-
+my $cpbin=1;
 # Process command-line options
 Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
@@ -165,6 +165,18 @@ my $user = $ENV{"USER"};
 -e $iniFile || die "Error: could not open $iniFile for reading\n";
 open(INI, $iniFile);
 
+#pass bindir, refs to vars holding bin
+sub modbin {
+    local $_;
+    my $bindir=shift;
+    `mkdir -p $bindir`;
+    for (@_) {
+        my $src=$$_;
+        $$_="$bindir/".`basename $src`;
+        `cp $src $$_`;
+        die ""cp $src $$_" failed: $!" unless $? == 0;
+    }
+}
 sub dirsize {
     opendir ISEMPTY,$_[0];
     return scalar(readdir(ISEMPTY))-1;
@@ -178,6 +190,7 @@ if ($dryrun){
 	} else {
 		-e $dir || mkdir $dir;
 		mkdir "$dir/hgs";
+        modbin($bindir,\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize) if $cpbin;
     mkdir "$dir/scripts";
         my $cmdfile="$dir/rerun-vest.sh";
         open CMD,'>',$cmdfile;
