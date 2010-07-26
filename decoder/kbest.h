@@ -91,8 +91,7 @@ namespace KBest {
     }
 
     std::string derivation_tree(Derivation const& d,bool indent=true,int show_mask=Hypergraph::SPAN|Hypergraph::RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
-      EdgeHandle eh(d);
-      return d.edge->derivation_tree(*this,eh,indent,show_mask,maxdepth,depth);
+      return d.edge->derivation_tree(*this,EdgeHandle(&d),indent,show_mask,maxdepth,depth);
     }
 
     struct DerivationUniquenessHash {
