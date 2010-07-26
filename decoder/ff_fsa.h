@@ -4,14 +4,15 @@
 /*
   features whose score is just some PFSA over target string.  however, PFSA can use edge and smeta info (e.g. spans on edge) - not usually useful.
 
+//SEE ALSO: ff_fsa_dynamic.h, ff_from_fsa.h
+
   state is some fixed width byte array.  could actually be a void *, WordID sequence, whatever.
 
   TODO: fsa feature aggregator that presents itself as a single fsa; benefit: when wrapped in ff_from_fsa, only one set of left words is stored.  downside: compared to separate ff, the inside portion of lower-order models is incorporated later.  however, the full heuristic is already available and exact for those words.  so don't sweat it.
 
-  TODO: state (+ possibly span-specific) custom heuristic, e.g. in "longer than previous word" model, you can expect a higher outside if your state is a word of 2 letters.  this is on top of the nice heuristic for the unscored words, of course.  in ngrams, the avg prob will be about the same, but if the words possible for a source span are summarized, maybe it's possible to predict.  probably not worht the time.
+  TODO: state (+ possibly span-specific) custom heuristic, e.g. in "longer than previous word" model, you can expect a higher outside if your state is a word of 2 letters.  this is on top of the nice heuristic for the unscored words, of course.  in ngrams, the avg prob will be about the same, but if the words possible for a source span are summarized, maybe it's possible to predict.  probably not worth the effort.
 */
 
-//SEE ALSO: ff_fsa_dynamic.h, ff_from_fsa.h
 
 //TODO: decide whether to use init_features / add_value vs. summing elsewhere + set_value once (or inefficient for from_fsa: sum distinct feature_vectors.  but L->R if we only scan 1 word at a time, that's fine
 
@@ -48,11 +49,28 @@
 
 typedef ValueArray<uint8_t> Bytes;
 
-// it's not necessary to inherit from this, but you probably should to save yourself some boilerplate.  defaults to no-state
+/*
+usage:
+struct SameFirstLetter : public FsaFeatureFunctionBase<SameFirstLetter> {
+SameFirstLetter(string const& param) : FsaFeatureFunctionBase<SameFirstLetter>(1,singleton_sentence("END")) {  start[0]='a';h_start[0]=0; } // 1 byte of state, scan final (single) symbol "END" to get final state cost
+  int markov_order() const { return 1; }
+  Featval Scan1(WordID w,void const* old_state,void *new_state) const {
+    char cw=TD::Convert(w)[0];
+    char co=*(char const*)old_state;
+    *(char *)new_state = cw;
+    return cw==co?1:0;
+  }
+  void print_state(std::ostream &o,void const* st) const {
+    o<<*(char const*)st;
+  }
+  static std::string usage(bool param,bool verbose) {
+    return FeatureFunction::usage_helper("SameFirstLetter","[no args]","1 each time 2 consecutive words start with the same letter",param,verbose);
+  }
+};
 
-// usage:
-// struct FsaFeat : public FsaTypedBase<int,FsaFeat>
-// i.e. Impl is a CRTP
+// then, to decode, see ff_from_fsa.h
+ */
+
 template <class Impl>
 struct FsaFeatureFunctionBase {
   Impl const& d() const { return static_cast<Impl const&>(*this); }
@@ -66,6 +84,10 @@ protected:
     if (h_start.size()!=sb) h_start.resize(sb);
     state_bytes_=sb;
   }
+  void set_end_phrase(WordID single) {
+    end_phrase_=singleton_sentence(single);
+  }
+
   int fid_; // you can have more than 1 feature of course.
   void Init() { // CALL THIS MANUALLY (because feature name(s) may depend on param
     fid_=FD::Convert(d().name());
@@ -85,6 +107,7 @@ protected:
   inline void static to_state(void *state,T const* begin,T const* end) {
     to_state(state,(char const*)begin,(char const*)end);
   }
+
   inline static char hexdigit(int i) {
     int j=i-10;
     return j>=0?'a'+j:'0'+i;
@@ -95,6 +118,10 @@ protected:
   }
 
 public:
+  void state_cpy(void *to,void const*from) const {
+    std::memcpy(to,from,state_bytes_);
+  }
+
   // can override to different return type, e.g. just return feats:
   Featval describe_features(FeatureVector const& feats) const {
     return feats.get(fid_);
@@ -155,7 +182,14 @@ public:
 
   // NOTE: if you want to e.g. track statistics, cache, whatever, cast const away or use mutable members
   inline void Scan(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,void const* state,void *next_state,FeatureVector *features) const {
-    features->maybe_add(fid_,d().Scan1(w,state,next_state));
+    maybe_add_feat(features,d().Scan1(w,state,next_state));
+  }
+
+  inline void maybe_add_feat(FeatureVector *features,Featval v) const {
+    features->maybe_add(fid_,v);
+  }
+  inline void add_feat(FeatureVector *features,Featval v) const {
+    features->add_value(fid_,v);
   }
 
   // don't set state-bytes etc. in ctor because it may depend on parsing param string

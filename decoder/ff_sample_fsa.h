@@ -27,6 +27,23 @@ struct WordPenaltyFsa : public FsaFeatureFunctionBase<WordPenaltyFsa> {
 
 typedef FeatureFunctionFromFsa<WordPenaltyFsa> WordPenaltyFromFsa;
 
+struct SameFirstLetter : public FsaFeatureFunctionBase<SameFirstLetter> {
+  SameFirstLetter(std::string const& param) : FsaFeatureFunctionBase<SameFirstLetter>(1,singleton_sentence("END")) {  start[0]='a';h_start[0]=0; } // 1 byte of state, scan final (single) symbol "END" to get final state cost
+  int markov_order() const { return 1; }
+  Featval Scan1(WordID w,void const* old_state,void *new_state) const {
+    char cw=TD::Convert(w)[0];
+    char co=*(char const*)old_state;
+    *(char *)new_state = cw;
+    return cw==co?1:0;
+  }
+  void print_state(std::ostream &o,void const* st) const {
+    o<<*(char const*)st;
+  }
+  static std::string usage(bool param,bool verbose) {
+    return FeatureFunction::usage_helper("SameFirstLetter","[no args]","1 each time 2 consecutive words start with the same letter",param,verbose);
+  }
+};
+
 
 // appears to be buggy right now: give it a bonus weight (+)
 struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
