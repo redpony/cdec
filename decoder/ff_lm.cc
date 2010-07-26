@@ -617,13 +617,12 @@ LanguageModelFsa::LanguageModelFsa(string const& param) {
   set_ngram_order(lmorder);
 }
 
-//TODO: use sri equivalent states (expose in lm impl?)
 void LanguageModelFsa::Scan(SentenceMetadata const& /* smeta */,const Hypergraph::Edge& /* edge */,WordID w,void const* old_st,void *new_st,FeatureVector *features) const {
   //variable length array is in C99, msvc++, if it doesn't support it, #ifdef it or use a stackalloc call (forget the name)
   Featval p;
   if (ctxlen_) {
     WordID ctx[ngram_order_];
-    state_cpy(ctx,old_st);
+    state_copy(ctx,old_st);
     ctx[ctxlen_]=TD::none; // make this part of state?  wastes space but saves copies.
     p=pimpl_->WordProb(w,ctx);
 // states are sri contexts so are in reverse order (most recent word is first, then 1-back comes next, etc.).

@@ -2,6 +2,7 @@
 #define _FF_H_
 
 #include <vector>
+#include <cstring>
 #include "fdict.h"
 #include "hg.h"
 
@@ -29,6 +30,7 @@ class FeatureFunction {
   static std::string usage_helper(std::string const& name,std::string const& params,std::string const& details,bool show_params,bool show_details);
   static Features single_feature(int feat);
 public:
+
   // stateless feature that doesn't depend on source span: override and return true.  then your feature can be precomputed over rules.
   virtual bool rule_feature() const { return false; }
 
@@ -81,6 +83,8 @@ public:
   // of the particular FeatureFunction class.  There is one exception:
   // equality of the contents (i.e., memcmp) is required to determine whether
   // two states can be combined.
+
+  // by Log, I mean that the edge is non-const only so you can log to it with INFO_EDGE(edge,msg<<"etc.").  most features don't use this so implement the below.  it has a different name to allow a default implementation without name hiding when inheriting + overriding just 1.
   virtual void TraversalFeaturesLog(const SentenceMetadata& smeta,
                                     Hypergraph::Edge& edge, // this is writable only so you can use log()
                                      const std::vector<const void*>& ant_contexts,
