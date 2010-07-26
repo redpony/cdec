@@ -92,7 +92,9 @@ if output_fname:
 
     # re-sort preds to get a better diagonal
     ptags=[]
-    if False:
+    if True:
+        ptags = map(lambda (p,c): p, preds)
+    else:
         remaining = set(predict_frequencies.keys())
         for y, (gtag, gcount) in enumerate(gtags):
             best = (None, 0)
@@ -103,6 +105,9 @@ if output_fname:
             ptags.append(ptag)
             remaining.remove(ptag)
             if not remaining: break
+
+    print 'Predicted tag ordering:', ' '.join(ptags)
+    print 'Gold tag ordering:', ' '.join(map(lambda (t,c): t, gtags))
     
     draw = ImageDraw.Draw(image)
     for x, ptag in enumerate(ptags):
