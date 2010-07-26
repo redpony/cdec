@@ -76,6 +76,7 @@ if (GetOptions(
 	"max-iterations=i" => \$max_iterations,
 	"normalize=s" => \$normalize,
 	"pmem=s" => \$pmem,
+        "cpbin!" => \$cpbin,
 	"rand-directions=i" => \$rand_directions,
 	"random_directions=i" => \$rand_directions,
         "no-primary!" => \$noprimary,

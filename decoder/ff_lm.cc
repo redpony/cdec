@@ -1,5 +1,8 @@
 #define LM_FSA_SHORTEN_CONTEXT 1
 // seems to work great - just not sure if it actually speeds anything up
+//      virtual LogP contextBOW(const VocabIndex *context, unsigned length);
+				   /* backoff weight for truncating context */
+// does that need to be used?  i think so.
 
 namespace {
 char const* usage_name="LanguageModel";
@@ -244,13 +247,18 @@ class LanguageModelImpl {
     ngram_.contextID((VocabIndex*)context,ret);
     return ret;
   }
+  virtual double ContextBOW(WordID const* context,int shortened_len) {
+    return ngram_.contextBOW((VocabIndex*)context,shortened_len);
+  }
 
-  void ShortenContext(WordID * context,int len) {
+  double ShortenContext(WordID * context,int len) {
     int slen=ContextSize(context,len);
+    double p=ContextBOW(context,slen);
     while (len>slen) {
       --len;
       context[len]=TD::none;
     }
+    return p;
   }
 
   /// NOT a negative logp, i.e. should be worse prob = more negative.  that's what SRI wordProb returns, fortunately.
@@ -469,6 +477,10 @@ struct ClientLMI : public LanguageModelImpl
   virtual int ContextSize(WordID const* const, int len) {
     return len;
   }
+  virtual double ContextBOW(WordID const* context,int shortened_len) {
+    return 0;
+  }
+
 protected:
   LMClient client_;
 };
@@ -484,6 +496,9 @@ struct ReuseLMI : public LanguageModelImpl
     unsigned ret;
     ng->contextID((VocabIndex*)context,ret);
     return ret;
+  }
+  virtual double ContextBOW(WordID const* context,int shortened_len) {
+    return ng->contextBOW((VocabIndex*)context,shortened_len);
   }
 protected:
   Ngram *ng;
