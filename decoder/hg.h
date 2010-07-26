@@ -98,7 +98,7 @@ public:
 
     void copy_info(Edge const& o) {
 #if USE_INFO_EDGE
-      set_info(o.info_.str());
+      set_info(o.info_.str()); // by convention, each person putting info here starts with a separator (e.g. space).  it's empty if nobody put any info there.
 #endif
     }
     void copy_pod(Edge const& o) {
@@ -157,7 +157,7 @@ public:
         o<<rule_->AsString(mask&RULE_LHS);
       if (USE_INFO_EDGE) {
         std::string const& i=info();
-        if (mask&&!i.empty()) o << " ||| "<<i;
+        if (mask&&!i.empty()) o << " |||"<<i; // remember, the initial space is expected as part of i
       }
       o<<'}';
     }

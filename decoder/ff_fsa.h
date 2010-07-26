@@ -6,16 +6,18 @@
 
   state is some fixed width byte array.  could actually be a void *, WordID sequence, whatever.
 
-  TODO: fsa feature aggregator that presents itself as a single fsa; benefit: when wrapped in ff_from_fsa, only one set of left words is stored.
+  TODO: fsa feature aggregator that presents itself as a single fsa; benefit: when wrapped in ff_from_fsa, only one set of left words is stored.  downside: compared to separate ff, the inside portion of lower-order models is incorporated later.  however, the full heuristic is already available and exact for those words.  so don't sweat it.
+
+  TODO: state (+ possibly span-specific) custom heuristic, e.g. in "longer than previous word" model, you can expect a higher outside if your state is a word of 2 letters.  this is on top of the nice heuristic for the unscored words, of course.  in ngrams, the avg prob will be about the same, but if the words possible for a source span are summarized, maybe it's possible to predict.  probably not worht the time.
 */
 
 //SEE ALSO: ff_fsa_dynamic.h, ff_from_fsa.h
 
 //TODO: decide whether to use init_features / add_value vs. summing elsewhere + set_value once (or inefficient for from_fsa: sum distinct feature_vectors.  but L->R if we only scan 1 word at a time, that's fine
 
-//#define FSA_DEBUG
+#define FSA_DEBUG 0
 
-#ifdef USE_INFO_EDGE
+#if USE_INFO_EDGE
 #define FSA_DEBUG_CERR 0
 #else
 #define FSA_DEBUG_CERR 1
@@ -24,7 +26,7 @@
 #define FSA_DEBUG_DEBUG 0
 # define FSADBGif(i,e,x) do { if (i) { if (FSA_DEBUG_CERR){std::cerr<<x;}  INFO_EDGE(e,x); if (FSA_DEBUG_DEBUG){std::cerr<<"FSADBGif edge.info "<<&e<<" = "<<e.info()<<std::endl;}} } while(0)
 # define FSADBGif_nl(i,e) do { if (i) { if (FSA_DEBUG_CERR) std::cerr<<std::endl; INFO_EDGE(e,"; "); } } while(0)
-#ifdef FSA_DEBUG
+#if FSA_DEBUG
 # include <iostream>
 # define FSADBG(e,x) FSADBGif(d().debug(),e,x)
 # define FSADBGnl(e) FSADBGif_nl(d().debug(),e,x)
@@ -93,6 +95,11 @@ protected:
   }
 
 public:
+  // can override to different return type, e.g. just return feats:
+  Featval describe_features(FeatureVector const& feats) const {
+    return feats.get(fid_);
+  }
+
   bool debug() const { return true; }
   int fid() const { return fid_; } // return the one most important feature (for debugging)
   std::string name() const {
@@ -240,6 +247,8 @@ protected:
       Base::start.resize(sizeof(State));
       Base::h_start.resize(sizeof(State));
     }
+    assert(Base::start.size()==sizeof(State));
+    assert(Base::h_start.size()==sizeof(State));
     state(Base::start.begin())=s;
     state(Base::h_start.begin())=heuristic_s;
   }
@@ -254,28 +263,24 @@ public:
     o<<state(st);
   }
   int markov_order() const { return 1; }
-  Featval ScanT1(WordID w,int prevlen,int &len) const { return 0; }
-  inline void ScanT(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,int prevlen,int &len,FeatureVector *features) const {
-    features->maybe_add(d().fid_,d().ScanT1(w,prevlen,len));
+  Featval ScanT1(WordID w,St const&,St &) const { return 0; }
+  inline void ScanT(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,St const& prev_st,St &new_st,FeatureVector *features) const {
+    features->maybe_add(d().fid_,d().ScanT1(w,prev_st,new_st));
   }
-
   inline void Scan(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,void const* st,void *next_state,FeatureVector *features) const {
     Impl const& im=d();
-    FSADBG(edge,"Scan "<<FD::Convert(im.fid_)<<" = "<<(*features)[im.fid_]<<" "<<im.state(st)<<" ->"<<TD::Convert(w)<<" ");
-    im.ScanT(smeta,edge,w,im.state(st),im.state(next_state),features);
-    FSADBG(edge,im.state(next_state)<<" = "<<(*features)[im.fid_]);
+    FSADBG(edge,"Scan "<<FD::Convert(im.fid_)<<" = "<<im.describe_features(*features)<<" "<<im.state(st)<<"->"<<TD::Convert(w)<<" ");
+    im.ScanT(smeta,edge,w,state(st),state(next_state),features);
+    FSADBG(edge,state(next_state)<<" = "<<im.describe_features(*features));
     FSADBGnl(edge);
   }
 
 };
 
 
-
-
-
-// do not use if state size is 0, please.
 const bool optimize_FsaScanner_zerostate=false;
 
+// do not use if state size is 0.  should crash (maybe won't if you set optimize_FsaScanner_zerostate true)
 template <class FF>
 struct FsaScanner {
 //  enum {ALIGN=8};
