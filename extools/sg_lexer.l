@@ -241,7 +241,7 @@ ALIGN [0-9]+-[0-9]+
 		}
 <FEATVAL>{REAL}	{
 		// std::cerr << "Feature val input: " << yytext << std::endl;
-		cur_stats->counts.set_value(sglex_cur_fid, strtod(yytext, NULL));
+		cur_stats->counts[sglex_cur_fid] += strtod(yytext, NULL);
 		BEGIN(FEATS);
 		}
 <FEATVAL>.	{
