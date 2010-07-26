@@ -9,11 +9,12 @@
 #include "ff_ruleshape.h"
 #include "ff_bleu.h"
 #include "ff_sample_fsa.h"
-
+#include "ff_lm_fsa.h"
 boost::shared_ptr<FFRegistry> global_ff_registry;
 
 void register_feature_functions() {
   global_ff_registry->Register(new FFFactory<LanguageModel>);
+  global_ff_registry->Register(new FFFactory<FeatureFunctionFromFsa<LanguageModelFsa> >); // same as LM but using fsa wrapper
   global_ff_registry->Register(new FFFactory<WordPenaltyFromFsa>); // same as WordPenalty, but implemented using ff_fsa
   global_ff_registry->Register(new FFFactory<FeatureFunctionFromFsa<LongerThanPrev> >);
   global_ff_registry->Register(new FFFactory<FeatureFunctionFromFsa<ShorterThanPrev> >);
