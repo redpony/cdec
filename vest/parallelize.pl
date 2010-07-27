@@ -238,7 +238,7 @@ my $script = "";
 # fork == one thread runs the sentserver, while the
 # other spawns the sentclient commands.
 if (my $pid = fork) {
-  sleep 4; # give other thread time to start sentserver
+  sleep 8; # give other thread time to start sentserver
   $script =
       qq{wait
 $cdcmd$sentclient $host:$port:$key $cmd
