@@ -39,6 +39,7 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
     //post: [left,e] are the seen left words
     return e;
   }
+
   template <class Accum>
   void ScanPhraseAccum(SentenceMetadata const& /* smeta */,const Hypergraph::Edge&edge,WordID const* begin,WordID const* end,void const* old_st,void *new_st,Accum *a) const {
     if (begin==end) return; // otherwise w/ shortening it's possible to end up with no words at all.
@@ -73,6 +74,7 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
     FSALMDBGnl(edge);
     Add(p,a);
   }
+
   template <class Accum>
   void ScanAccum(SentenceMetadata const& /* smeta */,const Hypergraph::Edge& /* edge */,WordID w,void const* old_st,void *new_st,Accum *a) const {
     if (!ctxlen_) {
