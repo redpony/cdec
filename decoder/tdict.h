@@ -31,6 +31,7 @@ struct TD {
   static void ConvertSentence(std::string const& sent, std::vector<WordID>* ids);
   static void GetWordIDs(const std::vector<std::string>& strings, std::vector<WordID>* ids);
   static std::string GetString(const std::vector<WordID>& str);
+  static std::string GetString(WordID const* i,WordID const* e);
   static int AppendString(const WordID& w, int pos, int bufsize, char* buffer);
   static unsigned int NumWords();
   static WordID Convert(const std::string& s);

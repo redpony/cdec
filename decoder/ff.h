@@ -18,7 +18,8 @@ typedef std::vector<WordID> Features; // set of features ids
 class FeatureFunction {
  public:
   std::string name; // set by FF factory using usage()
-  bool debug; // also set by FF factory checking param for immediate initial "debug"
+  bool debug_; // also set by FF factory checking param for immediate initial "debug"
+  bool debug() const { return debug_; }
   FeatureFunction() : state_size_() {}
   explicit FeatureFunction(int state_size) : state_size_(state_size) {}
   virtual ~FeatureFunction();

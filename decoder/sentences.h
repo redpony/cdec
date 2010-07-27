@@ -29,7 +29,10 @@ inline void wordcpy(WordID *dest,WordID const* src,int n) {
 inline void wordcpy(WordID *dest,WordID const* src,WordID const* src_end) {
   wordcpy(dest,src,src_end-src);
 }
-
+inline void wordcpy_reverse(WordID *dest,WordID const* src,WordID const* src_end) {
+  for(WordID const* i=src_end;i>src;)
+    *dest++=*--i;
+}
 inline Sentence singleton_sentence(WordID t) {
   return Sentence(1,t);
 }

@@ -8,14 +8,20 @@
 
   state is some fixed width byte array.  could actually be a void *, WordID sequence, whatever.
 
+  TODO: there are a confusing array of default-implemented supposedly slightly more efficient overrides enabled; however, the two key differences are: do you score a phrase, or just word at a time (the latter constraining you to obey markov_order() everywhere.
+
+  TODO: considerable simplification of implementation if Scan implementors are required to update state in place (using temporary copy if they need it), or e.g. using memmove (copy from end to beginning) to rotate state right.
+
+  TODO: at what sizes is memcpy/memmove better than looping over 2-3 ints and assigning?
+
   TODO: fsa ff scores phrases not just words
   TODO: fsa feature aggregator that presents itself as a single fsa; benefit: when wrapped in ff_from_fsa, only one set of left words is stored.  downside: compared to separate ff, the inside portion of lower-order models is incorporated later.  however, the full heuristic is already available and exact for those words.  so don't sweat it.
 
   TODO: state (+ possibly span-specific) custom heuristic, e.g. in "longer than previous word" model, you can expect a higher outside if your state is a word of 2 letters.  this is on top of the nice heuristic for the unscored words, of course.  in ngrams, the avg prob will be about the same, but if the words possible for a source span are summarized, maybe it's possible to predict.  probably not worth the effort.
 */
 
-
-//TODO: decide whether to use init_features / add_value vs. summing elsewhere + set_value once (or inefficient for from_fsa: sum distinct feature_vectors.  but L->R if we only scan 1 word at a time, that's fine
+#define FSA_SCORE_PHRASE 1
+// if true, special effort is made to give entire phrases to fsa models so they can understate their true markov_order but sometimes have more specific probs.
 
 #define FSA_DEBUG 0
 
@@ -47,29 +53,15 @@
 #include "tdict.h"
 #include "hg.h"
 #include "sentences.h"
+#include "feature_accum.h"
 
 typedef ValueArray<uint8_t> Bytes;
 
 /*
-usage:
-struct SameFirstLetter : public FsaFeatureFunctionBase<SameFirstLetter> {
-SameFirstLetter(string const& param) : FsaFeatureFunctionBase<SameFirstLetter>(1,singleton_sentence("END")) {  start[0]='a';h_start[0]=0; } // 1 byte of state, scan final (single) symbol "END" to get final state cost
-  int markov_order() const { return 1; }
-  Featval Scan1(WordID w,void const* old_state,void *new_state) const {
-    char cw=TD::Convert(w)[0];
-    char co=*(char const*)old_state;
-    *(char *)new_state = cw;
-    return cw==co?1:0;
-  }
-  void print_state(std::ostream &o,void const* st) const {
-    o<<*(char const*)st;
-  }
-  static std::string usage(bool param,bool verbose) {
-    return FeatureFunction::usage_helper("SameFirstLetter","[no args]","1 each time 2 consecutive words start with the same letter",param,verbose);
-  }
-};
+usage: see ff_sample_fsa.h or ff_lm_fsa.h
 
-// then, to decode, see ff_from_fsa.h
+ then, to decode, see ff_from_fsa.h (or TODO: left->right target-earley style rescoring)
+
  */
 
 template <class Impl>
@@ -77,21 +69,26 @@ struct FsaFeatureFunctionBase {
   Impl const& d() const { return static_cast<Impl const&>(*this); }
   Impl & d()  { return static_cast<Impl &>(*this); }
 protected:
-  int state_bytes_; // don't forget to set this. default 0 (it may depend on params of course)
+  int ssz; // don't forget to set this. default 0 (it may depend on params of course)
   Bytes start,h_start; // start state and estimated-features (heuristic) start state.  set these.  default empty.
   Sentence end_phrase_; // words appended for final traversal (final state cost is assessed using Scan) e.g. "</s>" for lm.
   void set_state_bytes(int sb=0) {
     if (start.size()!=sb) start.resize(sb);
     if (h_start.size()!=sb) h_start.resize(sb);
-    state_bytes_=sb;
+    ssz=sb;
   }
   void set_end_phrase(WordID single) {
     end_phrase_=singleton_sentence(single);
   }
 
-  int fid_; // you can have more than 1 feature of course.
-  void Init() { // CALL THIS MANUALLY (because feature name(s) may depend on param
-    fid_=FD::Convert(d().name());
+  // CALL 1 of these MANUALLY  (because feature name(s) may depend on param, it's not done in ctor)
+  void InitFidNamed(std::string const& fname="") {
+    fid_=FD::Convert(name.empty()?name():fname);
+    Init();
+  }
+  Features features_;
+  void Init() {
+    features_=FeatureFunction::single_feature(fid_);
   }
 
   inline void static to_state(void *state,char const* begin,char const* end) {
@@ -119,11 +116,14 @@ protected:
   }
 
 public:
+  int fid_; // you can have more than 1 feature of course.
+
   void state_copy(void *to,void const*from) const {
-    std::memcpy(to,from,state_bytes_);
+    if (ssz)
+      std::memcpy(to,from,ssz);
   }
   void state_zero(void *st) const { // you should call this if you don't know the state yet and want it to be hashed/compared properly
-    std::memset(st,0,state_bytes_);
+    std::memset(st,0,ssz);
   }
 
   // can override to different return type, e.g. just return feats:
@@ -139,7 +139,7 @@ public:
 
   void print_state(std::ostream &o,void const*state) const {
     char const* i=(char const*)state;
-    char const* e=i+state_bytes_;
+    char const* e=i+ssz;
     for (;i!=e;++i)
       print_hex_byte(o,*i);
   }
@@ -149,26 +149,26 @@ public:
     d().print_state(o,state);
     return o.str();
   }
+  typedef SingleFeatureAccumulator Accum;
 
-  //edges may have old features on them.  override if you have more than 1 fid.  we need to call this explicitly because edges may have old feature values already, and I chose to use add_value (+=) to simplify scanning a phrase, rather than set_value (=) for fsa ffs.  could revisit this and use set_value and therefore sum
-  void init_features(FeatureVector *fv) const {
-    fv->set_value(fid_,0);
-    //erase(fid_)
-  }
   // return m: all strings x with the same final m+1 letters must end in this state
   /* markov chain of order m: P(xn|xn-1...x1)=P(xn|xn-1...xn-m) */
   int markov_order() const { return 0; } // override if you use state.  order 0 implies state_bytes()==0 as well, as far as scoring/splitting is concerned (you can still track state, though)
   //TODO: if we wanted, we could mark certain states as maximal-context, but this would lose our fixed amount of left context in ff_from_fsa, and lose also our vector operations (have to scan left words 1 at a time, checking always to see where you change from h to inside - BUT, could detect equivalent LM states, which would be nice).
 
-  Features features() const { // override this if >1 fid
-    return FeatureFunction::single_feature(fid_);
+  Features features() const {
+    return features_;
+  }
+
+  int n_features() const {
+    return features_.size();
   }
 
   // override this (static)
   static std::string usage(bool param,bool verbose) {
     return FeatureFunction::usage_helper("unnamed_fsa_feature","","",param,verbose);
   }
-  int state_bytes() const { return state_bytes_; } // or override this
+  int state_bytes() const { return ssz; } // or override this
   void const* start_state() const {
     return start.begin();
   }
@@ -176,92 +176,134 @@ public:
     return h_start.begin();
   }
   Sentence const& end_phrase() const { return end_phrase_; }
-  // move from state to next_state after seeing word x, while emitting features->add_value(fid,val) possibly with duplicates.  state and next_state will never be the same memory.
+  // move from state to next_state after seeing word x, while emitting features->set_value(fid,val) possibly with duplicates.  state and next_state will never be the same memory.
   //TODO: decide if we want to require you to support dest same as src, since that's how we use it most often in ff_from_fsa bottom-up wrapper (in l->r scoring, however, distinct copies will be the rule), and it probably wouldn't be too hard for most people to support.  however, it's good to hide the complexity here, once (see overly clever FsaScan loop that swaps src/dest addresses repeatedly to scan a sequence by effectively swapping)
 
-  // different name because of inheritance method hiding; simple/common case; 1 fid
+protected:
+  // overrides have different name because of inheritance method hiding;
+
+  // simple/common case; 1 fid.  these need not be overriden if you have multiple feature ids
   Featval Scan1(WordID w,void const* state,void *next_state) const {
+    assert(0);
     return 0;
   }
+  Featval Scan1Meta(SentenceMetadata const& /* smeta */,const Hypergraph::Edge& /* edge */,
+                    WordID w,void const* state,void *next_state) const {
+    return d().Scan1(w,state,next_state);
+  }
+public:
+  template <class T>
+  static inline T* state_as(void *p) { return (T*)p; }
+  template <class T>
+  static inline T const* state_as(void const* p) { return (T*)p; }
 
-  // NOTE: if you want to e.g. track statistics, cache, whatever, cast const away or use mutable members
-  inline void Scan(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,void const* state,void *next_state,FeatureVector *features) const {
-    maybe_add_feat(features,d().Scan1(w,state,next_state));
+  // must override this or Scan1Meta or Scan1
+  template <class Accum>
+  inline void ScanAccum(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,
+                        WordID w,void const* state,void *next_state,Accum *a) const {
+    Add(d().Scan1Meta(smeta,edge,smeta,edge,w,state,next_state),a);
   }
 
-  inline void maybe_add_feat(FeatureVector *features,Featval v) const {
-    features->maybe_add(fid_,v);
+  // bounce back and forth between two state vars starting at cs, returning end state location.  if we required src=dest addr safe state updating, this concept wouldn't need to exist.
+  // recommend you override this if you score phrases differently than word-by-word.
+  template <class Accum>
+  void *ScanPhraseAccumBounce(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID const* i, WordID const* end,void *cs,void *ns,Accum *accum) const {
+    // extra code - IT'S FOR EFFICIENCY, MAN!  IT'S OK!  definitely no bugs here.
+    if (!ssz) {
+      for (;i<end;++i)
+        ScanAccum(smeta,edge,*i,0,0,accum);
+      return 0;
+    }
+    void *os,*es;
+    if ((end-i)&1) { // odd # of words
+      os=cs;
+      es=ns;
+      goto odd;
+    } else {
+      i+=1;
+      es=cs;
+      os=ns;
+    }
+    for (;i<end;i+=2) {
+      d().ScanAccum(smeta,edge,i[-1],es,os,accum); // e->o
+    odd:
+      d().ScanAccum(smeta,edge,i[0],os,es,accum); // o->e
+    }
+    return es;
   }
-  inline void add_feat(FeatureVector *features,Featval v) const {
-    features->add_value(fid_,v);
+
+
+
+  // override this (and SCAN_PHRASE_ACCUM_OVERRIDE  ) if you want e.g. maximum possible order ngram scores with markov_order < n-1.  in the future SparseFeatureAccumulator will probably be the only option for type-erased FSA ffs.  you will be adding to accum, not setting
+  template <class Accum>
+  inline void ScanPhraseAccum(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,
+                              WordID const* i, WordID const* end,void const* state,void *next_state,Accum *accum) const {
+    if (!ssz) {
+      for (;i<end;++i)
+        d().ScanAccum(smeta,edge,*i,0,0,accum);
+      return;
+    }
+    char tstate[ssz];
+    void *tst=tstate;
+    bool odd=(end-i)&1;
+    void *cs,*ns;
+    if (odd) {
+      cs=tst;
+      ns=next_state;
+    } else {
+      cs=next_state;
+      ns=tst;
+    }
+    state_copy(cs,state);
+    void *est=d().ScanPhraseAccumBounce(smeta,edge,i,end,cs,ns,accum);
+    assert(est==next_state);
+  }
+
+  // could replace this with a CRTP subclass providing these impls.
+#define SCAN_PHRASE_ACCUM_OVERRIDE \
+  template <class Accum> \
+  void *ScanPhraseAccumBounce(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID const* i, WordID const* end,void *cs,void *ns,Accum *accum) const { \
+    ScanPhraseAccum(smeta,edge,i,end,cs,ns,accum); \
+    return ns; \
+  } \
+  template <class Accum> \
+  inline void ScanPhraseAccumOnly(SentenceMetadata const& smeta,const Hypergraph::Edge& edge, \
+                              WordID const* i, WordID const* end,void const* state,Accum *accum) const { \
+    char s2[ssz]; ScanPhraseAccum(smeta,edge,i,end,state,(void*)s2,accum);                \
+  }
+
+  // override this or bounce along with above.  note: you can just call ScanPhraseAccum
+  // doesn't set state (for heuristic in ff_from_fsa)
+  template <class Accum>
+  inline void ScanPhraseAccumOnly(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,
+                              WordID const* i, WordID const* end,void const* state,Accum *accum) const {
+    char s1[ssz];
+    char s2[ssz];
+    state_copy(s1,state);
+    d().ScanPhraseAccumBounce(smeta,edge,i,end,(void*)s1,(void*)s2,accum);
+  }
+
+  template <class Accum>
+  inline void Add(Featval v,Accum *a) const { // for single-feat only
+    a->Add(v);
+  }
+
+  inline void set_feat(FeatureVector *features,Featval v) const {
+    features->set_value(fid_,v);
   }
 
   // don't set state-bytes etc. in ctor because it may depend on parsing param string
-  FsaFeatureFunctionBase(int statesz=0,Sentence const& end_sentence_phrase=Sentence()) : state_bytes_(statesz),start(statesz),h_start(statesz),end_phrase_(end_sentence_phrase) {}
+  FsaFeatureFunctionBase(int statesz=0,Sentence const& end_sentence_phrase=Sentence()) : ssz(statesz),start(statesz),h_start(statesz),end_phrase_(end_sentence_phrase) {}
 
 };
 
-// init state is in cs; overwrite cs, ns repeatedly (alternatively).  return resulting state
-template <class FsaFF>
-void *FsaScan(FsaFF const& ff,SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID const* i, WordID const* end,FeatureVector *features, void *cs,void *ns) {
-  // extra code - IT'S FOR EFFICIENCY, MAN!  IT'S OK!  definitely no bugs here.
-  void *os,*es;
-  if ((end-i)&1) { // odd # of words
-    os=cs;
-    es=ns;
-    goto odd;
-  } else {
-    i+=1;
-    es=cs;
-    os=ns;
-  }
-  for (;i<end;i+=2) {
-    ff.Scan(smeta,edge,i[-1],es,os,features); // e->o
-  odd:
-    ff.Scan(smeta,edge,i[0],os,es,features); // o->e
-  }
-  return es;
-}
-
-// if you have a more efficient implementation for scanning a phrase than one word at a time (e.g. LM context using sliding window buffer rather than rotating through a fixed state size), you can override this
-template <class FsaFF>
-void Scan(FsaFF const& ff,SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID const* i,WordID const* e,void const* state,void *next_state,FeatureVector *features) {
-  int ssz=ff.state_bytes();
-  if (!ssz) {
-    for (;i<e;++i)
-      ff.Scan(smeta,edge,*i,0,0,features);
-    return;
-  }
-  Bytes tstate(ssz);
-  void *tst=tstate.begin();
-  bool odd=(e-i)&1;
-  void *cs,*ns;
-  if (odd) {
-    cs=tst;
-    ns=next_state;
-  } else {
-    cs=next_state;
-    ns=tst;
-  }
-  std::memcpy(cs,state,ssz);
-  void *est=FsaScan(ff,smeta,edge,i,end,features,cs,ns);
-  assert(est==next_state);
-}
+template <class Impl>
+struct MultipleFeatureFsa : public FsaFeatureFunctionBase<Impl> {
+  typedef SparseFeatureAccumulator Accum;
+};
 
 
-// like above Scan, but don't bother storing final state (for FinalTraversalFeatures)
-template <class FF>
-void AccumFeatures(FF const& ff,SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID const* i, WordID const* end,FeatureVector *h_features,void const* start_state) {
-  int ssz=ff.state_bytes();
-  if (ssz) {
-    Bytes state(ssz),state2(ssz);
-    void *cs=state.begin(),*ns=state2.begin();
-    memcpy(cs,start_state,ff.state_bytes());
-    FsaScan(ff,smeta,edge,i,end,h_features,cs,ns);
-  } else
-    for (;i<end;++i)
-      ff.Scan(smeta,edge,*i,0,0,h_features);
-}
+
 
 // if State is pod.  sets state size and allocs start, h_start
 // usage:
@@ -316,9 +358,7 @@ public:
 };
 
 
-const bool optimize_FsaScanner_zerostate=false;
-
-// do not use if state size is 0.  should crash (maybe won't if you set optimize_FsaScanner_zerostate true)
+// keep a "current state" (bouncing back and forth)
 template <class FF>
 struct FsaScanner {
 //  enum {ALIGN=8};
@@ -347,28 +387,16 @@ struct FsaScanner {
     cs=st0;
     std::memcpy(st0,state,ssz);
   }
-  void scan(WordID w,FeatureVector *feat) {
-    if (optimize_FsaScanner_zerostate && !ssz) {
-      ff.Scan(smeta,edge,w,0,0,feat);
-      return;
-    }
+  template <class Accum>
+  void scan(WordID w,Accum *a) {
     void *ns=nexts();
-    ff.Scan(smeta,edge,w,cs,ns,feat);
+    ff.ScanAccum(smeta,edge,w,cs,ns,a);
     cs=ns;
   }
-
-  void scan(WordID const* i,WordID const* end,FeatureVector *feat) {
-#if 1
-    // faster.
-    if (optimize_FsaScanner_zerostate && !ssz)
-      for (;i<end;++i)
-        ff.Scan(smeta,edge,*i,0,0,feat);
-    else
-      cs=FsaScan(ff,smeta,edge,i,end,feat,cs,nexts());
-#else
-    for (;i<end;++i)
-      scan(*i,feat);
-#endif
+  template <class Accum>
+  void scan(WordID const* i,WordID const* end,Accum *a) {
+    // faster. and allows greater-order excursions
+    cs=ff.ScanPhraseAccumBounce(smeta,edge,i,end,cs,nexts(),a);
   }
 };
 

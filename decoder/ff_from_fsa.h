@@ -5,8 +5,8 @@
 
 #define FSA_FF_DEBUG 0
 #if FSA_FF_DEBUG
-# define FSAFFDBG(e,x) FSADBGif(debug,e,x)
-# define FSAFFDBGnl(e) FSADBGif_nl(debug,e)
+# define FSAFFDBG(e,x) FSADBGif(debug(),e,x)
+# define FSAFFDBGnl(e) FSADBGif_nl(debug(),e)
 #else
 # define FSAFFDBG(e,x)
 # define FSAFFDBGnl(e)
@@ -30,7 +30,7 @@ class FeatureFunctionFromFsa : public FeatureFunction {
   typedef WordID const* WP;
 public:
   FeatureFunctionFromFsa(std::string const& param) : ff(param) {
-    debug=true; // because factory won't set until after we construct.
+    debug_=true; // because factory won't set until after we construct.
     Init();
   }
 
@@ -48,18 +48,27 @@ public:
                              FeatureVector* estimated_features,
                              void* out_state) const
   {
-    ff.init_features(features); // estimated_features is fresh
+    TRule const& rule=*edge.rule_;
+    Sentence const& e = rule.e();
+    typename Impl::Accum accum,h_accum;
     if (!ssz) {
-      TRule const& rule=*edge.rule_;
-      Sentence const& e = rule.e();
-      for (int j = 0; j < e.size(); ++j) { // items in target side of rule
-        if (e[j] < 1) { // variable
-        } else {
+      Sentence phrase;
+      phrase.reserve(e.size());
+      for (int j=0,je=e.size();;++j) { // items in target side of rule
+        if (je==j || e[j]<1) { // end or variable
+          if (phrase.size()) {
+            FSAFFDBG(edge," ["<<TD::GetString(phrase)<<']');
+            ff.ScanPhraseAccum(smeta,edge,begin(phrase),end(phrase),0,0,&accum);
+          }
+          if (je==j)
+            break;
+          phrase.clear();
+        } else { // word
           WordID ew=e[j];
-          FSAFFDBG(edge,' '<<TD::Convert(ew));
-          ff.Scan(smeta,edge,ew,0,0,features);
+          phrase.push_back(ew);
         }
       }
+      accum.Store(ff,features);
       FSAFFDBGnl(edge);
       return;
     }
@@ -70,8 +79,6 @@ public:
     W left_out=left_begin; // [left,fsa_state) = left ctx words.  if left words aren't full, then null wordid
     WP left_full=left_end_full(out_state);
     FsaScanner<Impl> fsa(ff,smeta,edge); // this holds our current state and eventuallybecomes our right state if we saw enough words
-    TRule const& rule=*edge.rule_;
-    Sentence const& e = rule.e();
     for (int j = 0; j < e.size(); ++j) { // items in target side of rule
       if (e[j] < 1) { // variable
         SP a = ant_contexts[-e[j]]; // variables a* are referring to this child derivation state.
@@ -91,11 +98,11 @@ public:
           left_out=(W)left_full;
           // heuristic known now
           fsa.reset(h_start);
-          fsa.scan(left_begin,left_full,estimated_features); // save heuristic (happens once only)
-          fsa.scan(al+ntofill,ale,features); // because of markov order, fully filled left words scored starting at h_start put us in the right state to score the extra words (which are forgotten)
+          fsa.scan(left_begin,left_full,&h_accum); // save heuristic (happens once only)
+          fsa.scan(al+ntofill,ale,&accum); // because of markov order, fully filled left words scored starting at h_start put us in the right state to score the extra words (which are forgotten)
           al+=ntofill; // we used up the first ntofill words of al to end up in some known state via exactly M words total (M-ntofill were there beforehand).  now we can scan the remaining al words of this child
         } else { // more to score / state to update (left already full)
-          fsa.scan(al,ale,features);
+          fsa.scan(al,ale,&accum);
         }
         if (anw==M) // child had full state already
           fsa.reset(fsa_state(a));
@@ -108,22 +115,24 @@ public:
           *left_out++=ew;
           if (left_out==left_full) { // handle heuristic, once only, establish state
             fsa.reset(h_start);
-            fsa.scan(left_begin,left_full,estimated_features); // save heuristic (happens only once)
+            fsa.scan(left_begin,left_full,&h_accum); // save heuristic (happens only once)
           }
         } else
-          fsa.scan(ew,features);
+          fsa.scan(ew,&accum);
       }
     }
 
     void *out_fsa_state=fsa_state(out_state);
     if (left_out<left_full) { // finally: partial heuristic for unfilled items
-      fsa.reset(h_start);
-      fsa.scan(left_begin,left_out,estimated_features);
+//      fsa.reset(h_start);      fsa.scan(left_begin,left_out,&h_accum);
+      ff.ScanPhraseAccumOnly(smeta,edge,left_begin,left_out,h_start,&h_accum);
       do { *left_out++=TD::none; } while(left_out<left_full); // none-terminate so left_end(out_state) will know how many words
       ff.state_zero(out_fsa_state); // so we compare / hash correctly. don't know state yet because left context isn't full
     } else // or else store final right-state.  heuristic was already assigned
       ff.state_copy(out_fsa_state,fsa.cs);
-    FSAFFDBG(edge," = " << describe_state(out_state)<<" "<<name<<"="<<ff.describe_features(*features)<<" h="<<ff.describe_features(*estimated_features)<<")");
+    accum.Store(ff,features);
+    h_accum.Store(ff,estimated_features);
+    FSAFFDBG(edge," = " << describe_state(out_state)<<" "<<name<<"="<<accum.describe(ff)<<" h="<<h_accum.describe(ff)<<")");
     FSAFFDBGnl(edge);
   }
 
@@ -149,34 +158,35 @@ public:
                                       const void* residual_state,
                                       FeatureVector* final_features) const
   {
-    ff.init_features(final_features);
     Sentence const& ends=ff.end_phrase();
+    typename Impl::Accum accum;
     if (!ssz) {
-      AccumFeatures(ff,smeta,edge,begin(ends),end(ends),final_features,0);
-      return;
+      FSAFFDBG(edge," (final,0state,end="<<ends<<")");
+      ff.ScanPhraseAccumOnly(smeta,edge,begin(ends),end(ends),0,&accum);
+    } else {
+      SP ss=ff.start_state();
+      WP l=(WP)residual_state,lend=left_end(residual_state);
+      SP rst=fsa_state(residual_state);
+      FSAFFDBG(edge," (final");// "<<name);//<< " before="<<*final_features);
+      if (lend==rst) { // implying we have an fsa state
+        ff.ScanPhraseAccumOnly(smeta,edge,l,lend,ss,&accum); // e.g. <s> score(full left unscored phrase)
+        FSAFFDBG(edge," start="<<ff.describe_state(ss)<<"->{"<<Sentence(l,lend)<<"}");
+        ff.ScanPhraseAccumOnly(smeta,edge,begin(ends),end(ends),rst,&accum); // e.g. [ctx for last M words] score("</s>")
+        FSAFFDBG(edge," end="<<ff.describe_state(rst)<<"->{"<<ends<<"}");
+      } else { // all we have is a single short phrase < M words before adding ends
+        int nl=lend-l;
+        Sentence whole(ends.size()+nl);
+        WordID *wb=begin(whole);
+        wordcpy(wb,l,nl);
+        wordcpy(wb+nl,begin(ends),ends.size());
+        FSAFFDBG(edge," whole={"<<whole<<"}");
+        // whole = left-words + end-phrase
+        ff.ScanPhraseAccumOnly(smeta,edge,wb,end(whole),ss,&accum);
+      }
     }
-    SP ss=ff.start_state();
-    WP l=(WP)residual_state,lend=left_end(residual_state);
-    SP rst=fsa_state(residual_state);
-    FSAFFDBG(edge," (final");// "<<name);//<< " before="<<*final_features);
-
-    if (lend==rst) { // implying we have an fsa state
-      AccumFeatures(ff,smeta,edge,l,lend,final_features,ss); // e.g. <s> score(full left unscored phrase)
-      FSAFFDBG(edge," start="<<ff.describe_state(ss)<<"->{"<<Sentence(l,lend)<<"}");
-      AccumFeatures(ff,smeta,edge,begin(ends),end(ends),final_features,rst); // e.g. [ctx for last M words] score("</s>")
-      FSAFFDBG(edge," end="<<ff.describe_state(rst)<<"->{"<<ends<<"}");
-    } else { // all we have is a single short phrase < M words before adding ends
-      int nl=lend-l;
-      Sentence whole(ends.size()+nl);
-      WordID *w=begin(whole);
-      wordcpy(w,l,nl);
-      wordcpy(w+nl,begin(ends),ends.size());
-      FSAFFDBG(edge," whole={"<<whole<<"}");
-      // whole = left-words + end-phrase
-      AccumFeatures(ff,smeta,edge,w,end(whole),final_features,ss);
-    }
-    FSAFFDBG(edge,' '<<name<<"="<<ff.describe_features(*final_features));
+    FSAFFDBG(edge,' '<<name<<"="<<accum.describe(ff));
     FSAFFDBGnl(edge);
+    accum.Store(ff,final_features);
   }
 
   bool rule_feature() const {

@@ -85,6 +85,17 @@ std::string TD::GetString(const std::vector<WordID>& str) {
   return o.str();
 }
 
+std::string TD::GetString(WordID const* i,WordID const* e) {
+  ostringstream o;
+  bool sp=false;
+  for (;i<e;++i,sp=true) {
+    if (sp)
+      o << ' ';
+    o << TD::Convert(*i);
+  }
+  return o.str();
+}
+
 int TD::AppendString(const WordID& w, int pos, int bufsize, char* buffer)
 {
   const char* word = TD::Convert(w);

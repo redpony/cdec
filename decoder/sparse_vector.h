@@ -60,6 +60,11 @@ class SparseVector {
     SPARSE_VECTOR_MAP_RESERVED(values_,-1,-2);
   }
 public:
+  T const& get_singleton() const {
+    assert(values_.size()==1);
+    return values_.begin()->second;
+  }
+
   typedef SparseVector<T> Self;
   typedef SPARSE_VECTOR_MAP<int, T> MapType;
   typedef typename MapType::const_iterator const_iterator;
@@ -113,7 +118,7 @@ public:
     return values_[index];
   }
 
-  void set_value(int index, const T &value) {
+  inline void set_value(int index, const T &value) {
     values_[index] = value;
   }
 
@@ -234,6 +239,15 @@ public:
 /*    typename MapType::iterator found = values_.find(key);
     if (found!=values_end())
     values_.erase(found);*/
+  }
+
+  template <class T2>
+  void set_from(SparseVector<T2> const& other) {
+    for (typename MapType::const_iterator
+           it = other.values_.begin(); it != other.values_.end(); ++it)
+    {
+      values_[it->first]=it->second;
+    }
   }
 
     SparseVector<T> &operator+=(const SparseVector<T> &other) {
