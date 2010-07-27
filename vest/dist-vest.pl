@@ -174,10 +174,11 @@ sub modbin {
     local $_;
     my $bindir=shift;
     `mkdir -p $bindir`;
+    -d $bindir || die "couldn't make bindir $bindir";
     for (@_) {
         my $src=$$_;
         $$_="$bindir/".basename($src);
-        `cp $src $$_`;
+        `cp -p $src $$_`;
         die "cp $src $$_ failed: $!" unless $? == 0;
     }
 }
