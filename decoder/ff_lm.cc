@@ -594,6 +594,7 @@ void LanguageModelFsa::set_ngram_order(int i) {
 LanguageModelFsa::LanguageModelFsa(string const& param) {
   int lmorder;
   pimpl_ = make_lm_impl(param,&lmorder,&fid_);
+  InitHaveFid();
   floor_=pimpl_->floor_;
   set_ngram_order(lmorder);
 }

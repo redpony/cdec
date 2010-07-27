@@ -66,6 +66,16 @@ usage: see ff_sample_fsa.h or ff_lm_fsa.h
 
 template <class Impl>
 struct FsaFeatureFunctionBase {
+  // CALL 1 of these MANUALLY  (because feature name(s) may depend on param, it's not done in ctor)
+  void Init(std::string const& fname="") {
+    fid_=FD::Convert(fname.empty()?name():fname);
+    InitHaveFid();
+  }
+  Features features_;
+  void InitHaveFid() {
+    features_=FeatureFunction::single_feature(fid_);
+  }
+
   Impl const& d() const { return static_cast<Impl const&>(*this); }
   Impl & d()  { return static_cast<Impl &>(*this); }
 protected:
@@ -79,16 +89,6 @@ protected:
   }
   void set_end_phrase(WordID single) {
     end_phrase_=singleton_sentence(single);
-  }
-
-  // CALL 1 of these MANUALLY  (because feature name(s) may depend on param, it's not done in ctor)
-  void InitFidNamed(std::string const& fname="") {
-    fid_=FD::Convert(name.empty()?name():fname);
-    Init();
-  }
-  Features features_;
-  void Init() {
-    features_=FeatureFunction::single_feature(fid_);
   }
 
   inline void static to_state(void *state,char const* begin,char const* end) {
