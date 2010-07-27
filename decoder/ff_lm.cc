@@ -1,5 +1,5 @@
 #define LM_FSA_SHORTEN_CONTEXT 1
-// seems to work great - just not sure if it actually speeds anything up
+// seems to work great  - just not sure if it actually speeds anything up
 //      virtual LogP contextBOW(const VocabIndex *context, unsigned length);
 				   /* backoff weight for truncating context */
 // does that need to be used?  i think so.
@@ -188,7 +188,7 @@ struct LMClient {
   char request_buffer[16000];
 };
 
-class LanguageModelImpl {
+class LanguageModelImpl : public LanguageModelInterface {
   void init(int order) {
     //all these used to be const members, but that has no performance implication, and now there's less duplication.
     order_=order;
@@ -249,21 +249,6 @@ class LanguageModelImpl {
   }
   virtual double ContextBOW(WordID const* context,int shortened_len) {
     return ngram_.contextBOW((VocabIndex*)context,shortened_len);
-  }
-
-  double ShortenContext(WordID * context,int len) {
-    int slen=ContextSize(context,len);
-    double p=ContextBOW(context,slen);
-    while (len>slen) {
-      --len;
-      context[len]=TD::none;
-    }
-    return p;
-  }
-
-  /// NOT a negative logp, i.e. should be worse prob = more negative.  that's what SRI wordProb returns, fortunately.
-  inline double clamp(double logp) const {
-    return logp < floor_ ? floor_ : logp;
   }
 
   inline double LookupProbForBufferContents(int i) {
@@ -457,7 +442,6 @@ public:
   int order_;
   int state_size_;
  public:
-  double floor_;
   WordID kSTART;
   WordID kSTOP;
   WordID kUNKNOWN;
@@ -606,9 +590,6 @@ void LanguageModelFsa::set_ngram_order(int i) {
     }
   }
 }
-namespace {
-WordID empty_context=TD::none;
-}
 
 LanguageModelFsa::LanguageModelFsa(string const& param) {
   int lmorder;
@@ -617,29 +598,8 @@ LanguageModelFsa::LanguageModelFsa(string const& param) {
   set_ngram_order(lmorder);
 }
 
-void LanguageModelFsa::Scan(SentenceMetadata const& /* smeta */,const Hypergraph::Edge& /* edge */,WordID w,void const* old_st,void *new_st,FeatureVector *features) const {
-  //variable length array is in C99, msvc++, if it doesn't support it, #ifdef it or use a stackalloc call (forget the name)
-  Featval p;
-  if (ctxlen_) {
-    WordID ctx[ngram_order_];
-    state_copy(ctx,old_st);
-    ctx[ctxlen_]=TD::none; // make this part of state?  wastes space but saves copies.
-    p=pimpl_->WordProb(w,ctx);
-// states are sri contexts so are in reverse order (most recent word is first, then 1-back comes next, etc.).
-    WordID *nst=(WordID *)new_st;
-    nst[0]=w; // new most recent word
-    to_state(nst+1,ctx,ctxlen_-1); // rotate old words right
-#if LM_FSA_SHORTEN_CONTEXT
-    pimpl_->ShortenContext(nst,ctxlen_);
-#endif
-  } else {
-    p=pimpl_->WordProb(w,&empty_context);
-  }
-  add_feat(features,(p<floor_)?floor_:p);
-}
-
-void LanguageModelFsa::print_state(ostream &o,void *st) const {
-  WordID *wst=(WordID *)st;
+void LanguageModelFsa::print_state(ostream &o,void const* st) const {
+  WordID const *wst=(WordID const*)st;
   o<<'[';
   for (int i=ctxlen_;i>0;) {
     --i;
@@ -660,7 +620,7 @@ LanguageModel::~LanguageModel() {
 }
 
 string LanguageModel::DebugStateToString(const void* state) const{
-  return pimpl_->DebugStateToString(state);
+  return imp().DebugStateToString(state);
 }
 
 void LanguageModel::TraversalFeaturesImpl(const SentenceMetadata& /* smeta */,
@@ -669,13 +629,13 @@ void LanguageModel::TraversalFeaturesImpl(const SentenceMetadata& /* smeta */,
                                           SparseVector<double>* features,
                                           SparseVector<double>* estimated_features,
                                           void* state) const {
-  features->set_value(fid_, pimpl_->LookupWords(*edge.rule_, ant_states, state));
-  estimated_features->set_value(fid_, pimpl_->EstimateProb(state));
+  features->set_value(fid_, imp().LookupWords(*edge.rule_, ant_states, state));
+  estimated_features->set_value(fid_, imp().EstimateProb(state));
 }
 
 void LanguageModel::FinalTraversalFeatures(const void* ant_state,
                                            SparseVector<double>* features) const {
-  features->set_value(fid_, pimpl_->FinalTraversalCost(ant_state));
+  features->set_value(fid_, imp().FinalTraversalCost(ant_state));
 }
 
 #ifdef HAVE_RANDLM
@@ -763,13 +723,13 @@ void LanguageModelRandLM::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                           SparseVector<double>* estimated_features,
                                           void* state) const {
   (void) smeta;
-  features->set_value(fid_, pimpl_->LookupWords(*edge.rule_, ant_states, state));
-  estimated_features->set_value(fid_, pimpl_->EstimateProb(state));
+  features->set_value(fid_, imp().LookupWords(*edge.rule_, ant_states, state));
+  estimated_features->set_value(fid_, imp().EstimateProb(state));
 }
 
 void LanguageModelRandLM::FinalTraversalFeatures(const void* ant_state,
                                            SparseVector<double>* features) const {
-  features->set_value(fid_, pimpl_->FinalTraversalCost(ant_state));
+  features->set_value(fid_, imp().FinalTraversalCost(ant_state));
 }
 
 #endif

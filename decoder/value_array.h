@@ -15,11 +15,33 @@
 # include <boost/serialization/access.hpp>
 #endif
 
+//TODO: use awesome type traits (and/or policy typelist argument) to provide these only when possible?
+#define VALUE_ARRAY_ADD 1
+#define VALUE_ARRAY_MUL 1
+#define VALUE_ARRAY_BITWISE 0
+#define VALUE_ARRAY_OSTREAM 1
+
+#if VALUE_ARRAY_OSTREAM
+# include <iostream>
+#endif
+
 // valarray like in that size is fixed (so saves space compared to vector), but same interface as vector (less resize/push_back/insert, of course)
 template <class T, class A = std::allocator<T> >
 class ValueArray : A // private inheritance so stateless allocator adds no size.
 {
+  typedef ValueArray<T,A> Self;
 public:
+#if VALUE_ARRAY_OSTREAM
+  friend inline std::ostream & operator << (std::ostream &o,Self const& s) {
+    o<<'[';
+    for (unsigned i=0,e=s.size();i<e;++i) {
+        if (i) o<<' ';
+        o<<s[i];
+    }
+    o<<']';
+    return o;
+  }
+#endif
   static const int SV_MAX=sizeof(T)/sizeof(T*)>1?sizeof(T)/sizeof(T*):1;
   //space optimization: SV_MAX T will fit inside what would otherwise be a pointer to heap data.  todo in the far future if bored.
   typedef T value_type;
@@ -82,6 +104,37 @@ public:
     clear();
   }
 
+#undef VALUE_ARRAY_OPEQ
+#define VALUE_ARRAY_OPEQ(op) template <class T2,class A2> Self & operator op (ValueArray<T2,A2> const& o) { assert(sz==o.sz); for (int i=0,e=sz;i<=e;++i) array[i] op o.array[i]; return *this; }
+#if VALUE_ARRAY_ADD
+  VALUE_ARRAY_OPEQ(+=)
+  VALUE_ARRAY_OPEQ(-=)
+#endif
+#if VALUE_ARRAY_MUL
+  VALUE_ARRAY_OPEQ(*=)
+  VALUE_ARRAY_OPEQ(/=)
+#endif
+#if VALUE_ARRAY_BITWISE
+  VALUE_ARRAY_OPEQ(|=)
+  VALUE_ARRAY_OPEQ(*=)
+#endif
+#undef VALUE_ARRAY_OPEQ
+#undef VALUE_ARRAY_BINOP
+#define VALUE_ARRAY_BINOP(op,opeq) template <class T2,class A2> friend inline Self operator op (Self x,ValueArray<T2,A2> const& y) { x opeq y; return x; }
+#if VALUE_ARRAY_ADD
+  VALUE_ARRAY_BINOP(+,+=)
+  VALUE_ARRAY_BINOP(-,-=)
+#endif
+#if VALUE_ARRAY_MUL
+  VALUE_ARRAY_BINOP(*,*=)
+  VALUE_ARRAY_BINOP(/,/=)
+#endif
+#if VALUE_ARRAY_BITWISE
+  VALUE_ARRAY_BINOP(|,|=)
+  VALUE_ARRAY_BINOP(*,*=)
+#endif
+
+#undef VALUE_ARRAY_BINOP
   void clear()
   {
     for (size_type i = sz; i != 0; --i) {

@@ -1,6 +1,8 @@
 #ifndef FF_SAMPLE_FSA_H
 #define FF_SAMPLE_FSA_H
 
+//TODO: fsa interface changed to include ScanPhrase* Scan*Accum.  update these so they compile+work
+
 #include "ff_from_fsa.h"
 
 // example: feature val = 1 * # of target words

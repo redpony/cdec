@@ -43,7 +43,7 @@ shared_ptr<FeatureFunction> FFRegistry::Create(const string& ffname, const strin
     }
     res = it->second->Create(p);
     res->name=ffname;
-    res->debug=debug;
+    res->debug_=debug;
   }
   return res;
 }

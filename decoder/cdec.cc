@@ -190,7 +190,6 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
     exit(1);
   }
 
-
   if (conf.count("usage")) {
     cout<<global_ff_registry->usage(str("usage",conf),true,true)<<endl;
     exit(0);
