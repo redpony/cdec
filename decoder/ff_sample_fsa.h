@@ -132,10 +132,9 @@ struct ShorterThanPrev : FsaTypedBase<int,ShorterThanPrev> {
     */
 
   // evil anti-google int & len out-param:
-  void ScanT(SentenceMetadata const& /* smeta */,const Hypergraph::Edge& /* edge */,WordID w,int prevlen,int &len,FeatureVector *features) const {
+  Featval ScanT1(SentenceMetadata const& /* smeta */,const Hypergraph::Edge& /* edge */,WordID w,int prevlen,int &len) const {
     len=wordlen(w);
-    if (len<prevlen)
-      features->add_value(fid_,1);
+    return (len<prevlen) ? 1 : 0;
   }
 
 };
