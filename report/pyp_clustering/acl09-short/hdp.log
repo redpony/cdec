@@ -1,0 +1,638 @@
+This is pdfTeXk, Version 3.1415926-1.40.9 (Web2C 7.5.7) (format=pdflatex 2008.12.28)  2 DEC 2009 19:45
+entering extended mode
+ %&-line parsing enabled.
+**hdp
+(./hdp.tex
+LaTeX2e <2005/12/01>
+Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, german-x-2008-06-18, ngerman-x-2008-06-18, ancientgreek, ibycus, ar
+abic, basque, bulgarian, catalan, pinyin, coptic, croatian, czech, danish, dutc
+h, esperanto, estonian, farsi, finnish, french, galician, german, ngerman, mono
+greek, greek, hungarian, icelandic, indonesian, interlingua, irish, italian, la
+tin, lithuanian, mongolian, mongolian2a, bokmal, nynorsk, polish, portuguese, r
+omanian, russian, sanskrit, serbian, slovak, slovenian, spanish, swedish, turki
+sh, ukenglish, ukrainian, uppersorbian, welsh, loaded.
+(/usr/local/texlive/2008/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2005/09/16 v1.4f Standard LaTeX document class
+(/usr/local/texlive/2008/texmf-dist/tex/latex/base/size11.clo
+File: size11.clo 2005/09/16 v1.4f Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(./acl-ijcnlp2009.sty
+Conference Style for ACL 2005 -- released Octobe 11, 2004
+\titlebox=\skip43
+) (/usr/local/texlive/2008/texmf-dist/tex/latex/psnfss/times.sty
+Package: times 2005/04/12 PSNFSS-v9.2a (SPQR) 
+)
+(/usr/local/texlive/2008/texmf-dist/tex/latex/base/latexsym.sty
+Package: latexsym 1998/08/17 v2.2e Standard LaTeX package (lasy symbols)
+\symlasy=\mathgroup4
+LaTeX Font Info:    Overwriting symbol font `lasy' in version `bold'
+(Font)                  U/lasy/m/n --> U/lasy/b/n on input line 47.
+)
+(./prettyref.sty
+Package: prettyref 1998/07/09 v3.0
+)
+(/usr/local/texlive/2008/texmf-dist/tex/latex/subfig/subfig.sty
+Package: subfig 2005/06/28 ver: 1.3 subfig package
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+(/usr/local/texlive/2008/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2008/08/24 v3.1j Customizing captions (AR)
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2008/08/24 v3.1j caption3 kernel (AR)
+\captionmargin=\dimen103
+\captionmargin@=\dimen104
+\captionwidth=\dimen105
+\caption@indent=\dimen106
+\caption@parindent=\dimen107
+\caption@hangindent=\dimen108
+)
+\c@ContinuedFloat=\count87
+)
+\c@KVtest=\count88
+\sf@farskip=\skip44
+\sf@captopadj=\dimen109
+\sf@capskip=\skip45
+\sf@nearskip=\skip46
+\c@subfigure=\count89
+\c@subfigure@save=\count90
+\c@lofdepth=\count91
+\c@subtable=\count92
+\c@subtable@save=\count93
+\c@lotdepth=\count94
+\sf@top=\skip47
+\sf@bottom=\skip48
+)
+(./jeffe.sty (/usr/local/texlive/2008/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2000/07/18 v2.13 AMS math features
+\@mathmargin=\skip49
+
+For additional information on amsmath, use the `?' option.
+(/usr/local/texlive/2008/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2000/06/29 v2.01
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0
+\@emptytoks=\toks15
+\ex@=\dimen110
+))
+(/usr/local/texlive/2008/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d
+\pmbraise@=\dimen111
+)
+(/usr/local/texlive/2008/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 1999/12/14 v2.01 operator names
+)
+\inf@bad=\count95
+LaTeX Info: Redefining \frac on input line 211.
+\uproot@=\count96
+\leftroot@=\count97
+LaTeX Info: Redefining \overline on input line 307.
+\classnum@=\count98
+\DOTSCASE@=\count99
+LaTeX Info: Redefining \ldots on input line 379.
+LaTeX Info: Redefining \dots on input line 382.
+LaTeX Info: Redefining \cdots on input line 467.
+\Mathstrutbox@=\box26
+\strutbox@=\box27
+\big@size=\dimen112
+LaTeX Font Info:    Redeclaring font encoding OML on input line 567.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
+\macc@depth=\count100
+\c@MaxMatrixCols=\count101
+\dotsspace@=\muskip10
+\c@parentequation=\count102
+\dspbrk@lvl=\count103
+\tag@help=\toks16
+\row@=\count104
+\column@=\count105
+\maxfields@=\count106
+\andhelp@=\toks17
+\eqnshift@=\dimen113
+\alignsep@=\dimen114
+\tagshift@=\dimen115
+\tagwidth@=\dimen116
+\totwidth@=\dimen117
+\lineht@=\dimen118
+\@envbody=\toks18
+\multlinegap=\skip50
+\multlinetaggap=\skip51
+\mathdisplay@stack=\toks19
+LaTeX Info: Redefining \[ on input line 2666.
+LaTeX Info: Redefining \] on input line 2667.
+)
+(/usr/local/texlive/2008/texmf-dist/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2002/01/22 v2.2d
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2001/10/25 v2.2f
+\symAMSa=\mathgroup5
+\symAMSb=\mathgroup6
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 132.
+))
+\timehh=\count107
+\timemm=\count108
+\mdYY=\count109
+)
+(/usr/local/texlive/2008/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2006/02/20 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/usr/local/texlive/2008/texmf/tex/latex/config/graphics.cfg
+File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
+)
+Package graphics Info: Driver file: pdftex.def on input line 90.
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2008/09/08 v0.04l Graphics/color for pdfTeX
+\Gread@gobject=\count110
+))
+\Gin@req@height=\dimen119
+\Gin@req@width=\dimen120
+)
+(/usr/local/texlive/2008/texmf-dist/tex/latex/algorithms/algorithm.sty
+Package: algorithm 
+
+Document Style `algorithm' - floating environment
+(/usr/local/texlive/2008/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count111
+\float@exts=\toks20
+\float@box=\box28
+\@float@everytoks=\toks21
+\@floatcapt=\box29
+)
+(/usr/local/texlive/2008/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
+)
+\@float@every@algorithm=\toks22
+\c@algorithm=\count112
+)
+(./algpseudocode.sty
+Package: algpseudocode 
+ (./algorithmicx.sty
+Package: algorithmicx 2005/04/27 v1.2 Algorithmicx
+
+Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
+\c@ALG@line=\count113
+\c@ALG@rem=\count114
+\c@ALG@nested=\count115
+\ALG@tlm=\skip52
+\ALG@thistlm=\skip53
+\c@ALG@Lnr=\count116
+\c@ALG@blocknr=\count117
+\c@ALG@storecount=\count118
+\c@ALG@tmpcounter=\count119
+\ALG@tmplength=\skip54
+)
+Document Style - pseudocode environments for use with the `algorithmicx' style
+) (./hyphen.sty)
+(/usr/local/texlive/2008/texmf-dist/tex/latex/ltxmisc/relsize.sty
+Package: relsize 2003/07/04 ver 3.1
+
+
+Package relsize Warning: Failed to get list of font sizes.
+(relsize)                Falling back to old definition. on input line 81.
+
+) (/usr/local/texlive/2008/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2006/05/05 v1.1b Input encoding file
+\inpenc@prehook=\toks23
+\inpenc@posthook=\toks24
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/base/applemac.def
+File: applemac.def 2006/05/05 v1.1b Input encoding file
+))
+No file hdp.aux.
+\openout1 = `hdp.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 83.
+LaTeX Font Info:    ... okay on input line 83.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 83.
+LaTeX Font Info:    ... okay on input line 83.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 83.
+LaTeX Font Info:    ... okay on input line 83.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 83.
+LaTeX Font Info:    ... okay on input line 83.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 83.
+LaTeX Font Info:    ... okay on input line 83.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 83.
+LaTeX Font Info:    ... okay on input line 83.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 83.
+(/usr/local/texlive/2008/texmf-dist/tex/latex/psnfss/ot1ptm.fd
+File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
+)
+Package caption Info: Begin \AtBeginDocument code.
+Package caption3 Info: subfig package 1.2 or 1.3 is loaded.
+LaTeX Info: Redefining \subref on input line 83.
+Package caption Info: float package is loaded.
+Package caption Info: End \AtBeginDocument code.
+
+(/usr/local/texlive/2008/texmf-dist/tex/context/base/supp-pdf.tex
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count120
+\scratchdimen=\dimen121
+\scratchbox=\box30
+\nofMPsegments=\count121
+\nofMParguments=\count122
+\everyMPshowfont=\toks25
+\MPscratchCnt=\count123
+\MPscratchDim=\dimen122
+\MPnumerator=\count124
+\everyMPtoPDFconversion=\toks26
+)
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 84.
+LaTeX Font Info:    Try loading font information for U+lasy on input line 84.
+ (/usr/local/texlive/2008/texmf-dist/tex/latex/base/ulasy.fd
+File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
+)
+LaTeX Font Info:    Try loading font information for U+msa on input line 84.
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2002/01/19 v2.2g AMS font definitions
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 84.
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2002/01/19 v2.2g AMS font definitions
+)
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 84.
+LaTeX Font Info:    Try loading font information for OMS+ptm on input line 84.
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/psnfss/omsptm.fd
+File: omsptm.fd 
+)
+
+LaTeX Font Warning: Font shape `OMS/ptm/bx/n' undefined
+(Font)              using `OMS/ptm/m/n' instead
+(Font)              for symbol `textdagger' on input line 84.
+
+LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <12> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 84.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 84.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 84.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 93.
+
+LaTeX Warning: Citation `goldwater06' on page 1 undefined on input line 93.
+
+
+Underfull \hbox (badness 4859) in paragraph at lines 92--98
+\OT1/ptm/m/n/10.95 sam-plers for non-parametric Bayesian
+ []
+
+
+Underfull \hbox (badness 4242) in paragraph at lines 92--98
+\OT1/ptm/m/n/10.95 er-able book-keeping. \OT1/ptm/b/n/10.95 ?\OT1/ptm/m/n/10.95
+ ) pre-sented an
+ []
+
+
+Underfull \hbox (badness 1248) in paragraph at lines 92--98
+\OT1/ptm/m/n/10.95 incor-rect and, even after cor-rec-tion, is
+ []
+
+
+LaTeX Warning: Citation `teh06hdp' on page 1 undefined on input line 102.
+
+
+LaTeX Warning: Citation `goldwater06' on page 1 undefined on input line 102.
+
+
+LaTeX Warning: Citation `goldwater06interpolating' on page 1 undefined on input
+ line 102.
+
+
+LaTeX Warning: Citation `liang07hdppcfg' on page 1 undefined on input line 102.
+
+
+
+LaTeX Warning: Citation `finkel07infinite' on page 1 undefined on input line 10
+2.
+
+
+LaTeX Warning: Citation `denero08sampling' on page 1 undefined on input line 10
+2.
+
+
+LaTeX Warning: Citation `ferguson73' on page 1 undefined on input line 103.
+
+
+LaTeX Warning: Citation `teh06hdp' on page 1 undefined on input line 103.
+
+
+LaTeX Warning: Citation `goldwater06' on page 1 undefined on input line 104.
+
+
+Underfull \hbox (badness 2158) in paragraph at lines 101--113
+\OT1/ptm/m/n/10.95 unsu-per-vised learn-ing for a vari-ety of tasks,
+ []
+
+
+Underfull \hbox (badness 1694) in paragraph at lines 101--113
+\OT1/ptm/m/n/10.95 includ-ing lan-guage mod-el-ing, word and mor-
+ []
+
+
+LaTeX Warning: Citation `aldous85' on page 1 undefined on input line 131.
+
+
+LaTeX Warning: Reference `fig:tables' on page 1 undefined on input line 145.
+
+[1{/usr/local/texlive/2008/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
+
+
+
+]
+<tables.pdf, id=21, 295.1025pt x 51.19125pt>
+File: tables.pdf Graphic file (type pdf)
+ <use tables.pdf>
+LaTeX Font Info:    Try loading font information for OT1+phv on input line 151.
+
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/psnfss/ot1phv.fd
+File: ot1phv.fd 2001/06/04 scalable font definitions for OT1/phv.
+)
+LaTeX Font Info:    Font shape `OT1/phv/bx/n' in size <9> not available
+(Font)              Font shape `OT1/phv/b/n' tried instead on input line 151.
+
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 182.
+
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 182.
+
+<approximations.pdf, id=22, 372.1628pt x 463.548pt>
+File: approximations.pdf Graphic file (type pdf)
+ <use approximations.pdf>
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 197.
+
+
+LaTeX Warning: Reference `eqn:true_expected' on page 2 undefined on input line 
+197.
+
+
+LaTeX Warning: Reference `eqn:digamma' on page 2 undefined on input line 197.
+
+
+LaTeX Warning: Reference `eqn:antoniak_approximation' on page 2 undefined on in
+put line 197.
+
+
+LaTeX Warning: Reference `eqn:true_expected' on page 2 undefined on input line 
+197.
+
+
+LaTeX Warning: Reference `eqn:digamma' on page 2 undefined on input line 197.
+
+
+LaTeX Warning: Reference `eqn:antoniak_approximation' on page 2 undefined on in
+put line 197.
+
+
+LaTeX Warning: Reference `eq:hdp_p1' on page 2 undefined on input line 201.
+
+
+LaTeX Warning: Citation `antoniak74' on page 2 undefined on input line 201.
+
+
+Underfull \hbox (badness 1048) in paragraph at lines 201--202
+\OT1/ptm/m/n/10.95 Rather than explic-itly track-ing the num-ber of
+ []
+
+
+Underfull \hbox (badness 2435) in paragraph at lines 201--202
+\OT1/ptm/m/n/10.95 bigram model, GGJ06 approx-i-mate the table
+ []
+
+
+Underfull \hbox (badness 1509) in paragraph at lines 201--202
+\OT1/ptm/m/n/10.95 counts using the expec-ta-tion $\OML/cmm/m/it/10.95 E\OT1/cm
+r/m/n/10.95 [\OML/cmm/m/it/10.95 t[]\OT1/cmr/m/n/10.95 ]$\OT1/ptm/m/n/10.95 . E
+xpected
+ []
+
+
+Underfull \hbox (badness 1275) in paragraph at lines 205--207
+\OT1/ptm/m/n/10.95 Antoniak also gives an approx-i-ma-tion to this
+ []
+
+
+LaTeX Warning: Citation `antoniak74' on page 2 undefined on input line 211.
+
+
+LaTeX Warning: Reference `eqn:antoniak_approximation' on page 2 undefined on in
+put line 211.
+
+
+LaTeX Warning: Reference `fig:graphs' on page 2 undefined on input line 212.
+
+[2 <./tables.pdf> <./approximations.pdf>]
+
+LaTeX Warning: Reference `eqn:antoniak_approximation' on page 3 undefined on in
+put line 216.
+
+
+LaTeX Warning: Reference `eqn:true_expected' on page 3 undefined on input line 
+216.
+
+
+LaTeX Warning: Reference `eqn:true_expected' on page 3 undefined on input line 
+216.
+
+
+Overfull \hbox (9.47058pt too wide) detected at line 226
+ []$[]        \OML/cmm/m/it/10.95 E\OT1/cmr/m/n/10.95 [\OML/cmm/m/it/10.95 t[]\
+OT1/cmr/m/n/10.95 ] \OMS/cmsy/m/n/10.95 ^^Y \OML/cmm/m/it/10.95 []P[]\OT1/cmr/
+m/n/10.95 (\OML/cmm/m/it/10.95 w\OT1/cmr/m/n/10.95 )[]\OML/cmm/m/it/10.95 H[] \
+OMS/cmsy/m/n/10.95 ^^@ []$ 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 226--228
+\OT1/ptm/m/n/10.95 We then use the asymp-totic expan-sion,
+ []
+
+
+Underfull \hbox (badness 3780) in paragraph at lines 226--228
+[]\OT1/ptm/m/n/10.95 , omit-ing trail-ing terms
+ []
+
+
+Overfull \hbox (7.89845pt too wide) detected at line 231
+[]
+ []
+
+
+LaTeX Warning: Citation `antoniak74' on page 3 undefined on input line 233.
+
+
+LaTeX Warning: Reference `eqn:harmonic' on page 3 undefined on input line 236.
+
+
+LaTeX Warning: Reference `eqn:digamma' on page 3 undefined on input line 236.
+
+
+LaTeX Warning: Reference `eqn:true_expected' on page 3 undefined on input line 
+236.
+
+
+LaTeX Warning: Reference `eqn:true_expected' on page 3 undefined on input line 
+250.
+
+
+LaTeX Warning: Reference `eqn:digamma' on page 3 undefined on input line 250.
+
+
+LaTeX Warning: Reference `fig:graphs' on page 3 undefined on input line 250.
+
+
+LaTeX Warning: Reference `eqn:digamma' on page 3 undefined on input line 250.
+
+
+LaTeX Warning: Citation `teh06hdp' on page 3 undefined on input line 256.
+
+
+LaTeX Warning: Reference `fig:histogram' on page 3 undefined on input line 258.
+
+
+
+LaTeX Warning: Reference `fig:tables' on page 3 undefined on input line 258.
+
+
+Overfull \hbox (4.42407pt too wide) in paragraph at lines 264--275
+[][] 
+ []
+
+
+LaTeX Warning: Reference `fig:tables' on page 3 undefined on input line 276.
+
+
+LaTeX Warning: Reference `fig:tables' on page 3 undefined on input line 276.
+
+
+LaTeX Warning: Reference `fig:histogram' on page 3 undefined on input line 281.
+
+
+
+LaTeX Warning: Reference `fig:tables' on page 3 undefined on input line 281.
+
+[3]
+
+LaTeX Warning: Reference `alg:increment' on page 4 undefined on input line 283.
+
+
+
+LaTeX Warning: Reference `alg:decrement' on page 4 undefined on input line 283.
+
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 283--283
+[][]\OT1/ptm/m/n/9 A C++ tem-plate class that imple-ments
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 283--283
+\OT1/ptm/m/n/9 the algo-rithm pre-sented is made avail-able at:
+ []
+
+
+LaTeX Warning: Reference `alg:increment' on page 4 undefined on input line 284.
+
+
+
+LaTeX Warning: Reference `alg:decrement' on page 4 undefined on input line 284.
+
+
+
+LaTeX Warning: Reference `eqn:digamma' on page 4 undefined on input line 348.
+
+
+LaTeX Warning: Reference `fig:graphs' on page 4 undefined on input line 353.
+
+
+Underfull \hbox (badness 2261) in paragraph at lines 353--354
+\OT1/ptm/m/n/10.95 The authors would like to thank Tom Grif-
+ []
+
+
+Underfull \hbox (badness 1436) in paragraph at lines 353--354
+\OT1/ptm/m/n/10.95 fiths for pro-vid-ing the code used to pro-duce
+ []
+
+No file hdp.bbl.
+[4] (./hdp.aux)
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 4066 strings out of 493876
+ 55704 string characters out of 1150567
+ 119040 words of memory out of 3000000
+ 7240 multiletter control sequences out of 10000+50000
+ 37855 words of font info for 89 fonts, out of 3000000 for 5000
+ 726 hyphenation exceptions out of 8191
+ 44i,16n,42p,1355b,387s stack positions out of 5000i,500n,10000p,200000b,50000s
+{/usr/local/texlive/2008/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
+exlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmbx10.pfb></usr/local/texlive/20
+08/texmf-dist/fonts/type1/bluesky/cm/cmbx5.pfb></usr/local/texlive/2008/texmf-d
+ist/fonts/type1/bluesky/cm/cmbx6.pfb></usr/local/texlive/2008/texmf-dist/fonts/
+type1/bluesky/cm/cmbx8.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/blue
+sky/cm/cmex10.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cm
+mi10.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmmi5.pfb><
+/usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmmi6.pfb></usr/local
+/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmmi8.pfb></usr/local/texlive/2
+008/texmf-dist/fonts/type1/bluesky/cm/cmmi9.pfb></usr/local/texlive/2008/texmf-
+dist/fonts/type1/bluesky/cm/cmr10.pfb></usr/local/texlive/2008/texmf-dist/fonts
+/type1/bluesky/cm/cmr5.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/blue
+sky/cm/cmr6.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmr8
+.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmr9.pfb></usr/
+local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmsy10.pfb></usr/local/tex
+live/2008/texmf-dist/fonts/type1/bluesky/cm/cmsy5.pfb></usr/local/texlive/2008/
+texmf-dist/fonts/type1/bluesky/cm/cmsy6.pfb></usr/local/texlive/2008/texmf-dist
+/fonts/type1/bluesky/cm/cmsy8.pfb></usr/local/texlive/2008/texmf-dist/fonts/typ
+e1/bluesky/cm/cmsy9.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/public/
+cmex/fmex9.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/urw/helvetic/uhv
+b8a.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb
+></usr/local/texlive/2008/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/loc
+al/texlive/2008/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive
+/2008/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on hdp.pdf (4 pages, 192812 bytes).
+PDF statistics:
+ 141 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 131072)
+ 11 words of extra memory for PDF output out of 10000 (max. 10000000)
+
