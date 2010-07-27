@@ -388,6 +388,12 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
+  const string input = str("input",conf);
+  cerr << "Reading input from " << ((input == "-") ? "STDIN" : input.c_str()) << endl;
+  ReadFile in_read(input);
+  istream *in = in_read.stream();
+  assert(*in);
+
   // load feature weights (and possibly freeze feature set)
   vector<double> feature_weights,prelm_feature_weights;
   Weights w,prelm_w;
@@ -503,11 +509,6 @@ int main(int argc, char** argv) {
 
   int combine_size = conf["combine_size"].as<int>();
   if (combine_size < 1) combine_size = 1;
-  const string input = str("input",conf);
-  cerr << "Reading input from " << ((input == "-") ? "STDIN" : input.c_str()) << endl;
-  ReadFile in_read(input);
-  istream *in = in_read.stream();
-  assert(*in);
 
   SparseVector<prob_t> acc_vec;  // accumulate gradient
   double acc_obj = 0; // accumulate objective

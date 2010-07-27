@@ -201,7 +201,7 @@ public:
   template <class Accum>
   inline void ScanAccum(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,
                         WordID w,void const* state,void *next_state,Accum *a) const {
-    Add(d().Scan1Meta(smeta,edge,smeta,edge,w,state,next_state),a);
+    Add(d().Scan1Meta(smeta,edge,w,state,next_state),a);
   }
 
   // bounce back and forth between two state vars starting at cs, returning end state location.  if we required src=dest addr safe state updating, this concept wouldn't need to exist.
@@ -233,7 +233,7 @@ public:
   }
 
 
-
+  // note you'll still have to override ScanAccum
   // override this (and SCAN_PHRASE_ACCUM_OVERRIDE  ) if you want e.g. maximum possible order ngram scores with markov_order < n-1.  in the future SparseFeatureAccumulator will probably be the only option for type-erased FSA ffs.  you will be adding to accum, not setting
   template <class Accum>
   inline void ScanPhraseAccum(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,
@@ -284,9 +284,13 @@ public:
   }
 
   template <class Accum>
-  inline void Add(Featval v,Accum *a) const { // for single-feat only
+  inline void Add(Featval v,Accum *a) const { // for single-feat only.  but will work for different accums
+    a->Add(fid_,v);
+  }
+  inline void Add(Featval v,SingleFeatureAccumulator *a) const {
     a->Add(v);
   }
+
 
   inline void set_feat(FeatureVector *features,Featval v) const {
     features->set_value(fid_,v);
@@ -343,15 +347,31 @@ public:
     o<<state(st);
   }
   int markov_order() const { return 1; }
-  Featval ScanT1(WordID w,St const&,St &) const { return 0; }
-  inline void ScanT(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,St const& prev_st,St &new_st,FeatureVector *features) const {
-    features->maybe_add(d().fid_,d().ScanT1(w,prev_st,new_st));
+
+  // override this
+  Featval ScanT1S(WordID w,St const& /* from */ ,St & /* to */) const {
+    return 0;
   }
-  inline void Scan(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,void const* st,void *next_state,FeatureVector *features) const {
+
+  // or this
+  Featval ScanT1(SentenceMetadata const& /* smeta */,const Hypergraph::Edge& /* edge */,WordID w,St const& from ,St & to) const {
+    return d().ScanT1S(w,from,to);
+  }
+
+  // or this (most general)
+  template <class Accum>
+  inline void ScanT(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,St const& prev_st,St &new_st,Accum *a) const {
+    Add(d().ScanT1(smeta,edge,w,prev_st,new_st),a);
+  }
+
+  // note: you're on your own when it comes to Phrase overrides.  see FsaFeatureFunctionBase.  sorry.
+
+  template <class Accum>
+  inline void ScanAccum(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,void const* st,void *next_state,Accum *a) const {
     Impl const& im=d();
-    FSADBG(edge,"Scan "<<FD::Convert(im.fid_)<<" = "<<im.describe_features(*features)<<" "<<im.state(st)<<"->"<<TD::Convert(w)<<" ");
-    im.ScanT(smeta,edge,w,state(st),state(next_state),features);
-    FSADBG(edge,state(next_state)<<" = "<<im.describe_features(*features));
+    FSADBG(edge,"Scan "<<FD::Convert(im.fid_)<<" = "<<a->describe(im)<<" "<<im.state(st)<<"->"<<TD::Convert(w)<<" ");
+    im.ScanT(smeta,edge,w,state(st),state(next_state),a);
+    FSADBG(edge,state(next_state)<<" = "<<a->describe(im));
     FSADBGnl(edge);
   }
 

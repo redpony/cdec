@@ -1,7 +1,7 @@
 #ifndef FF_LM_FSA_H
 #define FF_LM_FSA_H
 
-//FIXME: 3gram has differences in 4th decimal digit, compared to regular ff_lm.  this is USUALLY a bug (there's way more actual precision in there).  this was with #define LM_FSA_SHORTEN_CONTEXT 1
+//FIXME: 3gram has differences in 4th decimal digit, compared to regular ff_lm.  this is USUALLY a bug (there's way more actual precision in there).  this was with #define LM_FSA_SHORTEN_CONTEXT 1 and 0 (so it's not that)
 
 
 #define FSA_LM_DEBUG 0
@@ -84,7 +84,7 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
       WordID ctx[ngram_order_];
       state_copy(ctx,old_st);
       ctx[ctxlen_]=TD::none; // make this part of state?  wastes space but saves copies.
-      Featval p=pimpl_->WordProb(w,ctx);
+      Featval p=floored(pimpl_->WordProb(w,ctx));
 // states are sri contexts so are in reverse order (most recent word is first, then 1-back comes next, etc.).
       WordID *nst=(WordID *)new_st;
       nst[0]=w; // new most recent word
@@ -92,7 +92,7 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
 #if LM_FSA_SHORTEN_CONTEXT
       p+=pimpl_->ShortenContext(nst,ctxlen_);
 #endif
-      Add(floored(p),a);
+      Add(p,a);
     }
   }
 
