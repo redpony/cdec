@@ -57,10 +57,11 @@ my $noprimary;
 my $maxsim=0;
 my $oraclen=0;
 my $oracleb=20;
+my $bleu_weight=1;
 my $dirargs='';
 my $density_prune;
 my $usefork;
-my $cpbin=0;
+my $cpbin=1;
 # Process command-line options
 Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
@@ -81,6 +82,7 @@ if (GetOptions(
         "cpbin!" => \$cpbin,
 	"rand-directions=i" => \$rand_directions,
 	"random_directions=i" => \$rand_directions,
+        "bleu_weight=s" => \$bleu_weight,
         "no-primary!" => \$noprimary,
         "max-similarity=s" => \$maxsim,
         "oracle-directions=i" => \$oraclen,
@@ -296,7 +298,8 @@ while (1){
 		$icc++;
         my $nop=$noprimary?"--no_primary":"";
         my $targs=$oraclen ? "--decoder_translations='$runFile'":"";
-		$cmd="$MAPINPUT -w $inweights -r $dir/hgs -s $devSize -d $rand_directions --max_similarity=$maxsim --oracle_directions=$oraclen --oracle_batch=$oracleb $targs $dirargs > $dir/agenda.$im1-$opt_iter";
+        my $bwargs=$bleu_weight!=1 ? "--bleu_weight=$bleu_weight":"";
+		$cmd="$MAPINPUT -w $inweights -r $dir/hgs $bwargs -s $devSize -d $rand_directions --max_similarity=$maxsim --oracle_directions=$oraclen --oracle_batch=$oracleb $targs $dirargs > $dir/agenda.$im1-$opt_iter";
 		print STDERR "COMMAND:\n$cmd\n";
 		$result = system($cmd);
 		unless ($result == 0){
