@@ -299,7 +299,7 @@
 \end{exampleblock}
 \begin{itemize}
 \only<1>{\item S -> $\langle$ NP\ind{1} VP\ind{2}, NP\ind{1} VP\ind{2} $\rangle$, \\ NP -> $\langle$ PRP\ind{1}, PRP\ind{1} $\rangle$}
-\only<1>{\item PRP -> $\langle$ Je, I $\rangle$, \\ VP -> $\langle$ ne veux pas VB\ind{1}, do not want to VB\ind{1} $\rangle$, \\ VB -> $\langle$ travailler, work $\rangle$}
+\only<1>{\item PRP -> $\langle$ Je, I $\rangle$, VB -> $\langle$ travailler, work $\rangle$ \\ VP -> $\langle$ ne veux pas VB\ind{1}, do not want to VB\ind{1} $\rangle$}
 \only<2->{
   \item Strong model of sentence structure.
   \item Reliant on a treebank to train the parser.
@@ -471,13 +471,23 @@ Output:
 
 
 \begin{frame}[t]{Workshop Streams}
-Expand, describing challenges faced in each stream.
-\vspace{0.25in}
-\begin{unpacked_itemize}
-\item Implement scalable SCFG grammar extraction algorithms.
-\item Improve SCFG decoders to efficiently handle the grammars produce.
-\item Investigate discriminative training regimes to leverage features extracted from these grammars.
-\end{unpacked_itemize}
+\begin{enumerate}
+\item Implement scalable labelled SCFG grammar induction algorithms:
+\begin{itemize}
+\item by clustering translation phrases which occur in the same context we can learn which phrases are substituteable,
+\item we have implemented both parametric and non-parametric Bayesian clustering algorithms.
+\end{itemize}
+\item Improve SCFG decoders to efficiently handle the grammars produced:
+\begin{itemize}
+\item translation complexity scales quadratically as we add more categories,
+\item in order to decode efficiently with the grammars we've induced we have created faster search algorithms tuned for syntactic grammars.
+\end{itemize}
+\item Investigate discriminative training regimes to leverage features extracted from these grammars:
+\begin{itemize}
+\item to make the most of our induced grammars we need discriminative training algorithms that learn from more than a handful of features,
+\item we've implemented two large scale discriminative algorithms for training our models.
+\end{itemize}
+\end{enumerate}
 \end{frame}
 
 \begin{frame}[t]{Extrinsic evaluation: Bleu}
@@ -565,7 +575,7 @@ Expand, describing challenges faced in each stream.
 \item Europarl Dutch-French:
   \begin{itemize}
   \item 100k sentence pairs, standard Europarl test sets
-  \item Hiero baseline score: Europarl 2008 - 26.3 (1 reference)
+  \item Hiero baseline score: Europarl 2008 - 15.75 (1 reference)
   \item Major challenges: V2 / V-final word order, morphology
   \end{itemize}
 \end{unpacked_itemize}
@@ -595,11 +605,11 @@ Expand, describing challenges faced in each stream.
 
       \end{figure}
     \end{exampleblock}
-  \vspace{0.25in}
+  %\vspace{0.25in}
   \end{column}
   \begin{column}{0.7\textwidth}
     \begin{unpacked_itemize}
-      \item 1:55pm Experimental Setup. Trevor
+      \item 1:55pm Grammar induction and evaluation. Trevor
       \item 2:10pm Non-parametric models of category induction. Chris
       \item 2:25pm Inducing categories for morphology. Jan
       \item 2:35pm Smoothing, backoff and hierarchical grammars. Olivia
@@ -635,7 +645,6 @@ Expand, describing challenges faced in each stream.
 
       \end{figure}
     \end{exampleblock}
-  \vspace{0.25in}
   \end{column}
   \begin{column}{0.7\textwidth}
     \begin{itemize}
@@ -661,8 +670,6 @@ Expand, describing challenges faced in each stream.
   \end{unpacked_itemize}
 \end{frame}
 
-\begin{frame}[t]{This slide is intentionally left blank.}
-\end{frame}
 
 \begin{frame}[t]{Outline}
 \begin{columns}
@@ -687,12 +694,12 @@ Expand, describing challenges faced in each stream.
 
       \end{figure}
     \end{exampleblock}
-  \vspace{0.25in}
+  %\vspace{0.25in}
   \end{column}
   \begin{column}{0.7\textwidth}
     \begin{unpacked_itemize}
-      \only<1>{\item \alert{1:55pm Motivation and experimental methodology. Trevor}}
-      \only<2->{\item 1:55pm Motivation and experimental methodology. Trevor}
+      \only<1>{\item \alert{1:55pm Grammar induction and evaluation. Trevor}}
+      \only<2->{\item 1:55pm Grammar induction and evaluation. Trevor}
       \only<2>{\item \alert{2:10pm Non-parametric models of category induction. Chris}}
       \only<1,3->{\item 2:10pm Non-parametric models of category induction. Chris}
       \only<3>{\item \alert{2:25pm Inducing categories for morphology. Jan}}
@@ -733,83 +740,26 @@ Expand, describing challenges faced in each stream.
 
       \end{figure}
     \end{exampleblock}
-  \vspace{0.25in}
   \end{column}
   \begin{column}{0.7\textwidth}
     \begin{itemize}
     \setlength{\itemsep}{25pt}
     \setlength{\parskip}{0pt}
     \setlength{\parsep}{0pt}
-    \only<1>{\item \alert{3:15pm Training models with rich features spaces. Vlad}}
-    \only<2->{\item 3:15pm Training models with rich features spaces. Vlad}
-    \only<2>{\item \alert{3:30pm Decoding with complex grammars. Adam}}
-    \only<1,3->{\item 3:30pm Decoding with complex grammars. Adam}
-    \only<3>{\item \alert{4:00pm Closing remarks. Phil}}
-    \only<1,2,4->{\item 4:00pm Closing remarks. Phil}
-    \only<4>{\item \alert{4:05pm Finish.}}
-    \only<1-3>{\item 4:05pm Finish.}
+    \only<1>{\item \alert{3:20pm Parametric models: posterior regularisation. Desai}}
+    \only<2->{\item 3:20pm Parametric models: posterior regularisation. Desai}
+    \only<2>{\item \alert{3:35pm Training models with rich features spaces. Vlad}}
+    \only<1,3->{\item 3:35pm Training models with rich features spaces. Vlad}
+    \only<3>{\item \alert{3:50pm Decoding with complex grammars. Adam}}
+    \only<1,2,4->{\item 3:50pm Decoding with complex grammars. Adam}
+    \only<4>{\item \alert{4:20pm Closing remarks. Phil}}
+    \only<1-3,5->{\item 4:20pm Closing remarks. Phil}
+    \only<5>{\item \alert{4:25pm Finish.}}
+    \only<1-4>{\item 4:25pm Finish.}
     \end{itemize}
   \end{column}
 \end{columns}
 \end{frame}
-
-
-\begin{frame}[t]{This slide is intentionally left blank.}
-\end{frame}
-
-
-\begin{frame}[t]{Statistical machine translation: state-of-the-art}
-%\vspace{1.0cm}
-\begin{exampleblock}{Urdu $\rightarrow$ English}
-  \begin{figure}
-    {\centering \includegraphics[scale=0.55]{urdu-bl.pdf}}
-  \end{figure}
-\end{exampleblock}
-\begin{itemize}
-  \item Current state-of-the-art translation models struggle with language pairs which exhibit large differences in structure.
-\end{itemize}
-\end{frame}
-
-\begin{frame}[t]{Statistical machine translation: our unsupervised grammars}
-%\vspace{1.0cm}
-\begin{exampleblock}{Urdu $\rightarrow$ English}
-  \begin{figure}
-    {\centering \includegraphics[scale=0.55]{urdu-25hp.pdf}}
-  \end{figure}
-\end{exampleblock}
-\begin{itemize}
-  \item In this workshop we've made some small steps towards better translations for difficult language pairs.
-\end{itemize}
-\only<2->{
-  Google Translate: \\
-  \hspace{0.25in} {\em *After the attack a number of local residents has blank areas.}
-}
-\end{frame}
-
-
-\begin{frame}[t]{Induced Translation Structure}
-\begin{center}
-\includegraphics[scale=0.32]{joshua_tree19.pdf}
-\end{center}
-\end{frame}
-
-\begin{frame}[t]{What we've achieved:}
-  \vspace{0.5in}
-  \begin{unpacked_itemize}
-    \item 
-    \item
-  \end{unpacked_itemize}
-\end{frame}
-
-
-\begin{frame}[t]{We're we'll go from here:}
-  \vspace{0.5in}
-  \begin{unpacked_itemize}
-    \item 
-    \item 
-  \end{unpacked_itemize}
-\end{frame}
-
 
 
 \end{document}
