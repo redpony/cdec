@@ -1,0 +1,21 @@
+tuned on urdu baselines (hiero) devtest, test on mt09
+
+hdt: single pass (no pruning of -LM forest).  these weights were used for the
+final +LM rescoring in all cases. (tune BLEU 22.2)
+
+2pass-hdt: 1st pass weights same as final weights (bad) (tune BLEU ???)
+
+2pass-hdt0: 1st pass weights tuned without any lm (same final weights as hdt). (tune BLEU 14.7)
+
+2pass-hdt1: 1st pass weights tuned with unigram lm (same final). (tune BLEU 16.2)
+
+data files / graphs: 2nd column is BLEU
+
+2pass-hdt - first column is beam alpha scaled per source word.
+
+times.2pass-hdt - first column is +LM rescoring time
+
+space.2pass-hdt - first column is portion of -LM forest edges kept
+
+It would be nice to graph these with the same scale, or preferably as 3 lines in
+the same graph.
