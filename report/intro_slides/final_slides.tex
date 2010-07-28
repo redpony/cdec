@@ -279,10 +279,14 @@
     \includegraphics[scale=0.55]{JeVeuxTravailler-Hiero.pdf}
   \end{center}
 \end{block}
-\begin{itemize}
+\begin{unpacked_itemize}
+\only<1>{\item S -> $\langle$ X\ind{1}, X\ind{1} $\rangle$, \\ S -> $\langle$ S\ind{1} X\ind{2}, S\ind{1} X\ind{2} $\rangle$}
+\only<1>{\item X -> $\langle$ Je, I $\rangle$, \hspace{0.5in} X -> $\langle$ ne X\ind{1} pas, do not X\ind{1} $\rangle$, \\ X -> $\langle$ veux, want to$\rangle$, X -> $\langle$ travailler, work $\rangle$}
+\only<2->{
 \item Only requires the parallel corpus.
 \item But weak model of sentence structure.
-\end{itemize}
+}
+\end{unpacked_itemize}
 \end{frame}
 
 \begin{frame}[t]{Models of translation}
@@ -294,8 +298,12 @@
 \end{center}
 \end{exampleblock}
 \begin{itemize}
-\item Strong model of sentence structure.
-\item Reliant on a treebank to train the parser.
+\only<1>{\item S -> $\langle$ NP\ind{1} VP\ind{2}, NP\ind{1} VP\ind{2} $\rangle$, \\ NP -> $\langle$ PRP\ind{1}, PRP\ind{1} $\rangle$}
+\only<1>{\item PRP -> $\langle$ Je, I $\rangle$, \\ VP -> $\langle$ ne veux pas VB\ind{1}, do not want to VB\ind{1} $\rangle$, \\ VB -> $\langle$ travailler, work $\rangle$}
+\only<2->{
+  \item Strong model of sentence structure.
+  \item Reliant on a treebank to train the parser.
+}
 \end{itemize}
 \end{frame}
 
@@ -361,6 +369,26 @@ Parallel corpora far exceed treebanks (millions of words):
 \only<4>{ \item X10 -> $\langle$ ne veux pas, do not want to $\rangle$, \item X10 -> $\langle$ ne X14\ind{1} pas, do not X14\ind{1} $\rangle$ }
 \end{unpacked_itemize}
 \end{frame}
+
+\begin{frame}[t]{Models of translation}
+\vspace{0.25in}
+\begin{block}{This workshop}
+  \begin{center}
+    \includegraphics[scale=0.55]{JeNeVeuxPasTravailler-Hiero-labelled.pdf}
+    \hspace{0.3in}
+    \includegraphics[scale=0.55]{JeVeuxTravailler-Hiero-labelled.pdf}
+  \end{center}
+\end{block}
+\begin{unpacked_itemize}
+\only<1>{\item S -> $\langle$ X4\ind{1} X2\ind{2}, X4\ind{1} X2\ind{2} $\rangle$, X4 -> $\langle$ X1\ind{1} X10\ind{2}, X1\ind{1} X10\ind{2} $\rangle$}
+\only<1>{\item X1 -> $\langle$ Je, I $\rangle$, X10 -> $\langle$ ne X14\ind{1} pas, do not X14\ind{1} $\rangle$, \\ X14 -> $\langle$ veux, want to$\rangle$, X10 -> $\langle$ travailler, work $\rangle$}
+\only<2->{
+  \item Only requires the parallel corpus.
+  \item But also gives a strong model of sentence structure.
+}
+\end{unpacked_itemize}
+\end{frame}
+
 
 \begin{frame}[t]{Workshop overview}
 Input:
@@ -717,13 +745,18 @@ Expand, describing challenges faced in each stream.
     \only<2>{\item \alert{3:30pm Decoding with complex grammars. Adam}}
     \only<1,3->{\item 3:30pm Decoding with complex grammars. Adam}
     \only<3>{\item \alert{4:00pm Closing remarks. Phil}}
-    \only<1-2,4-->{\item 4:00pm Closing remarks. Phil}
+    \only<1,2,4->{\item 4:00pm Closing remarks. Phil}
     \only<4>{\item \alert{4:05pm Finish.}}
     \only<1-3>{\item 4:05pm Finish.}
     \end{itemize}
   \end{column}
 \end{columns}
 \end{frame}
+
+
+\begin{frame}[t]{This slide is intentionally left blank.}
+\end{frame}
+
 
 \begin{frame}[t]{Statistical machine translation: state-of-the-art}
 %\vspace{1.0cm}
