@@ -2,7 +2,9 @@
 #define _HG_H_
 
 // define USE_INFO_EDGE 1 if you want lots of debug info shown with --show_derivations - otherwise it adds quite a bit of overhead if ffs have their logging enabled (e.g. ff_from_fsa)
-#define USE_INFO_EDGE 0
+#ifndef USE_INFO_EDGE
+# define USE_INFO_EDGE 0
+#endif
 #if USE_INFO_EDGE
 # define INFO_EDGE(e,msg) do { std::ostringstream &o=(e.info_);o<<msg; } while(0)
 # define INFO_EDGEw(e,msg) do { std::ostringstream &o(e.info_);if (o.empty()) o<<' ';o<<msg; } while(0)
