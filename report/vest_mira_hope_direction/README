@@ -1,0 +1,9 @@
+First column = tune iteration, second column = tune BLEU
+
+Choosing the average of a few random sentence's model->hope direction, With Vlad's default --bleu_weight=1, nothing improved, and convergenced seemed to be slower, which is the opposite of what we intended.  5 random directions and the orthogonal directions were still used (fewer than normal random directions; the oracle directions replaced some of them).
+
+dev.bleu.baseline.txt - usual search directions (orth+random)
+
+dev.bleu.oracle_mira_direction.txt - as above, but fewer random directions, 10 model->hope directions
+
+note that the search directions are recomputed after each MERT iteration.
