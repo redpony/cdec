@@ -130,7 +130,7 @@ if ($metric =~ /^ter$|^aer$/i) {
   $DIR_FLAG = '';
 }
 
-my $refs_comma_sep = get_comma_sep_refs($refFiles);
+my $refs_comma_sep = get_comma_sep_refs('r',$refFiles);
 
 unless ($dir){
 	$dir = "vest";
@@ -297,7 +297,7 @@ while (1){
 		print STDERR `date`;
 		$icc++;
         my $nop=$noprimary?"--no_primary":"";
-        my $targs=$oraclen ? "--decoder_translations='$runFile'":"";
+        my $targs=$oraclen ? "--decoder_translations='$runFile.gz' ".get_comma_sep_refs('-references',$refFiles):"";
         my $bwargs=$bleu_weight!=1 ? "--bleu_weight=$bleu_weight":"";
 		$cmd="$MAPINPUT -w $inweights -r $dir/hgs $bwargs -s $devSize -d $rand_directions --max_similarity=$maxsim --oracle_directions=$oraclen --oracle_batch=$oracleb $targs $dirargs > $dir/agenda.$im1-$opt_iter";
 		print STDERR "COMMAND:\n$cmd\n";
@@ -473,11 +473,11 @@ sub get_lines {
 }
 
 sub get_comma_sep_refs {
-  my ($p) = @_;
+  my ($r,$p) = @_;
   my $o = `echo $p`;
   chomp $o;
   my @files = split /\s+/, $o;
-  return "-r " . join(' -r ', @files);
+  return "-$r " . join(' -$r ', @files);
 }
 
 sub read_weights_file {
