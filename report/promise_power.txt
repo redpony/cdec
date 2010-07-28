@@ -13,7 +13,7 @@ BLEU.  TODO: test under more conditions, or try idea with different formula, or
 prob. cube beams.
 
 
-urdu mt09 2pass 1st pass tuned w/ unigram, prelm_beam_prune=1 scale_prune_srclen
+with urdu mt09 2pass 1st pass tuned w/ unigram, prelm_beam_prune=1 scale_prune_srclen
 
 promise_power: BLEU rescoring time
 0: 20.21 1.8s
