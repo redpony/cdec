@@ -42,7 +42,7 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
   }
 
   template <class Accum>
-  void ScanAccum(SentenceMetadata const& /* smeta */,const Hypergraph::Edge& /* edge */,WordID w,void const* old_st,void *new_st,Accum *a) const {
+  void ScanAccum(SentenceMetadata const& /* smeta */,Hypergraph::Edge const& /* edge */,WordID w,void const* old_st,void *new_st,Accum *a) const {
     if (!ctxlen_) {
       Add(floored(pimpl_->WordProb(w,&empty_context)),a);
       return;
@@ -84,14 +84,17 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
     WordID ctx[nboth+1];
     ctx[nboth]=TD::none;
     // reverse order - state at very end of context, then [i,end) in rev order ending at ctx[0]
-    wordcpy_reverse(ctx,begin,end);
-    W ctx_score_end=ctx+nw;
-    wordcpy(ctx_score_end,st,st_end); // st already reversed
+    W ctx_score_end=wordcpy_reverse(ctx,begin,end);
+    assert(ctx_score_end==ctx+nw);
+    wordcpy(ctx_score_end,st,st_end); // st already reversed.
+    // we could just copy the filled state words, but it probably doesn't save much time (and might cost some to scan to find the nones.  most contexts are full except for the shortest source spans.
 //    FSALMDBG(edge," Scan("<<TD::GetString(ctx,ctx+nboth)<<')');
     Featval p=0;
     FSALMDBGnl(edge);
     for(;ctx_score_end>ctx;--ctx_score_end)
       p+=floored(pimpl_->WordProb(ctx_score_end[-1],ctx_score_end));
+    //TODO: look for score discrepancy -
+    // i had some idea that maybe shortencontext would return a different prob if the length provided was > ctxlen_; however, since the same 4th digit disagreement happens with LM_FSA_SHORTEN_CONTEXT 0 anyway, it's not that.  perhaps look to SCAN_PHRASE_ACCUM_OVERRIDE - make sure they do the right thing.
 #if LM_FSA_SHORTEN_CONTEXT
     p+=pimpl_->ShortenContext(ctx,nboth<ctxlen_?nboth:ctxlen_);
 #endif

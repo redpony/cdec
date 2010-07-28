@@ -4,6 +4,23 @@
 				   /* backoff weight for truncating context */
 // does that need to be used?  i think so.
 
+
+// if defined, and EDGE_INFO is defined, then --show_derivation will give a nice summary of all the components of the LM score, if you pass debug as the first param to the LM
+// (TODO) - because components are hidden within lm impl class, would have to pass edge in
+#define LM_DEBUG 0
+
+#define LM_DEBUG_DEBUG 0
+# define LMDBGif(i,e,x) do { if (i) { if (LM_DEBUG_CERR){std::cerr<<x;}  INFO_EDGE(e,x); if (LM_DEBUG_DEBUG){std::cerr<<"LMDBGif edge.info "<<&e<<" = "<<e.info()<<std::endl;}} } while(0)
+# define LMDBGif_nl(i,e) do { if (i) { if (LM_DEBUG_CERR) std::cerr<<std::endl; INFO_EDGE(e,"; "); } } while(0)
+#if LM_DEBUG
+# include <iostream>
+# define LMDBG(e,x) LMDBGif(debug(),e,x)
+# define LMDBGnl(e) LMDBGif_nl(debug(),e,x)
+#else
+# define LMDBG(e,x)
+# define LMDBGnl(e)
+#endif
+
 namespace {
 char const* usage_name="LanguageModel";
 char const* usage_short="srilm.gz [-n FeatureName] [-o StateOrder] [-m LimitLoadOrder]";
