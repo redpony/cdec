@@ -8,7 +8,7 @@
 
   state is some fixed width byte array.  could actually be a void *, WordID sequence, whatever.
 
-  TODO: there are a confusing array of default-implemented supposedly slightly more efficient overrides enabled; however, the two key differences are: do you score a phrase, or just word at a time (the latter constraining you to obey markov_order() everywhere.
+  TODO: there are a confusing array of default-implemented supposedly slightly more efficient overrides enabled; however, the two key differences are: do you score a phrase, or just word at a time (the latter constraining you to obey markov_order() everywhere.  you have to implement the word case no matter what.
 
   TODO: considerable simplification of implementation if Scan implementors are required to update state in place (using temporary copy if they need it), or e.g. using memmove (copy from end to beginning) to rotate state right.
 
@@ -19,9 +19,6 @@
 
   TODO: state (+ possibly span-specific) custom heuristic, e.g. in "longer than previous word" model, you can expect a higher outside if your state is a word of 2 letters.  this is on top of the nice heuristic for the unscored words, of course.  in ngrams, the avg prob will be about the same, but if the words possible for a source span are summarized, maybe it's possible to predict.  probably not worth the effort.
 */
-
-#define FSA_SCORE_PHRASE 1
-// if true, special effort is made to give entire phrases to fsa models so they can understate their true markov_order but sometimes have more specific probs.
 
 #define FSA_DEBUG 0
 
@@ -187,7 +184,7 @@ protected:
     assert(0);
     return 0;
   }
-  Featval Scan1Meta(SentenceMetadata const& /* smeta */,const Hypergraph::Edge& /* edge */,
+  Featval Scan1Meta(SentenceMetadata const& /* smeta */,Hypergraph::Edge const& /* edge */,
                     WordID w,void const* state,void *next_state) const {
     return d().Scan1(w,state,next_state);
   }
@@ -199,19 +196,19 @@ public:
 
   // must override this or Scan1Meta or Scan1
   template <class Accum>
-  inline void ScanAccum(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,
+  inline void ScanAccum(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,
                         WordID w,void const* state,void *next_state,Accum *a) const {
     Add(d().Scan1Meta(smeta,edge,w,state,next_state),a);
   }
 
   // bounce back and forth between two state vars starting at cs, returning end state location.  if we required src=dest addr safe state updating, this concept wouldn't need to exist.
-  // recommend you override this if you score phrases differently than word-by-word.
+  // required that you override this if you score phrases differently than word-by-word, however, you can just use the SCAN_PHRASE_ACCUM_OVERRIDE macro to do that in terms of ScanPhraseAccum
   template <class Accum>
-  void *ScanPhraseAccumBounce(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID const* i, WordID const* end,void *cs,void *ns,Accum *accum) const {
+  void *ScanPhraseAccumBounce(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,WordID const* i, WordID const* end,void *cs,void *ns,Accum *accum) const {
     // extra code - IT'S FOR EFFICIENCY, MAN!  IT'S OK!  definitely no bugs here.
     if (!ssz) {
       for (;i<end;++i)
-        ScanAccum(smeta,edge,*i,0,0,accum);
+        d().ScanAccum(smeta,edge,*i,0,0,accum);
       return 0;
     }
     void *os,*es;
@@ -233,11 +230,14 @@ public:
   }
 
 
+  static const bool simple_phrase_score=true; // if d().simple_phrase_score_, then you should expect different Phrase scores for phrase length > M.  so, set this false if you provide ScanPhraseAccum (SCAN_PHRASE_ACCUM_OVERRIDE macro does this)
+
+  // override this (and use SCAN_PHRASE_ACCUM_OVERRIDE  ) if you want e.g. maximum possible order ngram scores with markov_order < n-1.  in the future SparseFeatureAccumulator will probably be the only option for type-erased FSA ffs.
   // note you'll still have to override ScanAccum
-  // override this (and SCAN_PHRASE_ACCUM_OVERRIDE  ) if you want e.g. maximum possible order ngram scores with markov_order < n-1.  in the future SparseFeatureAccumulator will probably be the only option for type-erased FSA ffs.  you will be adding to accum, not setting
   template <class Accum>
-  inline void ScanPhraseAccum(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,
-                              WordID const* i, WordID const* end,void const* state,void *next_state,Accum *accum) const {
+  void ScanPhraseAccum(SentenceMetadata const& smeta,Hypergraph::Edge const & edge,
+                              WordID const* i, WordID const* end,
+                              void const* state,void *next_state,Accum *accum) const {
     if (!ssz) {
       for (;i<end;++i)
         d().ScanAccum(smeta,edge,*i,0,0,accum);
@@ -247,6 +247,7 @@ public:
     void *tst=tstate;
     bool odd=(end-i)&1;
     void *cs,*ns;
+    // we're going to use Bounce (word by word alternating of states) such that the final place is next_state
     if (odd) {
       cs=tst;
       ns=next_state;
@@ -259,24 +260,30 @@ public:
     assert(est==next_state);
   }
 
+
+
   // could replace this with a CRTP subclass providing these impls.
+  // the d() subclass dispatch is not needed because these will be defined in the subclass
 #define SCAN_PHRASE_ACCUM_OVERRIDE \
+  static const bool simple_phrase_score=false; \
   template <class Accum> \
-  void *ScanPhraseAccumBounce(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID const* i, WordID const* end,void *cs,void *ns,Accum *accum) const { \
-    ScanPhraseAccum(smeta,edge,i,end,cs,ns,accum); \
+  void *ScanPhraseAccumBounce(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,WordID const* i, WordID const* end,void *cs,void *ns,Accum *accum) const { \
+    ScanPhraseAccum(smeta,edge,i,end,cs,ns,accum);  \
     return ns; \
   } \
   template <class Accum> \
-  inline void ScanPhraseAccumOnly(SentenceMetadata const& smeta,const Hypergraph::Edge& edge, \
-                              WordID const* i, WordID const* end,void const* state,Accum *accum) const { \
-    char s2[ssz]; ScanPhraseAccum(smeta,edge,i,end,state,(void*)s2,accum);                \
+  void ScanPhraseAccumOnly(SentenceMetadata const& smeta,Hypergraph::Edge const& edge, \
+                              WordID const* i, WordID const* end, \
+                              void const* state,Accum *accum) const { \
+    char s2[ssz]; ScanPhraseAccum(smeta,edge,i,end,state,(void*)s2,accum); \
   }
 
   // override this or bounce along with above.  note: you can just call ScanPhraseAccum
   // doesn't set state (for heuristic in ff_from_fsa)
   template <class Accum>
-  inline void ScanPhraseAccumOnly(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,
-                              WordID const* i, WordID const* end,void const* state,Accum *accum) const {
+  void ScanPhraseAccumOnly(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,
+                           WordID const* i, WordID const* end,
+                           void const* state,Accum *accum) const {
     char s1[ssz];
     char s2[ssz];
     state_copy(s1,state);
@@ -354,20 +361,20 @@ public:
   }
 
   // or this
-  Featval ScanT1(SentenceMetadata const& /* smeta */,const Hypergraph::Edge& /* edge */,WordID w,St const& from ,St & to) const {
+  Featval ScanT1(SentenceMetadata const& /* smeta */,Hypergraph::Edge const& /* edge */,WordID w,St const& from ,St & to) const {
     return d().ScanT1S(w,from,to);
   }
 
   // or this (most general)
   template <class Accum>
-  inline void ScanT(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,St const& prev_st,St &new_st,Accum *a) const {
+  inline void ScanT(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,WordID w,St const& prev_st,St &new_st,Accum *a) const {
     Add(d().ScanT1(smeta,edge,w,prev_st,new_st),a);
   }
 
   // note: you're on your own when it comes to Phrase overrides.  see FsaFeatureFunctionBase.  sorry.
 
   template <class Accum>
-  inline void ScanAccum(SentenceMetadata const& smeta,const Hypergraph::Edge& edge,WordID w,void const* st,void *next_state,Accum *a) const {
+  inline void ScanAccum(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,WordID w,void const* st,void *next_state,Accum *a) const {
     Impl const& im=d();
     FSADBG(edge,"Scan "<<FD::Convert(im.fid_)<<" = "<<a->describe(im)<<" "<<im.state(st)<<"->"<<TD::Convert(w)<<" ");
     im.ScanT(smeta,edge,w,state(st),state(next_state),a);
@@ -393,8 +400,8 @@ struct FsaScanner {
   inline void *nexts() const {
     return (cs==st0)?st1:st0;
   }
-  const Hypergraph::Edge& edge;
-  FsaScanner(FF const& ff,SentenceMetadata const& smeta,const Hypergraph::Edge& edge) : ff(ff),smeta(smeta),edge(edge)
+  Hypergraph::Edge const& edge;
+  FsaScanner(FF const& ff,SentenceMetadata const& smeta,Hypergraph::Edge const& edge) : ff(ff),smeta(smeta),edge(edge)
   {
     ssz=ff.state_bytes();
     int stride=((ssz+ALIGN-1)/ALIGN)*ALIGN; // round up to multiple of ALIGN
