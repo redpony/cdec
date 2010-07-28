@@ -111,7 +111,6 @@ std::string UrlDecodeString(const std::string & encoded) {
 }
 
 std::string UrlEncodeString(const std::string & decoded) {
-  const char * sz_decoded = decoded.c_str();
   size_t needed_length = decoded.length() * 3 + 3;
   char stackalloc[64];
   char * buf = needed_length > sizeof(stackalloc)/sizeof(*stackalloc) ?

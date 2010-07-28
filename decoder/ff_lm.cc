@@ -1,5 +1,6 @@
 #define LM_FSA_SHORTEN_CONTEXT 1
-// seems to work great  - just not sure if it actually speeds anything up
+// seems to work great  - just not sure if it actually speeds anything up.  theoretically slightly more compact (more sharing) forest, but unlikely to make a big difference
+
 //      virtual LogP contextBOW(const VocabIndex *context, unsigned length);
 				   /* backoff weight for truncating context */
 // does that need to be used?  i think so.
@@ -619,11 +620,12 @@ LanguageModelFsa::LanguageModelFsa(string const& param) {
 void LanguageModelFsa::print_state(ostream &o,void const* st) const {
   WordID const *wst=(WordID const*)st;
   o<<'[';
-  for (int i=ctxlen_;i>0;) {
+  bool sp=false;
+  for (int i=ctxlen_;i>0;sp=true) {
     --i;
     WordID w=wst[i];
     if (w==TD::none) continue;
-    if (i) o<<' ';
+    if (sp) o<<' ';
     o << TD::Convert(w);
   }
   o<<']';

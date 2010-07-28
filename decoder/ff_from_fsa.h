@@ -3,7 +3,9 @@
 
 #include "ff_fsa.h"
 
-#define FSA_FF_DEBUG 0
+#ifndef FSA_FF_DEBUG
+# define FSA_FF_DEBUG 0
+#endif
 #if FSA_FF_DEBUG
 # define FSAFFDBG(e,x) FSADBGif(debug(),e,x)
 # define FSAFFDBGnl(e) FSADBGif_nl(debug(),e)
@@ -49,35 +51,36 @@ public:
                              void* out_state) const
   {
     TRule const& rule=*edge.rule_;
-    Sentence const& e = rule.e();
+    Sentence const& e = rule.e();  // items in target side of rule
     typename Impl::Accum accum,h_accum;
     if (!ssz) { // special case for no state - but still build up longer phrases to score in case FSA overrides ScanPhraseAccum
       if (Impl::simple_phrase_score) {
-        // save the effort of building up the contiguous rule phrases
-        for (int j=0,je=e.size();j<je;++j) // items in target side of rule
+        // save the effort of building up the contiguous rule phrases - probably can just use the else branch, now that phrases aren't copied but are scanned off e directly.
+        for (int j=0,ee=e.size();j<ee;++j) {
           if (e[j]>=1) // token
             ff.ScanAccum(smeta,edge,(WordID)e[j],NULL,NULL,&accum);
-        FSAFFDBG(edge," "<<TD::Convert(e[j]));
+          FSAFFDBG(edge," "<<TD::Convert(e[j]));
+        }
       } else {
-        Sentence phrase;
-        phrase.reserve(e.size());
-        for (int j=0,je=e.size();;++j) { // items in target side of rule
-          if (je==j || e[j]<1) { // end or variable
-            if (phrase.size()) {
-              FSAFFDBG(edge," ["<<TD::GetString(phrase)<<']');
-              ff.ScanPhraseAccum(smeta,edge,begin(phrase),end(phrase),0,0,&accum);
-            }
-            if (je==j)
-              break;
-            phrase.clear();
-          } else { // word
-            WordID ew=e[j];
-            phrase.push_back(ew);
+#undef RHS_WORD
+#define RHS_WORD(j) (e[j]>=1)
+        for (int j=0,ee=e.size();;++j) { // items in target side of rule
+          for(;;++j) {
+            if (j>=ee) goto rhs_done; // j may go 1 past ee due to k possibly getting to end
+            if (RHS_WORD(j)) break;
           }
+          // word @j
+          int k=j;
+          while(k<ee) if (!RHS_WORD(++k)) break;
+          //end or nonword @k - [j,k) is phrase
+          FSAFFDBG(edge," ["<<TD::GetString(&e[j],&e[k])<<']');
+          ff.ScanPhraseAccum(smeta,edge,&e[j],&e[k],0,0,&accum);
+          j=k;
         }
       }
+    rhs_done:
       accum.Store(ff,features);
-      FSAFFDBG(egde,"="<<accum->describe(ff));
+      FSAFFDBG(edge,"="<<accum.describe(ff));
       FSAFFDBGnl(edge);
       return;
     }
@@ -91,8 +94,9 @@ public:
     WP left_full=left_end_full(out_state);
     FsaScanner<Impl> fsa(ff,smeta,edge);
     /* fsa holds our current state once we've seen our first M rule or child left-context words.  that state scores up the rest of the words at the time, and is replaced by the right state of any full child.  at the end, if we've got at least M left words in all, it becomes our right state (otherwise, we don't bother storing the partial state, which might seem useful any time we're built on by a rule that has our variable in the initial position - but without also storing the heuristic for that case, we just end up rescanning from scratch anyway to produce the heuristic.  so we just store all 0 bytes if we have less than M left words at the end. */
-    for (int j = 0; j < e.size(); ++j) { // items in target side of rule
-      if (e[j] < 1) { // variable
+    for (int j = 0,ee=e.size(); j < ee; ++j) { // items in target side of rule
+    s_rhs_next:
+      if (!RHS_WORD(j)) { // variable
         // variables a* are referring to this child derivation state.
         SP a = ant_contexts[-e[j]];
         WP al=(WP)a,ale=left_end(a); // the child left words
@@ -121,7 +125,6 @@ public:
         assert(anw<=M); // of course, we never store more than M left words in an item.
       } else { // single word
         WordID ew=e[j];
-        FSAFFDBG(edge,' '<<TD::Convert(ew));
         // some redundancy: non-vectorized version of above handling of left words of child item
         if (left_out<left_full) {
           *left_out++=ew;
@@ -129,11 +132,24 @@ public:
             fsa.reset(ff.heuristic_start_state());
             fsa.scan(left_begin,left_full,&h_accum); // save heuristic (happens only once)
           }
-        } else
-          fsa.scan(ew,&accum);
+        } else {
+          if (Impl::simple_phrase_score) {
+            fsa.scan(ew,&accum); // single word scan isn't optimal if phrase is different
+            FSAFFDBG(edge,' '<<TD::Convert(ew));
+          } else {
+            int k=j;
+            while(k<ee) if (!RHS_WORD(++k)) break;
+            FSAFFDBG(edge," rule-phrase["<<TD::GetString(&e[j],&e[k])<<']');
+            fsa.scan(&e[j],&e[k],&accum);
+            if (k==ee) goto s_rhs_done;
+            j=k;
+            goto s_rhs_next;
+          }
+        }
       }
     }
-
+#undef RHS_WORD
+  s_rhs_done:
     void *out_fsa_state=fsa_state(out_state);
     if (left_out<left_full) { // finally: partial heuristic for unfilled items
 //      fsa.reset(ff.heuristic_start_state());      fsa.scan(left_begin,left_out,&h_accum);
