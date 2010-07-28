@@ -1,0 +1,25 @@
+cdec option "promise_power"
+
+po::value<double>()->default_value(0)
+
+Give more beam budget to more promising previous-pass nodes when pruning - but
+allocate the same average beams.  0 means off, 1 means beam proportional to
+inside*outside prob, n means nth power (affects just --cubepruning_pop_limit).
+note: for the same poplimit, this gives more search error unless very close to 0
+(recommend disabled; even 0.01 is slightly worse than 0) which is a bad sign and
+suggests this isn't doing a good job; further it's slightly slower to LM cube
+rescore with 0.01 compared to 0, as well as giving (very insignificantly) lower
+BLEU.  TODO: test under more conditions, or try idea with different formula, or
+prob. cube beams.
+
+
+urdu mt09 2pass 1st pass tuned w/ unigram, prelm_beam_prune=1 scale_prune_srclen
+
+promise_power: BLEU rescoring time
+0: 20.21 1.8s
+0.01: 20.16 1.9s
+0.1: 20.11 2.0s
+(insignificant differences)
+
+10: 19.7 1.1s
+(faster but much worse bleu)
