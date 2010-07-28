@@ -75,7 +75,7 @@
 %  $^3$Carnegie Mellon University\\ 
 %  $^4$University of Edinburgh
 }
-\date[June 21]{June 21, 2010}
+\date[June 28]{June 28, 2010}
 
 %\subject{Unsupervised models of Synchronous Grammar Induction for SMT}
 
@@ -109,26 +109,27 @@
 %\end{frame}
 
 
-\begin{frame}[t]{Team members}
-\begin{center}
-{\bf Senior Members} \\
-  Phil Blunsom (Oxford)\\
-  Trevor Cohn (Sheffield)\\
-  Adam Lopez (Edinburgh/COE)\\
-  Chris Dyer (CMU)\\
-  Jonathan Graehl (ISI)\\
-\vspace{0.2in}
-{\bf Graduate Students} \\
-  Jan Botha (Oxford) \\
-  Vladimir Eidelman (Maryland) \\
-  Ziyuan Wang (JHU) \\
-  ThuyLinh Nguyen (CMU) \\
-\vspace{0.2in}
-{\bf Undergraduate Students} \\
-  Olivia Buzek (Maryland) \\
-  Desai Chen (CMU) \\
-\end{center}
-\end{frame}
+%\begin{frame}[t]{Team members}
+%\begin{center}
+%{\bf Senior Members} \\
+%  Phil Blunsom (Oxford)\\
+%  Trevor Cohn (Sheffield)\\
+%  Adam Lopez (Edinburgh/COE)\\
+%  Chris Dyer (CMU)\\
+%  Jonathan Graehl (ISI)\\
+%  Chris Callison-Burch (JHU)\\
+%\vspace{0.1in}
+%{\bf Graduate Students} \\
+%  Jan Botha (Oxford) \\
+%  Vladimir Eidelman (Maryland) \\
+%  Ziyuan Wang (JHU) \\
+%  ThuyLinh Nguyen (CMU) \\
+%\vspace{0.1in}
+%{\bf Undergraduate Students} \\
+%  Olivia Buzek (Maryland) \\
+%  Desai Chen (CMU) \\
+%\end{center}
+%\end{frame}
 
 
 
@@ -158,7 +159,7 @@
 \end{itemize}
 \end{frame}
 
-\begin{frame}[t]{Statistical machine translation: Before}
+\begin{frame}[t]{Statistical machine translation: state-of-the-art}
 %\vspace{1.0cm}
 \begin{exampleblock}{Urdu $\rightarrow$ English}
   \begin{figure}
@@ -167,18 +168,6 @@
 \end{exampleblock}
 \begin{itemize}
   \item Current state-of-the-art translation models struggle with language pairs which exhibit large differences in structure.
-\end{itemize}
-\end{frame}
-
-\begin{frame}[t]{Statistical machine translation: After}
-%\vspace{1.0cm}
-\begin{exampleblock}{Urdu $\rightarrow$ English}
-  \begin{figure}
-    {\centering \includegraphics[scale=0.55]{urdu-25hp.pdf}}
-  \end{figure}
-\end{exampleblock}
-\begin{itemize}
-  \item In this workshop we've made some small steps towards better translations for difficult language pairs.
 \end{itemize}
 \end{frame}
 
@@ -232,9 +221,9 @@
 \end{exampleblock}
 \only<4>{
   \begin{itemize}
-  \item Phrasal translation equivalences \textcolor{green}{(existing models)}
-  \item {\bf Constituent reordering \textcolor{blue}{(this workshop!)}}
-  \item Morphology \textcolor{red}{(Next year?)}
+  \item Phrasal translation equivalences
+  \item Constituent reordering
+  \item Morphology
   \end{itemize}
 }
 \end{frame}
@@ -243,50 +232,6 @@
 \begin{center}
   \includegraphics[scale=0.35]{GoogleTranslateLanguages.pdf}
 \end{center}
-\end{frame}
-
-\begin{frame}[t]{Workshop overview}
-Input:
-  \begin{itemize}
-%  \item Joshua decoder
-  \item Existing procedures for synchronous grammar extraction
-  \end{itemize}
-\vspace{0.3in}
-Output:
-  \begin{itemize}
-    \item New unsupervised models for large scale synchronous grammar extraction,
-%    \item An implementation of this model,
-    \item A comparison and analysis of the existing and proposed models,
-    \item Extended decoders (cdec/Joshua) capable of working efficiently with these models.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}[t]{Models of translation}
-\begin{exampleblock}{Supervised SCFG: Syntactic Tree-to-String}
-\begin{center}
-  \includegraphics[scale=0.55]{JeNeVeuxPasTravailler-tsg.pdf}
-  \hspace{0.3in}
-  \includegraphics[scale=0.55]{JeVeuxTravailler-tsg.pdf}
-\end{center}
-\end{exampleblock}
-\begin{itemize}
-\item Strong model of sentence structure.
-\item Reliant on a treebank to train the parser.
-\end{itemize}
-\end{frame}
-
-\begin{frame}[t]{Models of translation}
-\begin{block}{Unlabelled SCFG: Hiero}
-  \begin{center}
-    \includegraphics[scale=0.55]{JeNeVeuxPasTravailler-Hiero.pdf}
-    \hspace{0.3in}
-    \includegraphics[scale=0.55]{JeVeuxTravailler-Hiero.pdf}
-  \end{center}
-\end{block}
-\begin{itemize}
-\item Only requires the parallel corpus.
-\item But weak model of sentence structure.
-\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -324,6 +269,60 @@ Output:
       %\end{figure}
   \end{exampleblock}
 \end{frame}
+
+
+\begin{frame}[t]{Models of translation}
+\begin{block}{Unlabelled SCFG: Hiero}
+  \begin{center}
+    \includegraphics[scale=0.55]{JeNeVeuxPasTravailler-Hiero.pdf}
+    \hspace{0.3in}
+    \includegraphics[scale=0.55]{JeVeuxTravailler-Hiero.pdf}
+  \end{center}
+\end{block}
+\begin{itemize}
+\item Only requires the parallel corpus.
+\item But weak model of sentence structure.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Models of translation}
+\begin{exampleblock}{Supervised SCFG: Syntactic Tree-to-String}
+\begin{center}
+  \includegraphics[scale=0.55]{JeNeVeuxPasTravailler-tsg.pdf}
+  \hspace{0.3in}
+  \includegraphics[scale=0.55]{JeVeuxTravailler-tsg.pdf}
+\end{center}
+\end{exampleblock}
+\begin{itemize}
+\item Strong model of sentence structure.
+\item Reliant on a treebank to train the parser.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[t]{Impact}
+\vspace{0.5in}
+\begin{table}
+  \begin{tabular}{l|rr}
+    \hline
+    Language & Words &  Domain \\ \hline
+    English & 4.5M& Financial news \\
+    Chinese & 0.5M & Broadcasting news \\ 
+    Arabic &  300K (1M planned)  &  News  \\
+    Korean & 54K  & Military \\ \hline
+  \end{tabular}
+\caption{Major treebanks: data size and domain \label{table_treebanks_size}}
+\end{table}
+\end{frame}
+
+
+\begin{frame}[t]{Impact}
+Parallel corpora far exceed treebanks (millions of words):
+  \begin{figure}
+    {\centering \includegraphics[scale=0.7]{resource_matrix.pdf}}
+  \end{figure}
+\end{frame}
+
 
 \begin{frame}[t]{Models of translation}
 \begin{exampleblock}{Phrase extraction:}
@@ -363,6 +362,23 @@ Output:
 \end{unpacked_itemize}
 \end{frame}
 
+\begin{frame}[t]{Workshop overview}
+Input:
+  \begin{itemize}
+%  \item Joshua decoder
+  \item Existing procedures for unlabelled synchronous grammar extraction
+  \end{itemize}
+\vspace{0.3in}
+Output:
+  \begin{itemize}
+    \item New unsupervised models for large scale synchronous grammar extraction,
+%    \item An implementation of this model,
+    \item A comparison and analysis of the existing and proposed models,
+    \item Extended decoders (cdec/Joshua) capable of working efficiently with these models.
+  \end{itemize}
+\end{frame}
+
+
 %\begin{frame}[t]{Models of translation}
 %\begin{block}{Hierarchical}
 %  \begin{center}
@@ -381,55 +397,33 @@ Output:
 %\end{frame}
 
 
-\begin{frame}[t]{Impact}
-\vspace{0.5in}
-\begin{table}
-  \begin{tabular}{l|rr}
-    \hline
-    Language & Words &  Domain \\ \hline
-    English & 4.5M& Financial news \\
-    Chinese & 0.5M & Broadcasting news \\ 
-    Arabic &  300K (1M planned)  &  News  \\
-    Korean & 54K  & Military \\ \hline
-  \end{tabular}
-\caption{Major treebanks: data size and domain \label{table_treebanks_size}}
-\end{table}
-\end{frame}
 
-
-\begin{frame}[t]{Impact}
-Parallel corpora far exceed treebanks (millions of words):
-  \begin{figure}
-    {\centering \includegraphics[scale=0.7]{resource_matrix.pdf}}
-  \end{figure}
-\end{frame}
-
-
-\begin{frame}[t]{Models of translation}
-\begin{block}{Hierarchical}
-  \begin{center}
-    \includegraphics[scale=0.55]{JeNeVeuxPasTravailler-Hiero-labelled.pdf}
-    \hspace{0.3in}
-    \includegraphics[scale=0.55]{JeVeuxTravailler-Hiero-labelled.pdf}
-  \end{center}
-\end{block}
-\begin{itemize}
-\item \alert{AIM: Implement a large scale open-source synchronous constituent learning system.} 
-\item \alert{AIM: Investigate and understand the relationship between the choice of synchronous grammar and SMT performance,} 
-\item \alert{AIM: and fix our decoders accordingly.} 
-\end{itemize}
-\end{frame}
-
-\begin{frame}[t]{Evaluation goals}
-We will predominately evaluate using BLEU, but also use automatic structured metrics and perform small scale human evaluation:
-\vspace{0.25in}
-\begin{unpacked_itemize}
-\item Evaluate phrasal, syntactic, unsupervised syntactic,
-\item Aim 1: Do no harm (not true of existing syntactic approach)
-\item Aim 2: Exceed the performance of current non-syntactic systems.
-\item Aim 3: Meet or exceed performance of existing syntactic systems.
-\end{unpacked_itemize}
-\end{frame}
+%\begin{frame}[t]{Models of translation}
+%\vspace{0.25in}
+%\begin{block}{Hierarchical}
+%  \begin{center}
+%    \includegraphics[scale=0.55]{JeNeVeuxPasTravailler-Hiero-labelled.pdf}
+%    \hspace{0.3in}
+%    \includegraphics[scale=0.55]{JeVeuxTravailler-Hiero-labelled.pdf}
+%  \end{center}
+%\end{block}
+%%\begin{itemize}
+%%\item \alert{AIM: Implement a large scale open-source synchronous constituent learning system.} 
+%%\item \alert{AIM: Investigate and understand the relationship between the choice of synchronous grammar and SMT performance,} 
+%%\item \alert{AIM: and fix our decoders accordingly.} 
+%%\end{itemize}
+%\end{frame}
+%
+%\begin{frame}[t]{Evaluation goals}
+%We will predominately evaluate using BLEU, but also use automatic structured metrics and perform small scale human evaluation:
+%\vspace{0.25in}
+%\begin{unpacked_itemize}
+%\item Evaluate phrasal, syntactic, unsupervised syntactic,
+%\item Aim 1: Do no harm (not true of existing syntactic approach)
+%\item Aim 2: Exceed the performance of current non-syntactic systems.
+%\item Aim 3: Meet or exceed performance of existing syntactic systems.
+%\end{unpacked_itemize}
+%\end{frame}
 
 %\begin{frame}[t]{Impact}
 %Success will have a significant impact on two areas of CL:
@@ -449,88 +443,338 @@ We will predominately evaluate using BLEU, but also use automatic structured met
 
 
 \begin{frame}[t]{Workshop Streams}
+Expand, describing challenges faced in each stream.
 \vspace{0.25in}
 \begin{unpacked_itemize}
 \item Implement scalable SCFG grammar extraction algorithms.
-\item Improve SCFG decoders to effieciently handle the grammars produce.
-\item Investigate discriminative training regimes the leverage features extracted from these grammars.
+\item Improve SCFG decoders to efficiently handle the grammars produce.
+\item Investigate discriminative training regimes to leverage features extracted from these grammars.
 \end{unpacked_itemize}
+\end{frame}
+
+\begin{frame}[t]{Extrinsic evaluation: Bleu}
+\begin{exampleblock}{
+   \only<1>{Ngram overlap metrics:}
+   \only<2>{Ngram overlap metrics: 1-gram precision $p_1 = \frac{11}{14}$}
+   \only<3>{Ngram overlap metrics: 2-gram precision $p_2 = \frac{5}{13}$}
+   \only<4>{Ngram overlap metrics: 3-gram precision $p_3 = \frac{2}{12}$}
+   \only<5>{Ngram overlap metrics: 4-gram precision $p_4 = \frac{1}{11}$}
+}
+\vspace{0.2cm}
+{\em Source}: \begin{CJK}欧盟 办事处 与 澳洲 大使馆 在 同 一 建筑 内 \end{CJK} \\
+\vspace{0.3cm}
+\only<1>{{\em Candidate}: the chinese embassy in australia and the eu representative office in the same building}
+\only<2>{{\em Candidate}: \alert{the} chinese \alert{embassy} \alert{in} australia \alert{and} \alert{the} \alert{eu} representative \alert{office} \alert{in} \alert{the} \alert{same} \alert{building}}
+\only<3>{{\em Candidate}: the chinese embassy in australia \alert{and} \alert{the} \alert{eu} representative office \alert{in} \alert{the} \alert{same} \alert{building}}
+\only<4>{{\em Candidate}: the chinese embassy in australia and the eu representative office \alert{in} \alert{the} \alert{same} \alert{building}}
+\only<5>{{\em Candidate}: the chinese embassy in australia and the eu representative office \alert{in} \alert{the} \alert{same} \alert{building}}
+\vspace{0.2cm}
+\end{exampleblock}
+
+\begin{block}{Reference Translations:}
+  \begin{enumerate}
+  \only<1>{\item the eu office and the australian embassy are housed in the same building}
+  \only<2>{\item \alert{the} \alert{eu} \alert{office} \alert{and} \alert{the} australian \alert{embassy} are housed \alert{in} \alert{the} \alert{same} \alert{building}}
+  \only<3>{\item \alert{the} \alert{eu} office \alert{and} \alert{the} australian embassy are housed \alert{in} \alert{the} \alert{same} \alert{building}}
+  \only<4>{\item the eu office and the australian embassy are housed \alert{in} \alert{the} \alert{same} \alert{building}}
+  \only<5>{\item the eu office and the australian embassy are housed \alert{in} \alert{the} \alert{same} \alert{building}}
+
+  \only<1>{\item the european union office is in the same building as the australian embassy}
+  \only<2>{\item \alert{the} european union \alert{office} is \alert{in} \alert{the} \alert{same} \alert{building} as \alert{the} australian \alert{embassy}}
+  \only<3>{\item the european union office is \alert{in} \alert{the} \alert{same} \alert{building} as the australian embassy}
+  \only<4>{\item the european union office is \alert{in} \alert{the} \alert{same} \alert{building} as the australian embassy}
+  \only<5>{\item the european union office is \alert{in} \alert{the} \alert{same} \alert{building} as the australian embassy}
+
+  \only<1>{\item the european union 's office and the australian embassy are both located in the same building}
+  \only<2>{\item \alert{the} european union 's \alert{office} \alert{and} \alert{the} australian \alert{embassy} are both located \alert{in} \alert{the} \alert{same} \alert{building}}
+  \only<3>{\item the european union 's office \alert{and} \alert{the} australian embassy are both located \alert{in} \alert{the} \alert{same} \alert{building}}
+  \only<4>{\item the european union 's office and the australian embassy are both located \alert{in} \alert{the} \alert{same} \alert{building}}
+  \only<5>{\item the european union 's office and the australian embassy are both located \alert{in} \alert{the} \alert{same} \alert{building}}
+  
+  \only<1>{\item the eu 's mission is in the same building with the australian embassy}
+  \only<2>{\item \alert{the} \alert{eu} 's mission is \alert{in} \alert{the} \alert{same} \alert{building} with \alert{the} australian \alert{embassy}}
+  \only<3>{\item \alert{the} \alert{eu} 's mission is \alert{in} \alert{the} \alert{same} \alert{building} with the australian embassy}
+  \only<4>{\item the eu 's mission is \alert{in} \alert{the} \alert{same} \alert{building} with the australian embassy}
+  \only<5>{\item the eu 's mission is \alert{in} \alert{the} \alert{same} \alert{building} with the australian embassy}
+  \end{enumerate}
+\end{block}
+\end{frame}
+
+\begin{frame}[t]{Extrinsic evaluation: Bleu}
+\begin{exampleblock}{BLEU}
+\Large
+\begin{align}
+\nonumber BLEU_n = BP \times \exp{\left( \sum_{n=1}^{N} w_n \log{p_n} \right) }\\
+\nonumber BP = \left\{ 
+  \begin{array}{ll} 
+    1 & \mbox{if $c > r$}  \\
+    \exp{(1-\frac{R'}{C'})} & \mbox{if $c <= r$}
+  \end{array} \right.
+\end{align}
+\end{exampleblock}
+\begin{itemize}
+\item {\em BP} is the {\em Brevity Penalty}, $w_n$ is the ngram length weights (usually $\frac{1}{n}$), $p_n$ is precision of ngram predictions, $R'$ is the total length of all references and $C'$ is the sum of the best matching candidates.
+\item statistics are calculate over the whole {\em document}, i.e. all the sentences.
+\end{itemize}
 \end{frame}
 
 
 
-\begin{frame}[t]{Language pairs (small)}
-\begin{itemize}
+\begin{frame}[t]{Language pairs}
+\begin{unpacked_itemize}
 \item BTEC Chinese-English:
   \begin{itemize}
   \item 44k sentence pairs, short sentences
   \item Widely reported `prototyping' corpus
-  \item Hiero baseline score: 52.4 (16 references)
-  \item Prospects: BTEC always gives you good results
+  \item Hiero baseline score: 57.0 (16 references)
   \end{itemize}
 \item NIST Urdu-English:
   \begin{itemize}
   \item 50k sentence pairs
-  \item Hiero baseline score: MT05 - 23.7 (4 references)
+  \item Hiero baseline score: 21.1 (4 references)
   \item Major challenges: major long-range reordering, SOV word order
-  \item Prospects: small data, previous gains with supervised syntax
-  \end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}[t]{Language pairs (large)}
-\begin{itemize}
-\item NIST Chinese-English:
-  \begin{itemize}
-  \item 1.7M sentence pairs, Standard NIST test sets
-  \item Hiero baseline score: MT05 - 33.9 (4 references)
-  \item Major challenges: large data, mid-range reordering, lexical ambiguity
-  \item Prospects: supervised syntax gains reported
-  \end{itemize}
-\item NIST Arabic-English:
-  \begin{itemize}
-  \item 900k sentence pairs
-  \item Hiero baseline score: MT05 - 48.9 (4 references)
-  \item Major challenges: strong baseline, local reordering, VSO word order
-  \item Prospects: difficult
   \end{itemize}
 \item Europarl Dutch-French:
   \begin{itemize}
-  \item 1.5M sentence pairs, standard Europarl test sets
+  \item 100k sentence pairs, standard Europarl test sets
   \item Hiero baseline score: Europarl 2008 - 26.3 (1 reference)
-  \item Major challenges: V2 / V-final word order, many non-literal translations
-  \item Prospects: ???
+  \item Major challenges: V2 / V-final word order, morphology
   \end{itemize}
-\end{itemize}
+\end{unpacked_itemize}
 \end{frame}
 
 
-\begin{frame}[t]{Summary}
+\begin{frame}[t]{Outline}
+\begin{columns}
+  \begin{column}{0.2\textwidth}
+    \begin{exampleblock}{}
+      \begin{figure}
+        \tiny
+        {\centering \includegraphics[scale=0.07]{trevor.jpg}} \\
+        Trevor Cohn \\
+        
+        {\centering \includegraphics[scale=0.06]{dyer.jpg}} \\
+        Chris Dyer\\
+        
+        {\centering \includegraphics[scale=0.11]{jan.jpg}} \\
+        Jan Botha \\
+        
+        {\centering \includegraphics[scale=0.06]{olivia.jpg}} \\
+        Olivia Buzek\\
+        
+        {\centering \includegraphics[scale=0.10]{desai.jpg}}\\
+        Desai Chen\\
+
+      \end{figure}
+    \end{exampleblock}
+  \vspace{0.25in}
+  \end{column}
+  \begin{column}{0.7\textwidth}
+    \begin{unpacked_itemize}
+      \item 1:55pm Experimental Setup. Trevor
+      \item 2:10pm Non-parametric models of category induction. Chris
+      \item 2:25pm Inducing categories for morphology. Jan
+      \item 2:35pm Smoothing, backoff and hierarchical grammars. Olivia
+      \item 2:45pm Parametric models: posterior regularisation. Desai
+      \item 3:00pm Break.
+    \end{unpacked_itemize}
+  \end{column}
+\end{columns}
+\end{frame}
+
+
+
+\begin{frame}[t]{Outline}
+\begin{columns}
+  \begin{column}{0.2\textwidth}
+    \begin{exampleblock}{}
+      \begin{figure}
+        \tiny
+        {\centering \includegraphics[scale=0.05]{vlad.jpg}} \\
+        Vlad Eidelman\\
+        
+        {\centering \includegraphics[scale=0.15]{ziyuan.pdf}} \\
+        Ziyuan Wang\\
+        
+        {\centering \includegraphics[scale=0.06]{adam.jpg}} \\
+        Adam Lopez\\
+        
+        {\centering \includegraphics[scale=0.10]{jon.pdf}} \\
+        Jon Graehl\\
+        
+        {\centering \includegraphics[scale=0.15]{linh.pdf}} \\
+        ThuyLinh Nguyen\\
+
+      \end{figure}
+    \end{exampleblock}
+  \vspace{0.25in}
+  \end{column}
+  \begin{column}{0.7\textwidth}
+    \begin{itemize}
+    \setlength{\itemsep}{25pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item 3:15pm Training models with rich features spaces. Vlad
+    \item 3:30pm Decoding with complex grammars. Adam
+    \item 4:00pm Closing remarks. Phil
+    \item 4:05pm Finish.
+    \end{itemize}
+  \end{column}
+\end{columns}
+\end{frame}
+
+
+
+\begin{frame}[t]{Remember:}
+  \vspace{0.5in}
+  \begin{unpacked_itemize}
+    \item Idea: Learn synchronous grammar labels which encode substituteability; phrases which occur in the same context should receive the same label.
+    \item Result: Better models of translation structure, morphology and improved decoding algorithms.
+  \end{unpacked_itemize}
+\end{frame}
+
+\begin{frame}[t]{This slide is intentionally left blank.}
+\end{frame}
+
+\begin{frame}[t]{Outline}
+\begin{columns}
+  \begin{column}{0.2\textwidth}
+    \begin{exampleblock}{}
+      \begin{figure}
+        \tiny
+        {\centering \includegraphics[scale=0.07]{trevor.jpg}} \\
+        Trevor Cohn \\
+        
+        {\centering \includegraphics[scale=0.06]{dyer.jpg}} \\
+        Chris Dyer\\
+        
+        {\centering \includegraphics[scale=0.11]{jan.jpg}} \\
+        Jan Botha \\
+        
+        {\centering \includegraphics[scale=0.06]{olivia.jpg}} \\
+        Olivia Buzek\\
+        
+        {\centering \includegraphics[scale=0.10]{desai.jpg}}\\
+        Desai Chen\\
+
+      \end{figure}
+    \end{exampleblock}
+  \vspace{0.25in}
+  \end{column}
+  \begin{column}{0.7\textwidth}
+    \begin{unpacked_itemize}
+      \only<1>{\item \alert{1:55pm Experimental Setup. Trevor}}
+      \only<2->{\item 1:55pm Experimental Setup. Trevor}
+      \only<2>{\item \alert{2:10pm Non-parametric models of category induction. Chris}}
+      \only<1,3->{\item 2:10pm Non-parametric models of category induction. Chris}
+      \only<3>{\item \alert{2:25pm Inducing categories for morphology. Jan}}
+      \only<1,2,4->{\item 2:25pm Inducing categories for morphology. Jan}
+      \only<4>{\item \alert{2:35pm Smoothing, backoff and hierarchical grammars. Olivia}}
+      \only<1-3,5->{\item 2:35pm Smoothing, backoff and hierarchical grammars. Olivia}
+      \only<5>{\item \alert{2:45pm Parametric models: posterior regularisation. Desai}}
+      \only<1-4,6->{\item 2:45pm Parametric models: posterior regularisation. Desai}
+      \only<6>{\item \alert{3:00pm Break.}}
+      \only<1-5>{\item 3:00pm Break.}
+    \end{unpacked_itemize}
+  \end{column}
+\end{columns}
+\end{frame}
+
+
+
+\begin{frame}[t]{Outline}
+\begin{columns}
+  \begin{column}{0.2\textwidth}
+    \begin{exampleblock}{}
+      \begin{figure}
+        \tiny
+        {\centering \includegraphics[scale=0.05]{vlad.jpg}} \\
+        Vlad Eidelman\\
+        
+        {\centering \includegraphics[scale=0.15]{ziyuan.pdf}} \\
+        Ziyuan Wang\\
+        
+        {\centering \includegraphics[scale=0.06]{adam.jpg}} \\
+        Adam Lopez\\
+        
+        {\centering \includegraphics[scale=0.10]{jon.pdf}} \\
+        Jon Graehl\\
+        
+        {\centering \includegraphics[scale=0.15]{linh.pdf}} \\
+        ThuyLinh Nguyen\\
+
+      \end{figure}
+    \end{exampleblock}
+  \vspace{0.25in}
+  \end{column}
+  \begin{column}{0.7\textwidth}
+    \begin{itemize}
+    \setlength{\itemsep}{25pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \only<1>{\item \alert{3:15pm Training models with rich features spaces. Vlad}}
+    \only<2->{\item 3:15pm Training models with rich features spaces. Vlad}
+    \only<2>{\item \alert{3:30pm Decoding with complex grammars. Adam}}
+    \only<1,3->{\item \alert{4:00pm Closing remarks. Phil}
+    \only<3>{\item 4:05pm Finish.}
+    \only<>{\item 4:05pm Finish.}
+    \end{itemize}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[t]{Statistical machine translation: state-of-the-art}
+%\vspace{1.0cm}
+\begin{exampleblock}{Urdu $\rightarrow$ English}
+  \begin{figure}
+    {\centering \includegraphics[scale=0.55]{urdu-bl.pdf}}
+  \end{figure}
+\end{exampleblock}
 \begin{itemize}
-\item Scientific Merit:
-  \begin{itemize}
-  \item A systematic comparison of existing syntactive approaches to SMT.
-  \item An empirical study of how constituency is useful in SMT.
-  \item An evaluation of existing theories of grammar induction in a practical application (end-to-end evaluation).
-  \end{itemize}
-\item Potential Impact:
-  \begin{itemize}
-  \item Better MT systems, for more languages, across a range of domains.
-  \item More accessible high performance translation models for researchers. % all over the world.
-  \end{itemize}
-\item Feasibility:
-  \begin{itemize}
-  \item A great team with a wide range of both theoretical and practical experience.
-  %\item Incremental plan without any deal breaking dependencies.
-  \item Solid preparation.
-  \end{itemize}
-\item Novelty:
-  \begin{itemize}
-  \item First attempt at large scale unsupervised synchronous grammar induction.
-%  \item First study seeking to compare and understand the impact of synchronous structure on translation performance. 
-  \end{itemize}
+  \item Current state-of-the-art translation models struggle with language pairs which exhibit large differences in structure.
 \end{itemize}
 \end{frame}
+
+\begin{frame}[t]{Statistical machine translation: our unsupervised grammars}
+%\vspace{1.0cm}
+\begin{exampleblock}{Urdu $\rightarrow$ English}
+  \begin{figure}
+    {\centering \includegraphics[scale=0.55]{urdu-25hp.pdf}}
+  \end{figure}
+\end{exampleblock}
+\begin{itemize}
+  \item In this workshop we've made some small steps towards better translations for difficult language pairs.
+\end{itemize}
+\only<2->{
+  Google Translate: \\
+  \hspace{0.25in} {\em *After the attack a number of local residents has blank areas.}
+}
+\end{frame}
+
+
+\begin{frame}[t]{Induced Translation Structure}
+\begin{center}
+\includegraphics[scale=0.32]{joshua_tree19.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}[t]{What we've achieved:}
+  \vspace{0.5in}
+  \begin{unpacked_itemize}
+    \item 
+    \item
+  \end{unpacked_itemize}
+\end{frame}
+
+
+\begin{frame}[t]{We're we'll go from here:}
+  \vspace{0.5in}
+  \begin{unpacked_itemize}
+    \item 
+    \item 
+  \end{unpacked_itemize}
+\end{frame}
+
 
 
 \end{document}
