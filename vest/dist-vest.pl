@@ -304,7 +304,7 @@ while (1){
 			die "ERROR: mapinput command returned non-zero exit code $result\n";
 		}
 
-		`mkdir $dir/splag.$im1`;
+		`mkdir -p $dir/splag.$im1`;
 		$cmd="split -a 3 -l $lines_per_mapper $dir/agenda.$im1-$opt_iter $dir/splag.$im1/mapinput.";
 		print STDERR "COMMAND:\n$cmd\n";
 		$result = system($cmd);
