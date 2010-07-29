@@ -1,5 +1,48 @@
 \chapter{Training}
+
+An integral part of constructing a state-of-the-art machine translation system is the training procedure. The goal of training is to optimize the model parameters to maximize translation quality on some metric, where the parameters are the weights associated with the features we use in our model, and the metric is BLEU. 
+
+The most common approach to training is Minimum Error Rate Training (MERT), which tunes the parameters to minimize error according to an arbitrary error function. Thus, in our case this is equivalent to saying that it maximizes the 1-best translation under the BLEU metric. MERT is a log-linear model which allows us to combine different features in order to find the best target translation $e*$ for a input source $f$:
+$$e* = \argmax_e p(e|f) = argmax_e \sum_{k=1}^K \w_k\h_k(e,f)$$
+
+where $h_k(e,f)$ is a feature associated with the translation of $f$ to $e$, and $w$ is the weight associated with that feature. Unfortunately, MERT has been empirically unable to extend beyond optimization of a handful of features, thus necessecitating dense features. Theses features typically include:
+
+\begin{itemize}
+\item rule relative frequency $P(e|f)$
+\item target $n$-gram language model $P(e)$
+\item `pass-through' penalty when passing a source word to the target side untranslated
+\item lexical translation probabilities $P_{lex}(\overline{e}|\overline{f})$ and $P_{lex}(\overline{f}|\overline{e})$
+\item count of the number of times that arity-0,1, or 2 SCFG rules were used 
+\item count of the total number of rules used
+\item source word penalty
+\item target word penalty
+\item count of the number of times the glue rule is used 
+\end{itemize} 
+
+However, after the creation of the refined grammars which have been described in the previous sections, we have additional information available to us which we would like to leverage in order to improve translational performance. The way in which we would like to utilize this informaiton is by extracting it as features for our model. For instance, some features of particular instance may be:
+
 \section{Feature Extraction}
+There are a number potentially useful features we could extract from the refined grammars, such as:
+\begin{itemize}
+\item Source Syntactic Features
+\item Target Syntactic Features
+\item Source Context Features
+\item OOV
+\item Glue Rule
+\item Morphology
+\end{itemize}
+
+
+\subsection{Source Syntactic Features}
+\subsection{OOV}
+\subsection{Glue Rule}
+\subsection{Backoff}
+
+Given the fact that MERT is unable to optimize the sparse features we are interested in, in this workshop we investigated two alternative methods which allow us to train a model with a high dimensional feature space. The two approaches werethe Margin Infused Relaxed Algorithm (MIRA) and Expected BLEU. All three optimization algorithms perform inference over the hypergraph, but as Table~\ref{tab:comp} shows, they are performing in quite different ways. MERT aims to optimize parameters to maximize the 1-best BLEU, or alternatively to minimize the error, by constructing a piece-wise linear error surface from the entire tuning set and performing a line search in order to find the appropriate weights. The primary limitation of this, which is responsible for its inability to scale, is the unknown
+
 \section{Margin Infused Relaxed Algorithm}
 \section{Expected BLEU}
-\section{Results}
+\section{Accomplishments}
+-implemented mira and exp bleu in open source decoders
+
+\section{Future Work}
