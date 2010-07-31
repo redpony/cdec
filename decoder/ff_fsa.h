@@ -8,6 +8,13 @@
 
   state is some fixed width byte array.  could actually be a void *, WordID sequence, whatever.
 
+  TODO: maybe ff that wants to know about SentenceMetadata should store a ref to
+  it permanently rather than get passed it for every operation.  we're never
+  decoding more than 1 sentence at once and it's annoying to pass it.  same
+  could apply for result edge as well since so far i only use it for logging
+  when USE_INFO_EDGE 1 - would make the most sense if the same change happened
+  to ff.h at the same time.
+
   TODO: there are a confusing array of default-implemented supposedly slightly more efficient overrides enabled; however, the two key differences are: do you score a phrase, or just word at a time (the latter constraining you to obey markov_order() everywhere.  you have to implement the word case no matter what.
 
   TODO: considerable simplification of implementation if Scan implementors are required to update state in place (using temporary copy if they need it), or e.g. using memmove (copy from end to beginning) to rotate state right.
@@ -152,6 +159,16 @@ public:
   /* markov chain of order m: P(xn|xn-1...x1)=P(xn|xn-1...xn-m) */
   int markov_order() const { return 0; } // override if you use state.  order 0 implies state_bytes()==0 as well, as far as scoring/splitting is concerned (you can still track state, though)
   //TODO: if we wanted, we could mark certain states as maximal-context, but this would lose our fixed amount of left context in ff_from_fsa, and lose also our vector operations (have to scan left words 1 at a time, checking always to see where you change from h to inside - BUT, could detect equivalent LM states, which would be nice).
+
+
+
+  // if [i,end) are unscored words of length <= markov_order, score some of them on the right, and return the number scored, i.e. [end-r,end) will have been scored for return r.  CAREFUL: for ngram you have to sometimes remember to pay all of the backoff once you see a few more words to the left.
+  template <class Accum>
+  int early_score_words(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,WordID const* i, WordID const* end,Accum *accum) const {
+    return 0;
+  }
+
+  // this isn't currently used at all.  this left-shortening is not recommended (wasn't worth the computation expense for ngram): specifically for bottom up scoring (ff_from_fsa), you can return a shorter left-words context - but this means e.g. for ngram tracking that a backoff occurred where the final BO cost isn't yet known.  you would also have to remember any necessary info in your own state - in the future, ff_from_fsa on a list of fsa features would only shorten it to the max
 
   Features features() const {
     return features_;

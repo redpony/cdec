@@ -15,8 +15,7 @@ struct WordPenaltyFsa : public FsaFeatureFunctionBase<WordPenaltyFsa> {
 
   WordPenaltyFsa(std::string const& param) {
     Init();
-    return;
-    //below are all defaults:
+    return; //below are all defaults:
     set_state_bytes(0);
     start.clear();
     h_start.clear();
@@ -104,7 +103,6 @@ struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
 };
 
 // similar example feature; base type exposes stateful type, defines markov_order 1, state size = sizeof(State)
-// also buggy right now: give it a bonus weight
 struct ShorterThanPrev : FsaTypedBase<int,ShorterThanPrev> {
   typedef FsaTypedBase<int,ShorterThanPrev> Base;
   static std::string usage(bool param,bool verbose) {
@@ -119,8 +117,7 @@ struct ShorterThanPrev : FsaTypedBase<int,ShorterThanPrev> {
     return std::strlen(TD::Convert(w));
   }
   ShorterThanPrev(std::string const& param)
-  : Base(-1,4/* ,singleton_sentence(TD::se) */)
-    // start, h_start, end_phrase
+    : Base(-1,4,singleton_sentence(TD::se)) // start, h_start, end_phrase
     // estimate: anything <4 chars is usually shorter than previous
   {
     Init();

@@ -44,7 +44,9 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
 
   template <class Accum>
   void ScanAccum(SentenceMetadata const& /* smeta */,Hypergraph::Edge const& edge,WordID w,void const* old_st,void *new_st,Accum *a) const {
+#if USE_INFO_EDGE
     Hypergraph::Edge &de=(Hypergraph::Edge &)edge;
+#endif
     if (!ctxlen_) {
       Add(floored(pimpl_->WordProb(w,&empty_context)),a);
       return;
@@ -72,7 +74,9 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
   //FIXME: there is a bug in here somewhere, or else the 3gram LM we use gives different scores for phrases (impossible? BOW nonzero when shortening context past what LM has?)
   template <class Accum>
   void ScanPhraseAccum(SentenceMetadata const& /* smeta */,const Hypergraph::Edge&edge,WordID const* begin,WordID const* end,void const* old_st,void *new_st,Accum *a) const {
+# if USE_INFO_EDGE
     Hypergraph::Edge &de=(Hypergraph::Edge &)edge;
+# endif
     if (begin==end) return; // otherwise w/ shortening it's possible to end up with no words at all.
     /* // this is forcing unigram prob always.  we will instead build the phrase
     if (!ctxlen_) {
