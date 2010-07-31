@@ -1,4 +1,6 @@
-#define LM_FSA_SHORTEN_CONTEXT 1
+#ifndef LM_FSA_SHORTEN_CONTEXT
+# define LM_FSA_SHORTEN_CONTEXT 1
+#endif
 // seems to work great  - just not sure if it actually speeds anything up.  theoretically slightly more compact (more sharing) forest, but unlikely to make a big difference
 
 //      virtual LogP contextBOW(const VocabIndex *context, unsigned length);
