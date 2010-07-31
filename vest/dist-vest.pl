@@ -477,7 +477,7 @@ sub get_comma_sep_refs {
   my $o = `echo $p`;
   chomp $o;
   my @files = split /\s+/, $o;
-  return "-$r " . join(' -$r ', @files);
+  return "-$r " . join(" -$r ", @files);
 }
 
 sub read_weights_file {
