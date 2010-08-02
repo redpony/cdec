@@ -124,9 +124,6 @@ struct InsideOutsides {
   KType compute(Hypergraph const& hg,KWeightFunction const& kwf=KWeightFunction()) {
     return compute(hg,Outside1<KType>(),kwf);
   }
-  template <class KWeightFunction>
-  KType compute_inside(Hypergraph const& hg,KWeightFunction const& kwf=KWeightFunction()) {
-  }
 
   template <class KWeightFunction,class O1>
   KType compute(Hypergraph const& hg,O1 outside1,KWeightFunction const& kwf=KWeightFunction()) {
