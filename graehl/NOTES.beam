@@ -1,0 +1,20 @@
+(graehl, comments on code)
+
+passive chart: completion of actual translation rules (X or S NT in Hiero), have
+rule features.  Hyperedge inserted with copy of rule feature vector
+(non-sparse).  Inefficient; should be postponed on intermediate parses with
+global pruning; just keep pointer to rules and models must provide an interface
+to build a (sparse) feat. vector on demand later for the stuff we keep.
+
+multithreading: none.  list of hyperarcs for refinement would need to be
+segregated into subforest blocks and have own output lists for later merging.
+e.g. bottom up count number of tail-reachable nodes under each hypernode, then
+assign to workers.
+
+ngram caching: trie, no locks, for example.  for threading, LRU hashing w/ locks per bucket is probably better, or per-thread caches.  probably cache is reset per sentence?
+
+randlm worth using?  guess not.
+
+actually get all 0-state models in 1st pass parse and prune passive edges per span.
+
+allocate cube pruning budget per prev pass
