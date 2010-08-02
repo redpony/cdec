@@ -38,9 +38,8 @@ WeightType Inside(const Hypergraph& hg,
   inside_score.resize(num_nodes);
 //  std::fill(inside_score.begin(), inside_score.end(), WeightType()); // clear handles
   for (int i = 0; i < num_nodes; ++i) {
-    const Hypergraph::Node& cur_node = hg.nodes_[i];
     WeightType* const cur_node_inside_score = &inside_score[i];
-    Hypergraph::EdgesVector const& in=cur_node.in_edges_;
+    Hypergraph::EdgesVector const& in=hg.nodes_[i].in_edges_;
     const int num_in_edges = in.size();
     if (num_in_edges == 0) {
       *cur_node_inside_score = WeightType(1); //FIXME: why not call weight(edge) instead?
@@ -75,9 +74,8 @@ void Outside(const Hypergraph& hg,
 //  std::fill(outside_score.begin(), outside_score.end(), WeightType()); // cleared
   outside_score.back() = scale_outside;
   for (int i = num_nodes - 1; i >= 0; --i) {
-    const Hypergraph::Node& cur_node = hg.nodes_[i];
     const WeightType& head_node_outside_score = outside_score[i];
-    Hypergraph::EdgesVector const& in=cur_node.in_edges_;
+    Hypergraph::EdgesVector const& in=hg.nodes_[i].in_edges_;
     const int num_in_edges = in.size();
     for (int j = 0; j < num_in_edges; ++j) {
       const Hypergraph::Edge& edge = hg.edges_[in[j]];
@@ -141,8 +139,7 @@ struct InsideOutsides {
   typename XWeightFunction::Result expect(Hypergraph const& hg,XWeightFunction const& xwf=XWeightFunction())  {
     typename XWeightFunction::Result x;      // default constructor is semiring 0
     for (int i = 0,num_nodes=hg.nodes_.size(); i < num_nodes; ++i) {
-      const Hypergraph::Node& cur_node = hg.nodes_[i];
-      Hypergraph::EdgesVector const& in=cur_node.in_edges_;
+      Hypergraph::EdgesVector const& in=hg.nodes_[i].in_edges_;
       const int num_in_edges = in.size();
       for (int j = 0; j < num_in_edges; ++j) {
         const Hypergraph::Edge& edge = hg.edges_[in[j]];
@@ -159,8 +156,7 @@ struct InsideOutsides {
   void compute_edge_marginals(Hypergraph const& hg,std::vector<V> &vs,VWeight const& weight) {
     vs.resize(hg.edges_.size());
     for (int i = 0,num_nodes=hg.nodes_.size(); i < num_nodes; ++i) {
-      const Hypergraph::Node& cur_node = hg.nodes_[i];
-      Hypergraph::EdgesVector const& in=cur_node.in_edges_;
+      Hypergraph::EdgesVector const& in=hg.nodes_[i].in_edges_;
       const int num_in_edges = in.size();
       for (int j = 0; j < num_in_edges; ++j) {
         int edgei=in[j];
