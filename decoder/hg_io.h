@@ -2,8 +2,8 @@
 #define _HG_IO_H_
 
 #include <iostream>
-
 #include "lattice.h"
+
 class Hypergraph;
 
 struct HypergraphIO {

@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
+#include "fast_lexical_cast.hpp"
 
 #include "tdict.h"
 #include "json_parse.h"

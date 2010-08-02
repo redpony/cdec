@@ -2,7 +2,7 @@
 
 //TODO: actually score rule_feature()==true features once only, hash keyed on rule or modify TRule directly?  need to keep clear in forest which features come from models vs. rules; then rescoring could drop all the old models features at once
 
-#include <boost/lexical_cast.hpp>
+#include "fast_lexical_cast.hpp"
 #include <stdexcept>
 #include "ff.h"
 

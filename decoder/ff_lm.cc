@@ -56,7 +56,7 @@ char const* usage_verbose="-n determines the name of the feature (and its weight
 #include <netdb.h>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
+#include "fast_lexical_cast.hpp"
 
 #include "tdict.h"
 #include "Vocab.h"

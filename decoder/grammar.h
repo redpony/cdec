@@ -25,9 +25,10 @@ struct GrammarIter {
 };
 
 struct Grammar {
+  //TODO: HASH_MAP?
   typedef std::map<WordID, std::vector<TRulePtr> > Cat2Rules;
   static const std::vector<TRulePtr> NO_RULES;
-  
+
   Grammar(): ctf_levels_(0) {}
   virtual ~Grammar();
   virtual const GrammarIter* GetRoot() const = 0;
@@ -52,7 +53,7 @@ struct Grammar {
  protected:
   Cat2Rules rhs2unaries_;     // these must be filled in by subclasses!
   std::vector<TRulePtr> unaries_;
-  std::string grammar_name_; 
+  std::string grammar_name_;
   unsigned int ctf_levels_;
 };
 
@@ -63,17 +64,17 @@ struct TextGrammar : public Grammar {
   TextGrammar();
   TextGrammar(const std::string& file);
   void SetMaxSpan(int m) { max_span_ = m; }
-  
+
   virtual const GrammarIter* GetRoot() const;
   void AddRule(const TRulePtr& rule, const unsigned int ctf_level=0, const TRulePtr& coarse_parent=TRulePtr());
   void ReadFromFile(const std::string& filename);
   virtual bool HasRuleForSpan(int i, int j, int distance) const;
   const std::vector<TRulePtr>& GetUnaryRules(const WordID& cat) const;
-  
+
  private:
   int max_span_;
   boost::shared_ptr<TGImpl> pimpl_;
-  
+
 };
 
 struct GlueGrammar : public TextGrammar {

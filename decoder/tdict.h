@@ -36,7 +36,7 @@ struct TD {
   static unsigned int NumWords();
   static WordID Convert(const std::string& s);
   static WordID Convert(char const* s);
-  static const char* Convert(const WordID& w);
+  static const char* Convert(WordID w);
 };
 
 struct ToTD {

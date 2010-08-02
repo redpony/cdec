@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
+#include "fast_lexical_cast.hpp"
 
 #include "filelib.h"
 #include "hg_io.h"

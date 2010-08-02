@@ -7,7 +7,7 @@ char const* bleu_usage_verbose="Uses feature id 0!  Make sure there are no other
 
 #include <sstream>
 #include <unistd.h>
-#include <boost/lexical_cast.hpp>
+#include "fast_lexical_cast.hpp"
 
 #include <boost/shared_ptr.hpp>
 

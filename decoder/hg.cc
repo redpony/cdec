@@ -61,6 +61,7 @@ struct TropicalValue {
   }
   TropicalValue(unsigned v) : v_(v) {}
   TropicalValue(const prob_t& v) : v_(v) {}
+//  operator prob_t() const { return v_; }
   inline TropicalValue& operator+=(const TropicalValue& o) {
     if (v_ < o.v_) v_ = o.v_;
     return *this;
@@ -90,6 +91,7 @@ struct ViterbiTransitionEventWeightFunction {
 };
 
 
+//TODO: both Compute* methods build sparse vectors with size = whole subhypergraph, for every node.  there's no need for that.
 prob_t Hypergraph::ComputeEdgePosteriors(double scale, vector<prob_t>* posts) const {
   const ScaledEdgeProb weight(scale);
   const ScaledTransitionEventWeightFunction w2(scale);
@@ -130,6 +132,27 @@ void Hypergraph::PushWeightsToSource(double scale) {
     }
   }
 }
+
+namespace {
+struct vpusher : public vector<TropicalValue> {
+  int fid;
+  vpusher(int fid=0) : fid(fid) {  }
+  void operator()(int n,int /*ei*/,Hypergraph::Edge &e) const {
+    Hypergraph::TailNodeVector const& t=e.tail_nodes_;
+    prob_t p=e.edge_prob_;
+    for (int i=0;i<t.size();++i)
+      p*=(*this)[t[i]].v_;
+    e.feature_values_.set_value(fid,log(e.edge_prob_=p/(*this)[n].v_));
+  }
+};
+}
+
+void Hypergraph::PushViterbiWeightsToGoal(int fid) {
+  vpusher vi(fid);
+  Inside(*this,&vi,ViterbiWeightFunction());
+  visit_edges(vi);
+}
+
 
 void Hypergraph::PushWeightsToGoal(double scale) {
   vector<prob_t> posts;
@@ -425,6 +448,7 @@ struct IdCompare {
 //TODO: if you had parallel arrays associating data w/ each node or edge, you'd want access to reloc_node and reloc_edge - expose in stateful object?
 void Hypergraph::TopologicallySortNodesAndEdges(int goal_index,
                                                 const vector<bool>* prune_edges) {
+  edges_topo_=true;
   // figure out which nodes are reachable from the goal
   vector<int> reloc_node(nodes_.size(), -1);
   vector<int> reloc_edge(edges_.size(), -1);

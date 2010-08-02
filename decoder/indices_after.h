@@ -160,7 +160,7 @@ struct indices_after
   }
 
 private:
-  indices_after(indices_after const& o)
+  indices_after(indices_after const&)
   {
     map=NULL;
   }

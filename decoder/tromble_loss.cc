@@ -1,9 +1,9 @@
 #include "tromble_loss.h"
+#include "fast_lexical_cast.hpp"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/circular_buffer.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/unordered_map.hpp>
@@ -170,7 +170,7 @@ class TrombleLossComputerImpl {
 
   size_t StateSize() const {
     // n-1 boundary words plus counts for n-grams currently rendered as bytes even though most would fit in bits.
-    // Also, this is cached by higher up classes so no need to cache here.  
+    // Also, this is cached by higher up classes so no need to cache here.
     return MutableState::Size(thetas_.size(), bound_ngram_id_);
   }
 
@@ -179,8 +179,8 @@ class TrombleLossComputerImpl {
       const TRule &rule,
       const vector<const void*> &ant_contexts,
       void *out_context) const {
-    // TODO: get refs from sentence metadata.  
-    // This will require resizable features.  
+    // TODO: get refs from sentence metadata.
+    // This will require resizable features.
     if (smeta.GetSentenceID() >= ref_ids_.size()) {
       std::cerr << "Sentence ID " << smeta.GetSentenceID() << " doesn't have references; there are only " << ref_ids_.size() << " references." << std::endl;
       exit(1);
@@ -216,7 +216,7 @@ class TrombleLossComputerImpl {
           if (++pushed == keep) {
             std::copy(history.begin(), history.end(), out_state.left);
           }
-          // Now i is the length of the history coming from this constituent.  So it needs at least i+1 words to have a cross-child add.  
+          // Now i is the length of the history coming from this constituent.  So it needs at least i+1 words to have a cross-child add.
           AddWord(history, i + 1, ngrams, out_state.counts);
         }
         // If the consituent is shorter than thetas_.size(), then the
