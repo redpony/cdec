@@ -40,13 +40,14 @@ WeightType Inside(const Hypergraph& hg,
   for (int i = 0; i < num_nodes; ++i) {
     const Hypergraph::Node& cur_node = hg.nodes_[i];
     WeightType* const cur_node_inside_score = &inside_score[i];
-    const int num_in_edges = cur_node.in_edges_.size();
+    Hypergraph::EdgesVector const& in=cur_node.in_edges_;
+    const int num_in_edges = in.size();
     if (num_in_edges == 0) {
-      *cur_node_inside_score = WeightType(1);
+      *cur_node_inside_score = WeightType(1); //FIXME: why not call weight(edge) instead?
       continue;
     }
     for (int j = 0; j < num_in_edges; ++j) {
-      const Hypergraph::Edge& edge = hg.edges_[cur_node.in_edges_[j]];
+      const Hypergraph::Edge& edge = hg.edges_[in[j]];
       WeightType score = weight(edge);
       for (int k = 0; k < edge.tail_nodes_.size(); ++k) {
         const int tail_node_index = edge.tail_nodes_[k];
@@ -76,9 +77,10 @@ void Outside(const Hypergraph& hg,
   for (int i = num_nodes - 1; i >= 0; --i) {
     const Hypergraph::Node& cur_node = hg.nodes_[i];
     const WeightType& head_node_outside_score = outside_score[i];
-    const int num_in_edges = cur_node.in_edges_.size();
+    Hypergraph::EdgesVector const& in=cur_node.in_edges_;
+    const int num_in_edges = in.size();
     for (int j = 0; j < num_in_edges; ++j) {
-      const Hypergraph::Edge& edge = hg.edges_[cur_node.in_edges_[j]];
+      const Hypergraph::Edge& edge = hg.edges_[in[j]];
       WeightType head_and_edge_weight = weight(edge);
       head_and_edge_weight *= head_node_outside_score;
       const int num_tail_nodes = edge.tail_nodes_.size();
@@ -122,6 +124,10 @@ struct InsideOutsides {
   KType compute(Hypergraph const& hg,KWeightFunction const& kwf=KWeightFunction()) {
     return compute(hg,Outside1<KType>(),kwf);
   }
+  template <class KWeightFunction>
+  KType compute_inside(Hypergraph const& hg,KWeightFunction const& kwf=KWeightFunction()) {
+  }
+
   template <class KWeightFunction,class O1>
   KType compute(Hypergraph const& hg,O1 outside1,KWeightFunction const& kwf=KWeightFunction()) {
     typedef typename KWeightFunction::Weight KType2;
@@ -139,9 +145,10 @@ struct InsideOutsides {
     typename XWeightFunction::Result x;      // default constructor is semiring 0
     for (int i = 0,num_nodes=hg.nodes_.size(); i < num_nodes; ++i) {
       const Hypergraph::Node& cur_node = hg.nodes_[i];
-      const int num_in_edges = cur_node.in_edges_.size();
+      Hypergraph::EdgesVector const& in=cur_node.in_edges_;
+      const int num_in_edges = in.size();
       for (int j = 0; j < num_in_edges; ++j) {
-        const Hypergraph::Edge& edge = hg.edges_[cur_node.in_edges_[j]];
+        const Hypergraph::Edge& edge = hg.edges_[in[j]];
         KType kbar_e = outside[i];
         const int num_tail_nodes = edge.tail_nodes_.size();
         for (int k = 0; k < num_tail_nodes; ++k)
@@ -156,9 +163,10 @@ struct InsideOutsides {
     vs.resize(hg.edges_.size());
     for (int i = 0,num_nodes=hg.nodes_.size(); i < num_nodes; ++i) {
       const Hypergraph::Node& cur_node = hg.nodes_[i];
-      const int num_in_edges = cur_node.in_edges_.size();
+      Hypergraph::EdgesVector const& in=cur_node.in_edges_;
+      const int num_in_edges = in.size();
       for (int j = 0; j < num_in_edges; ++j) {
-        int edgei=cur_node.in_edges_[j];
+        int edgei=in[j];
         const Hypergraph::Edge& edge = hg.edges_[edgei];
         V x=weight(edge)*outside[i];
         const int num_tail_nodes = edge.tail_nodes_.size();

@@ -53,7 +53,7 @@ public:
     WordID cat_;  // non-terminal category if <0, 0 if not set
     EdgesVector in_edges_;   // contents refer to positions in edges_
     EdgesVector out_edges_;  // contents refer to positions in edges_
-    double promise; // set in global pruning; in [0,infty) so that mean is 1.  use: e.g. scale cube poplimit
+    double promise; // set in global pruning; in [0,infty) so that mean is 1.  use: e.g. scale cube poplimit.  //TODO: appears to be useless, compile without this?  on the other hand, pretty cheap.
     void copy_fixed(Node const& o) { // nonstructural fields only - structural ones are managed by sorting/pruning/subsetting
       cat_=o.cat_;
       promise=o.promise;
@@ -64,7 +64,6 @@ public:
       e2.reindex_push_back(o.in_edges_,in_edges_);
       e2.reindex_push_back(o.out_edges_,out_edges_);
     }
-
   };
 
   // TODO get rid of edge_prob_? (can be computed on the fly as the dot
@@ -82,10 +81,10 @@ public:
     prob_t edge_prob_;             // dot product of weights and feat_values
     int id_;   // equal to this object's position in the edges_ vector
 
-    // span info. typically, i_ and j_ refer to indices in the source sentence
-    // if a synchronous parse has been executed i_ and j_ will refer to indices
-    // in the target sentence / lattice and prev_i_ prev_j_ will refer to
-    // positions in the source.  Note: it is up to the translator implementation
+    // span info. typically, i_ and j_ refer to indices in the source sentence.
+    // In synchronous parsing, i_ and j_ will refer to target sentence/lattice indices
+    // while prev_i_ prev_j_ will refer to positions in the source.
+    // Note: it is up to the translator implementation
     // to properly set these values.  For some models (like the Forest-input
     // phrase based model) it may not be straightforward to do.  if these values
     // are not properly set, most things will work but alignment and any features
@@ -333,8 +332,7 @@ public:
   // edge in the hypergraph
   // alpha->size = edges_.size = beta->size
   // returns inside prob of goal node
-  prob_t ComputeEdgePosteriors(double scale,
-                               EdgeProbs* posts) const;
+  prob_t ComputeEdgePosteriors(double scale,EdgeProbs* posts) const;
 
   // find the score of the very best path passing through each edge
   prob_t ComputeBestPathThroughEdges(EdgeProbs* posts) const;
@@ -377,6 +375,10 @@ public:
   // not just lattices
   void PushWeightsToGoal(double scale = 1.0);
 
+  // contrary to PushWeightsToGoal, use viterbi semiring; store log(p) to fid.  note that p_viterbi becomes 1; k*p_viterbi becomes k.  also modifies edge_prob_ (note that the fid stored log(p) will stick around even if you reweight)
+  // afterwards, product of edge_prob_ for a derivation will equal 1 for the viterbi (p_v before, 1 after), and in general (k*p_v before, k after)
+  void PushViterbiWeightsToGoal(int fid=0);
+
 //  void SortInEdgesByEdgeWeights(); // local sort only - pretty useless
 
   void PruneUnreachable(int goal_node_id); // DEPRECATED
@@ -393,7 +395,7 @@ public:
   typedef EdgeProbs NodeProbs;
   void SetPromise(NodeProbs const& inside,NodeProbs const& outside, double power=1, bool normalize=true);
 
-  //TODO: in my opinion, looking at the ratio of logprobs (features \dot weights) rather than the absolute difference generalizes more nicely across sentence lengths and weight vectors that are constant multiples of one another.  at least make that an option.  i worked around this a little in cdec by making "beam alpha per source word" but that's not helping with different tuning runs.  this would also make me more comfortable about allocating promise
+  //TODO: in my opinion, looking at the ratio of logprobs (features \dot weights) rather than the absolute difference generalizes more nicely across sentence lengths and weight vectors that are constant multiples of one another.  at least make that an option.  i worked around this a little in cdec by making "beam alpha per source word" but that's not helping with different tuning runs.  this would also make me more comfortable about allocating Node.promise
 
   // beam_alpha=0 means don't beam prune, otherwise drop things that are e^beam_alpha times worse than best -   // prunes any edge whose prob_t on the best path taking that edge is more than e^alpha times
   //density=0 means don't density prune:   // for density>=1.0, keep this many times the edges needed for the 1best derivation
@@ -437,17 +439,34 @@ public:
   // edges_ is not guaranteed to be in any particular order
   typedef std::vector<Edge> Edges;
   Edges edges_;
+  bool edges_topo_; // TODO: this is always true right now - should reflect whether edges_ are ordered.  typically, you can just iterate over nodes (which are in topo order) and use in_edges to get the edges in topo order
+
+  template <class V>
+  void visit_edges_topo(V &v) {
+    for (int i = 0; i < nodes_.size(); ++i) {
+      EdgesVector const& in=nodes_[i].in_edges_;
+      for (int j=0;j<in.size();++j) {
+        int e=in[j];
+        v(i,e,edges_[e]);
+      }
+    }
+  }
+
+  template <class V>
+  void visit_edges(V &v) {
+    for (int i=0;i<edges_.size();++i)
+      v(edges_[i].head_node_,i,edges_[i]);
+  }
 
   // reorder nodes_ so they are in topological order
   // source nodes at 0 sink nodes at size-1
-  void TopologicallySortNodesAndEdges(int goal_idx,
-                                      const EdgeMask* prune_edges = NULL);
+  void TopologicallySortNodesAndEdges(int goal_idx, const EdgeMask* prune_edges = NULL);
 
   void set_ids(); // resync edge,node .id_
   void check_ids() const; // assert that .id_ have been kept in sync
 
 private:
-  Hypergraph(int num_nodes, int num_edges, bool is_lc) : is_linear_chain_(is_lc), nodes_(num_nodes), edges_(num_edges) {}
+  Hypergraph(int num_nodes, int num_edges, bool is_lc) : is_linear_chain_(is_lc), nodes_(num_nodes), edges_(num_edges),edges_topo_(true) {}
 
   static TRulePtr kEPSRule;
   static TRulePtr kUnaryRule;

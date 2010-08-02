@@ -1,13 +1,19 @@
+#define TD_ALLOW_UNDEFINED_WORDIDS 1
+
+// if 1, word ids that are >= end() will give a numeric token name (single per-thread shared buffer), which of course won't be Convert-able back to the id, because it's not added to the dict.  This is a convenience for logging fake token indices.  Any tokens actually added to the dict may cause end() to overlap the range of fake ids you were using - that's up to you to prevent.
+
+#include <stdlib.h>
+#include <cstring>
 #include <sstream>
 #include "Ngram.h"
 #include "dict.h"
 #include "tdict.h"
 #include "Vocab.h"
 #include "stringlib.h"
+#include "threadlocal.h"
 
 using namespace std;
 
-//FIXME: valgrind errors (static init order?)
 Vocab TD::dict_(0,TD::max_wordid);
 WordID TD::ss=dict_.ssIndex();
 WordID TD::se=dict_.seIndex();
@@ -65,7 +71,23 @@ WordID TD::Convert(char const* s) {
   return dict_.addWord((VocabString)s);
 }
 
-const char* TD::Convert(const WordID& w) {
+
+#if TD_ALLOW_UNDEFINED_WORDIDS
+# include "static_utoa.h"
+char undef_prefix[]="UNDEF_";
+static const int undefpre_n=sizeof(undef_prefix)/sizeof(undef_prefix[0]);
+THREADLOCAL char undef_buf[]="UNDEF_________________";
+inline char const* undef_token(WordID w)
+{
+  append_utoa(undef_buf+undefpre_n,w);
+  return undef_buf;
+}
+#endif
+
+const char* TD::Convert(WordID w) {
+#if TD_ALLOW_UNDEFINED_WORDIDS
+  if (w>=dict_.highIndex()) return undef_token(w);
+#endif
   return dict_.getWord((VocabIndex)w);
 }
 

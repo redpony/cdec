@@ -47,19 +47,14 @@
 # define FSADBGnl(e)
 #endif
 
-#include <boost/lexical_cast.hpp>
+#include "fast_lexical_cast.hpp"
 #include <sstream>
-#include <stdint.h> //C99
 #include <string>
 #include "ff.h"
 #include "sparse_vector.h"
-#include "value_array.h" // used to hold state
 #include "tdict.h"
 #include "hg.h"
-#include "sentences.h"
-#include "feature_accum.h"
-
-typedef ValueArray<uint8_t> Bytes;
+#include "ff_fsa_data.h"
 
 /*
 usage: see ff_sample_fsa.h or ff_lm_fsa.h
@@ -68,8 +63,9 @@ usage: see ff_sample_fsa.h or ff_lm_fsa.h
 
  */
 
+
 template <class Impl>
-struct FsaFeatureFunctionBase {
+struct FsaFeatureFunctionBase : public FsaFeatureFunctionData {
   // CALL 1 of these MANUALLY  (because feature name(s) may depend on param, it's not done in ctor)
   void Init(std::string const& fname="") {
     fid_=FD::Convert(fname.empty()?name():fname);
@@ -82,53 +78,8 @@ struct FsaFeatureFunctionBase {
 
   Impl const& d() const { return static_cast<Impl const&>(*this); }
   Impl & d()  { return static_cast<Impl &>(*this); }
-protected:
-  int ssz; // don't forget to set this. default 0 (it may depend on params of course)
-  Bytes start,h_start; // start state and estimated-features (heuristic) start state.  set these.  default empty.
-  Sentence end_phrase_; // words appended for final traversal (final state cost is assessed using Scan) e.g. "</s>" for lm.
-  void set_state_bytes(int sb=0) {
-    if (start.size()!=sb) start.resize(sb);
-    if (h_start.size()!=sb) h_start.resize(sb);
-    ssz=sb;
-  }
-  void set_end_phrase(WordID single) {
-    end_phrase_=singleton_sentence(single);
-  }
-
-  inline void static to_state(void *state,char const* begin,char const* end) {
-    std::memcpy(state,begin,end-begin);
-  }
-  inline void static to_state(void *state,char const* begin,int n) {
-    std::memcpy(state,begin,n);
-  }
-  template <class T>
-  inline void static to_state(void *state,T const* begin,int n=1) {
-    to_state(state,(char const*)begin,n*sizeof(T));
-  }
-  template <class T>
-  inline void static to_state(void *state,T const* begin,T const* end) {
-    to_state(state,(char const*)begin,(char const*)end);
-  }
-
-  inline static char hexdigit(int i) {
-    int j=i-10;
-    return j>=0?'a'+j:'0'+i;
-  }
-  inline static void print_hex_byte(std::ostream &o,unsigned c) {
-      o<<hexdigit(c>>4);
-      o<<hexdigit(c&0x0f);
-  }
-
 public:
   int fid_; // you can have more than 1 feature of course.
-
-  void state_copy(void *to,void const*from) const {
-    if (ssz)
-      std::memcpy(to,from,ssz);
-  }
-  void state_zero(void *st) const { // you should call this if you don't know the state yet and want it to be hashed/compared properly
-    std::memset(st,0,ssz);
-  }
 
   // can override to different return type, e.g. just return feats:
   Featval describe_features(FeatureVector const& feats) const {
@@ -170,26 +121,12 @@ public:
 
   // this isn't currently used at all.  this left-shortening is not recommended (wasn't worth the computation expense for ngram): specifically for bottom up scoring (ff_from_fsa), you can return a shorter left-words context - but this means e.g. for ngram tracking that a backoff occurred where the final BO cost isn't yet known.  you would also have to remember any necessary info in your own state - in the future, ff_from_fsa on a list of fsa features would only shorten it to the max
 
-  Features features() const {
-    return features_;
-  }
-
-  int n_features() const {
-    return features_.size();
-  }
 
   // override this (static)
   static std::string usage(bool param,bool verbose) {
     return FeatureFunction::usage_helper("unnamed_fsa_feature","","",param,verbose);
   }
-  int state_bytes() const { return ssz; } // or override this
-  void const* start_state() const {
-    return start.begin();
-  }
-  void const * heuristic_start_state() const {
-    return h_start.begin();
-  }
-  Sentence const& end_phrase() const { return end_phrase_; }
+
   // move from state to next_state after seeing word x, while emitting features->set_value(fid,val) possibly with duplicates.  state and next_state will never be the same memory.
   //TODO: decide if we want to require you to support dest same as src, since that's how we use it most often in ff_from_fsa bottom-up wrapper (in l->r scoring, however, distinct copies will be the rule), and it probably wouldn't be too hard for most people to support.  however, it's good to hide the complexity here, once (see overly clever FsaScan loop that swaps src/dest addresses repeatedly to scan a sequence by effectively swapping)
 
@@ -206,10 +143,6 @@ protected:
     return d().Scan1(w,state,next_state);
   }
 public:
-  template <class T>
-  static inline T* state_as(void *p) { return (T*)p; }
-  template <class T>
-  static inline T const* state_as(void const* p) { return (T*)p; }
 
   // must override this or Scan1Meta or Scan1
   template <class Accum>
@@ -307,21 +240,18 @@ public:
     d().ScanPhraseAccumBounce(smeta,edge,i,end,(void*)s1,(void*)s2,accum);
   }
 
+  // for single-feat only.  but will work for different accums
   template <class Accum>
-  inline void Add(Featval v,Accum *a) const { // for single-feat only.  but will work for different accums
+  inline void Add(Featval v,Accum *a) const {
     a->Add(fid_,v);
   }
-  inline void Add(Featval v,SingleFeatureAccumulator *a) const {
-    a->Add(v);
-  }
-
-
   inline void set_feat(FeatureVector *features,Featval v) const {
     features->set_value(fid_,v);
   }
 
   // don't set state-bytes etc. in ctor because it may depend on parsing param string
-  FsaFeatureFunctionBase(int statesz=0,Sentence const& end_sentence_phrase=Sentence()) : ssz(statesz),start(statesz),h_start(statesz),end_phrase_(end_sentence_phrase) {}
+  FsaFeatureFunctionBase(int statesz=0,Sentence const& end_sentence_phrase=Sentence()) :
+    FsaFeatureFunctionData(statesz,end_sentence_phrase) {  }
 
 };
 
@@ -398,7 +328,6 @@ public:
     FSADBG(edge,state(next_state)<<" = "<<a->describe(im));
     FSADBGnl(edge);
   }
-
 };
 
 

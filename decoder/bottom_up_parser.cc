@@ -1,5 +1,7 @@
 //TODO: when using many nonterminals, group passive edges for a span (treat all as a single X for the active items).
 
+//TODO: figure out what cdyer was talking about when he said that having unary rules A->B and B->A, doesn't make cycles appear in result provided rules are sorted in some way (that they typically are)
+
 #include "bottom_up_parser.h"
 
 #include <iostream>

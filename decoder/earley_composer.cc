@@ -9,7 +9,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/lexical_cast.hpp>
+#include "fast_lexical_cast.hpp"
 
 #include "phrasetable_fst.h"
 #include "sparse_vector.h"
@@ -206,15 +206,15 @@ ostream& operator<<(ostream& os, const Edge& e) {
   if (e.IsCreatedByScan())
     type = "SCAN";
   else if (e.IsCreatedByComplete())
-    type = "COMPLETE"; 
+    type = "COMPLETE";
   os << "["
 #ifdef DEBUG_CHART_PARSER
      << '(' << e.id << ") "
 #else
      << '(' << &e << ") "
 #endif
-     << "q=" << e.q << ", r=" << e.r 
-     << ", cat="<< TD::Convert(e.cat*-1) << ", dot=" 
+     << "q=" << e.q << ", r=" << e.r
+     << ", cat="<< TD::Convert(e.cat*-1) << ", dot="
      << e.dot
 #ifdef DEBUG_CHART_PARSER
      << e.dot->hint
@@ -588,7 +588,7 @@ class EarleyComposerImpl {
           assert(!"self-loop found!");
         }
 #endif
-    Hypergraph::Edge* hg_edge = NULL; 
+    Hypergraph::Edge* hg_edge = NULL;
     if (tail.size() == 0) {
       hg_edge = hg->AddEdge(kEPSRule, tail);
     } else if (tail.size() == 1) {

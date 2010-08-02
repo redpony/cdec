@@ -1,3 +1,4 @@
+#include "fast_lexical_cast.hpp"
 #include "viterbi.h"
 
 #include <sstream>
@@ -114,7 +115,6 @@ Both relationships are commutative but are not transitive. The relationship defi
 */
 #include <cmath>
 #include <stdexcept>
-#include <boost/lexical_cast.hpp>
 inline bool close_enough(double a,double b,double epsilon)
 {
     using std::fabs;

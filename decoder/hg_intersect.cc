@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <tr1/unordered_map>
-#include <boost/lexical_cast.hpp>
+#include "fast_lexical_cast.hpp"
 #include <boost/functional/hash.hpp>
 
 #include "tdict.h"
@@ -143,7 +143,7 @@ bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
     rule->parent_rule_ = edge.rule_;
     rule->ComputeArity();
     //cerr << "ADD: " << rule->AsString() << endl;
-    
+
     g->AddRule(rule);
   }
   g->SetMaxSpan(target.size() + 1);
