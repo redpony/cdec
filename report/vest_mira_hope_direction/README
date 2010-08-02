@@ -7,3 +7,17 @@ dev.bleu.baseline.txt - usual search directions (orth+random)
 dev.bleu.oracle_mira_direction.txt - as above, but fewer random directions, 10 model->hope directions
 
 note that the search directions are recomputed after each MERT iteration.
+
+/home/jgraehl/tune/urdu/vest-dth-oracle*
+
+~/tune/urdu$ ls -d vest-dth*
+vest-dth  vest-dth-oracle  vest-dth-oracle-bleuwt=0.1  vest-dth-oracle-bleuwt=10  vest-dth-oracle-bleuwt=100
+
+oraclewt devtest-estimated-BLEU
+0   22.01 (orth. dirs, 10 random dirs)
+0.1 22.13 (orth. dirs, 10+10 model->hope and fear->hope random directions, 5 purely random dirs)
+1   22.06 "
+10  21.85 "
+100 22.08 "
+
+no evidence of any advantage using oracle directions (TODO: decode mt09 as test set, check for any advantage when using many features)
