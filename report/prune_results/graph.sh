@@ -1,12 +1,15 @@
 # see do.sh for usage
 d=$(dirname `readlink -f $0`)
+. $d/lib.sh
 
 plboth() {
     local o=$1
     local oarg="-landscape"
     [ "$portrait" ] && oarg=
     shift
+    set -x
     pl -png -o $o.png "$@"
+set +x
     pl -ps -o $o.ps $oarg "$@"
     ps2pdf $o.ps $o.pdf
 }
@@ -24,12 +27,15 @@ graph3() {
     local of=$obase.png
     local ops=$obase.ps
         #yrange=0
+    local yrange_arg
+    [ "$ymin" ] && yrange_arg="yrange=$ymin $ymax"
     #pointsym=none pointsym2=none
     title=${title:-$ylbl $ylbl2 $ylbl3 vs. $xlbl}
     xlbl=${xlbl:=x}
     showvars_required obase xlbl ylbl ylbl2 ylbl3
+    showvars_optional yrange yrange_arg
     require_files $data
-    plboth $obase -prefab lines data=$data x=1  y=$y name="$ylbl" y2=$y2 name2="$ylbl2" y3=$y3 name3="$ylbl3" ylbldistance=$ylbldistance xlbl="$xlbl" title="$title" ystubfmt '%4g' ystubdet="size=6" linedet2="style=1" linedet3="style=3" -scale ${scale:-1.4}
+    plboth $obase -prefab lines data=$data x=1  "$yrange_arg" y=$y name="$ylbl" y2=$y2 name2="$ylbl2" y3=$y3 name3="$ylbl3" ylbldistance=$ylbldistance xlbl="$xlbl" title="$title" ystubfmt '%4g' ystubdet="size=6" linedet2="style=1" linedet3="style=3" -scale ${scale:-1.4}
     echo $of
 }
 
@@ -54,48 +60,6 @@ main() {
     exit
 }
 
-echo2() {
- echo "$@" 1>&2
-}
-
-errorq() {
- echo2 ERROR: "$@"
-}
-
-error() {
- errorq "$@"
- return 2
-}
-
-showvars_required() {
- echo2 $0 RUNNING WITH REQUIRED VARIABLES:
-    local k
- for k in "$@"; do
-  eval local v=\$$k
-  echo2 $k=$v
-  if [ -z "$v" ] ; then
-    errorq "required (environment or shell) variable $k not defined!"
-    return 1
-  fi
- done
- echo2
-}
-
-require_files() {
- local f
- [ "$*" ] || error "require_files called with empty args list"
- for f in "$@"; do
-    if ! have_file "$f" ; then
-        error "missing required file: $f"
-        return 1
-    fi
- done
- return 0
-}
-
-have_file() {
-    [ "$1" -a -f "$1" -a \( -z "$2" -o "$1" -nt "$2" \)  -a \( -z "$require_nonempty" -o -s "$1" \) ]
-}
 
 if ! [ "$nomain" ] ; then
     main "$@";exit
