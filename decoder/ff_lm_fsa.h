@@ -53,7 +53,7 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
     }
     //variable length array is in C99, msvc++, if it doesn't support it, #ifdef it or use a stackalloc call (forget the name)
     if (ctxlen_) {
-      WordID ctx[ngram_order_];
+      WordID ctx[ngram_order_]; //alloca if you don't have C99
       state_copy(ctx,old_st);
       ctx[ctxlen_]=TD::none; // make this part of state?  wastes space but saves copies.
       Featval p=floored(pimpl_->WordProb(w,ctx));
