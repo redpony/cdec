@@ -82,7 +82,6 @@ libcdec_a_SOURCES = \
   ../vest/comb_scorer.cc \
   ../vest/error_surface.cc \
   ../vest/viterbi_envelope.cc \
-  tromble_loss.cc \
   freqdict.cc \
   lexalign.cc \
   lextrans.cc \
