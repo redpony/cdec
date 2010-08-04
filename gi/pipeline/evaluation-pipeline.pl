@@ -9,6 +9,7 @@ my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR 
 my $JOBS = 15;
 my $PMEM = "9G";
 my $NUM_TRANSLATIONS = 30;
+my $GOAL = "S";
 
 # featurize_grammar may add multiple features from a single feature extractor
 # the key in this map is the extractor name, the value is a list of the extracted features
@@ -139,6 +140,7 @@ if (GetOptions(
         "jobs=i" => \$JOBS,
         "out-dir=s" => \$outdir,
         "lmorder=i" => \$lmorder,
+        "goal=s" => \$GOAL,
 ) == 0 || @ARGV!=2 || $help) {
         print_help();
         exit;
@@ -311,6 +313,7 @@ scfg_default_nt=OOV
 scfg_no_hiero_glue_grammar=true
 feature_function=WordPenalty
 feature_function=LanguageModel -o $lmorder $LANG_MODEL
+goal=$GOAL
 EOT
   print CDECINI "grammar=$bkoff_grmr\n" if $bkoffgram;
   close CDECINI;
