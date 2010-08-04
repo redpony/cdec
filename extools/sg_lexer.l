@@ -79,7 +79,7 @@ static void sglex_reset() {
 %}
 
 REAL [\-+]?[0-9]+(\.[0-9]*([eE][-+]*[0-9]+)?)?|inf|[\-+]inf
-NT [\-#$A-Z_:=.",\\][\-#$".A-Z+/=_0-9!:@\\]*
+NT [^\t \[\],]+
 ALIGN [0-9]+-[0-9]+
 
 %x LHS_END SRC TRG FEATS FEATVAL ALIGNS
@@ -191,6 +191,8 @@ ALIGN [0-9]+-[0-9]+
 }
 
 <TRG>\|\|\|	{
+		//std::cerr << "  trg_size: " << sglex_trg_rhs_size << std::endl;
+		//std::cerr << "  trg_arity: " << sglex_trg_arity << std::endl;
 		assert(sglex_trg_rhs_size > 0);
 		cur_trg_rhs.resize(sglex_trg_rhs_size);
 		for (int i = 0; i < sglex_trg_rhs_size; ++i)
