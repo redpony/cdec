@@ -21,11 +21,8 @@ public class PhraseObjective extends ProjectedObjective
 {
 	static final double GRAD_DIFF = 0.00002;
 	static double INIT_STEP_SIZE = 300;
-	static double VAL_DIFF = 1e-6; // FIXME needs to be tuned - and this might be too weak
+	static double VAL_DIFF = 1e-8; // tuned to BTEC subsample
 	static int ITERATIONS = 100;
-	//private double c1=0.0001; // wolf stuff
-	//private double c2=0.9;
-	//private static double lambda[][];
 	private PhraseCluster c;
 	
 	/**@brief
@@ -181,13 +178,13 @@ public class PhraseObjective extends ProjectedObjective
 		optimizer.setMaxIterations(ITERATIONS);
 		updateFunction();
 		boolean success = optimizer.optimize(this,stats,compositeStop);
-//		System.out.println("Ended optimzation Projected Gradient Descent\n" + stats.prettyPrint(1));
+		//System.out.println("Ended optimzation Projected Gradient Descent\n" + stats.prettyPrint(1));
 		//if(succed){
 			//System.out.println("Ended optimization in " + optimizer.getCurrentIteration());
 		//}else{
 //			System.out.println("Failed to optimize");
 		//}
-		//	ps.println(Arrays.toString(parameters));
+		//System.out.println(Arrays.toString(parameters));
 		
 		//	for(int edge=0;edge<data.getSize();edge++){
 		//	ps.println(Arrays.toString(q[edge]));
