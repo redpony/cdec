@@ -4,6 +4,9 @@
 //FIXME: when FSA_LM_PHRASE 1, 3gram fsa has differences, especially with unk words, in about the 4th decimal digit (about .05%), compared to regular ff_lm.  this is USUALLY a bug (there's way more actual precision in there).  this was with #define LM_FSA_SHORTEN_CONTEXT 1 and 0 (so it's not that).  also, LM_FSA_SHORTEN_CONTEXT gives identical scores with FSA_LM_PHRASE 0
 
 // enabling for now - retest unigram+ more, solve above puzzle
+
+// some impls in ff_lm.cc
+
 #define FSA_LM_PHRASE 1
 
 #define FSA_LM_DEBUG 0
@@ -15,8 +18,8 @@
 # define FSALMDBGnl(e)
 #endif
 
+#include "ff_fsa.h"
 #include "ff_lm.h"
-#include "ff_from_fsa.h"
 
 namespace {
 WordID empty_context=TD::none;
@@ -49,17 +52,13 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
 #endif
     if (!ctxlen_) {
       Add(floored(pimpl_->WordProb(w,&empty_context)),a);
-      return;
-    }
-    //variable length array is in C99, msvc++, if it doesn't support it, #ifdef it or use a stackalloc call (forget the name)
-    if (ctxlen_) {
+    } else {
       WordID ctx[ngram_order_]; //alloca if you don't have C99
       state_copy(ctx,old_st);
-      ctx[ctxlen_]=TD::none; // make this part of state?  wastes space but saves copies.
+      ctx[ctxlen_]=TD::none;
       Featval p=floored(pimpl_->WordProb(w,ctx));
-      FSALMDBG(de,"p("<<TD::Convert(w)<<"|"<<TD::Convert(ctx,ctx+ctxlen_)<<")="<<p);
-      FSALMDBGnl(de);
-// states are sri contexts so are in reverse order (most recent word is first, then 1-back comes next, etc.).
+      FSALMDBG(de,"p("<<TD::Convert(w)<<"|"<<TD::Convert(ctx,ctx+ctxlen_)<<")="<<p);FSALMDBGnl(de);
+      // states are srilm contexts so are in reverse order (most recent word is first, then 1-back comes next, etc.).
       WordID *nst=(WordID *)new_st;
       nst[0]=w; // new most recent word
       to_state(nst+1,ctx,ctxlen_-1); // rotate old words right
@@ -74,9 +73,7 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
   //FIXME: there is a bug in here somewhere, or else the 3gram LM we use gives different scores for phrases (impossible? BOW nonzero when shortening context past what LM has?)
   template <class Accum>
   void ScanPhraseAccum(SentenceMetadata const& /* smeta */,const Hypergraph::Edge&edge,WordID const* begin,WordID const* end,void const* old_st,void *new_st,Accum *a) const {
-# if USE_INFO_EDGE
-    Hypergraph::Edge &de=(Hypergraph::Edge &)edge;
-# endif
+    Hypergraph::Edge &de=(Hypergraph::Edge &)edge;(void)de;
     if (begin==end) return; // otherwise w/ shortening it's possible to end up with no words at all.
     /* // this is forcing unigram prob always.  we will instead build the phrase
     if (!ctxlen_) {
@@ -98,7 +95,6 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
     assert(ctx_score_end==ctx+nw);
     // we could just copy the filled state words, but it probably doesn't save much time (and might cost some to scan to find the nones.  most contexts are full except for the shortest source spans.
     FSALMDBG(de," scan.r->l("<<TD::GetString(ctx,ctx_score_end)<<"|"<<TD::GetString(ctx_score_end,ctx+nboth)<<')');
-    FSAFFDBG(de," r->l("<<TD::GetString(ctx,ctx_score_end)<<"|"<<TD::GetString(ctx_score_end,ctx+nboth)<<')');
     Featval p=0;
     FSALMDBGnl(edge);
     for(;ctx_score_end>ctx;--ctx_score_end)
@@ -128,6 +124,5 @@ private:
 
 };
 
-typedef FeatureFunctionFromFsa<LanguageModelFsa> LanguageModelFromFsa;
 
 #endif

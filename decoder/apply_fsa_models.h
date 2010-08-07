@@ -1,7 +1,7 @@
 #ifndef _APPLY_FSA_MODELS_H_
 #define _APPLY_FSA_MODELS_H_
 
-//#include "ff_fsa_dynamic.h"
+#include "ff_fsa_dynamic.h"
 
 struct FsaFeatureFunction;
 struct Hypergraph;

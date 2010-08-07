@@ -18,11 +18,8 @@
    uses guarantee about markov order=N to score ASAP
    encoding of state: if less than N-1 (ctxlen) words
 
-   either:
-   struct FF : public FsaImpl,FeatureFunctionFromFsa<FF> (more efficient)
-
-   or:
-   struct FF : public FsaFeatureFunctionDynamic,FeatureFunctionFromFsa<FF> (code sharing, but double dynamic dispatch)
+   usage:
+   typedef FeatureFunctionFromFsa<LanguageModelFsa> LanguageModelFromFsa;
 */
 
 template <class Impl>
@@ -270,7 +267,6 @@ private:
     return ((char *)ant+state_offset);
   }
 };
-
 
 #ifdef TEST_FSA
 # include "tdict.cc"

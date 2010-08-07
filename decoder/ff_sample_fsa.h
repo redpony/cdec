@@ -29,7 +29,11 @@ struct WordPenaltyFsa : public FsaFeatureFunctionBase<WordPenaltyFsa> {
 typedef FeatureFunctionFromFsa<WordPenaltyFsa> WordPenaltyFromFsa;
 
 struct SameFirstLetter : public FsaFeatureFunctionBase<SameFirstLetter> {
-  SameFirstLetter(std::string const& param) : FsaFeatureFunctionBase<SameFirstLetter>(1,singleton_sentence("END")) {  start[0]='a';h_start[0]=0; } // 1 byte of state, scan final (single) symbol "END" to get final state cost
+  SameFirstLetter(std::string const& param) : FsaFeatureFunctionBase<SameFirstLetter>(1,singleton_sentence("END"))
+                                               // 1 byte of state, scan final (single) symbol "END" to get final state cost
+  {
+    start[0]='a'; h_start[0]=0; Init();
+  }
   int markov_order() const { return 1; }
   Featval Scan1(WordID w,void const* old_state,void *new_state) const {
     char cw=TD::Convert(w)[0];
@@ -41,12 +45,13 @@ struct SameFirstLetter : public FsaFeatureFunctionBase<SameFirstLetter> {
     o<<*(char const*)st;
   }
   static std::string usage(bool param,bool verbose) {
-    return FeatureFunction::usage_helper("SameFirstLetter","[no args]","1 each time 2 consecutive words start with the same letter",param,verbose);
+    return FeatureFunction::usage_helper("SameFirstLetter",
+                                         "[no args]",
+                                         "1 each time 2 consecutive words start with the same letter",
+                                         param,verbose);
   }
 };
 
-
-// appears to be buggy right now: give it a bonus weight (+)
 struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
   typedef FsaFeatureFunctionBase<LongerThanPrev> Base;
   static std::string usage(bool param,bool verbose) {
@@ -104,7 +109,10 @@ struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
 
 // similar example feature; base type exposes stateful type, defines markov_order 1, state size = sizeof(State)
 struct ShorterThanPrev : FsaTypedBase<int,ShorterThanPrev> {
-  typedef FsaTypedBase<int,ShorterThanPrev> Base;
+  ShorterThanPrev(std::string const& param)
+    : FsaTypedBase<int,ShorterThanPrev>(-1,4,singleton_sentence(TD::se)) // start, h_start, end_phrase
+    // h_start estimate state: anything <4 chars is usually shorter than previous
+  { Init(); }
   static std::string usage(bool param,bool verbose) {
     return FeatureFunction::usage_helper(
       "ShorterThanPrev",
@@ -112,28 +120,13 @@ struct ShorterThanPrev : FsaTypedBase<int,ShorterThanPrev> {
       "stupid example stateful (bigram) feature: 1 per target word that's shorter than the previous word (end of sentence considered '</s>')",
       param,verbose);
   }
-
   static inline int wordlen(WordID w) {
     return std::strlen(TD::Convert(w));
   }
-  ShorterThanPrev(std::string const& param)
-    : Base(-1,4,singleton_sentence(TD::se)) // start, h_start, end_phrase
-    // estimate: anything <4 chars is usually shorter than previous
-  {
-    Init();
-  }
-
-
-/*  Featval ScanT1(WordID w,int prevlen,int &len) const;
-    // alternative to below:
-    */
-
-  // evil anti-google int & len out-param:
   Featval ScanT1(SentenceMetadata const& /* smeta */,const Hypergraph::Edge& /* edge */,WordID w,int prevlen,int &len) const {
     len=wordlen(w);
     return (len<prevlen) ? 1 : 0;
   }
-
 };
 
 
