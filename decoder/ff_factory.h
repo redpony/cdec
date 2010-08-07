@@ -63,6 +63,7 @@ struct FsaFactory : public FactoryBase<FsaFeatureFunction> {
 
 struct UntypedFactoryRegistry {
   std::string usage(std::string const& ffname,bool params=true,bool verbose=true) const;
+  bool have(std::string const& ffname);
   void DisplayList() const;
   void Register(const std::string& ffname, UntypedFactory* factory);
   void Register(UntypedFactory* factory);
@@ -106,6 +107,9 @@ extern FsaFFRegistry fsa_ff_registry;
 inline FsaFFRegistry & global_fsa_ff_registry() { return fsa_ff_registry; }
 extern FFRegistry ff_registry;
 inline FFRegistry & global_ff_registry() { return ff_registry; }
+
+void ff_usage(std::string const& name,std::ostream &out=std::cout);
+
 /*
 extern boost::shared_ptr<FsaFFRegistry> global_fsa_ff_registry;
 extern boost::shared_ptr<FFRegistry> global_ff_registry;

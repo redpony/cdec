@@ -2,6 +2,7 @@
 
 #include "ff.h"
 #include "stringlib.h"
+#include <stdexcept>
 
 using boost::shared_ptr;
 using namespace std;
@@ -25,6 +26,10 @@ bool UntypedFactoryRegistry::parse_debug(std::string & param) {
   if (debug)
     p.erase(0,debug_pre.size()+space);
   return debug;
+}
+
+bool UntypedFactoryRegistry::have(std::string const& ffname) {
+  return reg_.find(ffname)!=reg_.end();
 }
 
 void UntypedFactoryRegistry::DisplayList() const {
@@ -75,3 +80,15 @@ struct null_deleter
 boost::shared_ptr<FsaFFRegistry> global_fsa_ff_registry(&fsa_ff_registry,null_deleter());
 boost::shared_ptr<FFRegistry> global_ff_registry(&ff_registry,null_deleter());
 */
+
+void ff_usage(std::string const& n,std::ostream &out)
+{
+  bool have=ff_registry.have(n);
+  if (have)
+    cout<<"FF "<<ff_registry.usage(n,true,true)<<endl;
+  if (fsa_ff_registry.have(n))
+    cout<<"Fsa FF "<<fsa_ff_registry.usage(n,true,true)<<endl;
+  else if (!have)
+    throw std::runtime_error("Unknown feature "+n);
+}
+

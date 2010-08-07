@@ -200,14 +200,14 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
   if (conf.count("list_feature_functions")) {
     cerr << "Available feature functions (specify with -F; describe with -u FeatureName):\n";
     ff_registry.DisplayList();
-    cerr << "Available feature functions (specify with --fsa_feature_function):\n";
+    cerr << "Available FSA feature functions (specify with --fsa_feature_function):\n";
     fsa_ff_registry.DisplayList();
     cerr << endl;
     exit(1);
   }
 
   if (conf.count("usage")) {
-    cout<<ff_registry.usage(str("usage",conf),true,true)<<endl;
+    ff_usage(str("usage",conf));
     exit(0);
   }
   if (conf.count("help")) {

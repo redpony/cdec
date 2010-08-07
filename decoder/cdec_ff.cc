@@ -23,7 +23,7 @@ void register_feature_functions() {
 
   //TODO: worthless example target FSA ffs.  remove later
   ff_registry.Register(new FFFactory<WordPenaltyFromFsa>); // same as WordPenalty, but implemented using ff_fsa
-  ff_registry.Register(new FFFactory<FeatureFunctionFromFsa<SameFirstLetter> >);
+  RegisterFsaImpl<SameFirstLetter>(true,false);
   ff_registry.Register(new FFFactory<FeatureFunctionFromFsa<LongerThanPrev> >);
   ff_registry.Register(new FFFactory<FeatureFunctionFromFsa<ShorterThanPrev> >);
 
