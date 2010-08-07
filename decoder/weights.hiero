@@ -1,0 +1,10 @@
+SameFirstLetter 1
+LongerThanPrev 1
+ShorterThanPrev 1
+GlueTop 0.0
+Glue -1.0
+EgivenF -0.5
+FgivenE -0.5
+LexEgivenF -0.5
+LexFgivenE -0.5
+LM 1
