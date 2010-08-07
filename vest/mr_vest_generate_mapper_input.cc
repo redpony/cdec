@@ -147,7 +147,7 @@ struct oracle_directions {
     po::variables_map conf;
     InitCommandLine(argc,argv,&conf);
     init_bleumodel();
-    UseConf(*conf);
+    UseConf(conf);
     Run();
     return 0;
   }
