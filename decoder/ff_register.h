@@ -36,10 +36,14 @@ inline void RegisterFF() {
 }
 
 template <class FsaImpl>
-inline void RegisterFsaDynToFF(bool prefix=true) {
+inline void RegisterFsaDynToFF(std::string name,bool prefix=true) {
   typedef FsaFeatureFunctionDynamic<FsaImpl> DynFsa;
-  std::string name=FsaImpl::usage(false,false);
   ff_registry.Register(prefix?"DynamicFsa"+name:name,new FFFactory<FeatureFunctionFromFsa<DynFsa> >);
+}
+
+template <class FsaImpl>
+inline void RegisterFsaDynToFF(bool prefix=true) {
+  RegisterFsaDynToFF<FsaImpl>(FsaImpl::usage(false,false),prefix);
 }
 
 

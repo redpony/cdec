@@ -38,6 +38,8 @@ struct FsaFeatureFunction : public FsaFeatureFunctionData {
   virtual void print_state(std::ostream &o,void const*state) const {
     FsaFeatureFunctionData::print_state(o,state);
   }
+  virtual std::string describe() const { return "[FSA unnamed_dynamic_fsa_feature]"; }
+
   //end_phrase()
   virtual ~FsaFeatureFunction() {}
 
@@ -61,6 +63,10 @@ struct FsaFeatureFunctionDynamic : public FsaFeatureFunction {
     //static_cast<Impl const&>(*this);
   }
   int markov_order() const { return d().markov_order(); }
+
+  std::string describe() const   {
+    return d().describe();
+  }
 
   virtual void ScanAccum(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,
                         WordID w,void const* state,void *next_state,Accum *a) const {
@@ -105,19 +111,96 @@ struct FsaFeatureFunctionDynamic : public FsaFeatureFunction {
   }
 
   virtual void Init() {
-    d().sync_to_=(FsaFeatureFunction*)this;
+    d().sync_to_=(FsaFeatureFunctionData*)this;
     d().Init();
     d().sync();
   }
 
-  FsaFeatureFunctionDynamic(std::string const& param) : impl(param) {
+  template <class I>
+  FsaFeatureFunctionDynamic(I const& param) : impl(param) {
     Init();
   }
 private:
   Impl impl;
-
 };
 
+// constructor takes ptr or shared_ptr to Impl, otherwise same as above - note: not virtual
+template <class Impl>
+struct FsaFeatureFunctionPimpl : public FsaFeatureFunctionData {
+  typedef boost::shared_ptr<Impl const> Pimpl;
+  static const bool simple_phrase_score=Impl::simple_phrase_score;
+  Impl const& d() const { return *p_; }
+  int markov_order() const { return d().markov_order(); }
+
+  std::string describe() const   {
+    return d().describe();
+  }
+
+  void ScanAccum(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,
+                        WordID w,void const* state,void *next_state,Accum *a) const {
+    return d().ScanAccum(smeta,edge,w,state,next_state,a);
+  }
+
+  void ScanPhraseAccum(SentenceMetadata const& smeta,Hypergraph::Edge const & edge,
+                              WordID const* i, WordID const* end,
+                              void const* state,void *next_state,Accum *a) const {
+    return d().ScanPhraseAccum(smeta,edge,i,end,state,next_state,a);
+  }
+
+  void ScanPhraseAccumOnly(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,
+                           WordID const* i, WordID const* end,
+                           void const* state,Accum *a) const {
+    return d().ScanPhraseAccumOnly(smeta,edge,i,end,state,a);
+  }
+
+  void *ScanPhraseAccumBounce(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,WordID const* i, WordID const* end,void *cs,void *ns,Accum *a) const {
+    return d().ScanPhraseAccumBounce(smeta,edge,i,end,cs,ns,a);
+  }
+
+  int early_score_words(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,WordID const* i, WordID const* end,Accum *accum) const {
+    return d().early_score_words(smeta,edge,i,end,accum);
+  }
+
+  static std::string usage(bool param,bool verbose) {
+    return Impl::usage(param,verbose);
+  }
+
+  std::string usage_v(bool param,bool verbose) const {
+    return Impl::usage(param,verbose);
+  }
+
+  void print_state(std::ostream &o,void const*state) const {
+    return d().print_state(o,state);
+  }
+
+#if 0
+  // this and Init() don't touch p_ because we want to leave the original alone.
+      void init_name_debug(std::string const& n,bool debug) {
+    FsaFeatureFunctionData::init_name_debug(n,debug);
+  }
+#endif
+  void Init() {
+    p_=hold_pimpl_.get();
+#if 0
+    d().sync_to_=static_cast<FsaFeatureFunctionData*>(this);
+    d().Init();
+#endif
+    *static_cast<FsaFeatureFunctionData*>(this)=d();
+  }
+
+  FsaFeatureFunctionPimpl(Impl const* const p) : hold_pimpl_(p,null_deleter()) {
+    Init();
+  }
+  FsaFeatureFunctionPimpl(Pimpl const& p) : hold_pimpl_(p) {
+    Init();
+  }
+private:
+  Impl const* p_;
+  Pimpl hold_pimpl_;
+};
+
+typedef FsaFeatureFunctionPimpl<FsaFeatureFunction> FsaFeatureFunctionFwd; // allow ff_from_fsa for an existing dynamic-type ff (as opposed to usual register a wrapped known-type FSA in ff_register, which is more efficient)
+//typedef FsaFeatureFunctionDynamic<FsaFeatureFunctionFwd> DynamicFsaFeatureFunctionFwd;  //if you really need to have a dynamic fsa facade that's also a dynamic fsa
 
 //TODO: combine 2 (or N) FsaFeatureFunction (type erased)
 

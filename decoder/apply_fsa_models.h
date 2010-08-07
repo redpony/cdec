@@ -23,7 +23,10 @@ struct ApplyFsaBy {
   int algorithm;
   std::string name() const;
   friend inline std::ostream &operator << (std::ostream &o,ApplyFsaBy const& c) {
-    return o << c.name();
+    o << c.name();
+    if (c.algorithm==BU_CUBE)
+      o << "("<<c.pop_limit<<")";
+    return o;
   }
   explicit ApplyFsaBy(int alg, int poplimit=200);
   ApplyFsaBy(std::string const& name, int poplimit=200);

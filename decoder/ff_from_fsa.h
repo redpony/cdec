@@ -28,7 +28,12 @@ class FeatureFunctionFromFsa : public FeatureFunction {
   typedef WordID *W;
   typedef WordID const* WP;
 public:
-  FeatureFunctionFromFsa(std::string const& param) : ff(param) {
+  template <class I>
+  FeatureFunctionFromFsa(I const& param) : ff(param) {
+    debug_=true; // because factory won't set until after we construct.
+  }
+  template <class I>
+  FeatureFunctionFromFsa(I & param) : ff(param) {
     debug_=true; // because factory won't set until after we construct.
   }
 
@@ -234,7 +239,7 @@ public:
     assert(left_end(w2,w2+2)==w2+1);
   }
 
-  // override from FeatureFunction; should be called by factory after constructor.
+  // override from FeatureFunction; should be called by factory after constructor.  we'll also call in our own ctor
   void Init() {
     ff.Init();
     ff.sync();
@@ -246,6 +251,7 @@ public:
     SetStateSize(ssz+state_offset);
     assert(!ssz == !M); // no fsa state <=> markov order 0
   }
+
 private:
   Impl ff;
   int M; // markov order (ctx len)

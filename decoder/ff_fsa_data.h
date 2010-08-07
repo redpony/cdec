@@ -20,7 +20,6 @@ struct FsaFeatureFunctionData
   FsaFeatureFunctionData *sync_to_;
 
   void sync() const { // call this if you modify any fields after your constructor is done
-
     if (sync_to_) {
       DBGINIT("sync to "<<*sync_to_);
       *sync_to_=*this;
@@ -31,7 +30,7 @@ struct FsaFeatureFunctionData
   }
 
   friend std::ostream &operator<<(std::ostream &o,FsaFeatureFunctionData const& d) {
-    o << "[FSA "<<d.name_<<" features="<<FD::Convert(d.features_)<<" start=";
+    o << "[FSA "<<d.name_<<" features="<<FD::Convert(d.features_)<<" state_bytes="<<d.state_bytes()<<" end='"<<d.end_phrase()<<"' start=";
     d.print_state(o,d.start_state());
     o<<"]";
     return o;
@@ -62,7 +61,7 @@ struct FsaFeatureFunctionData
   int n_features() const {
     return features_.size();
   }
-  int state_bytes() const { return ssz; } // or override this
+  int state_bytes() const { return ssz; }
   void const* start_state() const {
     return start.begin();
   }
