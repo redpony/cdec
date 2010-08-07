@@ -25,6 +25,7 @@
 #include "weights.h"
 #include "tdict.h"
 #include "ff.h"
+#include "ff_fsa_dynamic.h"
 #include "ff_factory.h"
 #include "hg_intersect.h"
 #include "apply_models.h"
@@ -119,7 +120,8 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
     ("warn_0_weight","Warn about any feature id that has a 0 weight (this is perfectly safe if you intend 0 weight, though)")
         ("no_freeze_feature_set,Z", "Do not freeze feature set after reading feature weights file")
         ("feature_function,F",po::value<vector<string> >()->composing(), "Additional feature function(s) (-L for list)")
-        ("fsa_feature_function",po::value<vector<string> >()->composing(), "Additional FSA feature function(s) (-L for list)")
+        ("fsa_feature_function,A",po::value<vector<string> >()->composing(), "Additional FSA feature function(s) (-L for list)")
+    ("apply_fsa_by",po::value<string>()->default_value("BU_CUBE"), "Method for applying fsa_feature_functions - BU_FULL BU_CUBE EARLEY") //+ApplyFsaBy::all_names()
         ("list_feature_functions,L","List available feature functions")
         ("add_pass_through_rules,P","Add rules to translate OOV words as themselves")
 	("k_best,k",po::value<int>(),"Extract the k best derivations")
@@ -147,7 +149,7 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
         ("ctf_no_exhaustive", "Do not fall back to exhaustive parse if coarse-to-fine parsing fails")
         ("beam_prune", po::value<double>(), "Prune paths from +LM forest, keep paths within exp(alpha>=0)")
     ("scale_prune_srclen", "scale beams by the input length (in # of tokens; may not be what you want for lattices")
-    ("promise_power",po::value<double>()->default_value(0), "Give more beam budget to more promising previous-pass nodes when pruning - but allocate the same average beams.  0 means off, 1 means beam proportional to inside*outside prob, n means nth power (affects just --cubepruning_pop_limit).  note: for the same poplimit, this gives more search error unless very close to 0 (recommend disabled; even 0.01 is slightly worse than 0) which is a bad sign and suggests this isn't doing a good job; further it's slightly slower to LM cube rescore with 0.01 compared to 0, as well as giving (very insignificantly) lower BLEU.  TODO: test under more conditions, or try idea with different formula, or prob. cube beams.")
+    ("promise_power",po::value<double>()->default_value(0), "Give more beam budget to more promising previous-pass nodes when pruning - but allocate the same average beams.  0 means off, 1 means beam proportional to inside*outside prob, n means nth power (affects just --cubepruning_pop_limit).  note: for the same pop_limit, this gives more search error unless very close to 0 (recommend disabled; even 0.01 is slightly worse than 0) which is a bad sign and suggests this isn't doing a good job; further it's slightly slower to LM cube rescore with 0.01 compared to 0, as well as giving (very insignificantly) lower BLEU.  TODO: test under more conditions, or try idea with different formula, or prob. cube beams.")
         ("lexalign_use_null", "Support source-side null words in lexical translation")
         ("tagger_tagset,t", po::value<string>(), "(Tagger) file containing tag set")
         ("csplit_output_plf", "(Compound splitter) Output lattice in PLF format")
@@ -519,7 +521,8 @@ int main(int argc, char** argv) {
     palg = 0;
     cerr << "Using full intersection (no pruning).\n";
   }
-  const IntersectionConfiguration inter_conf(palg, conf["cubepruning_pop_limit"].as<int>());
+  int pop_limit=conf["cubepruning_pop_limit"].as<int>();
+  const IntersectionConfiguration inter_conf(palg, pop_limit);
 
   const int sample_max_trans = conf.count("max_translation_sample") ?
     conf["max_translation_sample"].as<int>() : 0;
@@ -619,7 +622,7 @@ int main(int argc, char** argv) {
                     inter_conf, // this is now reduced to exhaustive if all are stateless
                     &prelm_forest);
       forest.swap(prelm_forest);
-      forest.Reweight(prelm_feature_weights);
+      forest.Reweight(prelm_feature_weights); //FIXME: why the reweighting? here and below.  maybe in case we already had a featval for that id and ApplyModelSet only adds prob, doesn't recompute it?
       forest_stats(forest," prelm forest",show_tree_structure,show_features,prelm_feature_weights,oracle.show_derivation);
     }
 
@@ -642,8 +645,20 @@ int main(int argc, char** argv) {
 
     maybe_prune(forest,conf,"beam_prune","density_prune","+LM",srclen);
 
-    vector<WordID> trans;
-    ViterbiESentence(forest, &trans);
+
+
+    if (!fsa_ffs.empty()) {
+      Timer t("Target FSA rescoring:");
+      if (!has_late_models)
+        forest.Reweight(feature_weights);
+      Hypergraph fsa_forest;
+      assert(fsa_ffs.size()==1);
+      ApplyFsaBy cfg(str("apply_fsa_by",conf),pop_limit);
+      ApplyFsaModels(forest,smeta,*fsa_ffs[0],feature_weights,cfg,&fsa_forest);
+      forest.swap(fsa_forest);
+      forest.Reweight(feature_weights);
+      forest_stats(forest,"  +FSA forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
+    }
 
 
     /*Oracle Rescoring*/
@@ -687,6 +702,8 @@ int main(int argc, char** argv) {
         cout << HypergraphIO::AsPLF(forest, false) << endl;
       } else {
         if (!graphviz && !has_ref && !joshua_viz) {
+          vector<WordID> trans;
+          ViterbiESentence(forest, &trans);
           cout << TD::GetString(trans) << endl << flush;
         }
         if (joshua_viz) {
