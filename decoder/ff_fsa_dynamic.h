@@ -26,10 +26,14 @@ struct FsaFeatureFunction : public FsaFeatureFunctionData {
   virtual void *ScanPhraseAccumBounce(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,WordID const* i, WordID const* end,void *cs,void *ns,Accum *accum) const = 0;
 
   virtual int early_score_words(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,WordID const* i, WordID const* end,Accum *accum) const { return 0; }
+  // called after constructor, before use
+  virtual void Init() = 0;
   virtual std::string usage_v(bool param,bool verbose) const {
     return FeatureFunction::usage_helper("unnamed_dynamic_fsa_feature","","",param,verbose);
   }
-
+  virtual void init_name_debug(std::string const& n,bool debug) {
+    FsaFeatureFunctionData::init_name_debug(n,debug);
+  }
 
   virtual void print_state(std::ostream &o,void const*state) const {
     FsaFeatureFunctionData::print_state(o,state);
@@ -49,10 +53,13 @@ struct FsaFeatureFunction : public FsaFeatureFunctionData {
 // you might be wondering: why do this?  answer: it's cool, and it means that the bottom-up ff over ff_fsa wrapper doesn't go through multiple layers of dynamic dispatch
 // usage: typedef FsaFeatureFunctionDynamic<MyFsa> MyFsaDyn;
 template <class Impl>
-struct FsaFeatureFunctionDynamic : public FsaFeatureFunction,Impl {
+struct FsaFeatureFunctionDynamic : public FsaFeatureFunction {
   static const bool simple_phrase_score=Impl::simple_phrase_score;
-  Impl& d() { return static_cast<Impl&>(*this); }
-  Impl const& d() const { return static_cast<Impl const&>(*this); }
+  Impl& d() { return impl;//static_cast<Impl&>(*this);
+  }
+  Impl const& d() const { return impl;
+    //static_cast<Impl const&>(*this);
+  }
   int markov_order() const { return d().markov_order(); }
 
   virtual void ScanAccum(SentenceMetadata const& smeta,Hypergraph::Edge const& edge,
@@ -92,10 +99,22 @@ struct FsaFeatureFunctionDynamic : public FsaFeatureFunction,Impl {
     return d().print_state(o,state);
   }
 
-  FsaFeatureFunctionDynamic(std::string const& param) : Impl(param) {
+  void init_name_debug(std::string const& n,bool debug) {
+    FsaFeatureFunction::init_name_debug(n,debug);
+    d().init_name_debug(n,debug);
+  }
+
+  virtual void Init() {
     d().sync_to_=(FsaFeatureFunction*)this;
+    d().Init();
     d().sync();
   }
+
+  FsaFeatureFunctionDynamic(std::string const& param) : impl(param) {
+    Init();
+  }
+private:
+  Impl impl;
 
 };
 

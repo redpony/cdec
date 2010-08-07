@@ -6,17 +6,35 @@
 #include "sentences.h"
 #include "feature_accum.h"
 #include "value_array.h"
-
+#include "ff.h" //debug
 typedef ValueArray<uint8_t> Bytes;
 
-// stuff I see no reason to have virtual.  but there's a diamond inheritance problem to solve now when type erasing the CRTP impl wrapper.  virtual inheritance would slow things?
+// stuff I see no reason to have virtual.  but because it's impossible (w/o virtual inheritance to have dynamic fsa ff know where the impl's data starts, implemented a sync (copy) method that needs to be called.  init_name_debug was already necessary to keep state in sync between ff and ff_from_fsa, so no sync should be needed after it.  supposing all modifications were through setters, then no explicit sync call would ever be needed; updates could be mirrored.
 struct FsaFeatureFunctionData
 {
+  void init_name_debug(std::string const& n,bool debug) {
+    name_=n;
+    debug_=debug;
+  }
   //HACK for diamond inheritance (w/o costing performance)
   FsaFeatureFunctionData *sync_to_;
 
   void sync() const { // call this if you modify any fields after your constructor is done
-    if (sync_to_) *sync_to_=*this;
+
+    if (sync_to_) {
+      DBGINIT("sync to "<<*sync_to_);
+      *sync_to_=*this;
+      DBGINIT("synced result="<<*sync_to_<< " from this="<<*this);
+    } else {
+      DBGINIT("nobody to sync to - from FeatureFunctionData this="<<*this);
+    }
+  }
+
+  friend std::ostream &operator<<(std::ostream &o,FsaFeatureFunctionData const& d) {
+    o << "[FSA "<<d.name_<<" features="<<FD::Convert(d.features_)<<" start=";
+    d.print_state(o,d.start_state());
+    o<<"]";
+    return o;
   }
 
   FsaFeatureFunctionData(int statesz=0,Sentence const& end_sentence_phrase=Sentence()) : ssz(statesz),start(statesz),h_start(statesz),end_phrase_(end_sentence_phrase) {
@@ -68,8 +86,8 @@ struct FsaFeatureFunctionData
       print_hex_byte(o,*i);
   }
 
-protected:
   Features features_;
+protected:
   int ssz; // don't forget to set this. default 0 (it may depend on params of course)
   Bytes start,h_start; // start state and estimated-features (heuristic) start state.  set these.  default empty.
   Sentence end_phrase_; // words appended for final traversal (final state cost is assessed using Scan) e.g. "</s>" for lm.

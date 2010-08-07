@@ -609,12 +609,13 @@ void LanguageModelFsa::set_ngram_order(int i) {
       //TODO: reevaluate whether state space comes cleared by allocator or not.
     }
   }
+  sync(); // for dynamic markov_order copy etc
 }
 
 LanguageModelFsa::LanguageModelFsa(string const& param) {
   int lmorder;
   pimpl_ = make_lm_impl(param,&lmorder,&fid_);
-  InitHaveFid();
+  Init();
   floor_=pimpl_->floor_;
   set_ngram_order(lmorder);
 }

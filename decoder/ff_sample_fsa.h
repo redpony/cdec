@@ -14,12 +14,14 @@ struct WordPenaltyFsa : public FsaFeatureFunctionBase<WordPenaltyFsa> {
   }
 
   WordPenaltyFsa(std::string const& param) {
-    Init();
+#if 0
+    Init(); // gets called by factory already
     return; //below are all defaults:
     set_state_bytes(0);
     start.clear();
     h_start.clear();
-  }
+#endif
+    }
   // move from state to next_state after seeing word x, while emitting features->add_value(fid,val) possibly with duplicates.  state and next_state may be same memory.
   Featval Scan1(WordID w,void const* state,void *next_state) const {
     return 1;
@@ -32,7 +34,8 @@ struct SameFirstLetter : public FsaFeatureFunctionBase<SameFirstLetter> {
   SameFirstLetter(std::string const& param) : FsaFeatureFunctionBase<SameFirstLetter>(1,singleton_sentence("END"))
                                                // 1 byte of state, scan final (single) symbol "END" to get final state cost
   {
-    start[0]='a'; h_start[0]=0; Init();
+    start[0]='a'; h_start[0]=0;
+//    Init();
   }
   int markov_order() const { return 1; }
   Featval Scan1(WordID w,void const* old_state,void *new_state) const {
@@ -82,6 +85,7 @@ struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
   }
   int markov_order() const { return 1; }
   LongerThanPrev(std::string const& param) : Base(sizeof(int)/* ,singleton_sentence(TD::se) */) {
+#if 0
     Init();
     if (0) { // all this is done in constructor already
       set_state_bytes(sizeof(int));
@@ -96,7 +100,7 @@ struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
     assert(h_start.size()==sizeof(int));
     state(start.begin())=999999;
     state(h_start.begin())=4; // estimate: anything >4 chars is usually longer than previous
-
+#endif
   }
 
   Featval Scan1(WordID w,void const* from,void *next_state) const {

@@ -30,14 +30,21 @@ class FeatureFunctionFromFsa : public FeatureFunction {
 public:
   FeatureFunctionFromFsa(std::string const& param) : ff(param) {
     debug_=true; // because factory won't set until after we construct.
-    Init();
   }
 
   static std::string usage(bool args,bool verbose) {
     return Impl::usage(args,verbose);
   }
+  void init_name_debug(std::string const& n,bool debug) {
+    FeatureFunction::init_name_debug(n,debug);
+    ff.init_name_debug(n,debug);
+  }
 
-  Features features() const { return ff.features(); }
+  // this should override
+  Features features() const {
+    DBGINIT("FeatureFunctionFromFsa features() name="<<ff.name()<<" features="<<FD::Convert(ff.features()));
+    return ff.features();
+  }
 
   // Log because it potentially stores info in edge.  otherwise the same as regular TraversalFeatures.
   void TraversalFeaturesLog(const SentenceMetadata& smeta,
@@ -227,16 +234,20 @@ public:
     assert(left_end(w2,w2+2)==w2+1);
   }
 
-private:
-  Impl ff;
+  // override from FeatureFunction; should be called by factory after constructor.
   void Init() {
-//    FeatureFunction::name=Impl::usage(false,false); // already achieved by ff_factory.cc
+    ff.Init();
+    ff.sync();
+    DBGINIT("base (single feature) FsaFeatureFunctionBase::Init name="<<name_<<" features="<<FD::Convert(features()));
+//    FeatureFunction::name_=Impl::usage(false,false); // already achieved by ff_factory.cc
     M=ff.markov_order();
     ssz=ff.state_bytes();
     state_offset=sizeof(WordID)*M;
     SetStateSize(ssz+state_offset);
     assert(!ssz == !M); // no fsa state <=> markov order 0
   }
+private:
+  Impl ff;
   int M; // markov order (ctx len)
   FeatureFunctionFromFsa(); // not allowed.
 

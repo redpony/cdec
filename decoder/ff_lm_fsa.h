@@ -115,7 +115,14 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
 
   // impl details:
   void set_ngram_order(int i); // if you build ff_from_fsa first, then increase this, you will get memory overflows.  otherwise, it's the same as a "-o i" argument to constructor
+  // note: if you adjust ngram_order, ff_from_fsa won't notice.
+
   double floor_; // log10prob minimum used (e.g. unk words)
+
+  // because we might have a custom fid due to lm name option:
+  void Init() {
+    InitHaveFid();
+  }
 
 private:
   int ngram_order_;
