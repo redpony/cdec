@@ -1,0 +1,151 @@
+[X] ||| . ||| . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] . ||| [1] . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] anciano ||| [1] old man ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=1.38629
+[X] ||| [X,1] anciano . ||| [1] old man . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=1.38629
+[X] ||| [X,1] anciano [X,2] ||| [1] old man [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=1.38629
+[X] ||| [X,1] feo ||| ugly [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] feo . ||| ugly [1] . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] feo [X,2] ||| ugly [1] [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] gato ||| [1] cat ||| EgivenF=0.405465 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] gato . ||| [1] cat . ||| EgivenF=0.405465 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] gato [X,2] ||| [1] [2] cat ||| EgivenF=0 FgivenE=1.09861 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] gato [X,2] ||| [1] cat [2] ||| EgivenF=0 FgivenE=0.405465 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] gato [X,2] . ||| [1] [2] cat . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] gato negro ||| [1] black cat ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] gato negro . ||| [1] black cat . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] gato negro [X,2] ||| [1] black cat [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] grande ||| big [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] grande . ||| big [1] . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] grande [X,2] ||| big [1] [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] negro ||| black [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] negro . ||| black [1] . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] negro [X,2] ||| black [1] [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] oruga ||| [1] caterpiller ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] oruga . ||| [1] caterpiller . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] oruga [X,2] ||| [1] caterpiller [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] patito [X,2] ||| [1] [2] duckling ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] patito [X,2] . ||| [1] [2] duckling . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] patito feo ||| [1] ugly duckling ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] patito feo . ||| [1] ugly duckling . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] patito feo [X,2] ||| [1] ugly duckling [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] peces ||| [1] fish ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] peces . ||| [1] fish . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] peces [X,2] ||| [1] fish [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] perro ||| [1] dog ||| EgivenF=0.405465 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] perro . ||| [1] dog . ||| EgivenF=0.405465 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] perro [X,2] ||| [1] dog [2] ||| EgivenF=0 FgivenE=0.405465 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] perro [X,2] ||| [1] [2] dog ||| EgivenF=0 FgivenE=1.09861 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] perro [X,2] . ||| [1] [2] dog . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] perro grande ||| [1] big dog ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] perro grande . ||| [1] big dog . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] perro grande [X,2] ||| [1] big dog [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] pájaro [X,2] ||| [1] [2] bird ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] pájaro [X,2] . ||| [1] [2] bird . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] pájaro negro ||| [1] black bird ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] pájaro negro . ||| [1] black bird . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| [X,1] pájaro negro [X,2] ||| [1] black bird [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| anciano ||| old man ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=1.38629
+[X] ||| anciano . ||| old man . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=1.38629
+[X] ||| anciano [X,1] ||| old man [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=1.38629
+[X] ||| el ||| the ||| EgivenF=0.287682 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el [X,1] ||| the [1] ||| EgivenF=0.287682 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el [X,1] . ||| the [1] . ||| EgivenF=0.287682 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el [X,1] feo ||| the ugly [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el [X,1] feo . ||| the ugly [1] . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el [X,1] feo [X,2] ||| the ugly [1] [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el [X,1] grande ||| the big [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el [X,1] grande . ||| the big [1] . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el [X,1] grande [X,2] ||| the big [1] [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el [X,1] negro ||| the black [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el [X,1] negro . ||| the black [1] . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el [X,1] negro [X,2] ||| the black [1] [2] ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el gato ||| the cat ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el gato . ||| the cat . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el gato [X,1] ||| the [1] cat ||| EgivenF=0 FgivenE=0.693147 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el gato [X,1] ||| the cat [1] ||| EgivenF=0 FgivenE=0.693147 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el gato [X,1] . ||| the [1] cat . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el gato negro ||| the black cat ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el gato negro . ||| the black cat . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el gato negro [X,1] ||| the black cat [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el patito [X,1] ||| the [1] duckling ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el patito [X,1] . ||| the [1] duckling . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el patito feo ||| the ugly duckling ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el patito feo . ||| the ugly duckling . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el patito feo [X,1] ||| the ugly duckling [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el perro ||| the dog ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el perro . ||| the dog . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el perro [X,1] ||| the [1] dog ||| EgivenF=0 FgivenE=0.693147 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el perro [X,1] ||| the dog [1] ||| EgivenF=0 FgivenE=0.693147 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el perro [X,1] . ||| the [1] dog . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el perro grande ||| the big dog ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el perro grande . ||| the big dog . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el perro grande [X,1] ||| the big dog [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el pájaro [X,1] ||| the [1] bird ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el pájaro [X,1] . ||| the [1] bird . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el pájaro negro ||| the black bird ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el pájaro negro . ||| the black bird . ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| el pájaro negro [X,1] ||| the black bird [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0.287682 LexFgivenE=0
+[X] ||| eso ||| that ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| eso [X,1] ||| that [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| eso [X,1] . ||| that [1] . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| eso perro ||| that dog ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| eso perro . ||| that dog . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| eso perro [X,1] ||| that dog [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| este ||| this ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| este [X,1] ||| this [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| este [X,1] . ||| this [1] . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| este anciano ||| this old man ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=1.38629
+[X] ||| este anciano . ||| this old man . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=1.38629
+[X] ||| este anciano [X,1] ||| this old man [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=1.38629
+[X] ||| este gato ||| this cat ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| este gato . ||| this cat . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| este gato [X,1] ||| this cat [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| feo ||| ugly ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| gato ||| cat ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| gato . ||| cat . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| gato [X,1] ||| [1] cat ||| EgivenF=1.09861 FgivenE=1.09861 LexEgivenF=0 LexFgivenE=0
+[X] ||| gato [X,1] ||| cat [1] ||| EgivenF=0 FgivenE=0.405465 LexEgivenF=0 LexFgivenE=0
+[X] ||| gato [X,1] . ||| [1] cat . ||| EgivenF=1.09861 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| gato negro ||| black cat ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| gato negro . ||| black cat . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| gato negro [X,1] ||| black cat [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| grande ||| big ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| la ||| the ||| EgivenF=2.07944 FgivenE=0 LexEgivenF=2.07944 LexFgivenE=0
+[X] ||| la [X,1] ||| the [1] ||| EgivenF=2.07944 FgivenE=0 LexEgivenF=2.07944 LexFgivenE=0
+[X] ||| la [X,1] . ||| the [1] . ||| EgivenF=2.07944 FgivenE=0 LexEgivenF=2.07944 LexFgivenE=0
+[X] ||| la oruga ||| the caterpiller ||| EgivenF=0 FgivenE=0 LexEgivenF=2.07944 LexFgivenE=0
+[X] ||| la oruga . ||| the caterpiller . ||| EgivenF=0 FgivenE=0 LexEgivenF=2.07944 LexFgivenE=0
+[X] ||| la oruga [X,1] ||| the caterpiller [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=2.07944 LexFgivenE=0
+[X] ||| los ||| the ||| EgivenF=2.07944 FgivenE=0 LexEgivenF=2.07944 LexFgivenE=0
+[X] ||| los [X,1] ||| the [1] ||| EgivenF=2.07944 FgivenE=0 LexEgivenF=2.07944 LexFgivenE=0
+[X] ||| los [X,1] . ||| the [1] . ||| EgivenF=2.07944 FgivenE=0 LexEgivenF=2.07944 LexFgivenE=0
+[X] ||| los peces ||| the fish ||| EgivenF=0 FgivenE=0 LexEgivenF=2.07944 LexFgivenE=0
+[X] ||| los peces . ||| the fish . ||| EgivenF=0 FgivenE=0 LexEgivenF=2.07944 LexFgivenE=0
+[X] ||| los peces [X,1] ||| the fish [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=2.07944 LexFgivenE=0
+[X] ||| negro ||| black ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| oruga ||| caterpiller ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| oruga . ||| caterpiller . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| oruga [X,1] ||| caterpiller [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| patito ||| duckling ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| patito [X,1] ||| [1] duckling ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| patito [X,1] . ||| [1] duckling . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| patito feo ||| ugly duckling ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| patito feo . ||| ugly duckling . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| patito feo [X,1] ||| ugly duckling [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| peces ||| fish ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| peces . ||| fish . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| peces [X,1] ||| fish [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| perro ||| dog ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| perro . ||| dog . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| perro [X,1] ||| [1] dog ||| EgivenF=1.09861 FgivenE=1.09861 LexEgivenF=0 LexFgivenE=0
+[X] ||| perro [X,1] ||| dog [1] ||| EgivenF=0 FgivenE=0.405465 LexEgivenF=0 LexFgivenE=0
+[X] ||| perro [X,1] . ||| [1] dog . ||| EgivenF=1.09861 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| perro grande ||| big dog ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| perro grande . ||| big dog . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| perro grande [X,1] ||| big dog [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| pájaro ||| bird ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| pájaro [X,1] ||| [1] bird ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| pájaro [X,1] . ||| [1] bird . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| pájaro negro ||| black bird ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| pájaro negro . ||| black bird . ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
+[X] ||| pájaro negro [X,1] ||| black bird [1] ||| EgivenF=0 FgivenE=0 LexEgivenF=0 LexFgivenE=0
