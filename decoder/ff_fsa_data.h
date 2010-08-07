@@ -9,11 +9,19 @@
 
 typedef ValueArray<uint8_t> Bytes;
 
-// stuff I see no reason to have virtual.
+// stuff I see no reason to have virtual.  but there's a diamond inheritance problem to solve now when type erasing the CRTP impl wrapper.  virtual inheritance would slow things?
 struct FsaFeatureFunctionData
 {
+  //HACK for diamond inheritance (w/o costing performance)
+  FsaFeatureFunctionData *sync_to_;
+
+  void sync() const { // call this if you modify any fields after your constructor is done
+    if (sync_to_) *sync_to_=*this;
+  }
+
   FsaFeatureFunctionData(int statesz=0,Sentence const& end_sentence_phrase=Sentence()) : ssz(statesz),start(statesz),h_start(statesz),end_phrase_(end_sentence_phrase) {
     debug_=true;
+    sync_to_=0;
   }
 
   std::string name_;
@@ -65,6 +73,7 @@ protected:
   int ssz; // don't forget to set this. default 0 (it may depend on params of course)
   Bytes start,h_start; // start state and estimated-features (heuristic) start state.  set these.  default empty.
   Sentence end_phrase_; // words appended for final traversal (final state cost is assessed using Scan) e.g. "</s>" for lm.
+  // this can be called instead or after constructor (also set bytes and end_phrase_)
   void set_state_bytes(int sb=0) {
     if (start.size()!=sb) start.resize(sb);
     if (h_start.size()!=sb) h_start.resize(sb);

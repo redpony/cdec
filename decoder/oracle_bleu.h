@@ -149,7 +149,7 @@ struct OracleBleu {
     order=(loss==IBM_BLEU_3)?3:4;
     std::ostringstream param;
     param<<"-o "<<order;
-    pff=global_ff_registry->Create("BLEUModel",param.str());
+    pff=ff_registry.Create("BLEUModel",param.str());
   }
 
   bool is_null() const {

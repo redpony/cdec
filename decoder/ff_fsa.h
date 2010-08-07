@@ -8,6 +8,8 @@
 
   state is some fixed width byte array.  could actually be a void *, WordID sequence, whatever.
 
+  TODO: specify Scan return code or feature value = -inf for failure state (e.g. for hard intersection with desired target lattice?)
+
   TODO: maybe ff that wants to know about SentenceMetadata should store a ref to
   it permanently rather than get passed it for every operation.  we're never
   decoding more than 1 sentence at once and it's annoying to pass it.  same

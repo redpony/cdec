@@ -17,7 +17,7 @@ typedef std::vector<WordID> Features; // set of features ids
 // FinalTraversalFeatures(...)
 class FeatureFunction {
  public:
-  std::string name; // set by FF factory using usage()
+  std::string name_; // set by FF factory using usage()
   bool debug_; // also set by FF factory checking param for immediate initial "debug"
   bool debug() const { return debug_; }
   FeatureFunction() : state_size_() {}

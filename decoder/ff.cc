@@ -43,7 +43,7 @@ Features ModelSet::all_features(std::ostream *warn,bool warn0) {
   FFM ff_from;
   for (unsigned i=0;i<models_.size();++i) {
     FeatureFunction const& ff=*models_[i];
-    string const& ffname=ff.name;
+    string const& ffname=ff.name_;
     FFS si=ff.features();
     if (si.empty()) {
       WARNFF(ffname<<" doesn't yet report any feature IDs - implement features() method?");

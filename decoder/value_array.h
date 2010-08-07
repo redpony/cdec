@@ -150,8 +150,10 @@ public:
   }
 
   ValueArray(ValueArray const& other)
-    : sz(other.sz)
+    : A(other)
+    , sz(other.sz)
     , array(A::allocate(sz))
+
   {
     copy_construct(other.begin(),other.end(),array);
   }

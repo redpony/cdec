@@ -2,6 +2,9 @@
 #define STATIC_UTOA_H
 
 #include "threadlocal.h"
+
+
+#include <string>
 #include <cstring>
 
 #define DIGIT_LOOKUP_TABLE 0
@@ -24,8 +27,7 @@ inline char digit_to_char(int d) {
 #endif
 }
 
-
-// returns n in string [return,num); *num=0 yourself calling if you want a c_str
+// returns n in string [return,num); *num=0 yourself before calling if you want a c_str
 inline char *utoa(char *num,unsigned n) {
   if ( !n ) {
     *--num='0';
@@ -59,5 +61,55 @@ inline char* append_utoa(char *to,unsigned n) {
   return to+ns;
 }
 
+// so named to avoid gcc segfault when named itoa
+inline char *itoa(char *p,int n) {
+  if (n<0) {
+    p=utoa(p,-n); // TODO: check that (unsigned)(-INT_MIN) == 0x1000000 in 2s complement and not == 0
+    *--p='-';
+    return p;
+  } else
+    return utoa(p,n);
+}
+
+inline char *static_itoa(int n) {
+  return itoa(utoa_buf+utoa_bufsizem1,n);
+}
+
+
+inline std::string utos(unsigned n) {
+  const int bufsz=20;
+  char buf[bufsz];
+  char *end=buf+bufsz;
+  char *p=utoa(end,n);
+  return std::string(p,end);
+}
+
+inline std::string itos(int n) {
+  const int bufsz=20;
+  char buf[bufsz];
+  char *end=buf+bufsz;
+  char *p=itoa(end,n);
+  return std::string(p,end);
+}
+
+#ifdef ITOA_SAMPLE
+# include <cstdio>
+# include <sstream>
+# include <iostream>
+using namespace std;
+
+int main(int argc,char *argv[]) {
+  printf("d U d U d U\n");
+  for (int i=1;i<argc;++i) {
+    int n;
+    unsigned un;
+    sscanf(argv[i],"%d",&n);
+    sscanf(argv[i],"%u",&un);
+    printf("%d %u %s",n,un,static_itoa(n));
+    printf(" %s %s %s\n",static_utoa(un),itos(n).c_str(),utos(un).c_str());
+  }
+  return 0;
+}
+#endif
 
 #endif
