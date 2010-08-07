@@ -17,10 +17,9 @@ void UntypedFactoryRegistry::clear() {
   reg_.clear();
 }
 
-bool UntypedFactoryRegistry::parse_debug(std::string & param) {
+bool UntypedFactoryRegistry::parse_debug(std::string & p) {
   int pl=debug_pre.size();
   bool space=false;
-  std::string p=param;
   bool debug=match_begin(p,debug_pre)&&
     (p.size()==pl || (space=(p[pl]==' ')));
   if (debug)
@@ -70,13 +69,7 @@ FsaFFRegistry fsa_ff_registry;
 FFRegistry ff_registry;
 
 /*
-namespace {
-struct null_deleter
-{
-  template <class F>
-  void operator()(F const& f) const {  }
-};
-
+#include "null_deleter.h"
 boost::shared_ptr<FsaFFRegistry> global_fsa_ff_registry(&fsa_ff_registry,null_deleter());
 boost::shared_ptr<FFRegistry> global_ff_registry(&ff_registry,null_deleter());
 */

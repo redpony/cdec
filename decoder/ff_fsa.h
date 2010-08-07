@@ -91,6 +91,12 @@ struct FsaFeatureFunctionBase : public FsaFeatureFunctionData {
 public:
   int fid_; // you can have more than 1 feature of course.
 
+  std::string describe() const {
+    std::ostringstream o;
+    o<<*this;
+    return o.str();
+  }
+
   // can override to different return type, e.g. just return feats:
   Featval describe_features(FeatureVector const& feats) const {
     return feats.get(fid_);

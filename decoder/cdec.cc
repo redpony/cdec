@@ -68,7 +68,7 @@ inline string str(char const* name,po::variables_map const& conf) {
 shared_ptr<FeatureFunction> make_ff(string const& ffp,bool verbose_feature_functions,char const* pre="") {
   string ff, param;
   SplitCommandAndParam(ffp, &ff, &param);
-  cerr << "Feature: " << ff;
+  cerr << pre << "feature: " << ff;
   if (param.size() > 0) cerr << " (with config parameters '" << param << "')\n";
   else cerr << " (no config parameters)\n";
   shared_ptr<FeatureFunction> pf = ff_registry.Create(ff, param);
@@ -470,7 +470,9 @@ int main(int argc, char** argv) {
   vector<shared_ptr<FeatureFunction> > pffs,prelm_only_ffs;
   vector<const FeatureFunction*> late_ffs,prelm_ffs;
   if (conf.count("feature_function") > 0) {
-    const vector<string>& add_ffs = conf["feature_function"].as<vector<string> >();
+    vector<string> add_ffs;
+//    const vector<string>& add_ffs = conf["feature_function"].as<vector<string> >();
+    store_conf(conf,"feature_function",&add_ffs);
     for (int i = 0; i < add_ffs.size(); ++i) {
       pffs.push_back(make_ff(add_ffs[i],verbose_feature_functions));
       FeatureFunction const* p=pffs.back().get();
@@ -484,7 +486,9 @@ int main(int argc, char** argv) {
     }
   }
   if (conf.count("prelm_feature_function") > 0) {
-    const vector<string>& add_ffs = conf["prelm_feature_function"].as<vector<string> >();
+    vector<string> add_ffs;
+    store_conf(conf,"prelm_feature_function",&add_ffs);
+//    const vector<string>& add_ffs = conf["prelm_feature_function"].as<vector<string> >();
     for (int i = 0; i < add_ffs.size(); ++i) {
       prelm_only_ffs.push_back(make_ff(add_ffs[i],verbose_feature_functions,"prelm-only "));
       prelm_ffs.push_back(prelm_only_ffs.back().get());
@@ -494,12 +498,16 @@ int main(int argc, char** argv) {
   vector<shared_ptr<FsaFeatureFunction> > fsa_ffs;
   vector<string> fsa_names;
   store_conf(conf,"fsa_feature_function",&fsa_names);
+  for (int i=0;i<fsa_names.size();++i)
+    fsa_ffs.push_back(make_fsa_ff(fsa_names[i],verbose_feature_functions,"FSA "));
   if (fsa_ffs.size()>1) {
     //FIXME: support N fsa ffs.
     cerr<<"Only the first fsa FF will be used (FIXME).\n";
-    fsa_names.resize(1);
-    for (int i=0;i<fsa_names.size();++i)
-      fsa_ffs.push_back(make_fsa_ff(fsa_names[i],verbose_feature_functions,"FSA "));
+    fsa_ffs.resize(1);
+  }
+  if (!fsa_ffs.empty()) {
+    cerr<<"FSA: ";
+    show_all_features(fsa_ffs,feature_weights,cerr,cerr,true,true);
   }
 
   if (late_freeze) {
@@ -646,7 +654,6 @@ int main(int argc, char** argv) {
     maybe_prune(forest,conf,"beam_prune","density_prune","+LM",srclen);
 
 
-
     if (!fsa_ffs.empty()) {
       Timer t("Target FSA rescoring:");
       if (!has_late_models)
@@ -654,6 +661,7 @@ int main(int argc, char** argv) {
       Hypergraph fsa_forest;
       assert(fsa_ffs.size()==1);
       ApplyFsaBy cfg(str("apply_fsa_by",conf),pop_limit);
+      cerr << "FSA rescoring with "<<cfg<<" "<<fsa_ffs[0]->describe()<<endl;
       ApplyFsaModels(forest,smeta,*fsa_ffs[0],feature_weights,cfg,&fsa_forest);
       forest.swap(fsa_forest);
       forest.Reweight(feature_weights);

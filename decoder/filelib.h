@@ -8,6 +8,7 @@
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
 #include "gzstream.h"
+#include "null_deleter.h"
 
 bool FileExists(const std::string& file_name);
 bool DirectoryExists(const std::string& dir_name);
@@ -15,9 +16,6 @@ bool DirectoryExists(const std::string& dir_name);
 // reads from standard in if filename is -
 // uncompresses if file ends with .gz
 // otherwise, reads from a normal file
-struct file_null_deleter {
-    void operator()(void*) const {}
-};
 
 template <class Stream>
 struct BaseFile {
@@ -57,7 +55,7 @@ class ReadFile : public BaseFile<std::istream> {
   void Init(const std::string& filename) {
     filename_=filename;
     if (is_std()) {
-      ps_=PS(&std::cin,file_null_deleter());
+      ps_=PS(&std::cin,null_deleter());
     } else {
       if (!FileExists(filename)) {
         std::cerr << "File does not exist: " << filename << std::endl;
@@ -85,7 +83,7 @@ class WriteFile : public BaseFile<std::ostream> {
   void Init(const std::string& filename) {
     filename_=filename;
     if (is_std()) {
-      ps_=PS(&std::cout,file_null_deleter());
+      ps_=PS(&std::cout,null_deleter());
     } else {
       char const* file=filename_.c_str(); // just in case the gzstream keeps using the filename for longer than the constructor, e.g. inflateReset2.  warning in valgrind that I'm hoping will disappear - it makes no sense.
       ps_=PS(EndsWith(filename, ".gz") ?

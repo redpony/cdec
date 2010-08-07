@@ -13,6 +13,7 @@
 #include <cstring>
 #include "fdict.h"
 #include "hg.h"
+#include "feature_vector.h"
 
 class SentenceMetadata;
 class FeatureFunction;  // see definition below
@@ -54,7 +55,7 @@ public:
   // returns the number of bytes of context that this feature function will
   // (maximally) use.  By default, 0 ("stateless" models in Hiero/Joshua).
   // NOTE: this value is fixed for the instance of your class, you cannot
-  // use different amounts of memory for different nodes in the forest.
+  // use different amounts of memory for different nodes in the forest.  this will be read as soon as you create a ModelSet, then fixed forever on
   inline int NumBytesContext() const { return state_size_; }
 
   // Compute the feature values and (if this applies) the estimates of the
@@ -196,6 +197,52 @@ class ArityPenalty : public FeatureFunction {
   const double value_;
 };
 
+void show_features(Features const& features,DenseWeightVector const& weights,std::ostream &out,std::ostream &warn,bool warn_zero_wt=true); //show features and weights
+
+template <class FFp>
+Features all_features(std::vector<FFp> const& models_,DenseWeightVector &weights_,std::ostream *warn=0,bool warn_fid_0=false) {
+  using namespace std;
+  Features ffs;
+#define WARNFF(x) do { if (warn) { *warn << "WARNING: "<< x << endl; } } while(0)
+  typedef map<WordID,string> FFM;
+  FFM ff_from;
+  for (unsigned i=0;i<models_.size();++i) {
+    string const& ffname=models_[i]->name_;
+    Features si=models_[i]->features();
+    if (si.empty()) {
+      WARNFF(ffname<<" doesn't yet report any feature IDs - either supply feature weight, or use --no_freeze_feature_set, or implement features() method");
+    }
+    unsigned n0=0;
+    for (unsigned j=0;j<si.size();++j) {
+      WordID fid=si[j];
+      if (!fid) ++n0;
+      if (fid >= weights_.size())
+        weights_.resize(fid+1);
+      if (warn_fid_0 || fid) {
+        pair<FFM::iterator,bool> i_new=ff_from.insert(FFM::value_type(fid,ffname));
+        if (i_new.second) {
+          if (fid)
+            ffs.push_back(fid);
+          else
+            WARNFF("Feature id 0 for "<<ffname<<" (models["<<i<<"]) - probably no weight provided.  Don't freeze feature ids to see the name");
+        } else {
+          WARNFF(ffname<<" (models["<<i<<"]) tried to define feature "<<FD::Convert(fid)<<" already defined earlier by "<<i_new.first->second);
+        }
+      }
+    }
+    if (n0)
+      WARNFF(ffname<<" (models["<<i<<"]) had "<<n0<<" unused features (--no_freeze_feature_set to see them)");
+  }
+  return ffs;
+#undef WARNFF
+}
+
+template <class FFp>
+void show_all_features(std::vector<FFp> const& models_,DenseWeightVector &weights_,std::ostream &out,std::ostream &warn,bool warn_fid_0=true,bool warn_zero_wt=true) {
+  return show_features(all_features(models_,weights_,&warn,warn_fid_0),weights_,out,warn,warn_zero_wt);
+}
+
+
 // this class is a set of FeatureFunctions that can be used to score, rescore,
 // etc. a (translation?) forest
 class ModelSet {
@@ -224,7 +271,8 @@ class ModelSet {
 
   bool stateless() const { return !state_size_; }
   Features all_features(std::ostream *warnings=0,bool warn_fid_zero=false); // this will warn about duplicate features as well (one function overwrites the feature of another).  also resizes weights_ so it is large enough to hold the (0) weight for the largest reported feature id.  since 0 is a NULL feature id, it's never included.  if warn_fid_zero, then even the first 0 id is
-  void show_features(std::ostream &out,std::ostream &warn,bool warn_zero_wt=true); //show features and weights
+  void show_features(std::ostream &out,std::ostream &warn,bool warn_zero_wt=true);
+
  private:
   std::vector<const FeatureFunction*> models_;
   std::vector<double> weights_;

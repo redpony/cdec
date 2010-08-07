@@ -13,21 +13,23 @@
 #include "ff_register.h"
 
 void register_feature_functions() {
-  RegisterFsaImpl<SameFirstLetter>(true,false);
-  RegisterFsaImpl<LongerThanPrev>(true,false);
-  RegisterFF<LanguageModel>();
-  RegisterFsaImpl<LanguageModelFsa>(true,false); // same as LM but using fsa wrapper
-  ff_registry.Register("LanguageModelFsaDynamic",new FFFactory<FeatureFunctionFromFsa<FsaFeatureFunctionDynamic<LanguageModelFsa> > >); // test correctness of FsaFeatureFunctionDynamic erasure
+  //TODO: these are worthless example target FSA ffs.  remove later
+  RegisterFsaImpl<SameFirstLetter>(true);
+  RegisterFsaImpl<LongerThanPrev>(true);
+  RegisterFsaImpl<ShorterThanPrev>(true);
+//  ff_registry.Register("LanguageModelFsaDynamic",new FFFactory<FeatureFunctionFromFsa<FsaFeatureFunctionDynamic<LanguageModelFsa> > >); // to test correctness of FsaFeatureFunctionDynamic erasure
+  RegisterFsaDynToFF<LanguageModelFsa>();
+  RegisterFsaImpl<LanguageModelFsa>(true); // same as LM but using fsa wrapper
   RegisterFsaDynToFF<SameFirstLetter>();
+
+  RegisterFF<LanguageModel>();
 
   RegisterFF<WordPenalty>();
   RegisterFF<SourceWordPenalty>();
   RegisterFF<ArityPenalty>();
   RegisterFF<BLEUModel>();
 
-  //TODO: worthless example target FSA ffs.  remove later
   ff_registry.Register(new FFFactory<WordPenaltyFromFsa>); // same as WordPenalty, but implemented using ff_fsa
-  ff_registry.Register(new FFFactory<FeatureFunctionFromFsa<ShorterThanPrev> >);
 
   //TODO: use for all features the new Register which requires static FF::usage(false,false) give name
 #ifdef HAVE_RANDLM

@@ -405,10 +405,10 @@ void ApplyModelSet(const Hypergraph& in,
                    const IntersectionConfiguration& config,
                    Hypergraph* out) {
   //force exhaustive if there's no state req. for model
-  if (models.stateless() || config.algorithm == 0) {
+  if (models.stateless() || config.algorithm == IntersectionConfiguration::FULL) {
     NoPruningRescorer ma(models, smeta, in, out); // avoid overhead of best-first when no state
     ma.Apply();
-  } else if (config.algorithm == 1) {
+  } else if (config.algorithm == IntersectionConfiguration::CUBE) {
     int pl = config.pop_limit;
     const int max_pl_for_large=50;
     if (pl > max_pl_for_large && in.nodes_.size() > 80000) {

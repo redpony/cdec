@@ -36,47 +36,10 @@ Features FeatureFunction::single_feature(WordID feat) {
 }
 
 Features ModelSet::all_features(std::ostream *warn,bool warn0) {
-  typedef Features FFS;
-  FFS ffs;
-#define WARNFF(x) do { if (warn) { *warn << "WARNING: "<< x ; *warn<<endl; } } while(0)
-  typedef std::map<WordID,string> FFM;
-  FFM ff_from;
-  for (unsigned i=0;i<models_.size();++i) {
-    FeatureFunction const& ff=*models_[i];
-    string const& ffname=ff.name_;
-    FFS si=ff.features();
-    if (si.empty()) {
-      WARNFF(ffname<<" doesn't yet report any feature IDs - either supply feature weight, or use --no_freeze_feature_set, or implement features() method");
-    }
-    unsigned n0=0;
-    for (unsigned j=0;j<si.size();++j) {
-      WordID fid=si[j];
-      if (!fid) ++n0;
-      if (fid >= weights_.size())
-        weights_.resize(fid+1);
-      if (warn0 || fid) {
-        pair<FFM::iterator,bool> i_new=ff_from.insert(FFM::value_type(fid,ffname));
-        if (i_new.second) {
-          if (fid)
-            ffs.push_back(fid);
-          else
-            WARNFF("Feature id 0 for "<<ffname<<" (models["<<i<<"]) - probably no weight provided.  Don't freeze feature ids to see the name");
-        } else {
-          WARNFF(ffname<<" (models["<<i<<"]) tried to define feature "<<FD::Convert(fid)<<" already defined earlier by "<<i_new.first->second);
-        }
-      }
-    }
-    if (n0)
-      WARNFF(ffname<<" (models["<<i<<"]) had "<<n0<<" unused features (--no_freeze_feature_set to see them)");
-  }
-  return ffs;
-#undef WARNFF
+  return ::all_features(models_,weights_,warn,warn0);
 }
 
-void ModelSet::show_features(std::ostream &out,std::ostream &warn,bool warn_zero_wt)
-{
-  typedef Features FFS;
-  FFS ffs=all_features(&warn,warn_zero_wt);
+void show_features(Features const& ffs,DenseWeightVector const& weights_,std::ostream &out,std::ostream &warn,bool warn_zero_wt) {
   out << "Weight  Feature\n";
   for (unsigned i=0;i<ffs.size();++i) {
     WordID fid=ffs[i];
@@ -86,7 +49,12 @@ void ModelSet::show_features(std::ostream &out,std::ostream &warn,bool warn_zero
       warn<<"WARNING: "<<fname<<" has 0 weight."<<endl;
     out << wt << "  " << fname<<endl;
   }
+}
 
+void ModelSet::show_features(std::ostream &out,std::ostream &warn,bool warn_zero_wt)
+{
+//  ::show_features(all_features(),weights_,out,warn,warn_zero_wt);
+  show_all_features(models_,weights_,out,warn,warn_zero_wt,warn_zero_wt);
 }
 
 // Hiero and Joshua use log_10(e) as the value, so I do to

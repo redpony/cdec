@@ -1,6 +1,7 @@
 #include "apply_fsa_models.h"
 #include "hg.h"
 #include "ff_fsa_dynamic.h"
+#include "ff_from_fsa.h"
 #include "feature_vector.h"
 #include "stringlib.h"
 #include "apply_models.h"
@@ -27,7 +28,9 @@ struct ApplyFsa {
   }
   void ApplyBottomUp() {
     assert(cfg.IsBottomUp());
-    vector<const FeatureFunction*> ffs;
+    FeatureFunctionFromFsa<FsaFeatureFunctionFwd> buff(&fsa);
+    buff.Init(); // mandatory to call this (normally factory would do it)
+    vector<const FeatureFunction*> ffs(1,&buff);
     ModelSet models(weights, ffs);
     IntersectionConfiguration i(cfg.BottomUpAlgorithm(),cfg.pop_limit);
     ApplyModelSet(ih,smeta,models,i,oh);
