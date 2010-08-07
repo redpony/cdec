@@ -18,6 +18,18 @@
 #include <cstring>
 #include <string>
 #include <sstream>
+#include <algorithm>
+
+struct toupperc {
+  inline char operator()(char c) const {
+    return std::toupper(c);
+  }
+};
+
+inline std::string toupper(std::string s) {
+  std::transform(s.begin(),s.end(),s.begin(),toupperc());
+  return s;
+}
 
 template <class Istr, class Isubstr> inline
 bool match_begin(Istr bstr,Istr estr,Isubstr bsub,Isubstr esub)

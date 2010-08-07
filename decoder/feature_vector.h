@@ -11,4 +11,8 @@ typedef SparseVector<Featval> FeatureVector;
 typedef SparseVector<Featval> WeightVector;
 typedef std::vector<Featval> DenseWeightVector;
 
+inline void sparse_to_dense(WeightVector const& wv,DenseWeightVector *dv) {
+  wv.init_vector(dv);
+}
+
 #endif

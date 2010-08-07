@@ -44,6 +44,7 @@ rule_lexer.cc: rule_lexer.l
 noinst_LIBRARIES = libcdec.a
 
 libcdec_a_SOURCES = \
+  apply_fsa_models.cc \
   rule_lexer.cc \
   fst_translator.cc \
   csplit.cc \
