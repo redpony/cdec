@@ -145,6 +145,7 @@ struct OracleBleu {
     init_loss();
   }
   void init_loss() {
+    if (refs.empty()) return;
     loss=ScoreTypeFromString(loss_name);
     order=(loss==IBM_BLEU_3)?3:4;
     std::ostringstream param;

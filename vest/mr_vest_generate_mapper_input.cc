@@ -137,7 +137,6 @@ struct oracle_directions {
       exit(0);
     }
 
-    UseConf(*conf);
     return;
     bad_cmdline:
       cerr << dcmdline_options << endl;
@@ -147,12 +146,13 @@ struct oracle_directions {
   int main(int argc, char *argv[]) {
     po::variables_map conf;
     InitCommandLine(argc,argv,&conf);
+    init_bleumodel();
+    UseConf(*conf);
     Run();
     return 0;
   }
   bool verbose() const { return oracle.verbose; }
   void Run() {
-    init_bleumodel();
 //    register_feature_functions();
     AddPrimaryAndRandomDirections();
     AddOracleDirections();
