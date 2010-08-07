@@ -1,6 +1,14 @@
 #ifndef _FF_H_
 #define _FF_H_
 
+#define DEBUG_INIT 0
+#if DEBUG_INIT
+# include <iostream>
+# define DBGINIT(a) do { std::cerr<<a<<"\n"; } while(0)
+#else
+# define DBGINIT(a)
+#endif
+
 #include <vector>
 #include <cstring>
 #include "fdict.h"
@@ -19,6 +27,12 @@ class FeatureFunction {
  public:
   std::string name_; // set by FF factory using usage()
   bool debug_; // also set by FF factory checking param for immediate initial "debug"
+  //called after constructor, but before name_ and debug_ have been set
+  virtual void Init() { DBGINIT("default FF::Init name="<<name_); }
+  virtual void init_name_debug(std::string const& n,bool debug) {
+    name_=n;
+    debug_=debug;
+  }
   bool debug() const { return debug_; }
   FeatureFunction() : state_size_() {}
   explicit FeatureFunction(int state_size) : state_size_(state_size) {}
@@ -36,7 +50,7 @@ public:
   virtual bool rule_feature() const { return false; }
 
   //OVERRIDE THIS:
-  virtual Features features() const { return Features(); }
+  virtual Features features() const { return single_feature(FD::Convert(name_)); }
   // returns the number of bytes of context that this feature function will
   // (maximally) use.  By default, 0 ("stateless" models in Hiero/Joshua).
   // NOTE: this value is fixed for the instance of your class, you cannot
@@ -63,6 +77,7 @@ public:
   // if there's some state left when you transition to the goal state, score
   // it here.  For example, the language model computes the cost of adding
   // <s> and </s>.
+
 protected:
   virtual void FinalTraversalFeatures(const void* residual_state,
                                       FeatureVector* final_features) const;

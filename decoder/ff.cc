@@ -46,7 +46,7 @@ Features ModelSet::all_features(std::ostream *warn,bool warn0) {
     string const& ffname=ff.name_;
     FFS si=ff.features();
     if (si.empty()) {
-      WARNFF(ffname<<" doesn't yet report any feature IDs - implement features() method?");
+      WARNFF(ffname<<" doesn't yet report any feature IDs - either supply feature weight, or use --no_freeze_feature_set, or implement features() method");
     }
     unsigned n0=0;
     for (unsigned j=0;j<si.size();++j) {

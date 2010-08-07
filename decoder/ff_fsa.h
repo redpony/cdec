@@ -68,18 +68,26 @@ usage: see ff_sample_fsa.h or ff_lm_fsa.h
 
 template <class Impl>
 struct FsaFeatureFunctionBase : public FsaFeatureFunctionData {
-  // CALL 1 of these MANUALLY  (because feature name(s) may depend on param, it's not done in ctor)
-  void Init(std::string const& fname="") {
-    fid_=FD::Convert(fname.empty()?name():fname);
+  Impl const& d() const { return static_cast<Impl const&>(*this); }
+  Impl & d()  { return static_cast<Impl &>(*this); }
+
+  // this will get called by factory - override if you have multiple or dynamically named features.  note: may be called repeatedly
+  void Init() {
+    Init(name());
+    DBGINIT("base (single feature) FsaFeatureFunctionBase::Init name="<<name()<<" features="<<FD::Convert(features_));
+  }
+  void Init(std::string const& fname) {
+    fid_=FD::Convert(fname);
     InitHaveFid();
   }
-  Features features_;
   void InitHaveFid() {
     features_=FeatureFunction::single_feature(fid_);
   }
+  Features features() const {
+    DBGINIT("FeatureFunctionBase::features() name="<<name()<<" features="<<FD::Convert(features_));
+    return features_;
+  }
 
-  Impl const& d() const { return static_cast<Impl const&>(*this); }
-  Impl & d()  { return static_cast<Impl &>(*this); }
 public:
   int fid_; // you can have more than 1 feature of course.
 
@@ -252,8 +260,11 @@ public:
   }
 
   // don't set state-bytes etc. in ctor because it may depend on parsing param string
-  FsaFeatureFunctionBase(int statesz=0,Sentence const& end_sentence_phrase=Sentence()) :
-    FsaFeatureFunctionData(statesz,end_sentence_phrase) {  }
+  FsaFeatureFunctionBase(int statesz=0,Sentence const& end_sentence_phrase=Sentence())
+    : FsaFeatureFunctionData(statesz,end_sentence_phrase)
+  {
+    name_=name(); // should allow FsaDynamic wrapper to get name copied to it with sync
+  }
 
 };
 

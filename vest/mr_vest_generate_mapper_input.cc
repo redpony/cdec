@@ -18,15 +18,21 @@
 
 const bool DEBUG_ORACLE=true;
 
-boost::shared_ptr<FFRegistry> global_ff_registry;
+//TODO: decide on cdec_ff ffs, or just bleumodel - if just bleumodel, then do existing features on serialized hypergraphs remain?  weights (origin) is passed to oracle_bleu.h:ComputeOracle
+//void register_feature_functions();
+//FFRegistry ff_registry;
 namespace {
+void init_bleumodel() {
+  ff_registry.clear();
+  ff_registry.Register(new FFFactory<BLEUModel>);
+}
+
 struct init_ff {
   init_ff() {
-    global_ff_registry.reset(new FFRegistry);
-    global_ff_registry->Register(new FFFactory<BLEUModel>);
+    init_bleumodel();
   }
 };
-init_ff reg;
+//init_ff reg; // order of initialization?  ff_registry may not be init yet.  call in Run() instead.
 }
 
 using namespace std;
@@ -146,6 +152,8 @@ struct oracle_directions {
   }
   bool verbose() const { return oracle.verbose; }
   void Run() {
+    init_bleumodel();
+//    register_feature_functions();
     AddPrimaryAndRandomDirections();
     AddOracleDirections();
     compress_similar(directions,max_similarity,&cerr,true,verbose());
