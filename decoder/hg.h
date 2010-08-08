@@ -42,8 +42,8 @@ public:
   Hypergraph() : is_linear_chain_(false) {}
 
   // SmallVector is a fast, small vector<int> implementation for sizes <= 2
-  typedef SmallVectorInt TailNodeVector;
-  typedef std::vector<int> EdgesVector;
+  typedef SmallVectorInt TailNodeVector; // indices in nodes_
+  typedef std::vector<int> EdgesVector; // indices in edges_
 
   // TODO get rid of cat_?
   // TODO keep cat_ and add span and/or state? :)
@@ -51,8 +51,8 @@ public:
     Node() : id_(), cat_(), promise(1) {}
     int id_; // equal to this object's position in the nodes_ vector
     WordID cat_;  // non-terminal category if <0, 0 if not set
-    EdgesVector in_edges_;   // contents refer to positions in edges_
-    EdgesVector out_edges_;  // contents refer to positions in edges_
+    EdgesVector in_edges_;   // an in edge is an edge with this node as its head.  (in edges come from the bottom up to us)  indices in edges_
+    EdgesVector out_edges_;  // an out edge is an edge with this node as its tail.  (out edges leave us up toward the top/goal). indices in edges_
     double promise; // set in global pruning; in [0,infty) so that mean is 1.  use: e.g. scale cube poplimit.  //TODO: appears to be useless, compile without this?  on the other hand, pretty cheap.
     void copy_fixed(Node const& o) { // nonstructural fields only - structural ones are managed by sorting/pruning/subsetting
       cat_=o.cat_;
@@ -77,7 +77,7 @@ public:
     int head_node_;               // refers to a position in nodes_
     TailNodeVector tail_nodes_;   // contents refer to positions in nodes_
     TRulePtr rule_;
-    SparseVector<double> feature_values_;
+    FeatureVector feature_values_;
     prob_t edge_prob_;             // dot product of weights and feat_values
     int id_;   // equal to this object's position in the edges_ vector
 
@@ -325,6 +325,7 @@ public:
   }
 
   typedef std::vector<prob_t> EdgeProbs;
+  typedef std::vector<prob_t> NodeProbs;
   typedef std::vector<bool> EdgeMask;
   typedef std::vector<bool> NodeMask;
 
@@ -376,8 +377,10 @@ public:
   void PushWeightsToGoal(double scale = 1.0);
 
   // contrary to PushWeightsToGoal, use viterbi semiring; store log(p) to fid.  note that p_viterbi becomes 1; k*p_viterbi becomes k.  also modifies edge_prob_ (note that the fid stored log(p) will stick around even if you reweight)
-  // afterwards, product of edge_prob_ for a derivation will equal 1 for the viterbi (p_v before, 1 after), and in general (k*p_v before, k after)
-  void PushViterbiWeightsToGoal(int fid=0);
+  // afterwards, product of edge_prob_ for a derivation will equal 1 for the viterbi (p_v before, 1 after), and in general (k*p_v before, k after).  returns inside(goal)
+  prob_t PushViterbiWeightsToGoal(int fid=0);
+  prob_t ComputeNodeViterbi(NodeProbs *np) const;
+
 
 //  void SortInEdgesByEdgeWeights(); // local sort only - pretty useless
 
@@ -392,7 +395,6 @@ public:
   /// drop edge i if edge_margin[i] < prune_below, unless preserve_mask[i]
   void MarginPrune(EdgeProbs const& edge_margin,prob_t prune_below,EdgeMask const* preserve_mask=0,bool safe_inside=false,bool verbose=false);
   // promise[i]=((max_marginal[i]/viterbi)^power).todouble.  if normalize, ensure that avg promise is 1.
-  typedef EdgeProbs NodeProbs;
   void SetPromise(NodeProbs const& inside,NodeProbs const& outside, double power=1, bool normalize=true);
 
   //TODO: in my opinion, looking at the ratio of logprobs (features \dot weights) rather than the absolute difference generalizes more nicely across sentence lengths and weight vectors that are constant multiples of one another.  at least make that an option.  i worked around this a little in cdec by making "beam alpha per source word" but that's not helping with different tuning runs.  this would also make me more comfortable about allocating Node.promise

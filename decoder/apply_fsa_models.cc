@@ -7,6 +7,7 @@
 #include "apply_models.h"
 #include <stdexcept>
 #include <cassert>
+#include "cfg.h"
 
 using namespace std;
 
@@ -15,25 +16,30 @@ struct ApplyFsa {
            const SentenceMetadata& smeta,
            const FsaFeatureFunction& fsa,
            DenseWeightVector const& weights,
-           ApplyFsaBy const& cfg,
+           ApplyFsaBy const& by,
            Hypergraph* oh)
-    :ih(ih),smeta(smeta),fsa(fsa),weights(weights),cfg(cfg),oh(oh)
+    :ih(ih),smeta(smeta),fsa(fsa),weights(weights),by(by),oh(oh)
   {
 //    sparse_to_dense(weight_vector,&weights);
     Init();
   }
   void Init() {
-    ApplyBottomUp();
-    //TODO: implement l->r
+    if (by.IsBottomUp())
+      ApplyBottomUp();
+    else
+      ApplyEarley();
   }
   void ApplyBottomUp() {
-    assert(cfg.IsBottomUp());
+    assert(by.IsBottomUp());
     FeatureFunctionFromFsa<FsaFeatureFunctionFwd> buff(&fsa);
     buff.Init(); // mandatory to call this (normally factory would do it)
     vector<const FeatureFunction*> ffs(1,&buff);
     ModelSet models(weights, ffs);
-    IntersectionConfiguration i(cfg.BottomUpAlgorithm(),cfg.pop_limit);
+    IntersectionConfiguration i(by.BottomUpAlgorithm(),by.pop_limit);
     ApplyModelSet(ih,smeta,models,i,oh);
+  }
+  void ApplyEarley() {
+    CFG cfg(ih,true,false,true);
   }
 private:
   const Hypergraph& ih;
@@ -41,7 +47,7 @@ private:
   const FsaFeatureFunction& fsa;
 //  WeightVector weight_vector;
   DenseWeightVector weights;
-  ApplyFsaBy cfg;
+  ApplyFsaBy by;
   Hypergraph* oh;
 };
 
@@ -50,10 +56,10 @@ void ApplyFsaModels(const Hypergraph& ih,
                     const SentenceMetadata& smeta,
                     const FsaFeatureFunction& fsa,
                     DenseWeightVector const& weight_vector,
-                    ApplyFsaBy const& cfg,
+                    ApplyFsaBy const& by,
                     Hypergraph* oh)
 {
-  ApplyFsa a(ih,smeta,fsa,weight_vector,cfg,oh);
+  ApplyFsa a(ih,smeta,fsa,weight_vector,by,oh);
 }
 
 

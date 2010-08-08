@@ -147,10 +147,21 @@ struct vpusher : public vector<TropicalValue> {
 };
 }
 
-void Hypergraph::PushViterbiWeightsToGoal(int fid) {
+prob_t Hypergraph::ComputeNodeViterbi(NodeProbs *np) const
+{
+  return Inside(*this,
+                reinterpret_cast<std::vector<TropicalValue> *>(np),
+                ViterbiWeightFunction()).v_;
+}
+
+
+// save pushed weight ot some fid if we want.  0 = don't care
+prob_t Hypergraph::PushViterbiWeightsToGoal(int fid) {
   vpusher vi(fid);
-  Inside(*this,&vi,ViterbiWeightFunction());
+  NodeProbs np;
+  prob_t r=ComputeNodeViterbi(&np);
   visit_edges(vi);
+  return r;
 }
 
 

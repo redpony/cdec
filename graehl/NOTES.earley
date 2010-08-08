@@ -1,3 +1,16 @@
+1. fsts (modify target string produced) are quite feasible.  augment fsa ff to not just emit features, but also new target words.  composition or intersection is no problem (can always bunch into a single FSA/FST lazily by wrapping)
+
+2. sparse fsas (many transitions have -inf score) aren't efficiently supported presently (they are in early_composer where the fsa is a phrase table); the fsa ff interface doesn't even provide a way to query the non-0 transitions (you have to emit a -inf feature).  if sparse fsas were expected often and we wanted exact search, then a similar index of the tcfg as in earley_composer would make sense.  however, with prob. beam search, we prune out bad-scoring stuff anyway
+
+3. binarization of rhs isn't usually considered necessary in earley, but i liked the idea of optimal binarization making the most sharing possible.  however, this means what would have just been a scan is now a scan+complete.
+
+4. prefix (forward) + inside cost.  this is phrased in a way so that prefix includes inside.  but there's no reason not to think of it in exclusive terms (outside,inside) where prefix=outside*inside when using viterbi.  on the other hand, we usually use the outside*inside as the beam score.  and furthermore, it looks like when summing over all derivations, there would be some difficulty calculating, as the total inside wouldn't be known at first.
+
+(a,i) r => (+=a*r,r) would become (o,i) r => (+=[(o*i*r)/r],r) = (+=o*i,r)
+(_,b'') (a,b)  => (+=a*b'',+=b*b'') would become (_,b'') (o,b) => (?????)
+
+====
+
 
 the target CFG (tcfg) is finite - absolutely no cycles.  conceptually we're intersecting it with a wfsa (weights are feature vectors), which is a lot like parsing a lattice, in that states are (source state, dest state) pairs and you're covering some string(s) that go from source->dest in the wfsa.
 
