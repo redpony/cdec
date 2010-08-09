@@ -70,7 +70,9 @@ prob_t Hypergraph::ComputeEdgeViterbi(EdgeProbs *ev) const {
 }
 
 prob_t Hypergraph::ComputeEdgeViterbi(NodeProbs const& nv,EdgeProbs *ev) const {
-  for (int i=0;i<edges_.size();++i) {
+  int ne=edges_.size();
+  ev->resize(ne);
+  for (int i=0;i<ne;++i) {
     Edge const& e=edges_[i];
     prob_t r=e.edge_prob_;
     TailNodeVector const& t=e.tail_nodes_;
