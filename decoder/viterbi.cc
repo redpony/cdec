@@ -5,6 +5,8 @@
 #include <vector>
 #include "hg.h"
 
+#define DEBUG_VITERBI_SORT
+
 using namespace std;
 
 std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool estring, bool etree,bool show_derivation)
@@ -25,7 +27,12 @@ std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool es
     o << hg.show_viterbi_tree(false); // last item should be goal (or at least depend on prev items).  TODO: this doesn't actually reorder the nodes in hg.
     o<<endl;
   }
-
+#ifdef DEBUG_VITERBI_SORT
+  const_cast<Hypergraph&>(hg).ViterbiSortInEdges();
+  o<<name<<" (viterbi sort) first derivation: ";
+  o<<hg.show_first_tree(false);
+  o<<endl;
+#endif
   return o.str();
 }
 
