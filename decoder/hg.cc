@@ -16,6 +16,7 @@
 
 using namespace std;
 
+#if 0
 Hypergraph::Edge const* Hypergraph::ViterbiGoalEdge() const
 {
   Edge const* r=0;
@@ -26,6 +27,64 @@ Hypergraph::Edge const* Hypergraph::ViterbiGoalEdge() const
   }
   return r;
 }
+#endif
+
+Hypergraph::Edge const* Hypergraph::ViterbiSortInEdges()
+{
+  NodeProbs nv;
+  ComputeNodeViterbi(&nv);
+  return SortInEdgesByNodeViterbi(nv);
+}
+
+Hypergraph::Edge const* Hypergraph::SortInEdgesByNodeViterbi(NodeProbs const& nv)
+{
+  EdgeProbs ev;
+  ComputeEdgeViterbi(nv,&ev);
+  return ViterbiSortInEdges(ev);
+}
+
+namespace {
+struct less_ve {
+  Hypergraph::EdgeProbs const& ev;
+  //Hypergraph const& hg;
+  explicit less_ve(Hypergraph::EdgeProbs const& ev/*,Hypergraph const& hg */) : ev(ev)/*,hg(hg)*/ {  }
+  bool operator()(int a,int b) const {
+    return ev[a] > ev[b];
+  }
+};
+}
+
+Hypergraph::Edge const* Hypergraph::ViterbiSortInEdges(EdgeProbs const& ev)
+{
+  for (int i=0;i<nodes_.size();++i) {
+    EdgesVector &ie=nodes_[i].in_edges_;
+    std::sort(ie.begin(),ie.end(),less_ve(ev));
+  }
+  return first_edge();
+}
+
+prob_t Hypergraph::ComputeEdgeViterbi(EdgeProbs *ev) const {
+  NodeProbs nv;
+  ComputeNodeViterbi(&nv);
+  return ComputeEdgeViterbi(nv,ev);
+}
+
+prob_t Hypergraph::ComputeEdgeViterbi(NodeProbs const& nv,EdgeProbs *ev) const {
+  for (int i=0;i<edges_.size();++i) {
+    Edge const& e=edges_[i];
+    prob_t r=e.edge_prob_;
+    TailNodeVector const& t=e.tail_nodes_;
+    for (TailNodeVector::const_iterator j=t.begin(),jj=t.end();j!=jj;++j)
+      r*=nv[*j];
+    /*
+    for (int j=0;j<e.tail_nodes_.size();++j)
+      r*=nv[e.tail_nodes_[j]];
+    */
+    (*ev)[i]=r;
+  }
+  return nv.empty()?prob_t(0):nv.back();
+}
+
 
 std::string Hypergraph::stats(std::string const& name) const
 {
@@ -659,14 +718,15 @@ struct EdgeWeightSorter {
   }
 */
 
+std::string Hypergraph::show_first_tree(bool indent,int show_mask,int maxdepth,int depth) const {
+  EdgeHandle fe=first_edge();
+  return fe ? fe->derivation_tree(*this,fe,indent,show_mask,maxdepth,depth) : "";
+}
+
 std::string Hypergraph::show_viterbi_tree(bool indent,int show_mask,int maxdepth,int depth) const {
   HypergraphP v=CreateViterbiHypergraph();
 //  cerr<<viterbi_stats(*v,"debug show_viterbi_tree",true,true,false)<<endl;
-  if (v->NumberOfEdges()) {
-    Edge const* beste=&v->edges_.back();   //FIXME: this doesn't work. check CreateViterbiHypergraph ?
-    return beste->derivation_tree(*v,beste,indent,show_mask,maxdepth,depth);
-  }
-  return std::string();
+  return v->show_first_tree(indent,show_mask,maxdepth,depth);
 }
 
 HypergraphP Hypergraph::CreateEdgeSubset(EdgeMask &keep_edges) const {

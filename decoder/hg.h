@@ -197,24 +197,52 @@ public:
     }
   };
 
+  typedef std::vector<prob_t> EdgeProbs;
+  typedef std::vector<prob_t> NodeProbs;
+  typedef std::vector<bool> EdgeMask;
+  typedef std::vector<bool> NodeMask;
+
   std::string show_viterbi_tree(bool indent=true,int show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const;
-
-  typedef Edge const* EdgeHandle;
-  EdgeHandle operator()(int tailn,int /*taili*/,EdgeHandle /*parent*/) const {
-    return viterbi_edge(tailn);
-  }
-
-  Edge const* viterbi_edge(int node) const { // even if edges are sorted by edgeweights, this doesn't give viterbi
-    EdgesVector const& v=nodes_[node].in_edges_;
-    return v.empty() ? 0 : &edges_[v.front()];
-  }
+// builds viterbi hg and returns it formatted as a pretty string
 
   enum {
     NONE=0,CATEGORY=1,SPAN=2,PROB=4,FEATURES=8,RULE=16,RULE_LHS=32,PREV_SPAN=64,ALL=0xFFFFFFFF
   };
 
+  std::string show_first_tree(bool indent=true,int show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const;
+  // same as above, but takes in_edges_[0] all the way down - to make it viterbi cost (1-best), call ViterbiSortInEdges() first
+
+  typedef Edge const* EdgeHandle;
+  EdgeHandle operator()(int tailn,int /*taili*/,EdgeHandle /*parent*/) const {
+    return first_edge(tailn);
+  }
+
+  Edge const* first_edge(int node) const { // only actually viterbi if ViterbiSortInEdges() called.  otherwise it's just the first.
+    EdgesVector const& v=nodes_[node].in_edges_;
+    return v.empty() ? 0 : &edges_[v.front()];
+  }
+
+  Edge const* first_edge() const {
+    int nn=nodes_.size();
+    return nn>=0?first_edge(nn-1):0;
+  }
+
+
+#if 0
   // returns edge with rule_.IsGoal, returns 0 if none found.  otherwise gives best edge_prob_ - note: I don't think edge_prob_ is viterbi cumulative, so this would just be the best local probability.
   Edge const* ViterbiGoalEdge() const;
+#endif
+
+  int GoalNode() const { return nodes_.size()-1; } // by definition, and sorting of nodes in topo order (bottom up)
+
+// post: in_edges_ for each node is ordered by global viterbi.  returns 1best goal node edge as well
+  Edge const* ViterbiSortInEdges();
+  Edge const* SortInEdgesByNodeViterbi(NodeProbs const& nv);
+  Edge const* ViterbiSortInEdges(EdgeProbs const& eviterbi);
+
+  prob_t ComputeNodeViterbi(NodeProbs *np) const;
+  prob_t ComputeEdgeViterbi(EdgeProbs *ev) const;
+  prob_t ComputeEdgeViterbi(NodeProbs const&np,EdgeProbs *ev) const;
 
   void swap(Hypergraph& other) {
     other.nodes_.swap(nodes_);
@@ -324,11 +352,6 @@ public:
     }
   }
 
-  typedef std::vector<prob_t> EdgeProbs;
-  typedef std::vector<prob_t> NodeProbs;
-  typedef std::vector<bool> EdgeMask;
-  typedef std::vector<bool> NodeMask;
-
   // computes inside and outside scores for each
   // edge in the hypergraph
   // alpha->size = edges_.size = beta->size
@@ -379,8 +402,6 @@ public:
   // contrary to PushWeightsToGoal, use viterbi semiring; store log(p) to fid.  note that p_viterbi becomes 1; k*p_viterbi becomes k.  also modifies edge_prob_ (note that the fid stored log(p) will stick around even if you reweight)
   // afterwards, product of edge_prob_ for a derivation will equal 1 for the viterbi (p_v before, 1 after), and in general (k*p_v before, k after).  returns inside(goal)
   prob_t PushViterbiWeightsToGoal(int fid=0);
-  prob_t ComputeNodeViterbi(NodeProbs *np) const;
-
 
 //  void SortInEdgesByEdgeWeights(); // local sort only - pretty useless
 
