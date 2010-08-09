@@ -5,7 +5,7 @@
 #include <vector>
 #include "hg.h"
 
-#define DEBUG_VITERBI_SORT
+//#define DEBUG_VITERBI_SORT
 
 using namespace std;
 
@@ -29,7 +29,7 @@ std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool es
   }
 #ifdef DEBUG_VITERBI_SORT
   const_cast<Hypergraph&>(hg).ViterbiSortInEdges();
-  o<<name<<"  sorted #1 derivation: ";
+  o<<name<<"sorted #1 derivation: ";
   o<<hg.show_first_tree(false);
   o<<endl;
 #endif
