@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <cassert>
 #include "cfg.h"
+#include "hg_cfg.h"
 
 using namespace std;
 
@@ -118,3 +119,13 @@ int ApplyFsaBy::BottomUpAlgorithm() const {
     :IntersectionConfiguration::FULL;
 }
 
+void ApplyFsaModels(Hypergraph const& ih,
+                    const SentenceMetadata& smeta,
+                    const FsaFeatureFunction& fsa,
+                    DenseWeightVector const& weights, // pre: in is weighted by these (except with fsa featval=0 before this)
+                    ApplyFsaBy const& cfg,
+                    Hypergraph* out)
+{
+  HgCFG i(ih);
+  ApplyFsaModels(i,smeta,fsa,weights,cfg,out);
+}

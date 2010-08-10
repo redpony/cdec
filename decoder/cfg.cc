@@ -1,8 +1,21 @@
 #include "cfg.h"
 #include "hg.h"
 #include "cfg_format.h"
+#include "cfg_binarize.h"
 
 using namespace std;
+
+
+void CFG::Binarize(CFGBinarize const& b) {
+  if (!b.Binarizing()) return;
+  if (!b.bin_l2r) {
+    assert(b.bin_l2r);
+    return;
+  }
+  // l2r only so far:
+  cerr << "Binarizing "<<b<<endl;
+  //TODO.
+}
 
 void CFG::Init(Hypergraph const& hg,bool target_side,bool copy_features,bool push_weights) {
   uninit=false;

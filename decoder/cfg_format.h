@@ -1,10 +1,10 @@
 #ifndef CFG_FORMAT_H
 #define CFG_FORMAT_H
 
-#include <program_options.h>
 #include <string>
 #include "wordid.h"
 #include "feature_vector.h"
+#include "program_options.h"
 
 struct CFGFormat {
   bool identity_scfg;
@@ -18,8 +18,8 @@ struct CFGFormat {
   std::string partsep;
   template <class Opts> // template to support both printable_opts and boost nonprintable
   void AddOptions(Opts *opts) {
-    using namespace boost::program_options;
-    using namespace std;
+    //using namespace boost::program_options;
+    //using namespace std;
     opts->add_options()
       ("identity_scfg",defaulted_value(&identity_scfg),"output an identity SCFG: add an identity target side - '[X12] ||| [X13,1] a ||| [1] a ||| feat= ...' - the redundant target '[1] a |||' is omitted otherwise.")
       ("features",defaulted_value(&features),"print the CFG feature vector")
@@ -31,7 +31,7 @@ struct CFGFormat {
       ("nt_span",defaulted_value(&nt_span),"prefix A(i,j) for NT coming from hypergraph node with category A on span [i,j).  this is after --nt_prefix if any")
       ;
   }
-
+  void Validate() {  }
   template<class CFG>
   void print_source_nt(std::ostream &o,CFG const&cfg,int id,int position=1) const {
     o<<'[';
@@ -103,6 +103,7 @@ struct CFGFormat {
     set_defaults();
   }
 };
+
 
 
 #endif
