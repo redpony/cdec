@@ -36,6 +36,8 @@
 #include "sentence_metadata.h"
 #include "../vest/scorer.h"
 #include "apply_fsa_models.h"
+#include "program_options.h"
+#include "cfg_format.h"
 
 using namespace std;
 using namespace std::tr1;
@@ -105,6 +107,8 @@ void print_options(std::ostream &out,po::options_description const& opts) {
 }
 
 
+CFGFormat cfgf;
+
 void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* confp) {
   po::variables_map &conf=*confp;
   po::options_description opts("Configuration options");
@@ -168,6 +172,10 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
         ("forest_output,O",po::value<string>(),"Directory to write forests to")
         ("minimal_forests,m","Write minimal forests (excludes Rule information). Such forests can be used for ML/MAP training, but not rescoring, etc.");
   ob.AddOptions(&opts);
+  po::options_description cfgo("CFG output options");
+  cfgo.add_options()
+    ("cfg_output", po::value<string>(),"write final target CFG (before FSA rescorinn) to this file");
+  cfgf.AddOptions(&cfgo);
   po::options_description clo("Command line options");
   clo.add_options()
     ("config,c", po::value<vector<string> >(), "Configuration file(s) - latest has priority")
@@ -177,8 +185,9 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
     ;
 
   po::options_description dconfig_options, dcmdline_options;
-  dconfig_options.add(opts);
-  dcmdline_options.add(opts).add(clo);
+  dconfig_options.add(opts).add(cfgo);
+  //add(opts).add(cfgo)
+  dcmdline_options.add(dconfig_options).add(clo);
 
   po::store(parse_command_line(argc, argv, dcmdline_options), conf);
   if (conf.count("compgen")) {
@@ -653,7 +662,11 @@ int main(int argc, char** argv) {
 
     maybe_prune(forest,conf,"beam_prune","density_prune","+LM",srclen);
 
-
+    HgCFG hgcfg(forest);
+    if (conf.count("cfg_output")) {
+      WriteFile o(str("cfg_output",conf));
+      hgcfg.GetCFG().Print(o.get(),cfgf);
+    }
     if (!fsa_ffs.empty()) {
       Timer t("Target FSA rescoring:");
       if (!has_late_models)
@@ -662,12 +675,11 @@ int main(int argc, char** argv) {
       assert(fsa_ffs.size()==1);
       ApplyFsaBy cfg(str("apply_fsa_by",conf),pop_limit);
       cerr << "FSA rescoring with "<<cfg<<" "<<fsa_ffs[0]->describe()<<endl;
-      ApplyFsaModels(forest,smeta,*fsa_ffs[0],feature_weights,cfg,&fsa_forest);
+      ApplyFsaModels(hgcfg,smeta,*fsa_ffs[0],feature_weights,cfg,&fsa_forest);
       forest.swap(fsa_forest);
       forest.Reweight(feature_weights);
       forest_stats(forest,"  +FSA forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
     }
-
 
     /*Oracle Rescoring*/
     if(get_oracle_forest) {

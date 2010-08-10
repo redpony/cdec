@@ -26,6 +26,7 @@
 #include "trule.h"
 #include "prob.h"
 #include "indices_after.h"
+#include "nt_span.h"
 
 // if you define this, edges_ will be sorted
 // (normally, just nodes_ are - root must be nodes_.back()), but this can be quite
@@ -51,6 +52,7 @@ public:
     Node() : id_(), cat_(), promise(1) {}
     int id_; // equal to this object's position in the nodes_ vector
     WordID cat_;  // non-terminal category if <0, 0 if not set
+    WordID NT() const { return -cat_; }
     EdgesVector in_edges_;   // an in edge is an edge with this node as its head.  (in edges come from the bottom up to us)  indices in edges_
     EdgesVector out_edges_;  // an out edge is an edge with this node as its tail.  (out edges leave us up toward the top/goal). indices in edges_
     double promise; // set in global pruning; in [0,infty) so that mean is 1.  use: e.g. scale cube poplimit.  //TODO: appears to be useless, compile without this?  on the other hand, pretty cheap.
@@ -66,6 +68,7 @@ public:
     }
   };
 
+
   // TODO get rid of edge_prob_? (can be computed on the fly as the dot
   // product of the weight vector and the feature values)
   struct Edge {
@@ -80,6 +83,8 @@ public:
     FeatureVector feature_values_;
     prob_t edge_prob_;             // dot product of weights and feat_values
     int id_;   // equal to this object's position in the edges_ vector
+
+    //FIXME: these span ids belong in Node, not Edge, right?  every node should have the same spans.
 
     // span info. typically, i_ and j_ refer to indices in the source sentence.
     // In synchronous parsing, i_ and j_ will refer to target sentence/lattice indices
@@ -196,6 +201,47 @@ public:
       if (indent) o<<"\n";
     }
   };
+
+  // all this info ought to live in Node, but for some reason it's on Edges.
+  // except for stateful models that have split nt,span, this should identify the node
+  void SetNodeOrigin(int nodeid,NTSpan &r) const {
+    Node const &n=nodes_[nodeid];
+    r.nt=n.NT();
+    if (!n.in_edges_.empty()) {
+      Edge const& e=edges_[n.in_edges_.front()];
+      r.s.l=e.i_;
+      r.s.l=e.j_;
+//      if (e.rule_) r.nt=-e.rule_->lhs_;
+    }
+  }
+  NTSpan NodeOrigin(int nodeid) const {
+    NTSpan r;
+    SetNodeOrigin(nodeid,r);
+    return r;
+  }
+  Span NodeSpan(int nodeid) const {
+    Span s;
+    Node const &n=nodes_[nodeid];
+    if (!n.in_edges_.empty()) {
+      Edge const& e=edges_[n.in_edges_.front()];
+      s.l=e.i_;
+      s.l=e.j_;
+    }
+    return s;
+  }
+  // 0 if none, -TD index otherwise (just like in rule)
+  WordID NodeLHS(int nodeid) const {
+    Node const &n=nodes_[nodeid];
+    return n.NT();
+    /*
+    if (!n.in_edges_.empty()) {
+      Edge const& e=edges_[n.in_edges_.front()];
+      if (e.rule_)
+        return -e.rule_->lhs_;
+    }
+    return 0;
+    */
+  }
 
   typedef std::vector<prob_t> EdgeProbs;
   typedef std::vector<prob_t> NodeProbs;

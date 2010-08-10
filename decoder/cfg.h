@@ -25,6 +25,7 @@
 #include "prob.h"
 //#include "int_or_pointer.h"
 #include "small_vector.h"
+#include "nt_span.h"
 
 class Hypergraph;
 class CFGFormat; // #include "cfg_format.h"
@@ -34,6 +35,10 @@ struct CFG {
   typedef int NTHandle;
   typedef SmallVector<WordID> RHS; // same as in trule rhs: >0 means token, <=0 means -node index (not variable index)
   typedef std::vector<RuleHandle> Ruleids;
+
+  void print_nt_name(std::ostream &o,NTHandle n) const {
+    o << nts[n].from;
+  }
 
   struct Rule {
     int lhs; // index into nts
@@ -47,17 +52,33 @@ struct CFG {
 
   struct NT {
     Ruleids ruleids; // index into CFG rules with lhs = this NT.  aka in_edges_
+    NTSpan from; // optional name - still needs id to disambiguate
   };
 
-  CFG() : hg_() {  }
+  CFG() : hg_() { uninit=true; }
 
   // provided hg will have weights pushed up to root
   CFG(Hypergraph const& hg,bool target_side=true,bool copy_features=false,bool push_weights=true) {
     Init(hg,target_side,copy_features,push_weights);
   }
+  bool Uninitialized() const { return uninit; }
+  void Clear();
+  bool Empty() const { return nts.empty(); }
   void Init(Hypergraph const& hg,bool target_side=true,bool copy_features=false,bool push_weights=true);
   void Print(std::ostream &o,CFGFormat const& format) const; // see cfg_format.h
+  void PrintRule(std::ostream &o,RuleHandle rulei,CFGFormat const& format) const;
+  void Swap(CFG &o) { // make sure this includes all fields (easier to see here than in .cc)
+    using namespace std;
+    swap(uninit,o.uninit);
+    swap(hg_,o.hg_);
+    swap(goal_inside,o.goal_inside);
+    swap(pushed_inside,o.pushed_inside);
+    swap(rules,o.rules);
+    swap(nts,o.nts);
+    swap(goal_nt,o.goal_nt);
+  }
 protected:
+  bool uninit;
   Hypergraph const* hg_; // shouldn't be used for anything, esp. after binarization
   prob_t goal_inside,pushed_inside; // when we push viterbi weights to goal, we store the removed probability in pushed_inside
   // rules/nts will have same index as hg edges/nodes
@@ -67,5 +88,6 @@ protected:
   NTs nts;
   int goal_nt;
 };
+
 
 #endif
