@@ -3,13 +3,13 @@
 use strict;
 my @ORIG_ARGV=@ARGV;
 use Cwd qw(getcwd);
-my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
+my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../environment"; }
+use LocalConfig;
 use Getopt::Long;
 use IPC::Open2;
 use strict;
 use POSIX ":sys_wait_h";
-#my $QSUB_FLAGS = "-q batch -l pmem=3000mb,walltime=5:00:00";
-my $QSUB_FLAGS = "-l mem_free=9G";
+my $QSUB_CMD = qsub_args(mert_memory());
 
 # Default settings
 my $srcFile;
@@ -24,6 +24,8 @@ my $REDUCER = "$bin_dir/mr_vest_reduce";
 my $parallelize = "$bin_dir/parallelize.pl";
 my $sentserver = "$bin_dir/sentserver";
 my $sentclient = "$bin_dir/sentclient";
+my $LocalConfig = "$SCRIPT_DIR/../environment/LocalConfig.pm";
+
 my $SCORER = $FAST_SCORE;
 die "Can't find $MAPPER" unless -x $MAPPER;
 my $cdec = "$bin_dir/../decoder/cdec";
@@ -197,7 +199,7 @@ if ($dryrun){
 	} else {
 		-e $dir || mkdir $dir;
 		mkdir "$dir/hgs";
-        modbin("$dir/bin",\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize,\$sentserver,\$sentclient) if $cpbin;
+        modbin("$dir/bin",\$LocalConfig,\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize,\$sentserver,\$sentclient) if $cpbin;
     mkdir "$dir/scripts";
         my $cmdfile="$dir/rerun-vest.sh";
         open CMD,'>',$cmdfile;
@@ -276,6 +278,8 @@ while (1){
 		print STDERR "ERROR: Parallel decoder returned non-zero exit code $result\n";
 		die;
 	}
+        my $num_hgs = `ls $dir/hgs/*.gz | wc -l`;
+        print STDERR "HGs: $num_hgs\n";
 	my $dec_score = `cat $runFile | $SCORER $refs_comma_sep -l $metric`;
 	chomp $dec_score;
 	print STDERR "DECODER SCORE: $dec_score\n";
@@ -343,20 +347,21 @@ while (1){
 					die "ERROR: mapper returned non-zero exit code $result\n";
 				}
 			} else {
-        my $script_file = "$dir/scripts/map.$shard";
-        open F, ">$script_file" or die "Can't write $script_file: $!";
-        print F "$script\n";
-        close F;
+				my $script_file = "$dir/scripts/map.$shard";
+				open F, ">$script_file" or die "Can't write $script_file: $!";
+				print F "$script\n";
+				close F;
 				if ($first_shard) { print STDERR "$script\n"; $first_shard=0; }
 
 				$nmappers++;
-				my $jobid = `qsub $QSUB_FLAGS -S /bin/bash -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file`;
-        die "qsub failed: $!" unless $? == 0;
-	  		chomp $jobid;
+				my $qcmd = "$QSUB_CMD -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file";
+				my $jobid = `$qcmd`;
+				die "qsub failed: $!\nCMD was: $qcmd" unless $? == 0;
+				chomp $jobid;
 				$jobid =~ s/^(\d+)(.*?)$/\1/g;
-        $jobid =~ s/^Your job (\d+) .*$/\1/;
-		  	push(@cleanupcmds, "`qdel $jobid 2> /dev/null`");
-			  print STDERR " $jobid";
+				$jobid =~ s/^Your job (\d+) .*$/\1/;
+		 	 	push(@cleanupcmds, "`qdel $jobid 2> /dev/null`");
+				print STDERR " $jobid";
 				if ($joblist == "") { $joblist = $jobid; }
 				else {$joblist = $joblist . "\|" . $jobid; }
 			}
@@ -368,7 +373,7 @@ while (1){
 			print STDERR "Waiting for mappers to complete...\n";
 			while ($nmappers > 0) {
 			  sleep 5;
-			  my @livejobs = grep(/$joblist/, split(/\n/, `qstat`));
+			  my @livejobs = grep(/$joblist/, split(/\n/, `qstat | grep -v ' C '`));
 			  $nmappers = scalar @livejobs;
 			}
 			print STDERR "All mappers complete.\n";
