@@ -29,6 +29,7 @@
 
 class Hypergraph;
 class CFGFormat; // #include "cfg_format.h"
+class CFGBinarize; // #include "cfg_binarize.h"
 
 struct CFG {
   typedef int RuleHandle;
@@ -77,6 +78,7 @@ struct CFG {
     swap(nts,o.nts);
     swap(goal_nt,o.goal_nt);
   }
+  void Binarize(CFGBinarize const& binarize_options);
 protected:
   bool uninit;
   Hypergraph const* hg_; // shouldn't be used for anything, esp. after binarization

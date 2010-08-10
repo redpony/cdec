@@ -37,7 +37,9 @@
 #include "../vest/scorer.h"
 #include "apply_fsa_models.h"
 #include "program_options.h"
-#include "cfg_format.h"
+#include "cfg_options.h"
+
+CFGOptions cfg_options;
 
 using namespace std;
 using namespace std::tr1;
@@ -61,7 +63,6 @@ void ConvertSV(const SparseVector<prob_t>& src, SparseVector<double>* trg) {
   for (SparseVector<prob_t>::const_iterator it = src.begin(); it != src.end(); ++it)
     trg->set_value(it->first, it->second);
 }
-
 
 inline string str(char const* name,po::variables_map const& conf) {
   return conf[name].as<string>();
@@ -105,9 +106,6 @@ void print_options(std::ostream &out,po::options_description const& opts) {
   }
   out << '"';
 }
-
-
-CFGFormat cfgf;
 
 void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* confp) {
   po::variables_map &conf=*confp;
@@ -172,10 +170,8 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
         ("forest_output,O",po::value<string>(),"Directory to write forests to")
         ("minimal_forests,m","Write minimal forests (excludes Rule information). Such forests can be used for ML/MAP training, but not rescoring, etc.");
   ob.AddOptions(&opts);
-  po::options_description cfgo("CFG output options");
-  cfgo.add_options()
-    ("cfg_output", po::value<string>(),"write final target CFG (before FSA rescorinn) to this file");
-  cfgf.AddOptions(&cfgo);
+  po::options_description cfgo(cfg_options.description());
+  cfg_options.AddOptions(&cfgo);
   po::options_description clo("Command line options");
   clo.add_options()
     ("config,c", po::value<vector<string> >(), "Configuration file(s) - latest has priority")
@@ -555,6 +551,7 @@ int main(int argc, char** argv) {
   const bool crf_uniform_empirical = conf.count("crf_uniform_empirical");
   const bool get_oracle_forest = conf.count("get_oracle_forest");
 
+  cfg_options.Validate();
   if (get_oracle_forest)
     oracle.UseConf(conf);
 
@@ -663,9 +660,11 @@ int main(int argc, char** argv) {
     maybe_prune(forest,conf,"beam_prune","density_prune","+LM",srclen);
 
     HgCFG hgcfg(forest);
-    if (conf.count("cfg_output")) {
-      WriteFile o(str("cfg_output",conf));
-      hgcfg.GetCFG().Print(o.get(),cfgf);
+    cfg_options.maybe_output(hgcfg);
+    if (!cfg_options.cfg_output.empty()) {
+      WriteFile o(cfg_options.cfg_output);
+      CFG &cfg=hgcfg.GetCFG();
+      cfg.Print(o.get(),cfg_options.format);
     }
     if (!fsa_ffs.empty()) {
       Timer t("Target FSA rescoring:");
