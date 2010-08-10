@@ -106,7 +106,8 @@ void assign_trule(const TRulePtr& new_rule, const unsigned int ctf_level, const 
 bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
   if (!is_single_line_stripped(line))
     std::cerr<<"\nWARNING: building rule from multi-line string "<<line<<".\n";
-  if (!(mono||strict)) {
+  // backed off of this: it's failing to parse TRulePtr glue(new TRule("[" + goal_nt + "] ||| [" + goal_nt + ",1] ["+ default_nt + ",2] ||| [1] [2] ||| Glue=1")); thinks [1] is the features!
+  if (false && !(mono||strict)) {
     // use lexer
     istringstream il(line);
     n_assigned=0;
