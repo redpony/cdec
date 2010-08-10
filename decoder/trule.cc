@@ -4,6 +4,8 @@
 
 #include "stringlib.h"
 #include "tdict.h"
+#include "rule_lexer.h"
+#include "threadlocal.h"
 
 using namespace std;
 
@@ -91,7 +93,29 @@ TRule* TRule::CreateRuleMonolingual(const string& rule) {
   return new TRule(rule, false, true);
 }
 
+namespace {
+// callback for lexer
+THREADLOCAL int n_assigned=0;
+void assign_trule(const TRulePtr& new_rule, const unsigned int ctf_level, const TRulePtr& coarse_rule, void* extra) {
+  TRule *assignto=(TRule *)extra;
+  *assignto=*new_rule;
+}
+
+}
+
 bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
+  if (!is_single_line_stripped(line))
+    std::cerr<<"\nWARNING: building rule from multi-line string "<<line<<".\n";
+  if (!(mono||strict)) {
+    // use lexer
+    istringstream il(line);
+    n_assigned=0;
+    RuleLexer::ReadRules(&il,assign_trule,this);
+    if (n_assigned>1)
+      std::cerr<<"\nWARNING: more than one rule parsed from multi-line string; kept last: "<<line<<".\n";
+    return n_assigned;
+  }
+
   e_.clear();
   f_.clear();
   scores_.clear();

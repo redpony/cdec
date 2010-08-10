@@ -1,5 +1,6 @@
 #include "cfg.h"
 #include "hg.h"
+#include "cfg_format.h"
 
 using namespace std;
 
@@ -10,6 +11,7 @@ void CFG::Init(Hypergraph const& hg,bool target_side,bool copy_features,bool pus
   pushed_inside=push_weights ? goal_inside : prob_t(1);
   int nn=hg.nodes_.size(),ne=hg.edges_.size();
   nts.resize(nn);
+  goal_nt=nn-1;
   rules.resize(ne);
   for (int i=0;i<nn;++i)
     nts[i].ruleids=hg.nodes_[i].in_edges_;
@@ -39,4 +41,14 @@ void CFG::Init(Hypergraph const& hg,bool target_side,bool copy_features,bool pus
       }
     }
   }
+}
+
+namespace {
+}
+
+void CFG::Print(std::ostream &o,CFGFormat const& f) const {
+  char const* partsep=" ||| ";
+  if (!f.goal_nt_name.empty())
+    o << '['<<f.goal_nt_name <<']' << partsep; // print rhs
+  //TODO:
 }

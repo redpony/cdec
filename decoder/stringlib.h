@@ -20,6 +20,34 @@
 #include <sstream>
 #include <algorithm>
 
+inline std::size_t skip_ws(std::string const& s,std::size_t starting=0,char const* ws=" \t\n\r") {
+  return s.find_first_not_of(ws,starting);
+}
+
+// returns position of end of all non-ws chars before ending, i.e. string(s.begin()+skip_ws(s),s.begin()+trailing_ws(s)) strips both ends
+inline std::size_t trailing_ws(std::string const& s,std::size_t ending=std::string::npos,char const* ws=" \t\n\r") {
+  std::size_t n=s.find_last_not_of(ws,ending);
+  if (n==std::string::npos) return n;
+  else return n+1;
+}
+
+//TEST: if string is all whitespace, make sure that string(a+npos,a+npos) can't segfault (i.e. won't access any memory because begin==end)
+inline std::string strip_ws(std::string const& s) {
+  return std::string(s.begin()+skip_ws(s),s.begin()+trailing_ws(s));
+}
+
+
+inline bool is_single_line(std::string const& line) {
+  return std::count(line.begin(),line.end(),'\n')==0; // but we want to allow terminal newlines/blanks
+}
+
+// is_single_line(strip_ws(line))
+inline bool is_single_line_stripped(std::string const& line) {
+  std::size_t b=skip_ws(line),e=trailing_ws(line);
+  std::size_t n=line.find('\n',b);
+  return n==std::string::npos || n>=e;
+}
+
 struct toupperc {
   inline char operator()(char c) const {
     return std::toupper(c);
