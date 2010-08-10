@@ -99,6 +99,7 @@ THREADLOCAL int n_assigned=0;
 void assign_trule(const TRulePtr& new_rule, const unsigned int ctf_level, const TRulePtr& coarse_rule, void* extra) {
   TRule *assignto=(TRule *)extra;
   *assignto=*new_rule;
+  ++n_assigned;
 }
 
 }
