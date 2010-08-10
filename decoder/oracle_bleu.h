@@ -91,11 +91,11 @@ struct OracleBleu {
     using namespace boost::program_options;
     using namespace std;
     opts->add_options()
+      ("show_derivation", bool_switch(&show_derivation), "show derivation tree in kbest")
+      ("verbose",bool_switch(&verbose),"detailed logs")
       ("references,R", value<Refs >(&refs), "Translation reference files")
       ("oracle_loss", value<string>(&loss_name)->default_value("IBM_BLEU_3"), "IBM_BLEU_3 (default), IBM_BLEU etc")
       ("bleu_weight", value<double>(&bleu_weight)->default_value(1.), "weight to give the hope/fear loss function vs. model score")
-      ("show_derivation", bool_switch(&show_derivation), "show derivation tree in kbest")
-      ("verbose",bool_switch(&verbose),"detailed logs")
       ;
   }
   int order;

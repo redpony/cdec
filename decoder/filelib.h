@@ -30,6 +30,7 @@ struct BaseFile {
   }
   S* stream() { return ps_.get(); }
   S* operator->() { return ps_.get(); } // compat with old ReadFile * -> new Readfile. remove?
+  S &operator *() const { return get(); }
   S &get() const { return *ps_; }
   bool is_std() {
     return filename_=="-";
