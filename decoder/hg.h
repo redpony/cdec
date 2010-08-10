@@ -210,7 +210,7 @@ public:
     if (!n.in_edges_.empty()) {
       Edge const& e=edges_[n.in_edges_.front()];
       r.s.l=e.i_;
-      r.s.l=e.j_;
+      r.s.r=e.j_;
 //      if (e.rule_) r.nt=-e.rule_->lhs_;
     }
   }
@@ -225,7 +225,7 @@ public:
     if (!n.in_edges_.empty()) {
       Edge const& e=edges_[n.in_edges_.front()];
       s.l=e.i_;
-      s.l=e.j_;
+      s.r=e.j_;
     }
     return s;
   }
