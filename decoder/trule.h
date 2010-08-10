@@ -37,7 +37,7 @@ class TRule {
   TRule(const TRule& other) :
     e_(other.e_), f_(other.f_), lhs_(other.lhs_), scores_(other.scores_), arity_(other.arity_), prev_i(-1), prev_j(-1) {}
 
-  // deprecated - this will be private soon
+  // if mono or strict is true, then lexer won't be used, and //FIXME: > 9 variables won't work
   explicit TRule(const std::string& text, bool strict = false, bool mono = false) : prev_i(-1), prev_j(-1) {
     ReadFromString(text, strict, mono);
   }

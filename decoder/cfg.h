@@ -27,9 +27,7 @@
 #include "small_vector.h"
 
 class Hypergraph;
-class CFG;
-
-
+class CFGFormat; // #include "cfg_format.h"
 
 struct CFG {
   typedef int RuleHandle;
@@ -48,7 +46,7 @@ struct CFG {
   };
 
   struct NT {
-    Ruleids ruleids; // index into CFG rules with this lhs
+    Ruleids ruleids; // index into CFG rules with lhs = this NT.  aka in_edges_
   };
 
   CFG() : hg_() {  }
@@ -58,6 +56,7 @@ struct CFG {
     Init(hg,target_side,copy_features,push_weights);
   }
   void Init(Hypergraph const& hg,bool target_side=true,bool copy_features=false,bool push_weights=true);
+  void Print(std::ostream &o,CFGFormat const& format) const; // see cfg_format.h
 protected:
   Hypergraph const* hg_; // shouldn't be used for anything, esp. after binarization
   prob_t goal_inside,pushed_inside; // when we push viterbi weights to goal, we store the removed probability in pushed_inside
@@ -66,6 +65,7 @@ protected:
   Rules rules;
   typedef std::vector<NT> NTs;
   NTs nts;
+  int goal_nt;
 };
 
 #endif
