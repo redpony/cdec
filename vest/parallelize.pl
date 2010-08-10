@@ -18,6 +18,9 @@
 
 #ANNOYANCE: if input is shorter than -j n lines, or at the very last few lines, repeatedly sleeps.  time cut down to 15s from 60s
 
+my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../environment"; }
+use LocalConfig;
+
 use File::Temp qw/ tempfile /;
 use Getopt::Long;
 use IPC::Open2;
@@ -303,7 +306,7 @@ sub launch_job {
       push @errors,$errorfile;
       push @outs,$outfile;
     }
-    my $todo = "qsub -l mem_free=$pmem -N $clientname -o $outfile -e $errorfile";
+    my $todo = qsub_args($pmem) . " -N $clientname -o $outfile -e $errorfile";
     push @cmds,$todo;
 
     print STDERR "Running: $todo\n";

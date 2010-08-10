@@ -4,11 +4,12 @@ use Getopt::Long;
 use Cwd;
 my $CWD = getcwd;
 
-my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR; }
+my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../../environment"; }
+use LocalConfig;
 
 my $JOBS = 15;
 my $PMEM = "9G";
-my $NUM_TRANSLATIONS = 30;
+my $NUM_TRANSLATIONS = 50;
 my $GOAL = "S";
 
 # featurize_grammar may add multiple features from a single feature extractor
@@ -75,17 +76,7 @@ assert_exec($CDEC, $PARALLELIZE, $FILTER, $FEATURIZE, $DISTVEST, $FILTERBYF);
 
 my $numtopics = 25;
 
-my $config = "$SCRIPT_DIR/clsp.config";
-if ((scalar @ARGV) >= 2 && ($ARGV[0] eq '-c')) {
-  $config = $ARGV[1];
-  shift @ARGV; shift @ARGV;
-  unless (-f $config) {
-    $config = "$SCRIPT_DIR/$config";
-    unless (-f $config) {
-      $config .= ".config";
-    }
-  }
-}
+my $config = "$SCRIPT_DIR/" . (lc environment_name()) . '.config';
 print STDERR "CORPORA CONFIGURATION: $config\n";
 open CONF, "<$config" or die "Can't read $config: $!";
 my %paths;
@@ -128,8 +119,10 @@ my $gluegram;
 my $oovgram;
 my $usefork;
 my $lmorder = 3;
+my $density;
 if (GetOptions(
         "backoff-grammar=s" => \$bkoffgram,
+        "density-prune=f" => \$density,
         "glue-grammar=s" => \$gluegram,
         "oov-grammar=s" => \$oovgram,
         "data=s" => \$dataDir,
@@ -144,6 +137,10 @@ if (GetOptions(
 ) == 0 || @ARGV!=2 || $help) {
         print_help();
         exit;
+}
+my $DENSITY_PRUNE = '';
+if ($density) {
+  $DENSITY_PRUNE = "--density-prune $density";
 }
 if ($usefork) { $usefork="--use-fork"; } else { $usefork = ''; }
 my @fkeys = keys %$feat_map;
@@ -228,7 +225,7 @@ my $tuned_weights = mydircat($outdir, 'weights.tuned');
 if (-f $tuned_weights) {
   print STDERR "TUNED WEIGHTS $tuned_weights EXISTS: REUSING\n";
 } else {
-  my $cmd = "$DISTVEST $usefork --decode-nodes $JOBS --pmem=$PMEM --ref-files=$drefs --source-file=$dev --weights $weights $devini";
+  my $cmd = "$DISTVEST $usefork $DENSITY_PRUNE --decode-nodes $JOBS --pmem=$PMEM --ref-files=$drefs --source-file=$dev --weights $weights $devini";
   print STDERR "MERT COMMAND: $cmd\n";
   `rm -rf $outdir/vest 2> /dev/null`;
   chdir $outdir or die "Can't chdir to $outdir: $!";
@@ -265,7 +262,7 @@ sub write_random_weights_file {
   open F, ">$file" or die "Can't write $file: $!";
   my @feats = (@DEFAULT_FEATS, @extras);
   for my $feat (@feats) {
-    my $r = rand(1.6);
+    my $r = rand(0.4) + 0.8;
     my $w = $init_weights{$feat} * $r;
     if ($w == 0) { $w = 0.0001; print STDERR "WARNING: $feat had no initial weight!\n"; }
     print F "$feat $w\n";
