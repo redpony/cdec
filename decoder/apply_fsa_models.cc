@@ -9,6 +9,7 @@
 #include <cassert>
 #include "cfg.h"
 #include "hg_cfg.h"
+#include "utoa.h"
 
 using namespace std;
 
@@ -107,8 +108,8 @@ ApplyFsaBy::ApplyFsaBy(std::string const& n, int pop_limit) : pop_limit(pop_limi
 }
 
 ApplyFsaBy::ApplyFsaBy(int i, int pop_limit) : pop_limit(pop_limit) {
-  assert (i>=0);
-  assert (i<N_ALGORITHMS);
+  if (i<0 || i>=N_ALGORITHMS)
+    throw std::runtime_error("Unknown ApplyFsaBy type id: "+itos(i)+" - legal types: "+all_names());
   algorithm=i;
 }
 
