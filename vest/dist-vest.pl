@@ -16,7 +16,7 @@ my $srcFile;
 my $refFiles;
 my $bin_dir = $SCRIPT_DIR;
 die "Bin directory $bin_dir missing/inaccessible" unless -d $bin_dir;
-my $FAST_SCORE="$bin_dir/fast_score";
+my $FAST_SCORE="$bin_dir/../mteval/fast_score";
 die "Can't execute $FAST_SCORE" unless -x $FAST_SCORE;
 my $MAPINPUT = "$bin_dir/mr_vest_generate_mapper_input";
 my $MAPPER = "$bin_dir/mr_vest_map";
