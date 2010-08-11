@@ -14,7 +14,6 @@
 #include <stdint.h>
 #include <new>
 #include <stdint.h>
-#include "swap_pod.h"
 //sizeof(T)/sizeof(T*)>1?sizeof(T)/sizeof(T*):1
 
 template <class T,int SV_MAX=2>
@@ -246,10 +245,6 @@ public:
     return !(a==b);
   }
 
-  void swap(Self& o) const {
-    swap_pod(*this,o);
-  }
-
  private:
   union StorageType {
     T vals[SV_MAX];
@@ -259,11 +254,6 @@ public:
   uint16_t size_;
   uint16_t capacity_;  // only defined when size_ > __SV_MAX_STATIC
 };
-
-template <class T,int SV_MAX>
-inline void swap(SmallVector<T,SV_MAX> &a,SmallVector<T,SV_MAX> &b) {
-  a.swap(b);
-}
 
 typedef SmallVector<int,2> SmallVectorInt;
 

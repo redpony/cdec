@@ -2,9 +2,20 @@
 #include "hg.h"
 #include "cfg_format.h"
 #include "cfg_binarize.h"
+#include "hash.h"
+#include "batched_append.h"
+#include <limits>
+#include "fast_lexical_cast.hpp"
 
 using namespace std;
 
+namespace {
+BinRhs nullrhs(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
+}
+WordID CFG::BinName(BinRhs const& b);
+{
+  return TD::Convert(lexical_cast<string>(b.first)+"+"+lexical_cast<string>(b.second));
+}
 
 void CFG::Binarize(CFGBinarize const& b) {
   if (!b.Binarizing()) return;
@@ -14,7 +25,38 @@ void CFG::Binarize(CFGBinarize const& b) {
   }
   // l2r only so far:
   cerr << "Binarizing "<<b<<endl;
-  //TODO.
+  HASH_MAP<BinRhs,NTHandle> bin2lhs; // we're going to hash cons rather than build an explicit trie from right to left.
+  HASH_MAP_EMPTY(bin2lhs,nullrhs);
+  int rhsmin=b.bin_unary?0:1;
+  // iterate using indices and not iterators because we'll be adding to both nodes and edge list.  we could instead pessimistically reserve space for both, but this is simpler.  also: store original end of nts since we won't need to reprocess newly added ones.
+  NTs new_nts; // these will be appended at the end, so we don't have to worry about iterator invalidation
+  Rules new_rules;
+  //TODO: this could be factored easily into in-place (append to new_* like below) and functional (nondestructive copy) versions (copy orig to target and append to target)
+  int newnt=nts.size();
+  int newruleid=rules.size();
+  BinRhs bin;
+  for (NTs::const_iterator n=nts.begin(),nn=nts.end();n!=nn;++n) {
+    NT const& nt=*n;
+    for (Ruleids::iterator ir=n.ruleids.begin(),er=n.ruleids.end();ir!=er;++ir) {
+      RHS &rhs=ir->rhs; // we're going to binarize this while adding newly created rules to new_...
+      if (rhs.empty()) continue;
+      bin.second=rhs.back();
+      for (int r=rhs.size()-2;r>=rhsmin;--r) { // pairs from right to left (normally we leave the last pair alone)
+        rhs.pop_back();
+        bin.first=rhs[r];
+        if (newnt==(bin.second=(get_default(bin2lhs,bin,newnt)))) {
+          new_nts.push_back(NT());
+          new_nts.back().ruleids.push_back(newruleid);
+          new_rules.push_back(Rule(newnt,bin));
+          if (b.bin_name_nts)
+            new_nts.back().from.nt=BinName(bin);
+          ++newnt;++newruleid;
+        }
+      }
+    }
+  }
+  batch_append_swap(nts,new_nts);
+  batch_append_swap(rules,new_rules);
 }
 
 namespace {
