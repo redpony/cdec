@@ -246,7 +246,7 @@ public:
     return !(a==b);
   }
 
-  void swap(Self& o) const {
+  void swap(Self& o) {
     swap_pod(*this,o);
   }
 

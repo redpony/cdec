@@ -48,6 +48,7 @@ struct CFG {
 
   struct Rule {
     // for binarizing - no costs/probs
+    Rule() {  }
     Rule(int lhs,BinRhs const& binrhs) : lhs(lhs),rhs(2),p(1) {
       rhs[0]=binrhs.first;
       rhs[1]=binrhs.second;
