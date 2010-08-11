@@ -412,6 +412,11 @@ private:
   MapType values_;
 };
 
+template <class T>
+inline void swap(SparseVector<T> &a,SparseVector<T> &b) {
+  a.swap(b);
+}
+
 //like a pair but can live in a union, because it lacks default+copy ctors, dtor.
 template <class T>
 struct feature_val {
