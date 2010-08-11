@@ -51,10 +51,11 @@ struct murmur_hash_array
   }
 };
 
+
 // adds default val to table if key wasn't found, returns ref to val
 template <class H,class K>
 typename H::mapped_type & get_default(H &ht,K const& k,typename H::mapped_type const& v) {
-  return const_cast<typename H::data_type &>(ht.insert(typename H::value_type(k,v)).first->second);
+  return const_cast<typename H::mapped_type &>(ht.insert(typename H::value_type(k,v)).first->second);
 }
 
 #endif
