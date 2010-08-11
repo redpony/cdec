@@ -9,6 +9,7 @@
 
 #include "filelib.h"
 #include "aligner.h"
+#include "alignment_pharaoh.h"
 
 namespace po = boost::program_options;
 using namespace std;
@@ -349,9 +350,9 @@ int main(int argc, char **argv) {
     }
     if (line1.empty() && !*in1) break;
     shared_ptr<Array2D<bool> > out(new Array2D<bool>);
-    shared_ptr<Array2D<bool> > a1 = AlignerTools::ReadPharaohAlignmentGrid(line1);
+    shared_ptr<Array2D<bool> > a1 = AlignmentPharaoh::ReadPharaohAlignmentGrid(line1);
     if (in2) {
-      shared_ptr<Array2D<bool> > a2 = AlignerTools::ReadPharaohAlignmentGrid(line2);
+      shared_ptr<Array2D<bool> > a2 = AlignmentPharaoh::ReadPharaohAlignmentGrid(line2);
       cmd.Apply(*a1, *a2, out.get());
     } else {
       Array2D<bool> dummy;
@@ -359,7 +360,7 @@ int main(int argc, char **argv) {
     }
     
     if (cmd.Result() == 1) {
-      AlignerTools::SerializePharaohFormat(*out, &cout);
+      AlignmentPharaoh::SerializePharaohFormat(*out, &cout);
     }
   }
   if (cmd.Result() == 2)

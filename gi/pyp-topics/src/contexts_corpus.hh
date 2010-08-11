@@ -10,7 +10,7 @@
 
 #include "corpus.hh"
 #include "contexts_lexer.h"
-#include "../../../decoder/dict.h"
+#include "dict.h"
 
 
 class BackoffGenerator {

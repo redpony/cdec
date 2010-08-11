@@ -102,6 +102,8 @@ public:
     void copy_info(Edge const& o) {
 #if USE_INFO_EDGE
       set_info(o.info_.str()); // by convention, each person putting info here starts with a separator (e.g. space).  it's empty if nobody put any info there.
+#else
+      (void) o;
 #endif
     }
     void copy_pod(Edge const& o) {
@@ -142,7 +144,7 @@ public:
 #else
     std::string info() const { return std::string(); }
     void reset_info() {  }
-    void set_info(std::string const& s) {  }
+    void set_info(std::string const& ) {  }
 #endif
     void show(std::ostream &o,unsigned mask=SPAN|RULE) const {
       o<<'{';

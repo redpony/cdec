@@ -9,7 +9,7 @@
 #include "sparse_vector.h"
 #include "error_surface.h"
 #include "line_optimizer.h"
-#include "hg_io.h"
+#include "b64tools.h"
 
 using namespace std;
 namespace po = boost::program_options;

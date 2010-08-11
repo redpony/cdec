@@ -5,6 +5,7 @@
 #include <string>
 #include <cmath>
 
+#include "alignment_pharaoh.h"
 #include "stringlib.h"
 #include "sentence_metadata.h"
 #include "hg.h"
@@ -354,7 +355,7 @@ AlignerResults::AlignerResults(const std::string& param) :
     getline(in, line);
     if (!in) break;
     ++lc;
-    is_aligned_.push_back(AlignerTools::ReadPharaohAlignmentGrid(line));
+    is_aligned_.push_back(AlignmentPharaoh::ReadPharaohAlignmentGrid(line));
   }
   cerr << "  Loaded " << lc << " refs\n";
 }

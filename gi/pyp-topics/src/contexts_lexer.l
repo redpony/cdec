@@ -101,7 +101,7 @@ INT [\-+]?[0-9]+|inf|[\-+]inf
 
 %%
 
-#include "../../../decoder/filelib.h" 
+#include "filelib.h" 
 
 void ContextsLexer::ReadContexts(std::istream* in, ContextsLexer::ContextsCallback func, void* extra) {
   lex_line = 1;

@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include "tdict.h"
-#include "aligner.h"
+#include "alignment_pharaoh.h"
 
 using namespace std;
 
@@ -85,7 +85,7 @@ AERScorer::AERScorer(const vector<vector<WordID> >& refs, const string& src) : s
     cerr << "AERScorer can only take a single reference!\n";
     abort();
   }
-  ref_ = AlignerTools::ReadPharaohAlignmentGrid(TD::GetString(refs.front()));
+  ref_ = AlignmentPharaoh::ReadPharaohAlignmentGrid(TD::GetString(refs.front()));
 }
 
 static inline bool Safe(const Array2D<bool>& a, int i, int j) {
@@ -101,7 +101,7 @@ ScoreP AERScorer::ScoreCCandidate(const vector<WordID>& shyp) const {
 
 ScoreP AERScorer::ScoreCandidate(const vector<WordID>& shyp) const {
   boost::shared_ptr<Array2D<bool> > hyp =
-    AlignerTools::ReadPharaohAlignmentGrid(TD::GetString(shyp));
+    AlignmentPharaoh::ReadPharaohAlignmentGrid(TD::GetString(shyp));
 
   int m = 0;
   int r = 0;

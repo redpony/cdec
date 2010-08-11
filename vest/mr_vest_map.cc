@@ -6,6 +6,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "ces.h"
 #include "filelib.h"
 #include "stringlib.h"
 #include "sparse_vector.h"
@@ -13,7 +14,7 @@
 #include "viterbi_envelope.h"
 #include "inside_outside.h"
 #include "error_surface.h"
-#include "hg.h"
+#include "b64tools.h"
 #include "hg_io.h"
 
 using namespace std;
@@ -90,7 +91,7 @@ int main(int argc, char** argv) {
     ViterbiEnvelopeWeightFunction wf(origin, axis);
     ViterbiEnvelope ve = Inside<ViterbiEnvelope, ViterbiEnvelopeWeightFunction>(hg, NULL, wf);
     ErrorSurface es;
-    ds[sent_id]->ComputeErrorSurface(ve, &es, type, hg);
+    ComputeErrorSurface(*ds[sent_id], ve, &es, type, hg);
     //cerr << "Viterbi envelope has " << ve.size() << " segments\n";
     // cerr << "Error surface has " << es.size() << " segments\n";
     string val;
