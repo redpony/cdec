@@ -65,7 +65,7 @@ void CFG::Init(Hypergraph const& hg,bool target_side,bool copy_features,bool pus
         int n=nt_index(nvar,tails,target_side,w);
         ++nvar;
         if (push_weights) crp*=np[n];
-        rhs_out[j]=n;
+        rhs_out[j]=-n;
       }
     }
     assert(nvar==er.Arity());
