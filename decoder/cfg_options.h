@@ -33,6 +33,7 @@ struct CFGOptions {
   }
   void maybe_output(HgCFG &hgcfg) {
     if (cfg_output.empty()) return;
+    std::cerr<<"Printing CFG to "<<cfg_output<<": "<<format<<'\n';
     WriteFile o(cfg_output);
     maybe_binarize(hgcfg);
     hgcfg.GetCFG().Print(o.get(),format);

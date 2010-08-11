@@ -1,6 +1,7 @@
 #ifndef CFG_FORMAT_H
 #define CFG_FORMAT_H
 
+#include <iostream>
 #include <string>
 #include "wordid.h"
 #include "feature_vector.h"
@@ -31,6 +32,26 @@ struct CFGFormat {
       ("nt_span",defaulted_value(&nt_span),"prefix A(i,j) for NT coming from hypergraph node with category A on span [i,j).  this is after --nt_prefix if any")
       ;
   }
+
+  void print(std::ostream &o) const {
+    o<<"[";
+    if (identity_scfg)
+      o<<"Identity SCFG ";
+    if (features)
+      o<<"+Features ";
+    if (logprob_feat)
+      o<<logprob_feat_name<<"(logprob) ";
+    if (nt_span)
+      o<<"named-NTs ";
+    if (cfg_comma_nt)
+      o<<",N ";
+    o << "CFG output format";
+    o<<"]";
+  }
+  friend inline std::ostream &operator<<(std::ostream &o,CFGFormat const& me) {
+    me.print(o); return o;
+  }
+
   void Validate() {  }
   template<class CFG>
   void print_source_nt(std::ostream &o,CFG const&cfg,int id,int position=1) const {
@@ -43,7 +64,8 @@ struct CFGFormat {
   template <class CFG>
   void print_nt_name(std::ostream &o,CFG const& cfg,int id) const {
     o<<nt_prefix;
-    cfg.print_nt_name(o,id);
+    if (nt_span)
+      cfg.print_nt_name(o,id);
     o<<id;
   }
 

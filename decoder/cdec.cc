@@ -661,11 +661,6 @@ int main(int argc, char** argv) {
 
     HgCFG hgcfg(forest);
     cfg_options.maybe_output(hgcfg);
-    if (!cfg_options.cfg_output.empty()) {
-      WriteFile o(cfg_options.cfg_output);
-      CFG &cfg=hgcfg.GetCFG();
-      cfg.Print(o.get(),cfg_options.format);
-    }
     if (!fsa_ffs.empty()) {
       Timer t("Target FSA rescoring:");
       if (!has_late_models)
