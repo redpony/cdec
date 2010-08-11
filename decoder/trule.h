@@ -104,7 +104,7 @@ class TRule {
   bool Initialized() const { return e_.size(); }
 
   std::string AsString(bool verbose = true) const;
-
+  friend std::ostream &operator<<(std::ostream &o,TRule const& r);
   static TRule DummyRule() {
     TRule res;
     res.e_.resize(1, 0);

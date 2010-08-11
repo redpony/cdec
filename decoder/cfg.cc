@@ -36,8 +36,6 @@ void CFG::Init(Hypergraph const& hg,bool target_side,bool copy_features,bool pus
     Hypergraph::Edge const& e=hg.edges_[i];
     TRule const& er=*e.rule_; vector<WordID> const& rule_rhs=target_side?er.e():er.f();
     RHS &rhs=cfgr.rhs;
-    int nr=rule_rhs.size();
-    rhs.resize(nr);
     prob_t &crp=cfgr.p;
     crp=e.edge_prob_;
     cfgr.lhs=e.head_node_;
@@ -46,6 +44,8 @@ void CFG::Init(Hypergraph const& hg,bool target_side,bool copy_features,bool pus
 #endif
     if (copy_features) cfgr.f=e.feature_values_;
     if (push_weights) crp /=np[e.head_node_];
+    int nr=rule_rhs.size();
+    rhs.resize(nr);
     for (int j=0;j<nr;++j) {
       WordID w=rule_rhs[j];
       if (w>0)
@@ -71,6 +71,9 @@ void CFG::PrintRule(std::ostream &o,RuleHandle rulei,CFGFormat const& f) const {
   f.print_lhs(o,*this,r.lhs);
   f.print_rhs(o,*this,r.rhs.begin(),r.rhs.end());
   f.print_features(o,r.p,r.f);
+#if CFG_DEBUG
+  o<<f.partsep<<*r.rule;
+#endif
 }
 
 void CFG::Print(std::ostream &o,CFGFormat const& f) const {
