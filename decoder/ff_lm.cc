@@ -728,7 +728,7 @@ LanguageModelRandLM::LanguageModelRandLM(const string& param) :
       filename = argv[0];
     }
   }
-  set_order(order);
+//  set_order(order);
   int cache_MB = 200; // increase cache size
   randlm::RandLM* rlm = randlm::RandLM::initRandLM(filename, order, cache_MB);
   assert(rlm != NULL);

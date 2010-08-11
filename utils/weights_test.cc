@@ -5,7 +5,6 @@
 #include <gtest/gtest.h>
 #include "weights.h"
 #include "tdict.h"
-#include "hg.h"
 
 using namespace std;
 

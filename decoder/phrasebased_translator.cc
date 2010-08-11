@@ -68,7 +68,6 @@ struct PhraseBasedTranslatorImpl {
   PhraseBasedTranslatorImpl(const boost::program_options::variables_map& conf) :
       add_pass_through_rules(conf.count("add_pass_through_rules")),
       max_distortion(conf["pb_max_distortion"].as<int>()),
-      kSOURCE_RULE(new TRule("[X] ||| [X,1] ||| [X,1]", true)),
       kCONCAT_RULE(new TRule("[X] ||| [X,1] [X,2] ||| [X,1] [X,2]", true)),
       kNT_TYPE(TD::Convert("X") * -1) {
     assert(max_distortion >= 0);
@@ -141,6 +140,8 @@ struct PhraseBasedTranslatorImpl {
         for (int i = 0; i < phrases.size(); ++i) {
           Hypergraph::Edge* edge = minus_lm_forest->AddEdge(phrases[i], Hypergraph::TailNodeVector());
           edge->feature_values_ = edge->rule_->scores_;
+          edge->i_ = s.i;
+          edge->j_ = s.j;
           minus_lm_forest->ConnectEdgeToHeadNode(edge->id_, phrase_head_index);
         }
         CoverageNodeMap::iterator cit = c.find(s.coverage);
@@ -189,7 +190,6 @@ struct PhraseBasedTranslatorImpl {
 
   const bool add_pass_through_rules;
   const int max_distortion;
-  TRulePtr kSOURCE_RULE;
   const TRulePtr kCONCAT_RULE;
   const WordID kNT_TYPE;
   boost::shared_ptr<FSTNode> fst;

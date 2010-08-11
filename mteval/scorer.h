@@ -49,7 +49,7 @@ class Score : public boost::intrusive_refcount<Score> {
   virtual ScoreP Clone() const = 0;
 protected:
   Score() {  } // we define these explicitly because refcount is noncopyable
-  Score(Score const& o) {  }
+  Score(Score const&) {  }
 };
 
 //TODO: make sure default copy ctors for score types do what we want.
@@ -72,7 +72,6 @@ class SentenceScorer {
   virtual ~SentenceScorer();
   virtual ScoreP GetOne() const;
   virtual ScoreP GetZero() const;
-  void ComputeErrorSurface(const ViterbiEnvelope& ve, ErrorSurface* es, const ScoreType type, const Hypergraph& hg) const;
   virtual ScoreP ScoreCandidate(const Sentence& hyp) const = 0;
   virtual ScoreP ScoreCCandidate(const Sentence& hyp) const =0;
   virtual const std::string* GetSource() const;

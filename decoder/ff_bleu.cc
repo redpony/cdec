@@ -18,7 +18,7 @@ char const* bleu_usage_verbose="Uses feature id 0!  Make sure there are no other
 #include "hg.h"
 #include "stringlib.h"
 #include "sentence_metadata.h"
-#include "../vest/scorer.h"
+#include "scorer.h"
 
 using namespace std;
 

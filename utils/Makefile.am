@@ -1,0 +1,38 @@
+if HAVE_GTEST
+noinst_PROGRAMS = \
+  dict_test \
+  weights_test \
+  logval_test \
+  small_vector_test
+endif
+
+noinst_LIBRARIES = libutils.a
+
+libutils_a_SOURCES = \
+  alignment_pharaoh.cc \
+  b64tools.cc \
+  dict.cc \
+  tdict.cc \
+  fdict.cc \
+  gzstream.cc \
+  filelib.cc \
+  stringlib.cc \
+  sparse_vector.cc \
+  timing_stats.cc \
+  weights.cc
+
+dict_test_SOURCES = dict_test.cc
+dict_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
+weights_test_SOURCES = weights_test.cc
+weights_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
+logval_test_SOURCES = logval_test.cc
+logval_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
+small_vector_test_SOURCES = small_vector_test.cc
+small_vector_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
+
+AM_LDFLAGS = libutils.a -lz
+
+################################################################
+# do NOT NOT NOT add any other -I includes NO NO NO NO NO ######
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I.
+################################################################

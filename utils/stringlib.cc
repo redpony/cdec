@@ -6,8 +6,6 @@
 #include <iostream>
 #include <map>
 
-#include "lattice.h"
-
 using namespace std;
 
 void ParseTranslatorInput(const string& line, string* input, string* ref) {
@@ -28,15 +26,6 @@ void ParseTranslatorInput(const string& line, string* input, string* ref) {
   if (rline.size() > 0) {
     assert(ref);
     *ref = rline;
-  }
-}
-
-void ParseTranslatorInputLattice(const string& line, string* input, Lattice* ref) {
-  string sref;
-  ParseTranslatorInput(line, input, &sref);
-  if (sref.size() > 0) {
-    assert(ref);
-    LatticeTools::ConvertTextOrPLF(sref, ref);
   }
 }
 

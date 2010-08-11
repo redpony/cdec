@@ -1,6 +1,4 @@
 %{
-#include "rule_lexer.h"
-
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -8,7 +6,6 @@
 #include <cassert>
 #include "tdict.h"
 #include "fdict.h"
-#include "trule.h"
 #include "striped_grammar.h"
 
 int lex_line = 0;

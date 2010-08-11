@@ -9,7 +9,7 @@
 #include <vector>
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include "../vest/scorer.h"
+#include "scorer.h"
 #include "hg.h"
 #include "ff_factory.h"
 #include "ff_bleu.h"

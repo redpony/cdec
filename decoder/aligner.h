@@ -10,8 +10,6 @@ class Hypergraph;
 class SentenceMetadata;
 
 struct AlignerTools {
-  static boost::shared_ptr<Array2D<bool> > ReadPharaohAlignmentGrid(const std::string& al);
-  static void SerializePharaohFormat(const Array2D<bool>& alignment, std::ostream* out);
 
   // assumption: g contains derivations of input/ref and
   // ONLY input/ref.

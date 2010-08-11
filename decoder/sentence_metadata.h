@@ -3,7 +3,7 @@
 
 #include <cassert>
 #include "lattice.h"
-#include "../vest/scorer.h"
+#include "scorer.h"
 
 struct SentenceMetadata {
   SentenceMetadata(int id, const Lattice& ref) :

@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-#include "../../../decoder/dict.h" 
+#include "dict.h" 
 
 struct ContextsLexer {
   typedef std::vector<std::string> Context;

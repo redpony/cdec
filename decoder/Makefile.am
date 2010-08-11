@@ -2,24 +2,16 @@ bin_PROGRAMS = cdec
 
 if HAVE_GTEST
 noinst_PROGRAMS = \
-  dict_test \
-  weights_test \
   trule_test \
   hg_test \
   ff_test \
-  logval_test \
   parser_test \
-  grammar_test \
-  small_vector_test
+  grammar_test
 endif
 
-cdec_SOURCES = cdec.cc forest_writer.cc maxtrans_blunsom.cc cdec_ff.cc timing_stats.cc
-small_vector_test_SOURCES = small_vector_test.cc
-small_vector_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
+cdec_SOURCES = cdec.cc forest_writer.cc maxtrans_blunsom.cc cdec_ff.cc
 parser_test_SOURCES = parser_test.cc
 parser_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
-dict_test_SOURCES = dict_test.cc
-dict_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 ff_test_SOURCES = ff_test.cc
 ff_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 grammar_test_SOURCES = grammar_test.cc
@@ -28,15 +20,12 @@ hg_test_SOURCES = hg_test.cc
 hg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
 trule_test_SOURCES = trule_test.cc
 trule_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
-weights_test_SOURCES = weights_test.cc
-weights_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
-logval_test_SOURCES = logval_test.cc
-logval_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
 
-LDADD = libcdec.a
+LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I..
-AM_LDFLAGS = -lz
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I.. -I../mteval -I../utils
+
+AM_LDFLAGS = ../utils/libutils.a -lz
 
 rule_lexer.cc: rule_lexer.l
 	$(LEX) -s -CF -8 -o$@ $<
@@ -49,7 +38,6 @@ libcdec_a_SOURCES = \
   rule_lexer.cc \
   fst_translator.cc \
   csplit.cc \
-  dict.cc \
   translator.cc \
   scfg_translator.cc \
   hg.cc \
@@ -58,17 +46,10 @@ libcdec_a_SOURCES = \
   viterbi.cc \
   lattice.cc \
   aligner.cc \
-  gzstream.cc \
   apply_models.cc \
   earley_composer.cc \
   phrasetable_fst.cc \
-  sparse_vector.cc \
   trule.cc \
-  filelib.cc \
-  stringlib.cc \
-  fdict.cc \
-  tdict.cc \
-  weights.cc \
   ttables.cc \
   ff.cc \
   ff_lm.cc \
@@ -78,12 +59,6 @@ libcdec_a_SOURCES = \
   ff_tagger.cc \
   ff_bleu.cc \
   ff_factory.cc \
-  ../vest/scorer.cc \
-  ../vest/ter.cc \
-  ../vest/aer_scorer.cc \
-  ../vest/comb_scorer.cc \
-  ../vest/error_surface.cc \
-  ../vest/viterbi_envelope.cc \
   freqdict.cc \
   lexalign.cc \
   lextrans.cc \

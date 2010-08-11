@@ -34,7 +34,7 @@
 #include "inside_outside.h"
 #include "exp_semiring.h"
 #include "sentence_metadata.h"
-#include "../vest/scorer.h"
+#include "scorer.h"
 #include "apply_fsa_models.h"
 #include "program_options.h"
 #include "cfg_options.h"
@@ -57,6 +57,15 @@ namespace NgramCache { void Clear(); }
 
 void ShowBanner() {
   cerr << "cdec v1.0 (c) 2009-2010 by Chris Dyer\n";
+}
+
+void ParseTranslatorInputLattice(const string& line, string* input, Lattice* ref) {
+  string sref;
+  ParseTranslatorInput(line, input, &sref);
+  if (sref.size() > 0) {
+    assert(ref);
+    LatticeTools::ConvertTextOrPLF(sref, ref);
+  }
 }
 
 void ConvertSV(const SparseVector<prob_t>& src, SparseVector<double>* trg) {
