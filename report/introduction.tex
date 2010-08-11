@@ -115,6 +115,10 @@ We were able to show that each of these techniques could lead to faster decoding
 Chapter \ref{chap:decoding} describes this work.
 
 \paragraph{3) Discriminative training labelled SCFG translation models}
+The third stream of the workshop focussed on implementing discriminative training algorithms for the labelled SCFG translation models produced by our unsupervised grammar induction algorithms.
+Though the existing MERT \cite{och02mert} training algorithm is directly applicable to these grammars, it doesn't allow us to optimise models with large numbers of fine grained features extracted from the labels we've induced.
+In order to maximise the benefit from our induced grammars we explored and implemented discriminative training algorithms capable of handling thousands, rather than tens, of features.
+The algorithms we explored were Maximum Expected Bleu \cite{smith,li} and MIRA \cite{chiang}.
 Chapter \ref{chap:training} describes this work.
 
 The remainder of this introductory chapter provides a formal definition of SCFGs and describes the language pairs that we experimented with.
