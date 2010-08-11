@@ -9,6 +9,10 @@
 
 using namespace std;
 
+ostream &operator<<(ostream &o,TRule const& r) {
+  o<<r.AsString(true);
+}
+
 bool TRule::IsGoal() const {
   static const int kGOAL(TD::Convert("Goal") * -1); // this will happen once, and after static init of trule.cc static dict.
   return GetLHS() == kGOAL;
@@ -65,7 +69,7 @@ static WordID ConvertLHS(const string& w) {
   }
 }
 
-TRule* TRule::CreateRuleSynchronous(const std::string& rule) {
+TRule* TRule::CreateRuleSynchronous(const string& rule) {
   TRule* res = new TRule;
   if (res->ReadFromString(rule, true, false)) return res;
   cerr << "[ERROR] Failed to creating rule from: " << rule << endl;
@@ -106,7 +110,7 @@ void assign_trule(const TRulePtr& new_rule, const unsigned int ctf_level, const 
 
 bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
   if (!is_single_line_stripped(line))
-    std::cerr<<"\nWARNING: building rule from multi-line string "<<line<<".\n";
+    cerr<<"\nWARNING: building rule from multi-line string "<<line<<".\n";
   // backed off of this: it's failing to parse TRulePtr glue(new TRule("[" + goal_nt + "] ||| [" + goal_nt + ",1] ["+ default_nt + ",2] ||| [1] [2] ||| Glue=1")); thinks [1] is the features!
   if (false && !(mono||strict)) {
     // use lexer
@@ -114,7 +118,7 @@ bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
     n_assigned=0;
     RuleLexer::ReadRules(&il,assign_trule,this);
     if (n_assigned>1)
-      std::cerr<<"\nWARNING: more than one rule parsed from multi-line string; kept last: "<<line<<".\n";
+      cerr<<"\nWARNING: more than one rule parsed from multi-line string; kept last: "<<line<<".\n";
     return n_assigned;
   }
 
