@@ -17,7 +17,7 @@ void batched_append_swap(Vector &v,SRange & s) {
   size_t i=v.size();
   size_t news=i+s.size();
   v.resize(news);
-  typename SRange::iterator_type si=s.begin();
+  typename SRange::iterator si=s.begin();
   for (;i<news;++i,++si)
     swap(v[i],*si);
 }

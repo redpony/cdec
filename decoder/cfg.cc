@@ -10,9 +10,10 @@
 using namespace std;
 
 namespace {
-BinRhs nullrhs(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
+CFG::BinRhs nullrhs(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
 }
-WordID CFG::BinName(BinRhs const& b);
+
+WordID CFG::BinName(BinRhs const& b)
 {
   return TD::Convert(lexical_cast<string>(b.first)+"+"+lexical_cast<string>(b.second));
 }
@@ -37,8 +38,8 @@ void CFG::Binarize(CFGBinarize const& b) {
   BinRhs bin;
   for (NTs::const_iterator n=nts.begin(),nn=nts.end();n!=nn;++n) {
     NT const& nt=*n;
-    for (Ruleids::iterator ir=n.ruleids.begin(),er=n.ruleids.end();ir!=er;++ir) {
-      RHS &rhs=ir->rhs; // we're going to binarize this while adding newly created rules to new_...
+    for (Ruleids::const_iterator ir=nt.ruleids.begin(),er=nt.ruleids.end();ir!=er;++ir) {
+      RHS &rhs=rules[*ir].rhs; // we're going to binarize this while adding newly created rules to new_...
       if (rhs.empty()) continue;
       bin.second=rhs.back();
       for (int r=rhs.size()-2;r>=rhsmin;--r) { // pairs from right to left (normally we leave the last pair alone)
@@ -55,8 +56,8 @@ void CFG::Binarize(CFGBinarize const& b) {
       }
     }
   }
-  batch_append_swap(nts,new_nts);
-  batch_append_swap(rules,new_rules);
+  batched_append_swap(nts,new_nts);
+  batched_append_swap(rules,new_rules);
 }
 
 namespace {
