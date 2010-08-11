@@ -3,7 +3,7 @@
 
 // for now, debug means remembering and printing the TRule behind each CFG rule
 #ifndef CFG_DEBUG
-# define CFG_DEBUG 1
+# define CFG_DEBUG 0
 #endif
 
 /* for target FSA intersection, we want to produce a simple (feature weighted) CFG using the target projection of a hg.  this is essentially isomorphic to the hypergraph, and we're copying part of the rule info (we'll maintain a pointer to the original hg edge for posterity/debugging; and perhaps avoid making a copy of the feature vector).  but we may also want to support CFG read from text files (w/ features), without needing to have a backing hypergraph.  so hg pointer may be null?  multiple types of CFG?  always copy the feature vector?  especially if we choose to binarize, we won't want to rely on 1:1 alignment w/ hg
