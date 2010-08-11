@@ -12,7 +12,8 @@
 \usepackage{fancybox}
 \usepackage[square]{natbib}
 \usepackage{epsfig}
-\usepackage{subfig}
+%\usepackage{subfig}
+\usepackage{subfigure}
 \oddsidemargin 0mm
 \evensidemargin 5mm
 \topmargin -20mm
@@ -26,6 +27,8 @@
 
 \makeindex
 \theoremstyle{plain}
+
+\newcommand{\nt}[2]{\textrm{#1}_{\framebox[5pt]{\scriptsize #2}}}
 
 \begin{document}
 \title{\vspace{-15mm}\LARGE {\bf Final Report}\\[2mm]
@@ -87,9 +90,8 @@ We especially would like to thank Fred Jelinek for heading the Summer School eff
 \end{itemize}
 \tableofcontents
 
-\chapter{Introduction}
 
-Blah blah blah, LDA \citep{blei:2003}. Blah blah blah, posterior regularization \citep{ganchev:penn:2009}.
+\include{introduction}
 
 \include{training}
 
