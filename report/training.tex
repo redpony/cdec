@@ -3,7 +3,10 @@
 An integral part of constructing a state-of-the-art machine translation system is the training procedure. The goal of training is to optimize the model parameters to maximize translation quality on some metric, where the parameters are the weights associated with the features we use in our model, and the metric is BLEU. 
 
 The most common approach to training is Minimum Error Rate Training (MERT), which tunes the parameters to minimize error according to an arbitrary error function. Thus, in our case this is equivalent to saying that it maximizes the 1-best translation under the BLEU metric. MERT is a log-linear model which allows us to combine different features in order to find the best target translation $e*$ for a input source $f$:
-$$e* = \argmax_e p(e|f) = argmax_e \sum_{k=1}^K \w_k\h_k(e,f)$$
+
+\begin{equation}
+e^* = \arg \max_e p(e|f) = argmax_e \sum_{k=1}^K w_kh_k(e,f)
+\end{equation}
 
 where $h_k(e,f)$ is a feature associated with the translation of $f$ to $e$, and $w$ is the weight associated with that feature. Unfortunately, MERT has been empirically unable to extend beyond optimization of a handful of features, thus necessecitating dense features. Theses features typically include:
 
