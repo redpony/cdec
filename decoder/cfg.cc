@@ -13,9 +13,16 @@ namespace {
 CFG::BinRhs nullrhs(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
 }
 
+
 WordID CFG::BinName(BinRhs const& b)
 {
-  return TD::Convert(lexical_cast<string>(b.first)+"+"+lexical_cast<string>(b.second));
+  ostringstream o;
+#define BinNameOWORD(w) do { int n=w; if (n>0) o << TD::Convert(n); else { o << 'V' << -n; } } while(0)
+  BinNameOWORD(b.first);
+  o<<'+';
+  BinNameOWORD(b.second);
+#undef BinNameOWORD
+  return TD::Convert(o.str());
 }
 
 void CFG::Binarize(CFGBinarize const& b) {
