@@ -10,22 +10,19 @@ noinst_PROGRAMS = \
 endif
 
 cdec_SOURCES = cdec.cc forest_writer.cc maxtrans_blunsom.cc cdec_ff.cc
+cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
+
 parser_test_SOURCES = parser_test.cc
-parser_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
+parser_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 ff_test_SOURCES = ff_test.cc
-ff_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
+ff_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 grammar_test_SOURCES = grammar_test.cc
-grammar_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
+grammar_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 hg_test_SOURCES = hg_test.cc
-hg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
+hg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 trule_test_SOURCES = trule_test.cc
-trule_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a
-
-LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a
-
+trule_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I.. -I../mteval -I../utils
-
-AM_LDFLAGS = ../utils/libutils.a -lz
 
 rule_lexer.cc: rule_lexer.l
 	$(LEX) -s -CF -8 -o$@ $<
