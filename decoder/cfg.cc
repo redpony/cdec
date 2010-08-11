@@ -17,6 +17,13 @@ void CFG::Binarize(CFGBinarize const& b) {
   //TODO.
 }
 
+namespace {
+inline int nt_index(int nvar,Hypergraph::TailNodeVector const& t,bool target_side,int w) {
+  assert(w<0 || (target_side&&w==0));
+  return t[target_side?-w:nvar];
+}
+}
+
 void CFG::Init(Hypergraph const& hg,bool target_side,bool copy_features,bool push_weights) {
   uninit=false;
   hg_=&hg;
@@ -34,8 +41,6 @@ void CFG::Init(Hypergraph const& hg,bool target_side,bool copy_features,bool pus
   for (int i=0;i<ne;++i) {
     Rule &cfgr=rules[i];
     Hypergraph::Edge const& e=hg.edges_[i];
-    TRule const& er=*e.rule_; vector<WordID> const& rule_rhs=target_side?er.e():er.f();
-    RHS &rhs=cfgr.rhs;
     prob_t &crp=cfgr.p;
     crp=e.edge_prob_;
     cfgr.lhs=e.head_node_;
@@ -44,18 +49,27 @@ void CFG::Init(Hypergraph const& hg,bool target_side,bool copy_features,bool pus
 #endif
     if (copy_features) cfgr.f=e.feature_values_;
     if (push_weights) crp /=np[e.head_node_];
+    TRule const& er=*e.rule_;
+    vector<WordID> const& rule_rhs=target_side?er.e():er.f();
     int nr=rule_rhs.size();
-    rhs.resize(nr);
+    RHS &rhs_out=cfgr.rhs;
+    rhs_out.resize(nr);
+    Hypergraph::TailNodeVector const& tails=e.tail_nodes_;
+    int nvar=0;
+    //split out into separate target_side, source_side loops?
     for (int j=0;j<nr;++j) {
       WordID w=rule_rhs[j];
       if (w>0)
-        rhs[j]=w;
+        rhs_out[j]=w;
       else {
-        int n=e.tail_nodes_[-w];
+        int n=nt_index(nvar,tails,target_side,w);
+        ++nvar;
         if (push_weights) crp*=np[n];
-        rhs[j]=n;
+        rhs_out[j]=n;
       }
     }
+    assert(nvar==er.Arity());
+    assert(nvar==tails.size());
   }
 }
 

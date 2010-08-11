@@ -380,7 +380,6 @@ void show_models(po::variables_map const& conf,ModelSet &ms,char const* header) 
   ms.show_features(cerr,cerr,conf.count("warn_0_weight"));
 }
 
-
 template <class V>
 bool store_conf(po::variables_map const& conf,std::string const& name,V *v) {
   if (conf.count(name)) {
@@ -641,6 +640,8 @@ int main(int argc, char** argv) {
     }
 
     maybe_prune(forest,conf,"prelm_beam_prune","prelm_density_prune","-LM",srclen);
+
+    cfg_options.maybe_output_source(forest);
 
     bool has_late_models = !late_models.empty();
     if (has_late_models) {

@@ -17,6 +17,7 @@ struct CFGFormat {
   std::string nt_prefix;
   std::string logprob_feat_name;
   std::string partsep;
+  bool goal_nt() const { return !goal_nt_name.empty(); }
   template <class Opts> // template to support both printable_opts and boost nonprintable
   void AddOptions(Opts *opts) {
     //using namespace boost::program_options;

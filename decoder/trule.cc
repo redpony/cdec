@@ -10,7 +10,7 @@
 using namespace std;
 
 ostream &operator<<(ostream &o,TRule const& r) {
-  o<<r.AsString(true);
+  return o<<r.AsString(true);
 }
 
 bool TRule::IsGoal() const {

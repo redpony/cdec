@@ -125,7 +125,7 @@ class TRule {
   WordID GetLHS() const { return lhs_; }
   void ComputeArity();
 
-  // 0 = first variable, -1 = second variable, -2 = third ...
+  // 0 = first variable, -1 = second variable, -2 = third ..., i.e. tail_nodes_[-w] if w<=0, TD::Convert(w) otherwise
   std::vector<WordID> e_;
   // < 0: *-1 = encoding of category of variable
   std::vector<WordID> f_;
