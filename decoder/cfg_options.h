@@ -9,7 +9,7 @@
 struct CFGOptions {
   CFGFormat format;
   CFGBinarize binarize;
-  std::string cfg_output;
+  std::string cfg_output,source_cfg_output;
   void set_defaults() {
     format.set_defaults();
     binarize.set_defaults();
@@ -19,7 +19,8 @@ struct CFGOptions {
   template <class Opts> // template to support both printable_opts and boost nonprintable
   void AddOptions(Opts *opts) {
     opts->add_options()
-      ("cfg_output", defaulted_value(&cfg_output),"write final target CFG (before FSA rescorinn) to this file")
+      ("cfg_output", defaulted_value(&cfg_output),"write final target CFG (before FSA rescoring) to this file")
+      ("source_cfg_output", defaulted_value(&source_cfg_output),"write source CFG (after prelm-scoring, prelm-prune) to this file")
     ;
     binarize.AddOptions(opts);
     format.AddOptions(opts);
@@ -31,9 +32,16 @@ struct CFGOptions {
   char const* description() const {
     return "CFG output options";
   }
+  void maybe_output_source(Hypergraph const& hg) {
+    if (source_cfg_output.empty()) return;
+    std::cerr<<"Printing source CFG to "<<source_cfg_output<<": "<<format<<'\n';
+    WriteFile o(source_cfg_output);
+    CFG cfg(hg,false,format.features,format.goal_nt());
+    cfg.Print(o.get(),format);
+  }
   void maybe_output(HgCFG &hgcfg) {
     if (cfg_output.empty()) return;
-    std::cerr<<"Printing CFG to "<<cfg_output<<": "<<format<<'\n';
+    std::cerr<<"Printing target CFG to "<<cfg_output<<": "<<format<<'\n';
     WriteFile o(cfg_output);
     maybe_binarize(hgcfg);
     hgcfg.GetCFG().Print(o.get(),format);
@@ -43,7 +51,6 @@ struct CFGOptions {
     hgcfg.GetCFG().Binarize(binarize);
     hgcfg.binarized=true;
   }
-
 };
 
 

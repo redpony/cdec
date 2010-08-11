@@ -1,6 +1,7 @@
-#ifndef CFG_H
-#define CFG_H
+#ifndef CDEC_CFG_H
+#define CDEC_CFG_H
 
+// for now, debug means remembering and printing the TRule behind each CFG rule
 #ifndef CFG_DEBUG
 # define CFG_DEBUG 1
 #endif
@@ -9,7 +10,7 @@
 
    question: how much does making a copy (essentially) of hg simplify things?  is the space used worth it?  is the node in/out edges index really that much of a waste?  is the use of indices that annoying?
 
-   the only thing that excites me right now about an explicit cfg is that access to the target rhs can be less painful, and binarization *on the target side* is easier to define
+   answer: access to the source side and target side rhs is less painful - less indirection; if not a word (w>0) then -w is the NT index.  also, non-synchronous ops like binarization make sense.  hg is a somewhat bulky encoding of non-synchronous forest
 
    using indices to refer to NTs saves space (32 bit index vs 64 bit pointer) and allows more efficient ancillary maps for e.g. chart info (if we used pointers to actual node structures, it would be tempting to add various void * or other slots for use by mapped-during-computation ephemera)
  */
