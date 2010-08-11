@@ -26,7 +26,7 @@ void CFG::Binarize(CFGBinarize const& b) {
   }
   // l2r only so far:
   cerr << "Binarizing "<<b<<endl;
-  HASH_MAP<BinRhs,NTHandle> bin2lhs; // we're going to hash cons rather than build an explicit trie from right to left.
+  HASH_MAP<BinRhs,NTHandle,boost::hash<BinRhs> > bin2lhs; // we're going to hash cons rather than build an explicit trie from right to left.
   HASH_MAP_EMPTY(bin2lhs,nullrhs);
   int rhsmin=b.bin_unary?0:1;
   // iterate using indices and not iterators because we'll be adding to both nodes and edge list.  we could instead pessimistically reserve space for both, but this is simpler.  also: store original end of nts since we won't need to reprocess newly added ones.
