@@ -15,7 +15,7 @@ static const uint32_t DEFAULT_SEED=2654435769U;
 
 inline uint64_t MurmurHash64( const void * key, int len, unsigned int seed=DEFAULT_SEED )
 {
-  const uint64_t m = 0xc6a4a7935bd1e995;
+  const uint64_t m = 0xc6a4a7935bd1e995ULL;
   const int r = 47;
 
   uint64_t h = seed ^ (len * m);
