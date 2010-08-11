@@ -77,7 +77,8 @@ void CFG::Print(std::ostream &o,CFGFormat const& f) const {
   assert(!uninit);
   if (!f.goal_nt_name.empty()) {
     o << '['<<f.goal_nt_name <<']';
-    f.print_rhs(o,*this,&goal_nt,&goal_nt+1);
+    WordID rhs=-goal_nt;
+    f.print_rhs(o,*this,&rhs,&rhs+1);
     if (pushed_inside!=1)
       f.print_features(o,pushed_inside);
     o<<'\n';
