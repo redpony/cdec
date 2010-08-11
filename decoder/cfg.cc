@@ -129,7 +129,7 @@ void CFG::PrintRule(std::ostream &o,RuleHandle rulei,CFGFormat const& f) const {
   f.print_rhs(o,*this,r.rhs.begin(),r.rhs.end());
   f.print_features(o,r.p,r.f);
 #if CFG_DEBUG
-  o<<f.partsep<<*r.rule;
+  if (r.rule) o<<f.partsep<<*r.rule;
 #endif
 }
 
