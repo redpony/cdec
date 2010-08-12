@@ -5,6 +5,7 @@ bin_PROGRAMS = \
 if HAVE_GTEST
 noinst_PROGRAMS = \
   scorer_test
+TESTS = scorer_test
 endif
 
 noinst_LIBRARIES = libmteval.a

@@ -4,6 +4,9 @@ noinst_PROGRAMS = \
   weights_test \
   logval_test \
   small_vector_test
+
+TESTS = small_vector_test logval_test weights_test dict_test
+
 endif
 
 noinst_LIBRARIES = libutils.a

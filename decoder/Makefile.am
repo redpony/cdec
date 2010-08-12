@@ -7,6 +7,7 @@ noinst_PROGRAMS = \
   ff_test \
   parser_test \
   grammar_test
+TESTS = trule_test ff_test parser_test grammar_test hg_test
 endif
 
 cdec_SOURCES = cdec.cc forest_writer.cc maxtrans_blunsom.cc cdec_ff.cc

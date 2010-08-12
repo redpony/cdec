@@ -8,6 +8,7 @@ bin_PROGRAMS = \
 if HAVE_GTEST
 noinst_PROGRAMS = \
   lo_test
+TESTS = lo_test
 endif
 
 sentserver_SOURCES = sentserver.c
