@@ -20,20 +20,20 @@
 #include <sstream>
 #include <algorithm>
 
-inline std::size_t skip_ws(std::string const& s,std::size_t starting=0,char const* ws=" \t\n\r") {
+namespace {
+const char c_isspace[]=" \t\n\r\f\v"; // somewhat ridiculous, including characters nobody uses.
+const char common_isspace[]=" \t\n\r"; // even \n\r is borderline, but maybe you pass multiline DOS format text.
+}
+
+inline std::size_t skip_ws(std::string const& s,std::size_t starting=0,char const* ws=common_isspace) {
   return s.find_first_not_of(ws,starting);
 }
 
 // returns position of end of all non-ws chars before ending, i.e. string(s.begin()+skip_ws(s),s.begin()+trailing_ws(s)) strips both ends
-inline std::size_t trailing_ws(std::string const& s,std::size_t ending=std::string::npos,char const* ws=" \t\n\r") {
+inline std::size_t trailing_ws(std::string const& s,std::size_t ending=std::string::npos,char const* ws=common_isspace) {
   std::size_t n=s.find_last_not_of(ws,ending);
   if (n==std::string::npos) return n;
   else return n+1;
-}
-
-//TEST: if string is all whitespace, make sure that string(a+npos,a+npos) can't segfault (i.e. won't access any memory because begin==end)
-inline std::string strip_ws(std::string const& s) {
-  return std::string(s.begin()+skip_ws(s),s.begin()+trailing_ws(s));
 }
 
 
