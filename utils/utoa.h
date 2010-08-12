@@ -1,6 +1,7 @@
 #ifndef UTOA_H
 #define UTOA_H
 
+#include <stdint.h>
 #include <string>
 #include <cstring>
 
@@ -8,7 +9,10 @@
 # define DIGIT_LOOKUP_TABLE 0
 #endif
 
-const unsigned utoa_bufsize=21;
+// The largest 32-bit integer is 4294967295, that is 10 chars
+// 1 more for sign, and 1 for 0-termination of string
+// generally: 2 + std::numeric_limits<T>::is_signed + std::numeric_limits<T>::digits10
+const unsigned utoa_bufsize=12;
 const unsigned utoa_bufsizem1=utoa_bufsize-1;
 
 #ifdef DIGIT_LOOKUP_TABLE
@@ -27,11 +31,11 @@ inline char digit_to_char(int d) {
 }
 
 // returns n in string [return,num); *num=0 yourself before calling if you want a c_str
-inline char *utoa(char *num,unsigned n) {
+inline char *utoa(char *num,uint32_t n) {
   if ( !n ) {
     *--num='0';
   } else {
-    unsigned rem;
+    uint32_t rem;
     // 3digit lookup table, divide by 1000 faster?
     while ( n ) {
 #if 1
@@ -48,24 +52,23 @@ inline char *utoa(char *num,unsigned n) {
   return num;
 }
 
-
-inline char *itoa(char *p,int n) {
+inline char *itoa(char *p,int32_t n) {
   if (n<0) {
-    p=utoa(p,-n); // TODO: check that (unsigned)(-INT_MIN) == 0x1000000 in 2s complement and not == 0
+    p=utoa(p,-n); // (unsigned)(-INT_MIN) == 0x1000000 in 2s complement and not == 0.
     *--p='-';
     return p;
   } else
     return utoa(p,n);
 }
 
-inline std::string utos(unsigned n) {
+inline std::string utos(uint32_t n) {
   char buf[utoa_bufsize];
   char *end=buf+utoa_bufsize;
   char *p=utoa(end,n);
   return std::string(p,end);
 }
 
-inline std::string itos(int n) {
+inline std::string itos(int32_t n) {
   char buf[utoa_bufsize];
   char *end=buf+utoa_bufsize;
   char *p=itoa(end,n);
@@ -73,7 +76,7 @@ inline std::string itos(int n) {
 }
 
 //returns position of '\0' terminating number written starting at to
-inline char* append_utoa(char *to,unsigned n) {
+inline char* append_utoa(char *to,uint32_t n) {
   char buf[utoa_bufsize];
   char *end=buf+utoa_bufsize;
   char *s=utoa(end,n);
@@ -85,7 +88,7 @@ inline char* append_utoa(char *to,unsigned n) {
 }
 
 //returns position of '\0' terminating number written starting at to
-inline char* append_itoa(char *to,unsigned n) {
+inline char* append_itoa(char *to,int32_t n) {
   char buf[utoa_bufsize];
   char *end=buf+utoa_bufsize;
   char *s=itoa(end,n);
@@ -95,6 +98,5 @@ inline char* append_itoa(char *to,unsigned n) {
   *to++=0;
   return to;
 }
-
 
 #endif
