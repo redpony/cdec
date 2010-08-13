@@ -15,6 +15,8 @@
 #include <new>
 #include <stdint.h>
 #include "swap_pod.h"
+#include <boost/functional/hash.hpp>
+
 //sizeof(T)/sizeof(T*)>1?sizeof(T)/sizeof(T*):1
 
 template <class T,int SV_MAX=2>
@@ -250,6 +252,15 @@ public:
     swap_pod(*this,o);
   }
 
+  inline std::size_t hash() const {
+    using namespace boost;
+    if (size_==0) return 0;
+    if (size_==1) return hash_value(data_.vals[0]);
+    if (size<= SV_MAX)
+      return hash_range(data_.vals,data_.vals+size_);
+    return hash_range(data_.ptr,data_.ptr+size_);
+  }
+
  private:
   union StorageType {
     T vals[SV_MAX];
@@ -260,15 +271,20 @@ public:
   uint16_t capacity_;  // only defined when size_ > __SV_MAX_STATIC
 };
 
-template <class T,int SV_MAX>
-inline void swap(SmallVector<T,SV_MAX> &a,SmallVector<T,SV_MAX> &b) {
+template <class T,int M>
+std::size_t hash_value(SmallVector<T,M> const& x) {
+  return x.hash();
+}
+
+template <class T,int M>
+inline void swap(SmallVector<T,M> &a,SmallVector<T,M> &b) {
   a.swap(b);
 }
 
 typedef SmallVector<int,2> SmallVectorInt;
 
-template <class T,int N>
-void memcpy(void *out,SmallVector<T,N> const& v) {
+template <class T,int M>
+void memcpy(void *out,SmallVector<T,M> const& v) {
   std::memcpy(out,v.begin(),v.size()*sizeof(T));
 }
 

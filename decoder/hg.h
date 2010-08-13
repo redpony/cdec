@@ -392,7 +392,7 @@ public:
 
   // multiple the weights vector by the edge feature vector
   // (inner product) to set the edge probabilities
-  template <typename V>
+  template <class V>
   void Reweight(const V& weights) {
     for (int i = 0; i < edges_.size(); ++i) {
       Edge& e = edges_[i];

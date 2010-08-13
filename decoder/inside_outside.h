@@ -27,7 +27,7 @@ struct Boolean {
 // score for each node
 // NOTE: WeightType()  must construct the semiring's additive identity
 //       WeightType(1) must construct the semiring's multiplicative identity
-template<typename WeightType, typename WeightFunction>
+template<class WeightType, class WeightFunction>
 WeightType Inside(const Hypergraph& hg,
                   std::vector<WeightType>* result = NULL,
                   const WeightFunction& weight = WeightFunction()) {
@@ -58,7 +58,7 @@ WeightType Inside(const Hypergraph& hg,
   return inside_score.back();
 }
 
-template<typename WeightType, typename WeightFunction>
+template<class WeightType, class WeightFunction>
 void Outside(const Hypergraph& hg,
              std::vector<WeightType>& inside_score,
              std::vector<WeightType>* result,
@@ -179,7 +179,7 @@ struct InsideOutsides {
 // NOTE: XType * KType must be valid (and yield XType)
 // NOTE: This may do things slightly differently than you are used to, please
 // read the description in Li and Eisner (2009) carefully!
-template<typename KType, typename KWeightFunction, typename XType, typename XWeightFunction>
+template<class KType, class KWeightFunction, class XType, class XWeightFunction>
 KType InsideOutside(const Hypergraph& hg,
                     XType* result_x,
                     const KWeightFunction& kwf = KWeightFunction(),

@@ -2,13 +2,16 @@
 #define NAMED_ENUM_H
 
 #ifndef NAMED_ENUM_USE_OPTIONAL
-# define NAMED_ENUM_USE_OPTIONAL 1
+# define NAMED_ENUM_USE_OPTIONAL 0
 #endif
 
 //TODO: efficiency - supply map type (e.g. std::map or tr1::unordered_map) for string->int (int->string already fast w/ switch) - then implement iterators that don't assume contiguous ids.
 //TODO: hidden (can't convert string->id, but can do reverse) sentinel values.  XX (hidden) and XY (can convert to)
 //TODO: bitfield "A|B" strings - note: slightly complicates int->string, as well.
 //TODO: option for case-insensitive compare (ctype tolower?)
+//TODO: program_options validate method so you can declare po::value<MyEnum> instead of po::value<string>?
+//TODO: cout << MyEnum ?
+//impossible: (without wrapping in struct) MyEnum(string)
 
 /* named enum (string<->int).  note: inefficient linear search for string->int
 

@@ -6,24 +6,156 @@
 #include "batched_append.h"
 #include <limits>
 #include "fast_lexical_cast.hpp"
+//#include "indices_after.h"
 
 using namespace std;
 
+typedef CFG::Rule Rule;
+typedef CFG::NTOrder NTOrder;
+typedef CFG::RHS RHS;
+
+/////index ruleids:
+void CFG::UnindexRules() {
+  for (NTs::iterator n=nts.begin(),nn=nts.end();n!=nn;++n)
+    n->ruleids.clear();
+}
+
+void CFG::ReindexRules() {
+  UnindexRules();
+  for (int i=0,e=rules.size();i<e;++i)
+    if (!rules[i].is_null())
+      nts[rules[i].lhs].ruleids.push_back(i);
+}
+
+//////topo order:
 namespace {
-CFG::BinRhs nullrhs(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
+typedef std::vector<char> Seen; // 0 = unseen, 1 = seen+finished, 2 = open (for cycle detection; seen but not finished)
+enum { UNSEEN=0,SEEN,OPEN };
+
+
+// bottom -> top topo order (rev head->tails topo)
+template <class OutOrder>
+struct CFGTopo {
+// meaningless efficiency alternative: close over all the args except ni - so they're passed as a single pointer.  also makes visiting tail_nts simpler.
+  CFG const& cfg;
+  OutOrder outorder;
+  std::ostream *cerrp;
+  CFGTopo(CFG const& cfg,OutOrder const& outorder,std::ostream *cerrp=&std::cerr)
+    : cfg(cfg),outorder(outorder),cerrp(cerrp) // closure over args
+    , seen(cfg.nts.size()) {  }
+
+  Seen seen;
+  void operator()(CFG::NTHandle ni) {
+    char &seenthis=seen[ni];
+    if (seenthis==UNSEEN) {
+      seenthis=OPEN;
+
+      CFG::NT const& nt=cfg.nts[ni];
+      for (CFG::Ruleids::const_iterator i=nt.ruleids.begin(),e=nt.ruleids.end();i!=e;++i) {
+        Rule const& r=cfg.rules[*i];
+        r.visit_rhs_nts(*this); // recurse.
+      }
+
+      *outorder++=ni; // dfs finishing time order = reverse topo.
+      seenthis=SEEN;
+    } else if (cerrp && seenthis==OPEN) {
+      std::ostream &cerr=*cerrp;
+      cerr<<"WARNING: CFG Topo order attempt failed: NT ";
+      cfg.print_nt_name(cerr,ni);
+      cerr<<" already reached from goal(top) ";
+      cfg.print_nt_name(cerr,cfg.goal_nt);
+      cerr<<".  Continuing to reorder, but it's not fully topological.\n";
+    }
+  }
+
+};
+
+template <class O>
+void DoCFGTopo(CFG const& cfg,CFG::NTHandle goal,O const& o,std::ostream *w=0) {
+  CFGTopo<O> ct(cfg,o,w);
+  ct(goal);
+}
+
+}//ns
+
+// you would need to do this only if you didn't build from hg, or you Binarize without bin_topo option.  note: this doesn't sort the list of rules; it's assumed that if you care about the topo order you'll iterate over nodes.
+void CFG::OrderNTsTopo(NTOrder *o_,std::ostream *cycle_complain) {
+  NTOrder &o=*o_;
+  o.resize(nts.size());
+  DoCFGTopo(*this,goal_nt,o.begin(),cycle_complain);
+}
+
+
+/////sort/uniq:
+namespace {
+RHS null_rhs(1,INT_MIN);
+
+//sort
+struct ruleid_best_first {
+  CFG::Rules const* rulesp;
+  bool operator()(int a,int b) const { // true if a >(prob for ruleid) b
+    return (*rulesp)[b].p < (*rulesp)[a].p;
+  }
+};
+
+//uniq
+struct prob_pos {
+  prob_pos() {}
+  prob_pos(prob_t prob,int pos) : prob(prob),pos(pos) {}
+  prob_t prob;
+  int pos;
+  bool operator <(prob_pos const& o) const { return prob<o.prob; }
+};
+}//ns
+
+void CFG::UniqRules(NTHandle ni) {
+  typedef HASH_MAP<RHS,prob_pos> BestRHS; // faster to use trie? maybe.
+  BestRHS bestp; // once inserted, the position part (output index) never changes.  but the prob may be improved (overwrite ruleid at that position).
+  HASH_MAP_EMPTY(bestp,null_rhs);
+  Ruleids &adj=nts[ni].ruleids;
+  Ruleids oldadj=adj;
+  int oi=0;
+  for (int i=0,e=oldadj.size();i!=e;++i) { // this beautiful complexity is to ensure that adj' is a subsequence of adj (without duplicates)
+    int ri=oldadj[i];
+    Rule const& r=rules[ri];
+    prob_pos pi(r.p,oi);
+    prob_pos &oldpi=get_default(bestp,r.rhs,pi);
+    if (oldpi.pos==oi) {// newly inserted
+      adj[oi++]=ri;
+    } else if (oldpi.prob<pi.prob) { // we improve prev. best (overwrite it @old pos)
+      oldpi.prob=pi.prob;
+      adj[oldpi.pos]=ri; // replace worse rule w/ better
+    }
+  }
+  // post: oi = number of new adj
+  adj.resize(oi);
+}
+
+void CFG::SortLocalBestFirst(NTHandle ni) {
+  ruleid_best_first r;
+  r.rulesp=&rules;
+  Ruleids &adj=nts[ni].ruleids;
+  std::stable_sort(adj.begin(),adj.end(),r);
+}
+
+
+/////binarization:
+namespace {
+
+CFG::BinRhs null_bin_rhs(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
 
 // index i >= N.size()?  then it's in M[i-N.size()]
 WordID BinName(CFG::BinRhs const& b,CFG::NTs const& N,CFG::NTs const& M)
 {
   int nn=N.size();
   ostringstream o;
-#define BinNameOWORD(w) \
-  do { \
-    int n=w; if (n>0) o << TD::Convert(n); \
-    else {                                   \
-      int i=-n; \
-      if (i<nn) o<<N[i].from<<i; else o<<M[i-nn].from; \
-    }                                                  \
+#define BinNameOWORD(w)                                 \
+  do {                                                  \
+    int n=w; if (n>0) o << TD::Convert(n);              \
+    else {                                              \
+      int i=-n;                                         \
+      if (i<nn) o<<N[i].from<<i; else o<<M[i-nn].from;  \
+    }                                                   \
   } while(0)
 
   BinNameOWORD(b.first);
@@ -33,9 +165,7 @@ WordID BinName(CFG::BinRhs const& b,CFG::NTs const& N,CFG::NTs const& M)
   return TD::Convert(o.str());
 }
 
-}
-
-
+}//ns
 
 void CFG::Binarize(CFGBinarize const& b) {
   if (!b.Binarizing()) return;
@@ -43,12 +173,12 @@ void CFG::Binarize(CFGBinarize const& b) {
     assert(b.bin_l2r);
     return;
   }
-  // l2r only so far:
+  //TODO: l2r only so far:
   cerr << "Binarizing "<<b<<endl;
   HASH_MAP<BinRhs,NTHandle,boost::hash<BinRhs> > bin2lhs; // we're going to hash cons rather than build an explicit trie from right to left.
-  HASH_MAP_EMPTY(bin2lhs,nullrhs);
+  HASH_MAP_EMPTY(bin2lhs,null_bin_rhs);
   int rhsmin=b.bin_unary?0:1;
-  // iterate using indices and not iterators because we'll be adding to both nodes and edge list.  we could instead pessimistically reserve space for both, but this is simpler.  also: store original end of nts since we won't need to reprocess newly added ones.
+  // iterate using indices and not iterators because we'll be adding to both nts and rules list?  we could instead pessimistically reserve space for both, but this is simpler.  also: store original end of nts since we won't need to reprocess newly added ones.
   NTs new_nts; // these will be appended at the end, so we don't have to worry about iterator invalidation
   Rules new_rules;
   //TODO: this could be factored easily into in-place (append to new_* like below) and functional (nondestructive copy) versions (copy orig to target and append to target)
@@ -77,6 +207,8 @@ void CFG::Binarize(CFGBinarize const& b) {
   }
   batched_append_swap(nts,new_nts);
   batched_append_swap(rules,new_rules);
+  if (b.bin_topo) //TODO: more efficient (at least for l2r) maintenance of order
+    OrderNTsTopo();
 }
 
 namespace {

@@ -5,6 +5,11 @@
 #ifndef CFG_DEBUG
 # define CFG_DEBUG 0
 #endif
+#if CFG_DEBUG
+# define IF_CFG_DEBUG(x) x
+#else
+# define IF_CFG_DEBUG(x)
+#endif
 
 /* for target FSA intersection, we want to produce a simple (feature weighted) CFG using the target projection of a hg.  this is essentially isomorphic to the hypergraph, and we're copying part of the rule info (we'll maintain a pointer to the original hg edge for posterity/debugging; and perhaps avoid making a copy of the feature vector).  but we may also want to support CFG read from text files (w/ features), without needing to have a backing hypergraph.  so hg pointer may be null?  multiple types of CFG?  always copy the feature vector?  especially if we choose to binarize, we won't want to rely on 1:1 alignment w/ hg
 
@@ -28,6 +33,7 @@
 #include "small_vector.h"
 #include "nt_span.h"
 #include <algorithm>
+#include "indices_after.h"
 
 class Hypergraph;
 class CFGFormat; // #include "cfg_format.h"
@@ -47,7 +53,10 @@ struct CFG {
 
   struct Rule {
     // for binarizing - no costs/probs
-    Rule() {  }
+    Rule() : lhs(-1) {  }
+    bool is_null() const { return lhs<0; }
+    void set_null() { lhs=-1; rhs.clear();f.clear(); IF_CFG_DEBUG(rule.reset();) }
+
     Rule(int lhs,BinRhs const& binrhs) : lhs(lhs),rhs(2),p(1) {
       rhs[0]=binrhs.first;
       rhs[1]=binrhs.second;
@@ -57,18 +66,59 @@ struct CFG {
     RHS rhs;
     prob_t p; // h unused for now (there's nothing admissable, and p is already using 1st pass inside as pushed toward top)
     FeatureVector f; // may be empty, unless copy_features on Init
-#if CFG_DEBUG
-    TRulePtr rule; // normally no use for this (waste of space)
-#endif
+    IF_CFG_DEBUG(TRulePtr rule;)
     void Swap(Rule &o) {
       using namespace std;
       swap(lhs,o.lhs);
       swap(rhs,o.rhs);
       swap(p,o.p);
       swap(f,o.f);
-#if CFG_DEBUG
-      swap(rule,o.rule);
-#endif
+      IF_CFG_DEBUG(swap(rule,o.rule);)
+    }
+    template<class V>
+    void visit_rhs_nts(V &v) const {
+      for (RHS::const_iterator i=rhs.begin(),e=rhs.end();i!=e;++i) {
+        WordID w=*i;
+        if (w<=0)
+          v(-w);
+      }
+    }
+    template<class V>
+    void visit_rhs_nts(V const& v) const {
+      for (RHS::const_iterator i=rhs.begin(),e=rhs.end();i!=e;++i) {
+        WordID w=*i;
+        if (w<=0)
+          v(-w);
+      }
+    }
+
+    template<class V>
+    void visit_rhs(V &v) const {
+      for (RHS::const_iterator i=rhs.begin(),e=rhs.end();i!=e;++i) {
+        WordID w=*i;
+        if (w<=0)
+          v.visit_nt(-w);
+        else
+          v.visit_t(w);
+      }
+    }
+
+    // returns 0 or 1 (# of non null rules in this rule).
+    template <class O>
+    bool reorder_from(O &order,NTHandle removed=-1) {
+      for (RHS::iterator i=rhs.begin(),e=rhs.end();i!=e;++i) {
+        WordID &w=*i;
+        if (w<=0) {
+          int oldnt=-w;
+          NTHandle newnt=(NTHandle)order[oldnt]; // e.g. unsigned to int (-1) conversion should be ok
+          if (newnt==removed) {
+            set_null();
+            return false;
+          }
+          w=-newnt;
+        }
+      }
+      return true;
     }
   };
 
@@ -91,6 +141,17 @@ struct CFG {
   bool Uninitialized() const { return uninit; }
   void Clear();
   bool Empty() const { return nts.empty(); }
+  void UnindexRules(); // save some space?
+  void ReindexRules(); // scan over rules and rebuild NT::ruleids (e.g. after using UniqRules)
+  void UniqRules(NTHandle ni); // keep only the highest prob rule for each rhs and lhs=nt - doesn't remove from Rules; just removes from nts[ni].ruleids.  keeps the same order in this sense: for a given signature (rhs), that signature's first representative in the old ruleids will become the new position of the best.  as a consequence, if you SortLocalBestFirst() then UniqRules(), the result is still best first.  but you may also call this on unsorted ruleids.
+  inline void UniqRules() {
+    for (int i=0,e=nts.size();i!=e;++i) UniqRules(i);
+  }
+
+  void SortLocalBestFirst(NTHandle ni); // post: nts[ni].ruleids lists rules from highest p to lowest.  when doing best-first earley intersection/parsing, you don't want to use the global marginal viterbi; you want to ignore outside in ordering edges for a node, so call this.  stable in case of ties
+  inline void SortLocalBestFirst() {
+    for (int i=0,e=nts.size();i!=e;++i) SortLocalBestFirst(i);
+  }
   void Init(Hypergraph const& hg,bool target_side=true,bool copy_features=false,bool push_weights=true);
   void Print(std::ostream &o,CFGFormat const& format) const; // see cfg_format.h
   void PrintRule(std::ostream &o,RuleHandle rulei,CFGFormat const& format) const;
@@ -104,7 +165,79 @@ struct CFG {
     swap(nts,o.nts);
     swap(goal_nt,o.goal_nt);
   }
-  void Binarize(CFGBinarize const& binarize_options);
+
+  typedef std::vector<NTHandle> NTOrder; // a list of nts, in definition-before-use order.
+
+  //perhaps: give up on templated Order and move the below to .cc (NTOrder should be fine)
+
+  // post: iterating nts 0,1... the same as order[0],order[1],... ; return number of non-null rules (these aren't actually deleted)
+  // pre: order is (without duplicates) a range of NTHandle
+  template <class Order>
+  int ReorderNTs(Order const& order) {
+    using namespace std;
+    int nn=nts.size();
+#if 0
+    NTs newnts(order.size()); // because the (sub)permutation order may have e.g. 1<->4
+    int ni=0;
+    for (typename Order::const_iterator i=order.begin(),e=order.end();i!=e;++i) {
+      assert(*i<nn);
+      swap(newnts[ni++],nts[*i]);
+    }
+    swap(newnts,nts);
+#endif
+    indices_after remap_nti;
+    remap_nti.init_inverse_order(nn,order);
+    remap_nti.do_moves_swap(nts);// (equally efficient (or more?) than the disabled nt swapping above.
+    goal_nt=remap_nti.map[goal_nt]; // remap goal, of course
+    // fix rule ids
+    return RemapRules(remap_nti.map,(NTHandle)indices_after::REMOVED);
+  }
+
+  // return # of kept rules (not null)
+  template <class NTHandleRemap>
+  int RemapRules(NTHandleRemap const& remap_nti,NTHandle removed=-1) {
+    int n_non_null=0;
+    for (int i=0,e=rules.size();i<e;++i)
+      n_non_null+=rules[i].reorder_from(remap_nti,removed);
+    return n_non_null;
+  }
+
+  // call after rules are indexed.
+  template <class V>
+  void VisitRuleIds(V &v) {
+    for (int i=0,e=nts.size();i<e;++i)
+      for (Ruleids::const_iterator j=nts[i].ruleids.begin(),jj=nts[i].ruleids.begin();j!=jj;++j)
+        v(*j);
+  }
+  template <class V>
+  void VisitRuleIds(V const& v) {
+    for (int i=0,e=nts.size();i<e;++i)
+      for (Ruleids::const_iterator j=nts[i].ruleids.begin(),jj=nts[i].ruleids.begin();j!=jj;++j)
+        v(*j);
+  }
+
+  // no index needed
+  template <class V>
+  void VisitRulesUnindexed(V const &v) {
+    for (int i=0,e=rules.size();i<e;++i)
+      if (!rules[i].is_null())
+        v(i,rules[i]);
+  }
+
+
+
+  void OrderNTsTopo(NTOrder *o,std::ostream *cycle_complain=0); // places NTs in defined (completely) bottom-up before use order.  this is actually reverse topo order considering edges from lhs->rhs.
+  // you would need to do this only if you didn't build from hg, or you Binarize without bin_topo option.
+  // note: this doesn't sort the list of rules; it's assumed that if you care about the topo order you'll iterate over nodes.
+  // cycle_complain means to warn in case of back edges.  it's not necessary to prevent inf. loops.  you get some order that's not topo if there are loops.  starts from goal_nt, of course.
+
+  void OrderNTsTopo(std::ostream *cycle_complain=0) {
+    NTOrder o;
+    OrderNTsTopo(&o,cycle_complain);
+    ReorderNTs(o);
+  }
+
+  void Binarize(CFGBinarize const& binarize_options); // see cfg_binarize.h for docs
 
   typedef std::vector<NT> NTs;
   NTs nts;
