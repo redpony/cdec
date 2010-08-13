@@ -9,7 +9,7 @@
 struct CFGOptions {
   CFGFormat format;
   CFGBinarize binarize;
-  std::string cfg_output,source_cfg_output;
+  std::string cfg_output,source_cfg_output,cfg_unbin_output;
   void set_defaults() {
     format.set_defaults();
     binarize.set_defaults();
@@ -21,6 +21,7 @@ struct CFGOptions {
     opts->add_options()
       ("cfg_output", defaulted_value(&cfg_output),"write final target CFG (before FSA rescoring) to this file")
       ("source_cfg_output", defaulted_value(&source_cfg_output),"write source CFG (after prelm-scoring, prelm-prune) to this file")
+      ("cfg_unbin_output", defaulted_value(&cfg_unbin_output),"write pre-binarization CFG to this file") //TODO:
     ;
     binarize.AddOptions(opts);
     format.AddOptions(opts);
