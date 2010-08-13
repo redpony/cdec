@@ -14,30 +14,32 @@ To encode these prior beliefs, we make use of Pitman-Yor processes \citep{pitman
 Our models assume a fixed number of categories, $K$. The category type, $z \in \{ 1 , 2 , \ldots , K \}$, is generated from a PYP with a uniform base distribution:
 \begin{align*}
 z &| \p & \sim \theta_{\p} \\
-\theta_p &| a_{\p},b_{\p},K & \sim \textrm{PYP}(a_{\p},b_{\p},\textrm{Uniform}(K))
+\theta_{\p} &| a_{\p},b_{\p},K & \sim \textrm{PYP}(a_{\p},b_{\p},\frac{1}{K})
 \end{align*}
 \noindent Alternatively, we used hierarchical PYP process which shares statistics about the use of categories across phrases:
 \begin{align*}
 z &| \p & \sim \theta_{\p} \\
 \theta_{\p} &| a_{\p},b_{\p} & \sim \textrm{PYP}(a_{\p},b_{\p},\theta_0) \\
-\theta_0 &| a_0,b_0,K & \sim \textrm{PYP}(a_0,b_0,\textrm{Uniform}(K))
+\theta_0 &| a_0,b_0,K & \sim \textrm{PYP}(a_0,b_0,\frac{1}{K})
 \end{align*}
 
 \noindent Each category $z$ token then generates the context $\textbf{c}_i$. We again model this using a PYP, which will tend to cluster commonly used contexts across phrases into a single category. Additionally, by using hierarchical PYPs, we can smooth highly specific contexts by backing off to less specific contexts (e.g., composed of fewer words or word classes).
 
-The most basic version of our model uses a uniform prior base distribution over contexts:
+The most basic version of our model uses a uniform base distribution over contexts. This model was most useful when generating contexts consisting of a single word or word class (i.e., $\textbf{c}=c_{-1}c_1$) in either the source or target language on either side.
 
 \begin{align*}
-\textbf{c} |& z & \sim \phi_z \\
-\phi_z |& a_z,b_z & \sim \textrm{PYP}(a_z,b_z,\textrm{Uniform}(|V|^2))
+c_{-1}c_1 |& z & \sim \phi_z \\
+\phi_z |& a_z,b_z & \sim \textrm{PYP}(a_z,b_z,\frac{1}{|V|^2})
 \end{align*}
 
-\noindent TODO. For contexts with more than a single word on either side, we typically backed off from a 
+\noindent When larger contexts were used, the space of these contexts becomes very sparse, so another variant of our model uses a non-uniform base distribution to back off to the probability of generating a smaller context (i.e., $c_{-1}c_1$) as above and then generating the outer context
 
 \begin{align*}
-\textbf{c} |& z & \sim \phi_z \\
-\phi_z |& a_z,b_z, \phi_0 & \sim \textrm{PYP}(a_z,b_z,\phi_0(\cdot|z) \times \textrm{Uniform}(|V|^2)) \\
-\phi_0 |& a_0,b_0 & \sim \textrm{PYP}(a_z,b_z,\phi_0(\cdot|z))
+c_{-2}c_{-1}c_1c_2 |& z & \sim \phi_z \\
+\phi_z |& a_z,b_z & \sim \textrm{PYP}(a_z,b_z,P_1(\cdot|z)) \\
+&P_1(c_{-2}c_{-1}c_1c_2|z)& = \phi^{\textrm{\emph{inner}}}_z(c_{-1}c_1|z) \times \frac{1}{|V|^2} \\
+c_{-1}c_1 |& z & \sim \phi^{\textrm{\emph{inner}}}_z \\
+\phi^{\textrm{\emph{inner}}}_z |& a^{\textrm{\emph{inner}}}_z,b^{\textrm{\emph{inner}}}_z & \sim \textrm{PYP}(a^{\textrm{\emph{inner}}}_z,b^{\textrm{\emph{inner}}}_z,\frac{1}{|V|^2})
 \end{align*}
 
 \noindent Figure~\ref{fig:np_plate} shows a plate diagram for the model.
