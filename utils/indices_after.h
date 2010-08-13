@@ -1,6 +1,9 @@
 #ifndef INDICES_AFTER_REMOVING_H
 #define INDICES_AFTER_REMOVING_H
 
+//TODO: instead of making REMOVED a constant, make it class state (defaults to -1 as before, of course).
+
+#include <assert.h>
 #include <boost/config.hpp> // STATIC_CONSTANT
 #include <algorithm> //swap
 #include <iterator>
@@ -48,17 +51,48 @@ unsigned new_indices(KEEP keep,O out) {
   return new_indices(keep.begin(),keep.end(),out);
 }
 
+template <class V,class Out,class Permi>
+void copy_perm_to(Out o,V const& from,Permi i,Permi e) {
+  for (;i!=e;++i)
+    *o++=from[*i];
+}
+
+//to cannot be same as from, for most permutations.  for to==from, use indices_after::init_inverse_order instead.
+template <class Vto,class Vfrom,class Perm>
+void remap_perm_to(Vto &to,Vfrom const& from,Perm const& p) {
+  to.resize(p.size());
+  copy_perm_to(to.begin(),from,p.begin(),p.end());
+}
+
 // given a vector and a parallel sequence of bools where true means keep, keep only the marked elements while maintaining order.
 // this is done with a parallel sequence to the input, marked with positions the kept items would map into in a destination array, with removed items marked with the index -1.  the reverse would be more compact (parallel to destination array, index of input item that goes into it) but would require the input sequence be random access.
 struct indices_after
 {
   BOOST_STATIC_CONSTANT(unsigned,REMOVED=(unsigned)-1);
   unsigned *map; // map[i] == REMOVED if i is deleted
-  unsigned n_kept;
+  unsigned n_kept; // important to init this.
   unsigned n_mapped;
   template <class AB,class ABe>
   indices_after(AB i, ABe end) {
     init(i,end);
+  }
+
+  template <class Order>
+  void init_inverse_order(unsigned from_sz,Order const& order) {
+    init_inverse_order(from_sz,order.begin(),order.end());
+  }
+  template <class OrderI>
+  void init_inverse_order(unsigned from_sz,OrderI i,OrderI end) {
+    init_alloc(from_sz);
+    unsigned d=0;
+    n_kept=0;
+    for(;i!=end;++i) {
+      assert(d<from_sz);
+      map[d++]=*i;
+      ++n_kept;
+    }
+    for(;d<from_sz;++d)
+      map[d]=REMOVED;
   }
 
   template <class Vec,class R>
@@ -68,6 +102,25 @@ struct indices_after
     if ( !n_mapped ) return;
     map=(unsigned *)::operator new(sizeof(unsigned)*n_mapped);
     n_kept=new_indices_keep_if_n(n_mapped,r,map);
+  }
+  // contents uninit.
+  void init_alloc(unsigned n) {
+    free();
+    n_mapped=n;
+    map=n_mapped>0 ?
+      (unsigned *)::operator new(sizeof(unsigned)*n_mapped)
+      : 0;
+  }
+  void init_const(unsigned n,unsigned map_all_to) {
+    init_alloc(n);
+    for (unsigned i=0;i<n;++i)
+      map[i]=map_all_to;
+    n_kept=(map_all_to==REMOVED)?0:n;
+  }
+
+  void init_keep_none(unsigned n) {
+    init_const(n,REMOVED);
+    n_kept=0;
   }
 
   template <class AB,class ABe>
@@ -93,9 +146,14 @@ struct indices_after
   indices_after() : n_mapped(0) {}
   ~indices_after()
   {
+    free();
+  }
+  void free() {
     if (n_mapped)
       ::operator delete((void*)map);
+    n_mapped=0;
   }
+
   bool removing(unsigned i) const
   {
     return map[i] == REMOVED;
@@ -127,7 +185,6 @@ struct indices_after
   {
     using std::swap;
     assert(v.size()==n_mapped);
-    unsigned r=n_mapped;
     unsigned i=0;
     for (;i<n_mapped&&keeping(i);++i) ;
     for(;i<n_mapped;++i)

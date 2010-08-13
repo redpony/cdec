@@ -14,7 +14,7 @@
 //   PType scalar, RType vector
 // BAD examples:
 //   PType vector, RType scalar
-template <typename PType, typename RType>
+template <class PType, class RType>
 struct PRPair {
   PRPair() : p(), r() {}
   // Inside algorithm requires that T(0) and T(1)
@@ -35,26 +35,26 @@ struct PRPair {
   RType r;
 };
 
-template <typename P, typename R>
+template <class P, class R>
 std::ostream& operator<<(std::ostream& o, const PRPair<P,R>& x) {
   return o << '<' << x.p << ", " << x.r << '>';
 }
 
-template <typename P, typename R>
+template <class P, class R>
 const PRPair<P,R> operator+(const PRPair<P,R>& a, const PRPair<P,R>& b) {
   PRPair<P,R> result = a;
   result += b;
   return result;
 }
 
-template <typename P, typename R>
+template <class P, class R>
 const PRPair<P,R> operator*(const PRPair<P,R>& a, const PRPair<P,R>& b) {
   PRPair<P,R> result = a;
   result *= b;
   return result;
 }
 
-template <typename P, typename PWeightFunction, typename R, typename RWeightFunction>
+template <class P, class PWeightFunction, class R, class RWeightFunction>
 struct PRWeightFunction {
   explicit PRWeightFunction(const PWeightFunction& pwf = PWeightFunction(),
                             const RWeightFunction& rwf = RWeightFunction()) :

@@ -13,6 +13,46 @@
 
 using namespace std;
 
+//impl details (not exported).  flat namespace for my ease.
+
+typedef CFG::BinRhs BinRhs;
+typedef CFG::NTs NTs;
+typedef CFG::NT NT;
+typedef CFG::NTHandle NTHandle;
+typedef CFG::Rules Rules;
+typedef CFG::Rule Rule;
+typedef CFG::RuleHandle RuleHandle;
+
+namespace {
+
+// if we don't greedy-binarize, we want to encode recognized prefixes p (X -> p . rest) efficiently.  if we're doing this, we may as well also push costs so we can best-first select rules in a lazy fashion.  this is effectively left-branching binarization, of course.
+template <class K,class V>
+struct prefix_map_type {
+  typedef std::map<K,V> type;
+};
+//template typedef
+#define PREFIX_MAP(k,v) prefix_map_type<k,v>::type
+typedef NTHandle LHS;
+struct PrefixTrieNode {
+  prob_t backward; // (viterbi) backward prob (for cost pushing)
+  typedef PREFIX_MAP(LHS,RuleHandle) Completed; // can only have one rule w/ a given signature (duplicates should be collapsed when making CFG).  but there may be multiple rules, with different LHS
+  Completed completed;
+  typedef PREFIX_MAP(WordID,PrefixTrieNode *) Adj;
+  Adj adj;
+  //TODO:
+};
+
+struct PrefixTrie {
+  CFG const* cfgp;
+  CFG const& cfg() const { return *cfgp; }
+  PrefixTrie(CFG const& cfg) : cfgp(&cfg) {
+//TODO:
+  }
+};
+
+}//anon ns
+
+
 DEFINE_NAMED_ENUM(FSA_BY)
 
 struct ApplyFsa {

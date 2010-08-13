@@ -16,7 +16,7 @@ std::string viterbi_stats(Hypergraph const& hg, std::string const& name="forest"
 // WeightFunction must implement:
 //  typedef prob_t Weight;
 //  Weight operator()(Hypergraph::Edge const& e) const;
-template<typename Traversal,typename WeightFunction>
+template<class Traversal,class WeightFunction>
 typename WeightFunction::Weight Viterbi(const Hypergraph& hg,
                    typename Traversal::Result* result,
                    const Traversal& traverse,
