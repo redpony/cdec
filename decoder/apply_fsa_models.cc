@@ -13,6 +13,8 @@
 
 using namespace std;
 
+DEFINE_NAMED_ENUM(FSA_BY)
+
 struct ApplyFsa {
   ApplyFsa(HgCFG &i,
            const SentenceMetadata& smeta,
@@ -74,6 +76,7 @@ void ApplyFsaModels(HgCFG &i,
   a.Compute();
 }
 
+/*
 namespace {
 char const* anames[]={
   "BU_CUBE",
@@ -82,14 +85,18 @@ char const* anames[]={
   0
 };
 }
+*/
 
 //TODO: named enum type in boost?
 
 std::string ApplyFsaBy::name() const {
-  return anames[algorithm];
+//  return anames[algorithm];
+  return GetName(algorithm);
 }
 
 std::string ApplyFsaBy::all_names() {
+  return FsaByNames(" ");
+  /*
   std::ostringstream o;
   for (int i=0;i<N_ALGORITHMS;++i) {
     assert(anames[i]);
@@ -97,19 +104,24 @@ std::string ApplyFsaBy::all_names() {
     o<<anames[i];
   }
   return o.str();
+  */
 }
 
 ApplyFsaBy::ApplyFsaBy(std::string const& n, int pop_limit) : pop_limit(pop_limit) {
-  algorithm=0;
   std::string uname=toupper(n);
+  algorithm=GetFsaBy(uname);
+/*anames=0;
   while(anames[algorithm] && anames[algorithm] != uname) ++algorithm;
   if (!anames[algorithm])
     throw std::runtime_error("Unknown ApplyFsaBy type: "+n+" - legal types: "+all_names());
+*/
 }
 
-ApplyFsaBy::ApplyFsaBy(int i, int pop_limit) : pop_limit(pop_limit) {
-  if (i<0 || i>=N_ALGORITHMS)
+ApplyFsaBy::ApplyFsaBy(FsaBy i, int pop_limit) : pop_limit(pop_limit) {
+/*  if (i<0 || i>=N_ALGORITHMS)
     throw std::runtime_error("Unknown ApplyFsaBy type id: "+itos(i)+" - legal types: "+all_names());
+*/
+  GetName(i); // checks validity
   algorithm=i;
 }
 

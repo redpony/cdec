@@ -13,6 +13,31 @@
 #include <iosfwd>
 
 
+// change --opt-name=x --opt_name=x for all strings x.  danger: probably the argv from int main isn't supposed to be modified?
+inline int arg_minusto_underscore(char *s) {
+  if (!*s || *s++ != '-') return 0;
+  if (!*s || *s++ != '-') return 0;
+  int chars_replaced=0;
+  for(;*s;++s) {
+    if (*s=='=')
+      break;
+    if (*s=='-') {
+      *s='_';
+      ++chars_replaced;
+    }
+  }
+  return chars_replaced;
+}
+
+inline
+int argv_minus_to_underscore(int argc, char **argv) {
+  int chars_replaced=0;
+  for (int i=1;i<argc;++i) {
+    chars_replaced+=arg_minusto_underscore(argv[i]);
+  }
+  return chars_replaced;
+}
+
 template <class T>
 boost::program_options::typed_value<T>*
 defaulted_value(T *v)
