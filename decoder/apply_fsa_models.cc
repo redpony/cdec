@@ -10,6 +10,7 @@
 #include "cfg.h"
 #include "hg_cfg.h"
 #include "utoa.h"
+#include "hash.h"
 
 using namespace std;
 
@@ -26,12 +27,12 @@ typedef CFG::RuleHandle RuleHandle;
 namespace {
 
 // if we don't greedy-binarize, we want to encode recognized prefixes p (X -> p . rest) efficiently.  if we're doing this, we may as well also push costs so we can best-first select rules in a lazy fashion.  this is effectively left-branching binarization, of course.
-template <class K,class V>
+template <class K,class V,class Hash>
 struct prefix_map_type {
   typedef std::map<K,V> type;
 };
 //template typedef
-#define PREFIX_MAP(k,v) prefix_map_type<k,v>::type
+#define PREFIX_MAP(k,v) prefix_map_type<k,v,boost::hash<k> >::type
 typedef NTHandle LHS;
 struct PrefixTrieNode {
   prob_t backward; // (viterbi) backward prob (for cost pushing)

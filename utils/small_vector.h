@@ -252,13 +252,12 @@ public:
     swap_pod(*this,o);
   }
 
-  inline std::size_t hash() const {
-    using namespace boost;
+  inline std::size_t hash_impl() const {
     if (size_==0) return 0;
-    if (size_==1) return hash_value(data_.vals[0]);
+//    if (size_==1) return boost::hash_value(data_.vals[0]);
     if (size<= SV_MAX)
-      return hash_range(data_.vals,data_.vals+size_);
-    return hash_range(data_.ptr,data_.ptr+size_);
+      return boost::hash_range(data_.vals,data_.vals+size_);
+    return boost::hash_range(data_.ptr,data_.ptr+size_);
   }
 
  private:
@@ -271,9 +270,13 @@ public:
   uint16_t capacity_;  // only defined when size_ > __SV_MAX_STATIC
 };
 
+namespace boost {
+// shouldn't need to nest this, but getting into trouble with tr1::hash linkage
+}
+
 template <class T,int M>
-std::size_t hash_value(SmallVector<T,M> const& x) {
-  return x.hash();
+inline std::size_t hash_value(SmallVector<T,M> const& x) {
+  return x.hash_impl();
 }
 
 template <class T,int M>
