@@ -1,6 +1,8 @@
 #ifndef CDEC_HASH_H
 #define CDEC_HASH_H
 
+#include <boost/functional/hash.hpp>
+
 #include "murmur_hash.h"
 
 #include "config.h"
@@ -16,7 +18,6 @@
 # define HASH_MAP_EMPTY(h,empty)
 #endif
 
-#include <boost/functional/hash.hpp>
 
 // assumes C is POD
 template <class C>
