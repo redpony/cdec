@@ -25,30 +25,30 @@ category and then that category generates the contex for the phrase.
   \label{fig:EM}
 \end{figure}
 
-The joint probability of a category $z$ and a context $\bf{c}$ 
-given a phrase $\bf{p}$ is
+The joint probability of a category $z$ and a context $\textbf{c}$ 
+given a phrase $\textbf{p}$ is
 \[
-P(z,\bf{c}|\bf{p})=P(z|\bf{p})P(\bf{c}|z).
+P(z,\textbf{c}|\textbf{p})=P(z|\textbf{p})P(\textbf{c}|z).
 \]
-$P(z|\bf{p})$ is distribution of categories given a phrase.
+$P(z|\textbf{p})$ is distribution of categories given a phrase.
 This can be learned from data.
-$P(\bf{c}|z)$ is distribution of context given a category.
+$P(\textbf{c}|z)$ is distribution of context given a category.
 Since a context usually contains multiple slots for words, we further
 decompose this distribution into independent distributions at
 each slot. For example, suppose a context consists of two positions 
 before and after the phrase. Denote these words as 
 $c_{-2},c_{-1},c_1,c_2$.
 Use $P_{-2},P_{-1},P_1,P_2$ to denote distributions of words at each 
-position, $P(\bf{c}|z)$ is decomposed as
+position, $P(\textbf{c}|z)$ is decomposed as
 \[
-P(\bf{c}|z)=P_{-2}(c_{-2}|z)P_{-1}
+P(\textbf{c}|z)=P_{-2}(c_{-2}|z)P_{-1}
 (c_{-1}|z)P_1(c_1|z)P_2(c_2|z).
 \]
 The posterior probability of a category given a phrase
 and a context can be computed by normalizing the joint probability:
 \[
-P(z|\bf{p},\bf{c})=\frac{P(z,\bf{c}|\bf{p})}
-{\sum_{i=1,K}P(i,\bf{c}|\bf{p})}.
+P(z|\textbf{p},\textbf{c})=\frac{P(z,\textbf{c}|\textbf{p})}
+{\sum_{i=1,K}P(i,\textbf{c}|\textbf{p})}.
 \]
 With the mechanisms to compute the posterior probabilities, we can 
 apply EM to learn all the probabilities.
@@ -66,3 +66,16 @@ Posterior regularization
 provides a way to enforce sparsity \citep{ganchev:penn:2009}.
 The constraint we use here is called $l_1/ l_\infty$
 regularization.
+In a more mathematical formulation, for each phrase $\textbf{p}$,
+we want the quantity 
+\[\sum_{z=1}^K \max_i P(z|\textbf{p},\textbf{c}_i) \]
+to be small, where $\textbf{c}_i$ is the context
+appeared around the $i$th occurrence of phrase $\textbf{p}$
+throughout the data. This quantity roughly equals 
+the number of categories phrase $\textbf{p}$ uses.
+It is minimized to $1$ if and only if
+the posterior distributions $P(z|\textbf{p},\textbf{c}_i)$
+are the same
+for all
+occurrences of $\textbf{p}$. That is ,
+$\forall i,j$, $P(z|\textbf{p},\textbf{c}_i)=P(z|\textbf{p},\textbf{c}_j)$. 
