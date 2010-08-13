@@ -74,9 +74,9 @@ inline void throw_enum_error(std::string const& enumtype,std::string const& msg)
 
 /// declare the access function and define enum values
 #define DECLARE_NAMED_ENUM_T(DEF,EnumType)                    \
-  typedef enum  { \
+  enum EnumType { \
     DEF(NAMED_ENUM_VALUE,EnumType)                            \
-  } EnumType; \
+  }; \
   const char *GetName(EnumType dummy); \
   EnumType Get ## EnumType (const char *string); \
   inline EnumType Get ## EnumType (std::string const& s) { return Get ## EnumType (s.c_str()); }   \
