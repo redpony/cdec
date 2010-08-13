@@ -67,7 +67,8 @@ struct CFGFormat {
     o<<nt_prefix;
     if (nt_span)
       cfg.print_nt_name(o,id);
-    o<<id;
+    else
+      o<<id;
   }
 
   template <class CFG>

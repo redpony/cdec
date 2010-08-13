@@ -22,8 +22,8 @@ WordID BinName(CFG::BinRhs const& b,CFG::NTs const& N,CFG::NTs const& M)
     int n=w; if (n>0) o << TD::Convert(n); \
     else {                                   \
       int i=-n; \
-      CFG::NT const&nt = i<nn?N[i]:M[i-nn];    \
-      o << nt.from << i; }                     \
+      if (i<nn) o<<N[i].from<<i; else o<<M[i-nn].from; \
+    }                                                  \
   } while(0)
 
   BinNameOWORD(b.first);
