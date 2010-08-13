@@ -253,11 +253,12 @@ public:
   }
 
   inline std::size_t hash_impl() const {
+    using namespace boost;
     if (size_==0) return 0;
-//    if (size_==1) return boost::hash_value(data_.vals[0]);
-    if (size<= SV_MAX)
-      return boost::hash_range(data_.vals,data_.vals+size_);
-    return boost::hash_range(data_.ptr,data_.ptr+size_);
+    if (size_==1) return hash_value(data_.vals[0]);
+    if (size_ <= SV_MAX)
+      return hash_range(data_.vals,data_.vals+size_);
+    return hash_range(data_.ptr,data_.ptr+size_);
   }
 
  private:

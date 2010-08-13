@@ -18,6 +18,7 @@
 # define HASH_MAP_EMPTY(h,empty)
 #endif
 
+#define BOOST_HASHED_MAP(k,v) HASH_MAP<k,v,boost::hash<k> >
 
 // assumes C is POD
 template <class C>

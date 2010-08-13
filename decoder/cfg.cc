@@ -109,7 +109,7 @@ struct prob_pos {
 }//ns
 
 void CFG::UniqRules(NTHandle ni) {
-  typedef HASH_MAP<RHS,prob_pos> BestRHS; // faster to use trie? maybe.
+  typedef HASH_MAP<RHS,prob_pos,boost::hash<RHS> > BestRHS; // faster to use trie? maybe.
   BestRHS bestp; // once inserted, the position part (output index) never changes.  but the prob may be improved (overwrite ruleid at that position).
   HASH_MAP_EMPTY(bestp,null_rhs);
   Ruleids &adj=nts[ni].ruleids;
