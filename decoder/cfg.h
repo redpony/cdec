@@ -40,11 +40,10 @@ struct CFG {
   typedef std::vector<RuleHandle> Ruleids;
 
   void print_nt_name(std::ostream &o,NTHandle n) const {
-    o << nts[n].from;
+    o << nts[n].from << n;
   }
 
   typedef std::pair<int,int> BinRhs;
-  WordID BinName(BinRhs const& b);
 
   struct Rule {
     // for binarizing - no costs/probs
@@ -106,16 +105,17 @@ struct CFG {
     swap(goal_nt,o.goal_nt);
   }
   void Binarize(CFGBinarize const& binarize_options);
+
+  typedef std::vector<NT> NTs;
+  NTs nts;
+  typedef std::vector<Rule> Rules;
+  Rules rules;
+  int goal_nt;
+  prob_t goal_inside,pushed_inside; // when we push viterbi weights to goal, we store the removed probability in pushed_inside
 protected:
   bool uninit;
   Hypergraph const* hg_; // shouldn't be used for anything, esp. after binarization
-  prob_t goal_inside,pushed_inside; // when we push viterbi weights to goal, we store the removed probability in pushed_inside
   // rules/nts will have same index as hg edges/nodes
-  typedef std::vector<Rule> Rules;
-  Rules rules;
-  typedef std::vector<NT> NTs;
-  NTs nts;
-  int goal_nt;
 };
 
 inline void swap(CFG &a,CFG &b) {

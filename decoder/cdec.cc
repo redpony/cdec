@@ -193,7 +193,7 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
   dconfig_options.add(opts).add(cfgo);
   //add(opts).add(cfgo)
   dcmdline_options.add(dconfig_options).add(clo);
-
+  argv_minus_to_underscore(argc,argv);
   po::store(parse_command_line(argc, argv, dcmdline_options), conf);
   if (conf.count("compgen")) {
     print_options(cout,dcmdline_options);

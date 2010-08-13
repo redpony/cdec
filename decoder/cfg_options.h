@@ -28,6 +28,7 @@ struct CFGOptions {
   void Validate() {
     format.Validate();
     binarize.Validate();
+//    if (cfg_output.empty()) binarize.bin_name_nts=false;
   }
   char const* description() const {
     return "CFG output options";

@@ -11,19 +11,31 @@ using namespace std;
 
 namespace {
 CFG::BinRhs nullrhs(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
-}
 
-
-WordID CFG::BinName(BinRhs const& b)
+// index i >= N.size()?  then it's in M[i-N.size()]
+WordID BinName(CFG::BinRhs const& b,CFG::NTs const& N,CFG::NTs const& M)
 {
+  int nn=N.size();
   ostringstream o;
-#define BinNameOWORD(w) do { int n=w; if (n>0) o << TD::Convert(n); else { o << 'V' << -n; } } while(0)
+#define BinNameOWORD(w) \
+  do { \
+    int n=w; if (n>0) o << TD::Convert(n); \
+    else {                                   \
+      int i=-n; \
+      CFG::NT const&nt = i<nn?N[i]:M[i-nn];    \
+      o << nt.from << i; }                     \
+  } while(0)
+
   BinNameOWORD(b.first);
   o<<'+';
   BinNameOWORD(b.second);
 #undef BinNameOWORD
   return TD::Convert(o.str());
 }
+
+}
+
+
 
 void CFG::Binarize(CFGBinarize const& b) {
   if (!b.Binarizing()) return;
@@ -57,7 +69,7 @@ void CFG::Binarize(CFGBinarize const& b) {
           new_nts.back().ruleids.push_back(newruleid);
           new_rules.push_back(Rule(newnt,bin));
           if (b.bin_name_nts)
-            new_nts.back().from.nt=BinName(bin);
+            new_nts.back().from.nt=BinName(bin,nts,new_nts);
           ++newnt;++newruleid;
         }
       }
