@@ -20,7 +20,7 @@ category and then that category generates the contex for the phrase.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=3.5in]{EMdigram}
+  \includegraphics[width=3.5in]{pr-clustering/EMdigram}
   \caption{Basic Phrase Clustering Model}
   \label{fig:EM}
 \end{figure}
@@ -64,8 +64,22 @@ from the output, EM is using more categories than we wanted for
 each phrase.
 Posterior regularization
 provides a way to enforce sparsity \citep{ganchev:penn:2009}.
+The general idea of posterior regularization is to modify
+E-step of EM, so that instead of using posterior distribution
+as the $q$ distribution directly, we want to find the nearest
+$q$
+in a constrained space  as shown in Figure \ref{fig:EMPR}.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=3.5in]{pr-clustering/EMPR}
+  \caption{EM with posterior regularization}
+  \label{fig:EMPR}
+\end{figure}
+
 The constraint we use here is called $l_1/ l_\infty$
-regularization.
+regularization in Ganchev's technical report. The notations
+we use here largely follows Ganchev's.
 In a more mathematical formulation, for each phrase $\textbf{p}$,
 we want the quantity 
 \[\sum_{z=1}^K \max_i P(z|\textbf{p},\textbf{c}_i) \]
@@ -79,3 +93,46 @@ are the same
 for all
 occurrences of $\textbf{p}$. That is ,
 $\forall i,j$, $P(z|\textbf{p},\textbf{c}_i)=P(z|\textbf{p},\textbf{c}_j)$. 
+
+Define feature functions for $i$th occurrence of phrase $\textbf{p}$
+with category $j$,
+as a function of category $z$:
+\[
+\phi_{\textbf{p}ij}(z)=
+\begin{cases}
+1\text{ if z=j}\\
+0\text{ otherwise}
+\end{cases}.
+\]
+For notation simplicity, for
+each phrase category pair, 
+define variables $c_{\textbf{p}z}$ that will
+eventually be $\max_i E_q[\phi_{\textbf{p}iz}]$.
+The objective we want to optimize becomes:
+\[
+\arg\min_{q,c_{\textbf{p}z}} KL(q||P_{\theta}) + 
+\sigma \sum_{\textbf{p},z}c_{\textbf{p}z}
+\]
+\[
+\text{ s.t. }\forall \textbf{p},z,
+E_q[\phi_{\textbf{p}iz}]\leq c_{\textbf{p}z}.
+\]
+Using Lagrange Multipliers, this objective can
+be optimized in its dual form,
+for each phrase $\textbf{p}$:
+\[
+\arg\min_{\lambda\geq 0} \log 
+(\sum_{z,i} P_\theta(z|\textbf{p},\textbf{c}_i)
+\exp (-\lambda_{\textbf{p}iz}))
+\]
+\[
+\text{ s.t. } \forall \textbf{p},z,
+\sum_i \lambda_{\textbf{p}iz}\leq \sigma.
+\]
+This dual objective can be optimized with projected gradient
+descent.
+The $q$ distribution we are looking for is then
+\[
+q_i(z)\propto P_{\theta}(z|\textbf{p},\textbf{c}_i)
+\exp(\lambda_{\textbf{p}iz}).
+\]
