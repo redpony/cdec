@@ -1,3 +1,4 @@
+%option nounput
 %{
 #include "rule_lexer.h"
 
@@ -81,7 +82,7 @@ void scfglex_reset() {
 
 void check_and_update_ctf_stack(const TRulePtr& rp) {
   if (ctf_level > ctf_rule_stack.size()){
-    std::cerr << "Found rule at projection level " << ctf_level << " but previous rule was at level " 
+    std::cerr << "Found rule at projection level " << ctf_level << " but previous rule was at level "
       << ctf_rule_stack.size()-1 << " (cannot exceed previous level by more than one; line " << lex_line << ")" << std::endl;
     abort();
   }
@@ -115,8 +116,8 @@ NT [^\t \[\],]+
 %x LHS_END SRC TRG FEATS FEATVAL ALIGNS
 %%
 
-<INITIAL>[ \t]	{ 
-  ctf_level++; 
+<INITIAL>[ \t]	{
+  ctf_level++;
   };
 
 <INITIAL>\[{NT}\]   {
@@ -191,7 +192,7 @@ NT [^\t \[\],]+
 		memset(scfglex_nt_sanity, 0, scfglex_src_arity * sizeof(int));
 		BEGIN(TRG);
 		}
-<SRC>[^ \t]+	{ 
+<SRC>[^ \t]+	{
 		scfglex_tmp_token.assign(yytext, yyleng);
 		scfglex_src_rhs[scfglex_src_rhs_size] = TD::Convert(scfglex_tmp_token);
 		++scfglex_src_rhs_size;
@@ -250,7 +251,7 @@ NT [^\t \[\],]+
 		std::cerr << "Line " << lex_line << ": unexpected input in feature value: " << yytext << std::endl;
 		abort();
 		}
-<FEATS>{REAL} 	{ 
+<FEATS>{REAL} 	{
 		scfglex_feat_ids[scfglex_num_feats] = scfglex_phrase_fnames[scfglex_num_feats];
 		scfglex_feat_vals[scfglex_num_feats] = strtod(yytext, NULL);
 		++scfglex_num_feats;
