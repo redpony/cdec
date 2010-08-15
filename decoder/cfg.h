@@ -3,7 +3,7 @@
 
 // for now, debug means remembering and printing the TRule behind each CFG rule
 #ifndef CFG_DEBUG
-# define CFG_DEBUG 0
+# define CFG_DEBUG 1
 #endif
 #ifndef CFG_KEEP_TRULE
 # define CFG_KEEP_TRULE 0
@@ -98,6 +98,9 @@ struct CFG {
     prob_t p; // h unused for now (there's nothing admissable, and p is already using 1st pass inside as pushed toward top)
     FeatureVector f; // may be empty, unless copy_features on Init
     IF_CFG_TRULE(TRulePtr rule;)
+    int size() const { // for stats only
+      return rhs.size();
+    }
     void Swap(Rule &o) {
       using namespace std;
       swap(lhs,o.lhs);
@@ -187,6 +190,13 @@ struct CFG {
     for (int i=0,e=nts.size();i!=e;++i) nkept+=UniqRules(i);
     return nkept;
   }
+  int rules_size() const {
+    const int sz=rules.size();
+    int sum=sz;
+    for (int i=0;i<sz;++i)
+      sum+=rules[i].size();
+    return sum;
+  }
 
   void SortLocalBestFirst(NTHandle ni); // post: nts[ni].ruleids lists rules from highest p to lowest.  when doing best-first earley intersection/parsing, you don't want to use the global marginal viterbi; you want to ignore outside in ordering edges for a node, so call this.  stable in case of ties
   inline void SortLocalBestFirst() {
@@ -194,8 +204,10 @@ struct CFG {
   }
   void Init(Hypergraph const& hg,bool target_side=true,bool copy_features=false,bool push_weights=true);
   void Print(std::ostream &o,CFGFormat const& format) const; // see cfg_format.h
-  void PrintRule(std::ostream &o,RuleHandle rulei,CFGFormat const& format) const;
   void Print(std::ostream &o) const; // default format
+  void PrintRule(std::ostream &o,RuleHandle rulei,CFGFormat const& format) const;
+  void PrintRule(std::ostream &o,RuleHandle rulei) const;
+  std::string ShowRule(RuleHandle rulei) const;
   void Swap(CFG &o) { // make sure this includes all fields (easier to see here than in .cc)
     using namespace std;
     swap(uninit,o.uninit);
