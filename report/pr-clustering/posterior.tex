@@ -20,7 +20,7 @@ category and then that category generates the contex for the phrase.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=3.5in]{pr-clustering/EMdigram}
+  \includegraphics[width=3.0in]{pr-clustering/EMdigram}
   \caption{Basic Phrase Clustering Model}
   \label{fig:EM}
 \end{figure}
@@ -136,3 +136,58 @@ The $q$ distribution we are looking for is then
 q_i(z)\propto P_{\theta}(z|\textbf{p},\textbf{c}_i)
 \exp(\lambda_{\textbf{p}iz}).
 \]
+M-step can be performed as usual.
+\section{Agreement Models}
+Another type of constraint we used is agreement between
+different models. We came up with a similar generative
+model in the reverse direction to agree with 
+as shown in Figure \ref{fig:EMreverse}. We also
+took advantage of bi-text data we have and make models
+learning from different languages agree with each other.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=3.0in]{pr-clustering/EMreverse}
+  \caption{EM with posterior regularization}
+  \label{fig:EMreverse}
+\end{figure}
+
+In the reversed model,
+the posterior probability of the labelling of
+a context $\textbf{c}$ with
+phrase $\textbf{p}$ is 
+\[
+P(z|\textbf{c},\textbf{p})\propto 
+P(z|\textbf{c})P(\textbf{p}|z).
+\]
+Since a phrase contains a variable number of words,
+we only look at the first and last word of
+a phrase. That is $P(\textbf{p}|z)=P_1(p_1|z)P_n(p_n|z)$,
+where $n$ is the length of $\textbf{p}$, $P_1$ and $P_n$
+denotes distributions for words in the first and last position
+of a phrase given a category.
+
+The implementation of agreement models again ends up making
+a small change to E-step. The $q$ distribution for
+a phrase $\textbf{p}$ and a context $\textbf{c}$ 
+is given by
+\[
+q(z)=\sqrt{P_{\theta 1}
+(z|\textbf{p},\textbf{c})P_{\theta 2}(z|\textbf{p},\textbf{c})},
+\]
+where $P_{\theta 1}$ and $P_{\theta 2}$ are
+posterior distributions for two models.
+In M-step, both models should update their parameters with the
+same $q$ distribution computed as above.
+This modified EM maximizes the objective:
+\[
+\mathcal{L}_1+
+\mathcal{L}_2+
+\sum_{\textbf{p},\textbf{c}}
+\log\sum_z\sqrt{P_{\theta 1}(z|\textbf{p},\textbf{c})
+P_{\theta 2}(z|\textbf{p},\textbf{c})},
+\]
+where $\mathcal{L}_1$ and $\mathcal{L}_2$
+are log-likelihood of
+two models.
+\section{Experiments}
