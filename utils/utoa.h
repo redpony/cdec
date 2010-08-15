@@ -136,6 +136,9 @@ char *utoa_drop_trailing_0(char *buf,Uint_ n_, unsigned &n_skipped) {
   }
 }
 
+//#include "warning_push.h"
+//#pragma GCC diagnostic ignore "-Wtype-limits" // because sign check on itoa<unsigned> is annoying
+
 // desired feature: itoa(unsigned) = utoa(unsigned)
 // positive sign: 0 -> +0, 1-> +1.  obviously -n -> -n
 template <class Int>
@@ -167,6 +170,14 @@ char * itoa_left_pad(char *buf,char *bufend,Int i,bool positive_sign=false,char 
 }
 
 template <class Int>
+inline std::string utos(Int n) {
+  char buf[signed_for_int<Int>::toa_bufsize];
+  char *end=buf+signed_for_int<Int>::toa_bufsize;
+  char *p=utoa(end,n);
+  return std::string(p,end);
+}
+
+template <class Int>
 inline std::string itos(Int n) {
   char buf[signed_for_int<Int>::toa_bufsize];
   char *end=buf+signed_for_int<Int>::toa_bufsize;
@@ -174,13 +185,7 @@ inline std::string itos(Int n) {
   return std::string(p,end);
 }
 
-template <class Int>
-inline std::string utos(Int n) {
-  char buf[signed_for_int<Int>::toa_bufsize];
-  char *end=buf+signed_for_int<Int>::toa_bufsize;
-  char *p=itoa(end,n);
-  return std::string(p,end);
-}
+//#include "warning_pop.h"
 
 //returns position of '\0' terminating number written starting at to
 template <class Int>

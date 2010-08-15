@@ -34,10 +34,14 @@
 #include "nt_span.h"
 #include <algorithm>
 #include "indices_after.h"
+#include <boost/functional/hash.hpp>
 
 class Hypergraph;
 class CFGFormat; // #include "cfg_format.h"
 class CFGBinarize; // #include "cfg_binarize.h"
+
+#undef CFG_MUST_EQ
+#define CFG_MUST_EQ(f) if (!(o.f==f)) return false;
 
 struct CFG {
   typedef int RuleHandle;
@@ -52,6 +56,23 @@ struct CFG {
   typedef std::pair<int,int> BinRhs;
 
   struct Rule {
+    std::size_t hash_impl() const {
+      using namespace boost;
+      std::size_t h=lhs;
+      hash_combine(h,rhs);
+      hash_combine(h,p);
+      hash_combine(h,f);
+      return h;
+    }
+    bool operator ==(Rule const &o) const {
+      CFG_MUST_EQ(lhs)
+      CFG_MUST_EQ(rhs)
+      CFG_MUST_EQ(p)
+      CFG_MUST_EQ(f)
+      return true;
+    }
+    inline bool operator!=(Rule const& o) const { return !(o==*this); }
+
     // for binarizing - no costs/probs
     Rule() : lhs(-1) {  }
     bool is_null() const { return lhs<0; }
@@ -123,6 +144,11 @@ struct CFG {
   };
 
   struct NT {
+    std::size_t hash_impl() const { using namespace boost; return hash_value(ruleids); }
+    bool operator ==(NT const &o) const {
+      return ruleids==o.ruleids; // don't care about from
+    }
+    inline bool operator!=(NT const& o) const { return !(o==*this); }
     Ruleids ruleids; // index into CFG rules with lhs = this NT.  aka in_edges_
     NTSpan from; // optional name - still needs id to disambiguate
     void Swap(NT &o) {
@@ -165,6 +191,18 @@ struct CFG {
     swap(nts,o.nts);
     swap(goal_nt,o.goal_nt);
   }
+
+  //NOTE: this checks exact equality of data structures only.  it's well known that CFG equivalence (and intersection==empty) test is undecidable.
+  bool operator ==(CFG const &o) const {
+    // doesn't matter: hg, goal_inside
+    CFG_MUST_EQ(uninit)
+    CFG_MUST_EQ(pushed_inside)
+    CFG_MUST_EQ(goal_nt)
+    CFG_MUST_EQ(nts)
+    CFG_MUST_EQ(rules)
+    return true;
+  }
+  inline bool operator!=(CFG const& o) const { return !(o==*this); }
 
   typedef std::vector<NTHandle> NTOrder; // a list of nts, in definition-before-use order.
 
@@ -250,6 +288,15 @@ protected:
   Hypergraph const* hg_; // shouldn't be used for anything, esp. after binarization
   // rules/nts will have same index as hg edges/nodes
 };
+
+inline std::size_t hash_value(CFG::Rule const& r) {
+  return r.hash_impl();
+}
+
+inline std::size_t hash_value(CFG::NT const& r) {
+  return r.hash_impl();
+}
+
 
 inline void swap(CFG &a,CFG &b) {
   a.Swap(b);

@@ -243,6 +243,7 @@ char *prepend_pos_nonsci(char *p,F f) {
       *--p='0';
   } else
     p=utoa(p,u);
+  return p;
 }
 
 // modify p; return true if handled
