@@ -6,13 +6,16 @@ noinst_PROGRAMS = \
   hg_test \
   ff_test \
   parser_test \
-  grammar_test
-TESTS = trule_test ff_test parser_test grammar_test hg_test
+  grammar_test \
+  cfg_test
+TESTS = trule_test ff_test parser_test grammar_test hg_test cfg_test
 endif
 
 cdec_SOURCES = cdec.cc forest_writer.cc maxtrans_blunsom.cc cdec_ff.cc
 cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 
+cfg_test_SOURCES = cfg_test.cc
+cfg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 parser_test_SOURCES = parser_test.cc
 parser_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 ff_test_SOURCES = ff_test.cc

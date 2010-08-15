@@ -1,68 +1,20 @@
-#include <cassert>
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <gtest/gtest.h>
 #include "tdict.h"
 
 #include "json_parse.h"
-#include "filelib.h"
-#include "hg.h"
-#include "hg_io.h"
 #include "hg_intersect.h"
 #include "viterbi.h"
 #include "kbest.h"
 #include "inside_outside.h"
 
+#include "hg_test.h"
+
+
 using namespace std;
 
-class HGTest : public testing::Test {
- protected:
-  virtual void SetUp() { }
-  virtual void TearDown() { }
-  void CreateHG(Hypergraph* hg) const;
-  void CreateHG_int(Hypergraph* hg) const;
-  void CreateHG_tiny(Hypergraph* hg) const;
-  void CreateHGBalanced(Hypergraph* hg) const;
-  void CreateLatticeHG(Hypergraph* hg) const;
-  void CreateTinyLatticeHG(Hypergraph* hg) const;
-};
-       
-void HGTest::CreateTinyLatticeHG(Hypergraph* hg) const {
-  const string json = "{\"rules\":[1,\"[X] ||| [1] a\",2,\"[X] ||| [1] A\",3,\"[X] ||| [1] b\",4,\"[X] ||| [1] B'\"],\"features\":[\"f1\",\"f2\",\"Feature_1\",\"Feature_0\",\"Model_0\",\"Model_1\",\"Model_2\",\"Model_3\",\"Model_4\",\"Model_5\",\"Model_6\",\"Model_7\"],\"edges\":[],\"node\":{\"in_edges\":[]},\"edges\":[{\"tail\":[0],\"feats\":[0,-0.2],\"rule\":1},{\"tail\":[0],\"feats\":[0,-0.6],\"rule\":2}],\"node\":{\"in_edges\":[0,1]},\"edges\":[{\"tail\":[1],\"feats\":[0,-0.1],\"rule\":3},{\"tail\":[1],\"feats\":[0,-0.9],\"rule\":4}],\"node\":{\"in_edges\":[2,3]}}";
-  istringstream instr(json);
-  EXPECT_TRUE(HypergraphIO::ReadFromJSON(&instr, hg));
-}
-
-void HGTest::CreateLatticeHG(Hypergraph* hg) const {
-  const string json = "{\"rules\":[1,\"[X] ||| [1] a\",2,\"[X] ||| [1] A\",3,\"[X] ||| [1] A A\",4,\"[X] ||| [1] b\",5,\"[X] ||| [1] c\",6,\"[X] ||| [1] B C\",7,\"[X] ||| [1] A B C\",8,\"[X] ||| [1] CC\"],\"features\":[\"f1\",\"f2\",\"Feature_1\",\"Feature_0\",\"Model_0\",\"Model_1\",\"Model_2\",\"Model_3\",\"Model_4\",\"Model_5\",\"Model_6\",\"Model_7\"],\"edges\":[],\"node\":{\"in_edges\":[]},\"edges\":[{\"tail\":[0],\"feats\":[2,-0.3],\"rule\":1},{\"tail\":[0],\"feats\":[2,-0.6],\"rule\":2},{\"tail\":[0],\"feats\":[2,-1.7],\"rule\":3}],\"node\":{\"in_edges\":[0,1,2]},\"edges\":[{\"tail\":[1],\"feats\":[2,-0.5],\"rule\":4}],\"node\":{\"in_edges\":[3]},\"edges\":[{\"tail\":[2],\"feats\":[2,-0.6],\"rule\":5},{\"tail\":[1],\"feats\":[2,-0.8],\"rule\":6},{\"tail\":[0],\"feats\":[2,-0.01],\"rule\":7},{\"tail\":[2],\"feats\":[2,-0.8],\"rule\":8}],\"node\":{\"in_edges\":[4,5,6,7]}}";
-  istringstream instr(json);
-  EXPECT_TRUE(HypergraphIO::ReadFromJSON(&instr, hg));
-}
-
-void HGTest::CreateHG_tiny(Hypergraph* hg) const {
-  const string json = "{\"rules\":[1,\"[X] ||| <s>\",2,\"[X] ||| X [1]\",3,\"[X] ||| Z [1]\"],\"features\":[\"f1\",\"f2\",\"Feature_1\",\"Feature_0\",\"Model_0\",\"Model_1\",\"Model_2\",\"Model_3\",\"Model_4\",\"Model_5\",\"Model_6\",\"Model_7\"],\"edges\":[{\"tail\":[],\"feats\":[0,-2,1,-99],\"rule\":1}],\"node\":{\"in_edges\":[0]},\"edges\":[{\"tail\":[0],\"feats\":[0,-0.5,1,-0.8],\"rule\":2},{\"tail\":[0],\"feats\":[0,-0.7,1,-0.9],\"rule\":3}],\"node\":{\"in_edges\":[1,2]}}";
-  istringstream instr(json);
-  EXPECT_TRUE(HypergraphIO::ReadFromJSON(&instr, hg));
-}
-
-void HGTest::CreateHG_int(Hypergraph* hg) const {
-  const string json = "{\"rules\":[1,\"[X] ||| a\",2,\"[X] ||| b\",3,\"[X] ||| a [1]\",4,\"[X] ||| [1] b\"],\"features\":[\"f1\",\"f2\",\"Feature_1\",\"Feature_0\",\"Model_0\",\"Model_1\",\"Model_2\",\"Model_3\",\"Model_4\",\"Model_5\",\"Model_6\",\"Model_7\"],\"edges\":[{\"tail\":[],\"feats\":[0,0.1],\"rule\":1},{\"tail\":[],\"feats\":[0,0.1],\"rule\":2}],\"node\":{\"in_edges\":[0,1],\"cat\":\"X\"},\"edges\":[{\"tail\":[0],\"feats\":[0,0.3],\"rule\":3},{\"tail\":[0],\"feats\":[0,0.2],\"rule\":4}],\"node\":{\"in_edges\":[2,3],\"cat\":\"Goal\"}}";
-  istringstream instr(json);
-  EXPECT_TRUE(HypergraphIO::ReadFromJSON(&instr, hg));
-}
-
-void HGTest::CreateHG(Hypergraph* hg) const {
-  string json = "{\"rules\":[1,\"[X] ||| a\",2,\"[X] ||| A [1]\",3,\"[X] ||| c\",4,\"[X] ||| C [1]\",5,\"[X] ||| [1] B [2]\",6,\"[X] ||| [1] b [2]\",7,\"[X] ||| X [1]\",8,\"[X] ||| Z [1]\"],\"features\":[\"f1\",\"f2\",\"Feature_1\",\"Feature_0\",\"Model_0\",\"Model_1\",\"Model_2\",\"Model_3\",\"Model_4\",\"Model_5\",\"Model_6\",\"Model_7\"],\"edges\":[{\"tail\":[],\"feats\":[],\"rule\":1}],\"node\":{\"in_edges\":[0]},\"edges\":[{\"tail\":[0],\"feats\":[0,-0.8,1,-0.1],\"rule\":2}],\"node\":{\"in_edges\":[1]},\"edges\":[{\"tail\":[],\"feats\":[1,-1],\"rule\":3}],\"node\":{\"in_edges\":[2]},\"edges\":[{\"tail\":[2],\"feats\":[0,-0.2,1,-0.1],\"rule\":4}],\"node\":{\"in_edges\":[3]},\"edges\":[{\"tail\":[1,3],\"feats\":[0,-1.2,1,-0.2],\"rule\":5},{\"tail\":[1,3],\"feats\":[0,-0.5,1,-1.3],\"rule\":6}],\"node\":{\"in_edges\":[4,5]},\"edges\":[{\"tail\":[4],\"feats\":[0,-0.5,1,-0.8],\"rule\":7},{\"tail\":[4],\"feats\":[0,-0.7,1,-0.9],\"rule\":8}],\"node\":{\"in_edges\":[6,7]}}";
-  istringstream instr(json);
-  EXPECT_TRUE(HypergraphIO::ReadFromJSON(&instr, hg));
-}
-
-void HGTest::CreateHGBalanced(Hypergraph* hg) const {
-  const string json = "{\"rules\":[1,\"[X] ||| i\",2,\"[X] ||| a\",3,\"[X] ||| b\",4,\"[X] ||| [1] [2]\",5,\"[X] ||| [1] [2]\",6,\"[X] ||| c\",7,\"[X] ||| d\",8,\"[X] ||| [1] [2]\",9,\"[X] ||| [1] [2]\",10,\"[X] ||| [1] [2]\",11,\"[X] ||| [1] [2]\",12,\"[X] ||| [1] [2]\",13,\"[X] ||| [1] [2]\"],\"features\":[\"f1\",\"f2\",\"Feature_1\",\"Feature_0\",\"Model_0\",\"Model_1\",\"Model_2\",\"Model_3\",\"Model_4\",\"Model_5\",\"Model_6\",\"Model_7\"],\"edges\":[{\"tail\":[],\"feats\":[],\"rule\":1}],\"node\":{\"in_edges\":[0]},\"edges\":[{\"tail\":[],\"feats\":[],\"rule\":2}],\"node\":{\"in_edges\":[1]},\"edges\":[{\"tail\":[],\"feats\":[],\"rule\":3}],\"node\":{\"in_edges\":[2]},\"edges\":[{\"tail\":[1,2],\"feats\":[],\"rule\":4},{\"tail\":[2,1],\"feats\":[],\"rule\":5}],\"node\":{\"in_edges\":[3,4]},\"edges\":[{\"tail\":[],\"feats\":[],\"rule\":6}],\"node\":{\"in_edges\":[5]},\"edges\":[{\"tail\":[],\"feats\":[],\"rule\":7}],\"node\":{\"in_edges\":[6]},\"edges\":[{\"tail\":[4,5],\"feats\":[],\"rule\":8},{\"tail\":[5,4],\"feats\":[],\"rule\":9}],\"node\":{\"in_edges\":[7,8]},\"edges\":[{\"tail\":[3,6],\"feats\":[],\"rule\":10},{\"tail\":[6,3],\"feats\":[],\"rule\":11}],\"node\":{\"in_edges\":[9,10]},\"edges\":[{\"tail\":[7,0],\"feats\":[],\"rule\":12},{\"tail\":[0,7],\"feats\":[],\"rule\":13}],\"node\":{\"in_edges\":[11,12]}}";
-  istringstream instr(json);
-  EXPECT_TRUE(HypergraphIO::ReadFromJSON(&instr, hg));
-}
+typedef HGSetup HGTest;
 
 TEST_F(HGTest,Controlled) {
   Hypergraph hg;
@@ -187,7 +139,7 @@ TEST_F(HGTest,PruneInsideOutside) {
   cerr << TD::GetString(trans) << "\n";
   cerr << "cost: " << cost << "\n";
   hg.PrintGraphviz();
-  //hg.DensityPruneInsideOutside(0.5, false, 2.0);
+  hg.DensityPruneInsideOutside(0.5, false, 2.0);
   hg.BeamPruneInsideOutside(0.5, false, 0.5);
   cost = ViterbiESentence(hg, &trans);
   cerr << "Ncst: " << cost << endl;
@@ -274,7 +226,7 @@ TEST_F(HGTest,PLF) {
   string outplf = HypergraphIO::AsPLF(hg);
   cerr << " IN: " << inplf << endl;
   cerr << "OUT: " << outplf << endl;
-  assert(inplf == outplf);
+  EXPECT_EQ(inplf,outplf);
 }
 
 TEST_F(HGTest,PushWeightsToGoal) {
@@ -382,9 +334,8 @@ TEST_F(HGTest,TestAddExpectations) {
 }
 
 TEST_F(HGTest, Small) {
-  ReadFile rf("test_data/small.json.gz");
   Hypergraph hg;
-  assert(HypergraphIO::ReadFromJSON(rf.stream(), &hg));
+  CreateSmallHG(&hg);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("Model_0"), -2.0);
   wts.set_value(FD::Convert("Model_1"), -0.5);
