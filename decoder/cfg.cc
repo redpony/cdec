@@ -7,12 +7,12 @@
 #include <limits>
 #include "fast_lexical_cast.hpp"
 //#include "indices_after.h"
+#include "show.h"
 
-#define CFGPRINT(x) IF_CFG_DEBUG(std::cerr<<x)
-#define CFGSHOWC(x,s) CFGPRINT(#x<<"="<<x<<s)
-#define CFGSHOW(x) CFGSHOWC(x,"\n")
-#define CFGSHOWS(x) CFGSHOWC(x," ")
-#define CFGSHOW2(x,y) CFGSHOWS(x) CFGSHOW(y)
+#define DUNIQ(x) x
+#define DBIN(x)
+#define DCFG(x) IF_CFG_DEBUG(x)
+
 
 using namespace std;
 
@@ -37,7 +37,6 @@ void CFG::ReindexRules() {
 namespace {
 typedef std::vector<char> Seen; // 0 = unseen, 1 = seen+finished, 2 = open (for cycle detection; seen but not finished)
 enum { UNSEEN=0,SEEN,OPEN };
-
 
 // bottom -> top topo order (rev head->tails topo)
 template <class OutOrder>
@@ -120,22 +119,28 @@ int CFG::UniqRules(NTHandle ni) {
   HASH_MAP_EMPTY(bestp,null_rhs);
   Ruleids &adj=nts[ni].ruleids;
   Ruleids oldadj=adj;
-  int oi=0;
+  int newpos=0;
   for (int i=0,e=oldadj.size();i!=e;++i) { // this beautiful complexity is to ensure that adj' is a subsequence of adj (without duplicates)
     int ri=oldadj[i];
     Rule const& r=rules[ri];
-    prob_pos pi(r.p,oi);
+    prob_pos pi(r.p,newpos);
     prob_pos &oldpi=get_default(bestp,r.rhs,pi);
-    if (oldpi.pos==oi) {// newly inserted
-      adj[oi++]=ri;
-    } else if (oldpi.prob<pi.prob) { // we improve prev. best (overwrite it @old pos)
-      oldpi.prob=pi.prob;
-      adj[oldpi.pos]=ri; // replace worse rule w/ better
+    if (oldpi.pos==newpos) {// newly inserted
+      adj[newpos++]=ri;
+    } else {
+      SHOWP(DUNIQ,"Uniq duplicate: ") SHOW4(DUNIQ,oldpi.prob,pi.prob,oldpi.pos,newpos);
+      SHOW(DUNIQ,ShowRule(ri));
+      SHOW(DUNIQ,ShowRule(adj[oldpi.pos]));
+      if (oldpi.prob<pi.prob) { // we improve prev. best (overwrite it @old pos)
+        oldpi.prob=pi.prob;
+        adj[oldpi.pos]=ri; // replace worse rule w/ better
+      }
     }
+
   }
-  // post: oi = number of new adj
-  adj.resize(oi);
-  return oi;
+  // post: newpos = number of new adj
+  adj.resize(newpos);
+  return newpos;
 }
 
 void CFG::SortLocalBestFirst(NTHandle ni) {
@@ -201,8 +206,9 @@ void CFG::Binarize(CFGBinarize const& b) {
   for (NTs::const_iterator n=nts.begin(),nn=nts.end();n!=nn;++n) {
     NT const& nt=*n;
     for (Ruleids::const_iterator ir=nt.ruleids.begin(),er=nt.ruleids.end();ir!=er;++ir) {
-      CFGPRINT("Rule id# ") CFGSHOWS(*ir);IF_CFG_DEBUG(PrintRule(cerr<<" '",*ir,CFGFormat());cerr<<"'\n");
-      RHS &rhs=rules[*ir].rhs; // we're going to binarize this while adding newly created rules to new_...
+      RuleHandle ruleid=*ir;
+      SHOW2(DBIN,ruleid,ShowRule(ruleid))
+      RHS &rhs=rules[ruleid].rhs; // we're going to binarize this while adding newly created rules to new_...
       if (rhs.empty()) continue;
       int r=rhs.size()-2; // loop below: [r,r+1) is to be reduced into a (maybe new) binary NT
       if (rhsmin<=r) { // means r>=0 also
@@ -214,7 +220,7 @@ void CFG::Binarize(CFGBinarize const& b) {
 
           bin.first=rhs[r];
           bin_to=get_default(bin2lhs,bin,newnt);
-          CFGSHOWS(r) CFGSHOWS(newnt) CFGPRINT("bin="<<BinStr(bin,nts,new_nts)<<"=>") CFGSHOW(bin_to);
+          SHOW(DBIN,r) SHOW(DBIN,newnt) SHOWP(DBIN,"bin="<<BinStr(bin,nts,new_nts)<<"=>") SHOW(DBIN,bin_to);
           if (newnt==bin_to) { // it's new!
             new_nts.push_back(NT(newruleid++));
             //now -newnt is the index of the last (after new_nts is appended) nt.  bin is its rhs.  bin_to is its lhs
@@ -232,7 +238,7 @@ void CFG::Binarize(CFGBinarize const& b) {
       }
     }
   }
-#if 0
+#if 1
   batched_append_swap(nts,new_nts);
   batched_append_swap(rules,new_rules);
 #else
@@ -304,12 +310,22 @@ void CFG::Clear() {
   hg_=0;
 }
 
+namespace {
+CFGFormat form;
+}
+
 void CFG::PrintRule(std::ostream &o,RuleHandle rulei,CFGFormat const& f) const {
   Rule const& r=rules[rulei];
   f.print_lhs(o,*this,r.lhs);
   f.print_rhs(o,*this,r.rhs.begin(),r.rhs.end());
   f.print_features(o,r.p,r.f);
   IF_CFG_TRULE(if (r.rule) o<<f.partsep<<*r.rule;)
+}
+void CFG::PrintRule(std::ostream &o,RuleHandle rulei) const {
+  PrintRule(o,rulei,form);
+}
+string CFG::ShowRule(RuleHandle i) const {
+  ostringstream o;PrintRule(o,i);return o.str();
 }
 
 void CFG::Print(std::ostream &o,CFGFormat const& f) const {
@@ -332,9 +348,8 @@ void CFG::Print(std::ostream &o,CFGFormat const& f) const {
 }
 
 void CFG::Print(std::ostream &o) const {
-  Print(o,CFGFormat());
+  Print(o,form);
 }
-
 
 std::ostream &operator<<(std::ostream &o,CFG const &x) {
   x.Print(o);

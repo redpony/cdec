@@ -3,6 +3,7 @@
 #include "cfg.h"
 #include "hg_test.h"
 #include "cfg_options.h"
+#include "show.h"
 
 /* TODO: easiest way to get meaningful confirmations that things work: implement conversion back to hg, and compare viterbi/inside etc. stats for equality to original hg.  or you can define CSHOW_V and see lots of output */
 
@@ -60,8 +61,11 @@ TEST_P(CFGTest,Binarize) {
   CSHOWDO(cerr<<"\nUniqing: "<<nrules<<"\n");
   int nrem=cfgu.UniqRules();
   cerr<<"\nCFG "<<hgfile<<" Uniqed - remaining: "<<nrem<<" of "<<nrules<<"\n";
-  if (nrem==nrules)
+  if (nrem==nrules) {
     EXPECT_EQ(cfgu,cfg);
+    //TODO - check that 1best is still the same (that we removed only worse edges)
+  }
+
   for (int i=-1;i<8;++i) {
     bool uniq;
     if (i>=0) {
@@ -75,6 +79,7 @@ TEST_P(CFGTest,Binarize) {
     CFG cc=uniq?cfgu:cfg;
     CSHOW("\nBinarizing "<<(uniq?"uniqued ":"")<<": "<<i<<" "<<b);
     cc.Binarize(b);
+    cerr<<"Binarized "<<b<<" rules size "<<cfg.rules_size()<<" => "<<cc.rules_size()<<"\n";
     CSHOWDO(cc.Print(cerr,form);cerr<<"\n\n";);
   }
 }
