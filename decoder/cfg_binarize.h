@@ -18,7 +18,6 @@ struct CFGBinarize {
   bool bin_l2r;
   bool bin_unary;
   bool bin_name_nts;
-  bool bin_uniq;
   bool bin_topo;
   template <class Opts> // template to support both printable_opts and boost nonprintable
   void AddOptions(Opts *opts) {
@@ -27,7 +26,6 @@ struct CFGBinarize {
       ("cfg_binarize_unary", defaulted_value(&bin_unary),"if true, a rule-completing production A->BC may be binarized as A->U U->BC if U->BC would be used at least cfg_binarize_at times.")
       ("cfg_binarize_l2r", defaulted_value(&bin_l2r),"force left to right (a (b (c d))) binarization (ignore _at threshold)")
       ("cfg_binarize_name_nts", defaulted_value(&bin_name_nts),"create named virtual NT tokens e.g. 'A12+the' when binarizing 'B->[A12] the cat'")
-      ("cfg_binarize_uniq", defaulted_value(&bin_uniq),"in case of duplicate rules, keep only the one with highest prob")
       ("cfg_binarize_topo", defaulted_value(&bin_topo),"reorder nonterminals after binarization to maintain definition before use (topological order).  otherwise the virtual NTs will all appear after the regular NTs")
     ;
   }
@@ -45,7 +43,6 @@ struct CFGBinarize {
   }
   void set_defaults() {
     bin_topo=false;
-    bin_uniq=true;
     bin_at=0;
     bin_unary=false;
     bin_name_nts=true;
@@ -65,6 +62,8 @@ struct CFGBinarize {
         o << "greedy count>="<<bin_at;
       if (bin_name_nts)
         o << " named-NTs";
+      if (bin_topo)
+        o<<" preserve-topo-order";
     }
     o<<')';
   }

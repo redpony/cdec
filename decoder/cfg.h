@@ -5,10 +5,20 @@
 #ifndef CFG_DEBUG
 # define CFG_DEBUG 0
 #endif
+#ifndef CFG_KEEP_TRULE
+# define CFG_KEEP_TRULE 0
+#endif
+
 #if CFG_DEBUG
-# define IF_CFG_DEBUG(x) x
+# define IF_CFG_DEBUG(x) x;
 #else
 # define IF_CFG_DEBUG(x)
+#endif
+
+#if CFG_KEEP_TRULE
+# define IF_CFG_TRULE(x) x;
+#else
+# define IF_CFG_TRULE(x)
 #endif
 
 /* for target FSA intersection, we want to produce a simple (feature weighted) CFG using the target projection of a hg.  this is essentially isomorphic to the hypergraph, and we're copying part of the rule info (we'll maintain a pointer to the original hg edge for posterity/debugging; and perhaps avoid making a copy of the feature vector).  but we may also want to support CFG read from text files (w/ features), without needing to have a backing hypergraph.  so hg pointer may be null?  multiple types of CFG?  always copy the feature vector?  especially if we choose to binarize, we won't want to rely on 1:1 alignment w/ hg
@@ -76,7 +86,7 @@ struct CFG {
     // for binarizing - no costs/probs
     Rule() : lhs(-1) {  }
     bool is_null() const { return lhs<0; }
-    void set_null() { lhs=-1; rhs.clear();f.clear(); IF_CFG_DEBUG(rule.reset();) }
+    void set_null() { lhs=-1; rhs.clear();f.clear(); IF_CFG_TRULE(rule.reset();) }
 
     Rule(int lhs,BinRhs const& binrhs) : lhs(lhs),rhs(2),p(1) {
       rhs[0]=binrhs.first;
@@ -87,14 +97,14 @@ struct CFG {
     RHS rhs;
     prob_t p; // h unused for now (there's nothing admissable, and p is already using 1st pass inside as pushed toward top)
     FeatureVector f; // may be empty, unless copy_features on Init
-    IF_CFG_DEBUG(TRulePtr rule;)
+    IF_CFG_TRULE(TRulePtr rule;)
     void Swap(Rule &o) {
       using namespace std;
       swap(lhs,o.lhs);
       swap(rhs,o.rhs);
       swap(p,o.p);
       swap(f,o.f);
-      IF_CFG_DEBUG(swap(rule,o.rule);)
+      IF_CFG_TRULE(swap(rule,o.rule);)
     }
     template<class V>
     void visit_rhs_nts(V &v) const {
@@ -171,9 +181,11 @@ struct CFG {
   bool Empty() const { return nts.empty(); }
   void UnindexRules(); // save some space?
   void ReindexRules(); // scan over rules and rebuild NT::ruleids (e.g. after using UniqRules)
-  void UniqRules(NTHandle ni); // keep only the highest prob rule for each rhs and lhs=nt - doesn't remove from Rules; just removes from nts[ni].ruleids.  keeps the same order in this sense: for a given signature (rhs), that signature's first representative in the old ruleids will become the new position of the best.  as a consequence, if you SortLocalBestFirst() then UniqRules(), the result is still best first.  but you may also call this on unsorted ruleids.
-  inline void UniqRules() {
-    for (int i=0,e=nts.size();i!=e;++i) UniqRules(i);
+  int UniqRules(NTHandle ni); // keep only the highest prob rule for each rhs and lhs=nt - doesn't remove from Rules; just removes from nts[ni].ruleids.  keeps the same order in this sense: for a given signature (rhs), that signature's first representative in the old ruleids will become the new position of the best.  as a consequence, if you SortLocalBestFirst() then UniqRules(), the result is still best first.  but you may also call this on unsorted ruleids.  returns number of rules kept
+  inline int UniqRules() {
+    int nkept=0;
+    for (int i=0,e=nts.size();i!=e;++i) nkept+=UniqRules(i);
+    return nkept;
   }
 
   void SortLocalBestFirst(NTHandle ni); // post: nts[ni].ruleids lists rules from highest p to lowest.  when doing best-first earley intersection/parsing, you don't want to use the global marginal viterbi; you want to ignore outside in ordering edges for a node, so call this.  stable in case of ties
