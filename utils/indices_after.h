@@ -47,8 +47,8 @@ unsigned new_indices_keep_if_n(unsigned n,It i,KeepIf const& r,O out)
 }
 
 template <class KEEP,class O>
-unsigned new_indices(KEEP keep,O out) {
-  return new_indices(keep.begin(),keep.end(),out);
+unsigned new_indices_keep(KEEP keep,O out) {
+  return new_indices_keep(keep.begin(),keep.end(),out);
 }
 
 template <class V,class Out,class Permi>
@@ -129,8 +129,10 @@ struct indices_after
     if (n_mapped>0) {
       map=(unsigned *)::operator new(sizeof(unsigned)*n_mapped);
       n_kept=new_indices_keep(i,end,map);
-    } else
+    } else {
+      n_kept=0;
       map=NULL;
+    }
   }
   template <class A>
   void init(A const& a)
@@ -139,7 +141,7 @@ struct indices_after
   }
 
   template <class A>
-  indices_after(A const& a)
+  explicit indices_after(A const& a)
   {
     init(a.begin(),a.end());
   }

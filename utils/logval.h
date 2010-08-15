@@ -3,12 +3,13 @@
 
 #define LOGVAL_CHECK_NEG false
 
+#include <boost/functional/hash.hpp>
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
 #include <limits>
 
-template <typename T>
+template <class T>
 class LogVal {
  public:
   LogVal() : s_(), v_(-std::numeric_limits<T>::infinity()) {}
@@ -22,6 +23,11 @@ class LogVal {
   static LogVal<T> Zero() { return LogVal(); }
   static LogVal<T> e() { return LogVal(1,false); }
   void logeq(const T& v) { s_ = false; v_ = v; }
+
+  std::size_t hash_impl() const {
+    using namespace boost;
+    return hash_value(v_)+s_;
+  }
 
   LogVal& operator+=(const LogVal& a) {
     if (a.v_ == -std::numeric_limits<T>::infinity()) return *this;
@@ -98,31 +104,31 @@ class LogVal {
 };
 
 // copy elision - as opposed to explicit copy of LogVal<T> const& o1, we should be able to construct Logval r=a+(b+c) as a single result in place in r.  todo: return std::move(o1) - C++0x
-template<typename T>
+template<class T>
 LogVal<T> operator+(LogVal<T> o1, const LogVal<T>& o2) {
   o1 += o2;
   return o1;
 }
 
-template<typename T>
+template<class T>
 LogVal<T> operator*(LogVal<T> o1, const LogVal<T>& o2) {
   o1 *= o2;
   return o1;
 }
 
-template<typename T>
+template<class T>
 LogVal<T> operator/(LogVal<T> o1, const LogVal<T>& o2) {
   o1 /= o2;
   return o1;
 }
 
-template<typename T>
+template<class T>
 LogVal<T> operator-(LogVal<T> o1, const LogVal<T>& o2) {
   o1 -= o2;
   return o1;
 }
 
-template<typename T>
+template<class T>
 T log(const LogVal<T>& o) {
 #ifdef LOGVAL_CHECK_NEG
   if (o.s_) return log(-1.0);
@@ -130,12 +136,12 @@ T log(const LogVal<T>& o) {
   return o.v_;
 }
 
-template <typename T>
+template <class T>
 LogVal<T> pow(const LogVal<T>& b, const T& e) {
   return b.pow(e);
 }
 
-template <typename T>
+template <class T>
 bool operator<(const LogVal<T>& lhs, const LogVal<T>& rhs) {
   if (lhs.s_ == rhs.s_) {
     return (lhs.v_ < rhs.v_);
@@ -145,28 +151,32 @@ bool operator<(const LogVal<T>& lhs, const LogVal<T>& rhs) {
 }
 
 #if 0
-template <typename T>
+template <class T>
 bool operator<=(const LogVal<T>& lhs, const LogVal<T>& rhs) {
   return (lhs.v_ <= rhs.v_);
 }
 
-template <typename T>
+template <class T>
 bool operator>(const LogVal<T>& lhs, const LogVal<T>& rhs) {
   return (lhs.v_ > rhs.v_);
 }
 
-template <typename T>
+template <class T>
 bool operator>=(const LogVal<T>& lhs, const LogVal<T>& rhs) {
   return (lhs.v_ >= rhs.v_);
 }
 #endif
 
-template <typename T>
+
+template <class T>
+std::size_t hash_value(const LogVal<T>& x) { return x.hash_impl(); }
+
+template <class T>
 bool operator==(const LogVal<T>& lhs, const LogVal<T>& rhs) {
   return (lhs.v_ == rhs.v_) && (lhs.s_ == rhs.s_);
 }
 
-template <typename T>
+template <class T>
 bool operator!=(const LogVal<T>& lhs, const LogVal<T>& rhs) {
   return !(lhs == rhs);
 }
