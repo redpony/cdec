@@ -13,7 +13,7 @@ void batched_append(Vector &v,SRange const& s) {
 
 template <class SRange,class Vector>
 void batched_append_swap(Vector &v,SRange & s) {
-  using namespace std; // to find the right swap
+  using namespace std; // to find the right swap via ADL
   size_t i=v.size();
   size_t news=i+s.size();
   v.resize(news);

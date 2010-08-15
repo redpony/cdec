@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#pragma GCC diagnostic ignore "-Wunused"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 
 namespace {
 
