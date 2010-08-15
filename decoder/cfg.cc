@@ -8,6 +8,12 @@
 #include "fast_lexical_cast.hpp"
 //#include "indices_after.h"
 
+#define CFGPRINT(x) IF_CFG_DEBUG(std::cerr<<x)
+#define CFGSHOWC(x,s) CFGPRINT(#x<<"="<<x<<s)
+#define CFGSHOW(x) CFGSHOWC(x,"\n")
+#define CFGSHOWS(x) CFGSHOWC(x," ")
+#define CFGSHOW2(x,y) CFGSHOWS(x) CFGSHOW(y)
+
 using namespace std;
 
 typedef CFG::Rule Rule;
@@ -108,7 +114,7 @@ struct prob_pos {
 };
 }//ns
 
-void CFG::UniqRules(NTHandle ni) {
+int CFG::UniqRules(NTHandle ni) {
   typedef HASH_MAP<RHS,prob_pos,boost::hash<RHS> > BestRHS; // faster to use trie? maybe.
   BestRHS bestp; // once inserted, the position part (output index) never changes.  but the prob may be improved (overwrite ruleid at that position).
   HASH_MAP_EMPTY(bestp,null_rhs);
@@ -129,6 +135,7 @@ void CFG::UniqRules(NTHandle ni) {
   }
   // post: oi = number of new adj
   adj.resize(oi);
+  return oi;
 }
 
 void CFG::SortLocalBestFirst(NTHandle ni) {
@@ -145,10 +152,12 @@ namespace {
 CFG::BinRhs null_bin_rhs(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
 
 // index i >= N.size()?  then it's in M[i-N.size()]
-WordID BinName(CFG::BinRhs const& b,CFG::NTs const& N,CFG::NTs const& M)
+//WordID first,WordID second,
+string BinStr(CFG::BinRhs const& b,CFG::NTs const& N,CFG::NTs const& M)
 {
   int nn=N.size();
   ostringstream o;
+#undef BinNameOWORD
 #define BinNameOWORD(w)                                 \
   do {                                                  \
     int n=w; if (n>0) o << TD::Convert(n);              \
@@ -161,8 +170,12 @@ WordID BinName(CFG::BinRhs const& b,CFG::NTs const& N,CFG::NTs const& M)
   BinNameOWORD(b.first);
   o<<'+';
   BinNameOWORD(b.second);
-#undef BinNameOWORD
-  return TD::Convert(o.str());
+  return o.str();
+}
+
+WordID BinName(CFG::BinRhs const& b,CFG::NTs const& N,CFG::NTs const& M)
+{
+  return TD::Convert(BinStr(b,N,M));
 }
 
 }//ns
@@ -177,33 +190,44 @@ void CFG::Binarize(CFGBinarize const& b) {
   cerr << "Binarizing "<<b<<endl;
   HASH_MAP<BinRhs,NTHandle,boost::hash<BinRhs> > bin2lhs; // we're going to hash cons rather than build an explicit trie from right to left.
   HASH_MAP_EMPTY(bin2lhs,null_bin_rhs);
-  int rhsmin=b.bin_unary?0:1;
   // iterate using indices and not iterators because we'll be adding to both nts and rules list?  we could instead pessimistically reserve space for both, but this is simpler.  also: store original end of nts since we won't need to reprocess newly added ones.
+  int rhsmin=b.bin_unary?0:1;
   NTs new_nts; // these will be appended at the end, so we don't have to worry about iterator invalidation
   Rules new_rules;
   //TODO: this could be factored easily into in-place (append to new_* like below) and functional (nondestructive copy) versions (copy orig to target and append to target)
-  int newnt=-nts.size();
+  int newnt=-nts.size(); // we're going to store binary rhs with -nt to keep distinct from words (>=0)
   int newruleid=rules.size();
   BinRhs bin;
   for (NTs::const_iterator n=nts.begin(),nn=nts.end();n!=nn;++n) {
     NT const& nt=*n;
     for (Ruleids::const_iterator ir=nt.ruleids.begin(),er=nt.ruleids.end();ir!=er;++ir) {
+      CFGPRINT("Rule id# ") CFGSHOWS(*ir);IF_CFG_DEBUG(PrintRule(cerr<<" '",*ir,CFGFormat());cerr<<"'\n");
       RHS &rhs=rules[*ir].rhs; // we're going to binarize this while adding newly created rules to new_...
       if (rhs.empty()) continue;
-      bin.second=rhs.back();
-      for (int r=rhs.size()-2;r>=rhsmin;--r) { // pairs from right to left (normally we leave the last pair alone)
-        bin.first=rhs[r];
-        if (newnt==(bin.second=(get_default(bin2lhs,bin,newnt)))) {
-          new_nts.push_back(NT(newruleid));
-          new_rules.push_back(Rule(-newnt,bin));
-          ++newruleid;
-          if (b.bin_name_nts)
-            new_nts.back().from.nt=BinName(bin,nts,new_nts);
-          --newnt;
+      int r=rhs.size()-2; // loop below: [r,r+1) is to be reduced into a (maybe new) binary NT
+      if (rhsmin<=r) { // means r>=0 also
+        bin.second=rhs[r+1];
+        int bin_to; // the replacement for bin
+        assert(newruleid==rules.size()+new_rules.size());assert(-newnt==nts.size()+new_nts.size());
+        // also true at start/end of loop:
+        for (;;) { // pairs from right to left (normally we leave the last pair alone)
+
+          bin.first=rhs[r];
+          bin_to=get_default(bin2lhs,bin,newnt);
+          CFGSHOWS(r) CFGSHOWS(newnt) CFGPRINT("bin="<<BinStr(bin,nts,new_nts)<<"=>") CFGSHOW(bin_to);
+          if (newnt==bin_to) { // it's new!
+            new_nts.push_back(NT(newruleid++));
+            //now -newnt is the index of the last (after new_nts is appended) nt.  bin is its rhs.  bin_to is its lhs
+            new_rules.push_back(Rule(-newnt,bin));
+            --newnt;
+            if (b.bin_name_nts)
+              new_nts.back().from.nt=BinName(bin,nts,new_nts);
+          }
+          bin.second=bin_to;
+          --r;
+          if (r<rhsmin) break;
         }
-      }
-      if (rhsmin<rhs.size()) {
-        rhs[rhsmin]=bin.second;
+        rhs[rhsmin]=bin_to;
         rhs.resize(rhsmin+1);
       }
     }
@@ -246,9 +270,7 @@ void CFG::Init(Hypergraph const& hg,bool target_side,bool copy_features,bool pus
     prob_t &crp=cfgr.p;
     crp=e.edge_prob_;
     cfgr.lhs=e.head_node_;
-#if CFG_DEBUG
-    cfgr.rule=e.rule_;
-#endif
+    IF_CFG_TRULE(cfgr.rule=e.rule_;)
     if (copy_features) cfgr.f=e.feature_values_;
     if (push_weights) crp /=np[e.head_node_];
     TRule const& er=*e.rule_;
@@ -287,9 +309,7 @@ void CFG::PrintRule(std::ostream &o,RuleHandle rulei,CFGFormat const& f) const {
   f.print_lhs(o,*this,r.lhs);
   f.print_rhs(o,*this,r.rhs.begin(),r.rhs.end());
   f.print_features(o,r.p,r.f);
-#if CFG_DEBUG
-  if (r.rule) o<<f.partsep<<*r.rule;
-#endif
+  IF_CFG_TRULE(if (r.rule) o<<f.partsep<<*r.rule;)
 }
 
 void CFG::Print(std::ostream &o,CFGFormat const& f) const {

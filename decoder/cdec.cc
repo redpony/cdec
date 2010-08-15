@@ -670,7 +670,7 @@ int main(int argc, char** argv) {
     maybe_prune(forest,conf,"beam_prune","density_prune","+LM",srclen);
 
     HgCFG hgcfg(forest);
-    cfg_options.maybe_output(hgcfg);
+    cfg_options.prepare(hgcfg);
     if (!fsa_ffs.empty()) {
       Timer t("Target FSA rescoring:");
       if (!has_late_models)

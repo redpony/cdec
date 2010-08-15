@@ -11,7 +11,7 @@ struct CFGFormat {
   bool identity_scfg;
   bool features;
   bool logprob_feat;
-  bool cfg_comma_nt;
+  bool comma_nt;
   bool nt_span;
   std::string goal_nt_name;
   std::string nt_prefix;
@@ -27,7 +27,7 @@ struct CFGFormat {
       ("features",defaulted_value(&features),"print the CFG feature vector")
       ("logprob_feat",defaulted_value(&logprob_feat),"print a LogProb=-1.5 feature irrespective of --features.")
       ("logprob_feat_name",defaulted_value(&logprob_feat_name),"alternate name for the LogProb feature")
-      ("cfg_comma_nt",defaulted_value(&cfg_comma_nt),"if false, omit the usual [NP,1] ',1' variable index in the source side")
+      ("cfg_comma_nt",defaulted_value(&comma_nt),"if false, omit the usual [NP,1] ',1' variable index in the source side")
       ("goal_nt_name",defaulted_value(&goal_nt_name),"if nonempty, the first production will be '[goal_nt_name] ||| [x123] ||| LogProb=y' where x123 is the actual goal nt, and y is the pushed prob, if any")
       ("nt_prefix",defaulted_value(&nt_prefix),"NTs are [<nt_prefix>123] where 123 is the node number starting at 0, and the highest node (last in file) is the goal node in an acyclic hypergraph")
       ("nt_span",defaulted_value(&nt_span),"prefix A(i,j) for NT coming from hypergraph node with category A on span [i,j).  this is after --nt_prefix if any")
@@ -44,7 +44,7 @@ struct CFGFormat {
       o<<logprob_feat_name<<"(logprob) ";
     if (nt_span)
       o<<"named-NTs ";
-    if (cfg_comma_nt)
+    if (comma_nt)
       o<<",N ";
     o << "CFG output format";
     o<<"]";
@@ -58,7 +58,7 @@ struct CFGFormat {
   void print_source_nt(std::ostream &o,CFG const&cfg,int id,int position=1) const {
     o<<'[';
     print_nt_name(o,cfg,id);
-    if (cfg_comma_nt) o<<','<<position;
+    if (comma_nt) o<<','<<position;
     o<<']';
   }
 
@@ -116,7 +116,7 @@ struct CFGFormat {
     identity_scfg=false;
     features=true;
     logprob_feat=true;
-    cfg_comma_nt=true;
+    comma_nt=true;
     goal_nt_name="S";
     logprob_feat_name="LogProb";
     nt_prefix="";
