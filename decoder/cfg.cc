@@ -182,7 +182,7 @@ void CFG::Binarize(CFGBinarize const& b) {
   NTs new_nts; // these will be appended at the end, so we don't have to worry about iterator invalidation
   Rules new_rules;
   //TODO: this could be factored easily into in-place (append to new_* like below) and functional (nondestructive copy) versions (copy orig to target and append to target)
-  int newnt=nts.size();
+  int newnt=-nts.size();
   int newruleid=rules.size();
   BinRhs bin;
   for (NTs::const_iterator n=nts.begin(),nn=nts.end();n!=nn;++n) {
@@ -192,21 +192,29 @@ void CFG::Binarize(CFGBinarize const& b) {
       if (rhs.empty()) continue;
       bin.second=rhs.back();
       for (int r=rhs.size()-2;r>=rhsmin;--r) { // pairs from right to left (normally we leave the last pair alone)
-        rhs.pop_back();
         bin.first=rhs[r];
         if (newnt==(bin.second=(get_default(bin2lhs,bin,newnt)))) {
-          new_nts.push_back(NT());
-          new_nts.back().ruleids.push_back(newruleid);
-          new_rules.push_back(Rule(newnt,bin));
+          new_nts.push_back(NT(newruleid));
+          new_rules.push_back(Rule(-newnt,bin));
+          ++newruleid;
           if (b.bin_name_nts)
             new_nts.back().from.nt=BinName(bin,nts,new_nts);
-          ++newnt;++newruleid;
+          --newnt;
         }
+      }
+      if (rhsmin<rhs.size()) {
+        rhs[rhsmin]=bin.second;
+        rhs.resize(rhsmin+1);
       }
     }
   }
+#if 0
   batched_append_swap(nts,new_nts);
   batched_append_swap(rules,new_rules);
+#else
+  batched_append(nts,new_nts);
+  batched_append(rules,new_rules);
+#endif
   if (b.bin_topo) //TODO: more efficient (at least for l2r) maintenance of order
     OrderNTsTopo();
 }
@@ -301,4 +309,14 @@ void CFG::Print(std::ostream &o,CFGFormat const& f) const {
       o<<'\n';
     }
   }
+}
+
+void CFG::Print(std::ostream &o) const {
+  Print(o,CFGFormat());
+}
+
+
+std::ostream &operator<<(std::ostream &o,CFG const &x) {
+  x.Print(o);
+  return o;
 }

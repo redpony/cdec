@@ -53,7 +53,7 @@ struct CFG {
     o << nts[n].from << n;
   }
 
-  typedef std::pair<int,int> BinRhs;
+  typedef std::pair<WordID,WordID> BinRhs;
 
   struct Rule {
     std::size_t hash_impl() const {
@@ -144,6 +144,8 @@ struct CFG {
   };
 
   struct NT {
+    NT() {  }
+    explicit NT(RuleHandle r) : ruleids(1,r) {  }
     std::size_t hash_impl() const { using namespace boost; return hash_value(ruleids); }
     bool operator ==(NT const &o) const {
       return ruleids==o.ruleids; // don't care about from
@@ -181,6 +183,7 @@ struct CFG {
   void Init(Hypergraph const& hg,bool target_side=true,bool copy_features=false,bool push_weights=true);
   void Print(std::ostream &o,CFGFormat const& format) const; // see cfg_format.h
   void PrintRule(std::ostream &o,RuleHandle rulei,CFGFormat const& format) const;
+  void Print(std::ostream &o) const; // default format
   void Swap(CFG &o) { // make sure this includes all fields (easier to see here than in .cc)
     using namespace std;
     swap(uninit,o.uninit);
@@ -302,5 +305,6 @@ inline void swap(CFG &a,CFG &b) {
   a.Swap(b);
 }
 
+std::ostream &operator<<(std::ostream &o,CFG const &x);
 
 #endif

@@ -111,6 +111,7 @@ struct CFGFormat {
     }
   }
 
+  //TODO: default to no nt names (nt_span=0)
   void set_defaults() {
     identity_scfg=false;
     features=true;

@@ -145,7 +145,7 @@ public:
         if (!(s>>v)) error("reading value failed");
       }
       std::pair<iterator,bool> vi=values_.insert(value_type(k,v));
-      if (vi.second) {
+      if (!vi.second) {
         T &oldv=vi.first->second;
         switch(dp) {
         case NO_DUPS: error("read duplicate key with NO_DUPS.  key="
@@ -157,9 +157,11 @@ public:
         }
       }
     }
-    return;
+    goto good;
   eof:
     if (!s.eof()) error("reading key failed (before EOF)");
+  good:
+    s.clear(); // we may have reached eof, but that's no error.
   }
 
   friend inline std::ostream & operator<<(std::ostream &o,Self const& s) {
