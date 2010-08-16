@@ -214,6 +214,23 @@ WordID BinName(RHS const& b,CFG::NTs const& N,CFG::NTs const& M)
 }
 
 template <class Rhs>
+struct null_for;
+
+typedef CFG::BinRhs BinRhs;
+
+template <>
+struct null_for<BinRhs> {
+  static BinRhs null;
+};
+BinRhs null_for<BinRhs>::null(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
+
+template <>
+struct null_for<RHS> {
+  static RHS null;
+};
+RHS null_for<RHS>::null(1,std::numeric_limits<int>::min());
+
+template <class Rhs>
 struct add_virtual_rules {
   typedef CFG::RuleHandle RuleHandle;
   typedef CFG::NTHandle NTHandle;
@@ -342,24 +359,6 @@ struct add_virtual_rules {
     return 2;
   }
 };
-
-
-template <class Rhs>
-struct null_for;
-
-typedef CFG::BinRhs BinRhs;
-
-template <>
-struct null_for<BinRhs> {
-  static BinRhs null;
-};
-BinRhs null_for<BinRhs>::null(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
-
-template <>
-struct null_for<RHS> {
-  static RHS null;
-};
-RHS null_for<RHS>::null(1,std::numeric_limits<int>::min());
 
 }//ns
 
