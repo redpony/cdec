@@ -11,6 +11,7 @@ void batched_append(Vector &v,SRange const& s) {
   v.insert(v.end(),s.begin(),s.end());
 }
 
+//destroys input s, but moves its resources to the end of v.  //TODO: use move ctor in c++0x
 template <class SRange,class Vector>
 void batched_append_swap(Vector &v,SRange & s) {
   using namespace std; // to find the right swap via ADL
@@ -20,6 +21,7 @@ void batched_append_swap(Vector &v,SRange & s) {
   typename SRange::iterator si=s.begin();
   for (;i<news;++i,++si)
     swap(v[i],*si);
+  s.clear();
 }
 
 #endif

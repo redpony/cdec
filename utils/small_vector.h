@@ -22,6 +22,16 @@
 template <class T,int SV_MAX=2>
 class SmallVector {
 //  typedef unsigned short uint16_t;
+  void Alloc(size_t s) {
+    size_=s;
+    assert(s < 0xA000);
+    if (s>SV_MAX) {
+      capacity_ = s;
+      size_ = s;
+      data_.ptr = new T[s]; // TODO: replace this with allocator or ::operator new(sizeof(T)*s) everywhere
+    }
+  }
+
  public:
   typedef SmallVector<T,SV_MAX> Self;
   SmallVector() : size_(0) {}
@@ -37,28 +47,31 @@ class SmallVector {
   T *end() { return begin()+size_; }
   T const* end() const { return begin()+size_; }
 
-  explicit SmallVector(size_t s) : size_(s) {
-    assert(s < 0xA000);
+  explicit SmallVector(size_t s) {
+    Alloc(s);
     if (s <= SV_MAX) {
       for (int i = 0; i < s; ++i) new(&data_.vals[i]) T();
-    } else {
-      capacity_ = s;
-      size_ = s;
-      data_.ptr = new T[s]; // TODO: replace this with allocator or ::operator new(sizeof(T)*s) everywhere
-      for (int i = 0; i < size_; ++i) new(&data_.ptr[i]) T();
-    }
+    } //TODO: if alloc were raw space, construct here.
   }
 
-  SmallVector(size_t s, T const& v) : size_(s) {
-    assert(s < 0xA000);
+  SmallVector(size_t s, T const& v) {
+    Alloc(s);
     if (s <= SV_MAX) {
       for (int i = 0; i < s; ++i) data_.vals[i] = v;
     } else {
-      capacity_ = s;
-      size_ = s;
-      data_.ptr = new T[s];
       for (int i = 0; i < size_; ++i) data_.ptr[i] = v;
     }
+  }
+
+  //TODO: figure out iterator traits to allow this to be selcted for any iterator range
+  template <class I>
+  SmallVector(I const* begin,I const* end) {
+    int s=end-begin;
+    Alloc(s);
+    if (s <= SV_MAX) {
+      for (int i = 0; i < s; ++i,++begin) data_.vals[i] = *begin;
+    } else
+      for (int i = 0; i < s; ++i,++begin) data_.ptr[i] = *begin;
   }
 
   SmallVector(const Self& o) : size_(o.size_) {
@@ -70,6 +83,23 @@ class SmallVector {
       data_.ptr = new T[capacity_];
       std::memcpy(data_.ptr, o.data_.ptr, size_ * sizeof(T));
     }
+  }
+
+  //TODO: test.  this invalidates more iterators than std::vector since resize may move from ptr to vals.
+  T *erase(T *b) {
+    return erase(b,b+1);
+  }
+  T *erase(T *b,T* e) {
+    T *tb=begin(),*te=end();
+    int nbefore=b-tb;
+    if (e==te) {
+      resize(nbefore);
+    } else {
+      int nafter=te-e;
+      std::memmove(b,e,nafter*sizeof(T));
+      resize(nbefore+nafter);
+    }
+    return begin()+nbefore;
   }
 
   const Self& operator=(const Self& o) {
