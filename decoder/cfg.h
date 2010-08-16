@@ -92,6 +92,8 @@ struct CFG {
       rhs[0]=binrhs.first;
       rhs[1]=binrhs.second;
     }
+    Rule(int lhs,RHS const& rhs) : lhs(lhs),rhs(rhs),p(1) {
+    }
 
     int lhs; // index into nts
     RHS rhs;
@@ -302,7 +304,9 @@ struct CFG {
     ReorderNTs(o);
   }
 
+  void BinarizeL2R(bool bin_unary=false,bool name_nts=false);
   void Binarize(CFGBinarize const& binarize_options); // see cfg_binarize.h for docs
+  void BinarizeSplit(CFGBinarize const& binarize_options); // there may be many options affecting split.
 
   typedef std::vector<NT> NTs;
   NTs nts;
