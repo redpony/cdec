@@ -191,3 +191,34 @@ where $\mathcal{L}_1$ and $\mathcal{L}_2$
 are log-likelihood of
 two models.
 \section{Experiments}
+As a sanity check, we looked at a few examples produced by
+the basic model (EM) 
+and the posterior regularization (PR) model
+with sparsity constraints. Table \ref{tab:EMVSPR}
+shows a few examples.
+
+\begin{table}[h]
+  \centering
+  \includegraphics[width=3.5in]{pr-clustering/EMVSPR}
+  \caption[A few examples comparing EM and PR]
+  {A few examples comparing EM and PR. 
+    Count of most frequent category shows how 
+    many instances of a phrase are concetrated on 
+    the single most frequent tag. 
+    Number of categories shows how many categories
+    a phrase is labelled with. By experience as mentioned before, 
+    we want a phrase to use fewer categories. 
+	These numbers are fair indicators of sparsity.
+    }
+  \label{tab:EMVSPR}
+\end{table}
+
+The models are formally evaluated with two kinds
+of metrics. We feed the clustering output
+through the whole translation pipeline 
+to obtain a BLEU score. We also came up 
+with an intrinsic evaluation of clustering quality
+by comparing against a supervised CFG parser trained on the
+tree bank.
+
+
