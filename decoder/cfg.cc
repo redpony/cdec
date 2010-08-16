@@ -366,15 +366,16 @@ RHS null_for<RHS>::null(1,std::numeric_limits<int>::min());
 void CFG::BinarizeSplit(CFGBinarize const& b) {
   add_virtual_rules<RHS> v(*this,b.bin_name_nts);
   CFG_FOR_RULES(i,v.split_rhs(rules[i].rhs,false,false));
+  Rules &newr=v.new_rules;
 #undef CFG_FOR_VIRT
 #define CFG_FOR_VIRT(r,expr)                                                 \
-  for (Rules::iterator ri=v.new_rules.begin(),e=v.new_rules.end();ri!=e;++ri) { \
-    Rule &r=*ri;expr;  }
+  for (int i=0,e=newr.size();i<e;++i) { \
+    Rule &r=newr[i];expr;  } // NOTE: must use indices since we'll be adding rules as we iterate.
 
   int n_changed_total=0;
 
 #define CFG_SPLIT_PASS(N,free,just1) \
-  for (int i=0;i<b.N;++i) { \
+  for (int pass=0;pass<b.N;++pass) { \
     int n_changed=0; \
     CFG_FOR_VIRT(r,n_changed+=v.split_rhs(r.rhs,free,just1)); \
     if (!n_changed) { \
