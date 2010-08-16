@@ -42,7 +42,7 @@ c_{-1}c_1 |& z & \sim \phi^{\textrm{\emph{inner}}}_z \\
 \phi^{\textrm{\emph{inner}}}_z |& a^{\textrm{\emph{inner}}}_z,b^{\textrm{\emph{inner}}}_z & \sim \textrm{PYP}(a^{\textrm{\emph{inner}}}_z,b^{\textrm{\emph{inner}}}_z,\frac{1}{|V|^2})
 \end{align*}
 
-\noindent Figure~\ref{fig:np_plate} shows a plate diagram for the model.
+\noindent Figure~\ref{fig:np_plate} shows a plate diagram for the two parts of the model that were just described.
 
 \begin{figure}
 \begin{center}
@@ -53,11 +53,66 @@ c_{-1}c_1 |& z & \sim \phi^{\textrm{\emph{inner}}}_z \\
 \label{fig:np_plate}
 \end{figure}
 
+\paragraph{Hyperparameter priors.} The hyperparameters of the PYPs in our models are treated as random variables whose values are inferred from the data and the priors used to characterize the values we expect them to take on.  Since we have only a poor prior understanding about what their appropriate values should be, we use vague priors: discount parameters, $a_{(\cdot)}$, are drawn from a uniform Beta distribution ($a_{(\cdot)} \sim \textrm{Beta}(1,1)$) and concentration parameters, $b_{(\cdot)}$, are drawn from a Gamma distribution ($b_{(\cdot)} \sim \textrm{Gamma}(1,1)$).
+
 \subsection{Inference}
 
-Inference in this model was performed using Gibbs sampling \citep{geman:1984}, with the continuous parameters ($\theta_{\p}$, $\phi_z$, etc.) integrated out.  For the experiments reported below, we sampled for 1000 iterations, initializing by assigning every context in a phrase entirely to a random category.  New values for the PYP hyperparameters were resampled using slice sampling every 10 samples \citep{neal:2000,johnson:2009}. The final sample was used to estimate $p(z|\textbf{c},\p)$, and each phrase occurrence was labelled with the $z$ that maximized this probability (TODO check this).
+Inference in the nonparametric clustering models was performed using Gibbs sampling \citep{geman:1984}, with the continuous parameters ($\theta_{\p}$, $\phi_z$, etc.) integrated out \citep{blunsom:2009}.  For the experiments reported below, we sampled for 1,000 iterations.  The initial state of the sampler was created by assigning every context in a phrase entirely to a random category.
+
+Values for the PYP hyperparameters were resampled after every 10 samples of the Gibbs sampler using the range doubling slice sampling technique \citep{neal:2000,johnson:2009}.
+
+The final sample drawn from the model was used to estimate $p(z|\textbf{c},\p)$, and each phrase occurrence was labelled with the $z$ that maximized this probability.
 
 \section{Experiments}
+
+This section reports a number of experiments carried out to test the quality of the grammars learned using our nonparametric cluster models.
+
+\subsection{Corpora}
+
+The experiments reported in this section were carried out primarily on a small Chinese-English corpus from the travel and tourism domain \citep{btec} and a more general-domain Urdu-English corpus, made available by the US National Institute of Standards and Technology (NIST) for the Open MT Evaluation.\footnote{http://www.itl.nist.gov/iad/mig/tests/mt/} Table~\ref{tab:corpbtecur} provides statistics about the training and test data used in the experiments reported in this section. Translation quality evaluation is reported using case-insensitive \textsc{bleu} \citep{bleu} with the number of references given in Table~\ref{tab:corpbtecur}.
+
+\begin{table}[h]
+\caption{Training corpus statistics for BTEC Chinese-English and the NIST Urdu-English data sets.}
+\begin{center}
+\begin{tabular}{l|r|r}
+& BTEC & Urdu \\
+\hline
+Sentences & 44,016 & 51,214 \\
+English types & 9,555 & 31,492 \\
+English tokens & 364,297 & 968,013 \\
+Foreign types & 13,664 & 33,757 \\
+Foreign tokens & 333,438 & 1,052,260 \\
+\hline
+Development sentences & 1,006 & 882 \\
+Test sentences & 506 & 883 \\
+Num. references & 16 & 4
+\end{tabular}
+\end{center}
+\label{tab:corpbtecur}
+\end{table}%
+
+\subsection{Baseline and benchmark systems}
+
+We provide two baseline systems: a single-category system constructed using the procedure described by \cite{chiang:2007} and a system constructed by assigning categories to each phrasal occurrence in the training data.  Additionally, we provide a benchmark system using supervised English (target) language parse trees \citep{samt}.  Table~\ref{tab:npbaselines} summarizes these baseline conditions.
+
+\begin{table}[h]
+\caption{Baseline systems}
+\begin{center}
+\begin{tabular}{r|c|c}
+& BTEC & Urdu \\
+\hline
+Single category \citep{chiang:2007} & 57.0 & 21.1 \\
+\hline
+Random ($K=10$) & 56.0 & \\
+Random ($K=25$) & 55.4 & 19.7 \\
+Random ($K=50$) &  55.3 & \\
+\hline
+Supervised \citep{samt} & 57.8 & 24.5
+\end{tabular}
+\end{center}
+\label{tab:npbaselines}
+\end{table}%
+
 
 \subsection{Number of categories}
 
