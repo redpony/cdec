@@ -38,4 +38,11 @@ careful: none of this is wrapped in a block.  so you can't use one of these macr
 #define SHOW5(IF,x,y0,y1,y2,y3) SHOW1(IF,x) SHOW4(IF,y0,y1,y2,y3)
 #define SHOW6(IF,x,y0,y1,y2,y3,y4) SHOW1(IF,x) SHOW5(IF,y0,y1,y2,y3,y4)
 
+#define SHOWM(IF,m,x) SHOWP(IF,m<<": ") SHOW(IF,x)
+#define SHOWM2(IF,m,x0,x1) SHOWP(IF,m<<": ") SHOW2(IF,x0,x1)
+#define SHOWM3(IF,m,x0,x1,x2) SHOWP(IF,m<<": ") SHOW3(IF,x0,x1,x2)
+#define SHOWM4(IF,m,x0,x1,x2,x3) SHOWP(IF,m<<": ") SHOW4(IF,x0,x1,x2,x3)
+#define SHOWM5(IF,m,x0,x1,x2,x3,x4) SHOWP(IF,m<<": ") SHOW5(IF,x,x0,x1,x2,x3,x4)
+#define SHOWM6(IF,m,x0,x1,x2,x3,x4,x5) SHOWP(IF,m<<": ") SHOW6(IF,x0,x1,x2,x3,x4,x5)
+
 #endif
