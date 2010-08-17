@@ -5,11 +5,13 @@ This translation system uses only a single non-terminal symbol and therefore the
 However, we know that using a richer set of non-terminals can greatly improve translation, as evidenced by the improvments obtained by SAMT system \cite{samt} which augments a Hiero-style SCFG model with syntactic labels.
 This is best explained in terms of the generalisation capability: a single category grammar can create all manner of string-pairs, the majority of which are nonsensical and agrammatical, while a model with syntactic categories inherently limits the sets of string pairs to those which are grammatical (largely).
 This can be seen from the following example rules, showing how rules can be combined to arrive at ungrammatical string pairs.
-\begin{align*}
-X &\rightarrow \langle \mbox{does not}~X, \mbox{ne}~X~\mbox{pas} \rangle \\
-X &\rightarrow \langle \mbox{cat}, \mbox{chat} \rangle \\
-X &\Rightarrow \langle \mbox{does not cat}, \mbox{ne cat pas} \rangle
-\end{align*}
+\begin{align}
+X &\rightarrow \langle \mbox{does not}~X, \mbox{ne}~X~\mbox{pas} \rangle \label{eq:nepas}\\
+X &\rightarrow \langle \mbox{cat}, \mbox{chat} \rangle \label{eq:chat} \\
+X &\Rightarrow^{\ref{eq:nepas},\ref{eq:chat}} \langle \mbox{does not cat}, \mbox{ne cat pas} \rangle
+\nonumber
+\end{align}
+If the non-terminals in the above rules were replaced with, e.g., parts-of-speech, such that rule \ref{eq:nepas} required a verb instead of an X in its right hand side, and the rule \ref{eq:chat} rewrote a noun, then this ungrammatical string pair would no longer be licenced.
 
 As such, the single-category model licenses all manner of word-salad output, thus relying on the language model to salvage a coherent sentence from these options.
 In contrast, the set of translation options for the grammar with syntactic labels is much smaller and more coherent, and thus the language model has less heavy lifting to do.
@@ -30,7 +32,44 @@ Our bilingual translation setting differs from the earlier monolingual settings 
 
 \section{Clustering Configuration}
 
-Notion of context.
+It still remains to define what we mean by context. Well we could choose the entire sentence or even document in which the phrase appears, we adopt a more local definition of context. We use a window of one or two words preceding the phrase and one or two words following. This local context is still highly informative about the syntactic role of the phrase, but given its small size we expect to observe the same context many times in a small corpus. That is, the sparsity of the data should no lo
+
+It still remains to define what we mean by context. Well we could choose the entire sentence or even document in which the phrase appears, we adopt a more local definition of context. We use a window of one or two words preceding the phrase and one or two words following. This local context is still highly informative about the syntactic role of the phrase, but given its small size we expect to observe the same context many times in a small corpus. That is, the sparsity of the data should no longer be a serious problem, as it would be for full sentences or example.
+
+The input to the clustering system are bilingual phrases in their bilingual contexts, as extracted using the standard phrase-based grammar extraction pipeline. However we choose to primarily perform monolingual clustering by discarding one side of the data, typically the source. Focusing our attention on the target side of the corpus replicates the configuration which is known to work best for syntactic translation. The target-side syntax is more informative than source-side syntax, it better models the target language and also avoids an errorful projection step onto the target (due to the grammars of the two languages not being isomorphic). On the flip side, source side syntax could be more useful in pruning the beam search for decoding, where we can use the source parse to prune away improbable items before translating into the target language. We will determine experimentally whether the effects of better pruning versus better modelling target grammar are more important for translation.
+nger be a serious problem, as it would be for full sentences or example.
+
+The input to the clustering system are bilingual phrases in their bilingual contexts, as extracted using the standard phrase-based grammar extraction pipeline. This is illustrated in Figure~\ref{fig:extraction}. Instead of using the bilingual data directly, we choose to primarily perform monolingual clustering by discarding one side of the data, typically the source. Focusing our attention on the target side of the corpus replicates the configuration which is known to work best for syntactic translation. The target-side syntax is more informative than source-side syntax, as it better models the target language, thus better informing reordering and lexical selection. Target-side syntax avoids an errorful projection step onto the target, due to the grammars of the two languages rarely being even approximately isomorphic. On the flip side, source side syntax could be more useful in pruning the beam search for decoding, where we can use the source parse to prune away improbable items before translating into the target language. We will determine experimentally whether the effects of better pruning versus better modelling target grammar are more important for translation.
+
+\begin{CJK}{UTF8}{gbsn}
+\begin{figure}
+% input: 今天 有 棒球 比赛 吗 ? ||| are there any baseball games today ? ||| 1-0 1-1 1-2 2-3 3-4 0-5 4-6 5-6
+% from btec/split.zh-en.al line 26
+\centering
+\subfigure[Example word-aligned sentence pair]{\hfill \includegraphics{align} \hfill}
+
+\subfigure[Some bilingual phrases and contexts extracted from (a)]{
+\centering
+\begin{tabular}{rcl}
+\toprule
+$<$s$>$ $<$s$>$ & are there any baseball games today & ? $<$/s$>$ \\
+$<$s$>$ $<$s$>$ & 今天 有 棒球 比赛 & 吗 ? \\ 
+\midrule
+baseball games & today & ? $<$/s$>$ \\
+$<$s$>$ $<$s$>$ & 今天 & 有 棒球 \\
+\midrule
+$<$s$>$ $<$s$>$ & are there any & baseball games \\
+$<$s$>$ 今天 & 有 & 棒球 比赛 \\
+\midrule
+any baseball & games & today ? \\
+有 棒球 & 比赛 & 吗 ? \\
+\bottomrule
+\end{tabular}}
+\caption{Example showing how a sentence pair gives rise to bilingual phrases and their contexts. These serve as input to the clusterer, typically by discarding the source side and processing the target.}
+\label{fig:extraction}
+\end{figure}
+\end{CJK}
+
 Mono/source/target/bi, words/classes/POS.
 Give example.
 Notation.
