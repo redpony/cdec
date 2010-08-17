@@ -56,6 +56,7 @@ struct CFGOptions {
     return "CFG output options";
   }
   void maybe_print(CFG &cfg,std::string cfg_output,char const* desc=" unbinarized") {
+    if (cfg_output.empty() return;
     WriteFile o(cfg_output);
     std::cerr<<"Printing target"<<desc<<" CFG to "<<cfg_output<<": "<<format<<'\n';
     cfg.Print(o.get(),format);
