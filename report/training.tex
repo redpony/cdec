@@ -3,10 +3,7 @@
 An integral part of constructing a state-of-the-art machine translation system is the training procedure. The goal of training is to optimize the model parameters to maximize translation quality on some metric, where the parameters are the weights associated with the features we use in our model, and the metric is BLEU. 
 
 The most common approach to training is Minimum Error Rate Training (MERT), which tunes the parameters to minimize error according to an arbitrary error function. Thus, in our case this is equivalent to saying that it maximizes the 1-best translation under the BLEU metric. MERT is a log-linear model which allows us to combine different features in order to find the best target translation $e*$ for a input source $f$:
-
-\begin{equation}
-e^* = \arg \max_e p(e|f) = argmax_e \sum_{k=1}^K w_kh_k(e,f)
-\end{equation}
+$$e* = \arg\max e p(e|f) = argmax_e \sum_{k=1}^K w_kh_k(e,f)$$
 
 where $h_k(e,f)$ is a feature associated with the translation of $f$ to $e$, and $w$ is the weight associated with that feature. Unfortunately, MERT has been empirically unable to extend beyond optimization of a handful of features, thus necessecitating dense features. Theses features typically include:
 
@@ -37,15 +34,160 @@ There are a number potentially useful features we could extract from the refined
 
 
 \subsection{Source Syntactic Features}
-\subsection{OOV}
-\subsection{Glue Rule}
-\subsection{Backoff}
 
-Given the fact that MERT is unable to optimize the sparse features we are interested in, in this workshop we investigated two alternative methods which allow us to train a model with a high dimensional feature space. The two approaches werethe Margin Infused Relaxed Algorithm (MIRA) and Expected BLEU. All three optimization algorithms perform inference over the hypergraph, but as Table~\ref{tab:comp} shows, they are performing in quite different ways. MERT aims to optimize parameters to maximize the 1-best BLEU, or alternatively to minimize the error, by constructing a piece-wise linear error surface from the entire tuning set and performing a line search in order to find the appropriate weights. The primary limitation of this, which is responsible for its inability to scale, is the unknown
+Recent work with syntax-based systems which parse the source side with a previously trained supervised parser has shown that utilizing syntactic patterns can lead to substantial improvements. Such patterns can be especially useful in capturing long-range reordering patterns, and other high-level phenomena that we are otherwise unable to leverage. Figure~\ref{fig:synt_feat1} shows an example syntactic pattern, which captures the application of rule $X_{12}$ expanding to $X_{17}X_{25}$. Although this rule may not be particularly interesting, as the translation stays monotonic. 
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[scale=0.5]{training_img_files/synt_feat1.PNG}
+	\caption{Syntactic Feature}
+	\label{fig:synt_feat1}
+\end{figure}
+
+A more interesting example is presented in Figure~\ref{fig:synt_feat2}, where we can observe a large reodering taking place as $X_1$ expands to $X_6X_19$ and the latter moves to the left of the former.
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[scale=0.5]{training_img_files/synt_feat2.PNG}
+	\caption{Syntactic Reordering Feature}
+	\label{fig:synt_feat2}
+\end{figure}
+
+
+\subsection{OOV}
+Although we will always encounter Out-of-Vocabulary terms, we may be able to utilize the finer-grained categories to capture syntactic distribution patterns associated with each category to learn how to process the OOV terms. This may be particularly useful for numbers, nouns such as Proper names, or certain adjectives, which tend to cluster togther, as shown in Figure~\ref{fig:oov_feat}.
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[scale=0.5]{training_img_files/oov_feat.PNG}
+	\caption{OOV Feature}
+	\label{fig:oov_feat}
+\end{figure}
+
+\subsection{Glue Rule}
+In our current system, we have one dense feature for all Glue rule applications, however, there are in fact two seperate applications which we would like to distinguish. The first occurs when a top-level $S$ node expands to one of the $X_n$ categories in the grammar, as shown in Figure~\ref{fig:glu_feat}. The second occurs when an $S$ expands to another $S$ and one of the $X_n$ categories, as in Figure~\ref{glu_feat2}. Both of these features attempt to capture the high-level derivation structure of a sentence. 
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[scale=0.5]{training_img_files/glu_feat.PNG}
+	\caption{Glue Rule Expansion Feature}
+	\label{fig:glu_feat}
+\end{figure}
+
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[scale=0.5]{training_img_files/glu_feat2.PNG}
+	\caption{Glue Rule Combination Feature}
+	\label{fig:glu_feat2}
+\end{figure}
+
+\subsection{Backoff}
+Given that we have achieved significant gains from incorporating the hierarchical-bacoff feature as a dense feature, it may also be useful to add a sparser version in additional to or in place of the feature we currently use, of the form shown in Figure~\ref{fig:back_feat}.
+
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[scale=0.5]{training_img_files/back_feat.PNG}
+	\caption{Backoff Feature}
+	\label{fig:back_feat}
+\end{figure}
+
+\section{Training Algorithms}
+
+As we are interested in incorporating numerous features into our model to directly help translation, we want to perform discriminative training. Given the fact that MERT is unable to optimize the sparse features we are interested in, in this workshop we investigated two alternative methods which allow us to train a model with a high dimensional feature space. The two approaches were the Margin Infused Relaxed Algorithm (MIRA) and Expected BLEU. All three optimization algorithms perform inference over the hypergraph, but as Table~\ref{tab:comp} shows, they are performing in quite different ways. MERT aims to optimize parameters to maximize the 1-best BLEU, or alternatively to minimize the error, by constructing a piece-wise linear error surface from the entire tuning set and performing a line search in order to find the appropriate weights. The primary limitation of this, which is responsible for its inability to scale, is the unknown diretion of the line search. When done in a handful of dimensions, random directions work relatively well, however, as we increase the feature space this becaomes a severe problem. 
+
+Expected BLEU training, explained in detail in Section~\ref{sec:exp_bleu} is a probabilistic method which can be seen as an attempt to address some of these shortcomings. If instead of maximizing the 1-best hypothesis, as we do with MERT, we try to maximize the expected BLEU over all the hypotheses, we create a continuous, and therefore differentiable function for optimization which allows us to use gradient-based methods, such as L-BFGS. 
+
+MIRA training, on the other hand, is a large-margin based training method, which attempts to miminimze the loss augmented score of hypotheses against some reference translation in an online fashion. In order to do so, we need to solve a Quadratic optimization problem with linear constraints, which can be handled by a technique such as Sequential Minimal Optimization (SMO). The foremost downside of this approach is the approximation of the reference that needs to take place for the training to proceed. Since the MT grammar may not contain the necessary rules to produce the correct reference translation, therefore making the translation unreachable, we need to rely on an approximation of the reference. Previous work has explred various approaches for this, such as updating toward the model 1-best, or oracle 1-best. Another possibility is that there may be multiple derivations which lead to the same translation, therefore creating ambiguity regarding which rules, and features should be updated towards. We will expand on this in Section~\ref{sec:mira}.
+
+\begin{table*}[htb]
+	\centering
+		\begin{tabular}{|c|c|c|c|} 
+			& MERT & MIRA & Expected BLEU \\ \hline
+			Type & 1-best & Margin-based & Probabilistic \\ \hline
+			Objective & Minimize error & Minimize loss augmented score & Minimize expected error \\ \hline
+			Optimization & Line search & QP & Gradient Based \\ \hline
+			Limitations & Direction of search unknown & Approximation of reference & Approximate expectation \\ \hline
+		\end{tabular}
+	\caption{Training Comparison}
+	\label{tab:TrainingComparison}
+\end{table*}
 
 \section{Margin Infused Relaxed Algorithm}
+\label{sec:mira}
+
+MIRA was first introduced in 2003 by Crammer and Singer for the multi-class classification problem as a perceptron like algorithm, with the additional of a classifcation margin to reduce generalization error. This was later expanded by Taskar to structured value prediction problems, such as dependency parsing. It was notably applied to machine translation by Watanabe, and then Chiang, on whose work we build here.
+
+\subsection{Learning Algorithm}
+The basic online learning algorithm proceeds as in Algorithm X. We go through the data for $n$ iterations, and during each iteration we go through all our data points and update the weight vector after each example. We then use the new weight vector to process the next example, and so on, until we reach some convergence criteria. After convergence, we average over the weight vectors to produce a final weight vector which we can use to process new examples. The averaging of the weight vector is done to reduce overfitting, and has proved effective in previous applications. 
+
+When performing inference over the hypergraph, each edge in the hypergraph corresponds to a partial translation and has associated with it a decomposable score $s$:
+$$s(edge_i) = w*f(edge_i)$$
+which is comprised of the features on that edge and the current weight vector. These can then be added together to produce the score associated with a specific hypothesis translation:
+$$\sum_{edge \in derivation} s(edge)= S(e) $$
+
+We also compute a decomposable loss at each edge,which is the approximate BLEU score of the partial hypothesis on the edge. 
+What we want is to learn $w$ such that the correct output translation is given a higher score than the incorrect ones. The MIRA update does this optimization by keeping the norm of the change of the weights as small as possible
+$$ min ||w_{i+1} - w_i||$$
+subject to the margin constraints, which take the following form:
+$$ s(x,y) - s(x,z) \geq Loss(y,z), \forall{z} \in label(x)$$
+
+Essentially, these margin constraints force us to create a margin between the correct instance y, and the incorrect instance z which is at least as large as the Loss of z.
+
+
+
+
+\subsection{Oracle Extraction}
+In multi-class classification, we can form the constraint set by looking at all the possible labels of x, however, in structured prediction, this becomes infeasible. Thus, in practice previous work has resorted to approximating the constraint set by performing k-best extraction over the trees in dependency parsing, or translations in MT, using only these top $k$ labels as constraints in training. This leads to the modified training algorithm of k-best MIRA, described in Algorithm Y. 
+
+For MT, recent work has shown significant improvements from obtaining three different sets of k-best lists. The first is the model k-best
+$$w*f(e) $$
+ the second is the model+BLEU, also referred to as the oracle or hope hypothesis The first translation in this k-best set is the oracle translation toward which we update:
+ $$w*f(e) + BLEU $$
+ and the third is model-BLEU, or the feat hypothesis:
+ $$w*f(e) - BLEU $$
+ 
+
+The impetus behind updating toward towards a combination of the model and BLEU as the oracle translation is that some translations may have an excellent BLEU score, but a distant model score from the area in which most good translation reside, and parroting Voltaire, we do not want to the perfect to be the enemy of the good. 
+ 
+The reasoning behind the third set of k-best lists is that the constraints we care most about for learning are the ones where our system believes the hypothesis is a good one, and thus assigns it a high score, while the BLEU score is poor, thus proving in fact to be a poor translation. 
+
+\subsection{Online Updating}
+In order to efficiently train an online learning, significant modifications were necessary to our existing parallelization framework. As updating the weight vector after each example may be inadvisable since the weights could suffer significant jumping around, we could perform mini-batch updating, where weights are only updated after a certain amount of examples have been processed. An alternative which is similar in spirit is to run several learners in parallel, and have them share their k-best hypotheses sets between themselves, in order for each learner to incorporate more information at each update. Figure ~\ref{fig:update1} presents three learners receiving a sentence in parallel. Each learner has its own MIRA trainer and decoder, with its own feature weight vector. In Figure ~\ref{fig:update2} we see Learner 1 completing its decoding of the sentence with its current weight vector, and generating the three k-best lists as described above. It then uses these to update its weights for decoding the next sentence. In Figure ~\ref{fig:update3} we see that both Learner 1 and 2 have completed decoding and generate their respective k-best lists, and these are passed to Learner 3 in order for it to incorporate them, as well as it's own set of k-best lists, when it updates its weight vector.
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[scale=0.5]{training_img_files/update1.PNG}
+	\caption{Online Udpating 1)}
+	\label{fig:update1}
+\end{figure}
+
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[scale=0.5]{training_img_files/update2.PNG}
+	\caption{Online Udpating 2)}
+	\label{fig:update2}
+\end{figure}
+
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[scale=0.5]{training_img_files/update3.PNG}
+	\caption{Online Udpating 3)}
+	\label{fig:update3}
+\end{figure}
+
 \section{Expected BLEU}
+\label{sec:exp_bleu
+}
 \section{Accomplishments}
--implemented mira and exp bleu in open source decoders
+During the workshop, we succeeded in completely implementing MIRA and Expected BLEU training in Joshua and cdec, two state-of-the-art open source decoders. This includes the ability to extract oracles from the lattices, as well as the online updating parallelization architecture. Due to a lack of time and resources, we were unfortunatley unable to run the full suite of experiments which we had hoped for, but we leave these as immediate future work.
 
 \section{Future Work}
+The first set of experiments concerns a standardized comparison of MIRA and Expected BLEU training, using as-close-as-possible simliar grammas, features, and data sets. To the best of our knowledge, a systematic comparison of these two popular training algorihtms has not been performed, and would be of benefit to the community. 
+
+Second, we are interested in the language invariability of the parameters, number of iterations, and so forth for these algorthims. 
+
+
