@@ -1,7 +1,4 @@
-
 \chapter{Synchronous context free grammars} \label{sec:scfg}
-
-
 
 \begin{figure}
 \begin{center}
@@ -57,7 +54,11 @@ A toy example of an SCFG is given in Figure \ref{toy-scfg}.  The nonterminal sym
 The process of translation is accomplished by parsing the source language input sentence and simultaneously generating the target language output sentence.  This
 process is illustrated in Figure \ref{toy-scfg-parse}, which shows how parsing an  Urdu sentence generates an English translation using the toy example grammar.  The toy grammar and example parse omit the $w$ weights/probabilities assigned to the grammar rules.  In practice there are a huge number of alternative translations and derivations, and assigning probabilities allows us to choose the best translation according to the model, and to reduce the search space by expanding only the most promising partial translations. 
 
-\subsection{Hiero: SCFGs with one non-terminal symbol}
+SCFGs used for machine translation vary based on the set of non-terminal symbols that they use.  
+We briefly review two styles of SCFG: Hiero, an unsupervised approach  which uses only a single non-terminal symbol, and SAMT or syntax-augmented MT, a fully-supervised approach that has a rich set of linguistically-motivated non-terminals, but which relies on a treebank-trained parser.   
+Our approach tries to combine the best aspects of these two approaches, by inducing a rich set of non-terminals in an unsupervised fashion.
+
+\section{Hiero: SCFGs with one non-terminal symbol}\label{sec:hiero}
 
 The use of SCFGs for statistical machine translation was popularized by \citet{Chiang2005} with the introduction of the Hiero system.  Chiang's Hiero system extended the standard phrase-based approaches to statistical machine translation by allowing phrases that contain gaps.  Chiang described how these {\it hierarchical phrases} could be obtained by straightforwardly extending the standard methods \cite{Koehn2004,Koehn2003,Tillmann2003,Venugopal2003} for extracting phrase pairs from word-aligned sentence pairs.  Figure \ref{hiero-phrase-extraction} shows how a hierarchical phrase can be constructed by replacing two smaller phrase pairs with the nonterminals indexed $1$ and $2$.   These rules are written in the same format as the SCFG rules given in Figure \ref{toy-scfg}.  Although the Hiero rules are devoid of linguistic information, they are able to indicate reordering, as shown with the swapped positions of $X_1$ and $X_2$. 
 
@@ -69,9 +70,9 @@ The use of SCFGs for statistical machine translation was popularized by \citet{C
 \end{figure}
 
 
-Rather than using the full power of the SCFG formalism, the Hiero system instead uses a simple grammar with one non-terminal symbol, X, to extend conventional phrase-based models to allow phrases with gaps in them.  The Hiero system is technically a grammar-based approach to translation, but does not incorporate any linguistic information in its grammars.  Its process of decoding is also one of parsing, and it employs the Cocke-Kasami-Younger (CKY) dynamic programming algorithm to find the best derivation using its probabilistic grammar rules.   However, because Hiero-style parses are devoid of linguistic information, they fail to capture facts about Urdu like that it is post-positional or verb final. 
+Rather than using the full power of the SCFG formalism, the Hiero system instead uses a simple grammar with one non-terminal symbol, X, to extend conventional phrase-based models to allow phrases with gaps in them.  The Hiero system is technically a grammar-based approach to translation, but does not incorporate any linguistic information in its grammars.  Its process of decoding is also one of parsing, and it employs the Cocke-Kasami-Younger (CKY) dynamic programming algorithm to find the best derivation using its probabilistic grammar rules.   However, because Hiero grammars are devoid of linguistic information, they often fail to capture useful linguistic facts like that Urdu is post-positional and verb final. 
 
-\subsection{Enriching SCFGs with syntactic labels extracted from supervised parses}\label{samt}
+\section{SCFGs with syntactic labels extracted from supervised parses}\label{sec:samt}
 
 
 \begin{figure}
@@ -82,11 +83,11 @@ Rather than using the full power of the SCFG formalism, the Hiero system instead
 \end{figure}
 
 
-SCFGs with a rich set of linguistically motivated non-terminal symbols have been proposed as an alternative to Hiero. A number of approaches have been proposed for extracting linguistically-motivated grammars from a parsed parallel corpus \cite{Galley2004,samt}.   These approaches extract SCFGs from a parallel corpus that has been parsed using a supervised parser that was trained on a treebank.  
-
+SCFGs with a rich set of linguistically motivated non-terminal symbols have been proposed as an alternative to Hiero. A number of approaches have been proposed for extracting linguistically-motivated grammars from a parsed parallel corpus \cite{Galley2004,samt}.   These approaches extract SCFGs from a parallel corpus that has been parsed using a supervised parser that was trained on a treebank \cite{Marcus1993,Collins1996,Charniak1997}.  
+%
 Figure \ref{scfg-phrase-extraction} shows how linguistically motivated grammar rules can be extracted from a training sentence pair that has been automatically parsed and word-aligned.    Instead of assigning the generic label ``X'' to all extracted phrase pairs, as the Hiero model does, linguistic labels are extracted from the parse tree.   
 
-In the standard phrase-based and hierarchical phrase-based approaches to machine translation, many of the ``phrases'' that are used are not phrases in the sense of syntactic constituents.  They are simply sequences of words.  For example, in Figure \ref{scfg-phrase-extraction}, the phrases {\it Australia is} and {\it one of} are examples of phrases which have consistent Chinese phrase pairs, but which do not correspond to nodes in the parse tree.  If we were to limit ourselves to extracting only phrase pairs that were licensed by the parse tree and which had consistent word alignments, then we would have reduced coverage compared to Hiero.  Instead, we adopt the methodology described by\citet{samt}, which achieves the same coverage as Hiero by generating complex labels for non-consistuent phrases.  
+In the standard phrase-based and hierarchical phrase-based approaches to machine translation, many of the ``phrases'' that are used are not phrases in the sense of syntactic constituents.  They are simply sequences of words.  For example, in Figure \ref{scfg-phrase-extraction}, the phrases {\it Australia is} and {\it one of} are examples of phrases which have consistent Chinese phrase pairs, but which do not correspond to nodes in the parse tree.  If we were to limit ourselves to extracting only phrase pairs that were licensed by the parse tree and which had consistent word alignments, then we would have reduced coverage compared to Hiero.  SAMT \cite{samt} achieves the same coverage as Hiero by generating complex labels for non-constituent phrases.  
 
 
 \begin{figure}
@@ -97,29 +98,17 @@ In the standard phrase-based and hierarchical phrase-based approaches to machine
 \end{figure}
 
 
-\citet{samt} define a framework for extracting SCFGs with linguistically motivated nonterminals from an aligned parallel corpus where one side of the parallel corpus has been parsed. The resulting context-free rules contain a rich set of nonterminal categories. These categories include traditional nonterminal categories taken directly from the monolingual parse trees (e.g. DT, NP, VP), and extended categories formed by gluing together adjacent nonterminals (e.g. NP+V, RB+JJ) and incomplete constituents that denote a category missing a child component to the left (e.g.  NP\textbackslash DT) or to the right (e.g. NP/NN) in the style of Combinatory Categorial Grammars \cite{ccg1982}.   \citet{samt}'s Syntax Augmented Machine Translation (SAMT) grammars may also include hierarchical rules and glue rules \cite{chiang:2007} that are not linguistically motivated; such rules allow partial translations to be combined (with some penalty) without regard to syntactic structure.
+SAMT grammars include traditional nonterminal categories taken directly from the monolingual parse trees (e.g. DT, NP, VP), and extended categories formed by gluing together adjacent nonterminals (e.g. NP+V, RB+JJ) and incomplete constituents that denote a category missing a child component to the left (e.g.  NP\textbackslash DT) or to the right (e.g. NP/NN) in the style of Combinatory Categorial Grammars \cite{ccg1982}.   SAMT grammars may also include hierarchical rules and glue rules \cite{chiang:2007} that are not linguistically motivated; such rules allow partial translations to be combined (with some penalty) without regard to syntactic structure.
+
+Last year's SCALE summer workshop \cite{SCALE-report} illustrated that SAMT could result significant improvements over the Hiero baseline for  Urdu-English translation. 
 
 
+\section{Our approach: enriching SCFGs labels in an unsupervised fashion}\label{sec:our-approach}
 
-\begin{figure}
-%\begin{center}
-\includegraphics[height=3.75in]{SCFGs/hiero-tree}
-\includegraphics[height=3.75in]{SCFGs/samt-tree}
-\caption{Sample derivations for an Urdu sentence translated into English translation using a hierarchical phrase-based SCFG (left) and a linguistically motivated SCFG (right).  For reference, a human translator produced ``Hamid Ansari nominated for the post of vice president" as the translation of the Urdu. }
-%\end{center}
-\label{example-derivations}
-\end{figure}
-
-
-\subsection{Our approach: enriching SCFGs labels in an unsupervised fashion}\label{samt}
-
-Note that one of the major advantages of extracting the linguistic SCFG for an automatically parsed parallel corpus is that only one side of the parallel corpus needs to be parsed.  To extract an Urdu-English SCFG we therefore could use an English parser without the need for an Urdu parser.  During translation the Urdu input text gets parsed with the projected rules, but a stand-alone Urdu parser is never required. 
-However, all of the current approaches require that a parser, trained on supervised data, exist for at least one of the languages.  
-
-The methods explored in this summer workshop obviate the need for a supervised parser, and instead automatically induce the grammars from unlabeled texts.  The potential advantages of our approach are:
+One of the major disadvantages of extracting SAMT-style SCFGs is that the parallel corpus needs to be parsed using a supervised parser that has been trained on treebank.   The methods explored in this summer workshop obviate the need for a supervised parser, and instead automatically induce the grammars from unlabeled texts.  The potential advantages of our approach are:
 \begin{enumerate}
 \item It can be applied to language pairs for which treebanks do not exist.
 \item The set of non-terminal symbols is not tied to a particular treebank formalism, and therefore may be more appropriate for translation.
 \end{enumerate} 
-
+In our experimental setup (described in detail in the next chapter), we begin with the set of phrase-pairs extracted by  Hiero and posit a refined set of non-terminal labels for them.  Like SAMT, our SCFGs have identical coverage to Hiero but with a richer set of labels.    Unlike SAMT, our grammars are induced in an unsupervised fashion that does not require a parser, which makes our method applicable to any language pair, and arguably closer to statistical machine translation language-independent roots.
 
