@@ -95,7 +95,7 @@ public:
 
   typedef char const* Str;
   template <class O>
-  void print(O &o,Str pre="",Str post="",Str kvsep="=",Str pairsep=" ") const {
+  void print(O &o,Str kvsep="=",Str pairsep=" ",Str pre="",Str post="") const {
     o << pre;
     bool first=true;
     for (const_iterator i=values_.begin(),e=values_.end();i!=e;++i) {
@@ -121,7 +121,7 @@ public:
 
   // either key val alternating whitespace sep, or key=val (kvsep char is '=').  end at eof or terminator (non-ws) char
   template <class S>
-  void read(S &s,DupPolicy dp=NO_DUPS,bool use_kvsep=true,char kvsep='=',bool stop_at_terminator=false,char terminator=')') {
+  void read(S &s,DupPolicy dp=NO_DUPS,bool use_kvsep=true,char kvsep='=',bool use_pairsep=true,char optional_pairsep=';',bool stop_at_terminator=false,char terminator=')') {
     values_.clear();
     std::string id;
     WordID k;
@@ -130,11 +130,12 @@ public:
 #define SPARSE_MUST_READ(x) if (!(x)) error(#x);
     int ki;
     while (s) {
-      if (stop_at_terminator) {
+      if (stop_at_terminator||use_pairsep) {
         char c;
         if (!(s>>c)) goto eof;
-        s.unget();
-        if (c==terminator) return;
+        if (stop_at_terminator && c==terminator) return;
+        if (!use_pairsep || c!=optional_pairsep)
+          s.unget();
       }
       if (!(s>>id)) goto eof;
       if (use_kvsep && (ki=id.find(kvsep))!=std::string::npos) {

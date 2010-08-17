@@ -306,7 +306,8 @@ struct CFG {
 
   void BinarizeL2R(bool bin_unary=false,bool name_nts=false);
   void Binarize(CFGBinarize const& binarize_options); // see cfg_binarize.h for docs
-  void BinarizeSplit(CFGBinarize const& binarize_options); // there may be many options affecting split.
+  void BinarizeSplit(CFGBinarize const& binarize_options);
+  void BinarizeThresh(CFGBinarize const& binarize_options); // maybe unbundle opts later
 
   typedef std::vector<NT> NTs;
   NTs nts;

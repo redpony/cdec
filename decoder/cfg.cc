@@ -10,7 +10,7 @@
 #include "show.h"
 
 #define DUNIQ(x) x
-#define DBIN(x) x
+#define DBIN(x)
 #define DSP(x) x
 //SP:binarize by splitting.
 #define DCFG(x) IF_CFG_DEBUG(x)
@@ -464,6 +464,8 @@ void CFG::BinarizeSplit(CFGBinarize const& b) {
 void CFG::Binarize(CFGBinarize const& b) {
   if (!b.Binarizing()) return;
   cerr << "Binarizing "<<b<<endl;
+  if (b.bin_thresh>0)
+    BinarizeThresh(b);
   if (b.bin_split)
     BinarizeSplit(b);
   if (b.bin_l2r)
@@ -472,6 +474,14 @@ void CFG::Binarize(CFGBinarize const& b) {
     OrderNTsTopo();
 
 }
+
+namespace {
+}
+
+void CFG::BinarizeThresh(CFGBinarize const& b) {
+  throw runtime_error("TODO: some fancy linked list thing - see NOTES.partial.binarize");
+}
+
 
 void CFG::BinarizeL2R(bool bin_unary,bool name) {
   add_virtual_rules<BinRhs> v(*this,name);
