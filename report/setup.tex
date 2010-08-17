@@ -1,0 +1,76 @@
+\chapter{Experimental Setup}
+
+Our approach is based upon the popular and influential Hiero system \cite{chiang07} which uses a synchronous context free grammar (SCFG) to model translation. 
+This translation system uses only a single non-terminal symbol and therefore the system is inherently stateless. 
+However, we know that using a richer set of non-terminals can greatly improve translation, as evidenced by the improvments obtained by SAMT system \cite{samt} which augments a Hiero-style SCFG model with syntactic labels.
+This is best explained in terms of the generalisation capability: a single category grammar can create all manner of string-pairs, the majority of which are nonsensical and agrammatical, while a model with syntactic categories inherently limits the sets of string pairs to those which are grammatical (largely).
+This can be seen from the following example rules, showing how rules can be combined to arrive at ungrammatical string pairs.
+\begin{align*}
+X &\rightarrow \langle \mbox{does not}~X, \mbox{ne}~X~\mbox{pas} \rangle \\
+X &\rightarrow \langle \mbox{cat}, \mbox{chat} \rangle \\
+X &\Rightarrow \langle \mbox{does not cat}, \mbox{ne cat pas} \rangle
+\end{align*}
+
+As such, the single-category model licenses all manner of word-salad output, thus relying on the language model to salvage a coherent sentence from these options.
+In contrast, the set of translation options for the grammar with syntactic labels is much smaller and more coherent, and thus the language model has less heavy lifting to do.
+This setting plays well to the strengths of a n-gram language model which can accurately model local coherence but is unable to model global sentence-level effects (which are modelled by the syntactic translation model). 
+%In addition, a treebank parser and an n-gram language model have different strengths -- the parser can ensure more global grammatical coherence but over-generalises at the lexical level, while the n-gram model does the opposite.
+
+The central aim of the project was to induce automatically a rich translation grammar to realise some of the performance gains resulting from the use of linguistic grammars, but without using linguistic resources such as treebank parsers.
+This allows our approach to be more easily ported to work for translating a variety of languages, rather than being constrained to just translating into languages with good syntactic resources (typically English).
+
+\section{Distributional Hypothesis}
+
+Underlying most models of grammar induction is the distributional hypothesis. This theory states that
+``words that occur in the same contexts tend to have similar meaning'' \cite{harris:54}. Although phrased in terms of semantics, the distributional hypothesis applies equally to syntax, that is, words that can be substituted for one another most often share the same syntactic category (in general, semantics implies syntax). This is evidenced by the wide-spread use of the substitution test in theories of syntax to determine the constituency and syntactic category of a word or phrase.
+
+The majority of work on monolingual grammar induction has used some notion of context to inform the induced categories. This is best seen in the work of Alex Clark who uses the context surrounding a phrase to determine its category, and in Dan Klein's work, which uses context to determine constituency. In this project we follow the lead of these earlier works on monolingual grammar induction by using context to inform our clustering of words and phrases, such that words that appear in similar contexts are assigned to the same cluster. We expect that this clustering should bear a strong resemblance to the underlying syntax and, to some extent, the semantics of the language, and therefore improve translation accuracy.
+
+Our bilingual translation setting differs from the earlier monolingual settings in which most grammar induction research has been performed. We seek to label a broad range of n-grams (so-called phrases) as supplied from the phrase extraction process. These n-grams will be both constituents and non-constituents. The use of non-constituent translation units has been shown consistently to outperform systems which use only constituents in terms of translation quality. For this reason how grammar induction system must be able to infer useful syntactic categories for these non-constituent n-grams.
+
+\section{Clustering Configuration}
+
+Notion of context.
+Mono/source/target/bi, words/classes/POS.
+Give example.
+Notation.
+
+\begin{table}
+\begin{tabular}{cp{.7\textwidth}}
+\toprule
+  symbol & meaning \\
+\midrule
+  $\mathbf{p} = (p_1, \ldots, p_n)$ & a phrase (n-gram) of word tokens \\
+  $\mathbf{c} = (\ldots, c_{-2}, c_{-1}, c_1 c_2, \ldots)$ & a context of immediate words surrounding a phrase, with the index signifying the distance to the left (negative indices) or right (positive indices) of the phrase \\
+  $e = (p, c)$  & a edge denoting a phrase, $p$, occuring in context $c$ \\
+  $z$ & label assigned to an edge, denoting the cluster or non-terminal assigned to the phrase in context \\
+  $K$ & number of clusters, $z \in \{1,2, \ldots, K\}$ \\
+  $P$ & set of unique phrases \\
+  $C$ & set of unique contexts \\
+  $C_p$ & set of contexts in which $p$ has occurred \\
+  $P_c$ & set of phrases occuring in context $c$ \\
+\bottomrule
+\end{tabular}
+\caption{Notation used throughout this paper.}
+\end{table}
+
+\section{Pipeline}
+
+Brief overview of the pipeline. 
+
+\subsubsection{Phrase Extraction}
+
+\section{Evaluation}
+
+We evaluate the output of the pipeline in the standard way. But in order to short-cut the lengthy process we also evaluate the quality of the clustering against linguistic labellings.
+
+\subsubsection{BLEU}
+
+\subsubsection{Conditional Entropy}
+
+\[ H(S|Z) = \sum_{s,z} p(s,z) \log \frac{p(z)}{p(s,z)} \]
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "report"
+%%% End: 
