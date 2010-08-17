@@ -110,13 +110,18 @@ Brief overview of the pipeline, including phrase-extraction.
 
 \section{Evaluation}
 
-We evaluate the output of the pipeline in the standard way. But in order to short-cut the lengthy process we also evaluate the quality of the clustering against linguistic labellings.
+Given an induced clustering, we run the pipeline to completion to produce translations for our test set. We then compare these translations with human authored reference translations in order to evaluate the quality. We use the standard metric, blue, to measure the quality of the output translations. However as an alternative metric we consider an intrinsic evaluation of the clustering by comparing the induced labels against linguistic categories. That is, without running the decoder to create translations. This saves considerable time and also gives us an alternative view as to the quality of the clustering. We now describe each of these evaluation metrics in the following section.
 
 \subsubsection{BLEU}
 
+
 \subsubsection{Conditional Entropy}
 
+The second evaluation metric measures the similarity between the induced cluster labels and the syntactic categories predicted by a treebank-trained parser. This metric is considerably cheaper to evaluate than BLEU as it does not require a decoding pass, but instead works directly on the clustering output. Our objective is to maximise the quality of translation, and we trust BLEU to do this more directly than this instrinsic metric. However, we expect there to be interesting information in this metric, and the potential to short-cut the evaluation thus improving the turn-around time for experimental evaluation. 
+
+We measure the conditional entropy of the ``gold-standard'' categories for each phrase in context given the cluster labelling. For the gold-standard we use the predicted constituent categories from a tree-bank parser on the target side (English). Many phrases are not constituents, and therefore the parser output does not include their category; We exclude such phrases from the evaluation. The conditional entropy measures the amount of surprise at seeing the gold standard categories given that we know the clusters. If the cluster labels closely resemble the syntax, then there will be little surprise and the entropy will be low. If however the clusters do not match the syntax at all entropy will be very high. The conditional entropy is formulated as follows:
 \[ H(S|Z) = \sum_{s,z} p(s,z) \log \frac{p(z)}{p(s,z)} \]
+where $s$ are the constituent labels as output from a parser, $p(s,z)$ is the frequency of $s$ and $z$ labelling the same edge and $p(z)$ is the frequency of label $z$. If the clustering maps perfectly onto the syntax, then $z$ will always coocur with $s$ and the $\log$ term will vanish, resulting in a conditional entropy of zero. This metric can be gamed by using a separate category for every edge, and thereby still realising a perfect mapping but without any intelligent clustering at all. This degeneracy is not relevant for our models as we limit ourselves to small label sets, typically using $K = 25$ which is considerably fewer than the hundred or so syntactic categories in a treebank parser. 
 
 %%% Local Variables: 
 %%% mode: latex
