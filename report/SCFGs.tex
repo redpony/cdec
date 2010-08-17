@@ -71,7 +71,7 @@ The use of SCFGs for statistical machine translation was popularized by \citet{C
 
 Rather than using the full power of the SCFG formalism, the Hiero system instead uses a simple grammar with one non-terminal symbol, X, to extend conventional phrase-based models to allow phrases with gaps in them.  The Hiero system is technically a grammar-based approach to translation, but does not incorporate any linguistic information in its grammars.  Its process of decoding is also one of parsing, and it employs the Cocke-Kasami-Younger (CKY) dynamic programming algorithm to find the best derivation using its probabilistic grammar rules.   However, because Hiero-style parses are devoid of linguistic information, they fail to capture facts about Urdu like that it is post-positional or verb final. 
 
-\subsection{Syntax-augmented SCFGs extracted from supervised parses}\label{samt}
+\subsection{Enriching SCFGs with syntactic labels extracted from supervised parses}\label{samt}
 
 
 \begin{figure}
@@ -111,7 +111,7 @@ In the standard phrase-based and hierarchical phrase-based approaches to machine
 \end{figure}
 
 
-\subsection{SCFGs with syntactic labels extracted from supervised parses}\label{samt}
+\subsection{Our approach: enriching SCFGs labels in an unsupervised fashion}\label{samt}
 
 Note that one of the major advantages of extracting the linguistic SCFG for an automatically parsed parallel corpus is that only one side of the parallel corpus needs to be parsed.  To extract an Urdu-English SCFG we therefore could use an English parser without the need for an Urdu parser.  During translation the Urdu input text gets parsed with the projected rules, but a stand-alone Urdu parser is never required. 
 However, all of the current approaches require that a parser, trained on supervised data, exist for at least one of the languages.  
