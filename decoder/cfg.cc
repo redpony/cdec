@@ -10,7 +10,7 @@
 #include "show.h"
 
 #define DUNIQ(x) x
-#define DBIN(x)
+#define DBIN(x) x
 #define DSP(x) x
 //SP:binarize by splitting.
 #define DCFG(x) IF_CFG_DEBUG(x)
@@ -262,9 +262,16 @@ struct add_virtual_rules {
     set_nt_name(rhs);
   }
   inline void create_rule(Rhs const& rhs) {
-    new_rules.push_back(CFG::Rule(newnt--,rhs));
+    new_rules.push_back(CFG::Rule(-newnt,rhs));
+    --newnt;
+  }
+  inline void create_adding(Rhs const& rhs) {
+    NTHandle nt=get_default(rhs2lhs,rhs,newnt);
+    assert(nt==newnt);
+    create(rhs);
   }
   inline void create(Rhs const& rhs) {
+    SHOWP(DSP,"Create ") SHOW3(DSP,newnt,newruleid,BinStr(rhs,nts,new_nts))
     create_nt(rhs);
     create_rule(rhs);
     assert(newruleid==rules.size()+new_rules.size());assert(-newnt==nts.size()+new_nts.size());
@@ -291,76 +298,138 @@ struct add_virtual_rules {
   }
   //HACK: prevent this for instantiating for BinRhs.  we need to use rule index because we'll be adding rules before we can update.
   // returns 1 per replaced NT (0,1, or 2)
+  inline std::string Str(Rhs const& rhs) const {
+    return BinStr(rhs,nts,new_nts);
+  }
+
   template <class RHSi>
   int split_rhs(RHSi &rhs,bool only_free=false,bool only_reusing_1=false) {
+    typedef WordID const* WP;
     //TODO: don't actually build substrings of rhs; define key type that stores ref to rhs in new_nts by index (because it may grow), and also allows an int* [b,e) range to serve as key (i.e. don't insert the latter type of key).
     int n=rhs.size();
     if (n<=2) return 0;
-    int longest1=0;
+    int longest1=1;
     int mid=n/2;
-    int best_k=mid;
-    bool haver,havel;
+    int best_k;
+    enum {HAVE_L=-1,HAVE_NONE=0,HAVE_R=1};
+    int have1=HAVE_NONE; // will mean we already have some >1 length prefix or suffix as a virt. (it's free).  if we have both we use it immediately and return.
     NTHandle ntr,ntl;
     NTHandle bestntr,bestntl;
-    WordID *b=&rhs.front(),*e=b+n;
+    WP b=&rhs.front(),e=b+n;
+    WP wk=b;
+    SHOWM3(DSP,"Split",Str(rhs),only_free,only_reusing_1);
+    int rlen=n;
     for (int k=1;k<n-1;++k) {
       //TODO: handle length 1 l and r parts without explicitly building Rhs?
-      WordID *wk=&rhs[k];
+      ++wk; assert(k==wk-b);
+      --rlen; assert(rlen==n-k);
       Rhs l(b,wk);
-      int rlen=n-k;
       if (have(l,ntl)) {
+        if (k>1) { SHOWM3(DSP,"Have l",k,n,Str(l)) }
         Rhs r(wk,e);
         if (have(r,ntr)) {
+          SHOWM3(DSP,"Have r too",k,n,Str(r))
           rhs.resize(2);
           rhs[0]=ntl;
           rhs[1]=ntr;
           return 2;
         } else if (k>longest1) {
           longest1=k;
-          haver=false;
-          havel=true;
+          have1=HAVE_L;
           bestntl=ntl;
           best_k=k;
         }
-      } else if (rlen>=longest1) {
+      } else if (rlen>longest1) { // > or >= favors l or r branching, maybe.  who cares.
         Rhs r(wk,e);
         if (have(r,ntr)) {
           longest1=rlen;
-          havel=false;
-          haver=true;
+          if (rlen>1) { SHOWM3(DSP,"Have r (only) ",k,n,Str(r)) }
+          have1=HAVE_R;
           bestntr=ntr;
           best_k=k;
         }
       }
+      //TODO: swap order of consideration (l first or r?) depending on pre/post midpoint?  one will be useless to check for beating the longest single match so far.  check that second
+
     }
-    bool no1=longest1<=1; // a single token sub-rhs part is not really interesting, but it would be reported as havel or haver.
+    // now we know how we're going to split the rule; what follows is just doing the actual splitting:
+
     if (only_free) {
-      if (no1) return 0;
-      if (havel) {
-        rhs.erase(rhs.begin()+1,rhs.begin()+best_k);
-        rhs[0]=ntl;
-      } else if (haver) {
-        rhs.erase(rhs.begin()+best_k+1,rhs.end());
-        rhs[best_k]=ntr;
+      if (have1==HAVE_NONE)
+        return 0;
+      if (have1==HAVE_L) {
+        rhs.erase(rhs.begin()+1,rhs.begin()+best_k); //erase [1..best_k)
+        rhs[0]=bestntl;
+      } else {
+        assert(have1==HAVE_R);
+        rhs.erase(rhs.begin()+best_k+1,rhs.end()); // erase (best_k..)
+        rhs[best_k]=bestntr;
       }
       return 1;
     }
-    if (only_reusing_1 && no1) return 0;
-    //TODO: swap order of consideration (l first or r?) depending on pre/post midpoint?  one will be useless to check for beating the longest single match so far.  check that second.
-    WordID *best_wk=b+best_k;
-    Rhs l(b,best_wk);
-    Rhs r(best_wk,e);
-    //we build these first because adding rules may invalidate the underlying pointers (we end up binarizing already split virt rules)!
-    rhs.resize(2);
-    int nnt=newnt;
-    rhs[0]=havel?bestntl:nnt--;
-    rhs[1]=haver?bestntr:nnt;
-    // now that we've set rhs, we can actually safely add rules
-    if (!havel)
-      create(l);
-    if (!haver)
-      create(r);
-    return 2;
+    /* now we have to add some new virtual rules.
+       some awkward constraints:
+
+       1. can't resize rhs until you save copy of l or r split portion
+
+       2. can't create new rule until you finished modifying rhs (this is why we store newnt then create).  due to vector push_back invalidation.  perhaps we could bypass this by reserving sufficient space first before a splitting pass (# rules and nts created is <= 2 * # of rules being passed over)
+
+    */
+    if (have1==HAVE_NONE) { // default: split down middle.
+      DSP(assert(longest1==1));
+      WP m=b+mid;
+      if (n%2==0) {
+        WP i=b;
+        WP j=m;
+        for (;i!=m;++i,++j)
+          if (*i!=*j) goto notleqr;
+        // [...mid]==[mid...]!
+        RHS l(b,m); // 1. // this is equal to RHS(m,e).
+        rhs.resize(2);
+        rhs[0]=rhs[1]=newnt; //2.
+        create_adding(l);
+        return 1; // only had to create 1 total when splitting down middle when l==r
+      }
+    notleqr:
+      if (only_reusing_1) return 0;
+      best_k=mid; // rounds down
+      if (mid==1) {
+        RHS r(m,e); //1.
+        rhs.resize(2);
+        rhs[1]=newnt; //2.
+        create_adding(r);
+        return 1;
+      } else {
+        Rhs l(b,m);
+        Rhs r(m,e); // 1.
+        rhs.resize(2);
+        rhs[0]=newnt;
+        rhs[1]=newnt-1; // 2.
+        create_adding(l);
+        create_adding(r);
+        return 2;
+      }
+    }
+    WP best_wk=b+best_k;
+    //we build these first because adding rules may invalidate the underlying pointers (we end up binarizing already split virt rules)!.
+    //wow, that decision (not to use index into new_nts instead of pointer to rhs), while adding new nts to it really added some pain.
+    if (have1==HAVE_L) {
+      Rhs r(best_wk,e); //1.
+      rhs.resize(2);
+      rhs[0]=bestntl;
+      DSP(assert(best_wk<e-1)); // because we would have returned having both if rhs was singleton
+      rhs[1]=newnt; //2.
+      create_adding(r);
+    } else {
+      DSP(assert(have1==HAVE_R));
+      DSP(assert(best_wk>b+1)); // because we would have returned having both if lhs was singleton
+      Rhs l(b,best_wk); //1.
+      rhs.resize(2);
+      rhs[0]=newnt; //2.
+      rhs[1]=bestntr;
+      create_adding(l);
+    }
+    return 1;
   }
 };
 
