@@ -379,7 +379,7 @@ void maybe_prune(Hypergraph &forest,po::variables_map const& conf,string nbeam,s
       }
       forest.PruneInsideOutside(beam_prune,density_prune,pm,false,1,conf["promise_power"].as<double>());
       if (!forestname.empty()) forestname=" "+forestname;
-      forest_stats(forest,"  Pruned "+forestname+" forest",false,false,false);
+      forest_stats(forest,"  Pruned "+forestname+" forest",false,false,0,false);
       cerr << "  Pruned "<<forestname<<" forest portion of edges kept: "<<forest.edges_.size()/presize<<endl;
     }
 }

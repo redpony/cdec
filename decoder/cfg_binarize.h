@@ -37,8 +37,8 @@ struct CFGBinarize {
   }
   void Validate() {
     if (bin_thresh>0&&!bin_l2r) {
-      std::cerr<<"\nWARNING: greedy binarization not yet supported; using l2r (right branching) instead.\n";
-      bin_l2r=true;
+//      std::cerr<<"\nWARNING: greedy binarization not yet supported; using l2r (right branching) instead.\n";
+//      bin_l2r=true;
     }
     if (false && bin_l2r && bin_split) { // actually, split may be slightly incomplete due to finite number of passes.
       std::cerr<<"\nWARNING: l2r and split are both complete binarization and redundant.  Using split.\n";
