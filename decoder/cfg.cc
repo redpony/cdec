@@ -237,23 +237,17 @@ struct add_virtual_rules {
   CFG::NTs &nts,new_nts;
   CFG::Rules &rules, new_rules;
 // above will be appended at the end, so we don't have to worry about iterator invalidation
-  NTHandle newnt; //not negative.  TODO: i think we use it most often as negative.  either way, be careful.
+  WordID newnt; //negative of NTHandle, or positive => unary lexical item (not to binarize).  fit for rhs of a rule
   RuleHandle newruleid;
-  HASH_MAP<Rhs,NTHandle,boost::hash<Rhs> > rhs2lhs;
+  typedef HASH_MAP<Rhs,WordID,boost::hash<Rhs> > R2L;
+  R2L rhs2lhs; // an rhs maps to this -virtntid, or original id if length 1
   bool name_nts;
-  add_virtual_rules(CFG &cfg,bool name_nts=false) : nts(cfg.nts),rules(cfg.rules),newnt(nts.size()),newruleid(rules.size()),name_nts(name_nts) {
+  add_virtual_rules(CFG &cfg,bool name_nts=false) : nts(cfg.nts),rules(cfg.rules),newnt(-nts.size()),newruleid(rules.size()),name_nts(name_nts) {
     HASH_MAP_EMPTY(rhs2lhs,null_for<Rhs>::null);
   }
   NTHandle get_virt(Rhs const& r) {
     NTHandle nt=get_default(rhs2lhs,r,newnt);
-    if (newnt==nt) {
-      create_nt(r);
-      create_rule(r);
-    }
-    return nt;
-  }
-  NTHandle get_nt(Rhs const& r) {
-    NTHandle nt=get_default(rhs2lhs,r,newnt);
+    SHOW(DBIN,newnt) SHOWP(DBIN,"bin="<<BinStr(r,nts,new_nts)<<"=>") SHOW(DBIN,nt);
     if (newnt==nt) {
       create(r);
     }
@@ -268,12 +262,12 @@ struct add_virtual_rules {
     set_nt_name(rhs);
   }
   inline void create_rule(Rhs const& rhs) {
-    new_rules.push_back(CFG::Rule(newnt++,rhs));
+    new_rules.push_back(CFG::Rule(newnt--,rhs));
   }
   inline void create(Rhs const& rhs) {
     create_nt(rhs);
     create_rule(rhs);
-    assert(newruleid==rules.size()+new_rules.size());assert(newnt==nts.size()+new_nts.size());
+    assert(newruleid==rules.size()+new_rules.size());assert(-newnt==nts.size()+new_nts.size());
   }
 
   ~add_virtual_rules() {
@@ -285,7 +279,15 @@ struct add_virtual_rules {
     batched_append_swap(rules,new_rules);
   }
   inline bool have(Rhs const& rhs,NTHandle &h) const {
-    return rhs2lhs.find(rhs)!=rhs2lhs.end();
+    if (rhs.size()==1) {     // stop creating virtual unary rules.
+      h=rhs[0];
+      return true;
+    }
+    typename R2L::const_iterator i=rhs2lhs.find(rhs);
+    if (i==rhs2lhs.end())
+      return false;
+    h=i->second;
+    return true;
   }
   //HACK: prevent this for instantiating for BinRhs.  we need to use rule index because we'll be adding rules before we can update.
   // returns 1 per replaced NT (0,1, or 2)
@@ -302,6 +304,7 @@ struct add_virtual_rules {
     NTHandle bestntr,bestntl;
     WordID *b=&rhs.front(),*e=b+n;
     for (int k=1;k<n-1;++k) {
+      //TODO: handle length 1 l and r parts without explicitly building Rhs?
       WordID *wk=&rhs[k];
       Rhs l(b,wk);
       int rlen=n-k;
@@ -330,18 +333,19 @@ struct add_virtual_rules {
         }
       }
     }
+    bool no1=longest1<=1; // a single token sub-rhs part is not really interesting, but it would be reported as havel or haver.
     if (only_free) {
+      if (no1) return 0;
       if (havel) {
         rhs.erase(rhs.begin()+1,rhs.begin()+best_k);
-        rhs[0]=-ntl;
+        rhs[0]=ntl;
       } else if (haver) {
         rhs.erase(rhs.begin()+best_k+1,rhs.end());
-        rhs[best_k]=-ntr;
-      } else
-        return 0;
+        rhs[best_k]=ntr;
+      }
       return 1;
     }
-    if (only_reusing_1 && longest1==0) return 0;
+    if (only_reusing_1 && no1) return 0;
     //TODO: swap order of consideration (l first or r?) depending on pre/post midpoint?  one will be useless to check for beating the longest single match so far.  check that second.
     WordID *best_wk=b+best_k;
     Rhs l(b,best_wk);
@@ -349,8 +353,8 @@ struct add_virtual_rules {
     //we build these first because adding rules may invalidate the underlying pointers (we end up binarizing already split virt rules)!
     rhs.resize(2);
     int nnt=newnt;
-    rhs[0]=-(havel?bestntl:nnt++);
-    rhs[1]=-(haver?bestntr:nnt);
+    rhs[0]=havel?bestntl:nnt--;
+    rhs[1]=haver?bestntr:nnt;
     // now that we've set rhs, we can actually safely add rules
     if (!havel)
       create(l);
@@ -372,28 +376,20 @@ void CFG::BinarizeSplit(CFGBinarize const& b) {
     Rule &r=newr[i];expr;  } // NOTE: must use indices since we'll be adding rules as we iterate.
 
   int n_changed_total=0;
-
+  int n_changed;
 #define CFG_SPLIT_PASS(N,free,just1) \
   for (int pass=0;pass<b.N;++pass) { \
-    int n_changed=0; \
+    n_changed=0; \
     CFG_FOR_VIRT(r,n_changed+=v.split_rhs(r.rhs,free,just1)); \
     if (!n_changed) { \
       break; \
     } n_changed_total+=n_changed; }
 
   CFG_SPLIT_PASS(split_passes,false,false)
+    if (n_changed==0) return;
   CFG_SPLIT_PASS(split_share1_passes,false,true)
   CFG_SPLIT_PASS(split_free_passes,true,false)
 
-
-    /*
-  for (int i=0;i<b.split_passes;++i)
-    CFG_FOR_VIRT(r,v.split_rhs(r.rhs,false,false));
-  for (int i=0;i<b.split_share1_passes;++i)
-    CFG_FOR_VIRT(r,v.split_rhs(r.rhs,false,true));
-  for (int i=0;i<b.split_free_passes;++i)
-    CFG_FOR_VIRT(r,v.split_rhs(r.rhs,true));
-    */
 }
 
 void CFG::Binarize(CFGBinarize const& b) {
@@ -449,10 +445,10 @@ cerr << "Binarizing left->right " << (bin_unary?"real to unary":"stop at binary"
             if (name) new_nts.back().from.nt=BinName(bin,nts,new_nts);
           }
 */
-          bin.second=-bin_to;
+          bin.second=bin_to;
           --r;
           if (r<rhsmin) {
-            rhs[rhsmin]=-bin_to;
+            rhs[rhsmin]=bin_to;
             rhs.resize(rhsmin+1);
             break;
           }

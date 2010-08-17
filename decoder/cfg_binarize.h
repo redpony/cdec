@@ -26,7 +26,7 @@ struct CFGBinarize {
     opts->add_options()
       ("cfg_binarize_threshold", defaulted_value(&bin_thresh),"(if >0) repeatedly binarize CFG rhs bigrams which appear at least this many times, most frequent first.  resulting rules may be 1,2, or >2-ary.  this happens before the other types of binarization.")
 //      ("cfg_binarize_unary_threshold", defaulted_value(&bin_unary),"if >0, a rule-completing production A->BC may be binarized as A->U U->BC if U->BC would be used at least this many times.  this happens last.")
-      ("cfg_binarize_greedy_split", defaulted_value(&bin_split),"(DeNero et al) for each rule until binarized, pick a split point k of L->r[0..n) to make rules L->V1 V2, V1->r[0..k) V2->r[k..n), to minimize the number of new rules created")
+      ("cfg_binarize_split", defaulted_value(&bin_split),"(DeNero et al) for each rule until binarized, pick a split point k of L->r[0..n) to make rules L->V1 V2, V1->r[0..k) V2->r[k..n), to minimize the number of new rules created")
       ("cfg_split_full_passes", defaulted_value(&split_passes),"pass through the virtual rules only (up to) this many times (all real rules will have been split if not already binary)")
       ("cfg_split_share1_passes", defaulted_value(&split_share1_passes),"after the full passes, for up to this many times split when at least 1 of the items has been seen before")
       ("cfg_split_free_passes", defaulted_value(&split_free_passes),"only split off from virtual nts pre/post nts that already exist - could check for interior phrases but after a few splits everything should be tiny already.")
