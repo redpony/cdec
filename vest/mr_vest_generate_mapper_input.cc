@@ -85,8 +85,13 @@ struct oracle_directions {
 
   void Print() {
     for (int i = 0; i < dev_set_size; ++i)
-      for (int j = 0; j < directions.size(); ++j)
-        cout << forest_file(i) <<" " << i << ' ' << origin << ' ' << directions[j] << endl;
+      for (int j = 0; j < directions.size(); ++j) {
+        cout << forest_file(i) <<" " << i<<" ";
+        origin.print(cout,"=",";");
+        cout<<" ";
+        directions[j].print(cout,"=",";");
+        cout<<"\n";
+      }
   }
 
   void AddOptions(po::options_description *opts) {
@@ -117,7 +122,7 @@ struct oracle_directions {
     po::store(parse_command_line(argc, argv, dcmdline_options), *conf);
     po::notify(*conf);
     if (conf->count("dev_set_size") == 0) {
-      cerr << "Please specify the size of the development set using -d N\n";
+      cerr << "Please specify the size of the development set using -s N\n";
       goto bad_cmdline;
     }
     if (conf->count("weights") == 0) {

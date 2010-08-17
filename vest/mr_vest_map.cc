@@ -43,6 +43,11 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
 }
 
 bool ReadSparseVectorString(const string& s, SparseVector<double>* v) {
+#if 0
+  // this should work, but untested.
+  std::istringstream i(s);
+  i>>*v;
+#else
   vector<string> fields;
   Tokenize(s, ';', &fields);
   if (fields.empty()) return false;
@@ -56,6 +61,7 @@ bool ReadSparseVectorString(const string& s, SparseVector<double>* v) {
     v->set_value(FD::Convert(pair[0]), atof(pair[1].c_str()));
   }
   return true;
+#endif
 }
 
 int main(int argc, char** argv) {
