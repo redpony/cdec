@@ -52,7 +52,7 @@ P(z|\textbf{p},\textbf{c})=\frac{P(z,\textbf{c}|\textbf{p})}
 \]
 With the mechanisms to compute the posterior probabilities, we can 
 apply EM to learn all the probabilities.
-\section{Sparsity Constraints}
+\section{Sparsity Constraints}\label{sec:pr-sparse}
 A common linguistic intuition we have about the phrase 
 clustering problem is that a phrase should be put into very
 few categories, e.g. a verb phrase is unlikely to be used as 
@@ -115,8 +115,11 @@ The objective we want to optimize becomes:
 \]
 \[
 \text{ s.t. }\forall \textbf{p},z,
-E_q[\phi_{\textbf{p}iz}]\leq c_{\textbf{p}z}.
+E_q[\phi_{\textbf{p}iz}]\leq c_{\textbf{p}z},
 \]
+where $\sigma$ is a constant to control
+how strongly the soft constraint should
+be enforced.
 Using Lagrange Multipliers, this objective can
 be optimized in its dual form,
 for each phrase $\textbf{p}$:
@@ -137,7 +140,7 @@ q_i(z)\propto P_{\theta}(z|\textbf{p},\textbf{c}_i)
 \exp(\lambda_{\textbf{p}iz}).
 \]
 M-step can be performed as usual.
-\section{Agreement Models}
+\section{Agreement Models}\label{sec:pr-agree}
 Another type of constraint we used is agreement between
 different models. We came up with a similar generative
 model in the reverse direction to agree with 
@@ -248,9 +251,9 @@ phrases that don't correspond any constituents.
      hiero+POS &  & \\
      SAMT & & \\
      EM & & \\
-     pr100 & & \\
-     agree-language & & \\
-    agree direction & &\\
+     PR $\sigma=100$ & & \\
+     agree language & & \\
+     agree direction & &\\
      non-parametric & & \\
          \hline
   \end{tabular}
@@ -263,3 +266,18 @@ phrases that don't correspond any constituents.
     }
   \label{tab:results}
 \end{table}
+
+In Table \ref{tab:results}, hiero is hierachical phrase-based
+model with 1 category in all of its SCFG rules. Hiero+POS
+is hiero with all words labelled with their POS tags.
+SAMT is a syntax based system with a supervised
+parser trained on Treebank. EM is the first model mentioned
+in the beginning of this chapter. PR $\sigma=100$ is 
+posterior regularization model with sparsity constraint
+explained in Section \ref{sec:pr-sparse}.
+$\sigma$ is the constant controls strongness of the constraint.
+Agree language and agree direction are models with agreement 
+constraints mentioned in Section \ref{sec:pr-agree}. Non-parametric
+is non-parametric model introduced in the previous chapter.
+
+\section{Conclusion}
