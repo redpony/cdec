@@ -153,6 +153,7 @@ void Segment::ConstructTranslation(vector<WordID>* trans) const {
   }
   size_t ant_size = ant_trans.size();
   vector<const vector<WordID>*> pants(ant_size);
+  assert(ant_size == cur->edge->tail_nodes_.size());
   --ant_size;
   for (int i = 0; i < pants.size(); ++i) pants[ant_size - i] = &ant_trans[i];
   cur->edge->rule_->ESubstitute(pants, trans);

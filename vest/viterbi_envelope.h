@@ -54,7 +54,7 @@ struct ViterbiEnvelope {
   const ViterbiEnvelope& operator+=(const ViterbiEnvelope& other);
   const ViterbiEnvelope& operator*=(const ViterbiEnvelope& other);
   bool IsMultiplicativeIdentity() const {
-    return size() == 1 && (segs[0]->b == 0.0 && segs[0]->m == 0.0) && (!segs[0]->edge); }
+    return size() == 1 && (segs[0]->b == 0.0 && segs[0]->m == 0.0) && (!segs[0]->edge) && (!segs[0]->p1) && (!segs[0]->p2); }
   const std::vector<boost::shared_ptr<Segment> >& GetSortedSegs() const {
     if (!is_sorted) Sort();
     return segs;
