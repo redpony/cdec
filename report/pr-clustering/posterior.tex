@@ -246,16 +246,17 @@ phrases that don't correspond any constituents.
   \begin{tabular}{ |*{3}{c|} }
     \hline
     model & BLEU & H(Gold$|$Predicted)\\
-        \hline
+    \hline
     hiero & 21.1 & 5.77\\
-     hiero+POS &  & \\
-     SAMT & & \\
-     EM & & \\
-     PR $\sigma=100$ & & \\
-     agree language & & \\
-     agree direction & &\\
-     non-parametric & & \\
-         \hline
+    hiero+POS & 22.3 & 1.00 \\
+    SAMT & 24.5 & 0.00 \\
+    \hline
+    EM & 20.9 & 2.86 \\
+    PR $\sigma=100$ & 21.7 & 2.36 \\
+    agree language & 21.7 & 2.68 \\
+    agree direction & 22.1 & 2.35\\
+    non-parametric & 22.2 & ?\\
+    \hline
   \end{tabular}
     \caption
   {Evaluation of PR models.
@@ -267,7 +268,9 @@ phrases that don't correspond any constituents.
   \label{tab:results}
 \end{table}
 
-In Table \ref{tab:results}, hiero is hierachical phrase-based
+In Table \ref{tab:results}, the first three rows
+are baseline system. The rest are developed in the workshop.
+Hiero is hierachical phrase-based
 model with 1 category in all of its SCFG rules. Hiero+POS
 is hiero with all words labelled with their POS tags.
 SAMT is a syntax based system with a supervised
@@ -279,5 +282,4 @@ $\sigma$ is the constant controls strongness of the constraint.
 Agree language and agree direction are models with agreement 
 constraints mentioned in Section \ref{sec:pr-agree}. Non-parametric
 is non-parametric model introduced in the previous chapter.
-
 \section{Conclusion}
