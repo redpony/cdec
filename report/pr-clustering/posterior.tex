@@ -221,4 +221,45 @@ with an intrinsic evaluation of clustering quality
 by comparing against a supervised CFG parser trained on the
 tree bank.
 
+We are mainly working on Urdu-English language pair. 
+Urdu has very 
+different word ordering from English. 
+This leaves us room for improvement over
+phrase-based systems.
+Here in Table \ref{tab:results} 
+we show BLEU scores as well as
+conditional entropy for each of the models above
+on Urdu data. Conditional entropy is computed
+as the entropy of ``gold'' labelling given
+the predicted clustering. ``Gold'' labelling
+distribution
+is obtained from Collins parser
+trained on Penn Treebank. Since not
+all phrases are constituents, we ignored
+phrases that don't correspond any constituents.
 
+\begin{table}[h]
+  \centering
+  \begin{tabular}{ |*{3}{c|} }
+    \hline
+    model & BLEU & H(Gold$|$Predicted)\\
+        \hline
+    hiero & 21.1 & 5.77\\
+     hiero+POS &  & \\
+     SAMT & & \\
+     EM & & \\
+     pr100 & & \\
+     agree-language & & \\
+    agree direction & &\\
+     non-parametric & & \\
+         \hline
+  \end{tabular}
+    \caption
+  {Evaluation of PR models.
+	Left column shows BLEU scores
+	through the translation pipeline.
+	Right columns shows conditional entropy
+	of the 
+    }
+  \label{tab:results}
+\end{table}
