@@ -70,9 +70,17 @@ any baseball & games & today ? \\
 \end{figure}
 \end{CJK}
 
-Mono/source/target/bi, words/classes/POS.
-Give example.
-Notation.
+In addition to the choice of source versus target language, we also consider the choice of lexical units. Our default option is to use words, but we also consider using automatically induced parts of speech in their stead. To do this we replace the words in the corpus with their corresponding word classes, and then run the extraction heuristics to obtain the phrase context graphs over parts-of-speech. This improves the density of the counts, because many different phrases and contexts will share the same part-of-speech sequence. In addition the part-of-speech induction algorithm uses a different mechanism for learning the labelling -- namely, a form of hidden Markov model with a hard-clustering constraint -- and therefore would be expected to present complementary information to our methods of indepedently clustering each instance based solely on its context. For these reason we expect that using word classes rather than words will improve the results of our clustering methods. There is one caveat: errors in the word-classes will artifically conflate many disparate syntactic categories. This is not a huge problem for the contexts, where it will resemble noise in the data, however for phrases this is more of a problem. All of our models make the assumption that phrases are assigned very few different cluster labels, but when using word class sequences for phrases this will no longer be valid. For this reason we have also experimented with a conglomerate representation where the contexts are represented as word-classes but the phrases are composed of words. This means that we obtain the expected improvements in data sparsity, but without also conflating phrases which are not syntactically or semantically identical.
+
+The set of phrases and contacts are aggregated over the corpus, and are then collated into a file consisting of phrases, context and their occurrence counts. We refer to this structure as the phrase -- context graph, as illustrated in Figure \ref{fig:bipartite}. This is a bipartite graph with nodes for each phrase type and context type, and edges for instances of a phrase occurring in a given context.  The graph forms the input to the clustering algorithm, which labels the edges with cluster indices.  In the example, we expect that the clustering will produce two different clusters for nouns (the sub-graph to the right of `deal') and for verbs (the sub-graph to the left). This clustering maximises internal connectivity within each sub-graph while minimising external connectivity between the two sub-graphs. In other words, outgoing edges from phrases and contexts are largely assigned the same cluster label. 
+
+\begin{figure}
+\includegraphics[width=\textwidth]{deal}
+\caption{Example of a phrase-context graph, centered around `deal'. Phrases are shown as unshaded nodes and contexts are shaded in pink. Contexts include the left and right word surrounding the phrase, with an underscore denoting the gap for the phrase. Edges specify that phrase appears in a given context, and the edge weight denotes the occurence count.}
+\label{fig:bipartite}
+\end{figure}
+
+The notation used for the remainder of the paper for describing the clustering models and their inputs and outputs is given in Table~\ref{tab:notation}.
 
 \begin{table}
 \begin{tabular}{cp{.7\textwidth}}
@@ -91,13 +99,14 @@ Notation.
 \bottomrule
 \end{tabular}
 \caption{Notation used throughout this paper.}
+\label{tab:notation}
 \end{table}
 
 \section{Pipeline}
 
-Brief overview of the pipeline. 
+Brief overview of the pipeline, including phrase-extraction.
 
-\subsubsection{Phrase Extraction}
+\section{Data sets}
 
 \section{Evaluation}
 
