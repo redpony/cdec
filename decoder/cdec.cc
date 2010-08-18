@@ -46,6 +46,8 @@ using namespace std::tr1;
 using boost::shared_ptr;
 namespace po = boost::program_options;
 
+bool show_config=false;
+bool show_weights=false;
 bool verbose_feature_functions=true;
 
 // some globals ...
@@ -145,6 +147,8 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
         ("scfg_no_hiero_glue_grammar,n", "No Hiero glue grammar (nb. by default the SCFG decoder adds Hiero glue rules)")
         ("scfg_default_nt,d",po::value<string>()->default_value("X"),"Default non-terminal symbol in SCFG")
         ("scfg_max_span_limit,S",po::value<int>()->default_value(10),"Maximum non-terminal span limit (except \"glue\" grammar)")
+    ("show_config", po::bool_switch(&show_config), "show contents of loaded -c config files.  note: this will have to appear before the -c argument to take effect")
+    ("show_weights", po::bool_switch(&show_weights), "show effective feature weights")
         ("show_joshua_visualization,J", "Produce output compatible with the Joshua visualization tools")
         ("show_tree_structure", "Show the Viterbi derivation structure")
         ("show_expected_length", "Show the expected translation length under the model")
@@ -207,8 +211,10 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
     for (int i=0;i<cs.size();++i) {
       string cfg=cs[i];
       cerr << "Configuration file: " << cfg << endl;
-      ifstream config(cfg.c_str());
-      po::store(po::parse_config_file(config, dconfig_options), conf);
+      if (show_config)
+        CopyFile(cfg,cerr);
+      ReadFile conff(cfg);
+      po::store(po::parse_config_file(*conff, dconfig_options), conf);
     }
   }
   po::notify(conf);
@@ -448,9 +454,11 @@ int main(int argc, char** argv) {
       prelm_w.InitFromFile(plmw);
       prelm_feature_weights.resize(FD::NumFeats());
       prelm_w.InitVector(&prelm_feature_weights);
-//      cerr << "prelm_weights: " << WeightVector(prelm_feature_weights)<<endl;
+      if (show_weights)
+        cerr << "prelm_weights: " << WeightVector(prelm_feature_weights)<<endl;
     }
-//    cerr << "+LM weights: " << WeightVector(feature_weights)<<endl;
+    if (show_weights)
+      cerr << "+LM weights: " << WeightVector(feature_weights)<<endl;
   }
   bool warn0=conf.count("warn_0_weight");
   bool freeze=!conf.count("no_freeze_feature_set");
