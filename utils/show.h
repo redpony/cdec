@@ -3,7 +3,9 @@
 
 #ifndef SHOWS
 #include <iostream>
+#define SHOWS std::cerr
 #endif
+
 /* usage:
 #if DEBUG
 # define IFD(x) x
@@ -23,9 +25,6 @@ careful: none of this is wrapped in a block.  so you can't use one of these macr
 
  */
 
-#ifndef SHOWS
-#define SHOWS std::cerr
-#endif
 
 #define SHOWP(IF,x) IF(SHOWS<<x;)
 #define SHOWNL(IF) SHOWP("\n")
