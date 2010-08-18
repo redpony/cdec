@@ -46,6 +46,7 @@ using namespace std::tr1;
 using boost::shared_ptr;
 namespace po = boost::program_options;
 
+vector<string> cfg_files;
 bool show_config=false;
 bool show_weights=false;
 bool verbose_feature_functions=true;
@@ -147,7 +148,7 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
         ("scfg_no_hiero_glue_grammar,n", "No Hiero glue grammar (nb. by default the SCFG decoder adds Hiero glue rules)")
         ("scfg_default_nt,d",po::value<string>()->default_value("X"),"Default non-terminal symbol in SCFG")
         ("scfg_max_span_limit,S",po::value<int>()->default_value(10),"Maximum non-terminal span limit (except \"glue\" grammar)")
-    ("show_config", po::bool_switch(&show_config), "show contents of loaded -c config files.  note: this will have to appear before the -c argument to take effect")
+    ("show_config", po::bool_switch(&show_config), "show contents of loaded -c config files.")
     ("show_weights", po::bool_switch(&show_weights), "show effective feature weights")
         ("show_joshua_visualization,J", "Produce output compatible with the Joshua visualization tools")
         ("show_tree_structure", "Show the Viterbi derivation structure")
@@ -187,7 +188,7 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
   cfg_options.AddOptions(&cfgo);
   po::options_description clo("Command line options");
   clo.add_options()
-    ("config,c", po::value<vector<string> >(), "Configuration file(s) - latest has priority")
+    ("config,c", po::value<vector<string> >(&cfg_files), "Configuration file(s) - latest has priority")
         ("help,h", "Print this help message and exit")
     ("usage,u", po::value<string>(), "Describe a feature function type")
     ("compgen", "Print just option names suitable for bash command line completion builtin 'compgen'")
@@ -205,19 +206,33 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
     exit(0);
   }
   ShowBanner();
+  if (conf.count("show_config")) // special handling needed because we only want to notify() once.
+    show_config=true;
   if (conf.count("config")) {
     typedef vector<string> Cs;
     Cs cs=conf["config"].as<Cs>();
     for (int i=0;i<cs.size();++i) {
       string cfg=cs[i];
       cerr << "Configuration file: " << cfg << endl;
-      if (show_config)
-        CopyFile(cfg,cerr);
       ReadFile conff(cfg);
       po::store(po::parse_config_file(*conff, dconfig_options), conf);
     }
   }
   po::notify(conf);
+  if (show_config && !cfg_files.empty()) {
+    cerr<< "\nConfig files:\n\n";
+    for (int i=0;i<cfg_files.size();++i) {
+      string cfg=cfg_files[i];
+      cerr << "Configuration file: " << cfg << endl;
+      CopyFile(cfg,cerr);
+      cerr << "(end config "<<cfg<<"\n\n";
+    }
+    cerr <<"Command line:";
+    for (int i=0;i<argc;++i)
+      cerr<<" "<<argv[i];
+    cerr << "\n\n";
+  }
+
 
   if (conf.count("list_feature_functions")) {
     cerr << "Available feature functions (specify with -F; describe with -u FeatureName):\n";

@@ -14,6 +14,7 @@
 #include "fdict.h"
 #include "hg.h"
 #include "feature_vector.h"
+#include "value_array.h"
 
 class SentenceMetadata;
 class FeatureFunction;  // see definition below
@@ -242,6 +243,8 @@ void show_all_features(std::vector<FFp> const& models_,DenseWeightVector &weight
   return show_features(all_features(models_,weights_,&warn,warn_fid_0),weights_,out,warn,warn_zero_wt);
 }
 
+typedef std::string FFState; //FIXME: only context.data() is required to be contiguous, and it becomes invalid after next string operation.  use ValueArray instead? (higher performance perhaps, save a word due to fixed size)
+typedef std::vector<FFState> FFStates;
 
 // this class is a set of FeatureFunctions that can be used to score, rescore,
 // etc. a (translation?) forest
@@ -257,13 +260,13 @@ class ModelSet {
   // must be.  edge features are supposed to be overwritten, not added to (possibly because rule features aren't in ModelSet so need to be left alone
   void AddFeaturesToEdge(const SentenceMetadata& smeta,
                          const Hypergraph& hg,
-                         const std::vector<std::string>& node_states,
+                         const FFStates& node_states,
                          Hypergraph::Edge* edge,
-                         std::string* residual_context,
+                         FFState* residual_context,
                          prob_t* combination_cost_estimate = NULL) const;
 
   //this is called INSTEAD of above when result of edge is goal (must be a unary rule - i.e. one variable, but typically it's assumed that there are no target terminals either (e.g. for LM))
-  void AddFinalFeatures(const std::string& residual_context,
+  void AddFinalFeatures(const FFState& residual_context,
                         Hypergraph::Edge* edge,
                         SentenceMetadata const& smeta) const;
 

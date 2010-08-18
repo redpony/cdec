@@ -88,3 +88,20 @@ then X[k,i]->rY.s (a',b') with a' += a*b'', b' += b*b''
 ==========
 
 is forward cost viterbi fine?  i.e. can i have items whose names ignore the lhs NT (look up predictions that i finish lazily / graph structured?)
+======
+
+1) A -> x . * (trie)
+
+this is somewhat nice.  cost pushed for best first, of course.  similar benefit as left-branching binarization without the explicit predict/complete steps?
+
+vs. just
+
+2) * -> x . y
+
+here you have to potentially list out all A -> . x y as items * -> . x y immediately, and shared rhs seqs won't be shared except at the usual single-NT predict/complete.  of course, the prediction of items -> . x y can occur lazy best-first.
+
+vs.
+
+3) * -> x . *
+
+with 3, we predict all sorts of useless items - that won't give us our goal A and may not partcipate in any parse.  this is not a good option at all.

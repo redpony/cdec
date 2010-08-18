@@ -103,4 +103,18 @@ class WriteFile : public BaseFile<std::ostream> {
   }
 };
 
+inline void CopyFile(std::istream &in,std::ostream &out) {
+  out << in.rdbuf();
+}
+
+inline void CopyFile(std::string const& inf,std::ostream &out) {
+  ReadFile r(inf);
+  CopyFile(*r,out);
+}
+
+inline void CopyFile(std::string const& inf,std::string const& outf) {
+  WriteFile w(outf);
+  CopyFile(inf,*w);
+}
+
 #endif
