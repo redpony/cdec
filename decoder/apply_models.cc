@@ -43,7 +43,7 @@ struct Candidate {
                                        // into the +LM forest
   const Hypergraph::Edge* in_edge_;    // in -LM forest
   Hypergraph::Edge out_edge_;
-  string state_;
+  FFState state_;
   const JVector j_;
   prob_t vit_prob_;            // these are fixed until the cand
                                // is popped, then they may be updated
@@ -53,7 +53,7 @@ struct Candidate {
             const JVector& j,
             const Hypergraph& out_hg,
             const vector<CandidateList>& D,
-            const vector<string>& node_states,
+            const FFStates& node_states,
             const SentenceMetadata& smeta,
             const ModelSet& models,
             bool is_goal) :
@@ -74,7 +74,7 @@ struct Candidate {
   void InitializeCandidate(const Hypergraph& out_hg,
                            const SentenceMetadata& smeta,
                            const vector<vector<Candidate*> >& D,
-                           const vector<string>& node_states,
+                           const FFStates& node_states,
                            const ModelSet& models,
                            const bool is_goal) {
     const Hypergraph::Edge& in_edge = *in_edge_;
@@ -97,7 +97,7 @@ struct Candidate {
     prob_t edge_estimate = prob_t::One();
     if (is_goal) {
       assert(tail.size() == 1);
-      const string& ant_state = node_states[tail.front()];
+      const FFState& ant_state = node_states[tail.front()];
       models.AddFinalFeatures(ant_state, &out_edge_, smeta);
     } else {
       models.AddFeaturesToEdge(smeta, out_hg, node_states, &out_edge_, &state_, &edge_estimate);
@@ -154,7 +154,7 @@ struct CandidateUniquenessEquals {
 };
 
 typedef unordered_set<const Candidate*, CandidateUniquenessHash, CandidateUniquenessEquals> UniqueCandidateSet;
-typedef unordered_map<string, Candidate*, boost::hash<string> > State2Node;
+typedef unordered_map<FFState, Candidate*, boost::hash<FFState> > State2Node;
 
 class CubePruningRescorer {
 
@@ -304,7 +304,7 @@ public:
   vector<CandidateList> D;   // maps nodes in in-HG to the
                              // equivalent nodes (many due to state
                              // splits) in the out-HG.
-  vector<string> node_states_;  // for each node in the out-HG what is
+  FFStates node_states_;  // for each node in the out-HG what is
                              // its q function value?
   const int pop_limit_;
 };
@@ -320,7 +320,7 @@ struct NoPruningRescorer {
     node_states_.reserve(kRESERVE_NUM_NODES);
   }
 
-  typedef unordered_map<string, int, boost::hash<string> > State2NodeIndex;
+  typedef unordered_map<FFState, int, boost::hash<FFState> > State2NodeIndex;
 
   void ExpandEdge(const Hypergraph::Edge& in_edge, bool is_goal, State2NodeIndex* state2node) {
     const int arity = in_edge.Arity();
@@ -335,10 +335,10 @@ struct NoPruningRescorer {
       for (int i = 0; i < arity; ++i)
         tail[i] = nodemap[in_edge.tail_nodes_[i]][tail_iter[i]];
       Hypergraph::Edge* new_edge = out.AddEdge(in_edge, tail);
-      string head_state;
+      FFState head_state;
       if (is_goal) {
         assert(tail.size() == 1);
-        const string& ant_state = node_states_[tail.front()];
+        const FFState& ant_state = node_states_[tail.front()];
         models.AddFinalFeatures(ant_state, new_edge,smeta);
       } else {
         prob_t edge_estimate; // this is a full intersection, so we disregard this
@@ -394,7 +394,7 @@ struct NoPruningRescorer {
   Hypergraph& out;
 
   vector<vector<int> > nodemap;
-  vector<string> node_states_;  // for each node in the out-HG what is
+  FFStates node_states_;  // for each node in the out-HG what is
                              // its q function value?
 };
 

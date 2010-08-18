@@ -165,13 +165,13 @@ ModelSet::ModelSet(const vector<double>& w, const vector<const FeatureFunction*>
 
 void ModelSet::AddFeaturesToEdge(const SentenceMetadata& smeta,
                                  const Hypergraph& /* hg */,
-                                 const vector<string>& node_states,
+                                 const FFStates& node_states,
                                  Hypergraph::Edge* edge,
-                                 string* context,
+                                 FFState* context,
                                  prob_t* combination_cost_estimate) const {
   edge->reset_info();
   context->resize(state_size_);
-  memset(&(*context)[0], 0, state_size_); //FIXME: only context.data() is required to be contiguous, and it becomes invalid after next string operation.  use SmallVector<char>?  ValueArray? (higher performance perhaps, fixed size)
+  memset(&(*context)[0], 0, state_size_);
   SparseVector<double> est_vals;  // only computed if combination_cost_estimate is non-NULL
   if (combination_cost_estimate) *combination_cost_estimate = prob_t::One();
   for (int i = 0; i < models_.size(); ++i) {
@@ -193,7 +193,7 @@ void ModelSet::AddFeaturesToEdge(const SentenceMetadata& smeta,
   edge->edge_prob_.logeq(edge->feature_values_.dot(weights_));
 }
 
-void ModelSet::AddFinalFeatures(const std::string& state, Hypergraph::Edge* edge,SentenceMetadata const& smeta) const {
+void ModelSet::AddFinalFeatures(const FFState& state, Hypergraph::Edge* edge,SentenceMetadata const& smeta) const {
   assert(1 == edge->rule_->Arity());
   edge->reset_info();
   for (int i = 0; i < models_.size(); ++i) {
