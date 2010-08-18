@@ -56,7 +56,7 @@ c_{-1}c_1 |& z & \sim \phi^{\textrm{\emph{inner}}}_z \\
 
 \paragraph{Hyperparameter priors.} The hyperparameters of the PYPs in our models are treated as random variables whose values are inferred from the data and the priors used to characterize the values we expect them to take on.  Since we have only a poor prior understanding about what their appropriate values should be, we use vague priors: discount parameters, $a_{(\cdot)}$, are drawn from a uniform Beta distribution ($a_{(\cdot)} \sim \textrm{Beta}(1,1)$) and concentration parameters, $b_{(\cdot)}$, are drawn from a Gamma distribution ($b_{(\cdot)} \sim \textrm{Gamma}(1,1)$).
 
-\subsection{Inference}
+\section{Inference}
 
 Inference in the nonparametric clustering models was performed using Gibbs sampling \citep{geman:1984}, with the continuous parameters ($\theta_{\p}$, $\phi_z$, etc.) integrated out \citep{blunsom:2009}.  For the experiments reported below, we sampled for 1,000 iterations.  The initial state of the sampler was created by assigning every context in a phrase entirely to a random category.
 
@@ -134,6 +134,30 @@ $K=50$ & 56.2 & \\
 \end{center}
 \label{tab:npbaselines}
 \end{table}%
+
+
+\subsection{Context types}
+
+\begin{table}[h]
+\caption{Effect of varying $K$, single word left and right target language context, uniform $\phi_0$, hierarchical $\theta_0$.}
+\begin{center}
+\begin{tabular}{r|c|c}
+& BTEC & Urdu \\
+\hline
+Single category (baseline) & 57.0 & 21.1 \\
+\hline
+1-word target &  & \\
+1-word source &  & \\
+2-words target & & \\
+2-words source & & \\
+\end{tabular}
+\end{center}
+\label{tab:npbaselines}
+\end{table}%
+
+
+
+\section{Discussion}
 
 \subsection{Qualitative analysis of an example grammar}
 
@@ -237,8 +261,5 @@ Tables~\ref{tab:npexample1} and \ref{tab:npexample2} show a fragment of a 25-cat
 \end{center}
 \label{tab:npexample2}
 \end{table}%
-
-
-\subsection{Context types}
 
 
