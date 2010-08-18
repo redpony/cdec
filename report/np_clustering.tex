@@ -135,7 +135,9 @@ $K=50$ & 56.2 & \\
 \label{tab:npbaselines}
 \end{table}%
 
-\subsection{Example grammar}
+\subsection{Qualitative analysis of an example grammar}
+
+Tables~\ref{tab:npexample1} and \ref{tab:npexample2} show a fragment of a 25-category Urdu-English grammar learned using the nonparametric phrase clustering.  Rules were selected that maximized the relative frequency $p(\textrm{RHS}|\textrm{LHS})$, filtering out the top 25 (to minimize the appearance of frequent words), and showing only rules consisting of terminal symbols in their right hand side (for clarity). The frequency of each rule type in a grammar filtered for the development set is also given.
 
 \begin{table}[h]
 \caption{Fragment (part 1/2) of 25 category Urdu-English grammar, hierarchical $\theta_0$, uniform $\phi_0$, 1 word context on either side in the target language. Counts indicate the number of distinct rules that rewrite each category type. For clarity, only rules containing only terminal symbols in their RHS are shown.}
@@ -192,7 +194,7 @@ $K=50$ & 56.2 & \\
 \hline
 \end{tabular}
 \end{center}
-\label{tab:npexample2}
+\label{tab:npexample1}
 \end{table}%
 
 \begin{table}[h]
