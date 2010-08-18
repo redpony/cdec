@@ -72,7 +72,7 @@ public:
   // TODO get rid of edge_prob_? (can be computed on the fly as the dot
   // product of the weight vector and the feature values)
   struct Edge {
-//    int poplimit; //TODO: cube pruning per edge limit?  per node didn't work well at all.
+//    int poplimit; //TODO: cube pruning per edge limit?  per node didn't work well at all.  also, inside cost + outside(node) is the same information i'd use to set a per-edge limit anyway - and nonmonotonicity in cube pruning may mean it's good to favor edge (in same node) w/ relatively worse score
     Edge() : i_(-1), j_(-1), prev_i_(-1), prev_j_(-1) {}
     Edge(int id,Edge const& copy_pod_from) : id_(id) { copy_pod(copy_pod_from); } // call copy_features yourself later.
     Edge(int id,Edge const& copy_from,TailNodeVector const& tail) // fully inits - probably more expensive when push_back(Edge(...)) than setting after

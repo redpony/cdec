@@ -84,3 +84,7 @@ then X[k,i]->rY.s (a',b') with a' += a*b'', b' += b*b''
 
 (this is summing over all derivations)
 
+
+==========
+
+is forward cost viterbi fine?  i.e. can i have items whose names ignore the lhs NT (look up predictions that i finish lazily / graph structured?)
