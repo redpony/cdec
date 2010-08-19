@@ -1,4 +1,5 @@
-\newcommand{\gloss}[1]{\begin{small}\textit{(#1)}\end{small}}
+\newcommand{\gloss}[1]{\glossa{(#1)}}%\begin{small}\textit{(#1)}\end{small}}
+\newcommand{\glossa}[1]{\begin{small}\textit{#1}\end{small}}
 \newcommand{\pemph}[1]{\textbf{#1}}
 \newcommand{\mmsz}{0.4\textwidth}
 \newcommand{\mmultirow}[2]{\multirow{#1}{\mmsz}{#2}}
@@ -51,72 +52,67 @@ unsupervised methods \citep{Creutz2006,Goldsmith2001},
  .. lookup those leads from workshop feedback]. Highlight what is novel/unique about our approach.
 
 \section{Motivation for a Labelled Grammar}
-As elsewhere in the grammar induction work, we use the Hiero-grammar with its single non-terminal category, X, as a starting point and imagine that we induce it from a corpus that has been segmented into morphemes.
-For the moment, we ignore the fact that the grammar is synchronous and observe that a context-free grammar can be employed to generate words from morphemes, as shown by the grammar fragment and derivation in Figure \ref{fig:unlabelled_word_derivation1}.
+We use the Hiero-grammar with its single non-terminal category, X, as a starting point and imagine that we induce it from a corpus that has been segmented into morphemes.
+For the moment, we ignore the fact that this grammar is synchronous.
+Observe that a context-free grammar can be employed to generate words from morphemes, as shown by the grammar fragment and derivation of ``enabled'' in Figure \ref{fig:m_motivation_x}.
 
+Yet the same grammar fragment also licenses the production of nonsense, such as ``enablely''.
+This is because this grammar does not enforce proper restrictions on morpheme attachment, allowing a string like ``+ly address'' to attach to ``enable+'' as a `suffix'.
 
+We use the `+' character to mark morpheme boundaries.
+Apart from being a a display device, it also creates a distinction in the vocabulary if some token exists 
+both as a morpheme and a word in its own right.
+But it is insufficient for enforcing proper attachment, even if the grammar were aware of the marker's meaning.
+
+\subfigcapskip=15pt
 \begin{figure}[h]
- \centering
- \subfigure{
- \begin{tabular}{lcl}
-   X & $\rightarrow$ & en+ +able+ X \\
-   X & $\rightarrow$ & +d \\
-   X & $\rightarrow$ & +s \\
-   X & $\rightarrow$ & +r \\
- \end{tabular}
- }
- \hspace{10mm}
- \subfigure{
- 	treelets here
- }
- \caption{XX}
- \label{fig:unlabelled_word_derivation1}
+  \centering
+  \subfigure[Non-sensical words can be produced when using a single non-terminal category.]{\label{fig:m_motivation_x}
+  \begin{tabular}{rcl}
+    \begin{minipage}{0.3\textwidth}
+      \begin{tabular}{lcl}
+        X & $\rightarrow$ & en+ +able+ X \\
+        X & $\rightarrow$ & +d \\
+        \textit{X} & $\rightarrow$ & \textit{+ly address} \\
+      \end{tabular}
+    \end{minipage}
+    &
+    \begin{minipage}{0.3\textwidth}
+      \includegraphics[scale=1]{morphology/treelet_good}
+    \end{minipage}
+    &
+    \begin{minipage}{0.3\textwidth}
+      \includegraphics[scale=1]{morphology/treelet_bad} 
+    \end{minipage}
+    \\
+  \end{tabular}
+  }
+
+  \subfigure[Constraining the grammar with labelled rules can avoid the problem.]{\label{fig:m_motivation_labelled}
+  \begin{tabular}{rl}
+    \begin{minipage}{0.4\textwidth}
+      \begin{tabular}{lcl}
+        X & $\rightarrow$ & en+ +able+ \textbf{X3} \\
+        \textbf{X3} & $\rightarrow$ & +d \\
+        X & $\rightarrow$ & +ly address \\
+      \end{tabular}
+    \end{minipage}
+    &
+    \begin{minipage}{0.3\textwidth}
+      \includegraphics[scale=1]{morphology/treelet_good_label}
+    \end{minipage}
+    \\[10pt]
+  \end{tabular}
+  }
+  \caption{Grammar fragments and possible derivations they allow when using a single category (top) vs. multiple categories (bottom).}
+  \label{fig:m_motivation}
 \end{figure}
+\subfigcapskip=10pt
 
-The `+' character marks morpheme boundaries where other morphemes may attach.
-But this is merely for display purposes -- restrictions of where morphemes may attach are not enforced by the Hiero-grammar.
-In practice, a grammar fragment like the above will be part of a much larger grammar containing rules where X can rewrite as just about anything, including whole words and phrases.
-This means that it would license the production of nonsense, as shown in Figure \ref{fig:unlabelled_word_derivation2}.
-
-\begin{figure}[h]
- \centering
- \subfigure{
- \begin{tabular}{lcl}
-   X & $\rightarrow$ & en+ +able+ X \\
-   X & $\rightarrow$ & +d \\
-   X & $\rightarrow$ & +s \\
-   X & $\rightarrow$ & +ity to \\
-   X & $\rightarrow$ & comprehen+ X report+ \\
- \end{tabular}
- }
- \hspace{10mm}
- \subfigure{
- 	treelet here
- }
- \caption{XX}
- \label{fig:unlabelled_word_derivation2}
-\end{figure}
-
-In order to avoid this kind of unwanted behaviour, we wish to constrain the grammar by using more refined non-terminal categories.
-That way, a single grammar could produce word-forms {\emph and} larger, sentence-level structures, without mixing those levels as before (\ref{fig:labelled_word_derivation}):
-
-\begin{figure}[h]
- \centering
- \subfigure{
- \begin{tabular}{lcl}
-   X & $\rightarrow$ & en+ +able+ X5 \\
-   X5 & $\rightarrow$ & +d \\
-   X & $\rightarrow$ & +ness to \\
-   X & $\rightarrow$ & complete+ X3 report+ \\
- \end{tabular}
- }
- \hspace{10mm}
- \subfigure{
- 	treelet here
- }
- \caption{XX}
- \label{fig:labelled_word_derivation}
-\end{figure}
+To solve the problem, we wish to constrain the grammar by using more refined non-terminal categories.
+Specifically, we do not want the word-forming and sentence-forming rules of the grammar to mix.
+Thus we propose to use a set of labelled categories for word-formation, disjoint from X.
+With the modified grammar fragment shown in Figure \ref{fig:m_motivation_labelled}, the non-sensical word can no longer be produced.
 
 These examples only serve to illustrate word formation in the monolingual case.
 Of course, we are actually operating in a bilingual situation and using synchronous CFGs.
@@ -216,7 +212,7 @@ We therefore opted for a 4-gram language model, since that yields, on average, t
 \subsection{Intrinsic Evaluation}
 In order to gain some insight into the quality of the morpheme clustering, we scrutinised cluster contents for obvious patterns.
 This was done only for the case where the clustering was done on Dutch (source language), since expertise was available there but not in French.
-Some of the observations are summarised in Table \ref{tbl:m_cats}. 
+Some of the observations are summarised in Table~\ref{tbl:m_cats}. 
 
 \begin{table}[hbt]
   \centering
@@ -228,10 +224,10 @@ Some of the observations are summarised in Table \ref{tbl:m_cats}.
 The quality of unsupervised clustering is generally tricky to judge.
 In our case, it involves determining whether the clusters encode useful ``rules'' for morpheme combination.
 There are strong indications that certain worthwhile patterns are learned and that the clustering is therefore partially successful.
-To highlight some, note in Table \ref{tbl:m_cats} that categories 4 and 6 involve a clear separation between two high-level parts of speech, and that a fine-grained distinction about Dutch nouns was learned in categories 10 and 16.
+To highlight some, note in Table~\ref{tbl:m_cats} that categories~4 and 6 involve a clear separation between two high-level parts of speech, and that a fine-grained distinction about Dutch nouns was learned in categories~10 and 16.
 
 On the other hand, there are ample examples of conflation. Sometimes there is little or no useful linguistic pattern that can be discerned.
-As an example, the conflation shown for category 0 implies that both ``europe+'' and ``+s'' will receive the same label, which would give rise to the kind of unrestricted substitutability that we wanted to avoid, as explained in Figures \ref{fig:unlabelled_word_derivation1}-\ref{fig:labelled_word_derivation}.
+As an example, the conflation shown for category~0 implies that both ``europe+'' and ``+s'' will receive the same label, which would give rise to the kind of unrestricted substitutability that we wanted to avoid, as explained in Figure~\ref{fig:m_motivation}.
 
 \subsection{Extrinsic Evaluation}
 Ultimately, performance in translation is what matters.
@@ -270,8 +266,10 @@ In general, it is also clear that the alignment of the segmented sentence pair i
 
 \begin{figure}[hb]
   \centering
-  \includegraphics[width=7cm ]{morphology/alignment}
-  \caption{Alignment errors increase under segmentation. \textbf{Proper graphic is in preparation.}}
+  \subfigure[Before segmentation]{\includegraphics[scale=1]{morphology/al_orig}}
+  \hspace{10mm}
+  \subfigure[After segmentation]{\includegraphics[scale=1]{morphology/al_segm}}
+  \caption{Alignment errors increase under segmentation. (English: \glossa{Nothing may be changed about that.})}
   \label{fig:m_alignment_error}
 \end{figure}
 
@@ -279,36 +277,62 @@ These alignment errors affect both the baseline and clustered systems.
 However, the use of a single non-terminal probably allows the baseline system to recover better from bad grammar rules, due to the unrestricted substitution it licenses.
 In the clustered cases, on the other hand, the grammars are more constrained by design; there is no mechanism to recover from being constrained in the wrong way, aside from the standard glue rules.
 
-It has been observed elsewhere \citep{Virpioja2007} that segmentation of both languages decreases the BLEU score relative to the unsegmented case, when using phrase-based SMT.
-Comparing only the Hiero-cases, we obtained a similar result ($15.67\to15.57$), although we had expected an even larger decrease.
-This suggests word segmentation might be generally less harmful in the context of hierarchical phrase-based translation (Hiero) than with phrase-based SMT.
+%Comparing only the Hiero-cases, we see that segmentation decreased BLEU ($15.67\to15.57$).
+%Segmentation of both languages into morphemes has been shown to have this effect when using phrase-based SMT \citep{Virpioja2007}.
+%However, we had expected an even larger decrease, and it might be that segmentation is less harmful in the context of hierarchical phrase-based translation (e.g. Hiero).
 
-A further factor is that BLEU, applied in the standard way, is perfectly unforgiving towards partially correct words:
-  A word with the correct stem and incorrect inflection gets penalised just the same as a completely incorrect word. 
-Hence the inclusion of the BLEU(m) scores in Table~\ref{tbl:m_bleu} in order to detect such partial improvements.
-These show an improvement of the segmented cases over the original, but the unclustered baseline case still comes out on top.
+A further factor is that BLEU, applied in the standard way, is unforgiving towards partially correct words:
+  A word with the correct stem and incorrect inflection gets penalised just the same as a wholly incorrect word.
+Such partial improvements should increase the BLEU(m) score, Table~\ref{tbl:m_bleu}:
+Segmentation does have this effect, but the unclustered baseline does best by this measure.
 
-On a positive note, clustering succeeded in correctly generating words that were not observed in the training and for which the other systems failed:
+Neither the unigram scores nor the percentage of dangling morphemes in the output (i.e. ones that cannot recombine into words) improved under clustering.
+
+On a positive note, however, clustering succeeded in correctly generating words not observed in the training, and for which the other systems failed:
 
 \begin{table}[h]
   \begin{tabular}{llp{0.45\textwidth}}
-    Input: & het ivoriaanse model & \gloss{the pertaining\_to\_Ivory\_Coast model} \\
+    Input: & het ivoriaanse model & \multirow{2}{*}{\gloss{the pertaining\_to\_Ivory\_Coast model}} \\
     Reference: & du mod{\`e}le \textbf{ivoirien} \\ \hline
     Baseline:  & du mod{\`e}le \textbf{ivoir\"{i}enne} & incorrect gender \\
-    Source clustered: & du \textbf{ivoirien} mod{\`e}le & correct grammar, but wrong word order \\
+    Source clustered: & du \textbf{ivoirien} mod{\`e}le & correct gender, but wrong word order \\
     \phantom{.} \\
-    Input: & antidumpingmaatregelen & \gloss{anti-dumping measures}\\
-    Reference: & antidumping \\ \hline
-    Baseline:  & ... & correct morphemes, but bad order \\
-    Clustered: & antidumping & ...although +dumping+ is propagated from the input as OOV \\
+    Input: & de antidumpingmaatregelen & \multirow{2}{*}{\gloss{the anti-dumping measures}} \\
+    Reference: & des \textbf{mesures antidumping}\\ \hline
+    Baseline:  & \textbf{anti mesures dumping}   & correct morphemes, but bad order \\
+    Target clustered: & les \textbf{mesures antidumping} & ...although +dumping+ is simply propagated as is from the Dutch input \\
   \end{tabular}
 \end{table}
 
 \section{Conclusions and Future Work}
-Future possibilities: combine with back-off grammar work, e.g. back-off from a labelled grammar (trained on segmented data) to a Hiero grammar (trained on the unsegmented data).
-express input as a lattice. That way there's no hard decision about whether to use words or morphemes. It would also require changes to decoding: e.g. morphemes will need to be combined into words whenever appropriate and scored against a LM trained on full words.
+We have presented an approach to using a Hiero-type SCFG to perform translation at the morphology level.
+Context-based clustering of morpheme sequences allowed grammar rules to be constrained in way that should limit the formation of non-sensical words.
 
-need to find better solutions to the alignment problems
+We found that clustering \textit{per se} succeeded to a large extent.
+The clusters we analysed contained strong and clear patterns, learning for example a fine-grained distinction between noun gender in Dutch.
+
+In the context of translation, our approach managed to formulate novel words that were not observed in the training data, and this was a major part of our aim.
+On the whole, however, our approach degrades translation quality.
+
+Although our translation results were negative, we would not completely discard the idea of using a SCFG in this way. 
+The main problem is that segmenting the data introduces harmful errors into the word alignments.
+Bad alignments mean we're screwed from the start. \textit{Thinking out loud. Tone will be fixed later...}
+
+So we have to fix them. 
+
+A further aspect is that translation at the morpheme level is not appropriate in all cases.
+We really only want it to be used when confronting rare words or are called upon to create new ones.
+
+A logical next step will be to combine our approach using the back-off grammar work discussed elsewhere in this report.
+The idea would be to train a labelled grammar on segmented data (as we have done here) but allow back-off to a grammar trained on the unsegmented data.
+This would require sentences to be input to the decoder as lattices, so that there is no hard decision about whether words or morphemes are the best granularity of representation.
+This would require modifying the decoding algorithm to recombine morphemes into words when appropriate and score against a language model trained on full words.
+
+
+%Future possibilities: combine with back-off grammar work, e.g. back-off from a labelled grammar (trained on segmented data) to a Hiero grammar (trained on the unsegmented data).
+%express input as a lattice. That way there's no hard decision about whether to use words or morphemes. It would also require changes to decoding: e.g. morphemes will need to be combined into words whenever appropriate and scored against a LM trained on full words.
+%
+%need to find better solutions to the alignment problems
 
 
 
