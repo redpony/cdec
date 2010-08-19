@@ -10,6 +10,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits.hpp>
 #include <cstring>
+#include <boost/functional/hash.hpp>
 #ifdef USE_BOOST_SERIALIZE
 # include <boost/serialization/split_member.hpp>
 # include <boost/serialization/access.hpp>
@@ -35,8 +36,8 @@ public:
   friend inline std::ostream & operator << (std::ostream &o,Self const& s) {
     o<<'[';
     for (unsigned i=0,e=s.size();i<e;++i) {
-        if (i) o<<' ';
-        o<<s[i];
+      if (i) o<<' ';
+      o<<s[i];
     }
     o<<']';
     return o;
@@ -57,9 +58,9 @@ public:
   bool empty() const { return size() == 0; }
 
   iterator begin() { return array; }
-  iterator end() { return array + size(); }
+  iterator end() { return array + sz; }
   const_iterator begin() const { return array; }
-  const_iterator end() const { return array + size(); }
+  const_iterator end() const { return array + sz; }
 
   reference operator[](size_type pos) { return array[pos]; }
   const_reference operator[](size_type pos) const { return array[pos]; }
@@ -75,29 +76,79 @@ public:
 
   ValueArray() : sz(0), array(NULL) {}
 
-  explicit ValueArray(size_type s, const_reference t = T())
-  {
-    init(s,t);
+  friend inline std::size_t hash_value(Self const& x) {
+    return boost::hash_range(x.begin(),x.end());
   }
 
 protected:
+  void destroy()
+  {
+    // it's cool that this destroys in reverse order of construction, but why bother?
+    for (size_type i = sz; i != 0;)
+      A::destroy(array + --i);
+  }
+  void dealloc() {
+    if (array != NULL) A::deallocate(array,sz);
+    sz=0;
+  }
+  void alloc(size_type s) {
+    array=A::allocate(sz);
+    sz=s;
+  }
+
+  void realloc(size_type s) {
+    if (sz!=s) {
+      dealloc();
+      alloc(s);
+    }
+  }
+
+  template <class I,class F>
+  inline void init_range_map(I itr, I end,F const& f) {
+    alloc(std::distance(itr,end));
+    copy_construct_map(itr,end,array,f);
+  }
+  template <class I>
+  inline void init_range(I itr, I end) {
+    alloc(std::distance(itr,end));
+    copy_construct(itr,end,array);
+  }
   inline void init(size_type s, const_reference t = T()) {
     sz=s;
     array=s ? A::allocate(s) : 0;
     for (size_type i = 0; i != sz; ++i) { A::construct(array + i,t); }
   }
 public:
+  explicit ValueArray(size_type s, const_reference t = T())
+  {
+    init(s,t);
+  }
   void resize(size_type s, const_reference t = T()) {
     clear();
     init(s,t);
   }
 
   template <class I>
+  void reinit(I itr, I end) {
+    clear();
+    init_range(itr,end);
+  }
+
+  template <class I,class F>
+  void reinit_map(I itr, I end,F const& map) {
+    clear();
+    init_range_map(itr,end,map);
+  }
+
+  template <class I>
   ValueArray(I itr, I end)
-    : sz(std::distance(itr,end))
-    , array(A::allocate(sz))
   {
-    copy_construct(itr,end,array);
+    init_range(itr,end);
+  }
+  template <class I,class F>
+  ValueArray(I itr, I end,F const& map)
+  {
+    init_range_map(itr,end,map);
   }
 
   ~ValueArray() {
@@ -135,12 +186,11 @@ public:
 #endif
 
 #undef VALUE_ARRAY_BINOP
+
   void clear()
   {
-    for (size_type i = sz; i != 0; --i) {
-      A::destroy(array + (i - 1));
-    }
-    if (array != NULL) A::deallocate(array,sz);
+    destroy();
+    dealloc();
   }
 
   void swap(ValueArray& other)
@@ -177,41 +227,48 @@ public:
   boost::disable_if<
     boost::is_integral<Range>
    , ValueArray>::type& operator=(Range const& other)
-  {
-    ValueArray(other).swap(*this);
-    return *this;
-  }
+   {
+     ValueArray(other).swap(*this);
+     return *this;
+   }
 
 private:
-//friend class boost::serialization::access;
 
-template <class I1, class I2>
-void copy_construct(I1 itr, I1 end, I2 into)
-{
-  for (; itr != end; ++itr, ++into) A::construct(into,*itr);
-}
+  template <class I1, class I2>
+  void copy_construct(I1 itr, I1 end, I2 into)
+  {
+    for (; itr != end; ++itr, ++into) A::construct(into,*itr);
+  }
 
-template <class Archive>
-void save(Archive& ar, unsigned int version) const
-{
-  ar << sz;
-  for (size_type i = 0; i != sz; ++i) ar << at(i);
-}
+  template <class I1, class I2,class F>
+  void copy_construct_map(I1 itr, I1 end, I2 into,F const& f)
+  {
+    for (; itr != end; ++itr, ++into) A::construct(into,f(*itr));
+  }
+  //friend class boost::serialization::access;
+public:
+  template <class Archive>
+  void save(Archive& ar, unsigned int version) const
+  {
+    ar << sz;
+    for (size_type i = 0; i != sz; ++i) ar << at(i);
+  }
 
-template <class Archive>
-void load(Archive& ar, unsigned int version)
-{
-  size_type s;
-  ar >> s;
-  ValueArray v(s);
-  for (size_type i = 0; i != s; ++i) ar >> v[i];
-  this->swap(v);
-}
+  template <class Archive>
+  void load(Archive& ar, unsigned int version)
+  {
+    size_type s;
+    ar >> s;
+    ValueArray v(s);
+    for (size_type i = 0; i != s; ++i) ar >> v[i];
+    this->swap(v);
+  }
 #ifdef USE_BOOST_SERIALIZE
-BOOST_SERIALIZATION_SPLIT_MEMBER()
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif
-size_type sz;
-pointer array;
+private:
+  size_type sz;
+  pointer array;
 };
 
 
