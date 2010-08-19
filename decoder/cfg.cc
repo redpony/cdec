@@ -308,7 +308,7 @@ struct add_virtual_rules {
     //TODO: don't actually build substrings of rhs; define key type that stores ref to rhs in new_nts by index (because it may grow), and also allows an int* [b,e) range to serve as key (i.e. don't insert the latter type of key).
     int n=rhs.size();
     if (n<=2) return 0;
-    int longest1=1;
+    int longest1=1; // all this other stuff is not uninitialized when used, based on checking this and other things (it's complicated, learn to prove theorems, gcc)
     int mid=n/2;
     int best_k;
     enum {HAVE_L=-1,HAVE_NONE=0,HAVE_R=1};
@@ -445,7 +445,7 @@ void CFG::BinarizeSplit(CFGBinarize const& b) {
     Rule &r=newr[i];expr;  } // NOTE: must use indices since we'll be adding rules as we iterate.
 
   int n_changed_total=0;
-  int n_changed;
+  int n_changed=0; // quiets a warning
 #define CFG_SPLIT_PASS(N,free,just1) \
   for (int pass=0;pass<b.N;++pass) { \
     n_changed=0; \

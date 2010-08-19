@@ -5,6 +5,6 @@ if [ "$lm" ] ; then
     lmargs1="LanguageModel lm.gz -n LM"
 fi
 set -x
-$gdb $d/cdec -c $d/${cfg:=cdec-fsa}.ini -i $d/${in:=1dev.ur} $lmargs0 "$lmargs1" --show_features --show_config --show_weights "$@"
+$gdb ${cdec:=$d/cdec} -c $d/${cfg:=cdec-fsa}.ini -i $d/${in:=1dev.ur} $lmargs0 "$lmargs1" --show_features --show_config --show_weights "$@"
 set +x
 }
