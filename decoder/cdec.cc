@@ -881,5 +881,7 @@ int main(int argc, char** argv) {
       cout << "0\t**OBJ**=" << acc_obj << ';' << acc_vec << endl << flush;
     }
   }
+  exit(0); // maybe this will save some destruction overhead.  or g++ without cxx_atexit needed?
+  return 0;
 }
 

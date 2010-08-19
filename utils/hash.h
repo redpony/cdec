@@ -60,6 +60,34 @@ typename H::mapped_type & get_default(H &ht,K const& k,typename H::mapped_type c
   return const_cast<typename H::mapped_type &>(ht.insert(typename H::value_type(k,v)).first->second);
 }
 
+// get_or_construct w/ no arg: just use ht[k]
+template <class H,class K,class C0>
+typename H::mapped_type & get_or_construct(H &ht,K const& k,C0 const& c0) {
+  typedef typename H::mapped_type V;
+  typedef typename H::value_type KV;
+  typename H::iterator_type i=ht.find(k);
+  if (i==ht.end()) {
+    return const_cast<V &>(ht.insert(KV(k,V(c0))).first->second);
+  } else {
+    return i->second;
+  }
+}
+
+
+// get_or_call (0 arg)
+template <class H,class K,class F>
+typename H::mapped_type & get_or_call(H &ht,K const& k,F const& f) {
+  typedef typename H::mapped_type V;
+  typedef typename H::value_type KV;
+  typename H::iterator_type i=ht.find(k);
+  if (i==ht.end()) {
+    return const_cast<V &>(ht.insert(KV(k,f())).first->second);
+  } else {
+    return i->second;
+  }
+}
+
+
 // the below could also return a ref to the mapped max/min.  they have the advantage of not falsely claiming an improvement when an equal value already existed.  otherwise you could just modify the get_default and if equal assume new.
 template <class H,class K>
 bool improve_mapped_max(H &ht,K const& k,typename H::mapped_type const& v) {

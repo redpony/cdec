@@ -243,7 +243,10 @@ void show_all_features(std::vector<FFp> const& models_,DenseWeightVector &weight
   return show_features(all_features(models_,weights_,&warn,warn_fid_0),weights_,out,warn,warn_zero_wt);
 }
 
-typedef std::string FFState; //FIXME: only context.data() is required to be contiguous, and it becomes invalid after next string operation.  use ValueArray instead? (higher performance perhaps, save a word due to fixed size)
+typedef ValueArray<char> FFState; // this is about 10% faster than string.
+//typedef std::string FFState;
+
+//FIXME: only context.data() is required to be contiguous, and it becomes invalid after next string operation.  use ValueArray instead? (higher performance perhaps, save a word due to fixed size)
 typedef std::vector<FFState> FFStates;
 
 // this class is a set of FeatureFunctions that can be used to score, rescore,

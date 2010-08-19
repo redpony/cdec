@@ -1,3 +1,4 @@
+#include "maybe_update_bound.h"
 #include "apply_fsa_models.h"
 #include "hg.h"
 #include "ff_fsa_dynamic.h"
@@ -20,6 +21,7 @@ using namespace std;
 
 //impl details (not exported).  flat namespace for my ease.
 
+typedef CFG::RHS RHS;
 typedef CFG::BinRhs BinRhs;
 typedef CFG::NTs NTs;
 typedef CFG::NT NT;
@@ -50,7 +52,7 @@ with 3, we predict all sorts of useless items - that won't give us our goal A an
 */
 
 #define TRIE_START_LHS 1
-// option 1) above.  0 would be option 3), which is dumb
+// 1 is option 1) above.  0 would be option 3), which is dumb
 
 // if we don't greedy-binarize, we want to encode recognized prefixes p (X -> p . rest) efficiently.  if we're doing this, we may as well also push costs so we can best-first select rules in a lazy fashion.  this is effectively left-branching binarization, of course.
 template <class K,class V,class Hash>
@@ -61,58 +63,169 @@ struct fsa_map_type {
 #define FSA_MAP(k,v) fsa_map_type<k,v,boost::hash<k> >::type
 typedef WordID LHS; // so this will be -NTHandle.
 
+struct get_second {
+  template <class P>
+  typename P::second_type const& operator()(P const& p) const {
+    return p.second;
+  }
+};
+
+struct PrefixTrieNode;
+struct PrefixTrieEdge {
+  prob_t p;// viterbi additional prob, i.e. product over path incl. p_final = total rule prob
+  //DPFSA()
+  // we can probably just store deltas, but for debugging remember the full p
+  //    prob_t delta; //
+  PrefixTrieNode *dest;
+  WordID w; // for lhs, this will be positive NTHandle instead
+
+  // for sorting most probable first in adj; actually >(p)
+  inline bool operator <(PrefixTrieEdge const& o) const {
+    return o.p<p;
+  }
+};
 
 struct PrefixTrieNode {
-  prob_t backward; // (viterbi) backward prob (for cost pushing)
-#
+  prob_t p; // viterbi (max prob) of rule this node leads to - when building.  telescope later onto edges for best-first.
 #if TRIE_START_LHS
+  bool final; // may also have successors, of course
+  prob_t p_final; // additional prob beyond what we already paid. while building, this is the total prob
+  // instead of completed map, we have trie start w/ lhs.
+  NTHandle lhs; // instead of storing this in Item.
+#else
   typedef FSA_MAP(LHS,RuleHandle) Completed; // can only have one rule w/ a given signature (duplicates should be collapsed when making CFG).  but there may be multiple rules, with different LHS
   Completed completed;
-#else
-  bool complete; // may also have successors, of course
 #endif
-  // instead of completed map, we have trie start w/ lhs.?
+  explicit PrefixTrieNode(prob_t p=1) : p(p),final(false) {  }
 
   // outgoing edges will be ordered highest p to worst p
-  struct Edge {
-    DPFSA(prob_t p;) // we can probably just store deltas, but for debugging remember the full p
-    prob_t delta; // p[i]=delta*p[i-1], with p(-1)=1
-    PrefixTrieNode *dest;
-    WordID w;
-  };
-  typedef FSA_MAP(WordID,Edge) BuildAdj;
-  BuildAdj build_adj; //TODO: move builder elsewhere?
-  typedef ValueArray<Edge>  Adj;
-//  typedef vector<Edge> Adj;
+
+  typedef FSA_MAP(WordID,PrefixTrieEdge) PrefixTrieEdgeFor;
+public:
+  PrefixTrieEdgeFor edge_for; //TODO: move builder elsewhere?  then need 2nd hash or edge include pointer to builder.  just clear this later
+  void index_adj() {
+    index_adj(edge_for);
+  }
+
+  template <class M>
+  void index_adj(M &m) {
+    m.clear();
+    for (int i=0;i<adj.size();++i) {
+      PrefixTrieEdge const& e=adj[i];
+      m[e.w]=e;
+    }
+  }
+
+  // call only once.
+  void done_building_r() {
+    done_building();
+    for (int i=0;i<adj.size();++i)
+      adj[i].dest->done_building_r();
+  }
+
+  // for done_building; compute incremental (telescoped) edge p
+  PrefixTrieEdge const& operator()(PrefixTrieEdgeFor::value_type &pair) const {
+    PrefixTrieEdge &e=pair.second;
+    e.p=(e.dest->p)/p;
+    return e;
+  }
+
+  // call only once.
+  void done_building() {
+    adj.reinit_map(edge_for.begin(),edge_for.end(),*this);
+    if (final)
+      p_final/=p;
+    std::sort(adj.begin(),adj.end());
+  }
+
+  typedef ValueArray<PrefixTrieEdge>  Adj;
+//  typedef vector<PrefixTrieEdge> Adj;
   Adj adj;
-  //TODO:
+
+  typedef WordID W;
+  typedef NTHandle N; // not negative
+  typedef W const* RI;
+
+  // let's compute p_min so that every rule reachable from the created node has p at least this low.
+  PrefixTrieNode *improve_edge(PrefixTrieEdge const& e,prob_t rulep) {
+    PrefixTrieNode *d=e.dest;
+    maybe_increase_max(d->p,rulep);
+    return d;
+  }
+
+  PrefixTrieNode *build(W w,prob_t rulep) {
+    PrefixTrieEdgeFor::iterator i=edge_for.find(w);
+    if (i!=edge_for.end())
+      return improve_edge(i->second,rulep);
+    PrefixTrieEdge &e=edge_for[w];
+    return e.dest=new PrefixTrieNode(rulep);
+  }
+
+  void set_final(prob_t pf) {
+    final=true;p_final=pf;
+  }
+
+#ifdef HAVE_TAIL_RECURSE
+  // add string i...end
+  void build(RI i,RI end, prob_t rulep) {
+    if (i==end) {
+      set_final(rulep);
+    } else
+    // tail recursion:
+      build(*i)->build(i+1,end,rulep);
+  }
+#endif
 };
 
 #if TRIE_START_LHS
-//Trie starts with lhs, then continues w/ rhs
+//Trie starts with lhs (nonneg index), then continues w/ rhs (mixed >0 word, else NT)
 #else
 // just rhs.  i think item names should exclude lhs if possible (most sharing).  get prefix cost w/ forward = viterbi (global best-first admissable h only) and it should be ok?
 #endif
 
 // costs are pushed.
 struct PrefixTrie {
-  CFG const* cfgp;
+  CFG *cfgp;
+  Rules const* rulesp;
+  Rules const& rules() const { return *rulesp; }
   CFG const& cfg() const { return *cfgp; }
-  PrefixTrie(CFG const& cfg) : cfgp(&cfg) {
+  PrefixTrieNode root;
 
+  PrefixTrie(CFG &cfg) : cfgp(&cfg),rulesp(&cfg.rules) {
+//    cfg.SortLocalBestFirst(); // instead we'll sort in done_building_r
+    cfg.VisitRuleIds(*this);
+    root.done_building_r();
+    root.index_adj(); // maybe the index we use for building trie should be replaced by a much larger/faster table since we look up by lhs many times in parsing?
 //TODO:
+  }
+  void operator()(int ri) const {
+    Rule const& r=rules()[ri];
+    prob_t p=r.p;
+    PrefixTrieNode *n=const_cast<PrefixTrieNode&>(root).build(r.lhs,p);
+    for (RHS::const_iterator i=r.rhs.begin(),e=r.rhs.end();;++i) {
+      if (i==e) {
+        n->set_final(p);
+        break;
+      }
+      n=n->build(*i,p);
+    }
+#ifdef HAVE_TAIL_RECURSE
+    root.build(r.lhs,r.p)->build(r.rhs,r.p);
+#endif
   }
 };
 
 // these should go in a global best-first queue
 struct Item {
   prob_t forward;
+  // NOTE: sum = viterbi (max)
   /* The forward probability alpha_i(X[k]->x.y) is the sum of the probabilities of all
      constrained paths of length that end in state X[k]->x.y*/
   prob_t inner;
   /* The inner probability beta_i(X[k]->x.y) is the sum of the probabilities of all
      paths of length i-k that start in state X[k,k]->.xy and end in X[k,i]->x.y, and generate the input symbols x[k,...,i-1] */
-
+  PrefixTrieNode *dot; // dot is a function of the stuff already recognized, and gives a set of suffixes y to complete to finish a rhs for lhs() -> dot y
+  NTHandle lhs() const { return dot->lhs; }
 };
 
 }//anon ns
@@ -166,7 +279,7 @@ void ApplyFsa::ApplyBottomUp()
 void ApplyFsa::ApplyEarley()
 {
   hgcfg.GiveCFG(cfg);
-  cfg.SortLocalBestFirst();
+  PrefixTrie rt(cfg);
   // don't need to uniq - option to do that already exists in cfg_options
   //TODO:
 }
