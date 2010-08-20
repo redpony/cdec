@@ -40,7 +40,6 @@ int main(int argc, char **argv)
       ;
     options_description config_options("Allowed options");
     config_options.add_options()
-      ("help,h", "print help message")
       ("data,d", value<string>(), "file containing the documents and context terms")
       ("topics,t", value<int>()->default_value(50), "number of topics")
       ("document-topics-out,o", value<string>(), "file to write the document topics to")
