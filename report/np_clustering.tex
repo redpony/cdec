@@ -124,6 +124,22 @@ POS-only & 56.2 & 22.3 \\
 
 Because the margin of improvement from the 1-category baseline to the supervised condition is much more substantial in the Urdu-English condition than in the BTEC condition, some experiments were only carried out on Urdu.
 
+\subsection{Features in the multi-category systems}
+
+The features used in the baseline system to evaluate translation hypotheses were generalized to exploit the presence of category labels.  In addition to the language model and word penalty, we made use of the following features to score each rule $\textrm{Y} \rightarrow \langle \textbf{f},\textbf{e} \rangle$ in a derivation.
+
+\begin{enumerate}
+\item The lexical translation probability of the words in both phrases, $\textrm{{\emph lex}}(\textbf{e}|\textbf{f})$, as defined in \cite{Koehn2003}.
+\item The inverse lexical translation probability, $\textrm{{\emph lex}}(\textbf{f}|\textbf{e})$.
+\item The frequency of occurrence of the LHS category, $f(\textrm{Y})$.
+\item The relative frequency of \textbf{e} given \textbf{f}, collapsing all non-terminals into the symbol X, $f_{\textbf{X}}(\textbf{e}|\textbf{f})$. This is equivalent to the relative frequency of the rule in the 1-category `Hiero' grammar.
+\item The inverse relative frequency, $f_{\textbf{X}}(\textbf{f}|\textbf{e})$.
+\item The relative frequency of $\langle \textbf{f}, \textbf{e} \rangle$ given Y, $f(\textbf{f}, \textbf{e} | \textrm{Y})$.
+\item The log rule count, $\log C(\textrm{Y} \rightarrow \langle \textbf{f},\textbf{e} \rangle)$.
+\item A feature with value 1 (creates a count of the number of rules in the derivation).
+\end{enumerate}
+
+
 \subsection{Number of categories}
 
 \begin{table}[h]
