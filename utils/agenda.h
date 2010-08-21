@@ -37,7 +37,7 @@
  */
 
 #include "best.h"
-#include "hash.h"
+#include "intern_pool.h"
 #include "d_ary_heap.h"
 #include "lvalue_pmap.h"
 #include <vector>
@@ -76,18 +76,24 @@ PMAP_MEMBER_INDIRECT(LocationMap,unsigned,location)
 PMAP_MEMBER_INDIRECT(PriorityMap,best_t,priority)
 
 // LocMap and PrioMap are boost property maps put(locmap,key,size_t), Better(get(priomap,k1),get(priomap,k2)) means k1 should be above k2 (be popped first).  Locmap and PrioMap may have state; the rest are assumed stateless functors
-template <class Item,class Hash=boost::hash<Item>,class Equal=std::equal_to<Item>,class Better=std::less<Item> >
-struct Agenda {
+template <class Item,class Better=std::less<Item>, /* intern_pool args */ class KeyF=get_key<Item>,class HashKey=boost::hash<typename KeyF::return_type>,class EqKey=std::equal_to<typename KeyF::return_type>, class Pool=boost::object_pool<Item> >
+struct Agenda : intern_pool<Item,KeyF,EqKey,Pool> {
   /* this is less generic than it could be, because I want to use a single hash mapping to intern to canonical mutable object pointers, where the property maps are just lvalue accessors */
+  typedef intern_pool<Item,KeyF,EqKey,Pool> Intern; // inherited because I want to use construct()
+  typedef Item * Handle;
+  typedef LocationMap<Handle> LocMap;
+  typedef PriorityMap<Handle> PrioMap;
+  LocMap locmap;
+  PrioMap priomap;
+  //NOT NEEDED: initialize function object state (there is none)
+
+
 /*
   typedef Item *CanonItem;
   static const std::size_t heap_arity=4; // might be fastest possible (depends on key size probably - cache locality is bad w/ arity=2)
   typedef std::vector<CanonItem> HeapStorage;
   typedef boost::detail::d_ary_heap_indirect<Key,heap_arity,LocMap,PrioMap,Better,HeapStorage> Heap;
   HASH_SET<Key,Hash,Equal> queued;
-  typedef LocationMap<ItemP>
-  LocMap locmap;
-  PrioMap priomap;
   Agenda(LocMap const& lm=LocMap(),PrioMap const& pm=PrioMap()) : locmap(lm), priomap(pm) {  }
 */
 };

@@ -291,7 +291,7 @@ struct ItemP {
 
 struct Chart {
   //Agenda<Item> a;
-  //typedef HASH_MAP(Item,ItemP,boost::hash<Item>) Items;
+  //typedef HASH_MAP<Item,ItemP,boost::hash<Item> > Items;
   //typedef Items::iterator FindItem;
   //typedef std::pair<FindItem,bool> InsertItem;
 //  Items items;
