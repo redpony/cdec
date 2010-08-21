@@ -1,6 +1,9 @@
 #ifndef MAX_PLUS_H_
 #define MAX_PLUS_H_
 
+#define MAX_PLUS_ORDER 0
+#define MAX_PLUS_DEBUG(x)
+
 // max-plus algebra.  ordering a > b really means that (i.e. default a<b sorting will do worst (closest to 0) first.  so get used to passing predicates like std::greater<MaxPlus<T> > around
 // x+y := max{x,y}
 // x*y := x+y
@@ -13,11 +16,9 @@
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include <cassert>
 #include <limits>
 #include "semiring.h"
-#define TROPICAL_DEBUG(x)
-#undef LOGVAL_LOG0
-#define LOGVAL_LOG0 -std::numeric_limits<T>::infinity()
 
 template <class T>
 class MaxPlus {
@@ -29,7 +30,7 @@ class MaxPlus {
   MaxPlus(init_0) : v_(LOGVAL_LOG0) {  }
   MaxPlus(int x) : v_(std::log(x)) {}
   MaxPlus(unsigned x) : v_(std::log(x)) { }
-  MaxPlus(double lnx,bool sign) : v_(lnx) { TROPICAL_DEBUG(assert(!sign)); }
+  MaxPlus(double lnx,bool sign) : v_(lnx) { MAX_PLUS_DEBUG(assert(!sign)); }
   MaxPlus(double lnx,init_lnx) : v_(lnx) {}
   static Self exp(T lnx) { return MaxPlus(lnx,false); }
 
@@ -45,19 +46,10 @@ class MaxPlus {
 
   Self& logpluseq(const Self& a) {
     if (a.is_0()) return *this;
-    if (a.s_ == s_) {
-      if (a.v_ < v_) {
-        v_ = v_ + log1p(std::exp(a.v_ - v_));
-      } else {
-        v_ = a.v_ + log1p(std::exp(v_ - a.v_));
-      }
+    if (a.v_ < v_) {
+      v_ = v_ + log1p(std::exp(a.v_ - v_));
     } else {
-      if (a.v_ < v_) {
-        v_ = v_ + log1p(-std::exp(a.v_ - v_));
-      } else {
-        v_ = a.v_ + log1p(-std::exp(v_ - a.v_));
-        s_ = !s_;
-      }
+      v_ = a.v_ + log1p(std::exp(v_ - a.v_));
     }
     return *this;
   }
@@ -131,18 +123,17 @@ class MaxPlus {
 
   // intentionally not defining an operator < or operator > - because you may want to default (for library convenience) a<b means a better than b (i.e. gt)
   inline bool lt(Self const& o) const {
-    return v_<o.v_;
+    return v_ < o.v_;
   }
   inline bool gt(Self const& o) const {
-    return o.v_<v_;
+    return o.v_ > v_;
   }
-  friend inline bool operator==(Self const& lhs, Self const&rhs) {
+  friend inline bool operator==(Self const& lhs, Self const& rhs) {
     return lhs.v_ == rhs.v_;
   }
-  friend inline bool operator!=(Self const& lhs, Self const&rhs) {
+  friend inline bool operator!=(Self const& lhs, Self const& rhs) {
     return lhs.v_ != rhs.v_;
   }
-
   std::size_t hash() const {
     using namespace boost;
     return hash_value(v_);
@@ -153,7 +144,7 @@ class MaxPlus {
 
 /*
   operator T() const {
-    return std::exp(v_);
+  return std::exp(v_);
   }
 */
   T as_float() const {
@@ -167,15 +158,15 @@ template <class T>
 struct semiring_traits<MaxPlus<T> > : default_semiring_traits<MaxPlus<T> > {
   static const bool has_logplus=true;
   static const bool has_besteq=true;
+#if MAX_PLUS_ORDER
+  static const bool have_order=true;
+#endif
 };
 
-
+#if MAX_PLUS_ORDER
 template <class T>
-
-#if 0
-template <class T>
-bool operator=(const MaxPlus<T>& lhs, const MaxPlus<T>& rhs) {
-  return (lhs.v_ <= rhs.v_);
+bool operator<(const MaxPlus<T>& lhs, const MaxPlus<T>& rhs) {
+  return (lhs.v_ < rhs.v_);
 }
 
 template <class T>
