@@ -103,6 +103,12 @@ protected:
     }
   }
 
+  template <class C,class F>
+  inline void init_map(C const& c,F const& f) {
+    alloc(c.size());
+    copy_construct_map(c.begin(),c.end(),array,f);
+  }
+  // warning: std::distance is likely slow on maps (anything other than random access containers.  so container version using size will be better
   template <class I,class F>
   inline void init_range_map(I itr, I end,F const& f) {
     alloc(std::distance(itr,end));
@@ -123,9 +129,23 @@ public:
   {
     init(s,t);
   }
-  void resize(size_type s, const_reference t = T()) {
+  void reinit(size_type s, const_reference t = T()) {
     clear();
     init(s,t);
+  }
+
+  //copy any existing data like std::vector.  not A::construct exception safe.  try blah blah?
+  void resize(size_type s, const_reference t = T()) {
+    pointer na=A::allocate(s);
+    size_type nc=s<sz ? s : sz;
+    size_type i=0;
+    for (;i<nc;++i)
+      A::construct(na+i,array[i]);
+    for (;i<s;++i)
+      A::construct(na+i,t);
+    clear();
+    array=na;
+    sz=s;
   }
 
   template <class I>
@@ -135,9 +155,15 @@ public:
   }
 
   template <class I,class F>
-  void reinit_map(I itr, I end,F const& map) {
+  void reinit_map(I itr,I end,F const& map) {
     clear();
     init_range_map(itr,end,map);
+  }
+  // warning: std::distance is likely slow on maps,lists (anything other than random access containers.  so container version below using size() will be better
+  template <class C,class F>
+  void reinit_map(C const& c,F const& map) {
+    clear();
+    init_map(c,map);
   }
 
   template <class I>
