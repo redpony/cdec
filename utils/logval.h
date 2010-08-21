@@ -110,10 +110,10 @@ class LogVal {
 
   //remember, s_ means negative.
   inline bool lt(Self const& o) const {
-    return s_ ? (!o.s_ || o.v_<v_) : (o.s_ || v_<o.v_);
+    return s_==o.s_ ? v_ < o.v_ : s_ > o.s_;
   }
   inline bool gt(Self const& o) const {
-    return s_ ? (o.s_ && v_<o.v_) : (!o.s_ && o.v_<v_);
+    return s_==o.s_ ? o.v_ < v_ : s_ < o.s_;
   }
 
   Self operator-() const {
@@ -148,6 +148,7 @@ template <class T>
 struct semiring_traits<LogVal<T> > : default_semiring_traits<LogVal<T> > {
   static const bool has_logplus=true;
   static const bool has_besteq=true;
+  static const bool has_order=true;
   static const bool has_subtract=true;
   static const bool has_negative=true;
 };

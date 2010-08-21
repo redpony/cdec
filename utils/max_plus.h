@@ -1,7 +1,6 @@
 #ifndef MAX_PLUS_H_
 #define MAX_PLUS_H_
 
-#include
 // max-plus algebra.  ordering a > b really means that (i.e. default a<b sorting will do worst (closest to 0) first.  so get used to passing predicates like std::greater<MaxPlus<T> > around
 // x+y := max{x,y}
 // x*y := x+y
@@ -43,11 +42,6 @@ class MaxPlus {
   static Self e() { return Self(1,false); }
   void logeq(const T& v) { v_ = v; }
   bool signbit() const { return false; }
-
-  std::size_t hash_impl() const {
-    using namespace boost;
-    return hash_value(v_);
-  }
 
   Self& logpluseq(const Self& a) {
     if (a.is_0()) return *this;
@@ -116,15 +110,15 @@ class MaxPlus {
   }
 
 // copy elision - as opposed to explicit copy of Self const& o1, we should be able to construct Logval r=a+(b+c) as a single result in place in r.  todo: return std::move(o1) - C++0x
-  friend inline operator+(Self a,Self const& b) {
+  friend inline Self operator+(Self a,Self const& b) {
     a+=b;
     return a;
   }
-  friend inline operator*(Self a,Self const& b) {
+  friend inline Self operator*(Self a,Self const& b) {
     a*=b;
     return a;
   }
-  friend inline operator/(Self a,Self const& b) {
+  friend inline Self operator/(Self a,Self const& b) {
     a/=b;
     return a;
   }
@@ -148,6 +142,15 @@ class MaxPlus {
   friend inline bool operator!=(Self const& lhs, Self const&rhs) {
     return lhs.v_ != rhs.v_;
   }
+
+  std::size_t hash() const {
+    using namespace boost;
+    return hash_value(v_);
+  }
+  friend inline std::size_t hash_value(Self const& x) {
+    return x.hash();
+  }
+
 /*
   operator T() const {
     return std::exp(v_);
@@ -171,6 +174,11 @@ template <class T>
 
 #if 0
 template <class T>
+bool operator=(const MaxPlus<T>& lhs, const MaxPlus<T>& rhs) {
+  return (lhs.v_ <= rhs.v_);
+}
+
+template <class T>
 bool operator<=(const MaxPlus<T>& lhs, const MaxPlus<T>& rhs) {
   return (lhs.v_ <= rhs.v_);
 }
@@ -185,19 +193,5 @@ bool operator>=(const MaxPlus<T>& lhs, const MaxPlus<T>& rhs) {
   return (lhs.v_ >= rhs.v_);
 }
 #endif
-
-
-template <class T>
-std::size_t hash_value(const MaxPlus<T>& x) { return x.hash_impl(); }
-
-template <class T>
-bool operator==(const MaxPlus<T>& lhs, const MaxPlus<T>& rhs) {
-  return (lhs.v_ == rhs.v_) && (lhs.s_ == rhs.s_);
-}
-
-template <class T>
-bool operator!=(const MaxPlus<T>& lhs, const MaxPlus<T>& rhs) {
-  return !(lhs == rhs);
-}
 
 #endif
