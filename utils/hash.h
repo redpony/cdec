@@ -9,16 +9,22 @@
 #ifdef HAVE_SPARSEHASH
 # include <google/dense_hash_map>
 # define HASH_MAP google::dense_hash_map
+# define HASH_SET google::dense_hash_set
 # define HASH_MAP_RESERVED(h,empty,deleted) do { h.set_empty_key(empty); h.set_deleted_key(deleted); } while(0)
 # define HASH_MAP_EMPTY(h,empty) do { h.set_empty_key(empty); } while(0)
 #else
 # include <tr1/unordered_map>
 # define HASH_MAP std::tr1::unordered_map
+# define HASH_SET std::tr1::unordered_set
 # define HASH_MAP_RESERVED(h,empty,deleted)
 # define HASH_MAP_EMPTY(h,empty)
 #endif
 
 #define BOOST_HASHED_MAP(k,v) HASH_MAP<k,v,boost::hash<k> >
+
+namespace {
+const unsigned GOLDEN_MEAN_FRACTION=2654435769U;
+}
 
 // assumes C is POD
 template <class C>

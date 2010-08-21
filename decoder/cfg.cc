@@ -8,6 +8,7 @@
 #include "fast_lexical_cast.hpp"
 //#include "indices_after.h"
 #include "show.h"
+#include "null_traits.h"
 
 #define DUNIQ(x) x
 #define DBIN(x)
@@ -31,6 +32,7 @@ using namespace std;
 typedef CFG::Rule Rule;
 typedef CFG::NTOrder NTOrder;
 typedef CFG::RHS RHS;
+typedef CFG::BinRhs BinRhs;
 
 /////index ruleids:
 void CFG::UnindexRules() {
@@ -166,11 +168,11 @@ void CFG::SortLocalBestFirst(NTHandle ni) {
 /////binarization:
 namespace {
 
-CFG::BinRhs null_bin_rhs(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
+BinRhs null_bin_rhs(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
 
 // index i >= N.size()?  then it's in M[i-N.size()]
 //WordID first,WordID second,
-string BinStr(CFG::BinRhs const& b,CFG::NTs const& N,CFG::NTs const& M)
+string BinStr(BinRhs const& b,CFG::NTs const& N,CFG::NTs const& M)
 {
   int nn=N.size();
   ostringstream o;
@@ -203,7 +205,7 @@ string BinStr(RHS const& r,CFG::NTs const& N,CFG::NTs const& M)
 }
 
 
-WordID BinName(CFG::BinRhs const& b,CFG::NTs const& N,CFG::NTs const& M)
+WordID BinName(BinRhs const& b,CFG::NTs const& N,CFG::NTs const& M)
 {
   return TD::Convert(BinStr(b,N,M));
 }
@@ -213,22 +215,27 @@ WordID BinName(RHS const& b,CFG::NTs const& N,CFG::NTs const& M)
   return TD::Convert(BinStr(b,N,M));
 }
 
+/*
 template <class Rhs>
 struct null_for;
 
-typedef CFG::BinRhs BinRhs;
 
 template <>
 struct null_for<BinRhs> {
   static BinRhs null;
 };
-BinRhs null_for<BinRhs>::null(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
 
 template <>
 struct null_for<RHS> {
   static RHS null;
 };
-RHS null_for<RHS>::null(1,std::numeric_limits<int>::min());
+*/
+
+template <>
+BinRhs null_traits<BinRhs>::null(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
+
+template <>
+RHS null_traits<RHS>::null(1,std::numeric_limits<int>::min());
 
 template <class Rhs>
 struct add_virtual_rules {
@@ -243,7 +250,7 @@ struct add_virtual_rules {
   R2L rhs2lhs; // an rhs maps to this -virtntid, or original id if length 1
   bool name_nts;
   add_virtual_rules(CFG &cfg,bool name_nts=false) : nts(cfg.nts),rules(cfg.rules),newnt(-nts.size()),newruleid(rules.size()),name_nts(name_nts) {
-    HASH_MAP_EMPTY(rhs2lhs,null_for<Rhs>::null);
+    HASH_MAP_EMPTY(rhs2lhs,null_traits<Rhs>::null);
   }
   NTHandle get_virt(Rhs const& r) {
     NTHandle nt=get_default(rhs2lhs,r,newnt);
