@@ -26,11 +26,17 @@ TEST_F(LogValTest,Order) {
   EXPECT_FALSE(a < a);
 }
 
-TEST_F(LogValTest,Invert) {
+TEST_F(LogValTest,Negate) {
   LogVal<double> x(-2.4);
   LogVal<double> y(2.4);
-  y.invert();
+  y.negate();
   EXPECT_FLOAT_EQ(x,y);
+}
+
+TEST_F(LogValTest,Inverse) {
+  LogVal<double> x(1/2.4);
+  LogVal<double> y(2.4);
+  EXPECT_FLOAT_EQ(x,y.inverse());
 }
 
 TEST_F(LogValTest,Minus) {
