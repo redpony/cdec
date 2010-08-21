@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <limits>
+#include <cassert>
 #include "semiring.h"
 
 //TODO: template for supporting negation or not - most uses are for nonnegative "probs" only; probably some 10-20% speedup available
