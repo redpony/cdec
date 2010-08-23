@@ -64,8 +64,8 @@ The final sample drawn from the model was used to estimate $p(z|\textbf{c},\p)$,
 
 \begin{figure}
 \begin{center}
-\includegraphics[scale=0.75]{pyp_clustering/llh.pdf}
-\vspace{-0.3cm}
+\includegraphics[scale=0.5]{pyp_clustering/llh.pdf}
+\vspace{-0.7cm}
 \end{center}
 \caption{Log-likelihood versus number of samples with 10 categories (red circles) and 25 categories (blue diamonds) on the Urdu data, 1 target word on either side, hierarchical $\theta_0$, uniform $\phi_0$.}
 \label{fig:llh}
@@ -99,7 +99,7 @@ Num. references & 16 & 4
 \label{tab:corpbtecur}
 \end{table}%
 
-\subsection{Features used}
+\subsection{Translation system features}
 
 In addition to the language model and word penalty, we made use of the following features to score each rule $\textrm{Y} \rightarrow \langle \textbf{f},\textbf{e} \rangle$ used in a derivation.  Some features are meaningful only in the context of multi-category grammars.
 
@@ -116,11 +116,13 @@ In addition to the language model and word penalty, we made use of the following
 
 \noindent The above feature weights were tuned using the minimum error rate training algorithm (\textsc{mert}), to optimize the 1-best \textsc{bleu} on a held-out development set.
 
-\subsection{Baseline and benchmark systems}
+\subsection{Baseline and supervised benchmark systems}
 
-We provide two baseline systems: a single-category system constructed using the procedure described by \cite{chiang:2007} and a system constructed by assigning categories to each phrasal occurrence in the training data.  Additionally, we provide a benchmark system using supervised English (target) language parse trees \citep{samt}.  Table~\ref{tab:npbaselines} summarizes these baseline conditions.
+We provide a number of baselines to compare our unsupervised syntax systems against.  The most important is a single-category system constructed using the procedure described by \cite{chiang:2007} The single-category baseline represents the current state-of-the-art for systems that do not utilize supervised syntax or syntax proxies (like POS tags or syntactic chunks).  The random category baselines are provided to give an indication of how a poorly induced syntactic system (for a given $K$) would perform.
 
-\begin{table}[h]
+Additionally, we also provide two benchmark systems that use a more sensible set of nonterminal categories.  The first uses supervised English (target) language parse trees to annotate the phrases in the grammar as proposed by \cite{samt}.  The second (labeled Target POS-only) uses the target language part-of-speech tag for all rules that generate only a single terminal symbol in the target language, and the symbol X otherwise.
+
+\begin{table}
 \caption{Baseline systems}
 \begin{center}
 \begin{tabular}{r|c|c}
@@ -133,15 +135,17 @@ Random ($K=25$) & 55.4 & 19.7 \\
 Random ($K=50$) &  55.3 & 19.6 \\
 \hline
 Supervised \citep{samt} & 57.8 & 24.5 \\
-POS-only & 56.2 & 22.3 \\
+Target POS-only ({\emph supervised}) & 56.2 & 22.2 \\
 \end{tabular}
 \end{center}
 \label{tab:npbaselines}
 \end{table}%
 
-Because the margin of improvement from the 1-category baseline to the supervised condition is much more substantial in the Urdu-English condition than in the BTEC condition, some experiments were only carried out on Urdu.
-
 \subsection{Number of categories}
+
+The number of categories, $K$, is a free parameter in our nonparametric clustering model.  In this section, we report results exploring the effect of $K$ on translation quality on the BTEC and Urdu translation tasks.
+
+Preliminary experiments indicated that single word (to the left and right) target language contexts learned with with a uniform $\phi_0$ and a hierarchical $\theta_0$ produced useful clusters for translation, so we used this as the definition of the context for this experiment. Table~\ref{tab:npvaryk} summarizes the affect of varying $K$ using a single word of target language context, using a uniform $\phi_0$ and a hierarchical $\theta_0$. 
 
 \begin{table}[h]
 \caption{Effect of varying $K$, single word left and right target language context, uniform $\phi_0$, hierarchical $\theta_0$.}
@@ -152,33 +156,53 @@ Because the margin of improvement from the 1-category baseline to the supervised
 Single category (baseline) & 57.0 & 21.1 \\
 \hline
 $K=10$ & 56.4 & 21.2 \\
-$K=25$ & 57.5 & 22.0 \\
-$K=50$ & 56.2 & \\
+$K=25$ & \textbf{57.5} & \textbf{22.0} \\
+$K=50$ & 56.2 & 21.4 \\
 \end{tabular}
 \end{center}
-\label{tab:npbaselines}
+\label{tab:npvaryk}
 \end{table}%
 
 
 \subsection{Context types}
 
+Because the margin of improvement from the 1-category baseline to the supervised condition is much more substantial in the Urdu-English condition than in the BTEC condition, the experiments in this section were carried out only on Urdu.
+
+
 \begin{table}[h]
-\caption{Effect of varying the context definition and/or smoothing, $K=25$, hierarchical $\theta_0$.}
+\caption{Effect of varying the context definition and/or smoothing, $K=25$, hierarchical $\theta_0$; best results in bold. Baseline and benchmark systems also included for reference.}
 \begin{center}
-\begin{tabular}{r|c|c}
-& BTEC & Urdu \\
+\begin{tabular}{r|c|c|c|c}
+Context Type & $|\textbf{c}|/2$ & $\phi_0$ & \textsc{bleu} & $H(S|Z)$ \\
 \hline
-Single category (baseline) & 57.0 & 21.1 \\
+Baseline ($K=1$) & -- & -- & 20.9 &  4.49 \\
 \hline
-1-word target &  & \\
-1-word source &  & \\
-2-words target & & \\
-2-words source & & \\
+Source word & 1 & uniform & 21.7 & 3.25 \\
+Source word class & 1 & uniform & 20.4 & 3.03 \\
+Target word & 1 & uniform & 22.0 & 2.86 \\
+Target word class & 1 & uniform & \textbf{22.3} & \textbf{2.27} \\
+Source word & 2 & 1-word backoff & 21.3 & 3.41 \\
+Source word class & 2 & 1-class backoff & & 4.20 \\
+Target word & 2 & 1-word backoff & 20.8 & 3.16 \\
+Target word class & 2 & 1-class backoff & 20.1 & 4.06 \\
+\hline
+Supervised \citep{samt} & -- & -- & 24.6 & 0 \\
+Target POS-only ({\emph supervised}) & 1 & uniform & 22.2 & 1.85 \\
 \end{tabular}
 \end{center}
 \label{tab:npbaselines}
 \end{table}%
 
+\subsection{Correlating the intrinsic metric}
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=0.5]{pyp_clustering/correl.pdf}
+\vspace{-0.3cm}
+\end{center}
+\caption{The intrinsic conditional entropy metric $H(S|Z)$ correlates approximately linearly with \textsc{bleu}.}
+\label{fig:intr_correl}
+\end{figure}
 
 
 \section{Discussion}
