@@ -226,7 +226,6 @@ public:
 // just rhs.  i think item names should exclude lhs if possible (most sharing).  get prefix cost w/ forward = viterbi (global best-first admissable h only) and it should be ok?
 #endif
 
-// costs are pushed.
 struct PrefixTrie {
   CFG *cfgp;
   Rules const* rulesp;
@@ -255,7 +254,6 @@ struct PrefixTrie {
     }
 //    root.build(lhs,r.p)->build(r.rhs,r.p);
   }
-
 
 };
 
