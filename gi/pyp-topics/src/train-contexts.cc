@@ -55,6 +55,8 @@ int main(int argc, char **argv)
       ("max-threads", value<int>()->default_value(1), "maximum number of simultaneous threads allowed")
       ("max-contexts-per-document", value<int>()->default_value(0), "Only sample the n most frequent contexts for a document.")
       ("num-jobs", value<int>()->default_value(1), "allows finer control over parallelization")
+      ("temp-start", value<double>()->default_value(1.0), "starting annealing temperature.")
+      ("temp-end", value<double>()->default_value(1.0), "end annealing temperature.")
       ;
 
     cmdline_specific.add(config_options);
@@ -111,7 +113,8 @@ int main(int argc, char **argv)
                       vm["freq-cutoff-start"].as<int>(),
                       vm["freq-cutoff-end"].as<int>(),
                       vm["freq-cutoff-interval"].as<int>(),
-                      vm["max-contexts-per-document"].as<int>());
+                      vm["max-contexts-per-document"].as<int>(),
+                      vm["temp-start"].as<double>(), vm["temp-end"].as<double>());
 
   if (vm.count("document-topics-out")) {
     ogzstream documents_out(vm["document-topics-out"].as<string>().c_str());

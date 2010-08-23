@@ -78,6 +78,8 @@ public:
       return m_keys.at(i);
     }
 
+    const Dict& dict() const { return m_dict; }
+
 protected:
     TermBackoffPtr m_backoff;
     Dict m_dict;
