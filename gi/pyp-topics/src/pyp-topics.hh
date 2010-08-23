@@ -17,7 +17,7 @@ class PYPTopics {
 public:
   typedef std::vector<int> DocumentTopics;
   typedef std::vector<DocumentTopics> CorpusTopics;
-  typedef double F;
+  typedef long double F;
 
 public:
   PYPTopics(int num_topics, bool use_topic_pyp=false, unsigned long seed = 0,
@@ -31,9 +31,10 @@ public:
   void sample_corpus(const Corpus& corpus, int samples,
                      int freq_cutoff_start=0, int freq_cutoff_end=0, 
                      int freq_cutoff_interval=0,
-                     int max_contexts_per_document=0);
+                     int max_contexts_per_document=0,
+                     F temp_start=1.0, F temp_end=1.0);
 
-  int sample(const DocumentId& doc, const Term& term);
+  int sample(const DocumentId& doc, const Term& term, F inv_temp=1.0);
   std::pair<int,F> max(const DocumentId& doc, const Term& term) const;
   std::pair<int,F> max(const DocumentId& doc) const;
   int max_topic() const;
@@ -53,6 +54,8 @@ public:
   F prob(const Term& term, int topic, int level=0) const;
   void decrement(const Term& term, int topic, int level=0);
   void increment(const Term& term, int topic, int level=0);
+
+  F log_likelihood() const;
 
   std::ostream& print_document_topics(std::ostream& out) const;
   std::ostream& print_topic_terms(std::ostream& out) const;

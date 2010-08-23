@@ -472,7 +472,9 @@ PYP<Dish,Hash>::log_restaurant_prob() const {
     assert(false);
   }
   //return log_prob;
-  return log_prob + log_prior();
+  if (log_prob > 0.0)
+    std::cerr << log_prob << std::endl;
+  return log_prob;// + log_prior();
 }
 
 template <typename Dish, typename Hash>
