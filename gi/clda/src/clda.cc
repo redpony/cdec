@@ -61,8 +61,8 @@ int main(int argc, char** argv) {
   double alpha = 50.0;
   const double uniform_topic = 1.0 / num_classes;
   const double uniform_word = 1.0 / TD::NumWords();
-  vector<CCRP<int> > dr(zji.size(), CCRP<int>(disc, beta)); // dr[i] describes the probability of using a topic in document i
-  vector<CCRP<int> > wr(num_classes, CCRP<int>(disc, alpha)); // wr[k] describes the probability of generating a word in topic k
+  vector<CCRP<int> > dr(zji.size(), CCRP<int>(1,1,1,1,disc, beta)); // dr[i] describes the probability of using a topic in document i
+  vector<CCRP<int> > wr(num_classes, CCRP<int>(1,1,1,1,disc, alpha)); // wr[k] describes the probability of generating a word in topic k
   for (int j = 0; j < zji.size(); ++j) {
     const size_t num_words = wji[j].size();
     vector<int>& zj = zji[j];
@@ -89,6 +89,13 @@ int main(int argc, char** argv) {
       total_time += timer.Elapsed();
       timer.Reset();
       double llh = 0;
+#if 1
+      for (int j = 0; j < dr.size(); ++j)
+        dr[j].resample_hyperparameters(&rng);
+      for (int j = 0; j < wr.size(); ++j)
+        wr[j].resample_hyperparameters(&rng);
+#endif
+
       for (int j = 0; j < dr.size(); ++j)
         llh += dr[j].log_crp_prob();
       for (int j = 0; j < wr.size(); ++j)
@@ -120,6 +127,7 @@ int main(int argc, char** argv) {
   }
   for (int i = 0; i < num_classes; ++i) {
     cerr << "---------------------------------\n";
+    cerr << " final PYP(" << wr[i].discount() << "," << wr[i].concentration() << ")\n";
     ShowTopWordsForTopic(t2w[i]);
   }
   cerr << "-------------\n";

@@ -90,6 +90,12 @@ TEST_F(CRPTest, Exchangability) {
       cerr << i << ' ' << (hist[i]) << endl;
 }
 
+TEST_F(CRPTest, LP) {
+  CCRP<string> crp(1,1,1,1,0.1,50.0);
+  crp.increment("foo", 1.0, &rng);
+  cerr << crp.log_crp_prob() << endl;
+}
+
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
