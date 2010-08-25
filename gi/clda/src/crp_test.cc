@@ -79,6 +79,7 @@ TEST_F(CRPTest, Exchangability) {
       ++hist[c];
       tot += c;
     }
+    EXPECT_EQ(cust, crp.num_customers());
     cerr << "P(a) = " << (xt / samples) << endl;
     cerr << "E[num tables] = " << (tot / samples) << endl;
     double error = fabs((tot / samples) - 5.4);
