@@ -30,6 +30,10 @@ class CCRP {
     return it->second.table_counts_.size();
   }
 
+  unsigned num_customers() const {
+    return num_customers_;
+  }
+
   // returns +1 or 0 indicating whether a new table was opened
   int increment(const Dish& dish, const double& p0, MT19937* rng) {
     DishLocations& loc = dish_locs_[dish];
