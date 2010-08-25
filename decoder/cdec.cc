@@ -266,8 +266,8 @@ void InitCommandLine(int argc, char** argv, OracleBleu &ob, po::variables_map* c
 }
 
 // TODO move out of cdec into some sampling decoder file
-void SampleRecurse(const Hypergraph& hg, const vector<SampleSet>& ss, int n, vector<WordID>* out) {
-  const SampleSet& s = ss[n];
+void SampleRecurse(const Hypergraph& hg, const vector<SampleSet<prob_t> >& ss, int n, vector<WordID>* out) {
+  const SampleSet<prob_t>& s = ss[n];
   int i = rng->SelectSample(s);
   const Hypergraph::Edge& edge = hg.edges_[hg.nodes_[n].in_edges_[i]];
   vector<vector<WordID> > ants(edge.tail_nodes_.size());
@@ -290,9 +290,9 @@ void MaxTranslationSample(Hypergraph* hg, const int samples, const int k) {
   unordered_map<string, int, boost::hash<string> > m;
   hg->PushWeightsToGoal();
   const int num_nodes = hg->nodes_.size();
-  vector<SampleSet> ss(num_nodes);
+  vector<SampleSet<prob_t> > ss(num_nodes);
   for (int i = 0; i < num_nodes; ++i) {
-    SampleSet& s = ss[i];
+    SampleSet<prob_t>& s = ss[i];
     const vector<int>& in_edges = hg->nodes_[i].in_edges_;
     for (int j = 0; j < in_edges.size(); ++j) {
       s.add(hg->edges_[in_edges[j]].edge_prob_);
