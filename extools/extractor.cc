@@ -31,6 +31,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("input,i", po::value<string>()->default_value("-"), "Input file")
         ("default_category,d", po::value<string>(), "Default span type (use X for 'Hiero')")
+        ("x_cdyer_pos,x", "Extract monolingual POS contexts (cdyer experimental)")
         ("loose", "Use loose phrase extraction heuristic for base phrases")
         ("base_phrase,B", "Write base phrases")
         ("base_phrase_spans", "Write base sentences and phrase spans")
@@ -360,8 +361,8 @@ int main(int argc, char** argv) {
   AnnotatedParallelSentence sentence;
   vector<ParallelSpan> phrases;
   vector<WordID> all_cats;
-  const int max_base_phrase_size = conf["max_base_phrase_size"].as<int>();
-  const bool write_phrase_contexts = conf.count("phrase_context") > 0;
+  int max_base_phrase_size = conf["max_base_phrase_size"].as<int>();
+  bool write_phrase_contexts = conf.count("phrase_context") > 0;
   const bool write_base_phrases = conf.count("base_phrase") > 0;
   const bool write_base_phrase_spans = conf.count("base_phrase_spans") > 0;
   const bool loose_phrases = conf.count("loose") > 0;
@@ -378,6 +379,7 @@ int main(int argc, char** argv) {
   const string cs = conf["context_language"].as<string>();
   const bool context_s = cs == "source" || cs == "both";
   const bool context_t = cs == "target" || cs == "both";
+  const bool x_cdyer_pos = conf.count("x_cdyer_pos");
   int line = 0;
   CountCombiner cc(conf["combiner_size"].as<size_t>());
   HadoopStreamingRuleObserver o(&cc,
@@ -402,6 +404,13 @@ int main(int argc, char** argv) {
       if (line % 8000 == 0) cerr << " [" << line << "]\n" << flush;
     }
     sentence.ParseInputLine(buf);
+    if (x_cdyer_pos) {
+      sentence.e = sentence.f;
+      sentence.AllocateForAlignment();
+      for (int i = 0; i < sentence.e.size(); ++i) sentence.Align(i,i);
+      max_base_phrase_size = 1;
+      write_phrase_contexts = true;
+    }
     phrases.clear();
     Extract::ExtractBasePhrases(max_base_phrase_size, sentence, &phrases);
     if (loose_phrases)
