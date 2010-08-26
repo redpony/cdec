@@ -195,6 +195,8 @@ Target POS-only ({\emph supervised}) & 1 & uniform & 22.2 & 1.85 \\
 
 \subsection{Correlating the intrinsic metric}
 
+The experiments discussed in the previous section offer an opportunity to correlate the proposed conditional entropy metric, which measures how well the induced grammar predicts the labels found in the supervised labeling of the corpus.  Figure~\ref{fig:intr_correl} shows that there is a reasonable (inverse) correlation between the entropy of the predictive distribution and the \textsc{bleu} score on the test set.
+
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.5]{pyp_clustering/correl.pdf}
@@ -206,6 +208,8 @@ Target POS-only ({\emph supervised}) & 1 & uniform & 22.2 & 1.85 \\
 
 
 \section{Discussion}
+
+We now turn to an analysis of the results of the grammars learned using the nonparametric clustering models.
 
 \subsection{Qualitative analysis of an example grammar}
 
