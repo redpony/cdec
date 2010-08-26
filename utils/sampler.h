@@ -61,6 +61,9 @@ struct RandomNumberGenerator {
   // draw a value from U(0,1)
   double next() {return m_random();}
 
+  // draw a value from U(0,1)
+  double operator()() { return m_random(); }
+
   // draw a value from N(mean,var)
   double NextNormal(double mean, double var) {
     return boost::normal_distribution<double>(mean, var)(m_random);
