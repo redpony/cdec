@@ -117,6 +117,14 @@ int AnnotatedParallelSentence::ReadAlignmentPoint(const char* buf,
   return ch;
 }
 
+void AnnotatedParallelSentence::Align(const short a, const short b) {
+  aligned(a,b) = true;
+  ++f_aligned[a];
+  ++e_aligned[b];
+  aligns_by_fword[a].push_back(make_pair(a,b));
+  // cerr << a << " " << b << endl;
+}
+
 void AnnotatedParallelSentence::ParseAlignmentPoint(const char* buf, int start, int end) {
   short a, b;
   ReadAlignmentPoint(buf, start, end, false, &a, &b, 0, 0);
@@ -124,11 +132,7 @@ void AnnotatedParallelSentence::ParseAlignmentPoint(const char* buf, int start, 
     cerr << "(" << a << ',' << b << ") is out of bounds. INPUT=\n" << buf << endl;
     exit(1);
   }
-  aligned(a,b) = true;
-  ++f_aligned[a];
-  ++e_aligned[b];
-  aligns_by_fword[a].push_back(make_pair(a,b));
-  // cerr << a << " " << b << endl;
+  Align(a,b);
 }
 
 void AnnotatedParallelSentence::ParseSpanLabel(const char* buf, int start, int end) {
@@ -190,13 +194,6 @@ void AnnotatedParallelSentence::ParseInputLine(const char* buf) {
       case 3:  ParseSpanLabel(buf, start, ptr); break;
       default: cerr << "Can't happen\n"; abort();
     }
-  }
-  if (state < 2) {
-    cerr << "Not enough fields: " << buf << endl;
-    abort();
-  }
-  if (e.empty() || f.empty()) {
-    cerr << "Sentences must not be empty: " << buf << endl;
   }
 }
 

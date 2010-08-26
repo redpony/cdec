@@ -29,11 +29,13 @@ struct AnnotatedParallelSentence {
 
   int f_len, e_len;
 
+  void Align(const short a, const short b);
+  void AllocateForAlignment();
+
   static int ReadAlignmentPoint(const char* buf, int start, int end, bool permit_col, short* a, short* b, short* c, short* d);
 
  private:
   void Reset();
-  void AllocateForAlignment();
   void ParseAlignmentPoint(const char* buf, int start, int end);
   void ParseSpanLabel(const char* buf, int start, int end);
 };
