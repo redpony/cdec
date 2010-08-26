@@ -12,8 +12,10 @@ TESTS = lo_test
 endif
 
 sentserver_SOURCES = sentserver.c
+sentserver_LDFLAGS = -all-static
 
 sentclient_SOURCES = sentclient.c
+sentclient_LDFLAGS = -all-static
 
 mr_vest_generate_mapper_input_SOURCES = mr_vest_generate_mapper_input.cc line_optimizer.cc
 mr_vest_generate_mapper_input_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
