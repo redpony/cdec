@@ -3,6 +3,8 @@
 
 //TODO: option for non-constructed version (type_traits pod?), option for small array optimization (if sz < N, store inline in union, see small_vector.h)
 
+#define DBVALUEARRAY(x) x
+
 #include <cstdlib>
 #include <algorithm>
 #include <new>
@@ -83,6 +85,7 @@ public:
 protected:
   void destroy()
   {
+    if (!array) return;
     // it's cool that this destroys in reverse order of construction, but why bother?
     for (size_type i = sz; i != 0;)
       A::destroy(array + --i);
@@ -92,7 +95,7 @@ protected:
     sz=0;
   }
   void alloc(size_type s) {
-    array=A::allocate(sz);
+    array = s==0 ? 0 : A::allocate(sz);
     sz=s;
   }
 
@@ -103,6 +106,16 @@ protected:
     }
   }
 
+  void reinit_noconstruct(size_type s) {
+    destroy();
+    realloc(s);
+  }
+
+  template <class C,class F>
+  inline void init_map(C & c,F const& f) {
+    alloc(c.size());
+    copy_construct_map(c.begin(),c.end(),array,f);
+  }
   template <class C,class F>
   inline void init_map(C const& c,F const& f) {
     alloc(c.size());
@@ -119,22 +132,44 @@ protected:
     alloc(std::distance(itr,end));
     copy_construct(itr,end,array);
   }
-  inline void init(size_type s, const_reference t = T()) {
+  inline void fill(const_reference t) {
+    for (T *i=array,*e=array+sz;i!=e;++i)
+      new(i) T(t);
+  }
+  inline void fill() {
+    for (T *i=array,*e=array+sz;i!=e;++i)
+      new(i) T();
+  }
+
+  inline void init(size_type s) {
     sz=s;
     array=s ? A::allocate(s) : 0;
-    for (size_type i = 0; i != sz; ++i) { A::construct(array + i,t); }
+    fill();
+  }
+  inline void init(size_type s, const_reference t) {
+    sz=s;
+    array=s ? A::allocate(s) : 0;
+    fill(t);
   }
 public:
-  explicit ValueArray(size_type s, const_reference t = T())
+  ValueArray(size_type s, const_reference t)
   {
     init(s,t);
   }
-  void reinit(size_type s, const_reference t = T()) {
-    clear();
-    init(s,t);
+  explicit ValueArray(size_type s)
+  {
+    init(s);
+  }
+  void reinit(size_type s, const_reference t) {
+    reinit_noconstruct(s);
+    fill(t);
+  }
+  void reinit(size_type s) {
+    reinit_noconstruct(s);
+    fill();
   }
 
-  //copy any existing data like std::vector.  not A::construct exception safe.  try blah blah?
+  //copy any existing data like std::vector.  not A::construct exception safe.  try blah blah?  swap?
   void resize(size_type s, const_reference t = T()) {
     pointer na=A::allocate(s);
     size_type nc=s<sz ? s : sz;
@@ -150,20 +185,27 @@ public:
 
   template <class I>
   void reinit(I itr, I end) {
-    clear();
-    init_range(itr,end);
+    reinit_noconstruct(std::distance(itr,end));
+    copy_construct(itr,end,array);
   }
 
   template <class I,class F>
-  void reinit_map(I itr,I end,F const& map) {
-    clear();
-    init_range_map(itr,end,map);
+  void reinit_map(I itr,I end,F const& f) {
+    reinit_noconstruct(std::distance(itr,end));
+    copy_construct_map(itr,end,array,f);
   }
+
   // warning: std::distance is likely slow on maps,lists (anything other than random access containers.  so container version below using size() will be better
   template <class C,class F>
-  void reinit_map(C const& c,F const& map) {
-    clear();
-    init_map(c,map);
+  void reinit_map(C const& c,F const& f) {
+    reinit_noconstruct(c.size());
+    copy_construct_map(c.begin(),c.end(),array,f);
+  }
+
+  template <class C,class F>
+  void reinit_map(C & c,F const& f) {
+    reinit_noconstruct(c.size());
+    copy_construct_map(c.begin(),c.end(),array,f);
   }
 
   template <class I>
@@ -260,16 +302,22 @@ public:
 
 private:
 
-  template <class I1, class I2>
-  void copy_construct(I1 itr, I1 end, I2 into)
+  template <class I1>
+  void copy_construct(I1 itr, I1 end, T *into)
   {
     for (; itr != end; ++itr, ++into) A::construct(into,*itr);
   }
 
-  template <class I1, class I2,class F>
-  void copy_construct_map(I1 itr, I1 end, I2 into,F const& f)
+  //TODO: valgrind doesn't think this works.
+  template <class I1,class F>
+  void copy_construct_map(I1 itr, I1 end, T *into,F const& f)
   {
-    for (; itr != end; ++itr, ++into) A::construct(into,f(*itr));
+    while ( itr != end) {
+      DBVALUEARRAY(assert(into<array+sz));
+      A::construct(into,f(*itr));
+      ++itr;++into;
+    }
+
   }
   //friend class boost::serialization::access;
 public:

@@ -130,7 +130,7 @@
                         Equal const& equal = Equal()
       )
       : better(better), data(), distance(distance),
-        index_in_heap(index_in_heap) {
+        index_in_heap(index_in_heap),equal(equal) {
       data.reserve(container_reserve);
     }
     /* Implicit copy constructor */

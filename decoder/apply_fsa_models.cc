@@ -24,6 +24,8 @@
 #define DPFSA(x) x
 //prefix trie
 
+#define DBUILDTRIE(x) x
+
 #define PRINT_PREFIX 1
 #if PRINT_PREFIX
 # define IF_PRINT_PREFIX(x) x
@@ -146,6 +148,12 @@ struct PrefixTrieNode {
     return ret;
   }
 
+  unsigned size() const {
+    unsigned a=adj.size();
+    unsigned e=edge_for.size();
+    return a>e?a:e;
+  }
+
   void print_back_str(std::ostream &o) const {
     BPs back=back_vec();
     unsigned i=back.size();
@@ -201,6 +209,7 @@ public:
     m.clear();
     for (int i=0;i<adj.size();++i) {
       PrefixTrieEdge const& e=adj[i];
+      SHOWM2(DPFSA,"index_adj",i,e);
       m[e.w]=e;
     }
   }
@@ -211,27 +220,49 @@ public:
       // assert(e.p.is_1());  // actually, after done_building, e will have telescoped dest->p/p.
       NTHandle n=e.w;
       assert(n>=0);
+      SHOWM3(DPFSA,"index_lhs",i,e,n);
       v[n]=e.dest;
     }
+  }
+
+  template <class PV>
+  void done_root(PV &v) {
+    done_building_r();
+//    index_adj(); // we want an index for the root node?.  don't think so - index_lhs handles it.
+    index_lhs(v);
   }
 
   // call only once.
   void done_building_r() {
     done_building();
     for (int i=0;i<adj.size();++i)
-      adj[i].dest->done_building_r();
+      if (adj[i].dest) // skip final edge
+        adj[i].dest->done_building_r();
   }
 
   // for done_building; compute incremental (telescoped) edge p
-  PrefixTrieEdge const& operator()(PrefixTrieEdgeFor::value_type const& pair) const {
-    PrefixTrieEdge &e=const_cast<PrefixTrieEdge&>(pair.second);
+  PrefixTrieEdge /*const&*/ operator()(PrefixTrieEdgeFor::value_type & pair) const {
+    PrefixTrieEdge &e=pair.second;//const_cast<PrefixTrieEdge&>(pair.second);
     e.p=(e.dest->p)/p;
     return e;
   }
 
   // call only once.
   void done_building() {
+    SHOWM3(DBUILDTRIE,"done_building",edge_for.size(),adj.size(),1);
+#if 0
     adj.reinit_map(edge_for,*this);
+#else
+    adj.reinit(edge_for.size());
+    Adj::iterator o=adj.begin();
+    for (PrefixTrieEdgeFor::iterator i=edge_for.begin(),e=edge_for.end();i!=e;++i) {
+      SHOWM3(DBUILDTRIE,"edge_for",o-adj.begin(),i->first,i->second);
+      PrefixTrieEdge &edge=i->second;
+      edge.p=(edge.dest->p)/p;
+      *o++=edge;
+//      (*this)(*i);
+    }
+#endif
 //    if (final) p_final/=p;
     std::sort(adj.begin(),adj.end());
     //TODO: store adjacent differences on edges (compared to
@@ -294,12 +325,22 @@ public:
   ~PrefixTrieNode() {
     destroy_children();
   }
+  void print(std::ostream &o) const {
+    o << lhs << "->" << p;
+    o << ',' << size() << ',';
+    print_back_str(o);
+  }
+  PRINT_SELF(PrefixTrieNode)
 };
 
 
 //Trie starts with lhs (nonneg index), then continues w/ rhs (mixed >0 word, else NT)
 // trie ends with final edge, which points to a per-lhs prefix node
 struct PrefixTrie {
+  void print(std::ostream &o) const {
+    o << cfgp << ' ' << root;
+  }
+  PRINT_SELF(PrefixTrie);
   CFG *cfgp;
   Rules const* rulesp;
   Rules const& rules() const { return *rulesp; }
@@ -312,10 +353,9 @@ struct PrefixTrie {
   PrefixTrie(CFG &cfg) : cfgp(&cfg),rulesp(&cfg.rules),lhs2(cfg.nts.size(),0),lhs2complete(cfg.nts.size()) {
 //    cfg.SortLocalBestFirst(); // instead we'll sort in done_building_r
     print_cfg=cfgp;
+    SHOWM2(DBUILDTRIE,"PrefixTrie()",rulesp->size(),lhs2.size());
     cfg.VisitRuleIds(*this);
-    root.done_building_r();
-    root.index_adj(); // maybe the index we use for building trie should be replaced by a much larger/faster table since we look up by lhs many times in parsing?
-    root.index_lhs(lhs2);
+    root.done_root(lhs2);
   }
 
   void operator()(int ri) const {
@@ -323,12 +363,15 @@ struct PrefixTrie {
     NTHandle lhs=r.lhs;
     best_t p=r.p;
     NodeP n=const_cast<PrefixTrieNode&>(root).build_lhs(lhs,p);
+    SHOWM3(DBUILDTRIE,"Prefixtrie rule id",ri,root,p);
     for (RHS::const_iterator i=r.rhs.begin(),e=r.rhs.end();;++i) {
+      SHOWM2(DBUILDTRIE,"PrefixTrie build or final",i-r.rhs.begin(),*n);
       if (i==e) {
         n->set_final(lhs,p);
         break;
       }
       n=n->build(*i,p);
+      SHOWM2(DBUILDTRIE,"PrefixTrie built",*i,*n);
     }
 //    root.build(lhs,r.p)->build(r.rhs,r.p);
   }
@@ -390,8 +433,7 @@ struct ItemKey {
     }
   }
   NTHandle lhs() const { return dot->lhs; }
-  typedef ItemKey self_type;
-  SELF_TYPE_PRINT
+  PRINT_SELF(ItemKey)
 };
 inline ItemHash hash_value(ItemKey const& x) {
   return x.hash();
@@ -424,8 +466,7 @@ struct Item : ItemPrio,ItemKey {
     o<<" next="<<next;
     o<< ']';
   }
-  typedef Item self_type;
-  SELF_TYPE_PRINT
+  PRINT_SELF(Item)
 };
 
 struct GetItemKey {
@@ -553,6 +594,8 @@ template <class F>
 void ApplyFsa<F>::ApplyEarley()
 {
   hgcfg.GiveCFG(cfg);
+  print_cfg=&cfg;
+  print_fsa=&fsa;
   Chart<F> chart(cfg,smeta,fsa);
   // don't need to uniq - option to do that already exists in cfg_options
   //TODO:

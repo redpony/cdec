@@ -1,6 +1,8 @@
 #ifndef CDEC_CFG_H
 #define CDEC_CFG_H
 
+#define DVISITRULEID(x)
+
 // for now, debug means remembering and printing the TRule behind each CFG rule
 #ifndef CFG_DEBUG
 # define CFG_DEBUG 1
@@ -133,6 +135,10 @@ struct CFG {
       swap(f,o.f);
       IF_CFG_TRULE(swap(rule,o.rule);)
     }
+    friend inline void swap(Rule &a,Rule &b) {
+      a.Swap(b);
+    }
+
     template<class V>
     void visit_rhs_nts(V &v) const {
       for (RHS::const_iterator i=rhs.begin(),e=rhs.end();i!=e;++i) {
@@ -194,6 +200,9 @@ struct CFG {
       using namespace std;
       swap(ruleids,o.ruleids);
       swap(from,o.from);
+    }
+    friend inline void swap(NT &a,NT &b) {
+      a.Swap(b);
     }
   };
 
@@ -294,14 +303,19 @@ struct CFG {
   // call after rules are indexed.
   template <class V>
   void VisitRuleIds(V &v) {
-    for (int i=0,e=nts.size();i<e;++i)
-      for (Ruleids::const_iterator j=nts[i].ruleids.begin(),jj=nts[i].ruleids.begin();j!=jj;++j)
+    for (int i=0,e=nts.size();i<e;++i) {
+      SHOWM(DVISITRULEID,"VisitRuleIds nt",i);
+      for (Ruleids::const_iterator j=nts[i].ruleids.begin(),jj=nts[i].ruleids.end();j!=jj;++j) {
+        SHOWM2(DVISITRULEID,"VisitRuleIds",i,*j);
         v(*j);
+      }
+    }
+
   }
   template <class V>
   void VisitRuleIds(V const& v) {
     for (int i=0,e=nts.size();i<e;++i)
-      for (Ruleids::const_iterator j=nts[i].ruleids.begin(),jj=nts[i].ruleids.begin();j!=jj;++j)
+      for (Ruleids::const_iterator j=nts[i].ruleids.begin(),jj=nts[i].ruleids.end();j!=jj;++j)
         v(*j);
   }
 
@@ -350,7 +364,6 @@ inline std::size_t hash_value(CFG::Rule const& r) {
 inline std::size_t hash_value(CFG::NT const& r) {
   return r.hash_impl();
 }
-
 
 inline void swap(CFG &a,CFG &b) {
   a.Swap(b);
