@@ -36,7 +36,7 @@ struct FsaFeatureFunctionData
     return o;
   }
 
-  FsaFeatureFunctionData(int statesz=0,Sentence const& end_sentence_phrase=Sentence()) : ssz(statesz),start(statesz),h_start(statesz),end_phrase_(end_sentence_phrase) {
+  FsaFeatureFunctionData(int statesz=0,Sentence const& end_sentence_phrase=Sentence()) : start(statesz),h_start(statesz),end_phrase_(end_sentence_phrase),ssz(statesz) {
     debug_=true;
     sync_to_=0;
   }
@@ -86,10 +86,10 @@ struct FsaFeatureFunctionData
   }
 
   Features features_;
-protected:
-  int ssz; // don't forget to set this. default 0 (it may depend on params of course)
   Bytes start,h_start; // start state and estimated-features (heuristic) start state.  set these.  default empty.
   Sentence end_phrase_; // words appended for final traversal (final state cost is assessed using Scan) e.g. "</s>" for lm.
+protected:
+  int ssz; // don't forget to set this. default 0 (it may depend on params of course)
   // this can be called instead or after constructor (also set bytes and end_phrase_)
   void set_state_bytes(int sb=0) {
     if (start.size()!=sb) start.resize(sb);

@@ -106,7 +106,7 @@
             std::size_t Arity,
             typename IndexInHeapPropertyMap,
             typename DistanceMap,
-            typename Compare = std::less<Value>,
+            typename Better = std::less<Value>,
             typename Container = std::vector<Value>,
             typename Size = typename Container::size_type,
             typename Equal = std::equal_to<Value> >
@@ -120,16 +120,16 @@
     typedef Value value_type;
     typedef typename Container::const_iterator const_iterator;
     typedef const_iterator iterator;
-    // The distances being compared using compare and that are stored in the
+    // The distances being compared using better and that are stored in the
     // distance map
     typedef typename boost::property_traits<DistanceMap>::value_type distance_type;
-    d_ary_heap_indirect(DistanceMap distance,
-                        IndexInHeapPropertyMap index_in_heap,
-                        const Compare& compare = Compare(),
+    d_ary_heap_indirect(DistanceMap const& distance,
+                        IndexInHeapPropertyMap const& index_in_heap,
+                        const Better& better = Better(),
                         size_type container_reserve = 100000,
                         Equal const& equal = Equal()
       )
-      : compare(compare), data(), distance(distance),
+      : better(better), data(), distance(distance),
         index_in_heap(index_in_heap) {
       data.reserve(container_reserve);
     }
@@ -210,8 +210,9 @@
 
     void clear() {
 #if D_ARY_TRACK_OUT_OF_HEAP
-        for (typename Container::iterator i=data.begin(),e=data.end();i!=e;++i)
-          put(index_in_heap,*i,D_ARY_HEAP_NULL_INDEX);
+      using boost::put;
+      for (typename Container::iterator i=data.begin(),e=data.end();i!=e;++i)
+        put(index_in_heap,*i,D_ARY_HEAP_NULL_INDEX);
 #endif
       data.clear();
     }
@@ -224,6 +225,7 @@
       } else {
         size_type index = data.size();
         data.push_back(v);
+        using boost::put;
         put(index_in_heap, v, index);
         preserve_heap_property_up(index);
       }
@@ -239,6 +241,7 @@
     }
 
     void pop() {
+      using boost::put;
       if(D_ARY_TRACK_OUT_OF_HEAP)
         put(index_in_heap, data[0], D_ARY_HEAP_NULL_INDEX);
       if (data.size() != 1) {
@@ -261,22 +264,40 @@
     // (distance has become smaller, so it may need to rise toward top().
     // i.e. decrease-key in a min-heap
     void update(const Value& v) {
+      using boost::get;
       size_type index = get(index_in_heap, v);
-      preserve_heap_property_up(index);
+      preserve_heap_property_up(v,index);
       verify_heap();
     }
 
+    // return true if improved.
+    bool maybe_improve(const Value& v,distance_type dbetter) {
+      using boost::get;
+      if (better(dbetter,get(distance,v))) {
+        preserve_heap_property_up_dist(v,dbetter);
+        return true;
+      }
+      return false;
+    }
+
+
+#include "warning_push.h"
+#pragma GCC diagnostic ignored "-Wtype-limits"
+      // because maybe size_type is signed or unsigned
     inline bool contains(const Value &v,size_type i) const {
       return D_ARY_TRACK_OUT_OF_HEAP ?
         (i != D_ARY_HEAP_NULL_INDEX) :
         i>=0 && i<data.size() && equal(v,data[i]); // note: size_type may be signed (don't recommend it, though) - thus i>=0 check to catch uninit. data
     }
+#include "warning_pop.h"
 
     inline bool contains(const Value& v) const {
+      using boost::get;
       return contains(v,get(index_in_heap, v));
     }
 
     void push_or_update(const Value& v) { /* insert if not present, else update */
+      using boost::get;
       size_type index = get(index_in_heap, v);
       if (D_ARY_PUSH_GRAEHL) {
         if (contains(v,index))
@@ -287,6 +308,7 @@
         if (!contains(v,index)) {
           index = data.size();
           data.push_back(v);
+          using boost::put;
           put(index_in_heap, v, index);
         }
         preserve_heap_property_up(index);
@@ -296,7 +318,7 @@
 
     private:
     Equal equal;
-    Compare compare;
+    Better better;
     Container data;
     DistanceMap distance;
     IndexInHeapPropertyMap index_in_heap;
@@ -318,11 +340,13 @@
       Value value_b = data[index_b];
       data[index_a] = value_b;
       data[index_b] = value_a;
+      using boost::put;
       put(index_in_heap, value_a, index_b);
       put(index_in_heap, value_b, index_a);
     }
 
     inline void move_heap_element(Value const& v,size_type ito) {
+      using boost::put;
       put(index_in_heap,v,ito);
       data[ito]=v; //todo: move assign?
     }
@@ -332,8 +356,9 @@
       // This is a very expensive test so it should be disabled even when
       // NDEBUG is not defined
 #if D_ARY_VERIFY_HEAP
+      using boost::get;
       for (size_t i = 1; i < data.size(); ++i) {
-        if (compare(get(distance,data[i]), get(distance,data[parent(i)]))) {
+        if (better(get(distance,data[i]), get(distance,data[parent(i)]))) {
           assert (!"Element is smaller than its parent");
         }
       }
@@ -341,28 +366,47 @@
     }
 
     // we have a copy of the key, so we don't need to do that stupid find # of levels to move then move.  we act as though data[index]=currently_being_moved, but in fact it's an uninitialized "hole", which we fill at the very end
-    void preserve_heap_property_up(Value const& currently_being_moved,size_type index) {
-      size_type orig_index = index;
-      distance_type currently_being_moved_dist =
-        get(distance, currently_being_moved);
-      for (;;) {
-        if (index == 0) break; // Stop at root
-        size_type parent_index = parent(index);
-        Value const& parent_value = data[parent_index];
-        if (compare(currently_being_moved_dist, get(distance, parent_value))) {
-          move_heap_element(parent_value,index);
-          index = parent_index;
-        } else {
-          break; // Heap property satisfied
+    inline void preserve_heap_property_up(Value const& currently_being_moved,size_type index) {
+      using boost::get;
+      preserve_heap_property_up(currently_being_moved,index,get(distance,currently_being_moved));
+    }
+
+    inline void preserve_heap_property_up_set_dist(Value const& currently_being_moved,distance_type dbetter) {
+      using boost::get;
+      using boost::put;
+      put(distance,currently_being_moved,dbetter);
+      preserve_heap_property_up(currently_being_moved,get(index_in_heap,currently_being_moved),dbetter);
+      verify_heap();
+    }
+
+    void preserve_heap_property_up(Value const& currently_being_moved,size_type index,distance_type currently_being_moved_dist) {
+      using boost::put;
+      using boost::get;
+      if (D_ARY_UP_GRAEHL) {
+        for (;;) {
+          if (index == 0) break; // Stop at root
+          size_type parent_index = parent(index);
+          Value const& parent_value = data[parent_index];
+          if (better(currently_being_moved_dist, get(distance, parent_value))) {
+            move_heap_element(parent_value,index);
+            index = parent_index;
+          } else {
+            break; // Heap property satisfied
+          }
         }
+        //finish "swap chain" by filling hole w/ currently_being_moved
+        move_heap_element(currently_being_moved,index); // note: it's ok not to return early on index==0 at start, even if self-assignment isn't supported by Value - because currently_being_moved is a copy.
+      } else {
+        put(index_in_heap,currently_being_moved,index);
+        put(distance,currently_being_moved,currently_being_moved_dist);
+        preserve_heap_property_up(index);
       }
-      //finish "swap chain" by filling hole w/ currently_being_moved
-      move_heap_element(currently_being_moved,index); // note: it's ok not to return early on index==0 at start, even if self-assignment isn't supported by Value - because currently_being_moved is a copy.
     }
 
     // Starting at a node, move up the tree swapping elements to preserve the
     // heap property.  doesn't actually use swap; uses hole
     void preserve_heap_property_up(size_type index) {
+      using boost::get;
       if (index == 0) return; // Do nothing on root
       if (D_ARY_UP_GRAEHL) {
         Value copyi=data[index];
@@ -381,7 +425,7 @@
         if (index == 0) break; // Stop at root
         size_type parent_index = parent(index);
         Value parent_value = data[parent_index];
-        if (compare(currently_being_moved_dist, get(distance, parent_value))) {
+        if (better(currently_being_moved_dist, get(distance, parent_value))) {
           ++num_levels_moved;
           index = parent_index;
           continue;
@@ -392,6 +436,7 @@
       // Actually do the moves -- move num_levels_moved elements down in the
       // tree, then put currently_being_moved at the top
       index = orig_index;
+      using boost::put;
       for (size_type i = 0; i < num_levels_moved; ++i) {
         size_type parent_index = parent(index);
         Value parent_value = data[parent_index];
@@ -409,6 +454,7 @@
     // are any parent-child pairs that violate the heap property.  v is placed at data[i], but then pushed down (note: data[i] won't be read explicitly; it will instead be overwritten by percolation).  this also means that v must be a copy of data[i] if it was already at i.
     // e.g. v=data.back(), i=0, sz=data.size()-1 for pop(), implicitly swapping data[i], data.back(), and doing data.pop_back(), then adjusting from 0 down w/ swaps.  updates index_in_heap for v.
     inline void preserve_heap_property_down(Value const& currently_being_moved,size_type i,size_type heap_size) {
+      using boost::get;
       distance_type currently_being_moved_dist=get(distance,currently_being_moved);
       Value* data_ptr = &data[0];
       size_type index = 0; // hole at index - currently_being_moved to be put here when we find the final hole spot
@@ -423,7 +469,7 @@
 #undef D_ARY_MAYBE_IMPROVE_CHILD_I
 #define D_ARY_MAYBE_IMPROVE_CHILD_I \
             distance_type i_dist = get(distance, child_base_ptr[i]); \
-            if (compare(i_dist, smallest_child_dist)) { \
+            if (better(i_dist, smallest_child_dist)) { \
               smallest_child_index = i; \
               smallest_child_dist = i_dist; \
             }
@@ -439,7 +485,7 @@
         }
         //end: know best child
 
-        if (compare(smallest_child_dist, currently_being_moved_dist)) {
+        if (better(smallest_child_dist, currently_being_moved_dist)) {
           // instead of swapping, move.
           move_heap_element(child_base_ptr[smallest_child_index],index); // move up
           index=first_child_index+smallest_child_index; // descend - hole is now here
@@ -456,6 +502,7 @@
     }
 
     void preserve_heap_property_down() {
+      using boost::get;
       if (data.empty()) return;
       if (D_ARY_DOWN_GRAEHL) { // this *should* be more efficient because i avoid swaps.
         Value copy0=data[0];
@@ -484,7 +531,7 @@
             D_ARY_MAYBE_IMPROVE_CHILD_I
           }
         }
-        if (compare(smallest_child_dist, currently_being_moved_dist)) {
+        if (better(smallest_child_dist, currently_being_moved_dist)) {
           swap_heap_elements(smallest_child_index + first_child_index, index);
           index = smallest_child_index + first_child_index;
           continue;

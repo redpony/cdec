@@ -19,10 +19,23 @@
 #include <cassert>
 #include <limits>
 #include "semiring.h"
+#include "show.h"
+//#include "logval.h"
 
 template <class T>
 class MaxPlus {
  public:
+  void print(std::ostream &o) const {
+    o<<v_;
+  }
+  PRINT_SELF(MaxPlus<T>)
+  template <class O>
+  void operator=(O const& o) {
+    v_=o.v_;
+  }
+  template <class O>
+  MaxPlus(O const& o) : v_(o.v_) {  }
+
   typedef MaxPlus<T> Self;
   MaxPlus() : v_(LOGVAL_LOG0) {}
   explicit MaxPlus(double x) : v_(std::log(x)) {}

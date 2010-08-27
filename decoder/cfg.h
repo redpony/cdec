@@ -62,6 +62,28 @@ struct CFG {
   void print_nt_name(std::ostream &o,NTHandle n) const {
     o << nts[n].from << n;
   }
+  std::string nt_name(NTHandle n) const {
+    std::ostringstream o;
+    print_nt_name(o,n);
+    return o.str();
+  }
+  void print_rhs_name(std::ostream &o,WordID w) const {
+    if (w<=0) print_nt_name(o,-w);
+    else o<<TD::Convert(w);
+  }
+  std::string rhs_name(WordID w) const {
+    if (w<=0) return nt_name(-w);
+    else return TD::Convert(w);
+  }
+  static void static_print_rhs_name(std::ostream &o,WordID w) {
+    if (w<=0) o<<'['<<-w<<']';
+    else o<<TD::Convert(w);
+  }
+  static std::string static_rhs_name(WordID w) {
+    std::ostringstream o;
+    static_print_rhs_name(o,w);
+    return o.str();
+  }
 
   typedef std::pair<WordID,WordID> BinRhs;
 

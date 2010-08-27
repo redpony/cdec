@@ -6,6 +6,29 @@
 #define SHOWS std::cerr
 #endif
 
+
+#define SELF_TYPE_PRINT                                                                     \
+    template <class Char,class Traits> \
+    inline friend std::basic_ostream<Char,Traits> & operator <<(std::basic_ostream<Char,Traits> &o, self_type const& me)     \
+    { me.print(o);return o; } \
+    typedef self_type has_print;
+
+#define SELF_TYPE_PRINT_ANY_STREAM \
+    template <class O> \
+    friend inline O & operator <<(O &o, self_type const& me)     \
+    { me.print(o);return o; } \
+    typedef self_type has_print;
+
+#define SELF_TYPE_PRINT_OSTREAM \
+    friend inline std::ostream & operator <<(std::ostream &o, self_type const& me)     \
+    { me.print(o);return o; } \
+    typedef self_type has_print;
+
+#define PRINT_SELF(self) typedef self self_type; SELF_TYPE_PRINT_OSTREAM
+
+#undef SHOWALWAYS
+#define SHOWALWAYS(x) x
+
 /* usage:
 #if DEBUG
 # define IFD(x) x
@@ -36,6 +59,7 @@ careful: none of this is wrapped in a block.  so you can't use one of these macr
 #define SHOW4(IF,x,y0,y1,y2) SHOW1(IF,x) SHOW3(IF,y0,y1,y2)
 #define SHOW5(IF,x,y0,y1,y2,y3) SHOW1(IF,x) SHOW4(IF,y0,y1,y2,y3)
 #define SHOW6(IF,x,y0,y1,y2,y3,y4) SHOW1(IF,x) SHOW5(IF,y0,y1,y2,y3,y4)
+#define SHOW7(IF,x,y0,y1,y2,y3,y4,y5) SHOW1(IF,x) SHOW6(IF,y0,y1,y2,y3,y4,y5)
 
 #define SHOWM(IF,m,x) SHOWP(IF,m<<": ") SHOW(IF,x)
 #define SHOWM2(IF,m,x0,x1) SHOWP(IF,m<<": ") SHOW2(IF,x0,x1)
@@ -43,5 +67,6 @@ careful: none of this is wrapped in a block.  so you can't use one of these macr
 #define SHOWM4(IF,m,x0,x1,x2,x3) SHOWP(IF,m<<": ") SHOW4(IF,x0,x1,x2,x3)
 #define SHOWM5(IF,m,x0,x1,x2,x3,x4) SHOWP(IF,m<<": ") SHOW5(IF,x,x0,x1,x2,x3,x4)
 #define SHOWM6(IF,m,x0,x1,x2,x3,x4,x5) SHOWP(IF,m<<": ") SHOW6(IF,x0,x1,x2,x3,x4,x5)
+#define SHOWM7(IF,m,x0,x1,x2,x3,x4,x5,x6) SHOWP(IF,m<<": ") SHOW7(IF,x0,x1,x2,x3,x4,x5,x6)
 
 #endif

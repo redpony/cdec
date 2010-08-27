@@ -32,9 +32,9 @@ const unsigned GOLDEN_MEAN_FRACTION=2654435769U;
 template <class C>
 struct murmur_hash
 {
-  typedef MurmurInt return_type;
+  typedef MurmurInt result_type;
   typedef C /*const&*/ argument_type;
-  return_type operator()(argument_type const& c) const {
+  result_type operator()(argument_type const& c) const {
     return MurmurHash((void*)&c,sizeof(c));
   }
 };
@@ -43,9 +43,9 @@ struct murmur_hash
 template <>
 struct murmur_hash<std::string>
 {
-  typedef MurmurInt return_type;
+  typedef MurmurInt result_type;
   typedef std::string /*const&*/ argument_type;
-  return_type operator()(argument_type const& c) const {
+  result_type operator()(argument_type const& c) const {
     return MurmurHash(c.data(),c.size());
   }
 };
@@ -54,9 +54,9 @@ struct murmur_hash<std::string>
 template <class C>
 struct murmur_hash_array
 {
-  typedef MurmurInt return_type;
+  typedef MurmurInt result_type;
   typedef C /*const&*/ argument_type;
-  return_type operator()(argument_type const& c) const {
+  result_type operator()(argument_type const& c) const {
     return MurmurHash(&*c.begin(),c.size()*sizeof(*c.begin()));
   }
 };

@@ -14,26 +14,48 @@
 
 template <class I>
 struct get_key { // default accessor for I = like pair<key,val>
-  typedef typename I::first_type const& return_type;
+  typedef typename I::first_type const& result_type;
   typedef I const& argument_type;
-  return_type operator()(I const& i) const {
+  result_type operator()(I const& i) const {
     return i.first;
   }
 };
 
+// Arg type should be the non-pointer version.  this saves me from using boost type traits to remove_pointer.  f may be binary or unary
 template <class KeyF,class F,class Arg=typename KeyF::argument_type>
 struct compose_indirect {
-  typedef Arg *argument_type; // also Arg
+  typedef Arg *argument_type; // we also accept Arg &
   KeyF kf;
   F f;
-  typedef typename F::return_type return_type;
-  return_type operator()(Arg p) const {
+  typedef typename F::result_type result_type;
+  result_type operator()(Arg const& p) const {
     return f(kf(p));
   }
-  template <class V>
-  return_type operator()(Arg *p) const {
+  result_type operator()(Arg & p) const {
+    return f(kf(p));
+  }
+  result_type operator()(Arg * p) const {
     return f(kf(*p));
   }
+  template <class V>
+  result_type operator()(V const& v) const {
+    return f(kf(*v));
+  }
+
+  result_type operator()(Arg const& a1,Arg const& a2) const {
+    return f(kf(a1),kf(a2));
+  }
+  result_type operator()(Arg & a1,Arg & a2) const {
+    return f(kf(a1),kf(a2));
+  }
+  result_type operator()(Arg * a1,Arg * a2) const {
+    return f(kf(*a1),kf(*a2));
+  }
+  template <class V,class W>
+  result_type operator()(V const& v,W const&w) const {
+    return f(kf(*v),kf(*w));
+  }
+
 
 };
 
@@ -43,27 +65,29 @@ template <class F>
 struct indirect_function {
   F f;
   explicit indirect_function(F const& f=F()) : f(f) {}
-  typedef typename F::return_type return_type;
+  typedef typename F::result_type result_type;
   template <class V>
-  return_type operator()(V *p) const {
+  result_type operator()(V *p) const {
     return f(*p);
   }
 };
 */
 
-template <class Item,class KeyF=get_key<Item>,class HashKey=boost::hash<typename KeyF::return_type>,class EqKey=std::equal_to<typename KeyF::return_type>, class Pool=boost::object_pool<Item> >
+template <class Item,class KeyF=get_key<Item>,class HashKey=boost::hash<typename KeyF::result_type>,class EqKey=std::equal_to<typename KeyF::result_type>, class Pool=boost::object_pool<Item> >
 struct intern_pool : Pool {
   KeyF key;
-  typedef typename KeyF::return_type Key;
+  typedef typename KeyF::result_type Key;
   typedef Item *Handle;
-  typedef compose_indirect<KeyF,HashKey,Handle> HashDeep;
-  typedef compose_indirect<KeyF,EqKey,Handle> EqDeep;
+  typedef compose_indirect<KeyF,HashKey,Item> HashDeep;
+  typedef compose_indirect<KeyF,EqKey,Item> EqDeep;
   typedef HASH_SET<Handle,HashDeep,EqDeep> Canonical;
   typedef typename Canonical::iterator CFind;
   typedef std::pair<CFind,bool> CInsert;
   Canonical canonical;
-  void interneq(Handle &i) {
-    i=intern(i);
+  bool interneq(Handle &i) { // returns true if i is newly interned, false if it already existed
+    CInsert i_new=canonical.insert(i);
+    i=*i_new.first;
+    return i_new.second;
   }
 // inherited: Handle construct(...)
   Handle construct_fresh() { return Pool::construct(); }

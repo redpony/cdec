@@ -305,6 +305,21 @@ bool operator==(ValueArray<T,A> const& v1, ValueArray<T,A> const& v2)
     std::equal(v1.begin(),v1.end(),v2.begin());
 }
 
+template <class A>
+bool operator==(ValueArray<char,A> const& v1, ValueArray<char,A> const& v2)
+{
+  typename ValueArray<char,A>::size_type sz=v1.size();
+  return sz == v2.size() &&
+    0==std::memcmp(v1.begin(),v2.begin(),sizeof(char)*sz);
+}
+
+template <class A>
+bool operator==(ValueArray<unsigned char,A> const& v1, ValueArray<unsigned char,A> const& v2)
+{
+  typename ValueArray<char,A>::size_type sz=v1.size();
+  return sz == v2.size() &&
+    0==std::memcmp(v1.begin(),v2.begin(),sizeof(char)*sz);
+}
 
 template <class T,class A>
 bool operator< (ValueArray<T,A> const& v1, ValueArray<T,A> const& v2)
@@ -314,6 +329,15 @@ bool operator< (ValueArray<T,A> const& v1, ValueArray<T,A> const& v2)
                                        , v2.begin()
                                        , v2.end() );
 }
+
+template <class A>
+bool operator<(ValueArray<unsigned char,A> const& v1, ValueArray<unsigned char,A> const& v2)
+{
+  typename ValueArray<char,A>::size_type sz=v1.size();
+  return sz == v2.size() &&
+    std::memcmp(v1.begin(),v2.begin(),sizeof(char)*sz)<0;
+}
+
 
 template <class T,class A>
 void memcpy(void *out,ValueArray<T,A> const& v) {

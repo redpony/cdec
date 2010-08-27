@@ -3,6 +3,6 @@
 #else
 #include "warning_compiler.h"
 #if HAVE_DIAGNOSTIC_PUSH
-# pragma GCC diagnostic push
+#pragma GCC diagnostic push
 #endif
 #endif
