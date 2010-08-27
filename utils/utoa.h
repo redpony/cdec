@@ -137,7 +137,7 @@ char *utoa_drop_trailing_0(char *buf,Uint_ n_, unsigned &n_skipped) {
 }
 
 //#include "warning_push.h"
-//#pragma GCC diagnostic ignore "-Wtype-limits" // because sign check on itoa<unsigned> is annoying
+//#pragma GCC diagnostic ignored "-Wtype-limits" // because sign check on itoa<unsigned> is annoying
 
 // desired feature: itoa(unsigned) = utoa(unsigned)
 // positive sign: 0 -> +0, 1-> +1.  obviously -n -> -n

@@ -10,11 +10,18 @@
 #include <limits>
 #include <cassert>
 #include "semiring.h"
+#include "show.h"
 
 //TODO: template for supporting negation or not - most uses are for nonnegative "probs" only; probably some 10-20% speedup available
 template <class T>
 class LogVal {
  public:
+  void print(std::ostream &o) const {
+    if (s_) o<<"(-)";
+    o<<v_;
+  }
+  PRINT_SELF(LogVal<T>)
+
   typedef LogVal<T> Self;
 
   LogVal() : s_(), v_(LOGVAL_LOG0) {}
@@ -143,6 +150,7 @@ class LogVal {
 
   bool s_;
   T v_;
+
 };
 
 template <class T>

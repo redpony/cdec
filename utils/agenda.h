@@ -1,6 +1,7 @@
 #ifndef AGENDA_H
 #define AGENDA_H
 
+#define DBG_AGENDA(x) x
 /*
   a priority queue where you expect to queue the same item at different
   priorities several times before finally popping it.  higher priority = better.
@@ -48,54 +49,71 @@ template <class P>
 struct priority_traits {
   typedef typename P::priority_type priority_type;
 };
-
-// P p has priority_traits<P>::type &p->agenda_priority() and unsigned &p->agenda_location(), and bool & p->agenda_done()
-// this is really 4 functors in 1 (or lvalue property maps); you can supply your own as the Prio type in Agenda<...> below ; state is allowed.
-template <class P>
-struct AdjustablePriority {
-  typedef AdjustablePriority<P> Self;
-  typedef typename priority_traits<P>::priority_type Priority;
-  Priority & priority(P const &x) {
-    return x->agenda_priority();
-  }
-  unsigned & location(P const &x) { // this gets updated by push, pop, and adjust
-    return x->agenda_location();
-  }
-  void is_done(P const& x) const {
-    return x->agenda_done();
-  }
-  void set_done(P const& x) const {
-    x->agenda_done()=true;
-  }
-};
 */
 
 typedef best_t agenda_best_t;
+typedef unsigned agenda_location_t;
 
-PMAP_MEMBER_INDIRECT(LocationMap,unsigned,location)
-PMAP_MEMBER_INDIRECT(PriorityMap,best_t,priority)
+PMAP_MEMBER_INDIRECT(LocationMap,agenda_location_t,location)
+PMAP_MEMBER_INDIRECT(PriorityMap,agenda_best_t,priority)
+
+struct Less {
+  typedef bool result_type;
+  template <class A,class B>
+  bool operator()(A const& a,B const& b) const { return a<b; }
+};
 
 // LocMap and PrioMap are boost property maps put(locmap,key,size_t), Better(get(priomap,k1),get(priomap,k2)) means k1 should be above k2 (be popped first).  Locmap and PrioMap may have state; the rest are assumed stateless functors
-template <class Item,class Better=std::less<Item>, /* intern_pool args */ class KeyF=get_key<Item>,class HashKey=boost::hash<typename KeyF::return_type>,class EqKey=std::equal_to<typename KeyF::return_type>, class Pool=boost::object_pool<Item> >
-struct Agenda : intern_pool<Item,KeyF,EqKey,Pool> {
+template <class Item,class Better=Less, /* intern_pool args */ class KeyF=get_key<Item>,class HashKey=boost::hash<typename KeyF::result_type>,class EqKey=std::equal_to<typename KeyF::result_type>, class Pool=boost::object_pool<Item> >
+struct Agenda : intern_pool<Item,KeyF,HashKey,EqKey,Pool> {
+  typedef intern_pool<Item,KeyF,HashKey,EqKey,Pool> Intern; // inherited because I want to use construct()
   /* this is less generic than it could be, because I want to use a single hash mapping to intern to canonical mutable object pointers, where the property maps are just lvalue accessors */
-  typedef intern_pool<Item,KeyF,EqKey,Pool> Intern; // inherited because I want to use construct()
+  typedef typename KeyF::result_type Key;
   typedef Item * Handle;
   typedef LocationMap<Handle> LocMap;
   typedef PriorityMap<Handle> PrioMap;
   LocMap locmap;
-  PrioMap priomap;
+  PrioMap priomap; // note: priomap[item] is set by caller before giving us the item; then tracks best (for canonicalized item) thereafter
+
+  Better better;
   //NOT NEEDED: initialize function object state (there is none)
 
-
-/*
-  typedef Item *CanonItem;
+  typedef Item *ItemC; //canonicalized pointer
+  typedef Item *ItemP;
   static const std::size_t heap_arity=4; // might be fastest possible (depends on key size probably - cache locality is bad w/ arity=2)
-  typedef std::vector<CanonItem> HeapStorage;
-  typedef boost::detail::d_ary_heap_indirect<Key,heap_arity,LocMap,PrioMap,Better,HeapStorage> Heap;
-  HASH_SET<Key,Hash,Equal> queued;
-  Agenda(LocMap const& lm=LocMap(),PrioMap const& pm=PrioMap()) : locmap(lm), priomap(pm) {  }
-*/
+  typedef std::vector<ItemC> HeapStorage;
+  typedef d_ary_heap_indirect<Handle,heap_arity,LocMap,PrioMap,Better,HeapStorage,agenda_location_t> Heap;
+  Heap q;
+
+  // please don't call q.push etc. directly.
+  void add(ItemP i) {
+    bool fresh=interneq(i);
+    DBG_AGENDA(assert(fresh && !q.contains(i)));
+    q.push(i);
+  }
+  bool improve(ItemP i) {
+    ItemP c=i;
+    bool fresh=interneq(c);
+    if (fresh)
+      return add(c);
+    DBG_AGENDA(assert(q.contains(c)));
+    return q.maybe_improve(priomap[i]);
+  }
+  inline bool empty() {
+    return q.empty();
+  }
+  // no need to destroy the canon. item because we want to remember the best cost and reject more expensive ways of using it).
+  ItemC pop() {
+    DBG_AGENDA(assert(!empty()));
+    ItemC r=q.top();
+    q.pop();
+    return r;
+  }
+  agenda_best_t best() const {
+    return priomap[q.top()]; //TODO: cache/track the global best?
+  }
+
+  Agenda(unsigned reserve=1000000,LocMap const& lm=LocMap(),PrioMap const& pm=PrioMap(),EqKey const& eq=EqKey(),Better const& better=Better()) : locmap(lm), priomap(pm), better(better), q(priomap,locmap,better,reserve) {  }
 };
 
 #endif

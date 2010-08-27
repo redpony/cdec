@@ -9,6 +9,7 @@
 # define DBGINIT(a)
 #endif
 
+#include <stdint.h>
 #include <vector>
 #include <cstring>
 #include "fdict.h"
@@ -243,7 +244,7 @@ void show_all_features(std::vector<FFp> const& models_,DenseWeightVector &weight
   return show_features(all_features(models_,weights_,&warn,warn_fid_0),weights_,out,warn,warn_zero_wt);
 }
 
-typedef ValueArray<char> FFState; // this is about 10% faster than string.
+typedef ValueArray<uint8_t> FFState; // this is about 10% faster than string.
 //typedef std::string FFState;
 
 //FIXME: only context.data() is required to be contiguous, and it becomes invalid after next string operation.  use ValueArray instead? (higher performance perhaps, save a word due to fixed size)
