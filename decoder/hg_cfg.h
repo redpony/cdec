@@ -7,8 +7,12 @@ class Hypergraph;
 
 // in case you might want the CFG whether or not you apply FSA models:
 struct HgCFG {
-  HgCFG(Hypergraph const& ih) : ih(ih) {
+  void set_defaults() {
     have_cfg=binarized=have_features=uniqed=false;
+    want_features=true;
+  }
+  HgCFG(Hypergraph const& ih) : ih(ih) {
+    set_defaults();
   }
   Hypergraph const& ih;
   CFG cfg;
@@ -32,10 +36,13 @@ struct HgCFG {
     if (!have_cfg)
       InitCFG(to);
     else {
+      cfg.VisitRuleIds(*this);
       have_cfg=false;
       to.Clear();
-      to.Swap(cfg);
+      swap(to,cfg);
     }
+  }
+  void operator()(int ri) const {
   }
   CFG const& GetCFG() const {
     assert(have_cfg);
