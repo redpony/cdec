@@ -216,20 +216,21 @@ public:
   template <class PV>
   void index_lhs(PV &v) {
     for (int i=0,e=adj.size();i!=e;++i) {
-      PrefixTrieEdge const& e=adj[i];
-      // assert(e.p.is_1());  // actually, after done_building, e will have telescoped dest->p/p.
-      NTHandle n=e.w;
+      PrefixTrieEdge const& edge=adj[i];
+      // assert(edge.p.is_1());  // actually, after done_building, e will have telescoped dest->p/p.
+      NTHandle n=edge.w;
       assert(n>=0);
-      SHOWM3(DPFSA,"index_lhs",i,e,n);
-      v[n]=e.dest;
+      SHOWM3(DPFSA,"index_lhs",i,edge,n);
+      v[n]=edge.dest;
     }
   }
 
   template <class PV>
   void done_root(PV &v) {
-    done_building_r();
-//    index_adj(); // we want an index for the root node?.  don't think so - index_lhs handles it.
-    index_lhs(v);
+    assert(is_root());
+    done_building_r(); //sets adj
+//    index_adj(); // we want an index for the root node?.  don't think so - index_lhs handles it.  also we stopped clearing edge_for.
+    index_lhs(v); // uses adj
   }
 
   // call only once.
@@ -250,7 +251,7 @@ public:
   // call only once.
   void done_building() {
     SHOWM3(DBUILDTRIE,"done_building",edge_for.size(),adj.size(),1);
-#if 0
+#if 1
     adj.reinit_map(edge_for,*this);
 #else
     adj.reinit(edge_for.size());
@@ -264,6 +265,7 @@ public:
 //      (*this)(*i);
     }
 #endif
+    assert(adj.size()==edge_for.size());
 //    if (final) p_final/=p;
     std::sort(adj.begin(),adj.end());
     //TODO: store adjacent differences on edges (compared to
@@ -293,23 +295,21 @@ public:
     PrefixTrieEdgeFor::iterator i=edge_for.find(w);
     if (i!=edge_for.end())
       return improve_edge(i->second,rulep);
-    PrefixTrieEdge &e=edge_for[w];
+    PrefixTrieEdge &e=i->second;
     NodeP r=new PrefixTrieNode(lhs_,rulep);
     IF_PRINT_PREFIX(r->backp=BP(w,this));
-    return e.dest=r;
+    e.dest=r;
+    return r;
   }
 
   void set_final(NTHandle lhs_,best_t pf) {
     assert(no_adj());
     final=true;
-    /*
     PrefixTrieEdge &e=edge_for[-1];
     e.p=pf;
     e.dest=0;
     e.w=lhs_;
-    if (pf>p)
-      p=pf;
-    */
+    maybe_improve(p,pf);
   }
 
 private:
@@ -327,7 +327,7 @@ public:
     destroy_children();
   }
   void print(std::ostream &o) const {
-    o << lhs << "->" << p;
+    o << "Node"<<this<< ": "<<lhs << "->" << p;
     o << ',' << size() << ',';
     print_back_str(o);
   }
@@ -357,14 +357,16 @@ struct PrefixTrie {
     SHOWM2(DBUILDTRIE,"PrefixTrie()",rulesp->size(),lhs2.size());
     cfg.VisitRuleIds(*this);
     root.done_root(lhs2);
+    SHOWM4(DBUILDTRIE,"done w/ PrefixTrie: ",root,root.adj.size(),lhs2.size(),lhs2[0]);
   }
 
-  void operator()(int ri) const {
+  void operator()(int ri) {
     Rule const& r=rules()[ri];
     NTHandle lhs=r.lhs;
     best_t p=r.p;
-    NodeP n=const_cast<PrefixTrieNode&>(root).build_lhs(lhs,p);
-    SHOWM3(DBUILDTRIE,"Prefixtrie rule id",ri,root,p);
+//    NodeP n=const_cast<PrefixTrieNode&>(root).build_lhs(lhs,p);
+    NodeP n=root.build_lhs(lhs,p);
+    SHOWM4(DBUILDTRIE,"Prefixtrie rule id, root",ri,root,p,*n);
     for (RHS::const_iterator i=r.rhs.begin(),e=r.rhs.end();;++i) {
       SHOWM2(DBUILDTRIE,"PrefixTrie build or final",i-r.rhs.begin(),*n);
       if (i==e) {
@@ -381,6 +383,8 @@ struct PrefixTrie {
     if (!r) throw std::runtime_error("PrefixTrie: no CFG rule w/ lhs "+cfgp->nt_name(n));
     return r;
   }
+private:
+  PrefixTrie(PrefixTrie const& o);
 };
 
 

@@ -317,11 +317,11 @@
     }
 
     private:
-    Equal equal;
     Better better;
     Container data;
     DistanceMap distance;
     IndexInHeapPropertyMap index_in_heap;
+    Equal equal;
 
     // Get the parent of a given node in the heap
     static inline size_type parent(size_type index) {
