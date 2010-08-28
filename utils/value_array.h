@@ -57,7 +57,7 @@ public:
   typedef T* pointer;
 
   size_type size() const { return sz; }
-  bool empty() const { return size() == 0; }
+  bool empty() const { return !sz; }
 
   iterator begin() { return array; }
   iterator end() { return array + sz; }
@@ -87,15 +87,15 @@ protected:
   {
     if (!array) return;
     // it's cool that this destroys in reverse order of construction, but why bother?
-    for (size_type i = sz; i != 0;)
-      A::destroy(array + --i);
+    for (pointer i=array+sz;i>array;)
+      A::destroy(--i);
   }
   void dealloc() {
-    if (array != NULL) A::deallocate(array,sz);
+    if (sz && array != NULL) A::deallocate(array,sz);
     sz=0;
   }
   void alloc(size_type s) {
-    array = s==0 ? 0 : A::allocate(sz);
+    array = s==0 ? 0 : A::allocate(s);
     sz=s;
   }
 
@@ -133,11 +133,11 @@ protected:
     copy_construct(itr,end,array);
   }
   inline void fill(const_reference t) {
-    for (T *i=array,*e=array+sz;i!=e;++i)
+    for (pointer i=array,e=array+sz;i!=e;++i)
       new(i) T(t);
   }
   inline void fill() {
-    for (T *i=array,*e=array+sz;i!=e;++i)
+    for (pointer i=array,e=array+sz;i!=e;++i)
       new(i) T();
   }
 
@@ -184,7 +184,7 @@ public:
   }
 
   template <class I>
-  void reinit(I itr, I end) {
+  void reinit_range(I itr, I end) {
     reinit_noconstruct(std::distance(itr,end));
     copy_construct(itr,end,array);
   }
