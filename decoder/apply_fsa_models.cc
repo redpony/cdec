@@ -299,6 +299,7 @@ public:
     NodeP r=new PrefixTrieNode(lhs_,rulep);
     IF_PRINT_PREFIX(r->backp=BP(w,this));
     e.dest=r;
+    SHOWM4(DBUILDTRIE,"built node",this,w,*r,r);
     return r;
   }
 
