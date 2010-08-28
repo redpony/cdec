@@ -254,6 +254,7 @@ public:
     adj.reinit_map(edge_for,*this);
 #else
     adj.reinit(edge_for.size());
+    SHOWM3(DBUILDTRIE,"done_building_reinit",edge_for.size(),adj.size(),2);
     Adj::iterator o=adj.begin();
     for (PrefixTrieEdgeFor::iterator i=edge_for.begin(),e=edge_for.end();i!=e;++i) {
       SHOWM3(DBUILDTRIE,"edge_for",o-adj.begin(),i->first,i->second);
