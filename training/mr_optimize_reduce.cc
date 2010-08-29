@@ -108,11 +108,9 @@ int main(int argc, char** argv) {
     }
     wm.InitVector(&means);
   }
-  shared_ptr<Optimizer> o;
+  shared_ptr<BatchOptimizer> o;
   const string omethod = conf["optimization_method"].as<string>();
-  if (omethod == "sgd")
-    o.reset(new SGDOptimizer(conf["eta"].as<double>()));
-  else if (omethod == "rprop")
+  if (omethod == "rprop")
     o.reset(new RPropOptimizer(num_feats));  // TODO add configuration
   else
     o.reset(new LBFGSOptimizer(num_feats, conf["correction_buffers"].as<int>()));

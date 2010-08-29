@@ -10,10 +10,10 @@
 
 // abstract base class for first order optimizers
 // order of invocation: new, Load(), Optimize(), Save(), delete
-class Optimizer {
+class BatchOptimizer {
  public:
-  Optimizer() : eval_(1), has_converged_(false) {}
-  virtual ~Optimizer();
+  BatchOptimizer() : eval_(1), has_converged_(false) {}
+  virtual ~BatchOptimizer();
   virtual std::string Name() const = 0;
   int EvaluationCount() const { return eval_; }
   bool HasConverged() const { return has_converged_; }
@@ -41,7 +41,7 @@ class Optimizer {
   bool has_converged_;
 };
 
-class RPropOptimizer : public Optimizer {
+class RPropOptimizer : public BatchOptimizer {
  public:
   explicit RPropOptimizer(int num_vars,
                           double eta_plus = 1.2,
@@ -75,20 +75,7 @@ class RPropOptimizer : public Optimizer {
   const double delta_min_;
 };
 
-class SGDOptimizer : public Optimizer {
- public:
-  explicit SGDOptimizer(int num_vars, double eta = 0.1) : eta_(eta) {
-    (void) num_vars;
-  }
-  std::string Name() const;
-  void OptimizeImpl(const double& obj,
-                    const std::vector<double>& g,
-                    std::vector<double>* x);
- private:
-  const double eta_;
-};
-
-class LBFGSOptimizer : public Optimizer {
+class LBFGSOptimizer : public BatchOptimizer {
  public:
   explicit LBFGSOptimizer(int num_vars, int memory_buffers = 10);
   std::string Name() const;
