@@ -7,9 +7,9 @@
 
 using namespace std;
 
-Optimizer::~Optimizer() {}
+BatchOptimizer::~BatchOptimizer() {}
 
-void Optimizer::Save(ostream* out) const {
+void BatchOptimizer::Save(ostream* out) const {
   out->write((const char*)&eval_, sizeof(eval_));
   out->write((const char*)&has_converged_, sizeof(has_converged_));
   SaveImpl(out);
@@ -17,7 +17,7 @@ void Optimizer::Save(ostream* out) const {
   out->write((const char*)&magic, sizeof(magic));
 }
 
-void Optimizer::Load(istream* in) {
+void BatchOptimizer::Load(istream* in) {
   in->read((char*)&eval_, sizeof(eval_));
   ++eval_;
   in->read((char*)&has_converged_, sizeof(has_converged_));
@@ -28,11 +28,11 @@ void Optimizer::Load(istream* in) {
   cerr << Name() << " EVALUATION #" << eval_ << endl;
 }
 
-void Optimizer::SaveImpl(ostream* out) const {
+void BatchOptimizer::SaveImpl(ostream* out) const {
   (void)out;
 }
 
-void Optimizer::LoadImpl(istream* in) {
+void BatchOptimizer::LoadImpl(istream* in) {
   (void)in;
 }
 
@@ -76,18 +76,6 @@ void RPropOptimizer::LoadImpl(istream* in) {
   assert(n == delta_ij_.size());
   in->read((char*)&prev_g_[0], sizeof(double) * n);
   in->read((char*)&delta_ij_[0], sizeof(double) * n);
-}
-
-string SGDOptimizer::Name() const {
-  return "SGDOptimizer";
-}
-
-void SGDOptimizer::OptimizeImpl(const double& obj,
-                            const vector<double>& g,
-                            vector<double>* x) {
-  (void)obj;
-  for (int i = 0; i < g.size(); ++i)
-    (*x)[i] -= g[i] * eta_;
 }
 
 string LBFGSOptimizer::Name() const {

@@ -7,11 +7,15 @@ bin_PROGRAMS = \
   grammar_convert \
   atools \
   plftools \
-  collapse_weights
+  collapse_weights \
+  online_train
 
 noinst_PROGRAMS = \
   lbfgs_test \
   optimize_test
+
+online_train_SOURCES = online_train.cc online_optimizer.cc
+online_train_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
 atools_SOURCES = atools.cc
 atools_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
@@ -22,7 +26,7 @@ model1_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -l
 grammar_convert_SOURCES = grammar_convert.cc
 grammar_convert_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
-optimize_test_SOURCES = optimize_test.cc optimize.cc
+optimize_test_SOURCES = optimize_test.cc optimize.cc online_optimizer.cc
 optimize_test_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
 collapse_weights_SOURCES = collapse_weights.cc

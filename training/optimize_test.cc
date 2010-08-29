@@ -3,12 +3,13 @@
 #include <sstream>
 #include <boost/program_options/variables_map.hpp>
 #include "optimize.h"
+#include "online_optimizer.h"
 #include "sparse_vector.h"
 #include "fdict.h"
 
 using namespace std;
 
-double TestOptimizer(Optimizer* opt) {
+double TestOptimizer(BatchOptimizer* opt) {
   cerr << "TESTING NON-PERSISTENT OPTIMIZER\n";
 
   // f(x,y) = 4x1^2 + x1*x2 + x2^2 + x3^2 + 6x3 + 5
@@ -34,7 +35,7 @@ double TestOptimizer(Optimizer* opt) {
   return obj;
 }
 
-double TestPersistentOptimizer(Optimizer* opt) {
+double TestPersistentOptimizer(BatchOptimizer* opt) {
   cerr << "\nTESTING PERSISTENT OPTIMIZER\n";
   // f(x,y) = 4x1^2 + x1*x2 + x2^2 + x3^2 + 6x3 + 5
   // df/dx1 = 8*x1 + x2
@@ -95,11 +96,23 @@ void TestOptimizerVariants(int num_vars) {
   cerr << oa.Name() << " SUCCESS\n";
 }
 
+using namespace std::tr1;
+
+void TestOnline() {
+  size_t N = 20;
+  double C = 1.0;
+  double eta0 = 0.2;
+  shared_ptr<LearningRateSchedule> r(new ExponentialDecayLearningRate(N, eta0, 0.85));
+  //shared_ptr<LearningRateSchedule> r(new StandardLearningRate(N, eta0));
+  CumulativeL1OnlineOptimizer opt(r, N, C);
+  assert(r->eta(10) < r->eta(1));
+}
+
 int main() {
   int n = 3;
-  TestOptimizerVariants<SGDOptimizer>(n);
   TestOptimizerVariants<LBFGSOptimizer>(n);
   TestOptimizerVariants<RPropOptimizer>(n);
+  TestOnline();
   return 0;
 }
 
