@@ -16,7 +16,7 @@ if len(sys.argv) < 3:
 #read index:
 split_index={}
 
-marker="#"
+marker="##"
 
 if len(sys.argv) > 3:
   marker=sys.argv[3]
