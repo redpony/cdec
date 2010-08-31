@@ -55,7 +55,7 @@ WeightType Inside(const Hypergraph& hg,
       *cur_node_inside_score += score;
     }
   }
-  return inside_score.back();
+  return inside_score.empty() ? WeightType(0) : inside_score.back();
 }
 
 template<class WeightType, class WeightFunction>

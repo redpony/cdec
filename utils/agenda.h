@@ -64,6 +64,7 @@ struct Less {
 };
 
 // LocMap and PrioMap are boost property maps put(locmap,key,size_t), Better(get(priomap,k1),get(priomap,k2)) means k1 should be above k2 (be popped first).  Locmap and PrioMap may have state; the rest are assumed stateless functors
+// make sure the (default) location is not -1 for anything you add, or else an assertion may trigger
 template <class Item,class Better=Less, /* intern_pool args */ class KeyF=get_key<Item>,class HashKey=boost::hash<typename KeyF::result_type>,class EqKey=std::equal_to<typename KeyF::result_type>, class Pool=boost::object_pool<Item> >
 struct Agenda : intern_pool<Item,KeyF,HashKey,EqKey,Pool> {
   typedef intern_pool<Item,KeyF,HashKey,EqKey,Pool> Intern; // inherited because I want to use construct()
