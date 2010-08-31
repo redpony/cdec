@@ -8,8 +8,8 @@
 #define D_ARY_UP_GRAEHL 0 // untested
 #define D_ARY_APPEND_ALWAYS_PUSH 1 // heapify (0) is untested.  otherwise switch between push and heapify depending on size (cache effects, existing items vs. # appended ones)
 
-#define D_ARY_TRACK_OUT_OF_HEAP 0 // shouldn't need to track, because in contains() false positives looking up stale or random loc map values are impossible - we just check key
-#define D_ARY_VERIFY_HEAP 0
+#define D_ARY_TRACK_OUT_OF_HEAP 1 // shouldn't need to track, because in contains() false positives looking up stale or random loc map values are impossible - we just check key
+#define D_ARY_VERIFY_HEAP 1
 // This is a very expensive test so it should be disabled even when NDEBUG is not defined
 
 /* adapted from boost/graph/detail/d_ary_heap.hpp

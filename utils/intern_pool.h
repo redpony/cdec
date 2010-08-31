@@ -59,6 +59,30 @@ struct compose_indirect {
 
 };
 
+template <class KeyF,class F,class Arg=typename KeyF::argument_type>
+struct equal_indirect {
+  typedef Arg *argument_type; // we also accept Arg &
+  KeyF kf;
+  F f;
+  typedef bool result_type;
+
+  result_type operator()(Arg const& a1,Arg const& a2) const {
+    return f(kf(a1),kf(a2));
+  }
+  result_type operator()(Arg & a1,Arg & a2) const {
+    return f(kf(a1),kf(a2));
+  }
+  result_type operator()(Arg * a1,Arg * a2) const {
+    return a1==a2||(a1&&a2&&f(kf(*a1),kf(*a2)));
+  }
+  template <class V,class W>
+  result_type operator()(V const& v,W const&w) const {
+    return v==w||(v&&w&&f(kf(*v),kf(*w)));
+  }
+
+
+};
+
 /*
 
 template <class F>
@@ -79,7 +103,7 @@ struct intern_pool : Pool {
   typedef typename KeyF::result_type Key;
   typedef Item *Handle;
   typedef compose_indirect<KeyF,HashKey,Item> HashDeep;
-  typedef compose_indirect<KeyF,EqKey,Item> EqDeep;
+  typedef equal_indirect<KeyF,EqKey,Item> EqDeep;
   typedef HASH_SET<Handle,HashDeep,EqDeep> Canonical;
   typedef typename Canonical::iterator CFind;
   typedef std::pair<CFind,bool> CInsert;

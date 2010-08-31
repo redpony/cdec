@@ -21,7 +21,8 @@ struct TD {
   }
   */
   static const WordID max_wordid=0x7fffffff;
-  static const WordID none=(WordID)-1; // Vocab_None
+  static const WordID null=max_wordid-1;
+  static const WordID none=(WordID)-1; // Vocab_None - this will collide with mixed node/variable id / word space, though.  max_wordid will be distinct (still positive)
   static char const* const ss_str;  //="<s>";
   static char const* const se_str;  //="</s>";
   static char const* const unk_str; //="<unk>";
