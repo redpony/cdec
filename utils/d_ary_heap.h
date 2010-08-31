@@ -1,6 +1,8 @@
 #ifndef D_ARY_HEAP_H
 #define D_ARY_HEAP_H
 
+#include "show.h"
+#define DDARY(x) x
 
 #define D_ARY_PUSH_GRAEHL 0 // untested
 #define D_ARY_POP_GRAEHL 0 // untested
@@ -213,7 +215,7 @@
 #if D_ARY_TRACK_OUT_OF_HEAP
       using boost::put;
       for (typename Container::iterator i=data.begin(),e=data.end();i!=e;++i)
-        put(index_in_heap,*i,D_ARY_HEAP_NULL_INDEX);
+        put(index_in_heap,*i,(size_type)D_ARY_HEAP_NULL_INDEX);
 #endif
       data.clear();
     }
@@ -244,7 +246,7 @@
     void pop() {
       using boost::put;
       if(D_ARY_TRACK_OUT_OF_HEAP)
-        put(index_in_heap, data[0], D_ARY_HEAP_NULL_INDEX);
+        put(index_in_heap, data[0], (size_type)D_ARY_HEAP_NULL_INDEX);
       if (data.size() != 1) {
         if (D_ARY_POP_GRAEHL) {
           preserve_heap_property_down(data.back(),0,data.size()-1);
@@ -287,8 +289,9 @@
       // because maybe size_type is signed or unsigned
     inline bool contains(const Value &v,size_type i) const {
       if (D_ARY_TRACK_OUT_OF_HEAP)
-        return i != D_ARY_HEAP_NULL_INDEX;
+        return i != (size_type)D_ARY_HEAP_NULL_INDEX;
       size_type sz=data.size();
+      SHOWM2(DDARY,"d_ary_heap contains",i,data.size());
       return i>=0 && i<sz && equal(v,data[i]); // note: size_type may be signed (don't recommend it, though) - thus i>=0 check to catch uninit. data
     }
 #include "warning_pop.h"

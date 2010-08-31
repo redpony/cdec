@@ -499,8 +499,8 @@ typedef Item *ItemP;
 #undef INIT_LOCATION
 #if D_ARY_TRACK_OUT_OF_HEAP
 # define INIT_LOCATION                           , location(D_ARY_HEAP_NULL_INDEX)
-#elsif !defined(NDEBUG) || SAFE_VALGRIND
- // avoid spurious valgrind warning
+#elif !defined(NDEBUG) || SAFE_VALGRIND
+ // avoid spurious valgrind warning - FIXME: still complains???
 # define INIT_LOCATION                           , location()
 #else
 # define INIT_LOCATION
