@@ -77,8 +77,16 @@ struct CFG {
     if (w<=0) return nt_name(-w);
     else return TD::Convert(w);
   }
+  static void static_print_nt_name(std::ostream &o,NTHandle n) {
+    o<<'['<<n<<']';
+  }
+  static std::string static_nt_name(NTHandle w) {
+    std::ostringstream o;
+    static_print_nt_name(o,w);
+    return o.str();
+  }
   static void static_print_rhs_name(std::ostream &o,WordID w) {
-    if (w<=0) o<<'['<<-w<<']';
+    if (w<=0) static_print_nt_name(o,-w);
     else o<<TD::Convert(w);
   }
   static std::string static_rhs_name(WordID w) {

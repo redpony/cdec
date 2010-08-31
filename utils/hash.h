@@ -95,7 +95,6 @@ typename H::mapped_type & get_or_call(H &ht,K const& k,F const& f) {
   }
 }
 
-
 // the below could also return a ref to the mapped max/min.  they have the advantage of not falsely claiming an improvement when an equal value already existed.  otherwise you could just modify the get_default and if equal assume new.
 template <class H,class K>
 bool improve_mapped_max(H &ht,K const& k,typename H::mapped_type const& v) {
@@ -109,6 +108,32 @@ bool improve_mapped_max(H &ht,K const& k,typename H::mapped_type const& v) {
   }
   return false;
 }
+
+
+// return true if there was no old value.  like ht[k]=v but lets you know whether it was a new addition
+template <class H,class K>
+bool put(H &ht,K const& k,typename H::mapped_type const& v) {
+  std::pair<typename H::iterator,bool> inew=ht.insert(typename H::value_type(k,v));
+  if (inew.second)
+    return true;
+  inew.first->second=v;
+  return false;
+}
+
+// does not update old value (returns false) if one exists, otherwise add
+template <class H,class K>
+bool maybe_add(H &ht,K const& k,typename H::mapped_type const& v) {
+  std::pair<typename H::iterator,bool> inew=ht.insert(typename H::value_type(k,v));
+  return inew.second;
+}
+
+// ht[k] must not exist (yet)
+template <class H,class K>
+void add(H &ht,K const& k,typename H::mapped_type const& v) {
+  bool fresh=maybe_add(ht,k,v);
+  assert(fresh);
+}
+
 
 template <class H,class K>
 bool improve_mapped_min(H &ht,K const& k,typename H::mapped_type const& v) {

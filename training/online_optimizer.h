@@ -50,7 +50,8 @@ class OnlineOptimizer {
  public:
   virtual ~OnlineOptimizer();
   OnlineOptimizer(const std::tr1::shared_ptr<LearningRateSchedule>& s,
-    size_t training_instances) : schedule_(s), k_(), N_(training_instances) {}
+                  size_t training_instances)
+    : N_(training_instances),schedule_(s),k_() {}
   void UpdateWeights(const SparseVector<double>& approx_g, SparseVector<double>* weights) {
     ++k_;
     const double eta = schedule_->eta(k_);
