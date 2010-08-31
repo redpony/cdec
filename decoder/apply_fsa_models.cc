@@ -495,9 +495,8 @@ typedef Item *ItemP;
 
 /* we use a single type of item so it can live in a single best-first queue.  we hold them by pointer so they can have mutable state, e.g. priority/location, but also lists of predictions and kbest completions (i.e. completions[L,r] = L -> * (r,s), by 1best for each possible s.  we may discover more s later.  we could use different subtypes since we hold by pointer, but for now everything will be packed as variants of Item */
 struct Item : ItemPrio,ItemKey {
-  explicit Item(NodeP dot,int next=0) : ItemKey(dot),next(next),from(0) {  }
-  explicit Item(NodeP dot,FFState const& state,int next=0) : ItemKey(dot,state),next(next),from(0) {  }
-  unsigned location;
+  explicit Item(NodeP dot,int next=0) : ItemKey(dot),next(next),from(0),location(D_ARY_HEAP_NULL_INDEX) {  }
+  explicit Item(NodeP dot,FFState const& state,int next=0) : ItemKey(dot,state),next(next),from(0),location(D_ARY_HEAP_NULL_INDEX) {  }
   typedef std::queue<ItemP> Predicted;
   Predicted predicted; // this is empty, unless this is a predicted L -> .asdf item, or a to-complete L -> asdf .
   int next; // index of dot->adj to complete (if dest==0), or predict (if NT), or scan (if word).  note: we could store pointer inside adj since it and trie are @ fixed addrs.  less pointer arith, more space.
@@ -517,6 +516,7 @@ struct Item : ItemPrio,ItemKey {
     o<< ']';
   }
   PRINT_SELF(Item)
+  unsigned location;
 };
 
 struct GetItemKey {
@@ -645,6 +645,7 @@ void ApplyFsa<F>::ApplyEarley()
   Chart<F> chart(cfg,smeta,fsa);
   // don't need to uniq - option to do that already exists in cfg_options
   //TODO:
+  *oh=hgcfg.ih;
 }
 
 

@@ -12,6 +12,9 @@
 #define D_ARY_VERIFY_HEAP 1
 // This is a very expensive test so it should be disabled even when NDEBUG is not defined
 
+# undef D_ARY_HEAP_NULL_INDEX
+# define D_ARY_HEAP_NULL_INDEX (-1) // if you want to test contains before adding, init location to this.
+
 /* adapted from boost/graph/detail/d_ary_heap.hpp
 
   local modifications:
@@ -112,8 +115,6 @@
             typename Equal = std::equal_to<Value> >
   class d_ary_heap_indirect {
     BOOST_STATIC_ASSERT (Arity >= 2);
-# undef D_ARY_HEAP_NULL_INDEX
-# define D_ARY_HEAP_NULL_INDEX ((size_type)(-1))
     public:
     typedef Container container_type;
     typedef Size size_type;
@@ -285,9 +286,10 @@
 #pragma GCC diagnostic ignored "-Wtype-limits"
       // because maybe size_type is signed or unsigned
     inline bool contains(const Value &v,size_type i) const {
-      return D_ARY_TRACK_OUT_OF_HEAP ?
-        (i != D_ARY_HEAP_NULL_INDEX) :
-        i>=0 && i<data.size() && equal(v,data[i]); // note: size_type may be signed (don't recommend it, though) - thus i>=0 check to catch uninit. data
+      if (D_ARY_TRACK_OUT_OF_HEAP)
+        return i != D_ARY_HEAP_NULL_INDEX;
+      size_type sz=data.size();
+      return i>=0 && i<sz && equal(v,data[i]); // note: size_type may be signed (don't recommend it, though) - thus i>=0 check to catch uninit. data
     }
 #include "warning_pop.h"
 

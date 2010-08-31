@@ -55,6 +55,8 @@ typename WeightFunction::Weight Viterbi(const Hypergraph& hg,
       antsb[k] = &vit_result[edgeb.tail_nodes_[k]];
     traverse(edgeb, antsb, cur_node_best_result);
   }
+  if (vit_result.empty())
+    return WeightType(0);
   std::swap(*result, vit_result.back());
   return vit_weight.back();
 }

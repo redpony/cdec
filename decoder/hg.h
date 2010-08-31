@@ -298,6 +298,9 @@ public:
     std::swap(is_linear_chain_, other.is_linear_chain_);
     other.edges_.swap(edges_);
   }
+  friend inline void swap(Hypergraph &a,Hypergraph &b) {
+    a.swap(b);
+  }
 
   void ResizeNodes(int size) {
     nodes_.resize(size);
