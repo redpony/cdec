@@ -16,6 +16,6 @@ types of chart items:
 
 A->t.*,a,b (trie node t) with mutable state t-next for generating successor lazily (vs. all at once)
 
-A->t.B,a,b (t-next of A->t.* points to (B,t')): mutable state b-next for choosing which B->b,? to use.  note: such an item can't be queued immediately on its own, but can be added to the pending list of B->b,?
+A->t.B,a,b (t-next of A->t.* points to (B,t')): mutable state b-next for choosing which B->b,? to use.  note: such an item can't be queued immediately on its own, but can be added to the pending list of B->b,? ; once any B->b,? is completed then we see if any more b-next are already known; if they're exhausted then we add back to pending list?
 
 A->a,? - list of all known (b,inside prob) such that A[a,b].  we may also choose to represent this as A->.*,a,a.
