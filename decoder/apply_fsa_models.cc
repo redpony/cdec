@@ -164,7 +164,7 @@ struct PrefixTrieEdge {
 //note: ending a rule is handled with a special final edge, so that possibility can be explored in best-first order along with the rest (alternative: always finish a final rule by putting it on queue).  this edge has no symbol on it.
 struct PrefixTrieNode {
   best_t p; // viterbi (max prob) of rule this node leads to - when building.  telescope later onto edges for best-first.
-  bool final; // may also have successors, of course.  we don't really need to track this; a null dest edge in the adj list lets us encounter the fact in best first order.
+//  bool final; // may also have successors, of course.  we don't really need to track this; a null dest edge in the adj list lets us encounter the fact in best first order.
   typedef TrieBackP BP;
   typedef std::vector<BP> BPs;
   void back_vec(BPs &ns) const {
@@ -338,7 +338,7 @@ public:
 
   void set_final(NTHandle lhs_,best_t pf) {
     assert(no_adj());
-    final=true;
+//    final=true;
     PrefixTrieEdge &e=edge_for[null_wordid];
     e.p=pf;
     e.dest=0;
@@ -500,15 +500,15 @@ typedef Item *ItemP;
 #endif
 
 struct Item : ItemPrio,ItemKey {
-  explicit Item(NodeP dot,int next=0) : ItemKey(dot),next(next),from(0)
+  explicit Item(NodeP dot,int next=0) : ItemKey(dot),trienext(next),from(0)
                                         INIT_LOCATION
   {  }
-  explicit Item(NodeP dot,FFState const& state,int next=0) : ItemKey(dot,state),next(next),from(0)
+  explicit Item(NodeP dot,FFState const& state,int next=0) : ItemKey(dot,state),trienext(next),from(0)
                                                              INIT_LOCATION
   {  }
   typedef std::queue<ItemP> Predicted;
   Predicted predicted; // this is empty, unless this is a predicted L -> .asdf item, or a to-complete L -> asdf .
-  int next; // index of dot->adj to complete (if dest==0), or predict (if NT), or scan (if word).  note: we could store pointer inside adj since it and trie are @ fixed addrs.  less pointer arith, more space.
+  int trienext; // index of dot->adj to complete (if dest==0), or predict (if NT), or scan (if word).  note: we could store pointer inside adj since it and trie are @ fixed addrs.  less pointer arith, more space.
   ItemP from; //backpointer - 0 for L -> . asdf for the rest; L -> a .sdf, it's the L -> .asdf item.
   ItemP predicted_from() const {
     ItemP p=(ItemP)this;
@@ -521,7 +521,7 @@ struct Item : ItemPrio,ItemKey {
     ItemKey::print(o);
     o<<' ';
     ItemPrio::print(o);
-    o<<" next="<<next;
+    o<<" next="<<trienext;
     o<< ']';
   }
   PRINT_SELF(Item)
@@ -571,7 +571,7 @@ struct Chart {
       best_t trie_stop_p=topb/b;
       NodeP d=top->dot;
       PrefixTrieNode::Adj const& adj=d->adj;
-      int n=top->next;
+      int n=top->trienext;
       for (int m=adj.size();n<m;++n) { // cube corner
         PrefixTrieEdge const& te=adj[m];
         if (better(te.p,trie_stop_p)) {
