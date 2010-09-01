@@ -2,7 +2,7 @@
 #define D_ARY_HEAP_H
 
 #include "show.h"
-#define DDARY(x) x
+#define DDARY(x)
 
 #define D_ARY_PUSH_GRAEHL 0 // untested
 #define D_ARY_POP_GRAEHL 0 // untested

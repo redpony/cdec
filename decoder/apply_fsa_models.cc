@@ -1,3 +1,7 @@
+//see apply_fsa_models.README for notes on the l2r earley fsa+cfg intersection
+//implementation in this file (also some comments in this file)
+#define SAFE_VALGRIND 1
+
 #include "apply_fsa_models.h"
 #include <stdexcept>
 #include <cassert>
@@ -21,7 +25,6 @@
 #include "show.h"
 #include "string_to.h"
 
-#define SAFE_VALGRIND 1
 
 #define DFSA(x) x
 //fsa earley chart
@@ -78,20 +81,13 @@ I'm using option 1.
 */
 
 // if we don't greedy-binarize, we want to encode recognized prefixes p (X -> p . rest) efficiently.  if we're doing this, we may as well also push costs so we can best-first select rules in a lazy fashion.  this is effectively left-branching binarization, of course.
+
 template <class K,class V,class Hash>
 struct fsa_map_type {
-  typedef std::map<K,V> type;
+  typedef std::map<K,V> type; // change to HASH_MAP ?
 };
-//template typedef
+//template typedef - and macro to make it less painful
 #define FSA_MAP(k,v) fsa_map_type<k,v,boost::hash<k> >::type
-typedef WordID LHS; // so this will be -NTHandle.
-
-struct get_second {
-  template <class P>
-  typename P::second_type const& operator()(P const& p) const {
-    return p.second;
-  }
-};
 
 struct PrefixTrieNode;
 typedef PrefixTrieNode *NodeP;
@@ -136,7 +132,6 @@ ostream& print_map_by_nt(std::ostream &o,V const& v,CFG const*pcfg=print_cfg,cha
   return o;
 }
 
-
 struct PrefixTrieEdge {
   PrefixTrieEdge()
   //    : dest(0),w(TD::max_wordid)
@@ -164,9 +159,7 @@ struct PrefixTrieEdge {
     print_cfg_rhs(o,w);
     o<<"{"<<p<<"}->"<<dest;
   }
-
 };
-
 
 //note: ending a rule is handled with a special final edge, so that possibility can be explored in best-first order along with the rest (alternative: always finish a final rule by putting it on queue).  this edge has no symbol on it.
 struct PrefixTrieNode {
