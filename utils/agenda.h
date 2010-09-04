@@ -95,8 +95,10 @@ struct Agenda : intern_pool<Item,KeyF,HashKey,EqKey,Pool> {
   bool improve(ItemP i) {
     ItemP c=i;
     bool fresh=interneq(c);
-    if (fresh)
-      return add(c);
+    if (fresh) {
+      add(c);
+      return true;
+    }
     DBG_AGENDA(assert(q.contains(c)));
     return q.maybe_improve(priomap[i]);
   }
@@ -112,6 +114,11 @@ struct Agenda : intern_pool<Item,KeyF,HashKey,EqKey,Pool> {
   }
   agenda_best_t best() const {
     return priomap[q.top()]; //TODO: cache/track the global best?
+  }
+  // add only if worse than queue current best, otherwise evaluate immediately (e.g. for early stopping w/ expensive to compute additional cost).  return true if postponed (added)
+  bool postpone(ItemP i) {
+    if (better(priomap[i],best())) return false;
+    return improve(i);
   }
 
   Agenda(unsigned reserve=1000000,LocMap const& lm=LocMap(),PrioMap const& pm=PrioMap(),EqKey const& eq=EqKey(),Better const& better=Better()) : locmap(lm), priomap(pm), better(better), q(priomap,locmap,better,reserve) {  }
