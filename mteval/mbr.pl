@@ -1,14 +1,14 @@
+#!/usr/bin/perl -w
 #parallelize mbr computation from k-best list
 #Example usage : ./mbr.pl <kbest input file> <mbr output directory>
-
-#!/usr/bin/perl -w
 use strict;
 use File::Temp;
 use FileHandle;
+use Cwd qw(getcwd);
 
 sub create_qsub;
-
-my $MBR = "/chomes/vlad/ws10smt/mteval/mbr_kbest";
+my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../environment"; }
+my $MBR = "$SCRIPT_DIR/mbr_kbest";
 
 die unless -x $MBR;
 my $kbest = shift @ARGV;
