@@ -1,0 +1,1 @@
+../../../training/cluster-ptrain.pl cdec.ini pos.grammar weights --gaussian_prior --sigma_squared 1 &> training.log &
