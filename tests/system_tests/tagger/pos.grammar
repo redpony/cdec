@@ -1,4 +1,4 @@
-[X] ||| A B C ||| a b c
-[X] ||| A ||| a
-[X] ||| A ||| b
-[X] ||| B C ||| b c
+A B C ||| a b c
+A ||| a
+A ||| b
+B C ||| b c
