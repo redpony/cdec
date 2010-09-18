@@ -7,6 +7,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "decoder.h"
 #include "oracle_bleu.h"
 #include "timing_stats.h"
 #include "translator.h"
