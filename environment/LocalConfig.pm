@@ -31,6 +31,10 @@ my $CCONFIG = {
   'Valhalla' => {
     'HOST_REGEXP' => qr/^(thor|tyr)\.inf\.ed\.ac\.uk$/,
   },
+  'Blacklight' => {
+    'HOST_REGEXP' => qr/^blacklight.psc.edu$/,
+    'QSubMemFlag' => '-l pmem=',
+  },
 };
 
 our $senvironment_name;
