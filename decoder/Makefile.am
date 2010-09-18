@@ -43,6 +43,7 @@ libcdec_a_SOURCES = \
   scfg_translator.cc \
   hg.cc \
   hg_io.cc \
+  decoder.cc \
   hg_intersect.cc \
   viterbi.cc \
   lattice.cc \

@@ -1,6 +1,7 @@
 #ifndef CFG_OPTIONS_H
 #define CFG_OPTIONS_H
 
+#include "filelib.h"
 #include "hg_cfg.h"
 #include "cfg_format.h"
 #include "cfg_binarize.h"
