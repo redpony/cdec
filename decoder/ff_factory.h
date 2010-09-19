@@ -20,6 +20,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "ff_fsa_dynamic.h"
+
 class FeatureFunction;
 
 class FsaFeatureFunction;
