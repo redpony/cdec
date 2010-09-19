@@ -46,5 +46,6 @@ inline void RegisterFsaDynToFF(bool prefix=true) {
   RegisterFsaDynToFF<FsaImpl>(FsaImpl::usage(false,false),prefix);
 }
 
+void register_feature_functions();
 
 #endif

@@ -2,10 +2,9 @@
 
 #include "filelib.h"
 #include "decoder.h"
+#include "ff_register.h"
 
 using namespace std;
-
-void register_feature_functions();
 
 int main(int argc, char** argv) {
   register_feature_functions();
