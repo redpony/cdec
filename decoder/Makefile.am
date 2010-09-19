@@ -11,7 +11,7 @@ noinst_PROGRAMS = \
 TESTS = trule_test ff_test parser_test grammar_test hg_test cfg_test
 endif
 
-cdec_SOURCES = cdec.cc forest_writer.cc maxtrans_blunsom.cc cdec_ff.cc
+cdec_SOURCES = cdec.cc
 cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 
 cfg_test_SOURCES = cfg_test.cc
@@ -34,6 +34,9 @@ rule_lexer.cc: rule_lexer.l
 noinst_LIBRARIES = libcdec.a
 
 libcdec_a_SOURCES = \
+  forest_writer.cc \
+  maxtrans_blunsom.cc \
+  cdec_ff.cc \
   cfg.cc \
   apply_fsa_models.cc \
   rule_lexer.cc \
