@@ -13,6 +13,12 @@
 #include "ff_register.h"
 
 void register_feature_functions() {
+  static bool registered = false;
+  if (registered) {
+    assert(!"register_feature_functions() called twice!");
+  }
+  registered = true;
+
   //TODO: these are worthless example target FSA ffs.  remove later
   RegisterFsaImpl<SameFirstLetter>(true);
   RegisterFsaImpl<LongerThanPrev>(true);
