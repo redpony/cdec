@@ -2,6 +2,9 @@
 
 #include <iostream>
 #include "time.h" //cygwin needs
+
+#include "verbose.h"
+
 using namespace std;
 
 map<string, TimerInfo> Timer::stats;
@@ -16,8 +19,10 @@ Timer::~Timer() {
 }
 
 void Timer::Summarize() {
-  for (map<string, TimerInfo>::iterator it = stats.begin(); it != stats.end(); ++it) {
-    cerr << it->first << ": " << it->second.total_time << " secs (" << it->second.calls << " calls)\n";
+  if (!SILENT) {
+    for (map<string, TimerInfo>::iterator it = stats.begin(); it != stats.end(); ++it) {
+      cerr << it->first << ": " << it->second.total_time << " secs (" << it->second.calls << " calls)\n";
+    }
   }
   stats.clear();
 }

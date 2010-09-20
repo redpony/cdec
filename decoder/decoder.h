@@ -12,6 +12,8 @@ struct Hypergraph;
 struct DecoderImpl;
 
 struct DecoderObserver {
+  virtual ~DecoderObserver();
+  virtual void NotifyDecodingStart(const SentenceMetadata& smeta);
   virtual void NotifySourceParseFailure(const SentenceMetadata& smeta);
   virtual void NotifyTranslationForest(const SentenceMetadata& smeta, Hypergraph* hg);
   virtual void NotifyAlignmentFailure(const SentenceMetadata& semta);

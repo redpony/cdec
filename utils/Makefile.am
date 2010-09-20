@@ -22,6 +22,7 @@ libutils_a_SOURCES = \
   stringlib.cc \
   sparse_vector.cc \
   timing_stats.cc \
+  verbose.cc \
   weights.cc
 
 dict_test_SOURCES = dict_test.cc

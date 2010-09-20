@@ -13,6 +13,8 @@ struct SentenceMetadata {
     trg_len_(ref.size()),
     ref_(has_reference_ ? &ref : NULL) {}
 
+  int GetSentenceId() const { return sent_id_; }
+
   // this should be called by the Translator object after
   // it has parsed the source
   void SetSourceLength(int sl) { src_len_ = sl; }

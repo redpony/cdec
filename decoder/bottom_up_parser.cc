@@ -10,6 +10,7 @@
 #include "hg.h"
 #include "array2d.h"
 #include "tdict.h"
+#include "verbose.h"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ struct ParserStats {
   ParserStats() : active_items(), passive_items() {}
   void Reset() { active_items=0; passive_items=0; }
   void Report() {
-    cerr << "  ACTIVE ITEMS: " << active_items << "\tPASSIVE ITEMS: " << passive_items << endl;
+    if (!SILENT) cerr << "  ACTIVE ITEMS: " << active_items << "\tPASSIVE ITEMS: " << passive_items << endl;
   }
   int active_items;
   int passive_items;
@@ -172,7 +173,7 @@ PassiveChart::PassiveChart(const string& goal,
   for (int i = 0; i < grammars_.size(); ++i)
     act_chart_[i] = new ActiveChart(forest, *this);
   if (!kGOAL) kGOAL = TD::Convert("Goal") * -1;
-  cerr << "  Goal category: [" << goal << ']' << endl;
+  if (!SILENT) cerr << "  Goal category: [" << goal << ']' << endl;
 }
 
 void PassiveChart::ApplyRule(const int i,
@@ -241,9 +242,9 @@ bool PassiveChart::Parse() {
   for (int gi = 0; gi < grammars_.size(); ++gi)
     act_chart_[gi]->SeedActiveChart(*grammars_[gi]);
 
-  cerr << "    ";
+  if (!SILENT) cerr << "    ";
   for (int l=1; l<input_.size()+1; ++l) {
-    cerr << '.';
+    if (!SILENT) cerr << '.';
     for (int i=0; i<input_.size() + 1 - l; ++i) {
       int j = i + l;
       for (int gi = 0; gi < grammars_.size(); ++gi) {
@@ -278,7 +279,7 @@ bool PassiveChart::Parse() {
       }
     }
   }
-  cerr << endl;
+  if (!SILENT) cerr << endl;
 
   if (GoalFound())
     forest_->PruneUnreachable(forest_->nodes_.size() - 1);
