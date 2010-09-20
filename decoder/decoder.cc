@@ -142,6 +142,7 @@ struct DecoderImpl {
   ~DecoderImpl();
   bool Decode(const string& input, DecoderObserver*);
   void SetWeights(const vector<double>& weights) {
+    feature_weights = weights;
   }
 
   void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,WeightVector *weights=0,bool show_deriv=false) {
@@ -745,6 +746,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     //Add 1-best translation (trans) to psuedo-doc vectors
     oracle.IncludeLastScore(&cerr);
   }
+  o->NotifyTranslationForest(smeta, &forest);
 
   // TODO I think this should probably be handled by an Observer
   if (conf.count("forest_output") && !has_ref) {
@@ -824,6 +826,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
          const prob_t z = Inside<prob_t, EdgeProb>(forest);
          cerr << "  Contst. partition  log(Z): " << log(z) << endl;
       }
+      o->NotifyAlignmentForest(smeta, &forest);
       if (conf.count("forest_output")) {
         ForestWriter writer(str("forest_output",conf), sent_id);
         if (FileExists(writer.fname_)) {
@@ -889,12 +892,14 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       }
       if (conf.count("graphviz")) forest.PrintGraphviz();
     } else {
+      o->NotifyAlignmentFailure(smeta);
       cerr << "  REFERENCE UNREACHABLE.\n";
       if (write_gradient) {
         cout << endl << flush;
       }
     }
   }
+  o->NotifyDecodingComplete(smeta);
   return true;
 }
 
