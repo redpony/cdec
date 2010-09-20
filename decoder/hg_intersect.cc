@@ -5,6 +5,7 @@
 #include "fast_lexical_cast.hpp"
 #include <boost/functional/hash.hpp>
 
+#include "verbose.h"
 #include "tdict.h"
 #include "hg.h"
 #include "trule.h"
@@ -50,7 +51,7 @@ struct RuleFilter {
 };
 
 static bool FastLinearIntersect(const Lattice& target, Hypergraph* hg) {
-  cerr << "  Fast linear-chain intersection...\n";
+  if (!SILENT) cerr << "  Fast linear-chain intersection...\n";
   vector<bool> prune(hg->edges_.size(), false);
   set<int> cov;
   map<const TRule*, TRulePtr> inverted_rules;

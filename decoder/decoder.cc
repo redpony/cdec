@@ -10,6 +10,7 @@
 #include "filelib.h"
 #include "fdict.h"
 #include "timing_stats.h"
+#include "verbose.h"
 
 #include "translator.h"
 #include "phrasebased_translator.h"
@@ -51,6 +52,8 @@ static bool verbose_feature_functions=true;
 namespace Hack { void MaxTrans(const Hypergraph& in, int beam_size); }
 namespace NgramCache { void Clear(); }
 
+DecoderObserver::~DecoderObserver() {}
+void DecoderObserver::NotifyDecodingStart(const SentenceMetadata& smeta) {}
 void DecoderObserver::NotifySourceParseFailure(const SentenceMetadata&) {}
 void DecoderObserver::NotifyTranslationForest(const SentenceMetadata&, Hypergraph*) {}
 void DecoderObserver::NotifyAlignmentFailure(const SentenceMetadata&) {}
@@ -639,15 +642,17 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   if (sgml.find("id") != sgml.end())
     sent_id = atoi(sgml["id"].c_str());
 
-  cerr << "\nINPUT: ";
-  if (buf.size() < 100)
-    cerr << buf << endl;
-  else {
-    size_t x = buf.rfind(" ", 100);
-    if (x == string::npos) x = 100;
-    cerr << buf.substr(0, x) << " ..." << endl;
+  if (!SILENT) {
+    cerr << "\nINPUT: ";
+    if (buf.size() < 100)
+      cerr << buf << endl;
+    else {
+      size_t x = buf.rfind(" ", 100);
+      if (x == string::npos) x = 100;
+      cerr << buf.substr(0, x) << " ..." << endl;
+    }
+    cerr << "  id = " << sent_id << endl;
   }
-  cerr << "  id = " << sent_id << endl;
   string to_translate;
   Lattice ref;
   ParseTranslatorInputLattice(buf, &to_translate, &ref);
@@ -655,6 +660,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
 //FIXME: should get the avg. or max source length of the input lattice (like Lattice::dist_(start,end)); but this is only used to scale beam parameters (optionally) anyway so fidelity isn't important.
   const bool has_ref = ref.size() > 0;
   SentenceMetadata smeta(sent_id, ref);
+  o->NotifyDecodingStart(smeta);
   Hypergraph forest;          // -LM forest
   translator->ProcessMarkupHints(sgml);
   Timer t("Translation");
@@ -664,7 +670,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   translator->SentenceComplete();
 
   if (!translation_successful) {
-    cerr << "  NO PARSE FOUND.\n";
+    if (!SILENT) cerr << "  NO PARSE FOUND.\n";
     o->NotifySourceParseFailure(smeta);
     o->NotifyDecodingComplete(smeta);
     return false;
@@ -672,7 +678,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
 
   const bool show_tree_structure=conf.count("show_tree_structure");
   const bool show_features=conf.count("show_features");
-  forest_stats(forest,"  -LM forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
+  if (!SILENT) forest_stats(forest,"  -LM forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
   if (conf.count("show_expected_length")) {
     const PRPair<double, double> res =
       Inside<PRPair<double, double>,
@@ -714,7 +720,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
                   &lm_forest);
     forest.swap(lm_forest);
     forest.Reweight(feature_weights);
-    forest_stats(forest,"  +LM forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
+    if (!SILENT) forest_stats(forest,"  +LM forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
   }
 
   maybe_prune(forest,conf,"beam_prune","density_prune","+LM",srclen);
@@ -729,22 +735,22 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     Hypergraph fsa_forest;
     assert(fsa_ffs.size()==1);
     ApplyFsaBy cfg(str("apply_fsa_by",conf),pop_limit);
-    cerr << "FSA rescoring with "<<cfg<<" "<<fsa_ffs[0]->describe()<<endl;
+    if (!SILENT) cerr << "FSA rescoring with "<<cfg<<" "<<fsa_ffs[0]->describe()<<endl;
     ApplyFsaModels(hgcfg,smeta,*fsa_ffs[0],feature_weights,cfg,&fsa_forest);
     forest.swap(fsa_forest);
     forest.Reweight(feature_weights);
-    forest_stats(forest,"  +FSA forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
+    if (!SILENT) forest_stats(forest,"  +FSA forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
   }
 
   // Oracle Rescoring
   if(get_oracle_forest) {
     Oracle oc=oracle.ComputeOracle(smeta,&forest,FeatureVector(feature_weights),10,conf["forest_output"].as<std::string>());
-    cerr << "  +Oracle BLEU forest (nodes/edges): " << forest.nodes_.size() << '/' << forest.edges_.size() << endl;
-    cerr << "  +Oracle BLEU (paths): " << forest.NumberOfPaths() << endl;
+    if (!SILENT) cerr << "  +Oracle BLEU forest (nodes/edges): " << forest.nodes_.size() << '/' << forest.edges_.size() << endl;
+    if (!SILENT) cerr << "  +Oracle BLEU (paths): " << forest.NumberOfPaths() << endl;
     oc.hope.Print(cerr,"  +Oracle BLEU");
     oc.fear.Print(cerr,"  -Oracle BLEU");
     //Add 1-best translation (trans) to psuedo-doc vectors
-    oracle.IncludeLastScore(&cerr);
+    if (!SILENT) oracle.IncludeLastScore(&cerr);
   }
   o->NotifyTranslationForest(smeta, &forest);
 
@@ -752,7 +758,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   if (conf.count("forest_output") && !has_ref) {
     ForestWriter writer(str("forest_output",conf), sent_id);
     if (FileExists(writer.fname_)) {
-      cerr << "  Unioning...\n";
+      if (!SILENT) cerr << "  Unioning...\n";
       Hypergraph new_hg;
       {
         ReadFile rf(writer.fname_);
@@ -812,15 +818,15 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     HypergraphIO::WriteAsCFG(forest);
   if (has_ref) {
     if (HG::Intersect(ref, &forest)) {
-      cerr << "  Constr. forest (nodes/edges): " << forest.nodes_.size() << '/' << forest.edges_.size() << endl;
-      cerr << "  Constr. forest       (paths): " << forest.NumberOfPaths() << endl;
+      if (!SILENT) cerr << "  Constr. forest (nodes/edges): " << forest.nodes_.size() << '/' << forest.edges_.size() << endl;
+      if (!SILENT) cerr << "  Constr. forest       (paths): " << forest.NumberOfPaths() << endl;
       if (crf_uniform_empirical) {
-        cerr << "  USING UNIFORM WEIGHTS\n";
+        if (!SILENT) cerr << "  USING UNIFORM WEIGHTS\n";
         for (int i = 0; i < forest.edges_.size(); ++i)
           forest.edges_[i].edge_prob_=prob_t::One();
       } else {
         forest.Reweight(feature_weights);
-        cerr << "  Constr. VitTree: " << ViterbiFTree(forest) << endl;
+        if (!SILENT) cerr << "  Constr. VitTree: " << ViterbiFTree(forest) << endl;
       }
       if (conf.count("show_partition")) {
          const prob_t z = Inside<prob_t, EdgeProb>(forest);
@@ -830,7 +836,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       if (conf.count("forest_output")) {
         ForestWriter writer(str("forest_output",conf), sent_id);
         if (FileExists(writer.fname_)) {
-          cerr << "  Unioning...\n";
+          if (!SILENT) cerr << "  Unioning...\n";
           Hypergraph new_hg;
           {
             ReadFile rf(writer.fname_);
@@ -893,7 +899,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       if (conf.count("graphviz")) forest.PrintGraphviz();
     } else {
       o->NotifyAlignmentFailure(smeta);
-      cerr << "  REFERENCE UNREACHABLE.\n";
+      if (!SILENT) cerr << "  REFERENCE UNREACHABLE.\n";
       if (write_gradient) {
         cout << endl << flush;
       }

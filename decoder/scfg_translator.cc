@@ -14,6 +14,7 @@
 #include "sentence_metadata.h"
 #include "tdict.h"
 #include "viterbi.h"
+#include "verbose.h"
 
 #define foreach         BOOST_FOREACH
 #define reverse_foreach BOOST_REVERSE_FOREACH
@@ -100,7 +101,7 @@ struct SCFGTranslatorImpl {
     LatticeTools::ConvertTextOrPLF(input, &lattice);
     smeta->SetSourceLength(lattice.size());
     if (add_pass_through_rules){
-      cerr << "Adding pass through grammar" << endl;
+      if (!SILENT) cerr << "Adding pass through grammar" << endl;
       PassThroughGrammar* g = new PassThroughGrammar(lattice, default_nt, ctf_iterations_);
       g->SetGrammarName("PassThrough");
       glist.push_back(GrammarPtr(g));
@@ -109,13 +110,13 @@ struct SCFGTranslatorImpl {
       if(printGrammarsUsed)
         cerr << "Using grammar::" << glist[gi]->GetGrammarName() << endl;
     }
-    cerr << "First pass parse... " << endl;
+    if (!SILENT) cerr << "First pass parse... " << endl;
     ExhaustiveBottomUpParser parser(goal, glist);
     if (!parser.Parse(lattice, forest)){
-      cerr << "parse failed." << endl;
+      if (!SILENT) cerr << "parse failed." << endl;
       return false;
     } else {
-      cerr << "parse succeeded." << endl;
+      if (!SILENT) cerr << "parse succeeded." << endl;
     }
     forest->Reweight(weights);
     if (use_ctf_) {

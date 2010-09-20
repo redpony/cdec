@@ -13,6 +13,7 @@
 
 #include <boost/functional/hash.hpp>
 
+#include "verbose.h"
 #include "hg.h"
 #include "ff.h"
 
@@ -170,7 +171,7 @@ public:
       out(*o),
       D(in.nodes_.size()),
       pop_limit_(pop_limit) {
-    cerr << "  Applying feature functions (cube pruning, pop_limit = " << pop_limit_ << ')' << endl;
+    if (!SILENT) cerr << "  Applying feature functions (cube pruning, pop_limit = " << pop_limit_ << ')' << endl;
     node_states_.reserve(kRESERVE_NUM_NODES);
   }
 
@@ -181,14 +182,16 @@ public:
     int every = 1;
     if (num_nodes > 100) every = 10;
     assert(in.nodes_[pregoal].out_edges_.size() == 1);
-    cerr << "    ";
+    if (!SILENT) cerr << "    ";
     for (int i = 0; i < in.nodes_.size(); ++i) {
-      if (i % every == 0) cerr << '.';
+      if (!SILENT && i % every == 0) cerr << '.';
       KBest(i, i == goal_id);
     }
-    cerr << endl;
-    cerr << "  Best path: " << log(D[goal_id].front()->vit_prob_)
-         << "\t" << log(D[goal_id].front()->est_prob_) << endl;
+    if (!SILENT) {
+      cerr << endl;
+      cerr << "  Best path: " << log(D[goal_id].front()->vit_prob_)
+           << "\t" << log(D[goal_id].front()->est_prob_) << endl;
+    }
     out.PruneUnreachable(D[goal_id].front()->node_index_);
     FreeAll();
   }
@@ -379,12 +382,12 @@ struct NoPruningRescorer {
     int every = 1;
     if (num_nodes > 100) every = 10;
     assert(in.nodes_[pregoal].out_edges_.size() == 1);
-    cerr << "    ";
+    if (!SILENT) cerr << "    ";
     for (int i = 0; i < in.nodes_.size(); ++i) {
-      if (i % every == 0) cerr << '.';
+      if (!SILENT && i % every == 0) cerr << '.';
       ProcessOneNode(i, i == goal_id);
     }
-    cerr << endl;
+    if (!SILENT) cerr << endl;
   }
 
  private:
