@@ -11,6 +11,7 @@
 #include "tdict.h"
 #include "fdict.h"
 #include "trule.h"
+#include "verbose.h"
 
 int lex_line = 0;
 std::istream* scfglex_stream = NULL;
@@ -222,8 +223,10 @@ NT [^\t \[\],]+
 		// std::cerr << rp->AsString() << std::endl;
 		num_rules++;
     lex_line++;
-    if (num_rules %   50000 == 0) { std::cerr << '.' << std::flush; fl = true; }
-    if (num_rules % 2000000 == 0) { std::cerr << " [" << num_rules << "]\n"; fl = false; }
+    if (!SILENT) {
+      if (num_rules %   50000 == 0) { std::cerr << '.' << std::flush; fl = true; }
+      if (num_rules % 2000000 == 0) { std::cerr << " [" << num_rules << "]\n"; fl = false; }
+    }
     ctf_level = 0;
 		BEGIN(INITIAL);
 		}

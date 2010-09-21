@@ -580,10 +580,10 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
         cerr << "prelm rescoring with "<<prelm_ffs.size()<<" 0-state feature functions.  +LM pass will use "<<late_ffs.size()<<" features (not counting rule features)."<<endl;
 
   late_models = new ModelSet(feature_weights, late_ffs);
-  show_models(conf,*late_models,"late ");
+  if (!SILENT) show_models(conf,*late_models,"late ");
   prelm_models = new ModelSet(prelm_feature_weights, prelm_ffs);
-  if (has_prelm_models)
-    show_models(conf,*prelm_models,"prelm ");
+  if (has_prelm_models) {
+    if (!SILENT) show_models(conf,*prelm_models,"prelm "); }
 
   int palg = 1;
   if (LowercaseString(str("intersection_strategy",conf)) == "full") {

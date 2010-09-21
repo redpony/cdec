@@ -188,7 +188,7 @@ void PassiveChart::ApplyRule(const int i,
   new_edge->i_ = i;
   new_edge->j_ = j;
   new_edge->feature_values_ = r->GetFeatureValues();
-  if (lattice_cost)
+  if (lattice_cost && lc_fid_)
     new_edge->feature_values_.set_value(lc_fid_, lattice_cost);
   Cat2NodeMap& c2n = nodemap_(i,j);
   const bool is_goal = (r->GetLHS() == kGOAL);
