@@ -34,7 +34,7 @@ struct SCFGTranslatorImpl {
     if(conf.count("grammar")){
       vector<string> gfiles = conf["grammar"].as<vector<string> >();
       for (int i = 0; i < gfiles.size(); ++i) {
-    	  cerr << "Reading SCFG grammar from " << gfiles[i] << endl;
+    	  if (!SILENT) cerr << "Reading SCFG grammar from " << gfiles[i] << endl;
     	  TextGrammar* g = new TextGrammar(gfiles[i]);
     	  g->SetMaxSpan(max_span_limit);
     	  g->SetGrammarName(gfiles[i]);
@@ -46,7 +46,7 @@ struct SCFGTranslatorImpl {
       GlueGrammar* g = new GlueGrammar(conf["scfg_extra_glue_grammar"].as<string>());
       g->SetGrammarName("ExtraGlueGrammar");
       grammars.push_back(GrammarPtr(g));
-      cerr << "Adding glue grammar from file " << conf["scfg_extra_glue_grammar"].as<string>() << endl;
+      if (!SILENT) cerr << "Adding glue grammar from file " << conf["scfg_extra_glue_grammar"].as<string>() << endl;
     }
     ctf_iterations_=0;
     if (use_ctf_){
@@ -74,7 +74,7 @@ struct SCFGTranslatorImpl {
       GlueGrammar* g = new GlueGrammar(goal, default_nt, ctf_iterations_);
       g->SetGrammarName("GlueGrammar");
       grammars.push_back(GrammarPtr(g));
-      cerr << "Adding glue grammar for default nonterminal " << default_nt <<
+      if (!SILENT) cerr << "Adding glue grammar for default nonterminal " << default_nt <<
         " and goal nonterminal " << goal << endl;
     }
  }

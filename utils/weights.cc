@@ -4,11 +4,12 @@
 
 #include "fdict.h"
 #include "filelib.h"
+#include "verbose.h"
 
 using namespace std;
 
 void Weights::InitFromFile(const std::string& filename, vector<string>* feature_list) {
-  cerr << "Reading weights from " << filename << endl;
+  if (!SILENT) cerr << "Reading weights from " << filename << endl;
   ReadFile in_file(filename);
   istream& in = *in_file.stream();
   assert(in);
@@ -38,17 +39,22 @@ void Weights::InitFromFile(const std::string& filename, vector<string>* feature_
     wv_[fid] = val;
     if (feature_list) { feature_list->push_back(FD::Convert(fid)); }
     ++weight_count;
-    if (weight_count %   50000 == 0) { cerr << '.' << flush; fl = true; }
-    if (weight_count % 2000000 == 0) { cerr << " [" << weight_count << "]\n"; fl = false; }
+    if (!SILENT) {
+      if (weight_count %   50000 == 0) { cerr << '.' << flush; fl = true; }
+      if (weight_count % 2000000 == 0) { cerr << " [" << weight_count << "]\n"; fl = false; }
+    }
   }
-  if (fl) { cerr << endl; }
-  cerr << "Loaded " << weight_count << " feature weights\n";
+  if (!SILENT) {
+    if (fl) { cerr << endl; }
+    cerr << "Loaded " << weight_count << " feature weights\n";
+  }
 }
 
-void Weights::WriteToFile(const std::string& fname, bool hide_zero_value_features) const {
+void Weights::WriteToFile(const std::string& fname, bool hide_zero_value_features, const string* extra) const {
   WriteFile out(fname);
   ostream& o = *out.stream();
   assert(o);
+  if (extra) { o << "# " << *extra << endl; }
   o.precision(17);
   const int num_feats = FD::NumFeats();
   for (int i = 1; i < num_feats; ++i) {
