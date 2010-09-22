@@ -25,6 +25,12 @@ AC_CHECK_HEADER(google/dense_hash_map,
 AC_PROG_INSTALL
 GTEST_LIB_CHECK
 
+AC_ARG_ENABLE(mpi,
+ [ --enable-mpi  Build MPI binaries, assumes mpi.h is present ],
+ [ mpi=yes
+ ])
+AM_CONDITIONAL([MPI], [test "x$mpi" = xyes])
+
 AM_CONDITIONAL([SRI_LM], false)
 AC_ARG_WITH(srilm,
             [AC_HELP_STRING([--with-srilm=PATH], [(optional) path to SRI's LM toolkit])],
