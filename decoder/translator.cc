@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 
+#include "verbose.h"
+
 using namespace std;
 
 Translator::~Translator() {}
@@ -42,7 +44,7 @@ void Translator::SentenceComplete() {
 // metadata
 void Translator::ProcessMarkupHintsImpl(const map<string, string>& kv) {
   int unprocessed = kv.size() - kv.count("id");
-	cerr << "Inside translator process hints\n";
+  if (!SILENT) cerr << "Inside translator process hints\n";
   if (unprocessed > 0) {
     cerr << "Sentence markup contains unprocessed data:\n";
     for (map<string, string>::const_iterator it = kv.begin(); it != kv.end(); ++it) {

@@ -19,7 +19,6 @@ void BatchOptimizer::Save(ostream* out) const {
 
 void BatchOptimizer::Load(istream* in) {
   in->read((char*)&eval_, sizeof(eval_));
-  ++eval_;
   in->read((char*)&has_converged_, sizeof(has_converged_));
   LoadImpl(in);
   unsigned int magic = 0;           // should be uint32_t

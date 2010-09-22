@@ -22,6 +22,7 @@ class BatchOptimizer {
                 const std::vector<double>& g,
                 std::vector<double>* x) {
     assert(g.size() == x->size());
+    ++eval_;
     OptimizeImpl(obj, g, x);
     scitbx::lbfgs::traditional_convergence_test<double> converged(g.size());
     has_converged_ = converged(&(*x)[0], &g[0]);
