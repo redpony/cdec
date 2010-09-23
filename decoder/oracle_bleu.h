@@ -285,7 +285,7 @@ struct OracleBleu {
     WriteFile ko(kbest_out_filename_);
     std::cerr << "Output kbest to " << kbest_out_filename_<<std::endl;
 
-    if (unique)
+    if (!unique)
       kbest<KBest::NoFilter>(sent_id,forest,k,ko.get(),std::cerr);
     else {
       kbest<KBest::FilterUnique>(sent_id,forest,k,ko.get(),std::cerr);
