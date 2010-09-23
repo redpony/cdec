@@ -114,6 +114,7 @@ struct OracleBleu {
   }
   OracleBleu(int doc_size=10) {
     set_oracle_doc_size(doc_size);
+    show_derivation=false;
   }
 
   ScoreP doc_score,sentscore; // made from factory, so we delete them
