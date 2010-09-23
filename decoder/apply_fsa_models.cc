@@ -165,6 +165,16 @@ struct PrefixTrieEdge {
 struct PrefixTrieNode {
   best_t p; // viterbi (max prob) of rule this node leads to - when building.  telescope later onto edges for best-first.
 //  bool final; // may also have successors, of course.  we don't really need to track this; a null dest edge in the adj list lets us encounter the fact in best first order.
+  void p_delta(int next,best_t &p) const {
+    p*=adj[next].p;
+  }
+  void inc_adj(int &next,best_t &p) const {
+    p/=adj[next].p; //TODO: cache deltas
+    ++next;
+    p*=adj[next].p;
+  }
+
+
   typedef TrieBackP BP;
   typedef std::vector<BP> BPs;
   void back_vec(BPs &ns) const {
@@ -249,7 +259,7 @@ public:
       // assert(edge.p.is_1());  // actually, after done_building, e will have telescoped dest->p/p.
       NTHandle n=-edge.w;
       assert(n>=0);
-      SHOWM3(DPFSA,"index_lhs",i,edge,n);
+//      SHOWM3(DPFSA,"index_lhs",i,edge,n);
       v[n]=edge.dest;
     }
   }
@@ -428,24 +438,6 @@ private:
 };
 
 
-// these should go in a global best-first queue
-struct ItemPrio {
-  // NOTE: sum = viterbi (max)
-  ItemPrio() : priority(init_0()),inner(init_0()) {  }
-  best_t priority; // includes inner prob. (forward)
-  /* The forward probability alpha_i(X[k]->x.y) is the sum of the probabilities of all
-     constrained paths of length i that end in state X[k]->x.y*/
-  best_t inner;
-  /* The inner probability beta_i(X[k]->x.y) is the sum of the probabilities of all
-     paths of length i-k that start in state X[k,k]->.xy and end in X[k,i]->x.y, and generate the input symbols x[k,...,i-1] */
-  template<class O>
-  void print(O &o) const {
-    o<<priority; // TODO: show/use inner?
-  }
-  typedef ItemPrio self_type;
-  SELF_TYPE_PRINT
-
-};
 
 typedef std::size_t ItemHash;
 
@@ -499,15 +491,52 @@ typedef Item *ItemP;
 # define INIT_LOCATION
 #endif
 
+// these should go in a global best-first queue
+struct ItemPrio {
+  // NOTE: sum = viterbi (max)
+  ItemPrio() : priority(init_0()),inner(init_0()) {  }
+  explicit ItemPrio(best_t priority) : priority(priority),inner(init_0()) {  }
+  best_t priority; // includes inner prob. (forward)
+  /* The forward probability alpha_i(X[k]->x.y) is the sum of the probabilities of all
+     constrained paths of length i that end in state X[k]->x.y*/
+  best_t inner;
+  /* The inner probability beta_i(X[k]->x.y) is the sum of the probabilities of all
+     paths of length i-k that start in state X[k,k]->.xy and end in X[k,i]->x.y, and generate the input symbols x[k,...,i-1] */
+  template<class O>
+  void print(O &o) const {
+    o<<priority; // TODO: show/use inner?
+  }
+  typedef ItemPrio self_type;
+  SELF_TYPE_PRINT
+};
+
+#define ITEM_TYPE(X,t)                              \
+  X(t,ADJ,=-1)                                 \
+
+#define ITEM_TYPE_TYPE ItemType
+
+DECLARE_NAMED_ENUM(ITEM_TYPE)
+DEFINE_NAMED_ENUM(ITEM_TYPE)
+
 struct Item : ItemPrio,ItemKey {
-  explicit Item(NodeP dot,int next=0) : ItemKey(dot),trienext(next),from(0)
+/*  explicit Item(NodeP dot,best_t prio,int next) : ItemPrio(prio),ItemKey(dot),trienext(next),from(0)
                                         INIT_LOCATION
-  {  }
-  explicit Item(NodeP dot,FFState const& state,int next=0) : ItemKey(dot,state),trienext(next),from(0)
+                                        {  }*/
+//  ItemType t;
+  // lazy queueing of succesors item:
+  bool is_trie_adj() const {
+    return trienext>=0;
+  }
+  explicit Item(FFState const& state,NodeP dot,best_t prio,int next=0) : ItemPrio(prio),ItemKey(dot,state),trienext(next),from(0)
                                                              INIT_LOCATION
-  {  }
+  {
+//    t=ADJ;
+//    if (dot->adj.size())
+    dot->p_delta(next,priority);
+//    SHOWM1(DFSA,"Item(state,dot,prio)",prio);
+  }
   typedef std::queue<ItemP> Predicted;
-  Predicted predicted; // this is empty, unless this is a predicted L -> .asdf item, or a to-complete L -> asdf .
+//  Predicted predicted; // this is empty, unless this is a predicted L -> .asdf item, or a to-complete L -> asdf .
   int trienext; // index of dot->adj to complete (if dest==0), or predict (if NT), or scan (if word).  note: we could store pointer inside adj since it and trie are @ fixed addrs.  less pointer arith, more space.
   ItemP from; //backpointer - 0 for L -> . asdf for the rest; L -> a .sdf, it's the L -> .asdf item.
   ItemP predicted_from() const {
@@ -518,6 +547,7 @@ struct Item : ItemPrio,ItemKey {
   template<class O>
   void print(O &o) const {
     o<< '[';
+    o<<this<<": ";
     ItemKey::print(o);
     o<<' ';
     ItemPrio::print(o);
@@ -561,25 +591,53 @@ struct Chart {
   PrefixTrie trie;
   typedef Agenda<Item,BetterP,GetItemKey> A;
   A a;
-  void best_first(unsigned kbest=1) {
+
+  /* had to stop working on this for now - it's garbage/useless in this form - see NOTES.earley */
+
+  // p_partial is priority*p(rule) - excluding the FSA model score, and predicted
+  void succ(Item const& from,int adji,best_t p_partial) {
+    PrefixTrieEdge const& te=from.dot->adj[adji];
+    NodeP dest=te.dest;
+    if (te.is_final()) {
+      // complete
+      return;
+    }
+    WordID w=te.w;
+    if (w<0) {
+      NTHandle lhs=-w;
+    } else {
+
+    }
+  }
+
+  void extend1() {
     BetterP better;
-    assert(kbest==1); //TODO: k-best via best-first requires revisiting best things again and adjusting desc.  tricky.
-    while(!a.empty()) {
-      ItemP top=a.pop();
-      best_t b=a.best(); // remember; best_t a<b means a better than (higher prob) than b
-      best_t topb=top->priority;
-      best_t trie_stop_p=topb/b;
-      NodeP d=top->dot;
-      PrefixTrieNode::Adj const& adj=d->adj;
-      int n=top->trienext;
-      for (int m=adj.size();n<m;++n) { // cube corner
-        PrefixTrieEdge const& te=adj[m];
-        if (better(te.p,trie_stop_p)) {
-          SHOWM2(DFSA,"trying adj ",m,te)
+    Item &t=*a.top();
+    best_t tp=t.priority;
+    if (t.is_trie_adj()) {
+      best_t pstop=a.second_best(); // remember; best_t a<b means a better than (higher prob) than b
+//      NodeP d=t.dot;
+      PrefixTrieNode::Adj const& adj=t.dot->adj;
+      int n=t.trienext,m=adj.size();
+      SHOWM3(DFSA,"popped",t,tp,pstop);
+      for (;n<m;++n) { // cube corner
+        PrefixTrieEdge const& te=adj[n];
+        SHOWM3(DFSA,"maybe try trie next",n,te.p,pstop);
+        if (better(te.p,pstop)) { // can get some improvement
+          SHOWM2(DFSA,"trying adj ",m,te);
         } else {
-          break;
+          goto done;
         }
       }
+      a.pop();
+    done:;
+    }
+  }
+
+  void best_first(unsigned kbest=1) {
+    assert(kbest==1); //TODO: k-best via best-first requires revisiting best things again and adjusting desc.  tricky.
+    while(!a.empty()) {
+      extend1();
     }
   }
 
@@ -588,7 +646,9 @@ struct Chart {
     assert(fsa.state_bytes());
     print_fsa=&fsa;
     goal_nt=cfg.goal_nt;
-    a.add(a.construct(trie.lhs2_ex(goal_nt),fsa.start));
+    best_t prio=init_1();
+    SHOW1(DFSA,prio);
+    a.add(a.construct(fsa.start,trie.lhs2_ex(goal_nt),prio));
   }
 };
 
@@ -654,6 +714,7 @@ void ApplyFsa<F>::ApplyEarley()
   Chart<F> chart(cfg,smeta,fsa);
   // don't need to uniq - option to do that already exists in cfg_options
   //TODO:
+  chart.best_first();
   *oh=hgcfg.ih;
 }
 

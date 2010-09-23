@@ -283,6 +283,22 @@
       return false;
     }
 
+    distance_type best(distance_type null=0) const {
+      return empty() ? null : get(distance,data[0]);
+    }
+    distance_type second_best(distance_type null=0) const {
+      if (data.size()<2) return null;
+      int m=std::min(data.size(),Arity+1);
+//      if (m>=Arity) m=Arity+1;
+      distance_type b=get(distance,data[1]);
+      for (int i=2;i<m;++i) {
+        distance_type d=get(distance,data[i]);
+        if (better(d,b))
+          b=d;
+      }
+      return b;
+    }
+
 
 #include "warning_push.h"
 #pragma GCC diagnostic ignored "-Wtype-limits"

@@ -105,3 +105,7 @@ vs.
 3) * -> x . *
 
 with 3, we predict all sorts of useless items - that won't give us our goal A and may not partcipate in any parse.  this is not a good option at all.
+
+======
+
+-LM forest may have many in-edges per V.  (many rules per NT lhs).  so instead of generating all successors for scan/predict, i wanted to have them in sorted (admissable) -LM cost order and postpone once the prefix+rule part is more expensive than something else in the agenda.  question: how many such postponed successor things

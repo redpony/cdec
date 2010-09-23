@@ -107,14 +107,27 @@ struct Agenda : intern_pool<Item,KeyF,HashKey,EqKey,Pool> {
   }
   // no need to destroy the canon. item because we want to remember the best cost and reject more expensive ways of using it).
   ItemC pop() {
-    DBG_AGENDA(assert(!empty()));
     ItemC r=q.top();
     q.pop();
     return r;
   }
-  agenda_best_t best() const {
-    return priomap[q.top()]; //TODO: cache/track the global best?
+  void pop_discard() {
+    q.pop();
   }
+
+  ItemC top() {
+    DBG_AGENDA(assert(!empty()));
+    return q.top();
+  }
+
+  agenda_best_t best() const {
+    return q.best(); //TODO: cache/track the global best?
+  }
+
+  agenda_best_t second_best() const {
+    return q.second_best();
+  }
+
   // add only if worse than queue current best, otherwise evaluate immediately (e.g. for early stopping w/ expensive to compute additional cost).  return true if postponed (added)
   bool postpone(ItemP i) {
     if (better(priomap[i],best())) return false;
