@@ -1,5 +1,5 @@
-0 ||| ab ||| WordPenalty=-0.434294;SourceWordPenalty=-0.434294;Cost=0.1;LatticeCost=0.125 ||| -1.09359
-0 ||| cb ||| WordPenalty=-0.434294;SourceWordPenalty=-0.868589;Cost=0.3;LatticeCost=2.25 ||| -3.85288
-0 ||| a_b ||| WordPenalty=-0.434294;SourceWordPenalty=-0.868589;Cost=0.2;LatticeCost=2.5 ||| -4.00288
-0 ||| a b ||| WordPenalty=-0.868589;SourceWordPenalty=-0.868589;Glue=1;Cost=0.3;LatticeCost=2.5 ||| -4.53718
-0 ||| a' b ||| WordPenalty=-0.868589;SourceWordPenalty=-0.868589;Glue=1;Cost=0.3;LatticeCost=2.5 ||| -4.53718
+0 ||| ab ||| WordPenalty=-0.434294 SourceWordPenalty=-0.434294 Cost=0.1 LatticeCost=0.125 ||| -1.09359
+0 ||| cb ||| WordPenalty=-0.434294 SourceWordPenalty=-0.868589 Cost=0.3 LatticeCost=2.25 ||| -3.85288
+0 ||| a_b ||| WordPenalty=-0.434294 SourceWordPenalty=-0.868589 Cost=0.2 LatticeCost=2.5 ||| -4.00288
+0 ||| a' b ||| WordPenalty=-0.868589 SourceWordPenalty=-0.868589 Glue=1 Cost=0.3 LatticeCost=2.5 ||| -4.53718
+0 ||| a b ||| WordPenalty=-0.868589 SourceWordPenalty=-0.868589 Glue=1 Cost=0.3 LatticeCost=2.5 ||| -4.53718
