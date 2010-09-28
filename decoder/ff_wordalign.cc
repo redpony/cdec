@@ -72,11 +72,11 @@ RelativeSentencePosition::RelativeSentencePosition(const string& param) :
       pos_.push_back(v);
       for (int i = 0; i < v.size(); ++i)
         classes.insert(v[i]);
-      for (set<WordID>::iterator i = classes.begin(); i != classes.end(); ++i) {
-        ostringstream os;
-        os << "RelPos_FC:" << TD::Convert(*i);
-        fids_[*i] = FD::Convert(os.str());
-      }
+    }
+    for (set<WordID>::iterator i = classes.begin(); i != classes.end(); ++i) {
+      ostringstream os;
+      os << "RelPos_FC:" << TD::Convert(*i);
+      fids_[*i] = FD::Convert(os.str());
     }
   } else {
     condition_on_fclass_ = false;
@@ -104,7 +104,9 @@ void RelativeSentencePosition::TraversalFeaturesImpl(const SentenceMetadata& sme
   if (condition_on_fclass_) {
     assert(smeta.GetSentenceID() < pos_.size());
     const WordID cur_fclass = pos_[smeta.GetSentenceID()][edge.i_];
-    const int fid = fids_.find(cur_fclass)->second;
+    std::map<WordID, int>::const_iterator fidit = fids_.find(cur_fclass);
+    assert(fidit != fids_.end());
+    const int fid = fidit->second;
     features->set_value(fid, val);
   }
 //  cerr << f_len_ << " " << e_len_ << " [" << edge.i_ << "," << edge.j_ << "|" << edge.prev_i_ << "," << edge.prev_j_ << "]\t" << edge.rule_->AsString() << "\tVAL=" << val << endl;
