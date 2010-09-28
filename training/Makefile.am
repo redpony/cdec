@@ -22,10 +22,10 @@ bin_PROGRAMS += mpi_batch_optimize \
              mpi_online_optimize
 
 mpi_batch_optimize_SOURCES = mpi_batch_optimize.cc optimize.cc
-mpi_batch_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz -lmpi++ -lmpi
+mpi_batch_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
 
 mpi_online_optimize_SOURCES = mpi_online_optimize.cc online_optimizer.cc
-mpi_online_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz -lmpi++ -lmpi
+mpi_online_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
 endif
 
 online_train_SOURCES = online_train.cc online_optimizer.cc

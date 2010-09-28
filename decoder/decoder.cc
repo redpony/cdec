@@ -147,6 +147,7 @@ struct DecoderImpl {
   void SetWeights(const vector<double>& weights) {
     feature_weights = weights;
   }
+  void SetId(int next_sent_id) { sent_id = next_sent_id - 1; }
 
   void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,WeightVector *weights=0,bool show_deriv=false) {
     cerr << viterbi_stats(forest,name,true,show_tree,show_deriv);
@@ -622,6 +623,7 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
 Decoder::Decoder(istream* cfg) { pimpl_.reset(new DecoderImpl(conf,0,0,cfg)); }
 Decoder::Decoder(int argc, char** argv) { pimpl_.reset(new DecoderImpl(conf,argc, argv, 0)); }
 Decoder::~Decoder() {}
+void Decoder::SetId(int next_sent_id) { pimpl_->SetId(next_sent_id); }
 bool Decoder::Decode(const string& input, DecoderObserver* o) {
   bool del = false;
   if (!o) { o = new DecoderObserver; del = true; }
@@ -818,8 +820,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     HypergraphIO::WriteAsCFG(forest);
   if (has_ref) {
     if (HG::Intersect(ref, &forest)) {
-      if (!SILENT) cerr << "  Constr. forest (nodes/edges): " << forest.nodes_.size() << '/' << forest.edges_.size() << endl;
-      if (!SILENT) cerr << "  Constr. forest       (paths): " << forest.NumberOfPaths() << endl;
+      if (!SILENT) forest_stats(forest,"  Constr. forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
       if (crf_uniform_empirical) {
         if (!SILENT) cerr << "  USING UNIFORM WEIGHTS\n";
         for (int i = 0; i < forest.edges_.size(); ++i)

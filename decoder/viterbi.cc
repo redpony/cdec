@@ -16,7 +16,7 @@ std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool es
   if (estring) {
     vector<WordID> trans;
     const prob_t vs = ViterbiESentence(hg, &trans);
-    o<<name<<"  Viterbi logp: "<<log(vs)<<endl;
+    o<<name<<"  Viterbi logp: "<<log(vs)<< " (norm=" << log(vs)/trans.size() << ")" << endl;
     o<<name<<"       Viterbi: "<<TD::GetString(trans)<<endl;
   }
   if (etree) {

@@ -81,3 +81,10 @@ void Weights::InitFromVector(const std::vector<double>& w) {
     cerr << "WARNING: initializing weight vector has more features than the global feature dictionary!\n";
   wv_.resize(FD::NumFeats(), 0);
 }
+
+void Weights::InitFromVector(const SparseVector<double>& w) {
+  wv_.clear();
+  wv_.resize(FD::NumFeats(), 0.0);
+  for (int i = 1; i < FD::NumFeats(); ++i)
+    wv_[i] = w.value(i);
+}

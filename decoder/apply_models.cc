@@ -319,7 +319,7 @@ struct NoPruningRescorer {
       in(i),
       out(*o),
       nodemap(i.nodes_.size()) {
-    cerr << "  Rescoring forest (full intersection)\n";
+    if (!SILENT) cerr << "  Rescoring forest (full intersection)\n";
     node_states_.reserve(kRESERVE_NUM_NODES);
   }
 

@@ -26,6 +26,7 @@ struct Decoder {
   Decoder(std::istream* config_file);
   bool Decode(const std::string& input, DecoderObserver* observer = NULL);
   void SetWeights(const std::vector<double>& weights);
+  void SetId(int id);
   ~Decoder();
   const boost::program_options::variables_map& GetConf() const { return conf; }
  private:
