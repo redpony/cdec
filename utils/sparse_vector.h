@@ -525,7 +525,7 @@ private:
     if (values_.find(0) != values_.end()) { ++it; --eff_size; }
     ar & eff_size;
     while (it != this->end()) {
-      const std::pair<std::string, T> wire_pair(FD::Convert(it->first), it->second);
+      const std::pair<const std::string&, const T&> wire_pair(FD::Convert(it->first), it->second);
       ar & wire_pair;
       ++it;
     }
@@ -544,6 +544,10 @@ private:
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif
 };
+
+#if HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP
+BOOST_CLASS_TRACKING(SparseVector<double>,track_never)
+#endif
 
 template <class T>
 inline void swap(SparseVector<T> &a,SparseVector<T> &b) {
