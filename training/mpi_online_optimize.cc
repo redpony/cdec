@@ -277,6 +277,7 @@ int main(int argc, char** argv) {
       rng = new MT19937;
   }
   SparseVector<double> x;
+  weights.InitSparseVector(&x);
   int miter = corpus.size();  // hack to cause initial broadcast of order info
   TrainingObserver observer;
   double objective = 0;
@@ -308,7 +309,7 @@ int main(int argc, char** argv) {
       broadcast(world, order, 0);
     }
     if (rank == 0)
-      cerr << "Starting decoding. minibatch=" << size_per_proc << " sentences/proc x " << size << " procs. num_feats=" << x.size() << " training data proc. = " << (iter * batch_size / static_cast<double>(corpus.size())) << "  eta=" << lr->eta(iter) << endl;
+      cerr << "iter=" << iter << "   minibatch=" << size_per_proc << " sentences/proc x " << size << " procs. num_feats=" << x.size() << "   passes_thru_data=" << (iter * batch_size / static_cast<double>(corpus.size())) << "   eta=" << lr->eta(iter) << endl;
 
     const int beg = size * miter * size_per_proc + rank * size_per_proc;
     const int end = beg + size_per_proc;
