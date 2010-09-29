@@ -16,7 +16,7 @@ void TTable::DeserializeProbsFromText(std::istream* in) {
     (*in) >> e >> f >> p;
     if (e.empty()) break;
     ++c;
-    ttable[TD::Convert(e)][TD::Convert(f)] = prob_t(p);
+    ttable[TD::Convert(e)][TD::Convert(f)] = p;
   }
   cerr << "Loaded " << c << " translation parameters.\n";
 }
