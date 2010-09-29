@@ -266,6 +266,72 @@ void MarkovJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   }
 }
 
+// state: src word used, number of trg words generated
+SourceBigram::SourceBigram(const std::string& param) :
+    FeatureFunction(sizeof(WordID) + sizeof(int)) {
+}
+
+void SourceBigram::FinalTraversalFeatures(const void* context,
+                                      SparseVector<double>* features) const {
+  WordID left = *static_cast<const WordID*>(context);
+  int left_wc = *(static_cast<const int*>(context) + 1);
+  if (left_wc == 1)
+    FireFeature(-1, left, features);
+  FireFeature(left, -1, features);
+}
+
+void SourceBigram::FireFeature(WordID left,
+                   WordID right,
+                   SparseVector<double>* features) const {
+  int& fid = fmap_[left][right];
+  // TODO important important !!! escape strings !!!
+  if (!fid) {
+    ostringstream os;
+    os << "SB:";
+    if (left < 0) { os << "BOS"; } else { os << TD::Convert(left); }
+    os << '_';
+    if (right < 0) { os << "EOS"; } else { os << TD::Convert(right); }
+    fid = FD::Convert(os.str());
+    if (fid == 0) fid = -1;
+  }
+  if (fid > 0) features->set_value(fid, 1.0);
+  int& ufid = ufmap_[left];
+  if (!ufid) {
+    ostringstream os;
+    os << "SU:";
+    if (left < 0) { os << "BOS"; } else { os << TD::Convert(left); }
+    ufid = FD::Convert(os.str());
+    if (ufid == 0) fid = -1;
+  }
+  if (ufid > 0) features->set_value(ufid, 1.0);
+}
+
+void SourceBigram::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                            SparseVector<double>* /* estimated_features */,
+                                     void* context) const {
+  WordID& out_context = *static_cast<WordID*>(context);
+  int& out_word_count = *(static_cast<int*>(context) + 1);
+  const int arity = edge.Arity();
+  if (arity == 0) {
+    out_context = edge.rule_->f()[0];
+    out_word_count = edge.rule_->EWords();
+    assert(out_word_count == 1); // this is only defined for lex translation!
+    // revisit this if you want to translate into null words
+  } else if (arity == 2) {
+    WordID left = *static_cast<const WordID*>(ant_contexts[0]);
+    WordID right = *static_cast<const WordID*>(ant_contexts[1]);
+    int left_wc = *(static_cast<const int*>(ant_contexts[0]) + 1);
+    int right_wc = *(static_cast<const int*>(ant_contexts[0]) + 1);
+    if (left_wc == 1 && right_wc == 1)
+      FireFeature(-1, left, features);
+    FireFeature(left, right, features);
+    out_word_count = left_wc + right_wc;
+    out_context = right;
+  }
+}
 // state: POS of src word used, number of trg words generated
 SourcePOSBigram::SourcePOSBigram(const std::string& param) :
     FeatureFunction(sizeof(WordID) + sizeof(int)) {

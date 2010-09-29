@@ -78,6 +78,26 @@ class MarkovJumpFClass : public FeatureFunction {
 
 typedef std::map<WordID, int> Class2FID;
 typedef std::map<WordID, Class2FID> Class2Class2FID;
+class SourceBigram : public FeatureFunction {
+ public:
+  SourceBigram(const std::string& param);
+  virtual void FinalTraversalFeatures(const void* context,
+                                      SparseVector<double>* features) const;
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const;
+ private:
+  void FireFeature(WordID src,
+                   WordID trg,
+                   SparseVector<double>* features) const;
+  mutable Class2Class2FID fmap_;
+  mutable Class2FID ufmap_;
+};
+
 class SourcePOSBigram : public FeatureFunction {
  public:
   SourcePOSBigram(const std::string& param);
