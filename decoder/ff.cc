@@ -171,7 +171,9 @@ void ModelSet::AddFeaturesToEdge(const SentenceMetadata& smeta,
                                  prob_t* combination_cost_estimate) const {
   edge->reset_info();
   context->resize(state_size_);
-  memset(&(*context)[0], 0, state_size_);
+  if (state_size_ > 0) {
+    memset(&(*context)[0], 0, state_size_);
+  }
   SparseVector<double> est_vals;  // only computed if combination_cost_estimate is non-NULL
   if (combination_cost_estimate) *combination_cost_estimate = prob_t::One();
   for (int i = 0; i < models_.size(); ++i) {
