@@ -95,7 +95,7 @@ protected:
     sz=0;
   }
   void alloc(size_type s) {
-    array = s==0 ? 0 : A::allocate(s);
+    array=s?A::allocate(s):0;
     sz=s;
   }
 
@@ -142,13 +142,11 @@ protected:
   }
 
   inline void init(size_type s) {
-    sz=s;
-    array=s ? A::allocate(s) : 0;
+    alloc(s);
     fill();
   }
   inline void init(size_type s, const_reference t) {
-    sz=s;
-    array=s ? A::allocate(s) : 0;
+    alloc(s);
     fill(t);
   }
 public:
