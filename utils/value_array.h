@@ -171,16 +171,19 @@ public:
 
   //copy any existing data like std::vector.  not A::construct exception safe.  try blah blah?  swap?
   void resize(size_type s, const_reference t = T()) {
-    pointer na=A::allocate(s);
-    size_type nc=s<sz ? s : sz;
-    size_type i=0;
-    for (;i<nc;++i)
-      A::construct(na+i,array[i]);
-    for (;i<s;++i)
-      A::construct(na+i,t);
-    clear();
-    array=na;
-    sz=s;
+    if (s) {
+      pointer na=A::allocate(s);
+      size_type nc=s<sz ? s : sz;
+      size_type i=0;
+      for (;i<nc;++i)
+        A::construct(na+i,array[i]);
+      for (;i<s;++i)
+        A::construct(na+i,t);
+      clear();
+      array=na;
+      sz=s;
+    } else
+      clear();
   }
 
   template <class I>
@@ -270,7 +273,7 @@ public:
   ValueArray(ValueArray const& other)
     : A(other)
     , sz(other.sz)
-    , array(A::allocate(sz))
+    , array(sz?A::allocate(sz):0)
 
   {
     copy_construct(other.begin(),other.end(),array);
@@ -286,7 +289,7 @@ public:
   ValueArray( Range const& v
               , typename boost::disable_if< boost::is_integral<Range> >::type* = 0)
     : sz(boost::size(v))
-    , array(A::allocate(sz))
+    , array(sz?A::allocate(sz):0)
   {
     copy_construct(boost::begin(v),boost::end(v),array);
   }
