@@ -34,7 +34,7 @@ online_train_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutil
 atools_SOURCES = atools.cc
 atools_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
-model1_SOURCES = model1.cc
+model1_SOURCES = model1.cc ttables.cc
 model1_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
 grammar_convert_SOURCES = grammar_convert.cc

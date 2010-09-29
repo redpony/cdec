@@ -2,26 +2,25 @@
 #define _TTABLES_H_
 
 #include <iostream>
-#include <map>
+#include <tr1/unordered_map>
 
 #include "wordid.h"
-#include "prob.h"
 #include "tdict.h"
 
 class TTable {
  public:
   TTable() {}
-  typedef std::map<WordID, double> Word2Double;
-  typedef std::map<WordID, Word2Double> Word2Word2Double;
-  inline const prob_t prob(const int& e, const int& f) const {
+  typedef std::tr1::unordered_map<WordID, double> Word2Double;
+  typedef std::tr1::unordered_map<WordID, Word2Double> Word2Word2Double;
+  inline const double prob(const int& e, const int& f) const {
     const Word2Word2Double::const_iterator cit = ttable.find(e);
     if (cit != ttable.end()) {
       const Word2Double& cpd = cit->second;
       const Word2Double::const_iterator it = cpd.find(f);
-      if (it == cpd.end()) return prob_t(0.00001);
-      return prob_t(it->second);
+      if (it == cpd.end()) return 1e-9;
+      return it->second;
     } else {
-      return prob_t(0.00001);
+      return 1e-9;
     }
   }
   inline void Increment(const int& e, const int& f) {

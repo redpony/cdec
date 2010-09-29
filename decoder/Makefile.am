@@ -55,7 +55,6 @@ libcdec_a_SOURCES = \
   earley_composer.cc \
   phrasetable_fst.cc \
   trule.cc \
-  ttables.cc \
   ff.cc \
   ff_lm.cc \
   ff_ruleshape.cc \
