@@ -8,6 +8,7 @@ bin_PROGRAMS = \
   atools \
   plftools \
   collapse_weights \
+  cllh_filter_grammar \
   online_train
 
 noinst_PROGRAMS = \
@@ -27,6 +28,9 @@ mpi_batch_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/
 mpi_online_optimize_SOURCES = mpi_online_optimize.cc online_optimizer.cc
 mpi_online_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
 endif
+
+cllh_filter_grammar_SOURCES = cllh_filter_grammar.cc
+cllh_filter_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
 
 online_train_SOURCES = online_train.cc online_optimizer.cc
 online_train_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
