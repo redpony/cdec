@@ -29,8 +29,8 @@ int main(int argc, char** argv) {
     double denom = 0.0;
     int lc = 0;
     bool flag = false;
+    string line;
     while(true) {
-      string line;
       getline(in, line);
       if (!in) break;
       ++lc;
@@ -41,8 +41,11 @@ int main(int argc, char** argv) {
       Lattice src, trg;
       LatticeTools::ConvertTextToLattice(ssrc, &src);
       LatticeTools::ConvertTextToLattice(strg, &trg);
-      assert(src.size() > 0);
-      assert(trg.size() > 0);
+      if (src.size() == 0 || trg.size() == 0) {
+        cerr << "Error: " << lc << "\n" << line << endl;
+        assert(src.size() > 0);
+        assert(trg.size() > 0);
+      }
       denom += 1.0;
       vector<double> probs(src.size() + 1);
       for (int j = 0; j < trg.size(); ++j) {
