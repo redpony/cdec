@@ -13,6 +13,7 @@ using namespace std;
 
 FeatureFunction::~FeatureFunction() {}
 
+void FeatureFunction::PrepareForInput(const SentenceMetadata&) {}
 
 void FeatureFunction::FinalTraversalFeatures(const void* /* ant_state */,
                                              SparseVector<double>* /* features */) const {
@@ -161,6 +162,11 @@ ModelSet::ModelSet(const vector<double>& w, const vector<const FeatureFunction*>
     model_state_pos_[i] = state_size_;
     state_size_ += models_[i]->NumBytesContext();
   }
+}
+
+void ModelSet::PrepareForInput(const SentenceMetadata& smeta) {
+  for (int i = 0; i < models_.size(); ++i)
+    const_cast<FeatureFunction*>(models_[i])->PrepareForInput(smeta);
 }
 
 void ModelSet::AddFeaturesToEdge(const SentenceMetadata& smeta,

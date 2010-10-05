@@ -1,11 +1,14 @@
 #ifndef _SENTENCE_METADATA_H_
 #define _SENTENCE_METADATA_H_
 
+#include <string>
+#include <map>
 #include <cassert>
 #include "lattice.h"
 #include "scorer.h"
 
 struct SentenceMetadata {
+  friend class DecoderImpl;
   SentenceMetadata(int id, const Lattice& ref) :
     sent_id_(id),
     src_len_(-1),
@@ -42,7 +45,14 @@ struct SentenceMetadata {
   const DocScorer& GetDocScorer() const { return *ds; }
   double GetDocLen() const {return doc_len;}
 
+  std::string GetSGMLValue(const std::string& key) const {
+    std::map<std::string, std::string>::const_iterator it = sgml_.find(key);
+    if (it == sgml_.end()) return "";
+    return it->second;
+  }
+
  private:
+  std::map<std::string, std::string> sgml_;
   const int sent_id_;
   // the following should be set, if possible, by the Translator
   int src_len_;

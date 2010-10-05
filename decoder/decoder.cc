@@ -662,9 +662,10 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
 //FIXME: should get the avg. or max source length of the input lattice (like Lattice::dist_(start,end)); but this is only used to scale beam parameters (optionally) anyway so fidelity isn't important.
   const bool has_ref = ref.size() > 0;
   SentenceMetadata smeta(sent_id, ref);
+  smeta.sgml_.swap(sgml);
   o->NotifyDecodingStart(smeta);
   Hypergraph forest;          // -LM forest
-  translator->ProcessMarkupHints(sgml);
+  translator->ProcessMarkupHints(smeta.sgml_);
   Timer t("Translation");
   const bool translation_successful =
     translator->Translate(to_translate, &smeta, feature_weights, &forest);
@@ -696,6 +697,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     Timer t("prelm rescoring");
     forest.Reweight(prelm_feature_weights);
     Hypergraph prelm_forest;
+    prelm_models->PrepareForInput(smeta);
     ApplyModelSet(forest,
                   smeta,
                   *prelm_models,
@@ -713,6 +715,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   bool has_late_models = !late_models->empty();
   if (has_late_models) {
     Timer t("Forest rescoring:");
+    late_models->PrepareForInput(smeta);
     forest.Reweight(feature_weights);
     Hypergraph lm_forest;
     ApplyModelSet(forest,

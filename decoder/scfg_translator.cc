@@ -34,14 +34,14 @@ struct SCFGTranslatorImpl {
     if(conf.count("grammar")){
       vector<string> gfiles = conf["grammar"].as<vector<string> >();
       for (int i = 0; i < gfiles.size(); ++i) {
-    	  if (!SILENT) cerr << "Reading SCFG grammar from " << gfiles[i] << endl;
-    	  TextGrammar* g = new TextGrammar(gfiles[i]);
-    	  g->SetMaxSpan(max_span_limit);
-    	  g->SetGrammarName(gfiles[i]);
-    	  grammars.push_back(GrammarPtr(g));
-	    }
+        if (!SILENT) cerr << "Reading SCFG grammar from " << gfiles[i] << endl;
+        TextGrammar* g = new TextGrammar(gfiles[i]);
+        g->SetMaxSpan(max_span_limit);
+        g->SetGrammarName(gfiles[i]);
+        grammars.push_back(GrammarPtr(g));
+      }
+      if (!SILENT) cerr << endl;
     }
-    cerr << std::endl;
     if (conf.count("scfg_extra_glue_grammar")) {
       GlueGrammar* g = new GlueGrammar(conf["scfg_extra_glue_grammar"].as<string>());
       g->SetGrammarName("ExtraGlueGrammar");
