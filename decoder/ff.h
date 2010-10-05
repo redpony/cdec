@@ -52,6 +52,10 @@ public:
   // stateless feature that doesn't depend on source span: override and return true.  then your feature can be precomputed over rules.
   virtual bool rule_feature() const { return false; }
 
+  // called once, per input, before any feature calls to TraversalFeatures, etc.
+  // used to initialize sentence-specific data structures
+  virtual void PrepareForInput(const SentenceMetadata& smeta);
+
   //OVERRIDE THIS:
   virtual Features features() const { return single_feature(FD::Convert(name_)); }
   // returns the number of bytes of context that this feature function will
@@ -273,6 +277,10 @@ class ModelSet {
   void AddFinalFeatures(const FFState& residual_context,
                         Hypergraph::Edge* edge,
                         SentenceMetadata const& smeta) const;
+
+  // this is called once before any feature functions apply to a hypergraph
+  // it can be used to initialize sentence-specific data structures
+  void PrepareForInput(const SentenceMetadata& smeta);
 
   bool empty() const { return models_.empty(); }
 
