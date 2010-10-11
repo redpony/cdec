@@ -1,6 +1,9 @@
 \chapter{Posterior Regularization}
 Posterior regularization is an alternative way of clustering the phrases.
-Unlike a Baysian approach where intuitions about the data are expressed through the priors, posterior regularization imposes constraints on posterior distributions of the data.
+Unlike a Bayesian approach where intuitions about the data are 
+expressed through the priors, 
+posterior regularization imposes constraints 
+on posterior distributions of the data.
 
 In this chapter , we will introduce a basic clustering model with EM 
 and look at shortcomings of the basic model. This will motivate us for
@@ -27,9 +30,9 @@ category and then that category generates the contex for the phrase.
 
 The joint probability of a category $z$ and a context $\textbf{c}$ 
 given a phrase $\textbf{p}$ is
-\[
+\begin{equation}\label{eq:NBPost}
 P(z,\textbf{c}|\textbf{p})=P(z|\textbf{p})P(\textbf{c}|z).
-\]
+\end{equation}
 $P(z|\textbf{p})$ is distribution of categories given a phrase.
 This can be learned from data.
 $P(\textbf{c}|z)$ is distribution of context given a category.
@@ -51,7 +54,29 @@ P(z|\textbf{p},\textbf{c})=\frac{P(z,\textbf{c}|\textbf{p})}
 {\sum_{i=1,K}P(i,\textbf{c}|\textbf{p})}.
 \]
 With the mechanisms to compute the posterior probabilities, we can 
-apply EM to learn all the probabilities.
+apply expectation-maximization algorithm (EM)
+ to learn all the probabilities.
+EM algorithm maximizes the data likelihood
+\[
+\mathcal{L}=
+\sum_{\textbf{p},\textbf{c}}
+\log \sum_{z=1}^K P(z,\textbf{c}|\textbf{p})
+\]
+EM works by iterating between two steps:
+E step computes posterior 
+distributions according to Equation \ref{eq:NBPost},
+M step updates model parameters with maximum likelihood
+estimation as in Equation \ref{eq:MStep}.
+
+\begin{equation}\label{eq:MStep}
+\boldsymbol{\theta}=
+\arg\max_{\boldsymbol{\theta}}
+\sum_{\textbf{c},\textbf{p}}\sum_z
+P(z|\textbf{p},\textbf{c},
+\boldsymbol\theta^{old})\log
+P(\textbf{c},\textbf{p}|z,\boldsymbol{\theta}).
+\end{equation}
+
 \section{Sparsity Constraints}\label{sec:pr-sparse}
 A common linguistic intuition we have about the phrase 
 clustering problem is that a phrase should be put into very
@@ -66,9 +91,10 @@ Posterior regularization
 provides a way to enforce sparsity \citep{ganchev:penn:2009}.
 The general idea of posterior regularization is to modify
 E-step of EM, so that instead of using posterior distribution
-as the $q$ distribution directly, we want to find the nearest
+as the $q$ distribution directly, the nearest
 $q$
-in a constrained space  as shown in Figure \ref{fig:EMPR}.
+in a constrained space is used
+ as shown in Figure \ref{fig:EMPR}.
 
 \begin{figure}[h]
   \centering
@@ -77,12 +103,14 @@ in a constrained space  as shown in Figure \ref{fig:EMPR}.
   \label{fig:EMPR}
 \end{figure}
 
-The constraint we use here is called $l_1/ l_\infty$
+The constraint we use here is called $L_1/ L_\infty$
 regularization in Ganchev's technical report. The notations
 we use here largely follows Ganchev's.
 In a more mathematical formulation, for each phrase $\textbf{p}$,
 we want the quantity 
-\[\sum_{z=1}^K \max_i P(z|\textbf{p},\textbf{c}_i) \]
+\begin{equation}\label{eq:sparsity}
+\sum_{z=1}^K \max_i P(z|\textbf{p},\textbf{c}_i) 
+\end{equation}
 to be small, where $\textbf{c}_i$ is the context
 appeared around the $i$th occurrence of phrase $\textbf{p}$
 throughout the data. This quantity roughly equals 
@@ -92,7 +120,25 @@ the posterior distributions $P(z|\textbf{p},\textbf{c}_i)$
 are the same
 for all
 occurrences of $\textbf{p}$. That is ,
-$\forall i,j$, $P(z|\textbf{p},\textbf{c}_i)=P(z|\textbf{p},\textbf{c}_j)$. 
+$\forall i,j$, 
+$P(z|\textbf{p},\textbf{c}_i)=P(z|\textbf{p},\textbf{c}_j)$. 
+For example, Table \ref{tab:sparse} compares two $L_1/L_{\infty}$
+norms of phrases. The first phrase prefers multiple categories
+under different contexts, the second phrase prefers
+the same category under all contexts. The second phrase
+has a much smaller $L_1/L_{\infty}$ norm.
+
+\begin{table}[h]
+  \label{tab:sparse}
+
+  \centering
+  \includegraphics[width=3.5in]{pr-clustering/sparse0}
+  \caption{$L_1/L_{\infty}$ norm of a phrase
+  that prefers multiple categories}
+  \includegraphics[width=3.5in]{pr-clustering/sparse1}
+  \caption{$L_1/L_{\infty}$ norm of a phrase
+  that prefers a single phrase}
+\end{table}
 
 Define feature functions for $i$th occurrence of phrase $\textbf{p}$
 with category $j$,
@@ -106,16 +152,20 @@ as a function of category $z$:
 \]
 For notation simplicity, for
 each phrase category pair, 
-define variables $c_{\textbf{p}z}$ that will
-eventually be $\max_i E_q[\phi_{\textbf{p}iz}]$.
+define variables 
+$e_{\textbf{p}z}$ to be 
+$\max_i E_q[\phi_{\textbf{p}iz}]$. Note this is just
+a different notation for the term in
+Expression \ref{eq:sparsity}.
+
 The objective we want to optimize becomes:
 \[
 \arg\min_{q,c_{\textbf{p}z}} KL(q||P_{\theta}) + 
-\sigma \sum_{\textbf{p},z}c_{\textbf{p}z}
+\sigma \sum_{\textbf{p},z}e_{\textbf{p}z}
 \]
 \[
 \text{ s.t. }\forall \textbf{p},z,
-E_q[\phi_{\textbf{p}iz}]\leq c_{\textbf{p}z},
+E_q[\phi_{\textbf{p}iz}]\leq e_{\textbf{p}z},
 \]
 where $\sigma$ is a constant to control
 how strongly the soft constraint should
@@ -139,19 +189,52 @@ The $q$ distribution we are looking for is then
 q_i(z)\propto P_{\theta}(z|\textbf{p},\textbf{c}_i)
 \exp(\lambda_{\textbf{p}iz}).
 \]
-M-step can be performed as usual.
+M-step can be performed as usual by replacing
+$P(z|\textbf{p},\textbf{c},
+\boldsymbol\theta^{old})$ with 
+$q(z)$ in Equation \ref{eq:MStep}.
+
 \section{Agreement Models}\label{sec:pr-agree}
+
 Another type of constraint we used is agreement between
-different models. We came up with a similar generative
-model in the reverse direction to agree with 
-as shown in Figure \ref{fig:EMreverse}. We also
-took advantage of bi-text data we have and make models
-learning from different languages agree with each other.
+different models. The intuition is that if two models run
+on the same dataset, it is desirable for them to give the same 
+output. Suppose two models gives two posterior 
+distributions of categories
+$P_{\theta_1}(z|\textbf{p},\textbf{c})$,
+$P_{\theta_2}(z|\textbf{p},\textbf{c})$. The
+agreement constraint seeks posterior distributions
+$q_1(z),q_2(z)$
+such that $q_1(z)=q_2(z)$ while minimizing
+the KL-divergence
+$KL(q(z_1)q(z_2)||
+P_{\theta_1}(z|\textbf{p},\textbf{c})
+P_{\theta_1}(z|\textbf{p},\textbf{c}))$.
+The solution to $q_1,q_2$ has a simple closed
+form derived from Lagrange Multipliers shown in
+Equation \ref{eq:AgreePost}.
+\begin{equation}\label{eq:AgreePost}
+q_1(z)=q_2(z)\propto 
+\sqrt{P_{\theta_1}(z|\textbf{p},\textbf{c})
+P_{\theta_1}(z|\textbf{p},\textbf{c})}
+\end{equation}.
+
+Since there is no reason to believe in that
+phrases generates a category and then generate
+a context, it is very natural to come up with a model
+that generates in the reverse direction
+as shown in Figure \ref{fig:EMreverse}. This model
+and the original model should then follow the agreement 
+constraint.
+We also
+took advantage of bi-text data and make models
+learning from different languages to
+agree with each other.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=3.0in]{pr-clustering/EMreverse}
-  \caption{EM with posterior regularization}
+  \caption{Generative Model in the reverse Direction}
   \label{fig:EMreverse}
 \end{figure}
 
@@ -165,34 +248,28 @@ P(z|\textbf{c})P(\textbf{p}|z).
 \]
 Since a phrase contains a variable number of words,
 we only look at the first and last word of
-a phrase. That is $P(\textbf{p}|z)=P_1(p_1|z)P_n(p_n|z)$,
-where $n$ is the length of $\textbf{p}$, $P_1$ and $P_n$
+a phrase. That is $P(\textbf{p}|z)=P_l(p_l|z)P_r(p_r|z)$,
+where $P_l$ and $P_r$
 denotes distributions for words in the first and last position
-of a phrase given a category.
+, $p_l$ and $p_r$ are words in the first and last position.
 
 The implementation of agreement models again ends up making
 a small change to E-step. The $q$ distribution for
 a phrase $\textbf{p}$ and a context $\textbf{c}$ 
-is given by
-\[
-q(z)=\sqrt{P_{\theta 1}
-(z|\textbf{p},\textbf{c})P_{\theta 2}(z|\textbf{p},\textbf{c})},
-\]
-where $P_{\theta 1}$ and $P_{\theta 2}$ are
-posterior distributions for two models.
-In M-step, both models should update their parameters with the
-same $q$ distribution computed as above.
-This modified EM maximizes the objective:
+is given by Equation \ref{eq:AgreePost}.
+In M-step, both models should update their parameters with $q$ distribution computed as above.
+This modified EM is proven to
+maximizes the objective:
 \[
 \mathcal{L}_1+
 \mathcal{L}_2+
 \sum_{\textbf{p},\textbf{c}}
-\log\sum_z\sqrt{P_{\theta 1}(z|\textbf{p},\textbf{c})
-P_{\theta 2}(z|\textbf{p},\textbf{c})},
+\log\sum_z\sqrt{P_{\theta_1}(z|\textbf{p},\textbf{c})
+P_{\theta_2}(z|\textbf{p},\textbf{c})},
 \]
 where $\mathcal{L}_1$ and $\mathcal{L}_2$
-are log-likelihood of
-two models.
+are log-likelihoods of
+each individual model.
 \section{Experiments}
 As a sanity check, we looked at a few examples produced by
 the basic model (EM) 
@@ -206,7 +283,7 @@ shows a few examples.
   \caption[A few examples comparing EM and PR]
   {A few examples comparing EM and PR. 
     Count of most frequent category shows how 
-    many instances of a phrase are concetrated on 
+    many instances of a phrase are concentrated on 
     the single most frequent tag. 
     Number of categories shows how many categories
     a phrase is labelled with. By experience as mentioned before, 
