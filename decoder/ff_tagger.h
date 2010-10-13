@@ -48,4 +48,20 @@ class LexicalPairIdentity : public FeatureFunction {
 };
 
 
+class OutputIdentity : public FeatureFunction {
+ public:
+  OutputIdentity(const std::string& param);
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const;
+ private:
+  void FireFeature(WordID trg,
+                   SparseVector<double>* features) const;
+  mutable Class2FID fmap_;
+};
+
 #endif
