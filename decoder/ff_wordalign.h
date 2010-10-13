@@ -78,6 +78,7 @@ class MarkovJumpFClass : public FeatureFunction {
 
 typedef std::map<WordID, int> Class2FID;
 typedef std::map<WordID, Class2FID> Class2Class2FID;
+typedef std::map<WordID, Class2Class2FID> Class2Class2Class2FID;
 class SourceBigram : public FeatureFunction {
  public:
   SourceBigram(const std::string& param);
@@ -116,6 +117,26 @@ class SourcePOSBigram : public FeatureFunction {
                    SparseVector<double>* features) const;
   mutable Class2Class2FID fmap_;
   std::vector<std::vector<WordID> > pos_;
+};
+
+class LexicalTranslationTrigger : public FeatureFunction {
+ public:
+  LexicalTranslationTrigger(const std::string& param);
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const;
+ private:
+  void FireFeature(WordID trigger,
+                   WordID src,
+                   WordID trg,
+                   SparseVector<double>* features) const;
+  mutable Class2Class2Class2FID fmap_;  // trigger,src,trg
+  mutable Class2Class2FID target_fmap_;  // trigger,src,trg
+  std::vector<std::vector<WordID> > triggers_;
 };
 
 class AlignerResults : public FeatureFunction {

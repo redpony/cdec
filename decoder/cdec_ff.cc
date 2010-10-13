@@ -54,6 +54,6 @@ void register_feature_functions() {
   ff_registry.Register("CSplit_ReverseCharLM", new FFFactory<ReverseCharLMCSplitFeature>);
   ff_registry.Register("Tagger_BigramIdentity", new FFFactory<Tagger_BigramIdentity>);
   ff_registry.Register("LexicalPairIdentity", new FFFactory<LexicalPairIdentity>);
-
+  ff_registry.Register("LexicalTranslationTrigger", new FFFactory<LexicalTranslationTrigger>);
 }
 
