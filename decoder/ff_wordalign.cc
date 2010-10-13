@@ -266,7 +266,6 @@ void MarkovJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   }
 }
 
-// state: src word used, number of trg words generated
 SourceBigram::SourceBigram(const std::string& param) :
     FeatureFunction(sizeof(WordID) + sizeof(int)) {
 }
@@ -405,6 +404,64 @@ void SourcePOSBigram::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   }
 }
 
+LexicalTranslationTrigger::LexicalTranslationTrigger(const std::string& param) :
+    FeatureFunction(0) {
+  if (param.empty()) {
+    cerr << "LexicalTranslationTrigger requires a parameter (file containing triggers)!\n";
+  } else {
+    ReadFile rf(param);
+    istream& in = *rf.stream();
+    string line;
+    while(in) {
+      getline(in, line);
+      if (!in) continue;
+      vector<WordID> v;
+      TD::ConvertSentence(line, &v);
+      triggers_.push_back(v);
+    }
+  }
+}
+  
+void LexicalTranslationTrigger::FireFeature(WordID trigger, 
+                                     WordID src,
+                                     WordID trg,
+                                     SparseVector<double>* features) const {
+  int& fid = fmap_[trigger][src][trg];
+  if (!fid) {
+    ostringstream os;
+    os << "T:" << TD::Convert(trigger) << ':' << TD::Convert(src) << '_' << TD::Convert(trg);
+    fid = FD::Convert(os.str());
+  }
+  features->set_value(fid, 1.0);
+
+  int &tfid = target_fmap_[trigger][trg];
+  if (!tfid) {
+    ostringstream os;
+    os << "TT:" << TD::Convert(trigger) << ':' << TD::Convert(trg);
+    tfid = FD::Convert(os.str());
+  }
+  features->set_value(tfid, 1.0);
+}
+
+void LexicalTranslationTrigger::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                            SparseVector<double>* /* estimated_features */,
+                                     void* context) const {
+  if (edge.Arity() == 0) {
+    assert(edge.rule_->EWords() == 1);
+    assert(edge.rule_->FWords() == 1);
+    WordID trg = edge.rule_->e()[0]; 
+    WordID src = edge.rule_->f()[0];
+    const vector<WordID>& triggers = triggers_[smeta.GetSentenceID()];
+    for (int i = 0; i < triggers.size(); ++i) {
+      FireFeature(triggers[i], src, trg, features);
+    }
+  }
+}
+
+// state: src word used, number of trg words generated
 AlignerResults::AlignerResults(const std::string& param) :
     cur_sent_(-1),
     cur_grid_(NULL) {
