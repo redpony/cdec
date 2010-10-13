@@ -93,4 +93,38 @@ void LexicalPairIdentity::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   }
 }
 
+OutputIdentity::OutputIdentity(const std::string& param) {}
+
+void OutputIdentity::FireFeature(WordID trg,
+                                 SparseVector<double>* features) const {
+  int& fid = fmap_[trg];
+  if (!fid) {
+    static map<WordID, WordID> escape;
+    if (escape.empty()) {
+      escape[TD::Convert("=")] = TD::Convert("__EQ");
+      escape[TD::Convert(";")] = TD::Convert("__SC");
+      escape[TD::Convert(",")] = TD::Convert("__CO");
+    }
+    if (escape.count(trg)) trg = escape[trg];
+    ostringstream os;
+    os << "T:" << TD::Convert(trg);
+    fid = FD::Convert(os.str());
+  }
+  features->set_value(fid, 1.0);
+}
+
+void OutputIdentity::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const {
+  const vector<WordID>& ew = edge.rule_->e_;
+  for (int i = 0; i < ew.size(); ++i) {
+    const WordID& e = ew[i];
+    if (e > 0) FireFeature(e, features);
+  }
+}
+
+
 
