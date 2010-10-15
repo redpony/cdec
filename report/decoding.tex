@@ -107,11 +107,26 @@ An implementation detail that was important to our experiments was re-parsing.  
 
 \section{Grammar Pruning}\label{sec:pruning}
 
-An alternative means of reducing the overhead of parsing is to prune the translation grammar.  Although a pruned grammar will still retain the same number of nonterminal symbols, parsing time may be substantially improved if there are simply fewer 
+An alternative means of reducing the overhead of parsing is to prune the translation grammar.  Although a pruned grammar will still retain the same number of nonterminal symbols, parsing time may be substantially improved if there are simply fewer rules in the grammar.  Pruning the grammar might reasonably be viewed as a final step in grammar induction; however as the grammar induction methods explored in this workshop produced difficult to use grammars, we include this here as a means of working with them more efficiently.  The pruning algorithm was fairly straightforward: we first clustered all rules that had the same source side, apart from differences in nonterminal symbols in either right-hand or left-hand side. We then sorted the rules in each cluster by $p(e|f)$, and retained only the top $n$
+rules.  We then decoding the resulting grammars with no other algorithmic modifications.  These results are presented in Table~\ref{tab:pruning}.
 
+\begin{table}
+	\begin{tabular}{rrrr} \hline
+		$n$ & memory & time (s) & BLEU \\ \hline \hline
+		10 & 1.3G & 391.1 & 26.3\\
+		20 & 1.7G & 695.5 & 26.9\\
+		30 & 1.9G & 839.2 & 26.2\\
+		40 & 2.2G & 983.8 & 25.9\\
+		50 & 2.5G & 1048 & 26.4\\
+		$\infty$ & 6.1G & 3399  & 27.0\\ \hline 
+	\end{tabular}
+\end{table}
+
+Though encouraging, the results here are somewhat mixed: we do not find that performance, as measured by BLEU, degrades monotonically with decoding time, although decoding time varies with $n$ nicely as expected.  Indeed, the worst results on this dataset are roughly even with the baseline, meaning that we have sacrificed all of the increased accuracy of the grammar to obtain the speedup.  Nevertheless, it may be that with slightly more sophisticated pruning techniques, we could obtain similar speedups without any corresponding loss in accuracy.
+ 
 \section{Discussion}
 
-
+The induced grammars studied in this workshop present serious challenges for decoding algorithms.  However, the fairly simple techniques used here, and the resulting improvements in performance, demonstrate that efficient decoding with induced grammars is a reasonable goal.  Using a very simple coarse-to-fine algorithm, we were able to reduce decoding time by nearly half.  This is still far from being as efficient as decoding with a baseline grammar, but it is unrealistic to expect that a single technique will solve this kind of hard algorithmic problem.  On the other hand, it is likely that the coarse-to-fine technique could be combined with other techniques to provide substantial speedups.  An obvious experiment that is suggested by the current results is to do inside-outside pruning with the tuned -LM grammars used in our oracle experiment.  That experiment suggested that using a simpler model tuned for the final task yielded more accurate pruning than using a subset of the full model for pruning.  We intended to pursue this combination in further experiments.  Several recent techniques from the literature that may prove useful \citep{denero-EtAl:2009:NAACLHLT09,denero-pauls-klein:2009:Short,hopkins-langmead:2009:EMNLP}.  We expect to test these and additional novel algorithmic extensions in future work.
 
 
 
