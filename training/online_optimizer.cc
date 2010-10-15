@@ -12,3 +12,5 @@ double ExponentialDecayLearningRate::eta(int k) const {
 
 OnlineOptimizer::~OnlineOptimizer() {}
 
+void OnlineOptimizer::ResetEpochImpl() {}
+
