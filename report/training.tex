@@ -2,7 +2,7 @@
 
 An integral part of constructing a state-of-the-art machine translation system is the training procedure. The goal of training is to optimize the model parameters to maximize translation quality on some metric, where the parameters are the weights associated with the features we use in our model, and the metric is BLEU. 
 
-The most common approach to training is Minimum Error Rate Training (MERT), which tunes the parameters to minimize error according to an arbitrary error function. Thus, in our case this is equivalent to saying that it maximizes the 1-best translation under the BLEU metric. MERT is a log-linear model which allows us to combine different features in order to find the best target translation $e*$ for a input source $f$:
+The most common approach to training is Minimum Error Rate Training (MERT)~\cite{och:03}, which tunes the parameters to minimize error according to an arbitrary error function. Thus, in our case this is equivalent to saying that it maximizes the 1-best translation under the BLEU metric. MERT is a log-linear model which allows us to combine different features in order to find the best target translation $e*$ for a input source $f$:
 $$e* = \arg\max e p(e|f) = argmax_e \sum_{k=1}^K w_kh_k(e,f)$$
 
 where $h_k(e,f)$ is a feature associated with the translation of $f$ to $e$, and $w$ is the weight associated with that feature. Unfortunately, MERT has been empirically unable to extend beyond optimization of a handful of features, thus necessecitating dense features. Theses features typically include:
@@ -95,7 +95,7 @@ Given that we have achieved significant gains from incorporating the hierarchica
 
 \section{Training Algorithms}
 
-As we are interested in incorporating numerous features into our model to directly help translation, we want to perform discriminative training. Given the fact that MERT is unable to optimize the sparse features we are interested in, in this workshop we investigated two alternative methods which allow us to train a model with a high dimensional feature space. The two approaches were the Margin Infused Relaxed Algorithm (MIRA) and Expected BLEU. All three optimization algorithms perform inference over the hypergraph, but as Table~\ref{tab:comp} shows, they are performing in quite different ways. MERT aims to optimize parameters to maximize the 1-best BLEU, or alternatively to minimize the error, by constructing a piece-wise linear error surface from the entire tuning set and performing a line search in order to find the appropriate weights. The primary limitation of this, which is responsible for its inability to scale, is the unknown diretion of the line search. When done in a handful of dimensions, random directions work relatively well, however, as we increase the feature space this becaomes a severe problem. 
+As we are interested in incorporating numerous features into our model to directly help translation, we want to perform discriminative training. Given the fact that MERT is unable to optimize the sparse features we are interested in, in this workshop we investigated two alternative methods which allow us to train a model with a high dimensional feature space. The two approaches were the Margin Infused Relaxed Algorithm (MIRA)~\cite{mira:05} and Expected BLEU. All three optimization algorithms perform inference over the hypergraph, but as Table~\ref{tab:comp} shows, they are performing in quite different ways. MERT aims to optimize parameters to maximize the 1-best BLEU, or alternatively to minimize the error, by constructing a piece-wise linear error surface from the entire tuning set and performing a line search in order to find the appropriate weights. The primary limitation of this, which is responsible for its inability to scale, is the unknown diretion of the line search. When done in a handful of dimensions, random directions work relatively well, however, as we increase the feature space this becaomes a severe problem. 
 
 Expected BLEU training, explained in detail in Section~\ref{sec:exp_bleu} is a probabilistic method which can be seen as an attempt to address some of these shortcomings. If instead of maximizing the 1-best hypothesis, as we do with MERT, we try to maximize the expected BLEU over all the hypotheses, we create a continuous, and therefore differentiable function for optimization which allows us to use gradient-based methods, such as L-BFGS. 
 
@@ -117,10 +117,29 @@ MIRA training, on the other hand, is a large-margin based training method, which
 \section{Margin Infused Relaxed Algorithm}
 \label{sec:mira}
 
-MIRA was first introduced in 2003 by Crammer and Singer for the multi-class classification problem as a perceptron like algorithm, with the additional of a classifcation margin to reduce generalization error. This was later expanded by Taskar to structured value prediction problems, such as dependency parsing. It was notably applied to machine translation by Watanabe, and then Chiang, on whose work we build here.
+MIRA was first introduced in 2003 by Crammer and Singer for the multi-class classification problem as a perceptron like algorithm, with the additional of a classifcation margin to reduce generalization error. This was later expanded by Taskar to structured value prediction problems, such as dependency parsing. It was notably applied to machine translation by Watanabe, and then Chiang, on whose work we build here~\cite{watanabe:07,chiang:2009:naacl}.
 
 \subsection{Learning Algorithm}
-The basic online learning algorithm proceeds as in Algorithm X. We go through the data for $n$ iterations, and during each iteration we go through all our data points and update the weight vector after each example. We then use the new weight vector to process the next example, and so on, until we reach some convergence criteria. After convergence, we average over the weight vectors to produce a final weight vector which we can use to process new examples. The averaging of the weight vector is done to reduce overfitting, and has proved effective in previous applications. 
+The basic online learning algorithm proceeds as in Algorithm~\ref{alg1}. We go through the data for $n$ iterations, and during each iteration we go through all our data points and update the weight vector after each example. We then use the new weight vector to process the next example, and so on, until we reach some convergence criteria. After convergence, we average over the weight vectors to produce a final weight vector which we can use to process new examples. The averaging of the weight vector is done to reduce overfitting, and has proved effective in previous applications. 
+
+\begin{algorithm}
+\begin{algorithmic}
+\STATE Training data: $D=(x,y)$
+\STATE $weight_0=0, total=0, c=0$
+\FOR { $i= 1 \rightarrow n $}
+	\FOR {$d= (x,y)\in D$}
+  \STATE $weight_{c+1}$=update $weight_c$ with $d$
+  \STATE $total=total+weight_{c+1}$
+  \STATE $c=c+1$
+\ENDFOR
+\ENDFOR
+
+\STATE $weight_{final} = \frac{total}{n \times size(D)}$
+\end{algorithmic}
+\caption{Basic Online Training Algorithm}
+\label{alg1}
+
+\end{algorithm}
 
 When performing inference over the hypergraph, each edge in the hypergraph corresponds to a partial translation and has associated with it a decomposable score $s$:
 $$s(edge_i) = w*f(edge_i)$$
@@ -139,7 +158,31 @@ Essentially, these margin constraints force us to create a margin between the co
 
 
 \subsection{Oracle Extraction}
-In multi-class classification, we can form the constraint set by looking at all the possible labels of x, however, in structured prediction, this becomes infeasible. Thus, in practice previous work has resorted to approximating the constraint set by performing k-best extraction over the trees in dependency parsing, or translations in MT, using only these top $k$ labels as constraints in training. This leads to the modified training algorithm of k-best MIRA, described in Algorithm Y. 
+In multi-class classification, we can form the constraint set by looking at all the possible labels of x, however, in structured prediction, this becomes infeasible. Thus, in practice previous work has resorted to approximating the constraint set by performing k-best extraction over the trees in dependency parsing, or translations in MT, using only these top $k$ labels as constraints in training. This leads to the modified training algorithm of k-best MIRA, described in Algorithm~\ref{alg2}. 
+
+
+
+
+\begin{algorithm}
+\begin{algorithmic}
+\STATE Training data: $D=(e,f)$
+\STATE $weight_0=0, total=0, c=0$
+\FOR { $i= 1 \rightarrow n $}
+	\FOR {$d= (e,f)\in D$}
+  \STATE Generate $kbest(f) = \left\{e...e_k\right\}$
+  \STATE Generate margin constraints $\forall e\in kbest(f)$
+  \STATE $weight_{c+1}$=update $weight_c$ with $d$
+  \STATE $total=total+weight_{c+1}$
+  \STATE $c=c+1$
+\ENDFOR
+\ENDFOR
+
+\STATE $weight_{final} = \frac{total}{n \times size(D)}$
+\end{algorithmic}
+\caption{k-best MIRA Online Training Algorithm}
+\label{alg2}
+
+\end{algorithm}
 
 For MT, recent work has shown significant improvements from obtaining three different sets of k-best lists. The first is the model k-best
 $$w*f(e) $$
