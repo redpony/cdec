@@ -1,8 +1,20 @@
-if HAVE_GTEST
-noinst_PROGRAMS = \
-  scorer_test
-TESTS = scorer_test
-endif
+
+#noinst_PROGRAMS = \
+#  file_piece_test \
+#  joint_sort_test \
+#  key_value_packing_test \
+#  probing_hash_table_test \
+#  sorted_uniform_test
+
+#TESTS = \
+#  file_piece_test \
+#  joint_sort_test \
+#  key_value_packing_test \
+#  probing_hash_table_test \
+#  sorted_uniform_test
+
+#file_piece_test_SOURCES = file_piece_test.cc
+#file_piece_test_LDADD = libklm_util.a
 
 noinst_LIBRARIES = libklm_util.a
 
