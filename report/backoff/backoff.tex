@@ -8,8 +8,6 @@ Multi-category grammars can better represent complex structure and reordering us
 
 This portion of the project seeks to design a backoff grammar which can build on a multi-category grammar such as the one induced by the Pitman-Yor process described elsewhere in these proceedings.  The backoff grammar adds the flexibility of a single category grammar without sacrificing reordering.
 
-In the Motivation section, the reason for designing such a grammar is explored in more detail.  In the Naive Backoff section is explained the original implementation of the backoff grammar, and in the Hierarchical Backoff section, the last tested iteration of the grammar is explained.  Results of both grammars on the BTEC corpus versus a single-category Hiero baseline are explained in the Results and Analysis section.  Finally, we will conclude with this part's role in the larger workshop project as well as describe possible future work in the Conclusions section.
-
 \subsection{Naive Backoff}
 
 As was previously mentioned, given the sparsity of the training data, no phrase will have all of its linguistically possible contexts accounted for in the grammar.  As an example, consider the production in (\ref{eq:whenwill}):
