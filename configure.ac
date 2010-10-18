@@ -86,4 +86,4 @@ then
   AM_CONDITIONAL([RAND_LM], true)
 fi
 
-AC_OUTPUT(Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile training/Makefile vest/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile)
+AC_OUTPUT(Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile training/Makefile vest/Makefile klm/util/Makefile klm/lm/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile)
