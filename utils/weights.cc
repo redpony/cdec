@@ -15,9 +15,9 @@ void Weights::InitFromFile(const std::string& filename, vector<string>* feature_
   assert(in);
   int weight_count = 0;
   bool fl = false;
+  string buf;
+  double val = 0;
   while (in) {
-    double val = 0;
-    string buf;
     getline(in, buf);
     if (buf.size() == 0) continue;
     if (buf[0] == '#') continue;
@@ -27,12 +27,12 @@ void Weights::InitFromFile(const std::string& filename, vector<string>* feature_
     while(start < buf.size() && buf[start] == ' ') ++start;
     int end = 0;
     while(end < buf.size() && buf[end] != ' ') ++end;
-    int fid = FD::Convert(buf.substr(start, end - start));
+    const int fid = FD::Convert(buf.substr(start, end - start));
     while(end < buf.size() && buf[end] == ' ') ++end;
     val = strtod(&buf.c_str()[end], NULL);
     if (isnan(val)) {
       cerr << FD::Convert(fid) << " has weight NaN!\n";
-      abort();
+     abort();
     }
     if (wv_.size() <= fid)
       wv_.resize(fid + 1);
