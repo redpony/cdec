@@ -16,17 +16,24 @@ GetOptions("cdec=s" => \$DECODER,
            "pmem=s" => \$pmem,
            "mkcls=s" => \$mkcls,
           ) or usage();
-usage() unless (scalar @ARGV == 1);
+usage() unless (scalar @ARGV == 3);
 die "Cannot find mkcls (specify with --mkcls=/path/to/mkcls) at $mkcls\n" unless -f $mkcls;
 die "Cannot execute mkcls at $mkcls\n" unless -x $mkcls;
 
 my $in_file = shift @ARGV;
+my $m4 = shift @ARGV;
+my $im4 = shift @ARGV;
+die "Can't find model4: $m4" unless -f $m4;
+die "Can't find inverse model4: $im4" unless -f $im4;
+
 die "Expected format corpus.l1-l2 where l1 & l2 are two-letter abbreviations\nfor the source and target language respectively\n" unless ($in_file =~ /^.+\.([a-z][a-z])-([a-z][a-z])$/);
 my $f_lang = $1;
 my $e_lang = $2;
 
 print STDERR "Source language: $f_lang\n";
 print STDERR "Target language: $e_lang\n";
+print STDERR "  Model 4 align: $m4\n";
+print STDERR "InModel 4 align: $im4\n";
 print STDERR " Using mkcls in: $mkcls\n\n";
 die "Don't have an orthographic normalizer for $f_lang\n" unless -f "$SCRIPT_DIR/ortho-norm/$f_lang.pl";
 die "Don't have an orthographic normalizer for $e_lang\n" unless -f "$SCRIPT_DIR/ortho-norm/$e_lang.pl";
@@ -77,6 +84,8 @@ SCRIPT_DIR = $SCRIPT_DIR
 TRAINING_DIR = $training_dir
 MKCLS = $mkcls
 NCLASSES = $num_classes
+GIZAALIGN = $m4
+INVGIZAALIGN = $im4
 
 TARGETS = @targets
 PTRAIN = \$(TRAINING_DIR)/cluster-ptrain.pl --restart_if_necessary
@@ -105,16 +114,19 @@ exit 0;
 
 sub make_stage {
   my ($stage, $direction, $prev_stage) = @_;
-  my $stage_dir = "$align_dir/$stage-$direction";
+  my $stage_dir = "$align_dir/model-$direction";
   my $first = $direction;
   $first =~ s/^(.+)-.*$/$1/;
   mkdir $stage_dir;
   my $RELPOS = "feature_function=RelativeSentencePosition $align_dir/grammars/corpus.class.$first\n";
-  open CDEC, ">$stage_dir/cdec.ini" or die;
+  open CDEC, ">$stage_dir/cdec.$stage.ini" or die;
   print CDEC <<EOT;
-formalism=lexcrf
+formalism=lextrans
 intersection_strategy=full
 grammar=$align_dir/grammars/corpus.$direction.lex-grammar.gz
+feature_function=LexicalPairIdentity
+feature_function=InputIdentity
+feature_function=OutputIdentity
 EOT
   if ($stage =~ /relpos/) {
     print CDEC "$RELPOS\n";
@@ -122,36 +134,16 @@ EOT
     print CDEC "$RELPOS\n";
     print CDEC "feature_function=MarkovJump\n";
     print CDEC "feature_function=MarkovJumpFClass $align_dir/grammars/corpus.class.$first\n";
+    print CDEC "feature_function=SourceBigram\n";
     print CDEC "feature_function=SourcePOSBigram $align_dir/grammars/corpus.class.$first\n";
   }
   close CDEC;
-
-  my $init_weights = "weights.init.gz: ../grammars/weights.init.gz\n\tcp \$< \$\@\n";
-  if ($prev_stage) {
-    $init_weights = "weights.init.gz: ../$prev_stage-$direction/weights.final.gz\n\tcp \$< \$\@\n";
-  }
-
-  open MAKE, ">$stage_dir/Makefile" or die;
-  print MAKE <<EOT;
-all: weights.final.gz
-
-clean:
-	\$(RM) -r ptrain weights.init.gz weights.final.gz
-
-$init_weights
-
-weights.final.gz: weights.init.gz cdec.ini
-	\$(PTRAIN) \$(PTRAIN_PARAMS) cdec.ini ../grammars/corpus.$direction weights.init.gz
-	cp ptrain/weights.final.gz weights.final.gz
-	\$(RM) -r ptrain
-EOT
-  close MAKE;
 }
 
 sub usage {
   die <<EOT;
 
-Usage: $0 [OPTIONS] training_corpus.fr-en
+Usage: $0 [OPTIONS] training_corpus.fr-en giza.en-fr.A3 giza.fr-en.A3
 
 EOT
 }

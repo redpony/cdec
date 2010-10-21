@@ -574,3 +574,39 @@ void BlunsomSynchronousParseHack::TraversalFeaturesImpl(const SentenceMetadata& 
   SetStateMask(it->second, it->second + yield.size(), state);
 }
 
+InputIdentity::InputIdentity(const std::string& param) {}
+
+void InputIdentity::FireFeature(WordID src,
+                                SparseVector<double>* features) const {
+  int& fid = fmap_[src];
+  if (!fid) {
+    static map<WordID, WordID> escape;
+    if (escape.empty()) {
+      escape[TD::Convert("=")] = TD::Convert("__EQ");
+      escape[TD::Convert(";")] = TD::Convert("__SC");
+      escape[TD::Convert(",")] = TD::Convert("__CO");
+    }
+    if (escape.count(src)) src = escape[src];
+    ostringstream os;
+    os << "S:" << TD::Convert(src);
+    fid = FD::Convert(os.str());
+  }
+  features->set_value(fid, 1.0);
+}
+
+void InputIdentity::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const {
+  const vector<WordID>& fw = edge.rule_->f_;
+  for (int i = 0; i < fw.size(); ++i) {
+    const WordID& f = fw[i];
+    if (f > 0) FireFeature(f, features);
+  }
+}
+
+
+
+
