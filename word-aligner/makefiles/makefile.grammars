@@ -1,7 +1,7 @@
-all: corpus.f-e.lex-grammar.gz corpus.e-f.lex-grammar.gz corpus.class.e corpus.class.f weights.init.gz
+all: corpus.f-e.lex-grammar.gz corpus.e-f.lex-grammar.gz corpus.class.e corpus.class.f
 
 clean:
-	$(RM) orthonorm-dict.* voc2class* corpus.class.* corpus.e-f corpus.f-e weights* corpus.f-e.lex-grammar* *.model1 *voc corpus.e-f.lex-grammar*
+	$(RM) orthonorm-dict.* voc2class* corpus.class.* corpus.e-f corpus.f-e corpus.f-e.lex-grammar* *.model1 *voc corpus.e-f.lex-grammar*
 
 SUPPORT_DIR = $(SCRIPT_DIR)/support
 GZIP = /usr/bin/gzip
@@ -51,20 +51,13 @@ corpus.f-e.model1: corpus.f-e $(MODEL1)
 corpus.e-f.model1: corpus.e-f $(MODEL1)
 	$(MODEL1) corpus.e-f > corpus.e-f.model1
 
-bidir.grammars: corpus.f-e corpus.f-e.model1 corpus.e-f.model1 orthonorm-dict.f orthonorm-dict.e voc2class.e voc2class.f
+bidir.grammars: corpus.f-e corpus.f-e.model1 corpus.e-f.model1 orthonorm-dict.f orthonorm-dict.e voc2class.e voc2class.f $(GIZAALIGN) $(INVGIZAALIGN)
 	$(RM) $@
-	$(MAKE_LEX_GRAMMAR) corpus.f-e corpus.f-e.model1 corpus.e-f.model1 orthonorm-dict.f orthonorm-dict.e voc2class.e voc2class.f > bidir.grammars
+	$(MAKE_LEX_GRAMMAR) corpus.f-e corpus.f-e.model1 corpus.e-f.model1 orthonorm-dict.f orthonorm-dict.e voc2class.e voc2class.f $(GIZAALIGN) $(INVGIZAALIGN) > bidir.grammars
 
 corpus.f-e.lex-grammar.gz: bidir.grammars
 	$(EXTRACT_GRAMMAR) 1 bidir.grammars | $(GZIP) -9 > corpus.f-e.lex-grammar.gz
 
 corpus.e-f.lex-grammar.gz: bidir.grammars
 	$(EXTRACT_GRAMMAR) 2 bidir.grammars | $(GZIP) -9 > corpus.e-f.lex-grammar.gz
-
-weights.init.gz: bidir.grammars voc2class.f voc2class.e
-	$(EXTRACT_WEIGHTS) bidir.grammars > weights.init
-	$(SUPPLEMENT_WEIGHTS) voc2class.f > weights.dup
-	$(SUPPLEMENT_WEIGHTS) voc2class.e >> weights.dup
-	sort -u weights.dup >> weights.init
-	$(GZIP) -9 weights.init
 

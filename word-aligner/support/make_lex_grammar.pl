@@ -4,8 +4,8 @@ use strict;
 
 my $LIMIT_SIZE=30;
 
-my ($effile, $model1, $imodel1, $orthof, $orthoe, $class_e, $class_f) = @ARGV;
-die "Usage: $0 corpus.fr-en corpus.f-e.model1 corpus.e-f.model1 corpus.orthonorm-dict.f corpus.orthnorm-dict.e class.e class.f\n" unless $effile && -f $effile && $model1 && -f $model1 && $imodel1 && -f $imodel1 && $orthof && -f $orthof && $orthoe && -f $orthoe && -f $class_e && -f $class_f;
+my ($effile, $model1, $imodel1, $orthof, $orthoe, $class_e, $class_f, $gizaf2e, $gizae2f) = @ARGV;
+die "Usage: $0 corpus.fr-en corpus.f-e.model1 corpus.e-f.model1 corpus.orthonorm-dict.f corpus.orthnorm-dict.e class.e class.f\n" unless $effile && -f $effile && $model1 && -f $model1 && $imodel1 && -f $imodel1 && $orthof && -f $orthof && $orthoe && -f $orthoe && -f $class_e && -f $class_f && -f $gizaf2e && -f $gizae2f;
 
 my %eclass = ();
 my %fclass = ();
@@ -20,8 +20,12 @@ our %cache;
 open EF, "<$effile" or die;
 open M1, "<$model1" or die;
 open IM1, "<$imodel1" or die;
+open M4, "<$gizaf2e" or die;
+open IM4, "<$gizae2f" or die;
 binmode(EF,":utf8");
 binmode(M1,":utf8");
+binmode(M4,":utf8");
+binmode(IM4,":utf8");
 binmode(IM1,":utf8");
 binmode(STDOUT,":utf8");
 my %model1;
@@ -93,7 +97,7 @@ $of_dict{'<eps>'} = '<eps>';
 $oe_dict{'<eps>'} = '<eps>';
 
 my $MIN_FEATURE_COUNT = 0;
-my $ADD_PREFIX_ID = 0;
+my $ADD_PREFIX_ID = 1;
 my $ADD_CLASS_CLASS = 1;
 my $ADD_LEN = 1;
 my $ADD_SIM = 1;
@@ -102,13 +106,14 @@ my $ADD_111 = 1;
 my $ADD_ID = 1;
 my $ADD_PUNC = 1;
 my $ADD_NULL = 0;
-my $ADD_STEM_ID = 1;
+my $ADD_STEM_ID = 0;
 my $ADD_SYM = 0;
 my $BEAM_RATIO = 50;
 my $BIN_ORTHO = 1;
 my $BIN_DLEN = 1;
 my $BIN_IDENT = 1;
 my $BIN_DICE = 1;
+my $ADD_FIDENT = 0;
 
 my %fdict;
 my %fcounts;
@@ -126,8 +131,10 @@ while(<EF>) {
     $ecounts{$ew}++;
   }
   push @fs, '<eps>' if $ADD_NULL;
+  my $i = 0;
   for my $fw (@fs){
-    die "F: Empty word" if $fw eq '';
+    $i++;
+    die "F: Empty word\nI=$i FS: @fs" if $fw eq '';
     $fcounts{$fw}++;
   }
   for my $fw (@fs){
@@ -136,6 +143,27 @@ while(<EF>) {
     }
   }
 }
+
+print STDERR "Loading Giza output...\n";
+my %model4;
+while(<M4>) {
+  my $en = <M4>; chomp $en;
+  my $zh = <M4>; chomp $zh;
+  die unless $zh =~ /^NULL \({/;
+  my @ewords = split /\s+/, $en;
+  my @chunks = split /\}\) ?/, $zh;
+
+  for my $c (@chunks) {
+    my ($zh, $taps) = split / \(\{ /, $c;
+    if ($zh eq 'NULL') { $zh = '<eps>'; }
+    my @aps = map { $ewords[$_ - 1]; } (split / /, $taps);
+    #print "$zh -> @aps\n";
+    for my $ap (@aps) {
+      $model4{$zh}->{$ap} += 1;
+    }
+  }
+}
+close M4;
 
 my $specials = 0;
 my $fc = 1000000;
@@ -147,12 +175,14 @@ for my $f (sort keys %fdict) {
     my $efcount = $re->{$e};
     unless (defined $max) { $max = $efcount; }
     my $m1 = $model1{$f}->{$e};
+    my $m4 = $model4{$f}->{$e};
     my $im1 = $invm1{$e}->{$f};
-    my $is_good_pair = (defined $m1);
+    my $is_good_pair = (defined $m1 || defined $m4);
     my $is_inv_good_pair = (defined $im1);
-    my $dice = 2 * $efcount / ($ecounts{$e} + $fcounts{$f});
+    my $total_eandf = $ecounts{$e} + $fcounts{$f};
+    my $dice = 2 * $efcount / $total_eandf;
     my @feats;
-    if ($efcount > $MIN_FEATURE_COUNT) {
+    if ($ADD_FIDENT && $efcount > $MIN_FEATURE_COUNT) {
       $fc++;
       push @feats, "F$fc=1";
     }
@@ -212,13 +242,6 @@ for my $f (sort keys %fdict) {
       }
       push @feats, "S$id=1";
     }
-    if ($ADD_PREFIX_ID) {
-      if ($len_e > 3 && $len_f > 3 && $both_non_numeric) { 
-        my $pe = substr $oe, 0, 3;
-        my $pf = substr $of, 0, 3;
-        if ($pe eq $pf) { push @feats, "PfxIdentical=1"; }
-      }
-    }
     if ($ADD_SIM) {
       my $ld = 0;
       my $eff = $len_e;
@@ -226,7 +249,7 @@ for my $f (sort keys %fdict) {
       if (!$is_null) {
         $ld = ($eff - levenshtein($oe, $of)) / sqrt($eff);
       }
-      if ($ld > 1.5) { $is_good_pair = 1; }
+      #if ($ld > 1.5) { $is_good_pair = 1; }
       if ($BIN_ORTHO) {
         push @feats, orthobin($ld) . '=1';
       } else {
@@ -236,10 +259,19 @@ for my $f (sort keys %fdict) {
     my $ident = ($e eq $f);
     if ($ident) { $is_good_pair = 1; }
     if ($ident && $ADD_ID) {
+      if ($e =~ /\d/ && $len_e > 2) { push @feats, "IdentNumber=1"; }
+      if ($total_eandf < 8) { push @feats, "IdentRare=1"; }
       if ($BIN_IDENT) {
         push @feats, identbin($len_e) . '=1';
       } else {
         push @feats, "Identical=$len_e";
+      }
+    }
+    if ($ADD_PREFIX_ID && !$ident) {
+      if ($len_e > 3 && $len_f > 3 && $both_non_numeric) { 
+        my $pe = substr $oe, 0, 3;
+        my $pf = substr $of, 0, 3;
+        if ($pe eq $pf) { push @feats, "PfxIdentical=1"; }
       }
     }
     if ($efcount == 1 && $ecounts{$e} == 1 && $fcounts{$f} == 1) {
