@@ -5,7 +5,8 @@ use strict;
 my $LIMIT_SIZE=30;
 
 my ($effile, $model1, $imodel1, $orthof, $orthoe, $class_e, $class_f, $gizaf2e, $gizae2f) = @ARGV;
-die "Usage: $0 corpus.fr-en corpus.f-e.model1 corpus.e-f.model1 corpus.orthonorm-dict.f corpus.orthnorm-dict.e class.e class.f\n" unless $effile && -f $effile && $model1 && -f $model1 && $imodel1 && -f $imodel1 && $orthof && -f $orthof && $orthoe && -f $orthoe && -f $class_e && -f $class_f && -f $gizaf2e && -f $gizae2f;
+die "Usage: $0 corpus.fr-en corpus.f-e.model1 corpus.e-f.model1 corpus.orthonorm-dict.f corpus.orthnorm-dict.e class.e class.f\n" unless $effile && -f $effile && $model1 && -f $model1 && $imodel1 && -f $imodel1 && $orthof && -f $orthof && $orthoe && -f $orthoe && -f $class_e && -f $class_f;
+
 
 my %eclass = ();
 my %fclass = ();
@@ -20,12 +21,12 @@ our %cache;
 open EF, "<$effile" or die;
 open M1, "<$model1" or die;
 open IM1, "<$imodel1" or die;
-open M4, "<$gizaf2e" or die;
-open IM4, "<$gizae2f" or die;
+#open M4, "<$gizaf2e" or die;
+#open IM4, "<$gizae2f" or die;
+#binmode(M4,":utf8");
+#binmode(IM4,":utf8");
 binmode(EF,":utf8");
 binmode(M1,":utf8");
-binmode(M4,":utf8");
-binmode(IM4,":utf8");
 binmode(IM1,":utf8");
 binmode(STDOUT,":utf8");
 my %model1;
@@ -105,7 +106,7 @@ my $ADD_DICE = 1;
 my $ADD_111 = 1;
 my $ADD_ID = 1;
 my $ADD_PUNC = 1;
-my $ADD_NULL = 0;
+my $ADD_NULL = 1;
 my $ADD_STEM_ID = 0;
 my $ADD_SYM = 0;
 my $BEAM_RATIO = 50;
@@ -114,6 +115,8 @@ my $BIN_DLEN = 1;
 my $BIN_IDENT = 1;
 my $BIN_DICE = 1;
 my $ADD_FIDENT = 0;
+
+if ($ADD_NULL) { $fclass{'<eps>'}='NUL'; $eclass{'<eps>'} ='NUL'; }
 
 my %fdict;
 my %fcounts;
@@ -146,24 +149,24 @@ while(<EF>) {
 
 print STDERR "Loading Giza output...\n";
 my %model4;
-while(<M4>) {
-  my $en = <M4>; chomp $en;
-  my $zh = <M4>; chomp $zh;
-  die unless $zh =~ /^NULL \({/;
-  my @ewords = split /\s+/, $en;
-  my @chunks = split /\}\) ?/, $zh;
-
-  for my $c (@chunks) {
-    my ($zh, $taps) = split / \(\{ /, $c;
-    if ($zh eq 'NULL') { $zh = '<eps>'; }
-    my @aps = map { $ewords[$_ - 1]; } (split / /, $taps);
-    #print "$zh -> @aps\n";
-    for my $ap (@aps) {
-      $model4{$zh}->{$ap} += 1;
-    }
-  }
-}
-close M4;
+#while(<M4>) {
+#  my $en = <M4>; chomp $en;
+#  my $zh = <M4>; chomp $zh;
+#  die unless $zh =~ /^NULL \({/;
+#  my @ewords = split /\s+/, $en;
+#  my @chunks = split /\}\) ?/, $zh;
+#
+#  for my $c (@chunks) {
+#    my ($zh, $taps) = split / \(\{ /, $c;
+#    if ($zh eq 'NULL') { $zh = '<eps>'; }
+#    my @aps = map { $ewords[$_ - 1]; } (split / /, $taps);
+#    #print "$zh -> @aps\n";
+#    for my $ap (@aps) {
+#      $model4{$zh}->{$ap} += 1;
+#    }
+#  }
+#}
+#close M4;
 
 my $specials = 0;
 my $fc = 1000000;
@@ -207,7 +210,6 @@ for my $f (sort keys %fdict) {
     }
     my $is_null = undef;
     if ($ADD_NULL && $f eq '<eps>') {
-      push @feats, "IsNull=1";
       $is_null = 1;
     }
     if ($ADD_LEN) {

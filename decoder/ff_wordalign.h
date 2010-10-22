@@ -49,6 +49,11 @@ class MarkovJump : public FeatureFunction {
                                      void* out_context) const;
  private:
   const int fid_;
+  const int fid_lex_null_;
+  const int fid_null_lex_;
+  const int fid_null_null_;
+  const int fid_lex_lex_;
+
   bool binary_params_;
   std::vector<std::map<int, int> > flen2jump2fid_;
 };
@@ -96,7 +101,6 @@ class SourceBigram : public FeatureFunction {
                    WordID trg,
                    SparseVector<double>* features) const;
   mutable Class2Class2FID fmap_;
-  mutable Class2FID ufmap_;
 };
 
 class SourcePOSBigram : public FeatureFunction {

@@ -6,9 +6,10 @@ use Getopt::Long;
 my $training_dir = "$SCRIPT_DIR/../training";
 die "Can't find training dir: $training_dir" unless -d $training_dir;
 
-my $mkcls = '/Users/redpony/software/giza/giza-pp/mkcls-v2/mkcls';
+my $mkcls = '/Users/cdyer/software/giza-pp/mkcls-v2/mkcls';
 my $num_classes = 50;
 my $nodes = 40;
+my $TRAINING_ITERATIONS = 2000;
 my $pmem = "2500mb";
 my $DECODER = "cdec";
 GetOptions("cdec=s" => \$DECODER,
@@ -16,15 +17,11 @@ GetOptions("cdec=s" => \$DECODER,
            "pmem=s" => \$pmem,
            "mkcls=s" => \$mkcls,
           ) or usage();
-usage() unless (scalar @ARGV == 3);
+usage() unless (scalar @ARGV == 1);
 die "Cannot find mkcls (specify with --mkcls=/path/to/mkcls) at $mkcls\n" unless -f $mkcls;
 die "Cannot execute mkcls at $mkcls\n" unless -x $mkcls;
 
 my $in_file = shift @ARGV;
-my $m4 = shift @ARGV;
-my $im4 = shift @ARGV;
-die "Can't find model4: $m4" unless -f $m4;
-die "Can't find inverse model4: $im4" unless -f $im4;
 
 die "Expected format corpus.l1-l2 where l1 & l2 are two-letter abbreviations\nfor the source and target language respectively\n" unless ($in_file =~ /^.+\.([a-z][a-z])-([a-z][a-z])$/);
 my $f_lang = $1;
@@ -32,13 +29,11 @@ my $e_lang = $2;
 
 print STDERR "Source language: $f_lang\n";
 print STDERR "Target language: $e_lang\n";
-print STDERR "  Model 4 align: $m4\n";
-print STDERR "InModel 4 align: $im4\n";
 print STDERR " Using mkcls in: $mkcls\n\n";
 die "Don't have an orthographic normalizer for $f_lang\n" unless -f "$SCRIPT_DIR/ortho-norm/$f_lang.pl";
 die "Don't have an orthographic normalizer for $e_lang\n" unless -f "$SCRIPT_DIR/ortho-norm/$e_lang.pl";
 
-my @stages = qw(nopos relpos markov);
+my @stages = qw(markov);
 my @directions = qw(f-e e-f);
 
 my $corpus = 'c';
@@ -67,12 +62,8 @@ die unless $? == 0;
 my @targets = qw(grammars);
 
 for my $direction (@directions) {
-  my $prev_stage = undef;
-  for my $stage (@stages) {
-    push @targets, "$stage-$direction";
-    make_stage($stage, $direction, $prev_stage);
-    $prev_stage = $stage;
-  }
+  push @targets, "model-$direction";
+  make_stage($direction);
 }
 
 open TOPLEVEL, ">$align_dir/Makefile" or die "Can't write $align_dir/Makefile: $!";
@@ -84,8 +75,6 @@ SCRIPT_DIR = $SCRIPT_DIR
 TRAINING_DIR = $training_dir
 MKCLS = $mkcls
 NCLASSES = $num_classes
-GIZAALIGN = $m4
-INVGIZAALIGN = $im4
 
 TARGETS = @targets
 PTRAIN = \$(TRAINING_DIR)/cluster-ptrain.pl --restart_if_necessary
@@ -113,13 +102,12 @@ print STDERR "Created alignment task. chdir to talign/ then type make.\n\n";
 exit 0;
 
 sub make_stage {
-  my ($stage, $direction, $prev_stage) = @_;
+  my ($direction) = @_;
   my $stage_dir = "$align_dir/model-$direction";
   my $first = $direction;
   $first =~ s/^(.+)-.*$/$1/;
   mkdir $stage_dir;
-  my $RELPOS = "feature_function=RelativeSentencePosition $align_dir/grammars/corpus.class.$first\n";
-  open CDEC, ">$stage_dir/cdec.$stage.ini" or die;
+  open CDEC, ">$stage_dir/cdec.ini" or die "Can't write $stage_dir/cdec.ini: $!";
   print CDEC <<EOT;
 formalism=lextrans
 intersection_strategy=full
@@ -127,23 +115,22 @@ grammar=$align_dir/grammars/corpus.$direction.lex-grammar.gz
 feature_function=LexicalPairIdentity
 feature_function=InputIdentity
 feature_function=OutputIdentity
+feature_function=RelativeSentencePosition $align_dir/grammars/corpus.class.$first
+feature_function=MarkovJump +b
+feature_function=MarkovJumpFClass $align_dir/grammars/corpus.class.$first
+feature_function=SourceBigram
+feature_function=SourcePOSBigram $align_dir/grammars/corpus.class.$first
 EOT
-  if ($stage =~ /relpos/) {
-    print CDEC "$RELPOS\n";
-  } elsif ($stage =~ /markov/) {
-    print CDEC "$RELPOS\n";
-    print CDEC "feature_function=MarkovJump\n";
-    print CDEC "feature_function=MarkovJumpFClass $align_dir/grammars/corpus.class.$first\n";
-    print CDEC "feature_function=SourceBigram\n";
-    print CDEC "feature_function=SourcePOSBigram $align_dir/grammars/corpus.class.$first\n";
-  }
   close CDEC;
+  open AGENDA, ">$stage_dir/agenda.txt" or die "Can't write $stage_dir/agenda.txt: $!";
+  print AGENDA "cdec.ini $TRAINING_ITERATIONS\n";
+  close AGENDA;
 }
 
 sub usage {
   die <<EOT;
 
-Usage: $0 [OPTIONS] training_corpus.fr-en giza.en-fr.A3 giza.fr-en.A3
+Usage: $0 [OPTIONS] training_corpus.fr-en
 
 EOT
 }
