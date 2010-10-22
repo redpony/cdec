@@ -31,6 +31,7 @@ AM_CONDITIONAL([MPI], [test "x$mpi" = xyes])
 if test "x$mpi" = xyes
 then
   BOOST_SERIALIZATION
+  AC_DEFINE([HAVE_MPI], [1], [flag for MPI])
   # TODO BOOST_MPI needs to be implemented
   LIBS="$LIBS -lboost_mpi $BOOST_SERIALIZATION_LIBS -lmpi++ -lmpi"
 fi
