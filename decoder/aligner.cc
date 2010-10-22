@@ -24,8 +24,10 @@ void SourceEdgeCoveragesUsingParseIndices(const Hypergraph& g,
     if (edge.rule_->EWords() == 0 || edge.rule_->FWords() == 0)
       continue;
     // aligned to NULL (crf ibm variant only)
-    if (edge.prev_i_ == -1 || edge.i_ == -1)
+    if (edge.prev_i_ == -1 || edge.i_ == -1) {
+      cov.insert(-1);
       continue;
+    }
     assert(edge.j_ >= 0);
     assert(edge.prev_j_ >= 0);
     if (edge.Arity() == 0) {
@@ -211,7 +213,7 @@ void AlignerTools::WriteAlignment(const Lattice& src_lattice,
   // figure out the src and reference size;
   int src_size = src_sent.size();
   int ref_size = trg_sent.size();
-  Array2D<prob_t> align(src_size, ref_size, prob_t::Zero());
+  Array2D<prob_t> align(src_size + 1, ref_size, prob_t::Zero());
   for (int c = 0; c < g->edges_.size(); ++c) {
     const prob_t& p = edge_posteriors[c];
     const set<int>& srcs = src_cov[c];
@@ -220,7 +222,7 @@ void AlignerTools::WriteAlignment(const Lattice& src_lattice,
          si != srcs.end(); ++si) {
       for (set<int>::const_iterator ti = trgs.begin();
            ti != trgs.end(); ++ti) {
-        align(*si, *ti) += p;
+        align(*si + 1, *ti) += p;
       }
     }
   }
@@ -234,12 +236,12 @@ void AlignerTools::WriteAlignment(const Lattice& src_lattice,
   for (int j = 0; j < ref_size; ++j) {
     if (use_soft_threshold) {
       threshold = prob_t::Zero();
-      for (int i = 0; i < src_size; ++i)
+      for (int i = 0; i <= src_size; ++i)
         if (align(i, j) > threshold) threshold = align(i, j);
       //threshold *= prob_t(0.99);
     }
     for (int i = 0; i < src_size; ++i)
-      grid(i, j) = align(i, j) >= threshold;
+      grid(i, j) = align(i+1, j) >= threshold;
   }
   if (out == &cout) {
     // TODO need to do some sort of verbose flag

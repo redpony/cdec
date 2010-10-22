@@ -16,6 +16,8 @@
 
 static const int MAX_SENTENCE_SIZE = 100;
 
+static const int kNULL_i = 255;  // -1 as an unsigned char
+
 using namespace std;
 
 Model2BinaryFeatures::Model2BinaryFeatures(const string& ) :
@@ -149,7 +151,11 @@ void MarkovJumpFClass::FireFeature(const SentenceMetadata& smeta,
                                    int prev_src_pos,
                                    int cur_src_pos,
                                    SparseVector<double>* features) const {
+  if (prev_src_pos == kNULL_i || cur_src_pos == kNULL_i)
+    return;
+
   const int jumpsize = cur_src_pos - prev_src_pos;
+
   assert(smeta.GetSentenceID() < pos_.size());
   const WordID cur_fclass = pos_[smeta.GetSentenceID()][cur_src_pos];
   const int fid = fids_[smeta.GetSourceLength()].find(cur_fclass)->second.find(jumpsize)->second;
@@ -189,10 +195,13 @@ void MarkovJumpFClass::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   }
 }
 
-//  std::vector<std::map<int, int> > flen2jump2fid_;
 MarkovJump::MarkovJump(const string& param) :
     FeatureFunction(1),
     fid_(FD::Convert("MarkovJump")),
+    fid_lex_null_(FD::Convert("JumpLexNull")),
+    fid_null_lex_(FD::Convert("JumpNullLex")),
+    fid_null_null_(FD::Convert("JumpNullNull")),
+    fid_lex_lex_(FD::Convert("JumpLexLex")),
     binary_params_(false) {
   cerr << "    MarkovJump";
   vector<string> argv;
@@ -218,7 +227,7 @@ MarkovJump::MarkovJump(const string& param) :
   cerr << endl;
 }
 
-// TODO handle NULLs according to Och 2000
+// TODO handle NULLs according to Och 2000?
 void MarkovJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                        const Hypergraph::Edge& edge,
                                        const vector<const void*>& ant_states,
@@ -229,19 +238,20 @@ void MarkovJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   const int flen = smeta.GetSourceLength();
   if (edge.Arity() == 0) {
     dpstate = static_cast<unsigned int>(edge.i_);
-    if (edge.prev_i_ == 0) {
-      if (binary_params_) {
-        // NULL will be tricky
-        // TODO initial state distribution, not normal jumps
+    if (edge.prev_i_ == 0) {     // first word in sentence
+      if (edge.i_ >= 0 && binary_params_) {
         const int fid = flen2jump2fid_[flen].find(edge.i_ + 1)->second;
         features->set_value(fid, 1.0);
+      } else if (edge.i_ < 0 && binary_params_) {
+        // handled by bigram features
       }
     } else if (edge.prev_i_ == smeta.GetTargetLength() - 1) {
-        // NULL will be tricky
-      if (binary_params_) {
+      if (edge.i_ >= 0 && binary_params_) {
         int jumpsize = flen - edge.i_;
         const int fid = flen2jump2fid_[flen].find(jumpsize)->second;
         features->set_value(fid, 1.0);
+      } else if (edge.i_ < 0 && binary_params_) {
+        // handled by bigram features
       }
     }
   } else if (edge.Arity() == 1) {
@@ -253,13 +263,24 @@ void MarkovJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
       dpstate = static_cast<unsigned int>(left_index);
     else
       dpstate = static_cast<unsigned int>(right_index);
-    const int jumpsize = right_index - left_index;
+    if (left_index == kNULL_i || right_index == kNULL_i) {
+      if (left_index == kNULL_i && right_index == kNULL_i)
+        features->set_value(fid_null_null_, 1.0);
+      else if (left_index == kNULL_i)
+        features->set_value(fid_null_lex_, 1.0);
+      else
+        features->set_value(fid_lex_null_, 1.0);
 
-    if (binary_params_) {
-      const int fid = flen2jump2fid_[flen].find(jumpsize)->second;
-      features->set_value(fid, 1.0);
     } else {
-      features->set_value(fid_, fabs(jumpsize - 1));  // Blunsom and Cohn def
+      features->set_value(fid_lex_lex_, 1.0); // TODO should only use if NULL is enabled
+      const int jumpsize = right_index - left_index;
+
+      if (binary_params_) {
+        const int fid = flen2jump2fid_[flen].find(jumpsize)->second;
+        features->set_value(fid, 1.0);
+      } else {
+        features->set_value(fid_, fabs(jumpsize - 1));  // Blunsom and Cohn def
+      }
     }
   } else {
     assert(!"something really unexpected is happening");
@@ -294,15 +315,6 @@ void SourceBigram::FireFeature(WordID left,
     if (fid == 0) fid = -1;
   }
   if (fid > 0) features->set_value(fid, 1.0);
-  int& ufid = ufmap_[left];
-  if (!ufid) {
-    ostringstream os;
-    os << "SU:";
-    if (left < 0) { os << "BOS"; } else { os << TD::Convert(left); }
-    ufid = FD::Convert(os.str());
-    if (ufid == 0) fid = -1;
-  }
-  if (ufid > 0) features->set_value(ufid, 1.0);
 }
 
 void SourceBigram::TraversalFeaturesImpl(const SentenceMetadata& smeta,
@@ -386,8 +398,14 @@ void SourcePOSBigram::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   if (arity == 0) {
     assert(smeta.GetSentenceID() < pos_.size());
     const vector<WordID>& pos_sent = pos_[smeta.GetSentenceID()];
-    assert(edge.i_ < pos_sent.size());
-    out_context = pos_sent[edge.i_];
+    if (edge.i_ >= 0) {  // non-NULL source
+      assert(edge.i_ < pos_sent.size());
+      out_context = pos_sent[edge.i_];
+    } else { // NULL source
+      // should assert that source is kNULL?
+      static const WordID kNULL = TD::Convert("<eps>");
+      out_context = kNULL;
+    }
     out_word_count = edge.rule_->EWords();
     assert(out_word_count == 1); // this is only defined for lex translation!
     // revisit this if you want to translate into null words
