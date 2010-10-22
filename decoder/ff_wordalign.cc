@@ -454,6 +454,7 @@ void LexicalTranslationTrigger::TraversalFeaturesImpl(const SentenceMetadata& sm
     assert(edge.rule_->FWords() == 1);
     WordID trg = edge.rule_->e()[0]; 
     WordID src = edge.rule_->f()[0];
+    assert(triggers_.size() > smeta.GetSentenceID());
     const vector<WordID>& triggers = triggers_[smeta.GetSentenceID()];
     for (int i = 0; i < triggers.size(); ++i) {
       FireFeature(triggers[i], src, trg, features);
