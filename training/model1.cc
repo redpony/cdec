@@ -46,8 +46,9 @@ int main(int argc, char** argv) {
         assert(src.size() > 0);
         assert(trg.size() > 0);
       }
-      denom += 1.0;
+      denom += trg.size();
       vector<double> probs(src.size() + 1);
+      const double src_logprob = -log(src.size() + 1);
       for (int j = 0; j < trg.size(); ++j) {
         const WordID& f_j = trg[j][0].label;
         double sum = 0;
@@ -79,12 +80,12 @@ int main(int argc, char** argv) {
           for (int i = 1; i <= src.size(); ++i)
             tt.Increment(src[i-1][0].label, f_j, probs[i] / sum);
         }
-        likelihood += log(sum);
+        likelihood += log(sum) + src_logprob;
       }
     }
     if (flag) { cerr << endl; }
     cerr << "  log likelihood: " << likelihood << endl;
-    cerr << "    cross entopy: " << (-likelihood / denom) << endl;
+    cerr << "   cross entropy: " << (-likelihood / denom) << endl;
     cerr << "      perplexity: " << pow(2.0, -likelihood / denom) << endl;
     if (!final_iteration) tt.Normalize();
   }
