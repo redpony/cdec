@@ -6,10 +6,12 @@
 #include <cmath>
 #include <tr1/memory>
 
-#include <boost/mpi/timer.hpp>
-#include <boost/mpi.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
+#ifdef HAVE_MPI
+#include <boost/mpi/timer.hpp>
+#include <boost/mpi.hpp>
+#endif
 
 #include "verbose.h"
 #include "hg.h"
@@ -194,6 +196,7 @@ struct TrainingObserver : public DecoderObserver {
   int state;
 };
 
+#ifdef HAVE_MPI
 namespace mpi = boost::mpi;
 
 namespace boost { namespace mpi {
@@ -201,6 +204,7 @@ namespace boost { namespace mpi {
   struct is_commutative<std::plus<SparseVector<double> >, SparseVector<double> > 
     : mpl::true_ { };
 } } // end namespace boost::mpi
+#endif
 
 bool LoadAgenda(const string& file, vector<pair<string, int> >* a) {
   ReadFile rf(file);
@@ -229,10 +233,15 @@ bool LoadAgenda(const string& file, vector<pair<string, int> >* a) {
 }
 
 int main(int argc, char** argv) {
+#ifdef HAVE_MPI
   mpi::environment env(argc, argv);
   mpi::communicator world;
   const int size = world.size(); 
   const int rank = world.rank();
+#else
+  const int size = 1;
+  const int rank = 0;
+#endif
   if (size > 1) SetSilent(true);  // turn off verbose decoder output
   register_feature_functions();
   std::tr1::shared_ptr<MT19937> rng;
@@ -261,7 +270,11 @@ int main(int argc, char** argv) {
   }
 
   size_t total_corpus_size = 0;
+#ifdef HAVE_MPI
   reduce(world, corpus.size(), total_corpus_size, std::plus<size_t>(), 0);
+#else
+  total_corpus_size = corpus.size();
+#endif
 
   if (rank == 0) {
     cerr << "Total corpus size: " << total_corpus_size << endl;
@@ -311,7 +324,9 @@ int main(int argc, char** argv) {
     int iter = -1;
     bool converged = false;
     while (!converged) {
+#ifdef HAVE_MPI
       mpi::timer timer;
+#endif
       weights.InitFromVector(x);
       weights.InitVector(&lambdas);
       ++iter; ++titer;
@@ -342,16 +357,22 @@ int main(int argc, char** argv) {
       }
       SparseVector<double> local_grad, g;
       observer.GetGradient(&local_grad);
+#ifdef HAVE_MPI
       reduce(world, local_grad, g, std::plus<SparseVector<double> >(), 0);
+#else
+      g.swap(local_grad);
+#endif
       local_grad.clear();
       if (rank == 0) {
         g /= (size_per_proc * size);
         o->UpdateWeights(g, FD::NumFeats(), &x);
       }
+#ifdef HAVE_MPI
       broadcast(world, x, 0);
       broadcast(world, converged, 0);
       world.barrier();
       if (rank == 0) { cerr << "  ELAPSED TIME THIS ITERATION=" << timer.elapsed() << endl; }
+#endif
     }
   }
   return 0;
