@@ -1,9 +1,10 @@
 #include "ff_tagger.h"
 
+#include <sstream>
+
 #include "tdict.h"
 #include "sentence_metadata.h"
-
-#include <sstream>
+#include "stringlib.h"
 
 using namespace std;
 
@@ -52,23 +53,36 @@ void Tagger_BigramIdentity::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   }
 }
 
-LexicalPairIdentity::LexicalPairIdentity(const std::string& param) {}
+void LexicalPairIdentity::PrepareForInput(const SentenceMetadata& smeta) {
+  lexmap_->PrepareForInput(smeta);
+}
+
+LexicalPairIdentity::LexicalPairIdentity(const std::string& param) {
+  name_ = "Id";
+  if (param.size()) {
+    // name corpus.f emap.txt
+    vector<string> params;
+    SplitOnWhitespace(param, &params);
+    if (params.size() != 3) {
+      cerr << "LexicalPairIdentity takes 3 parameters: <name> <corpus.src.txt> <trgmap.txt>\n";
+      cerr << " * may be used for corpus.src.txt or trgmap.txt to use surface forms\n";
+      cerr << " Received: " << param << endl;
+      abort();
+    }
+    name_ = params[0];
+    lexmap_.reset(new FactoredLexiconHelper(params[1], params[2]));
+  } else {
+    lexmap_.reset(new FactoredLexiconHelper);
+  }
+}
 
 void LexicalPairIdentity::FireFeature(WordID src,
-                                 WordID trg,
-                                 SparseVector<double>* features) const {
+                                      WordID trg,
+                                      SparseVector<double>* features) const {
   int& fid = fmap_[src][trg];
   if (!fid) {
-    static map<WordID, WordID> escape;
-    if (escape.empty()) {
-      escape[TD::Convert("=")] = TD::Convert("__EQ");
-      escape[TD::Convert(";")] = TD::Convert("__SC");
-      escape[TD::Convert(",")] = TD::Convert("__CO");
-    }
-    if (escape.count(src)) src = escape[src];
-    if (escape.count(trg)) trg = escape[trg];
     ostringstream os;
-    os << "Id:" << TD::Convert(src) << ':' << TD::Convert(trg);
+    os << name_ << ':' << TD::Convert(src) << ':' << TD::Convert(trg);
     fid = FD::Convert(os.str());
   }
   features->set_value(fid, 1.0);
@@ -80,16 +94,14 @@ void LexicalPairIdentity::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
                                      void* context) const {
-  const vector<WordID>& ew = edge.rule_->e_;
-  const vector<WordID>& fw = edge.rule_->f_;
-  for (int i = 0; i < ew.size(); ++i) {
-    const WordID& e = ew[i];
-    if (e <= 0) continue;
-    for (int j = 0; j < fw.size(); ++j) {
-      const WordID& f = fw[j];
-      if (f <= 0) continue;
-      FireFeature(f, e, features);
-    }
+  // inline WordID SourceWordAtPosition(const int i);
+  // inline WordID CoarsenedTargetWordForTarget(const WordID surface_target);
+  if (edge.Arity() == 0) {
+    const WordID src = lexmap_->SourceWordAtPosition(edge.i_);
+    const vector<WordID>& ew = edge.rule_->e_;
+    assert(ew.size() == 1);
+    const WordID trg = lexmap_->CoarsenedTargetWordForTarget(ew[0]);
+    FireFeature(src, trg, features);
   }
 }
 
