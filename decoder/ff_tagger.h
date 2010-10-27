@@ -2,7 +2,9 @@
 #define _FF_TAGGER_H_
 
 #include <map>
+#include <boost/scoped_ptr.hpp>
 #include "ff.h"
+#include "factored_lexicon_helper.h"
 
 typedef std::map<WordID, int> Class2FID;
 typedef std::map<WordID, Class2FID> Class2Class2FID;
@@ -33,6 +35,7 @@ class Tagger_BigramIdentity : public FeatureFunction {
 class LexicalPairIdentity : public FeatureFunction {
  public:
   LexicalPairIdentity(const std::string& param);
+  virtual void PrepareForInput(const SentenceMetadata& smeta);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
@@ -44,7 +47,9 @@ class LexicalPairIdentity : public FeatureFunction {
   void FireFeature(WordID src,
                    WordID trg,
                    SparseVector<double>* features) const;
-  mutable Class2Class2FID fmap_;
+  std::string name_;  // used to construct feature string
+  boost::scoped_ptr<FactoredLexiconHelper> lexmap_; // different view (stemmed, etc) of source/target
+  mutable Class2Class2FID fmap_; // feature ideas
 };
 
 
