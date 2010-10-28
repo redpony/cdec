@@ -105,7 +105,9 @@ sub make_stage {
   my ($direction) = @_;
   my $stage_dir = "$align_dir/model-$direction";
   my $first = $direction;
+  my $second = $direction;
   $first =~ s/^(.+)-.*$/$1/;
+  $second =~ s/^.+-(.+)$/$1/;
   mkdir $stage_dir;
   open CDEC, ">$stage_dir/cdec.ini" or die "Can't write $stage_dir/cdec.ini: $!";
   print CDEC <<EOT;
@@ -113,6 +115,8 @@ formalism=lextrans
 intersection_strategy=full
 grammar=$align_dir/grammars/corpus.$direction.lex-grammar.gz
 feature_function=LexicalPairIdentity
+feature_function=LexicalPairIdentity C $align_dir/grammars/corpus.class.$first $align_dir/grammars/voc2class.$second
+feature_function=LexicalPairIdentity S $align_dir/grammars/corpus.stemmed.$first $align_dir/grammars/${second}stem.map
 feature_function=InputIdentity
 feature_function=OutputIdentity
 feature_function=RelativeSentencePosition $align_dir/grammars/corpus.class.$first
