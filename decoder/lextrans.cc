@@ -1,6 +1,7 @@
 #include "lextrans.h"
 
 #include <iostream>
+#include <cstdlib>
 
 #include "filelib.h"
 #include "hg.h"
@@ -13,10 +14,14 @@ using namespace std;
 struct LexicalTransImpl {
   LexicalTransImpl(const boost::program_options::variables_map& conf) :
       use_null(conf.count("lextrans_use_null") > 0),
+      psg_file_(),
       kXCAT(TD::Convert("X")*-1),
       kNULL(TD::Convert("<eps>")),
       kBINARY(new TRule("[X] ||| [X,1] [X,2] ||| [1] [2]")),
       kGOAL_RULE(new TRule("[Goal] ||| [X,1] ||| [1]")) {
+    if (conf.count("per_sentence_grammar_file")) {
+      psg_file_ = new ifstream(conf["per_sentence_grammar_file"].as<string>().c_str());
+    }
     vector<string> gfiles = conf["grammar"].as<vector<string> >();
     assert(gfiles.size() == 1);
     ReadFile rf(gfiles.front());
@@ -25,10 +30,10 @@ struct LexicalTransImpl {
     istream* in = rf.stream();
     int lc = 0;
     bool flag = false;
+    string line;
     while(*in) {
-      string line;
       getline(*in, line);
-      if (line.empty()) continue;
+      if (!*in) continue;
       ++lc;
       TRulePtr r(TRule::CreateRulePhrasetable(line));
       tg->AddRule(r);
@@ -39,7 +44,31 @@ struct LexicalTransImpl {
     cerr << "Loaded " << lc << " rules\n";
   }
 
+  void LoadSentenceGrammar(const string& s_offset) {
+    const unsigned long long int offset = strtoull(s_offset.c_str(), NULL, 10);
+    psg_file_->seekg(offset, ios::beg);
+    TextGrammar *tg = new TextGrammar;
+    sup_grammar.reset(tg);
+    const string kEND_MARKER = "###EOS###";
+    string line;
+    while(true) {
+      assert(*psg_file_);
+      getline(*psg_file_, line);
+      if (line == kEND_MARKER) break;
+      TRulePtr r(TRule::CreateRulePhrasetable(line));
+      tg->AddRule(r);
+    }
+  }
+
   void BuildTrellis(const Lattice& lattice, const SentenceMetadata& smeta, Hypergraph* forest) {
+    if (psg_file_) {
+      const string offset = smeta.GetSGMLValue("psg");
+      if (offset.size() < 2 || offset[0] != '@') {
+        cerr << "per_sentence_grammar_file given but sentence id=" << smeta.GetSentenceID() << " doesn't have grammar info!\n";
+        abort();
+      }
+      LoadSentenceGrammar(offset.substr(1));
+    }
     const int e_len = smeta.GetTargetLength();
     assert(e_len > 0);
     const int f_len = lattice.size();
@@ -53,8 +82,12 @@ struct LexicalTransImpl {
         const WordID src_sym = (j < 0 ? kNULL : lattice[j][0].label);
         const GrammarIter* gi = grammar->GetRoot()->Extend(src_sym);
         if (!gi) {
-          cerr << "No translations found for: " << TD::Convert(src_sym) << "\n";
-          abort();
+          if (psg_file_)
+            gi = sup_grammar->GetRoot()->Extend(src_sym);
+          if (!gi) {
+            cerr << "No translations found for: " << TD::Convert(src_sym) << "\n";
+            abort();
+          }
         }
         const RuleBin* rb = gi->GetRules();
         assert(rb);
@@ -88,11 +121,13 @@ struct LexicalTransImpl {
 
  private:
   const bool use_null;
+  ifstream* psg_file_;
   const WordID kXCAT;
   const WordID kNULL;
   const TRulePtr kBINARY;
   const TRulePtr kGOAL_RULE;
   GrammarPtr grammar;
+  GrammarPtr sup_grammar;
 };
 
 LexicalTrans::LexicalTrans(const boost::program_options::variables_map& conf) :

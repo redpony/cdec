@@ -43,7 +43,7 @@ void Translator::SentenceComplete() {
 // this may be overridden by translators that want to accept
 // metadata
 void Translator::ProcessMarkupHintsImpl(const map<string, string>& kv) {
-  int unprocessed = kv.size() - kv.count("id");
+  int unprocessed = kv.size() - kv.count("id") - kv.count("psg");
   if (!SILENT) cerr << "Inside translator process hints\n";
   if (unprocessed > 0) {
     cerr << "Sentence markup contains unprocessed data:\n";
