@@ -4,12 +4,13 @@ use utf8;
 
 die "Usage: $0 f.voc corpus.f-e grammar.f-e.gz\n" unless scalar @ARGV == 3;
 
-my $MAX_INMEM = 3000;
+my $MAX_INMEM = 2500;
 
 open FV,"<$ARGV[0]" or die "Can't read $ARGV[0]: $!";
 open C,"<$ARGV[1]" or die "Can't read $ARGV[1]: $!";
 open G,"gunzip -c $ARGV[2]|" or die "Can't read $ARGV[2]: $!";
 
+binmode STDOUT, ":utf8";
 binmode FV, ":utf8";
 binmode C, ":utf8";
 binmode G, ":utf8";
@@ -34,7 +35,7 @@ while(<G>) {
   chomp;
   my ($f, $e, $feats) = split / \|\|\| /;
   if ($most_freq{$f}) {
-    #print "$_\n";
+    print "$_\n";
     $memrc++;
   } else {
     $loadrc++;
@@ -50,15 +51,31 @@ close G;
 print STDERR "  mem rc: $memrc\n";
 print STDERR " load rc: $loadrc\n";
 
+my $id = 0;
+open O, ">ps.grammar" or die;
+binmode(O,":utf8");
 while(<C>) {
   my ($f,$e) = split / \|\|\| /;
   my @fwords = split /\s+/, $f;
   my $tot = 0;
+  my %used;
+  my $fpos = tell(O);
   for my $f (@fwords) {
+    next if $most_freq{$f};
+    next if $used{$f};
     my $r = $grammar{$f};
     die "No translations for: $f" unless $r;
     my $num = scalar @$r;
     $tot += $num;
+    for my $rule (@$r) {
+      print O "$f ||| $rule\n";
+    }
+    $used{$f} = 1;
   }
-  print "RULES: $tot\n";
+  print O "###EOS###\n";
+  print STDERR "id=$id POS=$fpos\n";
+  $id++;
+  last if $id == 10;
 }
+
+close O;
