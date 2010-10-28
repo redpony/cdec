@@ -38,11 +38,27 @@ while(<G>) {
     $memrc++;
   } else {
     $loadrc++;
-    $grammar{$f}="$e ||| $feats";
+    my $r = $grammar{$f};
+    if (!defined $r) {
+      $r = [];
+      $grammar{$f} = $r;
+    }
+    push @$r, "$e ||| $feats";
   }
 }
-
+close G;
 print STDERR "  mem rc: $memrc\n";
 print STDERR " load rc: $loadrc\n";
 
-
+while(<C>) {
+  my ($f,$e) = split / \|\|\| /;
+  my @fwords = split /\s+/, $f;
+  my $tot = 0;
+  for my $f (@fwords) {
+    my $r = $grammar{$f};
+    die "No translations for: $f" unless $r;
+    my $num = scalar @$r;
+    $tot += $num;
+  }
+  print "RULES: $tot\n";
+}
