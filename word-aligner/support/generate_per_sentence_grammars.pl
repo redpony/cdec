@@ -14,6 +14,7 @@ open FILT,"|gzip -c > $ARGV[3]" or die "Can't write $ARGV[3]: $!";
 open PSG,">$ARGV[4]" or die "Can't write $ARGV[4]: $!";
 open OTRAIN,">$ARGV[5]" or die "Can't write $ARGV[5]: $!";
 
+binmode OTRAIN, ":utf8";
 binmode FILT, ":utf8";
 binmode PSG, ":utf8";
 binmode STDOUT, ":utf8";
