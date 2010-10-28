@@ -99,7 +99,6 @@ $oe_dict{'<eps>'} = '<eps>';
 
 my $MIN_FEATURE_COUNT = 0;
 my $ADD_PREFIX_ID = 1;
-my $ADD_CLASS_CLASS = 1;
 my $ADD_LEN = 1;
 my $ADD_SIM = 1;
 my $ADD_DICE = 1;
@@ -202,11 +201,6 @@ for my $f (sort keys %fdict) {
       } else {
         push @feats, "Dice=$dice";
       }
-    }
-    if ($ADD_CLASS_CLASS) {
-      my $ce = $eclass{$e} or die "E- no class for: '$e'";
-      my $cf = $fclass{$f} or die "F- no class for: '$f'";
-      push @feats, "C${cf}_${ce}=1";
     }
     my $is_null = undef;
     if ($ADD_NULL && $f eq '<eps>') {
