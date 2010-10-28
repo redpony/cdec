@@ -7,7 +7,10 @@ my $wc = 0;
 while(<>) {
   chomp;
   my @words = split /\s+/;
-  for my $word (@words) { $wc++; $dict{$word}++; }
+  for my $word (@words) {
+    die if $word eq '';
+    $wc++; $dict{$word}++;
+  }
 }
 
 my $tc = 0;

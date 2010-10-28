@@ -35,7 +35,7 @@ my %sizes = ();
 while(<M1>) {
   chomp;
   my ($f, $e, $lp) = split /\s+/;
-  $model1{$f}->{$e} = 1;
+  $model1{$f}->{$e} = 1e-12 + exp($lp);
   $sizes{$f}++;
 }
 close M1;
@@ -50,7 +50,7 @@ while(<IM1>) {
   $invm1{$e}->{$f} = 1;
   $esizes{$e}++;
   if (($sizes{$f} or 0) < $LIMIT_SIZE && !(defined $model1{$f}->{$e})) {
-    $model1{$f}->{$e} = 1;
+    $model1{$f}->{$e} = 1e-12;
     $sizes{$f}++;
     $inv_add++;
   }
@@ -66,7 +66,7 @@ while(<M1>) {
   chomp;
   my ($f, $e, $lp) = split /\s+/;
   if (($esizes{$e} or 0) < $LIMIT_SIZE && !(defined $invm1{$e}->{$f})) {
-    $invm1{$e}->{$f} = 1;
+    $invm1{$e}->{$f} = 1e-12;
     $esizes{$e}++;
     $dir_add++;
   }
@@ -106,6 +106,7 @@ my $ADD_111 = 1;
 my $ADD_ID = 1;
 my $ADD_PUNC = 1;
 my $ADD_NULL = 1;
+my $ADD_MODEL1 = 1;
 my $ADD_STEM_ID = 0;
 my $ADD_SYM = 0;
 my $BEAM_RATIO = 50;
@@ -184,6 +185,8 @@ for my $f (sort keys %fdict) {
     my $total_eandf = $ecounts{$e} + $fcounts{$f};
     my $dice = 2 * $efcount / $total_eandf;
     my @feats;
+    if (defined $m1 && $ADD_MODEL1) { push @feats, "Model1=$m1"; my $m1d = $m1 * $dice; push @feats, "M1Dice=$m1d"; }
+    if ($ADD_MODEL1 && !defined $m1) { push @feats, "NoModel1=1"; }
     if ($ADD_FIDENT && $efcount > $MIN_FEATURE_COUNT) {
       $fc++;
       push @feats, "F$fc=1";
