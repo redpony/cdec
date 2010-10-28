@@ -55,6 +55,7 @@ my $id = 0;
 open O, ">ps.grammar" or die;
 binmode(O,":utf8");
 while(<C>) {
+  chomp;
   my ($f,$e) = split / \|\|\| /;
   my @fwords = split /\s+/, $f;
   my $tot = 0;
@@ -73,7 +74,8 @@ while(<C>) {
     $used{$f} = 1;
   }
   print O "###EOS###\n";
-  print STDERR "id=$id POS=$fpos\n";
+  print STDERR "<seg id=\"$id\" grammar=\"\@$fpos\"> $_ </seg>\n";
+  #print STDERR "id=$id POS=$fpos\n";
   $id++;
   last if $id == 10;
 }
