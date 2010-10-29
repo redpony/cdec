@@ -35,7 +35,7 @@ my %sizes = ();
 while(<M1>) {
   chomp;
   my ($f, $e, $lp) = split /\s+/;
-  $model1{$f}->{$e} = 1e-12 + exp($lp);
+  $model1{$f}->{$e} = sprintf("%.5g", 1e-12 + exp($lp));
   $sizes{$f}++;
 }
 close M1;
@@ -185,7 +185,11 @@ for my $f (sort keys %fdict) {
     my $total_eandf = $ecounts{$e} + $fcounts{$f};
     my $dice = 2 * $efcount / $total_eandf;
     my @feats;
-    if (defined $m1 && $ADD_MODEL1) { push @feats, "Model1=$m1"; my $m1d = $m1 * $dice; push @feats, "M1Dice=$m1d"; }
+    if (defined $m1 && $ADD_MODEL1) {
+      push @feats, "Model1=$m1";
+      my $m1d = sprintf("%.5g", $m1 * $dice);
+      push @feats, "M1Dice=$m1d";
+    }
     if ($ADD_MODEL1 && !defined $m1) { push @feats, "NoModel1=1"; }
     if ($ADD_FIDENT && $efcount > $MIN_FEATURE_COUNT) {
       $fc++;
