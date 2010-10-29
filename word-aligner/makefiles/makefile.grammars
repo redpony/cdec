@@ -1,4 +1,4 @@
-all: corpus.f-e.lex-grammar.gz corpus.e-f.lex-grammar.gz corpus.class.e corpus.class.f corpus.stemmed.f fstem.map corpus.stemmed.e estem.map corpus.f-e.sgml corpus.e-f.sgml
+all: corpus.f-e.lex-grammar.gz corpus.class.e corpus.class.f corpus.stemmed.f fstem.map corpus.stemmed.e estem.map corpus.f-e.sgml
 
 clean:
 	$(RM) orthonorm-dict.* voc2class* corpus.class.* corpus.e-f corpus.f-e corpus.f-e.lex-grammar* *.model1 *voc corpus.e-f.lex-grammar* *stem* corpus.f-e.sgml freq* psg*
@@ -66,24 +66,14 @@ corpus.e-f: corpus.f corpus.e $(MERGE_CORPUS)
 	$(MERGE_CORPUS) corpus.e corpus.f > $@
 
 corpus.f-e.model1: corpus.f-e $(MODEL1)
-	$(MODEL1) corpus.f-e > corpus.f-e.model1
+	$(MODEL1) corpus.f-e > $@
 
 corpus.e-f.model1: corpus.e-f $(MODEL1)
-	$(MODEL1) corpus.e-f > corpus.e-f.model1
+	$(MODEL1) corpus.e-f > $@
 
-bidir.grammars: corpus.f-e corpus.f-e.model1 corpus.e-f.model1 orthonorm-dict.f orthonorm-dict.e voc2class.e voc2class.f $(GIZAALIGN) $(INVGIZAALIGN)
-	$(RM) $@
-	$(MAKE_LEX_GRAMMAR) corpus.f-e corpus.f-e.model1 corpus.e-f.model1 orthonorm-dict.f orthonorm-dict.e voc2class.e voc2class.f $(GIZAALIGN) $(INVGIZAALIGN) > bidir.grammars
-
-corpus.f-e.lex-grammar.gz: bidir.grammars
-	$(EXTRACT_GRAMMAR) 1 bidir.grammars | $(GZIP) -9 > corpus.f-e.lex-grammar.gz
-
-corpus.e-f.lex-grammar.gz: bidir.grammars
-	$(EXTRACT_GRAMMAR) 2 bidir.grammars | $(GZIP) -9 > corpus.e-f.lex-grammar.gz
+corpus.f-e.lex-grammar.gz: corpus.f-e corpus.f-e.model1 corpus.e-f.model1 orthonorm-dict.f orthonorm-dict.e voc2class.e voc2class.f $(GIZAALIGN) $(INVGIZAALIGN)
+	$(MAKE_LEX_GRAMMAR) corpus.f-e corpus.f-e.model1 corpus.e-f.model1 orthonorm-dict.f orthonorm-dict.e voc2class.e voc2class.f $(GIZAALIGN) $(INVGIZAALIGN) | $(GZIP) -9 > $@
 
 corpus.f-e.sgml: f.voc corpus.f-e.lex-grammar.gz corpus.f-e
 	$(GENERATE_PSG) f.voc corpus.f-e corpus.f-e.lex-grammar.gz freq_grammar.f-e.gz psg.f-e $@
-
-corpus.e-f.sgml: e.voc corpus.e-f.lex-grammar.gz corpus.e-f
-	$(GENERATE_PSG) e.voc corpus.e-f corpus.e-f.lex-grammar.gz freq_grammar.e-f.gz psg.e-f $@
 

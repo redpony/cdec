@@ -33,8 +33,7 @@ print STDERR " Using mkcls in: $mkcls\n\n";
 die "Don't have an orthographic normalizer for $f_lang\n" unless -f "$SCRIPT_DIR/ortho-norm/$f_lang.pl";
 die "Don't have an orthographic normalizer for $e_lang\n" unless -f "$SCRIPT_DIR/ortho-norm/$e_lang.pl";
 
-my @stages = qw(markov);
-my @directions = qw(f-e e-f);
+my @directions = qw(f-e);
 
 my $corpus = 'c';
 
@@ -112,8 +111,13 @@ sub make_stage {
   open CDEC, ">$stage_dir/cdec.ini" or die "Can't write $stage_dir/cdec.ini: $!";
   print CDEC <<EOT;
 formalism=lextrans
+lextrans_use_null=true
 intersection_strategy=full
+
 grammar=$align_dir/grammars/corpus.$direction.lex-grammar.gz
+# grammar=$align_dir/grammars/freq_grammar.$direction.gz
+# per_sentence_grammar_file=$align_dir/grammars/psg.$direction
+
 feature_function=LexicalPairIdentity
 feature_function=LexicalPairIdentity C $align_dir/grammars/corpus.class.$first $align_dir/grammars/voc2class.$second
 feature_function=LexicalPairIdentity S $align_dir/grammars/corpus.stemmed.$first $align_dir/grammars/${second}stem.map
