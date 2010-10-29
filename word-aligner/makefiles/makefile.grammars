@@ -1,14 +1,14 @@
-all: corpus.f-e.lex-grammar.gz corpus.e-f.lex-grammar.gz corpus.class.e corpus.class.f corpus.stemmed.f fstem.map corpus.stemmed.e estem.map
+all: corpus.f-e.lex-grammar.gz corpus.e-f.lex-grammar.gz corpus.class.e corpus.class.f corpus.stemmed.f fstem.map corpus.stemmed.e estem.map corpus.f-e.sgml corpus.e-f.sgml
 
 clean:
-	$(RM) orthonorm-dict.* voc2class* corpus.class.* corpus.e-f corpus.f-e corpus.f-e.lex-grammar* *.model1 *voc corpus.e-f.lex-grammar* *stem* 
+	$(RM) orthonorm-dict.* voc2class* corpus.class.* corpus.e-f corpus.f-e corpus.f-e.lex-grammar* *.model1 *voc corpus.e-f.lex-grammar* *stem* corpus.f-e.sgml freq* psg*
+
 SUPPORT_DIR = $(SCRIPT_DIR)/support
 GZIP = /usr/bin/gzip
 ZCAT = zcat
-EXTRACT_WEIGHTS = $(SUPPORT_DIR)/extract_weights.pl
 EXTRACT_GRAMMAR = $(SUPPORT_DIR)/extract_grammar.pl
-SUPPLEMENT_WEIGHTS = $(SUPPORT_DIR)/supplement_weights_file.pl
 EXTRACT_VOCAB = $(SUPPORT_DIR)/extract_vocab.pl
+GENERATE_PSG = $(SUPPORT_DIR)/generate_per_sentence_grammars.pl
 ORTHONORM_E = $(SCRIPT_DIR)/ortho-norm/$(E_LANG).pl
 ORTHONORM_F = $(SCRIPT_DIR)/ortho-norm/$(F_LANG).pl
 STEM_F = $(SCRIPT_DIR)/stemmers/$(F_LANG).pl
@@ -80,4 +80,10 @@ corpus.f-e.lex-grammar.gz: bidir.grammars
 
 corpus.e-f.lex-grammar.gz: bidir.grammars
 	$(EXTRACT_GRAMMAR) 2 bidir.grammars | $(GZIP) -9 > corpus.e-f.lex-grammar.gz
+
+corpus.f-e.sgml: f.voc corpus.f-e.lex-grammar.gz corpus.f-e
+	$(GENERATE_PSG) f.voc corpus.f-e corpus.f-e.lex-grammar.gz freq_grammar.f-e.gz psg.f-e $@
+
+corpus.e-f.sgml: e.voc corpus.e-f.lex-grammar.gz corpus.e-f
+	$(GENERATE_PSG) e.voc corpus.e-f corpus.e-f.lex-grammar.gz freq_grammar.e-f.gz psg.e-f $@
 
