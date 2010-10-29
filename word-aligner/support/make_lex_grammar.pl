@@ -182,9 +182,18 @@ for my $f (sort keys %fdict) {
     my $im1 = $invm1{$e}->{$f};
     my $is_good_pair = (defined $m1 || defined $m4);
     my $is_inv_good_pair = (defined $im1);
+    my $ident = ($e eq $f);
+    if ($ident) { $is_good_pair = 1; }
     my $total_eandf = $ecounts{$e} + $fcounts{$f};
     my $dice = 2 * $efcount / $total_eandf;
     my @feats;
+    if ($efcount == 1 && $ecounts{$e} == 1 && $fcounts{$f} == 1) {
+      $is_good_pair = 1;
+      if ($ADD_111) {
+        push @feats, "OneOneOne=1";
+      }
+    }
+    next unless $is_good_pair;
     if (defined $m1 && $ADD_MODEL1) {
       push @feats, "Model1=$m1";
       my $m1d = sprintf("%.5g", $m1 * $dice);
@@ -259,8 +268,6 @@ for my $f (sort keys %fdict) {
         push @feats, "OrthoSim=$ld";
       }
     }
-    my $ident = ($e eq $f);
-    if ($ident) { $is_good_pair = 1; }
     if ($ident && $ADD_ID) {
       if ($e =~ /\d/ && $len_e > 2) { push @feats, "IdentNumber=1"; }
       if ($total_eandf < 8) { push @feats, "IdentRare=1"; }
@@ -277,22 +284,15 @@ for my $f (sort keys %fdict) {
         if ($pe eq $pf) { push @feats, "PfxIdentical=1"; }
       }
     }
-    if ($efcount == 1 && $ecounts{$e} == 1 && $fcounts{$f} == 1) {
-      $is_good_pair = 1;
-      if ($ADD_111) {
-        push @feats, "OneOneOne=1";
-      }
-    }
     if ($ADD_PUNC) {
-      if ($f =~ /^[!,\-\/"':;=+?.()\[\]«»]+$/ && $e =~ /[a-z]+/) {
+      if ($f =~ /^[!,\-\/"'`:;=+?.()\[\]«»]+$/ && $e =~ /[a-z]+/) {
         push @feats, "PuncMiss=1";
       }
     }
     my $is_special = ($is_good_pair && !(defined $m1));
     $specials++ if $is_special;
     print STDERR "$f -> $e\n" if $is_special;
-    print "1 ||| $f ||| $e ||| @feats\n" if $is_good_pair;
-    print "2 ||| $e ||| $f ||| @feats\n" if $is_inv_good_pair;
+    print "$f ||| $e ||| @feats\n" if $is_good_pair;
   }
 }
 print STDERR "Added $specials special rules that were not in the M1 set\n";
