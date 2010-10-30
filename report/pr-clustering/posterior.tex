@@ -316,23 +316,43 @@ distribution
 is obtained from Collins parser
 trained on Penn Treebank. Since not
 all phrases are constituents, we ignored
-phrases that don't correspond any constituents.
+phrases that don't correspond to any constituents.
+
+We conducted experiments with various data pre-processing
+and tried different models. Number of phrase categories
+is fixed at $25$. We chose to only look at
+the target side language. The context is set
+to be $1$ word to the left and to the right of the phrase.
+We chose such a setting because it emperically works better
+in the pipeline than other variations. This is also
+the case for non-parametric methods. The models as we discussed
+in previous sections are EM, EM with sparsity constraint, 
+agreement of two models in reverse directions and agreement
+of two models trained on two languages. We tried our models
+with word classes as well. In the context, each word is
+replaced with a word class unsupervisedly learned from the data.
+The results are shown in Table \ref{tab:results}.
 
 \begin{table}[h]
   \centering
-  \begin{tabular}{ |*{3}{c|} }
+  \begin{tabular}{ |*{4}{c|} }
     \hline
-    model & BLEU & H(Gold$|$Predicted)\\
+    \multicolumn{2}{|c|}{model} & BLEU & H(Gold$|$Predicted)\\
     \hline
-    hiero & 21.1 & 5.77\\
-    hiero+POS & 22.3 & 1.00 \\
-    SAMT & 24.5 & 0.00 \\
+    \multicolumn{2}{|c|}{hiero} & 21.1 & 5.77\\
+    \multicolumn{2}{|c|}{hiero+POS} & 22.3 & 1.00 \\
+    \multicolumn{2}{|c|}{SAMT} & 24.5 & 0.00 \\
     \hline
-    EM & 20.9 & 2.86 \\
-    PR $\sigma=100$ & 21.7 & 2.36 \\
-    agree language & 21.7 & 2.68 \\
-    agree direction & 22.1 & 2.35\\
-    non-parametric & 22.2 & ?\\
+	\multirow{2}{*}{EM} & words & 20.9 & 2.85 \\
+	& word classes & 21.54 & 2.86 \\ \hline
+    \multirow{2}{*}{PR $\sigma=100$}&words & 21.1 & 2.56 \\
+	&word classes & 21.7 & 2.36 \\ \hline
+    \multirow{2}{*}{agree language}&word & 21.7 & 2.80 \\
+	&word classes & 21.4 & 2.69\\ \hline
+    \multirow{2}{*}{agree direction}&word & 21.6 & 2.48\\
+	&word classes &22.1 &2.36 \\ \hline
+   \multirow{2}{*}{non-parametric}&word & 22.0 & 2.86\\
+	& word classes&22.3&2.27\\ 
     \hline
   \end{tabular}
     \caption
@@ -356,6 +376,8 @@ in the beginning of this chapter. PR $\sigma=100$ is
 posterior regularization model with sparsity constraint
 explained in Section \ref{sec:pr-sparse}.
 $\sigma$ is the constant controls strongness of the constraint.
+We picked $\sigma$ by trying different values ranging from 
+$1$ to $100$.
 Agree language and agree direction are models with agreement 
 constraints mentioned in Section \ref{sec:pr-agree}. Non-parametric
 is non-parametric model introduced in the previous chapter.
