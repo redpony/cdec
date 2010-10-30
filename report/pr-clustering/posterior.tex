@@ -183,7 +183,12 @@ for each phrase $\textbf{p}$:
 \sum_i \lambda_{\textbf{p}iz}\leq \sigma.
 \]
 This dual objective can be optimized with projected gradient
-descent.
+descent. Notice that each phrase has its own objective and
+constraint. The $\lambda$s are not shared acrossed
+phrases. Therefore we can optimize the objective
+for each phrase separately. It is convenient for parallelizing
+the algorithm. It also makes the objective easier to optimize.
+
 The $q$ distribution we are looking for is then
 \[
 q_i(z)\propto P_{\theta}(z|\textbf{p},\textbf{c}_i)
@@ -382,3 +387,16 @@ Agree language and agree direction are models with agreement
 constraints mentioned in Section \ref{sec:pr-agree}. Non-parametric
 is non-parametric model introduced in the previous chapter.
 \section{Conclusion}
+The posterior regularization framework has a solid theoretical foundation.
+It is shown mathematically to balance between constraint and likelihood.
+In our experiments,
+we used it to enforce sparsity constraint and agreement constraint and
+achieved results comparable to non-parametric method that enforces
+sparcity through priors. The algorithm is fairly fast if the constraint
+can be decomposed into smaller pieces and compute separately. In our case,
+the sparsity constraint for phrases can be decomposed into one small optimization
+procedure for each phrase. In practice, our algorithm is much 
+faster than non-parametric models with Gibbs sampling inference. 
+The agreement
+models are even faster because they are performing almost the same amount
+of computation as the simple models trained with EM.
