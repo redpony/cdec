@@ -9,7 +9,8 @@ bin_PROGRAMS = \
   plftools \
   collapse_weights \
   cllh_filter_grammar \
-  mpi_online_optimize
+  mpi_online_optimize \
+  mpi_batch_optimize
 
 noinst_PROGRAMS = \
   lbfgs_test \
@@ -20,12 +21,11 @@ TESTS = lbfgs_test optimize_test
 mpi_online_optimize_SOURCES = mpi_online_optimize.cc online_optimizer.cc
 mpi_online_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
 
-if MPI
-bin_PROGRAMS += mpi_batch_optimize \
-             compute_cllh
-
 mpi_batch_optimize_SOURCES = mpi_batch_optimize.cc optimize.cc
 mpi_batch_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
+
+if MPI
+bin_PROGRAMS += compute_cllh
 
 compute_cllh_SOURCES = compute_cllh.cc
 compute_cllh_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
