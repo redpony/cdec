@@ -20,6 +20,7 @@ noinst_LIBRARIES = libklm_util.a
 
 libklm_util_a_SOURCES = \
   ersatz_progress.cc \
+  bit_packing.cc \
   exception.cc \
   file_piece.cc \
   mmap.cc \
