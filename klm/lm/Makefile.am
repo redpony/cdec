@@ -7,11 +7,17 @@
 noinst_LIBRARIES = libklm.a
 
 libklm_a_SOURCES = \
-  exception.cc \
-  ngram.cc \
-  ngram_build_binary.cc \
+  binary_format.cc \
+  config.cc \
+  lm_exception.cc \
+  model.cc \
   ngram_query.cc \
-  virtual_interface.cc
+  read_arpa.cc \
+  search_hashed.cc \
+  search_trie.cc \
+  trie.cc \
+  virtual_interface.cc \
+  vocab.cc
 
 AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I..
 
