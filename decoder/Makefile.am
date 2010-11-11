@@ -12,7 +12,7 @@ TESTS = trule_test ff_test parser_test grammar_test hg_test cfg_test
 endif
 
 cdec_SOURCES = cdec.cc
-cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
+cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 cfg_test_SOURCES = cfg_test.cc
 cfg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
@@ -26,7 +26,8 @@ hg_test_SOURCES = hg_test.cc
 hg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 trule_test_SOURCES = trule_test.cc
 trule_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I.. -I../mteval -I../utils
+
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I.. -I../mteval -I../utils -I../klm
 
 rule_lexer.cc: rule_lexer.l
 	$(LEX) -s -CF -8 -o$@ $<
@@ -58,6 +59,7 @@ libcdec_a_SOURCES = \
   trule.cc \
   ff.cc \
   ff_lm.cc \
+  ff_klm.cc \
   ff_ruleshape.cc \
   ff_wordalign.cc \
   ff_csplit.cc \
