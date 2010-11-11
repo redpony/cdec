@@ -2,6 +2,7 @@
 
 #include "ff.h"
 #include "ff_lm.h"
+#include "ff_klm.h"
 #include "ff_csplit.h"
 #include "ff_wordalign.h"
 #include "ff_tagger.h"
@@ -29,6 +30,7 @@ void register_feature_functions() {
   RegisterFsaDynToFF<SameFirstLetter>();
 
   RegisterFF<LanguageModel>();
+  RegisterFF<KLanguageModel>();
 
   RegisterFF<WordPenalty>();
   RegisterFF<SourceWordPenalty>();
