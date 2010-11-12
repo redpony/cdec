@@ -12,6 +12,11 @@
 #include "ff_lm_fsa.h"
 #include "ff_sample_fsa.h"
 #include "ff_register.h"
+#include "ff_wordset.h"
+
+#ifdef HAVE_GLC
+#include <cdec/ff_glc.h>
+#endif
 
 void register_feature_functions() {
   static bool registered = false;
@@ -59,5 +64,9 @@ void register_feature_functions() {
   ff_registry.Register("OutputIdentity", new FFFactory<OutputIdentity>);
   ff_registry.Register("InputIdentity", new FFFactory<InputIdentity>);
   ff_registry.Register("LexicalTranslationTrigger", new FFFactory<LexicalTranslationTrigger>);
+  ff_registry.Register("WordSet", new FFFactory<WordSet>);
+#ifdef HAVE_GLC
+  ff_registry.Register("ContextCRF", new FFFactory<Model1Features>);
+#endif
 }
 

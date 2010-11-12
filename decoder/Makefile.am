@@ -26,7 +26,6 @@ hg_test_SOURCES = hg_test.cc
 hg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 trule_test_SOURCES = trule_test.cc
 trule_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
-
 AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I.. -I../mteval -I../utils -I../klm
 
 rule_lexer.cc: rule_lexer.l
@@ -58,6 +57,7 @@ libcdec_a_SOURCES = \
   phrasetable_fst.cc \
   trule.cc \
   ff.cc \
+  ff_wordset.cc \
   ff_lm.cc \
   ff_klm.cc \
   ff_ruleshape.cc \
@@ -75,3 +75,8 @@ libcdec_a_SOURCES = \
   JSON_parser.c \
   json_parse.cc \
   grammar.cc
+
+if GLC
+  # Until we build GLC as a library...
+  libcdec_a_SOURCES += ff_glc.cc
+endif
