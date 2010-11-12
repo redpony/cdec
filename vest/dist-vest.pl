@@ -285,8 +285,8 @@ while (1){
 	print STDERR "DECODER SCORE: $dec_score\n";
 
 	# save space
-	`gzip $runFile`;
-	`gzip $decoderLog`;
+	`gzip -f $runFile`;
+	`gzip -f $decoderLog`;
 
 
 	# run optimizer
