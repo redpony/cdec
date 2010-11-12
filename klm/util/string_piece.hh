@@ -51,7 +51,7 @@
 //Uncomment this line if you use ICU in your code.  
 //#define HAVE_ICU
 //Uncomment this line if you want boost hashing for your StringPieces.
-//#define HAVE_BOOST
+#define HAVE_BOOST
 
 #include <cstring>
 #include <iosfwd>
