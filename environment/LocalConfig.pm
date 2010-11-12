@@ -14,8 +14,9 @@ my $host = domainname;
 my $CCONFIG = {
   'LTICluster' => {
     'HOST_REGEXP' => qr/^cluster\d+\.lti\.cs\.cmu\.edu$/,
-    'QSubMemFlag' => '-l pmem=',
-    'QSubQueue' => '-q long',
+    'QSubMemFlag' => '-l h_vmem=',
+    'QSubExtraFlags' => '-l walltime=0:45:00',
+    #'QSubQueue' => '-q long',
   },
   'UMIACS' => {
     'HOST_REGEXP' => qr/^d.*\.umiacs\.umd\.edu$/,
