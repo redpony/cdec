@@ -50,6 +50,14 @@ AC_ARG_WITH(randlm,
             [with_randlm=no]
            )
 
+AM_CONDITIONAL([GLC], false)
+AC_ARG_WITH(glc,
+            [AC_HELP_STRING([--with-glc=PATH], [(optional) path to Global Lexical Coherence package (Context CRF)])],
+            [with_glc=$withval],
+            [with_glc=no]
+           )
+FF_GLC=""
+
 if test "x$with_srilm" != 'xno'
 then
   SAVE_CPPFLAGS="$CPPFLAGS"
@@ -85,6 +93,25 @@ then
   LIBS="$LIBS $LIB_RANDLM"
   FMTLIBS="$FMTLIBS librandlm.a"
   AM_CONDITIONAL([RAND_LM], true)
+fi
+
+
+if test "x$with_glc" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_glc} -I${with_glc}/cdec"
+
+  #AC_CHECK_HEADER(ff_glc.h,
+  #               [AC_DEFINE([HAVE_GLC], [], [flag for GLC])],
+  #               [AC_MSG_ERROR([Cannot find GLC!])])
+
+  AC_DEFINE([HAVE_GLC], [], [flag for GLC])
+  #LIB_RANDLM="-lrandlm"
+  #LDFLAGS="$LDFLAGS -L${with_glc}/lib"
+  #LIBS="$LIBS $LIB_RANDLM"
+  #FMTLIBS="$FMTLIBS libglc.a"
+  AC_SUBST(FF_GLC,"${with_glc}/cdec/ff_glc.cc")
+  AM_CONDITIONAL([GLC], true)
 fi
 
 AC_OUTPUT(Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile training/Makefile vest/Makefile klm/util/Makefile klm/lm/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile)
