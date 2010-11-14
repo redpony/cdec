@@ -101,13 +101,15 @@ sub rescore {
   print STDERR "RESCORING SENTENCE id=$id (# hypotheses=$nhyps)...\n";
   for (my $i=0; $i < $nhyps; $i++) {
     if ($reverse_model) {
-      print CDEC_OUT "$hyps[$i] ||| $src\n";
+      print CDEC_OUT "<seg id=\"$id\">$hyps[$i] ||| $src</seg>\n";
     } else {
-      print CDEC_OUT "$src ||| $hyps[$i]\n";
+      print CDEC_OUT "<seg id=\"$id\">$src ||| $hyps[$i]</seg>\n";
     }
     my $score = <CDEC_IN>;
     chomp $score;
-    print "$id ||| $hyps[$i] ||| $feats[$i] $feature_name=$score\n";
+    my @words = split /\s+/, $hyps[$i];
+    my $norm_score = $score / scalar @words;
+    print "$id ||| $hyps[$i] ||| $feats[$i] $feature_name=$score ${feature_name}_norm=$norm_score\n";
   }
 }
 
