@@ -1,7 +1,10 @@
 #!/usr/bin/perl -w
 use strict;
 
-die "Usage: $0 classes.txt corpus.txt" unless scalar @ARGV == 2;
+die "Usage: $0 [-unk] classes.txt corpus.txt\n Applies a vocabulary map to a corpus\n" unless scalar @ARGV == 2 || (scalar @ARGV == 3 && $ARGV[0] eq '-unk');
+
+my $unk = $ARGV[0] eq '-unk';
+shift @ARGV if $unk;
 
 my ($class, $text) = @ARGV;
 open C, "<$class" or die "Can't read $class: $!";
@@ -19,9 +22,14 @@ while(<C>) {
 close C;
 print STDERR "Loaded classes for $cc words\n";
 
+my @cats;
 while(<T>) {
   chomp;
-  my @cats = map { $dict{$_} or die "Undefined class for $_"; } split /\s+/;
+  if ($unk) {
+    @cats = map { $dict{$_} or "UNK" } split /\s+/;
+  } else {
+    @cats = map { $dict{$_} or die "Undefined class for $_"; } split /\s+/;
+  }
   print "@cats\n";
 }
 

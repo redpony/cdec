@@ -147,7 +147,7 @@ while(<EF>) {
   }
 }
 
-print STDERR "Loading Giza output...\n";
+#print STDERR "Loading Giza output...\n";
 my %model4;
 #while(<M4>) {
 #  my $en = <M4>; chomp $en;
