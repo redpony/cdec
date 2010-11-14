@@ -33,7 +33,7 @@ my $CCONFIG = {
     'HOST_REGEXP' => qr/^(thor|tyr)\.inf\.ed\.ac\.uk$/,
   },
   'Blacklight' => {
-    'HOST_REGEXP' => qr/^blacklight.psc.edu$/,
+    'HOST_REGEXP' => qr/^(blacklight.psc.edu|bl1.psc.teragrid.org)$/,
     'QSubMemFlag' => '-l pmem=',
   },
 };
