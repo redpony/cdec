@@ -347,12 +347,14 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
         ("scfg_no_hiero_glue_grammar,n", "No Hiero glue grammar (nb. by default the SCFG decoder adds Hiero glue rules)")
         ("scfg_default_nt,d",po::value<string>()->default_value("X"),"Default non-terminal symbol in SCFG")
         ("scfg_max_span_limit,S",po::value<int>()->default_value(10),"Maximum non-terminal span limit (except \"glue\" grammar)")
+    ("quiet", "Disable verbose output")
     ("show_config", po::bool_switch(&show_config), "show contents of loaded -c config files.")
     ("show_weights", po::bool_switch(&show_weights), "show effective feature weights")
         ("show_joshua_visualization,J", "Produce output compatible with the Joshua visualization tools")
         ("show_tree_structure", "Show the Viterbi derivation structure")
         ("show_expected_length", "Show the expected translation length under the model")
         ("show_partition,z", "Compute and show the partition (inside score)")
+        ("show_partition_as_translation", "Output the partition to STDOUT instead of a translation")
         ("show_cfg_search_space", "Show the search space as a CFG")
     ("show_features","Show the feature vector for the viterbi translation")
     ("prelm_density_prune", po::value<double>(), "Applied to -LM forest just before final LM rescoring: keep no more than this many times the number of edges used in the best derivation tree (>=1.0)")
@@ -434,7 +436,8 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
       cerr<<" "<<argv[i];
     cerr << "\n\n";
   }
-
+  if (conf.count("quiet"))
+    SetSilent(true);
 
   if (conf.count("list_feature_functions")) {
     cerr << "Available feature functions (specify with -F; describe with -u FeatureName):\n";
@@ -677,6 +680,9 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     if (!SILENT) cerr << "  NO PARSE FOUND.\n";
     o->NotifySourceParseFailure(smeta);
     o->NotifyDecodingComplete(smeta);
+    if (conf.count("show_partition_as_translation")) {
+      cout << "-Inf" << endl << flush;
+    }
     return false;
   }
 
@@ -784,7 +790,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   if (sample_max_trans) {
     MaxTranslationSample(&forest, sample_max_trans, conf.count("k_best") ? conf["k_best"].as<int>() : 0);
   } else {
-    if (kbest) {
+    if (kbest && !has_ref) {
       //TODO: does this work properly?
       oracle.DumpKBest(sent_id, forest, conf["k_best"].as<int>(), unique_kbest,"-");
     } else if (csplit_output_plf) {
@@ -902,11 +908,20 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
         }
       }
       if (conf.count("graphviz")) forest.PrintGraphviz();
+      if (kbest)
+        oracle.DumpKBest(sent_id, forest, conf["k_best"].as<int>(), unique_kbest,"-");
+      if (conf.count("show_partition_as_translation")) {
+        const prob_t z = Inside<prob_t, EdgeProb>(forest);
+        cout << log(z) << endl << flush;
+      }
     } else {
       o->NotifyAlignmentFailure(smeta);
       if (!SILENT) cerr << "  REFERENCE UNREACHABLE.\n";
       if (write_gradient) {
         cout << endl << flush;
+      }
+      if (conf.count("show_partition_as_translation")) {
+        cout << "-Inf" << endl << flush;
       }
     }
   }
