@@ -12,7 +12,7 @@ class TTable {
   TTable() {}
   typedef std::tr1::unordered_map<WordID, double> Word2Double;
   typedef std::tr1::unordered_map<WordID, Word2Double> Word2Word2Double;
-  inline const double prob(const int& e, const int& f) const {
+  inline double prob(const int& e, const int& f) const {
     const Word2Word2Double::const_iterator cit = ttable.find(e);
     if (cit != ttable.end()) {
       const Word2Double& cpd = cit->second;

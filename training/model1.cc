@@ -1,29 +1,63 @@
 #include <iostream>
 #include <cmath>
 
+#include <boost/program_options.hpp>
+#include <boost/program_options/variables_map.hpp>
+
 #include "lattice.h"
 #include "stringlib.h"
 #include "filelib.h"
 #include "ttables.h"
 #include "tdict.h"
+#include "em_utils.h"
 
+namespace po = boost::program_options;
 using namespace std;
 
-int main(int argc, char** argv) {
-  if (argc != 2) {
-    cerr << "Usage: " << argv[0] << " corpus.fr-en\n";
-    return 1;
+bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
+  po::options_description opts("Configuration options");
+  opts.add_options()
+        ("iterations,i",po::value<unsigned>()->default_value(5),"Number of iterations of EM training")
+        ("beam_threshold,t",po::value<double>()->default_value(-4),"log_10 of beam threshold (-10000 to include everything, 0 max)")
+        ("no_null_word,N","Do not generate from the null token");
+  po::options_description clo("Command line options");
+  clo.add_options()
+        ("config", po::value<string>(), "Configuration file")
+        ("help,h", "Print this help message and exit");
+  po::options_description dconfig_options, dcmdline_options;
+  dconfig_options.add(opts);
+  dcmdline_options.add(opts).add(clo);
+  
+  po::store(parse_command_line(argc, argv, dcmdline_options), *conf);
+  if (conf->count("config")) {
+    ifstream config((*conf)["config"].as<string>().c_str());
+    po::store(po::parse_config_file(config, dconfig_options), *conf);
   }
-  const int ITERATIONS = 5;
-  const double BEAM_THRESHOLD = 0.0001;
-  TTable tt;
+  po::notify(*conf);
+
+  if (argc < 2 || conf->count("help")) {
+    cerr << "Usage " << argv[0] << " [OPTIONS] corpus.fr-en\n";
+    cerr << dcmdline_options << endl;
+    return false;
+  }
+  return true;
+}
+
+int main(int argc, char** argv) {
+  po::variables_map conf;
+  if (!InitCommandLine(argc, argv, &conf)) return 1;
+  const string fname = argv[argc - 1];
+  const int ITERATIONS = conf["iterations"].as<unsigned>();
+  const double BEAM_THRESHOLD = pow(10.0, conf["beam_threshold"].as<double>());
+  const bool use_null = (conf.count("no_null_word") == 0);
   const WordID kNULL = TD::Convert("<eps>");
-  bool use_null = true;
+
+  TTable tt;
   TTable::Word2Word2Double was_viterbi;
   for (int iter = 0; iter < ITERATIONS; ++iter) {
     const bool final_iteration = (iter == (ITERATIONS - 1));
     cerr << "ITERATION " << (iter + 1) << (final_iteration ? " (FINAL)" : "") << endl;
-    ReadFile rf(argv[1]);
+    ReadFile rf(fname);
     istream& in = *rf.stream();
     double likelihood = 0;
     double denom = 0.0;
