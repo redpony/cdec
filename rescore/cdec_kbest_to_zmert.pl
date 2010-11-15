@@ -20,15 +20,16 @@ if (GetOptions(
 
 open W, "<$feature_file" or die "Can't read $feature_file: $!";
 my %weights;
+my @all_feats;
 while(<W>) {
   chomp;
   next if /^#/;
   next if /^\s*$/;
   my ($fname, $w) = split /\s+/;
+  push @all_feats, $fname;
   $weights{$fname} = 1;
 }
 close W;
-my @all_feats = sort keys %weights;
 
 open HYP, "<$hyp_file" or die "Can't read $hyp_file: $!";
 while(<HYP>) {
