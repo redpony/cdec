@@ -354,7 +354,7 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
         ("show_tree_structure", "Show the Viterbi derivation structure")
         ("show_expected_length", "Show the expected translation length under the model")
         ("show_partition,z", "Compute and show the partition (inside score)")
-        ("show_partition_as_translation", "Output the partition to STDOUT instead of a translation")
+        ("show_conditional_prob", "Output the conditional log prob to STDOUT instead of a translation")
         ("show_cfg_search_space", "Show the search space as a CFG")
     ("show_features","Show the feature vector for the viterbi translation")
     ("prelm_density_prune", po::value<double>(), "Applied to -LM forest just before final LM rescoring: keep no more than this many times the number of edges used in the best derivation tree (>=1.0)")
@@ -680,7 +680,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     if (!SILENT) cerr << "  NO PARSE FOUND.\n";
     o->NotifySourceParseFailure(smeta);
     o->NotifyDecodingComplete(smeta);
-    if (conf.count("show_partition_as_translation")) {
+    if (conf.count("show_conditional_prob")) {
       cout << "-Inf" << endl << flush;
     }
     return false;
@@ -807,6 +807,11 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     }
   }
 
+  prob_t first_z;
+  if (conf.count("show_conditional_prob")) {
+    first_z = Inside<prob_t, EdgeProb>(forest);
+  }
+
   // TODO this should be handled by an Observer
   const int max_trans_beam_size = conf.count("max_translation_beam") ?
     conf["max_translation_beam"].as<int>() : 0;
@@ -910,9 +915,9 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       if (conf.count("graphviz")) forest.PrintGraphviz();
       if (kbest)
         oracle.DumpKBest(sent_id, forest, conf["k_best"].as<int>(), unique_kbest,"-");
-      if (conf.count("show_partition_as_translation")) {
-        const prob_t z = Inside<prob_t, EdgeProb>(forest);
-        cout << log(z) << endl << flush;
+      if (conf.count("show_conditional_prob")) {
+        const prob_t ref_z = Inside<prob_t, EdgeProb>(forest);
+        cout << (log(ref_z) - log(first_z)) << endl << flush;
       }
     } else {
       o->NotifyAlignmentFailure(smeta);
@@ -920,7 +925,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       if (write_gradient) {
         cout << endl << flush;
       }
-      if (conf.count("show_partition_as_translation")) {
+      if (conf.count("show_conditional_prob")) {
         cout << "-Inf" << endl << flush;
       }
     }

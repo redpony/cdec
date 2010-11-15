@@ -46,7 +46,7 @@ if (defined $weights_file) {
   die "Can't read $weights_file" unless -f $weights_file;
   $weights = "-w $weights_file";
 }
-my $decoder_command = "$decoder -c $cdec_ini --quiet $weights --show_partition_as_translation";
+my $decoder_command = "$decoder -c $cdec_ini --quiet $weights --show_conditional_prob";
 print STDERR "DECODER COMMAND: $decoder_command\n";
 my $cdec_pid = open2(\*CDEC_IN, \*CDEC_OUT, $decoder_command)
   or die "Couldn't run $decoder: $!";
@@ -108,8 +108,7 @@ sub rescore {
     my $score = <CDEC_IN>;
     chomp $score;
     my @words = split /\s+/, $hyps[$i];
-    my $norm_score = $score / scalar @words;
-    print "$id ||| $hyps[$i] ||| $feats[$i] $feature_name=$score ${feature_name}_norm=$norm_score\n";
+    print "$id ||| $hyps[$i] ||| $feats[$i] $feature_name=$score\n";
   }
 }
 
