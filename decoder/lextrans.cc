@@ -60,7 +60,7 @@ struct LexicalTransImpl {
     }
   }
 
-  void BuildTrellis(const Lattice& lattice, const SentenceMetadata& smeta, Hypergraph* forest) {
+  bool BuildTrellis(const Lattice& lattice, const SentenceMetadata& smeta, Hypergraph* forest) {
     if (psg_file_) {
       const string offset = smeta.GetSGMLValue("psg");
       if (offset.size() < 2 || offset[0] != '@') {
@@ -86,7 +86,7 @@ struct LexicalTransImpl {
             gi = sup_grammar->GetRoot()->Extend(src_sym);
           if (!gi) {
             cerr << "No translations found for: " << TD::Convert(src_sym) << "\n";
-            abort();
+            return false;
           }
         }
         const RuleBin* rb = gi->GetRules();
@@ -117,6 +117,7 @@ struct LexicalTransImpl {
     Hypergraph::Node* goal = forest->AddNode(TD::Convert("Goal")*-1);
     Hypergraph::Edge* hg_edge = forest->AddEdge(kGOAL_RULE, tail);
     forest->ConnectEdgeToHeadNode(hg_edge, goal);
+    return true;
   }
 
  private:
@@ -146,7 +147,7 @@ bool LexicalTrans::TranslateImpl(const string& input,
     abort();
   }
   smeta->SetSourceLength(lattice.size());
-  pimpl_->BuildTrellis(lattice, *smeta, forest);
+  if (!pimpl_->BuildTrellis(lattice, *smeta, forest)) return false;
   forest->is_linear_chain_ = true;
   forest->Reweight(weights);
   return true;
