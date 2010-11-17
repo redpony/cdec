@@ -116,7 +116,7 @@ sub m1_prob {
 }
 
 sub usage {
-  print STDERR "Usage: $0 -m model_file.txt -h hypothesis.nbest -s source.txt\n  Adds the back-translation probability under Model 1\n";
+  print STDERR "Usage: $0 -m model_file.txt -h hypothesis.nbest -s source.txt\n  Adds the back-translation probability under Model 1\n  Use training/model1 to generate the required parameter file\n";
 }
 
 

@@ -7,11 +7,13 @@ use Getopt::Long;
 my $weights_file;
 my $hyp_file;
 my $help;
+my $kbest; # flag to extract reranked list
 
 Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
     "weights_file|w=s" => \$weights_file,
     "hypothesis_file|h=s" => \$hyp_file,
+    "kbest" => \$kbest,
     "help" => \$help,
 ) == 0 || @ARGV!=0 || $help || !$weights_file || !$hyp_file) {
   usage();
@@ -49,7 +51,7 @@ while(<HYP>) {
     die "Unweighted feature '$fname'" unless defined $weight;
     $tot += ($weight * $fval);
   }
-  $hyps{$hyp} = $tot;
+  $hyps{"$hyp ||| $feats"} = $tot;
 }
 extract_1best(\%hyps) if defined $cur;
 close HYP;
@@ -57,15 +59,22 @@ close HYP;
 sub extract_1best {
   my $rh = shift;
   my %hyps = %$rh;
-  my $best_score = undef;
-  my $best_hyp = undef;
-  for my $hyp (keys %hyps) {
-    if (!defined $best_score || $hyps{$hyp} > $best_score) {
-      $best_score = $hyps{$hyp};
-      $best_hyp = $hyp;
+  if ($kbest) {
+    for my $hyp (sort { $hyps{$b} <=> $hyps{$a} } keys %hyps) {
+      print "$hyp\n";
     }
+  } else {
+    my $best_score = undef;
+    my $best_hyp = undef;
+    for my $hyp (keys %hyps) {
+      if (!defined $best_score || $hyps{$hyp} > $best_score) {
+        $best_score = $hyps{$hyp};
+        $best_hyp = $hyp;
+      }
+    }
+    $best_hyp =~ s/ \|\|\|.*$//;
+    print "$best_hyp\n";
   }
-  print "$best_hyp\n";
 }
 
 sub usage {
