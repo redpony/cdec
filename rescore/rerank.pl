@@ -39,7 +39,7 @@ while(<HYP>) {
   my ($id, $hyp, $feats) = split / \|\|\| /;
   unless (defined $cur) { $cur = $id; }
   if ($cur ne $id) {
-    extract_1best(\%hyps);
+    extract_1best($cur, \%hyps);
     $cur = $id;
     %hyps = ();
   }
@@ -53,15 +53,15 @@ while(<HYP>) {
   }
   $hyps{"$hyp ||| $feats"} = $tot;
 }
-extract_1best(\%hyps) if defined $cur;
+extract_1best($cur, \%hyps) if defined $cur;
 close HYP;
 
 sub extract_1best {
-  my $rh = shift;
+  my ($id, $rh) = @_;
   my %hyps = %$rh;
   if ($kbest) {
     for my $hyp (sort { $hyps{$b} <=> $hyps{$a} } keys %hyps) {
-      print "$hyp\n";
+      print "$id ||| $hyp\n";
     }
   } else {
     my $best_score = undef;
@@ -79,8 +79,8 @@ sub extract_1best {
 
 sub usage {
   print <<EOT;
-Usage: $0 -w weights.txt -h hyp.nbest.txt
-  Reranks n-best lists with new weights, extracting the new 1-best entries.
+Usage: $0 -w weights.txt -h hyp.nbest.txt [--kbest]
+  Reranks n-best lists with new weights, extracting the new 1/k-best entries.
 EOT
 }
 
