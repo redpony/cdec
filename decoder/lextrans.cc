@@ -102,7 +102,7 @@ struct LexicalTransImpl {
         for (int k = 0; k < rb->GetNumRules(); ++k) {
           TRulePtr rule = rb->GetIthRule(k);
           if (align_only_) {
-            if (target_vocab.count(rule->f_[0]) == 0)
+            if (target_vocab.count(rule->e_[0]) == 0)
               continue;
           }
           Hypergraph::Edge* edge = forest->AddEdge(rule, Hypergraph::TailNodeVector());
