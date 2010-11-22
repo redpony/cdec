@@ -14,6 +14,7 @@ using namespace std;
 struct LexicalTransImpl {
   LexicalTransImpl(const boost::program_options::variables_map& conf) :
       use_null(conf.count("lextrans_use_null") > 0),
+      align_only_(conf.count("lextrans_align_only") > 0),
       psg_file_(),
       kXCAT(TD::Convert("X")*-1),
       kNULL(TD::Convert("<eps>")),
@@ -75,6 +76,13 @@ struct LexicalTransImpl {
     // hack to tell the feature function system how big the sentence pair is
     const int f_start = (use_null ? -1 : 0);
     int prev_node_id = -1;
+    set<WordID> target_vocab; // only set for alignment_only mode
+    if (align_only_) {
+      const Lattice& ref = smeta.GetReference();
+      for (int i = 0; i < ref.size(); ++i) {
+        target_vocab.insert(ref[i][0].label);
+      }
+    }
     for (int i = 0; i < e_len; ++i) {  // for each word in the *target*
       Hypergraph::Node* node = forest->AddNode(kXCAT);
       const int new_node_id = node->id_;
@@ -93,6 +101,10 @@ struct LexicalTransImpl {
         assert(rb);
         for (int k = 0; k < rb->GetNumRules(); ++k) {
           TRulePtr rule = rb->GetIthRule(k);
+          if (align_only_) {
+            if (target_vocab.count(rule->f_[0]) == 0)
+              continue;
+          }
           Hypergraph::Edge* edge = forest->AddEdge(rule, Hypergraph::TailNodeVector());
           edge->i_ = j;
           edge->j_ = j+1;
@@ -122,6 +134,7 @@ struct LexicalTransImpl {
 
  private:
   const bool use_null;
+  const bool align_only_;
   ifstream* psg_file_;
   const WordID kXCAT;
   const WordID kNULL;
