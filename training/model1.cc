@@ -19,7 +19,8 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("iterations,i",po::value<unsigned>()->default_value(5),"Number of iterations of EM training")
         ("beam_threshold,t",po::value<double>()->default_value(-4),"log_10 of beam threshold (-10000 to include everything, 0 max)")
-        ("no_null_word,N","Do not generate from the null token");
+        ("no_null_word,N","Do not generate from the null token")
+        ("no_add_viterbi,V","Do not add Viterbi alignment points (may generate a grammar where some training sentence pairs are unreachable)");
   po::options_description clo("Command line options");
   clo.add_options()
         ("config", po::value<string>(), "Configuration file")
@@ -51,6 +52,7 @@ int main(int argc, char** argv) {
   const double BEAM_THRESHOLD = pow(10.0, conf["beam_threshold"].as<double>());
   const bool use_null = (conf.count("no_null_word") == 0);
   const WordID kNULL = TD::Convert("<eps>");
+  const bool add_viterbi = (conf.count("no_add_viterbi") == 0);
 
   TTable tt;
   TTable::Word2Word2Double was_viterbi;
@@ -95,19 +97,21 @@ int main(int argc, char** argv) {
           sum += probs[i];
         }
         if (final_iteration) {
-          WordID max_i = 0;
-          double max_p = -1;
-          if (use_null) {
-            max_i = kNULL;
-            max_p = probs[0];
-          }
-          for (int i = 1; i <= src.size(); ++i) {
-            if (probs[i] > max_p) {
-              max_p = probs[i];
-              max_i = src[i-1][0].label;
+          if (add_viterbi) {
+            WordID max_i = 0;
+            double max_p = -1;
+            if (use_null) {
+              max_i = kNULL;
+              max_p = probs[0];
             }
+            for (int i = 1; i <= src.size(); ++i) {
+              if (probs[i] > max_p) {
+                max_p = probs[i];
+                max_i = src[i-1][0].label;
+              }
+            }
+            was_viterbi[max_i][f_j] = 1.0;
           }
-          was_viterbi[max_i][f_j] = 1.0;
         } else {
           if (use_null)
             tt.Increment(kNULL, f_j, probs[0] / sum);
