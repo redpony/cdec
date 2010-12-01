@@ -361,6 +361,18 @@ public:
         return *this;
     }
 
+    template <typename R>
+    SparseVector<T> &operator+=(const SparseVector<R> &other) {
+        for (typename SparseVector<R>::MapType::const_iterator
+                it = other.values_.begin(); it != other.values_.end(); ++it)
+        {
+//            T v =
+              (values_[it->first] += it->second);
+//            if (!v) values_.erase(it->first);
+        }
+        return *this;
+    }
+
     SparseVector<T> &operator-=(const SparseVector<T> &other) {
         for (typename MapType::const_iterator
                 it = other.values_.begin(); it != other.values_.end(); ++it)
@@ -512,8 +524,8 @@ public:
       values_.swap(other.values_);
     }
 
-private:
   MapType values_;
+private:
 
 #if HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP
   friend class boost::serialization::access;

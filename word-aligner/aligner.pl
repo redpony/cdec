@@ -118,15 +118,18 @@ grammar=$align_dir/grammars/corpus.$direction.lex-grammar.gz
 # grammar=$align_dir/grammars/freq_grammar.$direction.gz
 # per_sentence_grammar_file=$align_dir/grammars/psg.$direction
 
+feature_function=WordPairFeatures $align_dir/grammars/wordpairs.$direction.features.gz
 feature_function=LexicalPairIdentity
 feature_function=LexicalPairIdentity C $align_dir/grammars/corpus.class.$first $align_dir/grammars/voc2class.$second
 feature_function=LexicalPairIdentity S $align_dir/grammars/corpus.stemmed.$first $align_dir/grammars/${second}stem.map
 feature_function=InputIdentity
 feature_function=OutputIdentity
 feature_function=RelativeSentencePosition $align_dir/grammars/corpus.class.$first
+# the following two are deprecated
 feature_function=MarkovJump +b
 feature_function=MarkovJumpFClass $align_dir/grammars/corpus.class.$first
 feature_function=SourceBigram
+# following is deprecated- should reuse SourceBigram the way LexicalPairIdentity does
 feature_function=SourcePOSBigram $align_dir/grammars/corpus.class.$first
 EOT
   close CDEC;

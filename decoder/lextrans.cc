@@ -76,13 +76,13 @@ struct LexicalTransImpl {
     // hack to tell the feature function system how big the sentence pair is
     const int f_start = (use_null ? -1 : 0);
     int prev_node_id = -1;
-    set<WordID> target_vocab; // only set for alignment_only mode
-    if (align_only_) {
-      const Lattice& ref = smeta.GetReference();
-      for (int i = 0; i < ref.size(); ++i) {
-        target_vocab.insert(ref[i][0].label);
-      }
+    set<WordID> target_vocab;
+    const Lattice& ref = smeta.GetReference();
+    for (int i = 0; i < ref.size(); ++i) {
+      target_vocab.insert(ref[i][0].label);
     }
+    bool all_sources_to_all_targets_ = true;
+    set<WordID> trgs_used;
     for (int i = 0; i < e_len; ++i) {  // for each word in the *target*
       Hypergraph::Node* node = forest->AddNode(kXCAT);
       const int new_node_id = node->id_;
@@ -101,10 +101,13 @@ struct LexicalTransImpl {
         assert(rb);
         for (int k = 0; k < rb->GetNumRules(); ++k) {
           TRulePtr rule = rb->GetIthRule(k);
+          const WordID trg_word = rule->e_[0];
           if (align_only_) {
-            if (target_vocab.count(rule->e_[0]) == 0)
+            if (target_vocab.count(trg_word) == 0)
               continue;
           }
+          if (all_sources_to_all_targets_ && (target_vocab.count(trg_word) > 0))
+            trgs_used.insert(trg_word);
           Hypergraph::Edge* edge = forest->AddEdge(rule, Hypergraph::TailNodeVector());
           edge->i_ = j;
           edge->j_ = j+1;
@@ -112,6 +115,21 @@ struct LexicalTransImpl {
           edge->prev_j_ = i+1;
           edge->feature_values_ += edge->rule_->GetFeatureValues();
           forest->ConnectEdgeToHeadNode(edge->id_, new_node_id);
+        }
+        if (all_sources_to_all_targets_) {
+          for (set<WordID>::iterator it = target_vocab.begin(); it != target_vocab.end(); ++it) {
+            if (trgs_used.count(*it)) continue;
+            const WordID ungenerated_trg_word = *it;
+            TRulePtr rule;
+            rule.reset(TRule::CreateLexicalRule(src_sym, ungenerated_trg_word));
+            Hypergraph::Edge* edge = forest->AddEdge(rule, Hypergraph::TailNodeVector());
+            edge->i_ = j;
+            edge->j_ = j+1;
+            edge->prev_i_ = i;
+            edge->prev_j_ = i+1;
+            forest->ConnectEdgeToHeadNode(edge->id_, new_node_id);
+          }
+          trgs_used.clear();
         }
       }
       if (prev_node_id >= 0) {
