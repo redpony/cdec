@@ -246,18 +246,18 @@ string TRule::AsString(bool verbose) const {
   int idx = 0;
   if (lhs_ && verbose) {
     os << '[' << TD::Convert(lhs_ * -1) << "] |||";
-    for (int i = 0; i < f_.size(); ++i) {
-      const WordID& w = f_[i];
-      if (w < 0) {
-        int wi = w * -1;
-        ++idx;
-        os << " [" << TD::Convert(wi) << ',' << idx << ']';
-      } else {
-        os << ' ' << TD::Convert(w);
-      }
-    }
-    os << " ||| ";
   }
+  for (int i = 0; i < f_.size(); ++i) {
+    const WordID& w = f_[i];
+    if (w < 0) {
+      int wi = w * -1;
+      ++idx;
+      os << " [" << TD::Convert(wi) << ',' << idx << ']';
+    } else {
+      os << ' ' << TD::Convert(w);
+    }
+  }
+  os << " ||| ";
   if (idx > 9) {
     cerr << "Too many non-terminals!\n partial: " << os.str() << endl;
     exit(1);

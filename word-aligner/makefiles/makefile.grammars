@@ -1,7 +1,7 @@
-all: corpus.f-e.lex-grammar.gz corpus.class.e corpus.class.f corpus.stemmed.f fstem.map corpus.stemmed.e estem.map corpus.f-e.sgml
+all: corpus.f-e.lex-grammar.gz wordpairs.f-e.features.gz corpus.class.e corpus.class.f corpus.stemmed.f fstem.map corpus.stemmed.e estem.map corpus.f-e.sgml
 
 clean:
-	$(RM) orthonorm-dict.* voc2class* corpus.class.* corpus.e-f corpus.f-e corpus.f-e.lex-grammar* *.model1 *voc corpus.e-f.lex-grammar* *stem* corpus.f-e.sgml freq* psg*
+	$(RM) orthonorm-dict.* voc2class* corpus.class.* corpus.e-f corpus.f-e corpus.f-e.lex-grammar* *.model1 *voc corpus.e-f.lex-grammar* *stem* corpus.f-e.sgml freq* psg* wordpairs*
 
 SUPPORT_DIR = $(SCRIPT_DIR)/support
 GZIP = /usr/bin/gzip
@@ -9,6 +9,7 @@ ZCAT = zcat
 EXTRACT_GRAMMAR = $(SUPPORT_DIR)/extract_grammar.pl
 EXTRACT_VOCAB = $(SUPPORT_DIR)/extract_vocab.pl
 GENERATE_PSG = $(SUPPORT_DIR)/generate_per_sentence_grammars.pl
+GENERATE_WORDPAIR_FEATURES = $(SUPPORT_DIR)/generate_word_pair_features.pl
 ORTHONORM_E = $(SCRIPT_DIR)/ortho-norm/$(E_LANG).pl
 ORTHONORM_F = $(SCRIPT_DIR)/ortho-norm/$(F_LANG).pl
 STEM_F = $(SCRIPT_DIR)/stemmers/$(F_LANG).pl
@@ -66,13 +67,22 @@ corpus.e-f: corpus.f corpus.e $(MERGE_CORPUS)
 	$(MERGE_CORPUS) corpus.e corpus.f > $@
 
 corpus.f-e.model1: corpus.f-e $(MODEL1)
-	$(MODEL1) corpus.f-e > $@
+	$(MODEL1) -v -V corpus.f-e > $@
 
 corpus.e-f.model1: corpus.e-f $(MODEL1)
-	$(MODEL1) corpus.e-f > $@
+	$(MODEL1) -v -V corpus.e-f > $@
 
-corpus.f-e.lex-grammar.gz: corpus.f-e corpus.f-e.model1 corpus.e-f.model1 orthonorm-dict.f orthonorm-dict.e voc2class.e voc2class.f $(GIZAALIGN) $(INVGIZAALIGN)
-	$(MAKE_LEX_GRAMMAR) corpus.f-e corpus.f-e.model1 corpus.e-f.model1 orthonorm-dict.f orthonorm-dict.e voc2class.e voc2class.f $(GIZAALIGN) $(INVGIZAALIGN) | $(GZIP) -9 > $@
+corpus.f-e.full-model1: corpus.f-e $(MODEL1)
+	$(MODEL1) -t -999999 -v -V corpus.f-e > $@
+
+corpus.e-f.full-model1: corpus.e-f $(MODEL1)
+	$(MODEL1) -t -999999 -v -V corpus.e-f > $@
+
+corpus.f-e.lex-grammar.gz: corpus.f-e corpus.f-e.model1 corpus.e-f.model1
+	$(MAKE_LEX_GRAMMAR) corpus.f-e corpus.f-e.model1 corpus.e-f.model1 | $(GZIP) -9 > $@
+
+wordpairs.f-e.features.gz: corpus.f-e corpus.f-e.full-model1 corpus.e-f.full-model1 orthonorm-dict.f orthonorm-dict.e voc2class.e voc2class.f corpus.f-e.model1
+	$(GENERATE_WORDPAIR_FEATURES) corpus.f-e corpus.f-e.full-model1 corpus.e-f.full-model1 orthonorm-dict.f orthonorm-dict.e voc2class.e voc2class.f corpus.f-e.model1 | $(GZIP) -9 > $@
 
 corpus.f-e.sgml: f.voc corpus.f-e.lex-grammar.gz corpus.f-e
 	$(GENERATE_PSG) f.voc corpus.f-e corpus.f-e.lex-grammar.gz freq_grammar.f-e.gz psg.f-e $@

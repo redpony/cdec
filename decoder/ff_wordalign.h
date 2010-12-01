@@ -103,6 +103,43 @@ class SourceBigram : public FeatureFunction {
   mutable Class2Class2FID fmap_;
 };
 
+class LexNullJump : public FeatureFunction {
+ public:
+  LexNullJump(const std::string& param);
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* out_context) const;
+ private:
+  const int fid_lex_null_;
+  const int fid_null_lex_;
+  const int fid_null_null_;
+  const int fid_lex_lex_;
+};
+
+class NewJump : public FeatureFunction {
+ public:
+  NewJump(const std::string& param);
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* out_context) const;
+ private:
+  void FireFeature(const SentenceMetadata& smeta,
+                   const int prev_src_index,
+                   const int cur_src_index,
+                   SparseVector<double>* features) const;
+
+  bool use_binned_log_lengths_;
+  std::string fid_str_;  // identifies configuration uniquely
+};
+
 class SourcePOSBigram : public FeatureFunction {
  public:
   SourcePOSBigram(const std::string& param);
@@ -236,6 +273,24 @@ class BlunsomSynchronousParseHack : public FeatureFunction {
   mutable Vec2Int cur_map_;
   const std::vector<WordID> mutable * cur_ref_;
   mutable std::vector<std::vector<WordID> > refs_;
+};
+
+// association feature type look up a pair (e,f) in a table and return a vector
+// of feature values
+class WordPairFeatures : public FeatureFunction {
+ public:
+  WordPairFeatures(const std::string& param);
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const;
+
+ private:
+  std::vector<WordID> fkeys_;  // parallel to values_
+  std::vector<std::map<WordID, SparseVector<float> > > values_;  // fkeys_index -> e -> value
 };
 
 class InputIdentity : public FeatureFunction {

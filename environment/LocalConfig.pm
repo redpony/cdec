@@ -36,6 +36,10 @@ my $CCONFIG = {
     'HOST_REGEXP' => qr/^(blacklight.psc.edu|bl1.psc.teragrid.org)$/,
     'QSubMemFlag' => '-l pmem=',
   },
+  'LOCAL' => {
+    'HOST_REGEXP' => qr/local\.net$/,
+    'QSubMemFlag' => '',
+  },
 };
 
 our $senvironment_name;

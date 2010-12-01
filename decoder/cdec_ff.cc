@@ -51,6 +51,8 @@ void register_feature_functions() {
   ff_registry.Register("RuleShape", new FFFactory<RuleShapeFeatures>);
   ff_registry.Register("RelativeSentencePosition", new FFFactory<RelativeSentencePosition>);
   ff_registry.Register("Model2BinaryFeatures", new FFFactory<Model2BinaryFeatures>);
+  ff_registry.Register("LexNullJump", new FFFactory<LexNullJump>);
+  ff_registry.Register("NewJump", new FFFactory<NewJump>);
   ff_registry.Register("MarkovJump", new FFFactory<MarkovJump>);
   ff_registry.Register("MarkovJumpFClass", new FFFactory<MarkovJumpFClass>);
   ff_registry.Register("SourceBigram", new FFFactory<SourceBigram>);
@@ -64,6 +66,7 @@ void register_feature_functions() {
   ff_registry.Register("OutputIdentity", new FFFactory<OutputIdentity>);
   ff_registry.Register("InputIdentity", new FFFactory<InputIdentity>);
   ff_registry.Register("LexicalTranslationTrigger", new FFFactory<LexicalTranslationTrigger>);
+  ff_registry.Register("WordPairFeatures", new FFFactory<WordPairFeatures>);
   ff_registry.Register("WordSet", new FFFactory<WordSet>);
 #ifdef HAVE_GLC
   ff_registry.Register("ContextCRF", new FFFactory<Model1Features>);
