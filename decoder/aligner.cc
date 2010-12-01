@@ -1,12 +1,14 @@
 #include "aligner.h"
 
+#include <cstdio>
+#include <set>
+
 #include "array2d.h"
 #include "hg.h"
 #include "sentence_metadata.h"
 #include "inside_outside.h"
 #include "viterbi.h"
 #include "alignment_pharaoh.h"
-#include <set>
 
 using namespace std;
 
@@ -152,6 +154,22 @@ struct TransitionEventWeightFunction {
   }
 };
 
+inline void WriteProbGrid(const Array2D<prob_t>& m, ostream* pos) {
+  ostream& os = *pos;
+  char b[1024];
+  for (int i=0; i<m.width(); ++i) {
+    for (int j=0; j<m.height(); ++j) {
+      if (m(i,j) == prob_t::Zero()) {
+        os << "\t---X---";
+      } else {
+        snprintf(b, 1024, "%0.5f", static_cast<double>(m(i,j)));
+        os << '\t' << b;
+      }
+    }
+    os << '\n';
+  }
+}
+
 // this code is rather complicated since it must deal with generating alignments
 // when lattices are specified as input as well as with models that do not generate
 // full sentence pairs (like lexical alignment models)
@@ -245,7 +263,7 @@ void AlignerTools::WriteAlignment(const Lattice& src_lattice,
   }
   if (out == &cout) {
     // TODO need to do some sort of verbose flag
-    cerr << align << endl;
+    WriteProbGrid(align, &cerr);
     cerr << grid << endl;
   }
   (*out) << TD::GetString(src_sent) << " ||| " << TD::GetString(trg_sent) << " ||| ";
