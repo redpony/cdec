@@ -47,7 +47,7 @@ my %esizes=();
 while(<IM1>) {
   chomp;
   my ($e, $f, $lp) = split /\s+/;
-  $invm1{$e}->{$f} = 1;
+  $invm1{$e}->{$f} = sprintf("%.5g", 1e-12 + exp($lp));
   $esizes{$e}++;
   if (($sizes{$f} or 0) < $LIMIT_SIZE && !(defined $model1{$f}->{$e})) {
     $model1{$f}->{$e} = 1e-12;
@@ -196,10 +196,16 @@ for my $f (sort keys %fdict) {
     next unless $is_good_pair;
     if (defined $m1 && $ADD_MODEL1) {
       push @feats, "Model1=$m1";
-      my $m1d = sprintf("%.5g", $m1 * $dice);
-      push @feats, "M1Dice=$m1d";
+      my $m1d = sprintf("%.5g", sqrt($m1 * $dice));
+      push @feats, "Model1Dice=$m1d";
     }
     if ($ADD_MODEL1 && !defined $m1) { push @feats, "NoModel1=1"; }
+    if (defined $im1 && $ADD_MODEL1) {
+      push @feats, "InvModel1=$im1";
+    }
+    if (!defined $im1 && $ADD_MODEL1) {
+      push @feats, "NoInvModel1=1";
+    }
     if ($ADD_FIDENT && $efcount > $MIN_FEATURE_COUNT) {
       $fc++;
       push @feats, "F$fc=1";
@@ -235,6 +241,15 @@ for my $f (sort keys %fdict) {
     my $f_num = ($of =~ /^-?\d[0-9\.\,]+%?$/ && (length($of) > 3));
     my $e_num = ($oe =~ /^-?\d[0-9\.\,]+%?$/ && (length($oe) > 3));
     my $both_non_numeric = (!$e_num && !$f_num);
+    unless ($total_eandf > 20) {
+      if ($f_num && $e_num) {
+        my $xf = $of;
+        $xf =~ s/[.,]//g;
+        my $xe = $oe;
+        $xe =~ s/[.,]//g;
+        if (($of ne $oe) && ($xe eq $xf)) { push @feats, "NumNearIdent=1"; }
+      }
+    }
     if ($ADD_STEM_ID) {
       my $el = 4;
       my $fl = 4;
