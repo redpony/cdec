@@ -6,6 +6,7 @@
 
 #include "wordid.h"
 #include "tdict.h"
+#include "em_utils.h"
 
 class TTable {
  public:
@@ -28,6 +29,19 @@ class TTable {
   }
   inline void Increment(const int& e, const int& f, double x) {
     counts[e][f] += x;
+  }
+  void NormalizeVB(const double alpha) {
+    ttable.swap(counts);
+    for (Word2Word2Double::iterator cit = ttable.begin();
+         cit != ttable.end(); ++cit) {
+      double tot = 0;
+      Word2Double& cpd = cit->second;
+      for (Word2Double::iterator it = cpd.begin(); it != cpd.end(); ++it)
+        tot += it->second + alpha;
+      for (Word2Double::iterator it = cpd.begin(); it != cpd.end(); ++it)
+        it->second = exp(digamma(it->second + alpha) - digamma(tot));
+    }
+    counts.clear();
   }
   void Normalize() {
     ttable.swap(counts);
