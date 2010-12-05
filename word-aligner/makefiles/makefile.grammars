@@ -54,28 +54,28 @@ voc2class.e: corpus.e $(MKCLS)
 voc2class.f: corpus.f $(MKCLS)
 	$(MKCLS) -c$(NCLASSES) -n10 -pcorpus.f -Vvoc2class.f opt
 
-corpus.class.e: corpus.e voc2class.e $(CLASSIFY)
+corpus.class.e: corpus.e voc2class.e
 	$(CLASSIFY) voc2class.e corpus.e > $@
 
-corpus.class.f: corpus.f voc2class.f $(CLASSIFY)
+corpus.class.f: corpus.f voc2class.f
 	$(CLASSIFY) voc2class.f corpus.f > $@
 
-corpus.f-e: corpus.f corpus.e $(MERGE_CORPUS)
+corpus.f-e: corpus.f corpus.e
 	$(MERGE_CORPUS) corpus.f corpus.e > $@
 
-corpus.e-f: corpus.f corpus.e $(MERGE_CORPUS)
+corpus.e-f: corpus.f corpus.e
 	$(MERGE_CORPUS) corpus.e corpus.f > $@
 
-corpus.f-e.model1: corpus.f-e $(MODEL1)
-	$(MODEL1) -v -V corpus.f-e > $@
+corpus.f-e.model1: corpus.f-e
+	$(MODEL1) -v corpus.f-e > $@
 
-corpus.e-f.model1: corpus.e-f $(MODEL1)
+corpus.e-f.model1: corpus.e-f
 	$(MODEL1) -v -V corpus.e-f > $@
 
-corpus.f-e.full-model1: corpus.f-e $(MODEL1)
+corpus.f-e.full-model1: corpus.f-e
 	$(MODEL1) -t -999999 -v -V corpus.f-e > $@
 
-corpus.e-f.full-model1: corpus.e-f $(MODEL1)
+corpus.e-f.full-model1: corpus.e-f
 	$(MODEL1) -t -999999 -v -V corpus.e-f > $@
 
 corpus.f-e.lex-grammar.gz: corpus.f-e corpus.f-e.model1 corpus.e-f.model1
