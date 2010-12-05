@@ -10,9 +10,7 @@ my %fclass = ();
 load_classes($class_e, \%eclass);
 load_classes($class_f, \%fclass);
 
-our @IDENT_BINS = qw (Ident0 Ident1 Ident2 Ident3 Ident4 Ident5 Ident6 Ident7 Ident8_9 Ident8_9 Ident10_11 Ident10_11 Ident12_14 Ident12_14 Ident12_14);
-die unless scalar @IDENT_BINS == 15;
-our $MAX_IDENT_BIN = 'IdentGT' . scalar @IDENT_BINS;
+our @IDENT_BINS = qw (Ident0 Ident1 Ident2 Ident3 Ident4 Ident5 Ident6 Ident7 Ident8 Ident9);
 
 my $MIN_MAGNITUDE = 0.001; # minimum value of a feature
 
@@ -203,8 +201,8 @@ for my $f (sort keys %fdict) {
         }
       }
     }
-    my $f_num = ($of =~ /^-?\d[0-9\.\,]+%?$/ && (length($of) > 3));
-    my $e_num = ($oe =~ /^-?\d[0-9\.\,]+%?$/ && (length($oe) > 3));
+    my $f_num = ($of =~ /^-?\d[0-9\.\,]+%?$/ && (length($of) > 2));
+    my $e_num = ($oe =~ /^-?\d[0-9\.\,]+%?$/ && (length($oe) > 2));
     my $both_non_numeric = (!$e_num && !$f_num);
 
     unless ($total_eandf > 20) {
@@ -425,7 +423,8 @@ sub dlenbin {
 sub identbin {
   my $x = shift;
   if ($x == 0) { die; }
-  if ($x > scalar @IDENT_BINS) { return $MAX_IDENT_BIN; }
+  $x = int(log($x + 1) / log(1.3));
+  if ($x >= scalar @IDENT_BINS) { return $IDENT_BINS[-1]; }
   return $IDENT_BINS[$x];
 }
 

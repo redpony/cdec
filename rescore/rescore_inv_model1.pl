@@ -76,13 +76,17 @@ sub rescore {
   my @hyps = @$rh;
   my @feats = @$rf;
   my $nhyps = scalar @hyps;
+  my %cache = ();
   print STDERR "RESCORING SENTENCE id=$id (# hypotheses=$nhyps)...\n";
   for (my $i=0; $i < $nhyps; $i++) {
-    my $score = 0;
-    if ($reverse_model) {
-      die "not implemented";
-    } else {
-      $score = m1_prob($src, $hyps[$i]);
+    my $score = $cache{$hyps[$i]};
+    if (!defined $score) {
+      if ($reverse_model) {
+        die "not implemented";
+      } else {
+        $score = m1_prob($src, $hyps[$i]);
+      }
+      $cache{$hyps[$i]} = $score;
     }
     print "$id ||| $hyps[$i] ||| $feats[$i] $feature_name=$score\n";
   }

@@ -8,10 +8,6 @@
 
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
-#ifdef HAVE_MPI
-#include <boost/mpi/timer.hpp>
-#include <boost/mpi.hpp>
-#endif
 
 #include "verbose.h"
 #include "hg.h"
@@ -26,6 +22,11 @@
 #include "sparse_vector.h"
 #include "sampler.h"
 
+#ifdef HAVE_MPI
+#include <boost/mpi/timer.hpp>
+#include <boost/mpi.hpp>
+namespace mpi = boost::mpi;
+#endif
 
 using namespace std;
 namespace po = boost::program_options;
@@ -197,8 +198,6 @@ struct TrainingObserver : public DecoderObserver {
 };
 
 #ifdef HAVE_MPI
-namespace mpi = boost::mpi;
-
 namespace boost { namespace mpi {
   template<>
   struct is_commutative<std::plus<SparseVector<double> >, SparseVector<double> > 
