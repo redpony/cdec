@@ -340,6 +340,7 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
 	("k_best,k",po::value<int>(),"Extract the k best derivations")
 	("unique_k_best,r", "Unique k-best translation list")
         ("aligner,a", "Run as a word/phrase aligner (src & ref required)")
+        ("aligner_use_viterbi", "If run in alignment mode, compute the Viterbi (rather than MAP) alignment")
         ("intersection_strategy,I",po::value<string>()->default_value("cube_pruning"), "Intersection strategy for incorporating finite-state features; values include Cube_pruning, Full")
         ("cubepruning_pop_limit,K",po::value<int>()->default_value(200), "Max number of pops from the candidate heap at each node")
         ("goal",po::value<string>()->default_value("S"),"Goal symbol (SCFG & FST)")
@@ -869,7 +870,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
         }
       }
       if (aligner_mode && !output_training_vector)
-        AlignerTools::WriteAlignment(smeta.GetSourceLattice(), smeta.GetReference(), forest, &cout);
+        AlignerTools::WriteAlignment(smeta.GetSourceLattice(), smeta.GetReference(), forest, &cout, 0 == conf.count("aligner_use_viterbi"));
       if (write_gradient) {
         const prob_t ref_z = InsideOutside<prob_t, EdgeProb, SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>(forest, &ref_exp);
         ref_exp /= ref_z;
