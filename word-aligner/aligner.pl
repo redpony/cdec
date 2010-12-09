@@ -127,6 +127,7 @@ feature_function=LexicalPairIdentity C $align_dir/grammars/corpus.class.$first $
 feature_function=InputIdentity
 feature_function=OutputIdentity
 feature_function=RelativeSentencePosition $align_dir/grammars/corpus.class.$first
+feature_function=LexNullJump
 feature_function=NewJump
 feature_function=NewJump use_binned_log_lengths flen
 # jump distance and src and destination class type
