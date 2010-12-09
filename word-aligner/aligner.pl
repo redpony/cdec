@@ -120,17 +120,19 @@ grammar=$align_dir/grammars/corpus.$direction.lex-grammar.gz
 
 feature_function=WordPairFeatures $align_dir/grammars/wordpairs.$direction.features.gz
 feature_function=LexicalPairIdentity
-feature_function=LexicalPairIdentity C $align_dir/grammars/corpus.class.$first $align_dir/grammars/voc2class.$second
+# stem translation
 feature_function=LexicalPairIdentity S $align_dir/grammars/corpus.stemmed.$first $align_dir/grammars/${second}stem.map
+# POS translation
+feature_function=LexicalPairIdentity C $align_dir/grammars/corpus.class.$first $align_dir/grammars/voc2class.$second
 feature_function=InputIdentity
 feature_function=OutputIdentity
 feature_function=RelativeSentencePosition $align_dir/grammars/corpus.class.$first
-# the following two are deprecated
-feature_function=MarkovJump +b
-feature_function=MarkovJumpFClass $align_dir/grammars/corpus.class.$first
+feature_function=NewJump
+feature_function=NewJump use_binned_log_lengths flen
+# jump distance and src and destination class type
+feature_function=NewJump use_binned_log_lengths f0 fprev f:$align_dir/grammars/corpus.class.$first
 feature_function=SourceBigram
-# following is deprecated- should reuse SourceBigram the way LexicalPairIdentity does
-feature_function=SourcePOSBigram $align_dir/grammars/corpus.class.$first
+feature_function=SourceBigram SC $align_dir/grammars/corpus.class.$first
 EOT
   close CDEC;
   open AGENDA, ">$stage_dir/agenda.txt" or die "Can't write $stage_dir/agenda.txt: $!";

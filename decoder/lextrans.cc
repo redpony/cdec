@@ -81,7 +81,7 @@ struct LexicalTransImpl {
     for (int i = 0; i < ref.size(); ++i) {
       target_vocab.insert(ref[i][0].label);
     }
-    bool all_sources_to_all_targets_ = false;
+    bool all_sources_to_all_targets_ = false; // TODO configure this
     set<WordID> trgs_used;
     for (int i = 0; i < e_len; ++i) {  // for each word in the *target*
       Hypergraph::Node* node = forest->AddNode(kXCAT);

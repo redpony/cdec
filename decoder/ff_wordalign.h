@@ -3,7 +3,9 @@
 
 #include "ff.h"
 #include "array2d.h"
+#include "factored_lexicon_helper.h"
 
+#include <boost/scoped_ptr.hpp>
 #include <boost/multi_array.hpp>
 
 class RelativeSentencePosition : public FeatureFunction {
@@ -23,64 +25,6 @@ class RelativeSentencePosition : public FeatureFunction {
   std::map<WordID, int> fids_;  // fclass -> fid
 };
 
-class Model2BinaryFeatures : public FeatureFunction {
- public:
-  Model2BinaryFeatures(const std::string& param);
- protected:
-  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
-                                     const std::vector<const void*>& ant_contexts,
-                                     SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
-                                     void* out_context) const;
- private:
-  boost::multi_array<int, 3> fids_;
-};
-
-class MarkovJump : public FeatureFunction {
- public:
-  MarkovJump(const std::string& param);
- protected:
-  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
-                                     const std::vector<const void*>& ant_contexts,
-                                     SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
-                                     void* out_context) const;
- private:
-  const int fid_;
-  const int fid_lex_null_;
-  const int fid_null_lex_;
-  const int fid_null_null_;
-  const int fid_lex_lex_;
-
-  bool binary_params_;
-  std::vector<std::map<int, int> > flen2jump2fid_;
-};
-
-class MarkovJumpFClass : public FeatureFunction {
- public:
-  MarkovJumpFClass(const std::string& param);
-  virtual void FinalTraversalFeatures(const void* context,
-                                      SparseVector<double>* features) const;
- protected:
-  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
-                                     const std::vector<const void*>& ant_contexts,
-                                     SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
-                                     void* context) const;
-
-  void FireFeature(const SentenceMetadata& smeta,
-                   int prev_src_pos,
-                   int cur_src_pos,
-                   SparseVector<double>* features) const;
-
- private:
-  std::vector<std::map<WordID, std::map<int, int> > > fids_;  // flen -> fclass -> jumpsize -> fid
-  std::vector<std::vector<WordID> > pos_;
-};
-
 typedef std::map<WordID, int> Class2FID;
 typedef std::map<WordID, Class2FID> Class2Class2FID;
 typedef std::map<WordID, Class2Class2FID> Class2Class2Class2FID;
@@ -89,6 +33,7 @@ class SourceBigram : public FeatureFunction {
   SourceBigram(const std::string& param);
   virtual void FinalTraversalFeatures(const void* context,
                                       SparseVector<double>* features) const;
+  void PrepareForInput(const SentenceMetadata& smeta);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
@@ -100,7 +45,9 @@ class SourceBigram : public FeatureFunction {
   void FireFeature(WordID src,
                    WordID trg,
                    SparseVector<double>* features) const;
+  std::string fid_str_;
   mutable Class2Class2FID fmap_;
+  boost::scoped_ptr<FactoredLexiconHelper> lexmap_; // different view (stemmed, etc) of source
 };
 
 class LexNullJump : public FeatureFunction {
@@ -136,28 +83,25 @@ class NewJump : public FeatureFunction {
                    const int cur_src_index,
                    SparseVector<double>* features) const;
 
-  bool use_binned_log_lengths_;
-  std::string fid_str_;  // identifies configuration uniquely
-};
+  WordID GetSourceWord(int sentence_id, int index) const {
+    if (index < 0) return kBOS_;
+    assert(src_.size() > sentence_id);
+    const std::vector<WordID>& v = src_[sentence_id];
+    if (index >= v.size()) return kEOS_;
+    return v[index];
+  }
 
-class SourcePOSBigram : public FeatureFunction {
- public:
-  SourcePOSBigram(const std::string& param);
-  virtual void FinalTraversalFeatures(const void* context,
-                                      SparseVector<double>* features) const;
- protected:
-  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
-                                     const std::vector<const void*>& ant_contexts,
-                                     SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
-                                     void* context) const;
- private:
-  void FireFeature(WordID src,
-                   WordID trg,
-                   SparseVector<double>* features) const;
-  mutable Class2Class2FID fmap_;
-  std::vector<std::vector<WordID> > pos_;
+  const WordID kBOS_;
+  const WordID kEOS_;
+  bool use_binned_log_lengths_;
+  bool flen_;
+  bool elen_;
+  bool f0_;
+  bool fm1_;
+  bool fp1_;
+  bool fprev_;
+  std::vector<std::vector<WordID> > src_;
+  std::string fid_str_;  // identifies configuration uniquely
 };
 
 class LexicalTranslationTrigger : public FeatureFunction {
