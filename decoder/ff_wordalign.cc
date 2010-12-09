@@ -6,7 +6,13 @@
 #include <sstream>
 #include <string>
 #include <cmath>
+#include <tr1/unordered_map>
 
+#include <boost/tuple/tuple.hpp>
+#include "boost/tuple/tuple_comparison.hpp"
+#include <boost/functional/hash.hpp>
+
+#include "factored_lexicon_helper.h"
 #include "verbose.h"
 #include "alignment_pharaoh.h"
 #include "stringlib.h"
@@ -24,43 +30,6 @@ static const int kNULL_i = 255;  // -1 as an unsigned char
 using namespace std;
 
 // TODO new feature: if a word is translated as itself and there is a transition back to the same word, fire a feature
-
-Model2BinaryFeatures::Model2BinaryFeatures(const string& ) :
-    fids_(boost::extents[MAX_SENTENCE_SIZE][MAX_SENTENCE_SIZE][MAX_SENTENCE_SIZE]) {
-  for (int i = 1; i < MAX_SENTENCE_SIZE; ++i) {
-    for (int j = 0; j < i; ++j) {
-      for (int k = 0; k < MAX_SENTENCE_SIZE; ++k) {
-        int& val = fids_[i][j][k];
-        val = -1;
-        if (j < i) {
-          ostringstream os;
-          os << "M2FL:" << i << ":TI:" << k << "_SI:" << j;
-          val = FD::Convert(os.str());
-        }
-      }
-    }
-  }
-}
-
-void Model2BinaryFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                                 const Hypergraph::Edge& edge,
-                                                 const vector<const void*>& /*ant_states*/,
-                                                 SparseVector<double>* features,
-                                                 SparseVector<double>* // estimated_features
-                                                 ,
-                                                 void* // state
-  ) const {
-  // if the source word is either null or the generated word
-  // has no position in the reference
-  if (edge.i_ == -1 || edge.prev_i_ == -1)
-    return;
-
-  assert(smeta.GetTargetLength() > 0);
-  const int fid = fids_[smeta.GetSourceLength()][edge.i_][edge.prev_i_];
-  features->set_value(fid, 1.0);
-//  cerr << f_len_ << " " << e_len_ << " [" << edge.i_ << "," << edge.j_ << "|" << edge.prev_i_ << "," << edge.prev_j_ << "]\t" << edge.rule_->AsString() << "\tVAL=" << val << endl;
-}
-
 
 RelativeSentencePosition::RelativeSentencePosition(const string& param) :
     fid_(FD::Convert("RelativeSentencePosition")) {
@@ -119,87 +88,6 @@ void RelativeSentencePosition::TraversalFeaturesImpl(const SentenceMetadata& sme
 //  cerr << f_len_ << " " << e_len_ << " [" << edge.i_ << "," << edge.j_ << "|" << edge.prev_i_ << "," << edge.prev_j_ << "]\t" << edge.rule_->AsString() << "\tVAL=" << val << endl;
 }
 
-MarkovJumpFClass::MarkovJumpFClass(const string& param) :
-    FeatureFunction(1),
-    fids_(MAX_SENTENCE_SIZE) {
-  cerr << "    MarkovJumpFClass" << endl;
-  cerr << "Reading source POS tags from " << param << endl;
-  ReadFile rf(param);
-  istream& in = *rf.stream();
-  set<WordID> classes;
-  while(in) {
-    string line;
-    getline(in, line);
-    if (line.empty()) continue;
-    vector<WordID> v;
-    TD::ConvertSentence(line, &v);
-    pos_.push_back(v);
-    for (int i = 0; i < v.size(); ++i)
-      classes.insert(v[i]);
-  }
-  cerr << "  (" << pos_.size() << " lines)\n";
-  cerr << "  Classes: " << classes.size() << endl;
-  for (int ss = 1; ss < MAX_SENTENCE_SIZE; ++ss) {
-    map<WordID, map<int, int> >& cfids = fids_[ss];
-    for (set<WordID>::iterator i = classes.begin(); i != classes.end(); ++i) {
-      map<int, int> &fids = cfids[*i];
-      for (int j = -ss; j <= ss; ++j) {
-        ostringstream os;
-        os << "Jump_FL:" << ss << "_FC:" << TD::Convert(*i) << "_J:" << j;
-        fids[j] = FD::Convert(os.str());
-      }
-    }
-  }
-}
-
-void MarkovJumpFClass::FireFeature(const SentenceMetadata& smeta,
-                                   int prev_src_pos,
-                                   int cur_src_pos,
-                                   SparseVector<double>* features) const {
-  if (prev_src_pos == kNULL_i || cur_src_pos == kNULL_i)
-    return;
-
-  const int jumpsize = cur_src_pos - prev_src_pos;
-
-  assert(smeta.GetSentenceID() < pos_.size());
-  const WordID cur_fclass = pos_[smeta.GetSentenceID()][cur_src_pos];
-  const int fid = fids_[smeta.GetSourceLength()].find(cur_fclass)->second.find(jumpsize)->second;
-  features->set_value(fid, 1.0);
-}
-
-void MarkovJumpFClass::FinalTraversalFeatures(const void* context,
-                                      SparseVector<double>* features) const {
-  int left_index = *static_cast<const unsigned char*>(context);
-//  int right_index = cur_flen;
-  // TODO
-}
-
-void MarkovJumpFClass::TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
-                                     const std::vector<const void*>& ant_states,
-                                     SparseVector<double>* features,
-                                     SparseVector<double>* /* estimated_features */,
-                                     void* state) const {
-  unsigned char& dpstate = *((unsigned char*)state);
-  if (edge.Arity() == 0) {
-    dpstate = static_cast<unsigned int>(edge.i_);
-  } else if (edge.Arity() == 1) {
-    dpstate = *((unsigned char*)ant_states[0]);
-  } else if (edge.Arity() == 2) {
-    int left_index = *((unsigned char*)ant_states[0]);
-    int right_index = *((unsigned char*)ant_states[1]);
-    if (right_index == -1)
-      dpstate = static_cast<unsigned int>(left_index);
-    else
-      dpstate = static_cast<unsigned int>(right_index);
-//    const WordID cur_fclass = pos_[smeta.GetSentenceID()][right_index];
-//    cerr << edge.i_ << "," << edge.j_ << ": fclass=" << TD::Convert(cur_fclass) << " j=" << jumpsize << endl;
-//    const int fid = fids_[smeta.GetSourceLength()].find(cur_fclass)->second.find(jumpsize)->second;
-//    features->set_value(fid, 1.0);
-    FireFeature(smeta, left_index, right_index, features);
-  }
-}
-
 LexNullJump::LexNullJump(const string& param) :
     FeatureFunction(1),
     fid_lex_null_(FD::Convert("JumpLexNull")),
@@ -239,107 +127,71 @@ void LexNullJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   }
 }
 
-MarkovJump::MarkovJump(const string& param) :
-    FeatureFunction(1),
-    fid_(FD::Convert("MarkovJump")),
-    fid_lex_null_(FD::Convert("JumpLexNull")),
-    fid_null_lex_(FD::Convert("JumpNullLex")),
-    fid_null_null_(FD::Convert("JumpNullNull")),
-    fid_lex_lex_(FD::Convert("JumpLexLex")),
-    binary_params_(false) {
-  cerr << "    MarkovJump";
-  vector<string> argv;
-  int argc = SplitOnWhitespace(param, &argv);
-  if (argc != 1 || !(argv[0] == "-b" || argv[0] == "+b")) {
-    cerr << "MarkovJump: expected parameters to be -b or +b\n";
-    exit(1);
-  }
-  binary_params_ = argv[0] == "+b";
-  if (binary_params_) {
-    flen2jump2fid_.resize(MAX_SENTENCE_SIZE);
-    for (int i = 1; i < MAX_SENTENCE_SIZE; ++i) {
-      map<int, int>& jump2fid = flen2jump2fid_[i];
-      for (int jump = -i; jump <= i; ++jump) {
-        ostringstream os;
-        os << "Jump:FLen:" << i << "_J:" << jump;
-        jump2fid[jump] = FD::Convert(os.str());
-      }
-    }
-  } else {
-    cerr << " (Blunsom & Cohn definition)";
-  }
-  cerr << endl;
-}
-
-// TODO handle NULLs according to Och 2000?
-void MarkovJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                       const Hypergraph::Edge& edge,
-                                       const vector<const void*>& ant_states,
-                                       SparseVector<double>* features,
-                                       SparseVector<double>* /* estimated_features */,
-                                       void* state) const {
-  unsigned char& dpstate = *((unsigned char*)state);
-  const int flen = smeta.GetSourceLength();
-  if (edge.Arity() == 0) {
-    dpstate = static_cast<unsigned int>(edge.i_);
-    if (edge.prev_i_ == 0) {     // first word in sentence
-      if (edge.i_ >= 0 && binary_params_) {
-        const int fid = flen2jump2fid_[flen].find(edge.i_ + 1)->second;
-        features->set_value(fid, 1.0);
-      } else if (edge.i_ < 0 && binary_params_) {
-        // handled by bigram features
-      }
-    } else if (edge.prev_i_ == smeta.GetTargetLength() - 1) {
-      if (edge.i_ >= 0 && binary_params_) {
-        int jumpsize = flen - edge.i_;
-        const int fid = flen2jump2fid_[flen].find(jumpsize)->second;
-        features->set_value(fid, 1.0);
-      } else if (edge.i_ < 0 && binary_params_) {
-        // handled by bigram features
-      }
-    }
-  } else if (edge.Arity() == 1) {
-    dpstate = *((unsigned char*)ant_states[0]);
-  } else if (edge.Arity() == 2) {
-    int left_index = *((unsigned char*)ant_states[0]);
-    int right_index = *((unsigned char*)ant_states[1]);
-    if (right_index == -1)
-      dpstate = static_cast<unsigned int>(left_index);
-    else
-      dpstate = static_cast<unsigned int>(right_index);
-    if (left_index == kNULL_i || right_index == kNULL_i) {
-      if (left_index == kNULL_i && right_index == kNULL_i)
-        features->set_value(fid_null_null_, 1.0);
-      else if (left_index == kNULL_i)
-        features->set_value(fid_null_lex_, 1.0);
-      else
-        features->set_value(fid_lex_null_, 1.0);
-
-    } else {
-      features->set_value(fid_lex_lex_, 1.0); // TODO should only use if NULL is enabled
-      const int jumpsize = right_index - left_index;
-
-      if (binary_params_) {
-        const int fid = flen2jump2fid_[flen].find(jumpsize)->second;
-        features->set_value(fid, 1.0);
-      } else {
-        features->set_value(fid_, fabs(jumpsize - 1));  // Blunsom and Cohn def
-      }
-    }
-  } else {
-    assert(!"something really unexpected is happening");
-  }
-}
-
 NewJump::NewJump(const string& param) :
-    FeatureFunction(1) {
+    FeatureFunction(1),
+    kBOS_(TD::Convert("BOS")),
+    kEOS_(TD::Convert("EOS")) {
   cerr << "    NewJump";
   vector<string> argv;
+  set<string> permitted;
+  permitted.insert("use_binned_log_lengths");
+  permitted.insert("flen");
+  permitted.insert("elen");
+  permitted.insert("fprev");
+  permitted.insert("f0");
+  permitted.insert("f-1");
+  permitted.insert("f+1");
+  // also permitted f:FILENAME
   int argc = SplitOnWhitespace(param, &argv);
   set<string> config;
-  for (int i = 0; i < argc; ++i) config.insert(argv[i]);
+  string f_file;
+  for (int i = 0; i < argc; ++i) {
+    if (argv[i].size() > 2 && argv[i].find("f:") == 0) {
+      assert(f_file.empty());  // only one f file!
+      f_file = argv[i].substr(2);
+      cerr << " source_file=" << f_file;
+    } else {
+      if (permitted.count(argv[i])) {
+        assert(config.count(argv[i]) == 0);
+        config.insert(argv[i]);
+        cerr << " " << argv[i];
+      } else {
+        cerr << "\nNewJump: don't understand param '" << argv[i] << "'\n";
+        abort();
+      }
+    }
+  }
   cerr << endl;
   use_binned_log_lengths_ = config.count("use_binned_log_lengths") > 0;
+  f0_ = config.count("f0") > 0;
+  fm1_ = config.count("f-1") > 0;
+  fp1_ = config.count("f+1") > 0;
+  fprev_ = config.count("fprev") > 0;
+  elen_ = config.count("elen") > 0;
+  flen_ = config.count("flen") > 0;
+  if (f0_ || fm1_ || fp1_ || fprev_) {
+    if (f_file.empty()) {
+      cerr << "NewJump: conditioning on src but f:FILE not specified!\n";
+      abort();
+    }
+    ReadFile rf(f_file);
+    istream& in = *rf.stream();
+    string line;
+    while(in) {
+      getline(in, line);
+      if (!in) continue;
+      vector<WordID> v;
+      TD::ConvertSentence(line, &v);
+      src_.push_back(v);
+    }
+  }
+  fid_str_ = "J";
+  if (flen_) fid_str_ += "F";
+  if (elen_) fid_str_ += "E";
+  if (f0_) fid_str_ += "C";
+  if (fm1_) fid_str_ += "L";
+  if (fp1_) fid_str_ += "R";
+  if (fprev_) fid_str_ += "P";
 }
 
 // do a log transform on the length (of a sentence, a jump, etc)
@@ -351,33 +203,66 @@ int BinnedLogLength(int len) {
   return res;
 }
 
+// <0>=jump size <1>=jump_dir <2>=flen, <3>=elen, <4>=f0, <5>=f-1, <6>=f+1, <7>=fprev
+typedef boost::tuple<short, char, short, short, WordID, WordID, WordID, WordID> NewJumpFeatureKey;
+
+struct KeyHash : unary_function<NewJumpFeatureKey, size_t> {
+  size_t operator()(const NewJumpFeatureKey& k) const {
+    size_t h = 0x37473DEF321;
+    boost::hash_combine(h, k.get<0>());
+    boost::hash_combine(h, k.get<1>());
+    boost::hash_combine(h, k.get<2>());
+    boost::hash_combine(h, k.get<3>());
+    boost::hash_combine(h, k.get<4>());
+    boost::hash_combine(h, k.get<5>());
+    boost::hash_combine(h, k.get<6>());
+    boost::hash_combine(h, k.get<7>());
+    return h;
+  }
+};
+
 void NewJump::FireFeature(const SentenceMetadata& smeta,
                           const int prev_src_index,
                           const int cur_src_index,
                           SparseVector<double>* features) const {
+  const int id = smeta.GetSentenceID();
   const int src_len = smeta.GetSourceLength();
   const int raw_jump = cur_src_index - prev_src_index;
+  short jump_magnitude = raw_jump;
   char jtype = 0;
-  int jump_magnitude = raw_jump;
   if (raw_jump > 0) { jtype = 'R'; } // Right
   else if (raw_jump == 0) { jtype = 'S'; } // Stay
   else { jtype = 'L'; jump_magnitude = raw_jump * -1; } // Left
-  int effective_length = src_len;
+  int effective_src_len = src_len;
+  int effective_trg_len = smeta.GetTargetLength();
   if (use_binned_log_lengths_) {
     jump_magnitude = BinnedLogLength(jump_magnitude);
-    effective_length = BinnedLogLength(src_len);
+    effective_src_len = BinnedLogLength(src_len);
+    effective_trg_len = BinnedLogLength(effective_trg_len);
   }
+  NewJumpFeatureKey key(jump_magnitude,jtype,0,0,0,0,0);
+  using boost::get;
+  if (flen_)  get<2>(key) = effective_src_len;
+  if (elen_)  get<3>(key) = effective_trg_len;
+  if (f0_)    get<4>(key) = GetSourceWord(id, cur_src_index);
+  if (fm1_)   get<5>(key) = GetSourceWord(id, cur_src_index - 1);
+  if (fp1_)   get<6>(key) = GetSourceWord(id, cur_src_index + 1);
+  if (fprev_) get<7>(key) = GetSourceWord(id, prev_src_index);
 
-  if (true) {
-    static map<int, map<int, int> > len2jump2fid;
-    int& fid = len2jump2fid[src_len][raw_jump];
-    if (!fid) {
-      ostringstream os;
-      os << fid_str_ << ":FLen" << effective_length << ":" << jtype << jump_magnitude;
-      fid = FD::Convert(os.str());
-    }
-    features->set_value(fid, 1.0);
+  static std::tr1::unordered_map<NewJumpFeatureKey, int, KeyHash> fids;
+  int& fid = fids[key];
+  if (!fid) {
+    ostringstream os;
+    os << fid_str_ << ':' << jtype << jump_magnitude;
+    if (flen_)  os << ':' << get<2>(key);
+    if (elen_)  os << ':' << get<3>(key);
+    if (f0_)    os << ':' << TD::Convert(get<4>(key));
+    if (fm1_)   os << ':' << TD::Convert(get<5>(key));
+    if (fp1_)   os << ':' << TD::Convert(get<6>(key));
+    if (fprev_) os << ':' << TD::Convert(get<7>(key));    
+    fid = FD::Convert(os.str());
   }
+  features->set_value(fid, 1.0);
 }
 
 void NewJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
@@ -387,6 +272,7 @@ void NewJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                        SparseVector<double>* /* estimated_features */,
                                        void* state) const {
   unsigned char& dpstate = *((unsigned char*)state);
+  // IMPORTANT: this only fires on non-Null transitions!
   const int flen = smeta.GetSourceLength();
   if (edge.Arity() == 0) {
     dpstate = static_cast<unsigned int>(edge.i_);
@@ -427,6 +313,23 @@ void NewJump::TraversalFeaturesImpl(const SentenceMetadata& smeta,
 
 SourceBigram::SourceBigram(const std::string& param) :
     FeatureFunction(sizeof(WordID) + sizeof(int)) {
+  fid_str_ = "SB:";
+  if (param.size() > 0) {
+    vector<string> argv;
+    int argc = SplitOnWhitespace(param, &argv);
+    if (argc != 2) {
+      cerr << "SourceBigram [FEATURE_NAME_PREFIX PATH]\n";
+      abort();
+    }
+    fid_str_ = argv[0] + ":";
+    lexmap_.reset(new FactoredLexiconHelper(argv[1], "*"));
+  } else {
+    lexmap_.reset(new FactoredLexiconHelper);
+  }
+}
+
+void SourceBigram::PrepareForInput(const SentenceMetadata& smeta) {
+  lexmap_->PrepareForInput(smeta);
 }
 
 void SourceBigram::FinalTraversalFeatures(const void* context,
@@ -445,7 +348,7 @@ void SourceBigram::FireFeature(WordID left,
   // TODO important important !!! escape strings !!!
   if (!fid) {
     ostringstream os;
-    os << "SB:";
+    os << fid_str_;
     if (left < 0) { os << "BOS"; } else { os << TD::Convert(left); }
     os << '_';
     if (right < 0) { os << "EOS"; } else { os << TD::Convert(right); }
@@ -465,85 +368,7 @@ void SourceBigram::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   int& out_word_count = *(static_cast<int*>(context) + 1);
   const int arity = edge.Arity();
   if (arity == 0) {
-    out_context = edge.rule_->f()[0];
-    out_word_count = edge.rule_->EWords();
-    assert(out_word_count == 1); // this is only defined for lex translation!
-    // revisit this if you want to translate into null words
-  } else if (arity == 2) {
-    WordID left = *static_cast<const WordID*>(ant_contexts[0]);
-    WordID right = *static_cast<const WordID*>(ant_contexts[1]);
-    int left_wc = *(static_cast<const int*>(ant_contexts[0]) + 1);
-    int right_wc = *(static_cast<const int*>(ant_contexts[0]) + 1);
-    if (left_wc == 1 && right_wc == 1)
-      FireFeature(-1, left, features);
-    FireFeature(left, right, features);
-    out_word_count = left_wc + right_wc;
-    out_context = right;
-  }
-}
-// state: POS of src word used, number of trg words generated
-SourcePOSBigram::SourcePOSBigram(const std::string& param) :
-    FeatureFunction(sizeof(WordID) + sizeof(int)) {
-  cerr << "Reading source POS tags from " << param << endl;
-  ReadFile rf(param);
-  istream& in = *rf.stream();
-  while(in) {
-    string line;
-    getline(in, line);
-    if (line.empty()) continue;
-    vector<WordID> v;
-    TD::ConvertSentence(line, &v);
-    pos_.push_back(v);
-  }
-  cerr << "  (" << pos_.size() << " lines)\n";
-}
-
-void SourcePOSBigram::FinalTraversalFeatures(const void* context,
-                                      SparseVector<double>* features) const {
-  WordID left = *static_cast<const WordID*>(context);
-  int left_wc = *(static_cast<const int*>(context) + 1);
-  if (left_wc == 1)
-    FireFeature(-1, left, features);
-  FireFeature(left, -1, features);
-}
-
-void SourcePOSBigram::FireFeature(WordID left,
-                   WordID right,
-                   SparseVector<double>* features) const {
-  int& fid = fmap_[left][right];
-  if (!fid) {
-    ostringstream os;
-    os << "SP:";
-    if (left < 0) { os << "BOS"; } else { os << TD::Convert(left); }
-    os << '_';
-    if (right < 0) { os << "EOS"; } else { os << TD::Convert(right); }
-    fid = FD::Convert(os.str());
-    if (fid == 0) fid = -1;
-  }
-  if (fid < 0) return;
-  features->set_value(fid, 1.0);
-}
-
-void SourcePOSBigram::TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
-                                     const std::vector<const void*>& ant_contexts,
-                                     SparseVector<double>* features,
-                                            SparseVector<double>* /* estimated_features */,
-                                     void* context) const {
-  WordID& out_context = *static_cast<WordID*>(context);
-  int& out_word_count = *(static_cast<int*>(context) + 1);
-  const int arity = edge.Arity();
-  if (arity == 0) {
-    assert(smeta.GetSentenceID() < pos_.size());
-    const vector<WordID>& pos_sent = pos_[smeta.GetSentenceID()];
-    if (edge.i_ >= 0) {  // non-NULL source
-      assert(edge.i_ < pos_sent.size());
-      out_context = pos_sent[edge.i_];
-    } else { // NULL source
-      // should assert that source is kNULL?
-      static const WordID kNULL = TD::Convert("<eps>");
-      out_context = kNULL;
-    }
+    out_context = lexmap_->SourceWordAtPosition(edge.i_);
     out_word_count = edge.rule_->EWords();
     assert(out_word_count == 1); // this is only defined for lex translation!
     // revisit this if you want to translate into null words

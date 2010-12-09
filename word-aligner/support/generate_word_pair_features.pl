@@ -92,7 +92,7 @@ my $ADD_ID = 1;
 my $ADD_PUNC = 1;
 my $ADD_NULL = 1;
 my $ADD_MODEL1 = 1;
-my $ADD_NOMODEL1 = 1;
+my $ADD_NOMODEL1 = 0;
 my $BEAM_RATIO = 50;
 my $BIN_ORTHO = 1;
 my $BIN_DLEN = 1;
@@ -171,7 +171,7 @@ for my $f (sort keys %fdict) {
         }
         if ($im1 > $MIN_MAGNITUDE) {
           push @feats, "InvModel1=$im1" if $im1;
-        } else {
+        } elsif ($ADD_NOMODEL1) {
           push @feats, 'NoInvModel1=1';
         }
         my $am1 = sprintf("%.5g", sqrt($m1 * $im1));
