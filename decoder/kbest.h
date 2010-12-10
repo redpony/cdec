@@ -12,9 +12,9 @@
 
 namespace KBest {
   // default, don't filter any derivations from the k-best list
+  template<typename Dummy>
   struct NoFilter {
-    bool operator()(const std::vector<WordID>& yield) {
-      (void) yield;
+    bool operator()(const Dummy&) {
       return false;
     }
   };
@@ -32,7 +32,7 @@ namespace KBest {
   // the lazy k-best algorithm (Algorithm 3) from Huang and Chiang (IWPT 2005)
   template<typename T,  // yield type (returned by Traversal)
            typename Traversal,
-           typename DerivationFilter = NoFilter,
+           typename DerivationFilter = NoFilter<T>,
            typename WeightType = prob_t,
            typename WeightFunction = EdgeProb>
   struct KBestDerivations {

@@ -42,7 +42,7 @@ void ComputeErrorSurface(const SentenceScorer& ss, const ViterbiEnvelope& ve, Er
       Lattice ref;
       LatticeTools::ConvertTextOrPLF(psrc->substr(0, pos), &src);
       LatticeTools::ConvertTextOrPLF(psrc->substr(pos + 5), &ref);
-      AlignerTools::WriteAlignment(src, ref, hg, &os, true, &edges);
+      AlignerTools::WriteAlignment(src, ref, hg, &os, true, 0, &edges);
       string tstr = os.str();
       TD::ConvertSentence(tstr.substr(tstr.rfind(" ||| ") + 5), &trans);
     } else {

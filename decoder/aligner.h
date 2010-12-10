@@ -19,6 +19,7 @@ struct AlignerTools {
                              const Hypergraph& g,
                              std::ostream* out,
                              bool map_instead_of_viterbi = true,
+                             int k_best = 0,
                              const std::vector<bool>* edges = NULL);
 };
 

@@ -870,7 +870,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
         }
       }
       if (aligner_mode && !output_training_vector)
-        AlignerTools::WriteAlignment(smeta.GetSourceLattice(), smeta.GetReference(), forest, &cout, 0 == conf.count("aligner_use_viterbi"));
+        AlignerTools::WriteAlignment(smeta.GetSourceLattice(), smeta.GetReference(), forest, &cout, 0 == conf.count("aligner_use_viterbi"), kbest ? conf["k_best"].as<int>() : 0);
       if (write_gradient) {
         const prob_t ref_z = InsideOutside<prob_t, EdgeProb, SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>(forest, &ref_exp);
         ref_exp /= ref_z;
