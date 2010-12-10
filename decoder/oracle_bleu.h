@@ -286,7 +286,7 @@ struct OracleBleu {
     std::cerr << "Output kbest to " << kbest_out_filename_<<std::endl;
 
     if (!unique)
-      kbest<KBest::NoFilter>(sent_id,forest,k,ko.get(),std::cerr);
+      kbest<KBest::NoFilter<std::vector<WordID> > >(sent_id,forest,k,ko.get(),std::cerr);
     else {
       kbest<KBest::FilterUnique>(sent_id,forest,k,ko.get(),std::cerr);
     }
