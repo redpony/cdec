@@ -638,6 +638,10 @@ bool Decoder::Decode(const string& input, DecoderObserver* o) {
   return res;
 }
 void Decoder::SetWeights(const vector<double>& weights) { pimpl_->SetWeights(weights); }
+void Decoder::SetSupplementalGrammar(const std::string& grammar_string) {
+  assert(pimpl_->translator->GetDecoderType() == "SCFG");
+  static_cast<SCFGTranslator&>(*pimpl_->translator).SetSupplementalGrammar(grammar_string);
+}
 
 
 bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {

@@ -77,6 +77,12 @@ TextGrammar::TextGrammar(const string& file) :
   ReadFromFile(file);
 }
 
+TextGrammar::TextGrammar(istream* in) :
+    max_span_(10),
+    pimpl_(new TGImpl) {
+  ReadFromStream(in);
+}
+
 const GrammarIter* TextGrammar::GetRoot() const {
   return &pimpl_->root_;
 }
@@ -107,7 +113,11 @@ static void AddRuleHelper(const TRulePtr& new_rule, const unsigned int ctf_level
 
 void TextGrammar::ReadFromFile(const string& filename) {
   ReadFile in(filename);
-  RuleLexer::ReadRules(in.stream(), &AddRuleHelper, this);
+  ReadFromStream(in.stream());
+}
+
+void TextGrammar::ReadFromStream(istream* in) {
+  RuleLexer::ReadRules(in, &AddRuleHelper, this);
 }
 
 bool TextGrammar::HasRuleForSpan(int /* i */, int /* j */, int distance) const {

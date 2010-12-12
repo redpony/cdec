@@ -39,6 +39,7 @@ class Translator {
 
   // Free any sentence-specific resources
   void SentenceComplete();
+  virtual std::string GetDecoderType() const;
  protected:
   virtual bool TranslateImpl(const std::string& src,
                              SentenceMetadata* smeta,
@@ -55,6 +56,8 @@ class SCFGTranslatorImpl;
 class SCFGTranslator : public Translator {
  public:
   SCFGTranslator(const boost::program_options::variables_map& conf);
+  void SetSupplementalGrammar(const std::string& grammar);
+  virtual std::string GetDecoderType() const;
  protected:
   bool TranslateImpl(const std::string& src,
                  SentenceMetadata* smeta,

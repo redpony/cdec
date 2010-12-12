@@ -9,6 +9,10 @@ using namespace std;
 
 Translator::~Translator() {}
 
+std::string Translator::GetDecoderType() const {
+  return "UNKNOWN";
+}
+
 void Translator::ProcessMarkupHints(const map<string, string>& kv) {
   if (state_ != kUninitialized) {
     cerr << "Translator::ProcessMarkupHints in wrong state: " << state_ << endl;

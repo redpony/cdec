@@ -91,6 +91,17 @@ struct SCFGTranslatorImpl {
   bool show_tree_structure_;
   unsigned int ctf_iterations_;
   vector<GrammarPtr> grammars;
+  GrammarPtr sup_grammar_;
+
+  struct Equals { Equals(const GrammarPtr& v) : v_(v) {}
+                  bool operator()(const GrammarPtr& x) const { return x == v_; } const GrammarPtr& v_; };
+
+  void SetSupplementalGrammar(const std::string& grammar_string) {
+    grammars.erase(remove_if(grammars.begin(), grammars.end(), Equals(sup_grammar_)), grammars.end());
+    istringstream in(grammar_string);
+    sup_grammar_.reset(new TextGrammar(&in));
+    grammars.push_back(sup_grammar_);
+  }
 
   bool Translate(const string& input,
                  SentenceMetadata* smeta,
@@ -290,6 +301,10 @@ void SCFGTranslator::ProcessMarkupHintsImpl(const map<string, string>& kv) {
 
 }
 
+void SCFGTranslator::SetSupplementalGrammar(const std::string& grammar) {
+  pimpl_->SetSupplementalGrammar(grammar);
+}
+
 void SCFGTranslator::SentenceCompleteImpl() {
 
   if(usingSentenceGrammar)      // Drop the last sentence grammar from the list of grammars
@@ -297,5 +312,9 @@ void SCFGTranslator::SentenceCompleteImpl() {
       cerr << "Clearing grammar" << endl;
       pimpl_->grammars.pop_back();
     }
+}
+
+std::string SCFGTranslator::GetDecoderType() const {
+  return "SCFG";
 }
 
