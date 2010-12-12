@@ -1,12 +1,14 @@
 #ifndef GRAMMAR_H_
 #define GRAMMAR_H_
 
+#include <iostream>
 #include <algorithm>
 #include <vector>
 #include <map>
 #include <set>
-#include <boost/shared_ptr.hpp>
 #include <string>
+
+#include <boost/shared_ptr.hpp>
 
 #include "lattice.h"
 #include "trule.h"
@@ -62,12 +64,14 @@ typedef boost::shared_ptr<Grammar> GrammarPtr;
 class TGImpl;
 struct TextGrammar : public Grammar {
   TextGrammar();
-  TextGrammar(const std::string& file);
+  explicit TextGrammar(const std::string& file);
+  explicit TextGrammar(std::istream* in);
   void SetMaxSpan(int m) { max_span_ = m; }
 
   virtual const GrammarIter* GetRoot() const;
   void AddRule(const TRulePtr& rule, const unsigned int ctf_level=0, const TRulePtr& coarse_parent=TRulePtr());
   void ReadFromFile(const std::string& filename);
+  void ReadFromStream(std::istream* in);
   virtual bool HasRuleForSpan(int i, int j, int distance) const;
   const std::vector<TRulePtr>& GetUnaryRules(const WordID& cat) const;
 
@@ -92,4 +96,5 @@ struct PassThroughGrammar : public TextGrammar {
 };
 
 void RefineRule(TRulePtr pt, const unsigned int ctf_level);
+
 #endif

@@ -29,6 +29,11 @@ struct Decoder {
   void SetId(int id);
   ~Decoder();
   const boost::program_options::variables_map& GetConf() const { return conf; }
+
+  // add grammar rules (currently only supported by SCFG decoders)
+  // that will be used on subsequent calls to Decode. rules should be in standard
+  // text format. This function does NOT read from a file.
+  void SetSupplementalGrammar(const std::string& grammar);
  private:
   boost::program_options::variables_map conf;
   boost::shared_ptr<DecoderImpl> pimpl_;
