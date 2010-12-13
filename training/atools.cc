@@ -26,7 +26,7 @@ struct Command {
   virtual bool RequiresTwoOperands() const { return true; }
   virtual void Apply(const Array2D<bool>& a, const Array2D<bool>& b, Array2D<bool>* x) = 0;
   void EnsureSize(const Array2D<bool>& a, const Array2D<bool>& b, Array2D<bool>* x) {
-    x->resize(max(a.width(), b.width()), max(a.height(), b.width()));
+    x->resize(max(a.width(), b.width()), max(a.height(), b.height()));
   }
   static bool Safe(const Array2D<bool>& a, int i, int j) {
     if (i >= 0 && j >= 0 && i < a.width() && j < a.height())
