@@ -1,7 +1,7 @@
 bin_PROGRAMS = build_binary
 
 build_binary_SOURCES = build_binary.cc
-build_binary_LDADD = ../util/libklm_util.a libklm.a -lz
+build_binary_LDADD = libklm.a ../util/libklm_util.a -lz
 
 #noinst_PROGRAMS = \
 #  ngram_test
