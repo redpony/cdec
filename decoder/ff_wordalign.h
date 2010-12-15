@@ -237,6 +237,23 @@ class WordPairFeatures : public FeatureFunction {
   std::vector<std::map<WordID, SparseVector<float> > > values_;  // fkeys_index -> e -> value
 };
 
+// fires when a len(word) >= length_min_ is translated as itself and then a self-transition is made
+class IdentityCycleDetector : public FeatureFunction {
+ public:
+  IdentityCycleDetector(const std::string& param);
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const;
+ private:
+  int length_min_;
+  int fid_;
+  mutable std::map<WordID, bool> big_enough_;
+};
+
 class InputIdentity : public FeatureFunction {
  public:
   InputIdentity(const std::string& param);
