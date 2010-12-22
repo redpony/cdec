@@ -1,6 +1,0 @@
-data <- read.table("/Users/redpony/ws10smt/report/pyp_clustering/llh.dat", sep=" ", header=TRUE)
-attach(data)
-pdf("llh.pdf")
-plot(Samples,C25,type="o",pch=23,col="blue",ylab="LLH")
-lines(Samples,C10,type="o",col="red")
-dev.off()

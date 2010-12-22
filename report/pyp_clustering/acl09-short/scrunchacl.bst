@@ -1,1 +1,0 @@
-common/scrunchacl.bst

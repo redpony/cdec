@@ -1,8 +1,0 @@
-#!/usr/bin/perl
-
-for $i (0..5) {
-$beta = 10**$i;
-$cmd = "pygibbs_geom $beta\n";
-print $cmd;
-`$cmd`;
-}

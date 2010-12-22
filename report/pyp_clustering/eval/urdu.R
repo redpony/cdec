@@ -1,5 +1,0 @@
-data <- read.table("urdu.dat", header=TRUE)
-attach(data)
-data.lm <- glm(BLEU ~ ConditionalEntropy)
-plot(data$ConditionalEntropy,data$BLEU)
-abline(data.lm)
