@@ -1,2 +1,1 @@
-../../training/cluster-ptrain.pl cdec-train.ini dev.in-ref weights.ptinit --gaussian_prior --sigma_squared 1 &> training.log &
-
+~/cdec/training/mpi_batch_optimize -w weights.cur.gz -t dev.in-ref -d cdec-train.ini -M 200

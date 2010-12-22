@@ -22,9 +22,11 @@ struct BasicCSplitFeaturesImpl {
       letters_sq_(FD::Convert("LettersSq")),
       letters_sqrt_(FD::Convert("LettersSqrt")),
       in_dict_(FD::Convert("InDict")),
+      in_dict_sub_word_(FD::Convert("InDictSubWord")),
       short_(FD::Convert("Short")),
       long_(FD::Convert("Long")),
       oov_(FD::Convert("OOV")),
+      oov_sub_word_(FD::Convert("OOVSubWord")),
       short_range_(FD::Convert("ShortRange")),
       high_freq_(FD::Convert("HighFreq")),
       med_freq_(FD::Convert("MedFreq")),
@@ -52,15 +54,18 @@ struct BasicCSplitFeaturesImpl {
   }
 
   void TraversalFeaturesImpl(const Hypergraph::Edge& edge,
+                             const int src_word_size,
                              SparseVector<double>* features) const;
 
   const int word_count_;
   const int letters_sq_;
   const int letters_sqrt_;
   const int in_dict_;
+  const int in_dict_sub_word_;
   const int short_;
   const int long_;
   const int oov_;
+  const int oov_sub_word_;
   const int short_range_;
   const int high_freq_;
   const int med_freq_;
@@ -77,7 +82,9 @@ BasicCSplitFeatures::BasicCSplitFeatures(const string& param) :
 
 void BasicCSplitFeaturesImpl::TraversalFeaturesImpl(
                                      const Hypergraph::Edge& edge,
+                                     const int src_word_length,
                                      SparseVector<double>* features) const {
+  const bool subword = (edge.i_ > 0) || (edge.j_ < src_word_length);
   features->set_value(word_count_, 1.0);
   features->set_value(letters_sq_, (edge.j_ - edge.i_) * (edge.j_ - edge.i_));
   features->set_value(letters_sqrt_, sqrt(edge.j_ - edge.i_));
@@ -108,8 +115,10 @@ void BasicCSplitFeaturesImpl::TraversalFeaturesImpl(
   if (freq) {
     features->set_value(freq_, freq);
     features->set_value(in_dict_, 1.0);
+    if (subword) features->set_value(in_dict_sub_word_, 1.0);
   } else {
     features->set_value(oov_, 1.0);
+    if (subword) features->set_value(oov_sub_word_, 1.0);
     freq = 99.0f;
   }
   if (bad_words_.count(word) != 0)
@@ -143,7 +152,7 @@ void BasicCSplitFeatures::TraversalFeaturesImpl(
   (void) estimated_features;
   if (edge.Arity() == 0) return;
   if (edge.rule_->EWords() != 1) return;
-  pimpl_->TraversalFeaturesImpl(edge, features);
+  pimpl_->TraversalFeaturesImpl(edge, smeta.GetSourceLattice().size(), features);
 }
 
 struct ReverseCharLMCSplitFeatureImpl {
@@ -208,9 +217,17 @@ void ReverseCharLMCSplitFeature::TraversalFeaturesImpl(
   if (edge.rule_->EWords() != 1) return;
   const double lpp = pimpl_->LeftPhonotacticProb(smeta.GetSourceLattice(), edge.i_);
   features->set_value(fid_, lpp);
+#if 0
   WordID neighbor_word = 0;
   const WordID word = edge.rule_->e_[1];
-#if 0
+  const char* sword = TD::Convert(word);
+  const int len = strlen(sword);
+  int cur = 0;
+  int chars = 0;
+  while(cur < len) {
+    cur += UTF8Len(sword[cur]);
+    ++chars;
+  }
   if (chars > 4 && (sword[0] == 's' || sword[0] == 'n')) {
     neighbor_word = TD::Convert(string(&sword[1]));
   }
