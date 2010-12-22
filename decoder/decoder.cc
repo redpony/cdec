@@ -279,7 +279,6 @@ struct DecoderImpl {
   bool encode_b64;
   bool kbest;
   bool unique_kbest;
-  bool crf_uniform_empirical;
   bool get_oracle_forest;
   shared_ptr<WriteFile> extract_file;
   int combine_size;
@@ -379,7 +378,6 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
         ("max_translation_sample,X", po::value<int>(), "Sample the max translation from the chart")
         ("pb_max_distortion,D", po::value<int>()->default_value(4), "Phrase-based decoder: maximum distortion")
         ("cll_gradient,G","Compute conditional log-likelihood gradient and write to STDOUT (src & ref required)")
-        ("crf_uniform_empirical", "If there are multple references use (i.e., lattice) a uniform distribution rather than posterior weighting a la EM")
     ("get_oracle_forest,o", "Calculate rescored hypregraph using approximate BLEU scoring of rules")
     ("feature_expectations","Write feature expectations for all features in chart (**OBJ** will be the partition)")
         ("vector_format",po::value<string>()->default_value("b64"), "Sparse vector serialization format for feature expectations or gradients, includes (text or b64)")
@@ -611,7 +609,6 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
   encode_b64 = str("vector_format",conf) == "b64";
   kbest = conf.count("k_best");
   unique_kbest = conf.count("unique_k_best");
-  crf_uniform_empirical = conf.count("crf_uniform_empirical");
   get_oracle_forest = conf.count("get_oracle_forest");
 
   cfg_options.Validate();
@@ -842,14 +839,12 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   if (has_ref) {
     if (HG::Intersect(ref, &forest)) {
       if (!SILENT) forest_stats(forest,"  Constr. forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
-      if (crf_uniform_empirical) {
-        if (!SILENT) cerr << "  USING UNIFORM WEIGHTS\n";
-        for (int i = 0; i < forest.edges_.size(); ++i)
-          forest.edges_[i].edge_prob_=prob_t::One();
-      } else {
-        forest.Reweight(feature_weights);
-        if (!SILENT) cerr << "  Constr. VitTree: " << ViterbiFTree(forest) << endl;
-      }
+//      if (crf_uniform_empirical) {
+//        if (!SILENT) cerr << "  USING UNIFORM WEIGHTS\n";
+//        for (int i = 0; i < forest.edges_.size(); ++i)
+//          forest.edges_[i].edge_prob_=prob_t::One(); }
+      forest.Reweight(feature_weights);
+      if (!SILENT) cerr << "  Constr. VitTree: " << ViterbiFTree(forest) << endl;
       if (conf.count("show_partition")) {
          const prob_t z = Inside<prob_t, EdgeProb>(forest);
          cerr << "  Contst. partition  log(Z): " << log(z) << endl;
@@ -878,11 +873,9 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       if (write_gradient) {
         const prob_t ref_z = InsideOutside<prob_t, EdgeProb, SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>(forest, &ref_exp);
         ref_exp /= ref_z;
-        if (crf_uniform_empirical) {
-          log_ref_z = ref_exp.dot(feature_weights);
-        } else {
-          log_ref_z = log(ref_z);
-        }
+//        if (crf_uniform_empirical)
+//          log_ref_z = ref_exp.dot(feature_weights);
+        log_ref_z = log(ref_z);
         //cerr << "      MODEL LOG Z: " << log_z << endl;
         //cerr << "  EMPIRICAL LOG Z: " << log_ref_z << endl;
         if ((log_z - log_ref_z) < kMINUS_EPSILON) {

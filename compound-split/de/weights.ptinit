@@ -5,9 +5,11 @@ FugS 0
 FugN 0
 WordCount 0
 InDict 0
+InDictSubWord 0
 Short 0
 Long 0
 OOV 0
+OOVSubWord 0
 ShortRange 0
 HighFreq 0
 MedFreq 0

@@ -177,6 +177,7 @@ public:
 
   void Apply() {
     int num_nodes = in.nodes_.size();
+    assert(num_nodes >= 2);
     int goal_id = num_nodes - 1;
     int pregoal = goal_id - 1;
     int every = 1;
