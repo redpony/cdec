@@ -124,23 +124,6 @@ class LexicalTranslationTrigger : public FeatureFunction {
   std::vector<std::vector<WordID> > triggers_;
 };
 
-class AlignerResults : public FeatureFunction {
- public:
-  AlignerResults(const std::string& param);
- protected:
-  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
-                                     const std::vector<const void*>& ant_contexts,
-                                     SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
-                                     void* out_context) const;
- private:
-  int fid_;
-  std::vector<boost::shared_ptr<Array2D<bool> > > is_aligned_;
-  mutable int cur_sent_;
-  const Array2D<bool> mutable* cur_grid_;
-};
-
 #include <tr1/unordered_map>
 #include <boost/functional/hash.hpp>
 #include <cassert>
@@ -254,9 +237,9 @@ class IdentityCycleDetector : public FeatureFunction {
   mutable std::map<WordID, bool> big_enough_;
 };
 
-class InputIdentity : public FeatureFunction {
+class InputIndicator : public FeatureFunction {
  public:
-  InputIdentity(const std::string& param);
+  InputIndicator(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
@@ -268,6 +251,20 @@ class InputIdentity : public FeatureFunction {
   void FireFeature(WordID src,
                    SparseVector<double>* features) const;
   mutable Class2FID fmap_;
+};
+
+class Fertility : public FeatureFunction {
+ public:
+  Fertility(const std::string& param);
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const;
+ private:
+  mutable std::map<WordID, int> fids_;
 };
 
 #endif

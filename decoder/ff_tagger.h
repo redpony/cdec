@@ -13,9 +13,9 @@ typedef std::map<WordID, Class2FID> Class2Class2FID;
 // the sequence unfolds from left to right, which means it doesn't
 // have to split states based on left context.
 // fires unigram features as well
-class Tagger_BigramIdentity : public FeatureFunction {
+class Tagger_BigramIndicator : public FeatureFunction {
  public:
-  Tagger_BigramIdentity(const std::string& param);
+  Tagger_BigramIndicator(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
@@ -32,9 +32,9 @@ class Tagger_BigramIdentity : public FeatureFunction {
 
 // for each pair of symbols cooccuring in a lexicalized rule, fire
 // a feature (mostly used for tagging, but could be used for any model)
-class LexicalPairIdentity : public FeatureFunction {
+class LexicalPairIndicator : public FeatureFunction {
  public:
-  LexicalPairIdentity(const std::string& param);
+  LexicalPairIndicator(const std::string& param);
   virtual void PrepareForInput(const SentenceMetadata& smeta);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
@@ -53,9 +53,9 @@ class LexicalPairIdentity : public FeatureFunction {
 };
 
 
-class OutputIdentity : public FeatureFunction {
+class OutputIndicator : public FeatureFunction {
  public:
-  OutputIdentity(const std::string& param);
+  OutputIndicator(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,

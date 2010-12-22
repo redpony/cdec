@@ -1,3 +1,4 @@
+klm/lm/build_binary
 extools/extractor_monolingual
 gi/posterior-regularisation/prjava/lib/*.jar
 klm/lm/libklm.a

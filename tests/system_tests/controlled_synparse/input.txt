@@ -1,2 +1,2 @@
-A B C D ||| a d c b
-A B C D ||| a b c d
+A B C D
+A B C D

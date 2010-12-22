@@ -8,10 +8,10 @@
 
 using namespace std;
 
-Tagger_BigramIdentity::Tagger_BigramIdentity(const std::string& param) :
+Tagger_BigramIndicator::Tagger_BigramIndicator(const std::string& param) :
   FeatureFunction(sizeof(WordID)) {}
 
-void Tagger_BigramIdentity::FireFeature(const WordID& left,
+void Tagger_BigramIndicator::FireFeature(const WordID& left,
                                  const WordID& right,
                                  SparseVector<double>* features) const {
   int& fid = fmap_[left][right];
@@ -30,7 +30,7 @@ void Tagger_BigramIdentity::FireFeature(const WordID& left,
   features->set_value(fid, 1.0);
 }
 
-void Tagger_BigramIdentity::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+void Tagger_BigramIndicator::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
@@ -53,18 +53,18 @@ void Tagger_BigramIdentity::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   }
 }
 
-void LexicalPairIdentity::PrepareForInput(const SentenceMetadata& smeta) {
+void LexicalPairIndicator::PrepareForInput(const SentenceMetadata& smeta) {
   lexmap_->PrepareForInput(smeta);
 }
 
-LexicalPairIdentity::LexicalPairIdentity(const std::string& param) {
+LexicalPairIndicator::LexicalPairIndicator(const std::string& param) {
   name_ = "Id";
   if (param.size()) {
     // name corpus.f emap.txt
     vector<string> params;
     SplitOnWhitespace(param, &params);
     if (params.size() != 3) {
-      cerr << "LexicalPairIdentity takes 3 parameters: <name> <corpus.src.txt> <trgmap.txt>\n";
+      cerr << "LexicalPairIndicator takes 3 parameters: <name> <corpus.src.txt> <trgmap.txt>\n";
       cerr << " * may be used for corpus.src.txt or trgmap.txt to use surface forms\n";
       cerr << " Received: " << param << endl;
       abort();
@@ -76,7 +76,7 @@ LexicalPairIdentity::LexicalPairIdentity(const std::string& param) {
   }
 }
 
-void LexicalPairIdentity::FireFeature(WordID src,
+void LexicalPairIndicator::FireFeature(WordID src,
                                       WordID trg,
                                       SparseVector<double>* features) const {
   int& fid = fmap_[src][trg];
@@ -88,7 +88,7 @@ void LexicalPairIdentity::FireFeature(WordID src,
   features->set_value(fid, 1.0);
 }
 
-void LexicalPairIdentity::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+void LexicalPairIndicator::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
@@ -105,9 +105,9 @@ void LexicalPairIdentity::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   }
 }
 
-OutputIdentity::OutputIdentity(const std::string& param) {}
+OutputIndicator::OutputIndicator(const std::string& param) {}
 
-void OutputIdentity::FireFeature(WordID trg,
+void OutputIndicator::FireFeature(WordID trg,
                                  SparseVector<double>* features) const {
   int& fid = fmap_[trg];
   if (!fid) {
@@ -125,7 +125,7 @@ void OutputIdentity::FireFeature(WordID trg,
   features->set_value(fid, 1.0);
 }
 
-void OutputIdentity::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+void OutputIndicator::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,

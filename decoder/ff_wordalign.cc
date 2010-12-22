@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 #include <cmath>
+#include <bitset>
 #include <tr1/unordered_map>
 
 #include <boost/tuple/tuple.hpp>
@@ -443,58 +444,6 @@ void LexicalTranslationTrigger::TraversalFeaturesImpl(const SentenceMetadata& sm
   }
 }
 
-// state: src word used, number of trg words generated
-AlignerResults::AlignerResults(const std::string& param) :
-    cur_sent_(-1),
-    cur_grid_(NULL) {
-  vector<string> argv;
-  int argc = SplitOnWhitespace(param, &argv);
-  if (argc != 2) {
-    cerr << "Required format: AlignerResults [FeatureName] [file.pharaoh]\n";
-    exit(1);
-  }
-  cerr << "  feature: " << argv[0] << "\talignments: " << argv[1] << endl;
-  fid_ = FD::Convert(argv[0]);
-  ReadFile rf(argv[1]);
-  istream& in = *rf.stream(); int lc = 0;
-  while(in) {
-    string line;
-    getline(in, line);
-    if (!in) break;
-    ++lc;
-    is_aligned_.push_back(AlignmentPharaoh::ReadPharaohAlignmentGrid(line));
-  }
-  cerr << "  Loaded " << lc << " refs\n";
-}
-
-void AlignerResults::TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                           const Hypergraph::Edge& edge,
-                                           const vector<const void*>& /* ant_states */,
-                                           SparseVector<double>* features,
-                                           SparseVector<double>* /* estimated_features */,
-                                           void* /* state */) const {
-  if (edge.i_ == -1 || edge.prev_i_ == -1)
-    return;
-
-  if (cur_sent_ != smeta.GetSentenceID()) {
-    assert(smeta.HasReference());
-    cur_sent_ = smeta.GetSentenceID();
-    assert(cur_sent_ < is_aligned_.size());
-    cur_grid_ = is_aligned_[cur_sent_].get();
-  }
-
-  //cerr << edge.rule_->AsString() << endl;
-
-  int j = edge.i_;        // source side (f)
-  int i = edge.prev_i_;   // target side (e)
-  if (j < cur_grid_->height() && i < cur_grid_->width() && (*cur_grid_)(i, j)) {
-//    if (edge.rule_->e_[0] == smeta.GetReference()[i][0].label) {
-      features->set_value(fid_, 1.0);
-//      cerr << edge.rule_->AsString() << "   (" << i << "," << j << ")\n";
-//    }
-  }
-}
-
 BlunsomSynchronousParseHack::BlunsomSynchronousParseHack(const string& param) :
   FeatureFunction((100 / 8) + 1), fid_(FD::Convert("NotRef")), cur_sent_(-1) {
   ReadFile rf(param);
@@ -618,10 +567,10 @@ void IdentityCycleDetector::TraversalFeaturesImpl(const SentenceMetadata& smeta,
 }
 
 
-InputIdentity::InputIdentity(const std::string& param) {}
+InputIndicator::InputIndicator(const std::string& param) {}
 
-void InputIdentity::FireFeature(WordID src,
-                                SparseVector<double>* features) const {
+void InputIndicator::FireFeature(WordID src,
+                                 SparseVector<double>* features) const {
   int& fid = fmap_[src];
   if (!fid) {
     static map<WordID, WordID> escape;
@@ -638,7 +587,7 @@ void InputIdentity::FireFeature(WordID src,
   features->set_value(fid, 1.0);
 }
 
-void InputIdentity::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+void InputIndicator::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
@@ -767,6 +716,43 @@ void WordPairFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
     // TODO optional strict flag to make sure there are features for all pairs?
     if (it != values_[ind].end())
       (*features) += it->second;
+  }
+}
+
+struct PathFertility {
+  unsigned char null_fertility;
+  unsigned char index_fertility[255];
+  PathFertility& operator+=(const PathFertility& rhs) {
+    null_fertility += rhs.null_fertility;
+    for (int i = 0; i < 255; ++i)
+      index_fertility[i] += rhs.index_fertility[i];
+    return *this;
+  }
+};
+
+Fertility::Fertility(const string& config) :
+    FeatureFunction(sizeof(PathFertility)) {}
+
+void Fertility::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                      const Hypergraph::Edge& edge,
+                                      const std::vector<const void*>& ant_contexts,
+                                      SparseVector<double>* features,
+                                      SparseVector<double>* estimated_features,
+                                      void* context) const {
+  PathFertility& out_fert = *static_cast<PathFertility*>(context);
+  if (edge.Arity() == 0) {
+    if (edge.i_ < 0) {
+      out_fert.null_fertility = 1;
+    } else {
+      out_fert.index_fertility[edge.i_] = 1;
+    }
+  } else if (edge.Arity() == 2) {
+    const PathFertility left = *static_cast<const PathFertility*>(ant_contexts[0]);
+    const PathFertility right = *static_cast<const PathFertility*>(ant_contexts[1]);
+    out_fert += left;
+    out_fert += right;
+  } else if (edge.Arity() == 1) {
+    out_fert += *static_cast<const PathFertility*>(ant_contexts[0]);
   }
 }
 
