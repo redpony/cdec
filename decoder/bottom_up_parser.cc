@@ -14,20 +14,6 @@
 
 using namespace std;
 
-struct ParserStats {
-  ParserStats() : active_items(), passive_items() {}
-  void Reset() { active_items=0; passive_items=0; }
-  void Report() {
-    if (!SILENT) cerr << "  ACTIVE ITEMS: " << active_items << "\tPASSIVE ITEMS: " << passive_items << endl;
-  }
-  int active_items;
-  int passive_items;
-  void NotifyActive(int , int ) { ++active_items; }
-  void NotifyPassive(int , int ) { ++passive_items; }
-};
-
-ParserStats stats;
-
 class ActiveChart;
 class PassiveChart {
  public:
@@ -90,7 +76,6 @@ class ActiveChart {
     void ExtendTerminal(int symbol, float src_cost, vector<ActiveItem>* out_cell) const {
       const GrammarIter* ni = gptr_->Extend(symbol);
       if (ni) {
-        stats.NotifyActive(-1,-1);  // TRACKING STATS
         out_cell->push_back(ActiveItem(ni, ant_nodes_, lattice_cost + src_cost));
       }
     }
@@ -98,7 +83,6 @@ class ActiveChart {
       int symbol = hg->nodes_[node_index].cat_;
       const GrammarIter* ni = gptr_->Extend(symbol);
       if (!ni) return;
-      stats.NotifyActive(-1,-1);  // TRACKING STATS
       Hypergraph::TailNodeVector na(ant_nodes_.size() + 1);
       for (int i = 0; i < ant_nodes_.size(); ++i)
         na[i] = ant_nodes_[i];
@@ -181,7 +165,6 @@ void PassiveChart::ApplyRule(const int i,
                              const TRulePtr& r,
                              const Hypergraph::TailNodeVector& ant_nodes,
                              const float lattice_cost) {
-  stats.NotifyPassive(i,j);  // TRACKING STATS
   Hypergraph::Edge* new_edge = forest_->AddEdge(r, ant_nodes);
   new_edge->prev_i_ = r->prev_i;
   new_edge->prev_j_ = r->prev_j;
@@ -299,9 +282,7 @@ ExhaustiveBottomUpParser::ExhaustiveBottomUpParser(
 
 bool ExhaustiveBottomUpParser::Parse(const Lattice& input,
                                      Hypergraph* forest) const {
-  stats.Reset();
   PassiveChart chart(goal_sym_, grammars_, input, forest);
   const bool result = chart.Parse();
-  stats.Report();
   return result;
 }

@@ -1,0 +1,12 @@
+-lm_nodes 6
+-lm_edges 12
+-lm_paths 27
++lm_nodes 16
++lm_edges 30
++lm_paths 27
+-lm_nodes 2
+-lm_edges 4
+-lm_paths 3
++lm_nodes 4
++lm_edges 6
++lm_paths 3

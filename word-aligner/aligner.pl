@@ -119,16 +119,17 @@ grammar=$align_dir/grammars/corpus.$direction.lex-grammar.gz
 # per_sentence_grammar_file=$align_dir/grammars/psg.$direction
 
 feature_function=WordPairFeatures $align_dir/grammars/wordpairs.$direction.features.gz
-feature_function=LexicalPairIdentity
+feature_function=LexicalPairIndicator
 # stem translation
-feature_function=LexicalPairIdentity S $align_dir/grammars/corpus.stemmed.$first $align_dir/grammars/${second}stem.map
+feature_function=LexicalPairIndicator S $align_dir/grammars/corpus.stemmed.$first $align_dir/grammars/${second}stem.map
 # POS translation
-feature_function=LexicalPairIdentity C $align_dir/grammars/corpus.class.$first $align_dir/grammars/voc2class.$second
-feature_function=InputIdentity
-feature_function=OutputIdentity
+feature_function=LexicalPairIndicator C $align_dir/grammars/corpus.class.$first $align_dir/grammars/voc2class.$second
+feature_function=InputIndicator
+feature_function=OutputIndicator
 feature_function=RelativeSentencePosition $align_dir/grammars/corpus.class.$first
 feature_function=LexNullJump
 feature_function=NewJump
+feature_function=IdentityCycleDetector
 feature_function=NewJump use_binned_log_lengths flen
 # jump distance and src and destination class type
 feature_function=NewJump use_binned_log_lengths f0 fprev f:$align_dir/grammars/corpus.class.$first

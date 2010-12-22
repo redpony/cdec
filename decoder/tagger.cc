@@ -96,7 +96,7 @@ bool Tagger::TranslateImpl(const string& input,
                        SentenceMetadata* smeta,
                        const vector<double>& weights,
                        Hypergraph* forest) {
-  Lattice lattice;
+  Lattice& lattice = smeta->src_lattice_;
   LatticeTools::ConvertTextToLattice(input, &lattice);
   smeta->SetSourceLength(lattice.size());
   vector<WordID> sequence(lattice.size());
