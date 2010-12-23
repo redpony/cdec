@@ -5,9 +5,13 @@
 #include <string>
 
 #include "ff.h"
+#include "lm/model.hh"
 
-struct KLanguageModelImpl;
+template <class Model> struct KLanguageModelImpl;
 
+// the supported template types are instantiated explicitly
+// in ff_klm.cc.
+template <class Model>
 class KLanguageModel : public FeatureFunction {
  public:
   // param = "filename.lm [-o n]"
@@ -26,7 +30,7 @@ class KLanguageModel : public FeatureFunction {
                                      void* out_context) const;
  private:
   int fid_; // conceptually const; mutable only to simplify constructor
-  KLanguageModelImpl* pimpl_;
+  KLanguageModelImpl<Model>* pimpl_;
 };
 
 #endif

@@ -35,7 +35,6 @@ void register_feature_functions() {
   RegisterFsaDynToFF<SameFirstLetter>();
 
   RegisterFF<LanguageModel>();
-  RegisterFF<KLanguageModel>();
 
   RegisterFF<WordPenalty>();
   RegisterFF<SourceWordPenalty>();
@@ -48,6 +47,10 @@ void register_feature_functions() {
 #ifdef HAVE_RANDLM
   ff_registry.Register("RandLM", new FFFactory<LanguageModelRandLM>);
 #endif
+  ff_registry.Register("KLanguageModel", new FFFactory<KLanguageModel<lm::ngram::ProbingModel> >());
+  ff_registry.Register("KLanguageModel_Sorted", new FFFactory<KLanguageModel<lm::ngram::SortedModel> >());
+  ff_registry.Register("KLanguageModel_Trie", new FFFactory<KLanguageModel<lm::ngram::TrieModel> >());
+  ff_registry.Register("KLanguageModel_Probing", new FFFactory<KLanguageModel<lm::ngram::ProbingModel> >());
   ff_registry.Register("RuleShape", new FFFactory<RuleShapeFeatures>);
   ff_registry.Register("RelativeSentencePosition", new FFFactory<RelativeSentencePosition>);
   ff_registry.Register("LexNullJump", new FFFactory<LexNullJump>);
