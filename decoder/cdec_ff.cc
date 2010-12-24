@@ -12,6 +12,7 @@
 #include "ff_lm_fsa.h"
 #include "ff_sample_fsa.h"
 #include "ff_register.h"
+#include "ff_charset.h"
 #include "ff_wordset.h"
 
 #ifdef HAVE_GLC
@@ -51,6 +52,7 @@ void register_feature_functions() {
   ff_registry.Register("KLanguageModel_Sorted", new FFFactory<KLanguageModel<lm::ngram::SortedModel> >());
   ff_registry.Register("KLanguageModel_Trie", new FFFactory<KLanguageModel<lm::ngram::TrieModel> >());
   ff_registry.Register("KLanguageModel_Probing", new FFFactory<KLanguageModel<lm::ngram::ProbingModel> >());
+  ff_registry.Register("NonLatinCount", new FFFactory<NonLatinCount>);
   ff_registry.Register("RuleShape", new FFFactory<RuleShapeFeatures>);
   ff_registry.Register("RelativeSentencePosition", new FFFactory<RelativeSentencePosition>);
   ff_registry.Register("LexNullJump", new FFFactory<LexNullJump>);
