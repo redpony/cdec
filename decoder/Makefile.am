@@ -58,6 +58,7 @@ libcdec_a_SOURCES = \
   trule.cc \
   ff.cc \
   ff_wordset.cc \
+  ff_charset.cc \
   ff_lm.cc \
   ff_klm.cc \
   ff_ruleshape.cc \
