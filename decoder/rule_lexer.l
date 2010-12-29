@@ -46,10 +46,14 @@ int scfglex_num_feats;
 #define MAX_ARITY 20
 int scfglex_nt_sanity[MAX_ARITY];
 int scfglex_src_nts[MAX_ARITY];
-float scfglex_nt_size_means[MAX_ARITY];
-float scfglex_nt_size_vars[MAX_ARITY];
+// float scfglex_nt_size_means[MAX_ARITY];
+// float scfglex_nt_size_vars[MAX_ARITY];
 std::stack<TRulePtr> ctf_rule_stack;
 unsigned int ctf_level = 0;
+
+#define MAX_ALS 50
+AlignmentPoint scfglex_als[MAX_ALS];
+int scfglex_num_als;
 
 void sanity_check_trg_symbol(WordID nt, int index) {
   if (scfglex_src_nts[index-1] != nt) {
@@ -79,6 +83,7 @@ void scfglex_reset() {
   scfglex_num_feats = 0;
   scfglex_src_rhs_size = 0;
   scfglex_trg_rhs_size = 0;
+  scfglex_num_als = 0;
 }
 
 void check_and_update_ctf_stack(const TRulePtr& rp) {
@@ -215,7 +220,7 @@ NT [^\t \[\],]+
                   std::cerr << "Line " << lex_line << ": LHS and RHS arity mismatch!\n";
                   abort();
                 }
-		TRulePtr rp(new TRule(scfglex_lhs, scfglex_src_rhs, scfglex_src_rhs_size, scfglex_trg_rhs, scfglex_trg_rhs_size, scfglex_feat_ids, scfglex_feat_vals, scfglex_num_feats, scfglex_src_arity));
+		TRulePtr rp(new TRule(scfglex_lhs, scfglex_src_rhs, scfglex_src_rhs_size, scfglex_trg_rhs, scfglex_trg_rhs_size, scfglex_feat_ids, scfglex_feat_vals, scfglex_num_feats, scfglex_src_arity, scfglex_als, scfglex_num_als));
     check_and_update_ctf_stack(rp);
     TRulePtr coarse_rp = ((ctf_level == 0) ? TRulePtr() : ctf_rule_stack.top());
 		rule_callback(rp, ctf_level, coarse_rp, rule_callback_extra);
@@ -280,7 +285,7 @@ NT [^\t \[\],]+
 		  b += yytext[i] - '0';
 		  ++i;
 		}
-		// TODO store alignment points somewhere
+		scfglex_als[scfglex_num_als++]=AlignmentPoint(a,b);
 		}
 <ALIGNS>[ \t]	;
 <ALIGNS>.	{

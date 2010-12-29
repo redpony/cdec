@@ -38,6 +38,8 @@ libcdec_a_SOURCES = \
   maxtrans_blunsom.cc \
   cdec_ff.cc \
   cfg.cc \
+  dwarf.cc \
+  ff_dwarf.cc \
   apply_fsa_models.cc \
   rule_lexer.cc \
   fst_translator.cc \

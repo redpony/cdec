@@ -14,6 +14,7 @@
 #include "ff_register.h"
 #include "ff_charset.h"
 #include "ff_wordset.h"
+#include "ff_dwarf.h"
 
 #ifdef HAVE_GLC
 #include <cdec/ff_glc.h>
@@ -70,6 +71,7 @@ void register_feature_functions() {
   ff_registry.Register("LexicalTranslationTrigger", new FFFactory<LexicalTranslationTrigger>);
   ff_registry.Register("WordPairFeatures", new FFFactory<WordPairFeatures>);
   ff_registry.Register("WordSet", new FFFactory<WordSet>);
+  ff_registry.Register("Dwarf", new FFFactory<Dwarf>);
 #ifdef HAVE_GLC
   ff_registry.Register("ContextCRF", new FFFactory<Model1Features>);
 #endif

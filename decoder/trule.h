@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 #include <cassert>
+#include <iostream>
 #include <boost/shared_ptr.hpp>
 
 #include "sparse_vector.h"
@@ -12,18 +13,27 @@
 class TRule;
 typedef boost::shared_ptr<TRule> TRulePtr;
 
-struct NTSizeSummaryStatistics {
-  NTSizeSummaryStatistics(int arity) : means(arity), vars(arity) {}
-  std::vector<float> means;
-  std::vector<float> vars;
+struct AlignmentPoint {
+  AlignmentPoint() : s_(), t_() {}
+  AlignmentPoint(int s, int t) : s_(s), t_(t) {}
+  AlignmentPoint Inverted() const {
+    return AlignmentPoint(t_, s_);
+  }
+  short s_;
+  short t_;
 };
+inline std::ostream& operator<<(std::ostream& os, const AlignmentPoint& p) {
+  return os << '(' << static_cast<int>(p.s_) << '-' << static_cast<int>(p.t_) << ')';
+}
+
 
 // Translation rule
 class TRule {
  public:
   TRule() : lhs_(0), prev_i(-1), prev_j(-1) { }
-  TRule(WordID lhs, const WordID* src, int src_size, const WordID* trg, int trg_size, const int* feat_ids, const double* feat_vals, int feat_size, int arity) :
-      e_(trg, trg + trg_size), f_(src, src + src_size), lhs_(lhs), arity_(arity), prev_i(-1), prev_j(-1) {
+  TRule(WordID lhs, const WordID* src, int src_size, const WordID* trg, int trg_size, const int* feat_ids, const double* feat_vals, int feat_size, int arity, const AlignmentPoint* als, int alsnum) :
+      e_(trg, trg + trg_size), f_(src, src + src_size), lhs_(lhs), arity_(arity), prev_i(-1), prev_j(-1),
+      a_(als, als + alsnum) {
     for (int i = 0; i < feat_size; ++i)
       scores_.set_value(feat_ids[i], feat_vals[i]);
   }
@@ -113,6 +123,7 @@ class TRule {
 
   const std::vector<WordID>& f() const { return f_; }
   const std::vector<WordID>& e() const { return e_; }
+  const std::vector<AlignmentPoint>& als() const { return a_; }
 
   int EWords() const { return ELength() - Arity(); }
   int FWords() const { return FLength() - Arity(); }
@@ -141,8 +152,7 @@ class TRule {
   short int prev_i;
   short int prev_j;
 
-  // may be null
-  boost::shared_ptr<NTSizeSummaryStatistics> nt_size_summary_;
+  std::vector<AlignmentPoint> a_;  // alignment points, may be empty
 
   // only for coarse-to-fine decoding
   boost::shared_ptr<std::vector<TRulePtr> > fine_rules_;
