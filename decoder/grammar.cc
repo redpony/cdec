@@ -157,6 +157,7 @@ PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat, 
       has_rule_[i].insert(j);
       const string& src = TD::Convert(alts[k].label);
       TRulePtr pt(new TRule("[" + cat + "] ||| " + src + " ||| " + src + " ||| PassThrough=1"));
+      pt->a_.push_back(AlignmentPoint(0,0));
       AddRule(pt);
       RefineRule(pt, ctf_level);
     }
