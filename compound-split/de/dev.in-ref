@@ -77,11 +77,11 @@ abbrucharbeiten ||| # abbruch arbeiten
 abergläubischen ||| # abergläubischen
 abfallbewirtschaftungshierarchie ||| # abfall bewirtschaftung hierarchie
 abfallbewirtschaftungsplänen ||| # abfall bewirtschaftung plänen
-abfertigungsgebühren ||| # abfertigung gebühren
-beitragsunabhängig ||| # beitrag unabhängig
-einreichungsfrist ||| # einreichung frist
+abfertigungsgebühren ||| ((('#',0,1),),(('abfertigung',0,1),('abfertigungs',0,1),),(('gebühren',0,1),),)
+beitragsunabhängig ||| ((('#',0,1),),(('beitrag',0,1),('beitrags',0,1),),(('unabhängig',0,1),),)
+einreichungsfrist ||| ((('#',0,1),),(('einreichung',0,1),),(('frist',0,1),),)
 europaabgeordnete ||| # europa abgeordnete
-früherkennungskampagnen ||| # früh erkennung kampagnen
+früherkennungskampagnen ||| ((('#',0,1),),(('früh',0,1),),(('erkennung',0,1),('erkennungs',0,1),),(('kampagnen',0,1),),)
 hilfsagenturen ||| ((('#',0,1),),(('hilf',0,1),('hilfs',0,1),),(('agenturen',0,1),),)
 hilfsinstitutionen ||| ((('#',0,1),),(('hilf',0,1),('hilfs',0,1),),(('institutionen',0,1),),)
 kaisergranat ||| # kaiser granat
@@ -103,16 +103,16 @@ sonderpreis ||| # sonder preis
 modellrechnung ||| # modell rechnung
 treibhauseffekt ||| # treibhaus effekt
 europatournee ||| # europa tournee
-wirtschaftskrise ||| # wirtschafts krise
+wirtschaftskrise ||| ((('#',0,1),),(('wirtschafts',0,1),('wirtschaft',0,1),),(('krise',0,1),),)
 mittwochabend ||| # mittwoch abend
-abschiedsgala ||| # abschied gala
+abschiedsgala ||| ((('#',0,1),),(('abschied',0,1),('abschieds',0,1),),(('gala',0,1),),)
 betriebstag ||| # betrieb tag
 flughafen ||| # flughafen
 truthahn ||| # truthahn
 gehirnregion ||| # gehirn region
 feststellung ||| # feststellung
 thanksgiving ||| # thanks giving
-börsenhändler ||| # börsen händler
+börsenhändler ||| ((('#',0,1),),(('börsen',0,1),('börse',0,1),),(('händler',0,1),),)
 risikoforschung ||| # risiko forschung
 finanzkrise ||| # finanz krise
 erkenntnis ||| # erkenntnis
@@ -738,3 +738,55 @@ kaufrausch ||| ((('#',0,1),),(('kauf',0,1),),(('rausch',0,1),),)
 kommerzialisierung ||| # kommerzialisierung
 weihnachten ||| # weihnachten
 funktioniert ||| # funktioniert
+zittert ||| # zittert
+wikileaks ||| # wikileaks
+verfassungsgericht ||| ((('#',0,1),),(('verfassung',0,1),('verfassungs',0,1),),(('gericht',0,1),),)
+berlusconis ||| # berlusconis
+immunität ||| # immunität
+teilweise ||| # teilweise
+zinspolitik ||| # zins politik
+trichet ||| # trichet
+inflation ||| # inflation
+eurozone ||| ((('#',0,1),),(('euro',0,1),('eurozone',0,2),),(('zone',0,1),),)
+effektive ||| # effektive
+kontrolle ||| # kontrolle
+futtermittelindustrie ||| # futtermittel industrie
+deutschland ||| # deutschland
+verspielt ||| # verspielt
+regierung ||| # regierung
+vertrauen ||| # vertrauen
+westerwelle ||| # westerwelle
+abzugsdatum ||| ((('#',0,1),),(('abzugs',0,1),('abzug',0,1),),(('datum',0,1),),)
+ghettoblaster ||| # ghetto blaster
+unserem ||| # unserem
+alltag ||| # alltag
+verschwunden ||| # verschwunden
+trotzdem ||| # trotzdem
+ikonen ||| # ikonen
+jugendkultur ||| # jugend kultur
+tatsächlich ||| # tatsächlich
+deuten ||| # deuten
+hochrechnungen ||| # hochrechnungen
+mckinsey ||| # mckinsey
+company ||| # company
+darauf ||| # darauf
+kaufkraft ||| # kauf kraft
+dieser ||| # dieser
+aufstrebenden ||| # aufstrebenden
+mittelschicht ||| # mittel schicht
+nächsten ||| # nächsten
+jahrzehnts ||| # jahrzehnts
+billionen ||| # billionen
+dollar ||| # dollar
+anwachsen ||| # anwachsen
+könnte ||| # könnte
+doppelt ||| # doppelt
+aktuellen ||| # aktuellen
+erbrauchsniveau ||| ((('#',0,1),),(('erbrauch',0,1),('erbrauchs',0,1),),(('niveau',0,1),),)
+vereinigten ||| # vereinigten
+staaten ||| # staaten
+größten ||| # größten
+schwellenländer ||| ((('#',0,1),),(('schwellen',0,1),('schwelle',0,1),),(('länder',0,1),),)
+brasilien ||| # brasilien
+russland ||| # russland
+indien ||| # indien
