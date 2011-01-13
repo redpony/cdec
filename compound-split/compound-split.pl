@@ -62,7 +62,7 @@ while(<STDIN>) {
   my @todo = ();
   for (my $i=0; $i < scalar @words; $i++) {
     my $word = lc $words[$i];
-    if (length($word)<6 || $word =~ /^[,\-0-9\.]+$/) {
+    if (length($word)<6 || $word =~ /^[,\-0-9\.]+$/ || $word =~ /[@.\-\/:]/) {
       if ($IS_PLF) {
         push @res, "(('" . escape($word) . "',0,1),),";
       } else {
