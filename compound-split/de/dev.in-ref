@@ -725,7 +725,7 @@ vergiftet ||| # vergiftet
 kuklina ||| # kuklina
 trägerin ||| # trägerin
 alternativen ||| # alternativen
-nobelpreises ||| ((('#',0,1),),(('nobel',0,1),),(('preises',0,1),),)
+nobelpreis ||| ((('#',0,1),),(('nobel',0,1),),(('preis',0,1),),)
 kämpft |||  # kämpft
 rechte ||| # rechte
 soldaten ||| # soldaten
@@ -790,3 +790,11 @@ schwellenländer ||| ((('#',0,1),),(('schwellen',0,1),('schwelle',0,1),),(('län
 brasilien ||| # brasilien
 russland ||| # russland
 indien ||| # indien
+frühstück ||| # frühstück
+fortschritt ||| # fortschritt
+frühstückstisch ||| ((('#',0,1),),(('frühstück',0,1),('frühstücks',0,1),),(('tisch',0,1),),)
+unserer ||| # unserer
+familie ||| # familie
+vielen ||| # vielen
+jahren ||| # jahren
+tageszeitung ||| ((('#',0,1),),(('tag',0,1),('tages',0,1),),(('zeitung',0,1),),)
