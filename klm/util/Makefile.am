@@ -25,7 +25,6 @@ libklm_util_a_SOURCES = \
   file_piece.cc \
   mmap.cc \
   murmur_hash.cc \
-  scoped.cc \
-  string_piece.cc
+  scoped.cc
 
 AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I..
