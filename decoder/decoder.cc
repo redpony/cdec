@@ -838,12 +838,12 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     HypergraphIO::WriteAsCFG(forest);
   if (has_ref) {
     if (HG::Intersect(ref, &forest)) {
-      if (!SILENT) forest_stats(forest,"  Constr. forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
 //      if (crf_uniform_empirical) {
 //        if (!SILENT) cerr << "  USING UNIFORM WEIGHTS\n";
 //        for (int i = 0; i < forest.edges_.size(); ++i)
 //          forest.edges_[i].edge_prob_=prob_t::One(); }
       forest.Reweight(feature_weights);
+      if (!SILENT) forest_stats(forest,"  Constr. forest",show_tree_structure,show_features,feature_weights,oracle.show_derivation);
       if (!SILENT) cerr << "  Constr. VitTree: " << ViterbiFTree(forest) << endl;
       if (conf.count("show_partition")) {
          const prob_t z = Inside<prob_t, EdgeProb>(forest);

@@ -63,6 +63,7 @@ libcdec_a_SOURCES = \
   ff_charset.cc \
   ff_lm.cc \
   ff_klm.cc \
+  ff_spans.cc \
   ff_ruleshape.cc \
   ff_wordalign.cc \
   ff_csplit.cc \
