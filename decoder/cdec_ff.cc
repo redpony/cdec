@@ -1,6 +1,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ff.h"
+#include "ff_spans.h"
 #include "ff_lm.h"
 #include "ff_klm.h"
 #include "ff_csplit.h"
@@ -49,6 +50,7 @@ void register_feature_functions() {
 #ifdef HAVE_RANDLM
   ff_registry.Register("RandLM", new FFFactory<LanguageModelRandLM>);
 #endif
+  ff_registry.Register("SpanFeatures", new FFFactory<SpanFeatures>());
   ff_registry.Register("KLanguageModel", new FFFactory<KLanguageModel<lm::ngram::ProbingModel> >());
   ff_registry.Register("KLanguageModel_Sorted", new FFFactory<KLanguageModel<lm::ngram::SortedModel> >());
   ff_registry.Register("KLanguageModel_Trie", new FFFactory<KLanguageModel<lm::ngram::TrieModel> >());
