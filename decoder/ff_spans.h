@@ -21,6 +21,7 @@ class SpanFeatures : public FeatureFunction {
   const int kX;
   Array2D<int> span_feats_;
   std::vector<int> end_span_ids_;
+  std::vector<int> beg_span_ids_;
 };
 
 #endif
