@@ -21,12 +21,12 @@
 my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../environment"; }
 use LocalConfig;
 
+use Cwd qw/ abs_path cwd getcwd /; 
 use File::Temp qw/ tempfile /;
 use Getopt::Long;
 use IPC::Open2;
 use strict;
 use POSIX ":sys_wait_h";
-use Cwd qw(getcwd);
 
 my $tailn=5; # +0 = concatenate all the client logs.  5 = last 5 lines
 my $recycle_clients;    # spawn new clients when previous ones terminate
@@ -57,12 +57,6 @@ sub debug {
         my ($package, $filename, $line) = caller;
         print STDERR "DEBUG: $filename($line): ",join(' ',@_),"\n";
     }
-}
-sub abspath($) {
-    my $p=shift;
-    my $a=`readlink -f $p`;
-    chomp $a;
-    $a
 }
 my $is_shell_special=qr.[ \t\n\\><|&;"'`~*?{}$!()].;
 my $shell_escape_in_quote=qr.[\\"\$`!].;
@@ -116,7 +110,7 @@ sub extend_path($$;$$) {
     return $base.$ext;
 }
 
-my $abscwd=abspath(&getcwd);
+my $abscwd=abs_path(&getcwd);
 sub print_help;
 
 my $use_fork;
@@ -152,7 +146,7 @@ if ($no_which) {
     chomp $cmd;
     die "$prog not found - $cmd" unless $cmd;
 }
-#$cmd=abspath($cmd);
+#$cmd=abs_path($cmd);
 for my $arg (@ARGV) {
     $cmd .= " ".escape_shell($arg);
 }
@@ -180,7 +174,7 @@ if ($errordir) {
     print SF "$cdcmd$cmd\n";
     close SF;
     chmod 0755,$scriptfile;
-    $errordir=abspath($errordir);
+    $errordir=abs_path($errordir);
     &verbose("-e dir: $errordir");
 }
 

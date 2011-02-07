@@ -60,6 +60,7 @@ my $maxsim=0;
 my $oraclen=0;
 my $oracleb=20;
 my $bleu_weight=1;
+my $use_make;  # use make to parallelize line search
 my $dirargs='';
 my $density_prune;
 my $usefork;
@@ -69,7 +70,7 @@ Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
 	"decoder=s" => \$decoderOpt,
 	"decode-nodes=i" => \$decode_nodes,
-  "density-prune=f" => \$density_prune,
+	"density-prune=f" => \$density_prune,
 	"dont-clean" => \$disable_clean,
         "use-fork" => \$usefork,
 	"dry-run" => \$dryrun,
@@ -78,6 +79,7 @@ if (GetOptions(
 	"interval" => \$interval,
 	"iteration=i" => \$iteration,
 	"local" => \$run_local,
+	"use-make=i" => \$use_make,
 	"max-iterations=i" => \$max_iterations,
 	"normalize=s" => \$normalize,
 	"pmem=s" => \$pmem,
@@ -264,12 +266,18 @@ while (1){
 	my $im1 = $iteration - 1;
 	my $weightsFile="$dir/weights.$im1";
 	my $decoder_cmd = "$decoder -c $iniFile -w $weightsFile -O $dir/hgs";
-  if ($density_prune) {
-    $decoder_cmd .= " --density_prune $density_prune";
-  }
-	my $pcmd = "cat $srcFile | $parallelize $usefork -p $pmem -e $logdir -j $decode_nodes -- ";
-  if ($run_local) { $pcmd = "cat $srcFile |"; }
-  my $cmd = $pcmd . "$decoder_cmd 2> $decoderLog 1> $runFile";
+	if ($density_prune) {
+		$decoder_cmd .= " --density_prune $density_prune";
+	}
+	my $pcmd;
+	if ($run_local) {
+		$pcmd = "cat $srcFile |";
+	} elsif ($use_make) {
+		$pcmd = "cat $srcFile | $parallelize --use-fork -p $pmem -e $logdir -j $decode_nodes --";
+	} else {
+		$pcmd = "cat $srcFile | $parallelize $usefork -p $pmem -e $logdir -j $decode_nodes --";
+	}
+	my $cmd = "$pcmd $decoder_cmd 2> $decoderLog 1> $runFile";
 	print STDERR "COMMAND:\n$cmd\n";
 	my $result = 0;
 	$result = system($cmd);
@@ -287,7 +295,6 @@ while (1){
 	# save space
 	`gzip -f $runFile`;
 	`gzip -f $decoderLog`;
-
 
 	# run optimizer
 	print STDERR `date`;
@@ -330,6 +337,14 @@ while (1){
 		@cleanupcmds = ();
 		my %o2i = ();
 		my $first_shard = 1;
+		my $mkfile; # only used with makefiles
+		my $mkfilename;
+		if ($use_make) {
+			$mkfilename = "$dir/splag.$im1/domap.mk";
+			open $mkfile, ">$mkfilename" or die "Couldn't write $mkfilename: $!";
+			print $mkfile "all: $dir/splag.$im1/map.done\n\n";
+		}
+		my @mkouts = ();  # only used with makefiles
 		for my $shard (@shards) {
 			my $mapoutput = $shard;
 			my $client_name = $shard;
@@ -346,6 +361,17 @@ while (1){
 					cleanup();
 					die "ERROR: mapper returned non-zero exit code $result\n";
 				}
+			} elsif ($use_make) {
+				my $script_file = "$dir/scripts/map.$shard";
+				open F, ">$script_file" or die "Can't write $script_file: $!";
+				print F "#!/bin/bash\n";
+				print F "$script\n";
+				close F;
+				my $output = "$dir/splag.$im1/$mapoutput";
+				push @mkouts, $output;
+				chmod(0755, $script_file) or die "Can't chmod $script_file: $!";
+				if ($first_shard) { print STDERR "$script\n"; $first_shard=0; }
+				print $mkfile "$output: $dir/splag.$im1/$shard\n\t$script_file\n\n";
 			} else {
 				my $script_file = "$dir/scripts/map.$shard";
 				open F, ">$script_file" or die "Can't write $script_file: $!";
@@ -367,9 +393,20 @@ while (1){
 			}
 		}
 		if ($run_local) {
+			print STDERR "\nProcessing line search complete.\n";
+		} elsif ($use_make) {
+			print $mkfile "$dir/splag.$im1/map.done: @mkouts\n\ttouch $dir/splag.$im1/map.done\n\n";
+			close $mkfile;
+			my $mcmd = "make -j $use_make -f $mkfilename";
+			print STDERR "\nExecuting: $mcmd\n";
+			$result = system($mcmd);
+			unless ($result == 0){
+				cleanup();
+				die "ERROR: make command returned non-zero exit code $result\n";
+			}
 		} else {
 			print STDERR "\nLaunched $nmappers mappers.\n";
-      sleep 10;
+      			sleep 8;
 			print STDERR "Waiting for mappers to complete...\n";
 			while ($nmappers > 0) {
 			  sleep 5;
@@ -577,14 +614,21 @@ Usage: $executable [options] <ini file>
 Options:
 
 	--local
-		Run the decoder and optimizer locally.
+		Run the decoder and optimizer locally with a single thread.
+
+	--use-make <I>
+		Use make -j <I> to run the optimizer commands (useful on large
+		shared-memory machines where qsub is unavailable).
 
 	--decoder <decoder path>
 		Decoder binary to use.
 
-  --density-prune <N>
-    Limit the density of the hypergraph on each iteration to N times
-    the number of edges on the Viterbi path.
+	--decode-nodes <I>
+		Number of decoder processes to run in parallel. [default=15]
+
+	--density-prune <N>
+		Limit the density of the hypergraph on each iteration to N times
+		the number of edges on the Viterbi path.
 
 	--help
 		Print this message and exit.
