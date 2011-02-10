@@ -1,6 +1,8 @@
 #ifndef _APPLY_MODELS_H_
 #define _APPLY_MODELS_H_
 
+#include <iostream>
+
 struct ModelSet;
 struct Hypergraph;
 struct SentenceMetadata;
@@ -19,6 +21,14 @@ enum {
   IntersectionConfiguration(int alg, int k) : algorithm(alg), pop_limit(k) {}
   IntersectionConfiguration(exhaustive_t /* t */) : algorithm(0), pop_limit() {}
 };
+
+inline std::ostream& operator<<(std::ostream& os, const IntersectionConfiguration& c) {
+  if (c.algorithm == 0) { os << "FULL"; }
+  else if (c.algorithm == 1) { os << "CUBE:k=" << c.pop_limit; }
+  else if (c.algorithm == 2) { os << "N_ALGORITHMS"; }
+  else os << "OTHER";
+  return os;
+}
 
 void ApplyModelSet(const Hypergraph& in,
                    const SentenceMetadata& smeta,

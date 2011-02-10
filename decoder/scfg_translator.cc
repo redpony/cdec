@@ -124,10 +124,10 @@ struct SCFGTranslatorImpl {
     if (!SILENT) cerr << "First pass parse... " << endl;
     ExhaustiveBottomUpParser parser(goal, glist);
     if (!parser.Parse(lattice, forest)){
-      if (!SILENT) cerr << "parse failed." << endl;
+      if (!SILENT) cerr << "  parse failed." << endl;
       return false;
     } else {
-      if (!SILENT) cerr << "parse succeeded." << endl;
+      // if (!SILENT) cerr << "  parse succeeded." << endl;
     }
     forest->Reweight(weights);
     if (use_ctf_) {
