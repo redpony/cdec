@@ -282,32 +282,6 @@ void Hypergraph::PruneEdges(const EdgeMask& prune_edge, bool run_inside_algorith
   TopologicallySortNodesAndEdges(nodes_.size() - 1, &filtered);
 }
 
-void Hypergraph::SetPromise(NodeProbs const& inside,NodeProbs const& outside,double power, bool normalize)
-{
-  int nn=nodes_.size();
-  if (!nn) return;
-  assert(inside.size()==nn);
-  assert(outside.size()==nn);
-  double sum=0; //TODO: prevent underflow by using prob_t?
-  if (normalize)
-  for (int i=0;i<nn;++i) {
-    sum+=(nodes_[i].promise=pow(inside[i]*outside[i],power));
-  }
-  double by=nn/sum; // so avg promise is 1
-  if (normalize) {
-    for (int i=0;i<nn;++i)
-      nodes_[i].promise*=by;
-  }
-//#define DEBUG_PROMISE
-#ifdef DEBUG_PROMISE
-  cerr << "\n\nPer-node promises:\n";
-  cerr << "promise\tinside\toutside\t(power="<<power<<" normalize="<<normalize<<" sum="<<sum<<" by="<<by<<")"<<endl;
-  for (int i=0;i<nn;++i)
-    cerr <<nodes_[i].promise<<'\t'<<inside[i]<<'\t'<<outside[i]<<endl;
-#endif
-}
-
-
 
 // drop edges w/ max marginal prob less than cutoff.  this means that bigger cutoff is stricter.
 void Hypergraph::MarginPrune(vector<prob_t> const& io,prob_t cutoff,vector<bool> const* preserve_mask,bool safe_inside,bool verbose)
@@ -343,7 +317,7 @@ V nth_greatest(int n,vector<V> vs) {
   return vs[n];
 }
 
-bool Hypergraph::PruneInsideOutside(double alpha,double density,const EdgeMask* preserve_mask,const bool use_sum_prod_semiring, const double scale,double promise_power,bool safe_inside)
+bool Hypergraph::PruneInsideOutside(double alpha,double density,const EdgeMask* preserve_mask,const bool use_sum_prod_semiring, const double scale,bool safe_inside)
 {
   bool use_density=density!=0;
   bool use_beam=alpha!=0;
@@ -391,9 +365,7 @@ bool Hypergraph::PruneInsideOutside(double alpha,double density,const EdgeMask* 
       cutoff=beam_cut;
     }
   }
-  if (promise_power!=0)
-    SetPromise(io.inside,io.outside,promise_power,true);
-  MarginPrune(mm,cutoff,preserve_mask,safe_inside); // we do this last because otherwise indices in mm would be wrong for setting promise.
+  MarginPrune(mm,cutoff,preserve_mask,safe_inside);
   return density_won;
 }
 
