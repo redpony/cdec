@@ -467,8 +467,6 @@ public:
 
   /// drop edge i if edge_margin[i] < prune_below, unless preserve_mask[i]
   void MarginPrune(EdgeProbs const& edge_margin,prob_t prune_below,EdgeMask const* preserve_mask=0,bool safe_inside=false,bool verbose=false);
-  // promise[i]=((max_marginal[i]/viterbi)^power).todouble.  if normalize, ensure that avg promise is 1.
-  void SetPromise(NodeProbs const& inside,NodeProbs const& outside, double power=1, bool normalize=true);
 
   //TODO: in my opinion, looking at the ratio of logprobs (features \dot weights) rather than the absolute difference generalizes more nicely across sentence lengths and weight vectors that are constant multiples of one another.  at least make that an option.  i worked around this a little in cdec by making "beam alpha per source word" but that's not helping with different tuning runs.  this would also make me more comfortable about allocating Node.promise
 
@@ -476,10 +474,9 @@ public:
   //density=0 means don't density prune:   // for density>=1.0, keep this many times the edges needed for the 1best derivation
   // worse than the score of the global best past (or the highest edge posterior)
   // scale is for use_sum_prod_semiring (sharpens distribution?)
-  // promise_power is for a call to SetPromise (no call happens if power=0)
   // returns true if density pruning was tighter than beam
   // safe_inside would be a redundant anti-rounding error second bottom-up reachability before actually removing edges, to prevent stranded edges.  shouldn't be needed - if the hyperedges occur in defined-before-use (all edges with head h occur before h is used as a tail) order, then a grace margin for keeping edges that starts leniently and becomes more forbidding will make it impossible for this to occur, i.e. safe_inside=true is not needed.
-  bool PruneInsideOutside(double beam_alpha,double density,const EdgeMask* preserve_mask = NULL,const bool use_sum_prod_semiring=false, const double scale=1,double promise_power=0,bool safe_inside=false);
+  bool PruneInsideOutside(double beam_alpha,double density,const EdgeMask* preserve_mask = NULL,const bool use_sum_prod_semiring=false, const double scale=1,bool safe_inside=false);
 
   // legacy:
   void DensityPruneInsideOutside(const double scale, const bool use_sum_prod_semiring, const double density,const EdgeMask* preserve_mask = NULL) {
