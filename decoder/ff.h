@@ -40,6 +40,7 @@ class FeatureFunction {
   FeatureFunction() : state_size_() {}
   explicit FeatureFunction(int state_size) : state_size_(state_size) {}
   virtual ~FeatureFunction();
+  bool IsStateful() const { return state_size_ > 0; }
 
   // override this.  not virtual because we want to expose this to factory template for help before creating a FF
   static std::string usage(bool show_params,bool show_details) {
