@@ -64,6 +64,7 @@ my $use_make;  # use make to parallelize line search
 my $dirargs='';
 my $density_prune;
 my $usefork;
+my $pass_suffix = '';
 my $cpbin=1;
 # Process command-line options
 Getopt::Long::Configure("no_auto_abbrev");
@@ -72,6 +73,7 @@ if (GetOptions(
 	"decode-nodes=i" => \$decode_nodes,
 	"density-prune=f" => \$density_prune,
 	"dont-clean" => \$disable_clean,
+	"pass-suffix" => \$pass_suffix,
         "use-fork" => \$usefork,
 	"dry-run" => \$dryrun,
 	"epsilon=s" => \$epsilon,
@@ -265,7 +267,7 @@ while (1){
 	print STDERR `date`;
 	my $im1 = $iteration - 1;
 	my $weightsFile="$dir/weights.$im1";
-	my $decoder_cmd = "$decoder -c $iniFile -w $weightsFile -O $dir/hgs";
+	my $decoder_cmd = "$decoder -c $iniFile --weights$pass_suffix $weightsFile -O $dir/hgs";
 	if ($density_prune) {
 		$decoder_cmd .= " --density_prune $density_prune";
 	}
@@ -590,7 +592,11 @@ sub enseg {
 	my $i=0;
 	while (my $line=<SRC>){
 		chomp $line;
-		print NEWSRC "<seg id=\"$i\">$line</seg>\n";
+		if (/^\s*<seg/i) {
+			print NEWSRC "$line\n";
+		} else {
+			print NEWSRC "<seg id=\"$i\">$line</seg>\n";
+		}
 		$i++;
 	}
 	close SRC;
@@ -620,11 +626,11 @@ Options:
 		Use make -j <I> to run the optimizer commands (useful on large
 		shared-memory machines where qsub is unavailable).
 
-	--decoder <decoder path>
-		Decoder binary to use.
-
 	--decode-nodes <I>
 		Number of decoder processes to run in parallel. [default=15]
+
+	--decoder <decoder path>
+		Decoder binary to use.
 
 	--density-prune <N>
 		Limit the density of the hypergraph on each iteration to N times
@@ -639,6 +645,10 @@ Options:
 	--max-iterations <M>
 		Maximum number of iterations to run.  If not specified, defaults
 		to 10.
+
+	--pass-suffix <S>
+		If the decoder is doing multi-pass decoding, the pass suffix "2",
+		"3", etc., is used to control what iteration of weights is set.
 
 	--pmem <N>
 		Amount of physical memory requested for parallel decoding jobs.
