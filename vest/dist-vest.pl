@@ -73,7 +73,7 @@ if (GetOptions(
 	"decode-nodes=i" => \$decode_nodes,
 	"density-prune=f" => \$density_prune,
 	"dont-clean" => \$disable_clean,
-	"pass-suffix" => \$pass_suffix,
+	"pass-suffix=s" => \$pass_suffix,
         "use-fork" => \$usefork,
 	"dry-run" => \$dryrun,
 	"epsilon=s" => \$epsilon,
