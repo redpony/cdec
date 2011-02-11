@@ -592,7 +592,7 @@ sub enseg {
 	my $i=0;
 	while (my $line=<SRC>){
 		chomp $line;
-		if (/^\s*<seg/i) {
+		if ($line =~ /^\s*<seg/i) {
 			print NEWSRC "$line\n";
 		} else {
 			print NEWSRC "<seg id=\"$i\">$line</seg>\n";
