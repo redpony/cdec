@@ -4,6 +4,7 @@
 +lm_nodes 64
 +lm_edges 238
 +lm_paths 16807
++lm_trans it is quite understandable .
 constr_nodes 64
 constr_edges 238
 constr_paths 16807

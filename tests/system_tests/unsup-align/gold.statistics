@@ -4,6 +4,7 @@
 +lm_nodes 2
 +lm_edges 3
 +lm_paths 2
++lm_trans blue
 constr_nodes 2
 constr_edges 2
 constr_paths 1
@@ -13,6 +14,7 @@ constr_paths 1
 +lm_nodes 2
 +lm_edges 4
 +lm_paths 3
++lm_trans house
 constr_nodes 2
 constr_edges 2
 constr_paths 1
@@ -22,6 +24,7 @@ constr_paths 1
 +lm_nodes 7
 +lm_edges 20
 +lm_paths 49
++lm_trans the house
 constr_nodes 7
 constr_edges 10
 constr_paths 4
@@ -31,6 +34,7 @@ constr_paths 4
 +lm_nodes 7
 +lm_edges 16
 +lm_paths 25
++lm_trans house blue
 constr_nodes 7
 constr_edges 10
 constr_paths 4
@@ -40,6 +44,7 @@ constr_paths 4
 +lm_nodes 7
 +lm_edges 18
 +lm_paths 36
++lm_trans the the
 constr_nodes 7
 constr_edges 10
 constr_paths 4
@@ -49,6 +54,7 @@ constr_paths 4
 +lm_nodes 2
 +lm_edges 5
 +lm_paths 4
++lm_trans the
 constr_nodes 2
 constr_edges 2
 constr_paths 1
@@ -58,6 +64,7 @@ constr_paths 1
 +lm_nodes 7
 +lm_edges 18
 +lm_paths 36
++lm_trans the the
 constr_nodes 7
 constr_edges 10
 constr_paths 4
@@ -67,6 +74,7 @@ constr_paths 4
 +lm_nodes 7
 +lm_edges 14
 +lm_paths 16
++lm_trans thet thet
 constr_nodes 7
 constr_edges 10
 constr_paths 4
