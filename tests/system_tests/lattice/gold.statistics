@@ -4,3 +4,4 @@
 +lm_nodes 6
 +lm_edges 10
 +lm_paths 5
++lm_trans ab
