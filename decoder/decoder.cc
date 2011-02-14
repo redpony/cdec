@@ -453,7 +453,9 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
       cout << endl;
       exit(0);
     }
-    ShowBanner();
+    if (conf.count("quiet"))
+      SetSilent(true);
+    if (!SILENT) ShowBanner();
   }
   if (conf.count("show_config")) // special handling needed because we only want to notify() once.
     show_config=true;
@@ -467,6 +469,8 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
       po::store(po::parse_config_file(*conff, dconfig_options), conf);
     }
   }
+  if (conf.count("quiet"))
+    SetSilent(true);
   if (cfg) po::store(po::parse_config_file(*cfg, dconfig_options), conf);
   po::notify(conf);
   if (show_config && !cfg_files.empty()) {
@@ -482,8 +486,6 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
       cerr<<" "<<argv[i];
     cerr << "\n\n";
   }
-  if (conf.count("quiet"))
-    SetSilent(true);
 
   if (conf.count("list_feature_functions")) {
     cerr << "Available feature functions (specify with -F; describe with -u FeatureName):\n";

@@ -1,6 +1,6 @@
-bin_PROGRAMS = train_plm
+bin_PROGRAMS = gibbs_train_plm
 
-train_plm_SOURCES = train_plm.cc
-train_plm_LDADD = $(top_srcdir)/utils/libutils.a -lz
+gibbs_train_plm_SOURCES = gibbs_train_plm.cc
+gibbs_train_plm_LDADD = $(top_srcdir)/utils/libutils.a -lz
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I$(top_srcdir)/utils -I$(top_srcdir)/decoder -I$(top_srcdir)/mteval
+AM_CPPFLAGS = -funroll-loops -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I$(top_srcdir)/utils -I$(top_srcdir)/decoder -I$(top_srcdir)/mteval

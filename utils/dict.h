@@ -21,6 +21,30 @@ class Dict {
 
   inline int max() const { return words_.size(); }
 
+  static bool is_ws(char x) {
+    return (x == ' ' || x == '\t');
+  }
+
+  inline void ConvertWhitespaceDelimitedLine(const std::string& line, std::vector<int>* out) {
+    size_t cur = 0;
+    size_t last = 0;
+    int state = 0;
+    out->clear();
+    while(cur < line.size()) {
+      if (is_ws(line[cur++])) {
+        if (state == 0) continue;
+        out->push_back(Convert(line.substr(last, cur - last - 1)));
+        state = 0;
+      } else {
+        if (state == 1) continue;
+        last = cur - 1;
+        state = 1;
+      }
+    }
+    if (state == 1)
+      out->push_back(Convert(line.substr(last, cur - last)));
+  }
+
   inline WordID Convert(const std::string& word, bool frozen = false) {
     Map::iterator i = d_.find(word);
     if (i == d_.end()) {
