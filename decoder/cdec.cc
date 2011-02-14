@@ -3,6 +3,7 @@
 #include "filelib.h"
 #include "decoder.h"
 #include "ff_register.h"
+#include "verbose.h"
 
 using namespace std;
 
@@ -11,7 +12,7 @@ int main(int argc, char** argv) {
   Decoder decoder(argc, argv);
 
   const string input = decoder.GetConf()["input"].as<string>();
-  cerr << "Reading input from " << ((input == "-") ? "STDIN" : input.c_str()) << endl;
+  if (!SILENT) cerr << "Reading input from " << ((input == "-") ? "STDIN" : input.c_str()) << endl;
   ReadFile in_read(input);
   istream *in = in_read.stream();
   assert(*in);
