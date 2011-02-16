@@ -12,12 +12,14 @@ my $BEAM = 2.1;
 my $OUTPUT = 'plf';
 my $HELP;
 my $VERBOSE;
+my $PRESERVE_CASE;
 
 GetOptions("decoder=s" => \$CDEC,
            "language=s" => \$LANG,
            "beam=f" => \$BEAM,
            "output=s" => \$OUTPUT,
            "verbose" => \$VERBOSE,
+           "preserve_case" => \$PRESERVE_CASE,
            "help" => \$HELP
           ) or usage();
 
@@ -60,15 +62,18 @@ while(<STDIN>) {
   my @words = split /\s+/;
   my @res = ();
   my @todo = ();
+  my @casings = ();
   for (my $i=0; $i < scalar @words; $i++) {
     my $word = lc $words[$i];
     if (length($word)<6 || $word =~ /^[,\-0-9\.]+$/ || $word =~ /[@.\-\/:]/) {
+      push @casings, 0;
       if ($IS_PLF) {
         push @res, "(('" . escape($word) . "',0,1),),";
       } else {
         push @res, $word;
       }
     } else {
+      push @casings, guess_casing($words[$i]);
       push @res, undef;
       push @todo, $word;
     }
@@ -84,6 +89,7 @@ while(<STDIN>) {
         unless ($IS_PLF) {
           $seg =~ s/^# //o;
         }
+        if ($PRESERVE_CASE && $casings[$i]) { $seg = recase_words($seg); }
         $res[$i] = $seg;
       }
     }
@@ -100,11 +106,22 @@ while(<STDIN>) {
 close IN;
 close OUT;
 
+sub recase_words {
+  my $word = shift;
+  $word =~ s/\b(\w)/\u$1/g;
+  return $word;
+}
+
 sub escape {
   $_ = shift;
   s/\\/\\\\/g;
   s/'/\\'/g;
   return $_;
+}
+
+sub guess_casing {
+  my $word = shift @_;
+  if (lc($word) eq $word) { return 0; } else { return 1; }
 }
 
 sub usage {
@@ -118,6 +135,8 @@ Usage: $0 [OPTIONS] < file.txt
     --beam NUM            Beam threshold, used with PLF output
                             (probably between 1.5 and 5.0)
     --output plf|1best    Output format, 1best or plf (lattice)
+    --preserve_case       Preserve the casing of the input word
+                            (model will be scored lowercase)
     --verbose             Show verbose decoder output
 
 EOT
