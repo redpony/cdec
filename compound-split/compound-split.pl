@@ -70,7 +70,11 @@ while(<STDIN>) {
       if ($IS_PLF) {
         push @res, "(('" . escape($word) . "',0,1),),";
       } else {
-        push @res, $word;
+        if ($PRESERVE_CASE) {
+          push @res, $words[$i];
+        } else {
+          push @res, $word;
+        }
       }
     } else {
       push @casings, guess_casing($words[$i]);
