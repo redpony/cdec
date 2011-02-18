@@ -2,8 +2,10 @@
 #define _FF_SPANS_H_
 
 #include <vector>
+#include <map>
 #include "ff.h"
 #include "array2d.h"
+#include "wordid.h"
 
 class SpanFeatures : public FeatureFunction {
  public:
@@ -17,11 +19,14 @@ class SpanFeatures : public FeatureFunction {
                                      void* context) const;
   virtual void PrepareForInput(const SentenceMetadata& smeta);
  private:
+  WordID MapIfNecessary(const WordID& w) const;
   const int kS;
   const int kX;
   Array2D<int> span_feats_;
   std::vector<int> end_span_ids_;
   std::vector<int> beg_span_ids_;
+  std::map<WordID, WordID> word2class_;  // optional projection to coarser class
+  WordID oov_;
 };
 
 #endif
