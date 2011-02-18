@@ -5,7 +5,7 @@
 # [X] ||| so [X,1] die [X,2] der ||| as [X,1] the [X,2] the ||| 2.47712135315 2.53182387352 1.48463630676 ||| 0-0 2-2 4-4
 # [X] ||| so [X,1] die [X,2] der ||| is [X,1] the [X,2] of the ||| 2.47712135315 3.45197868347 2.64251494408 ||| 0-0 2-2 4-4 4-5
 
-die "Usage: 0 model1.f-e model1.e-f < grammar.scfg\n" unless scalar @ARGV == 2;
+die "Usage: $0 model1.f-e model1.e-f < grammar.scfg\n  (use trianing/model1 to extract the model files)\n" unless scalar @ARGV == 2;
 
 my $fm1 = shift @ARGV;
 die unless $fm1;
@@ -36,7 +36,10 @@ while(<>) {
   chomp;
   my ($l, $f, $e, $sscores, $al) = split / \|\|\| /;
   my @scores = split /\s+/, $sscores;
-  for (my $i=0; $i<3; $i++) { $scores[$i] = "$label[$i]=$scores[$i]"; }
+  unless ($sscores =~ /=/) {
+    for (my $i=0; $i<3; $i++) { $scores[$i] = "$label[$i]=$scores[$i]"; }
+  }
+  push @scores, "RuleCount=1";
   my @fs = split /\s+/, $f;
   my @es = split /\s+/, $e;
   my $flen = scalar @fs;
@@ -56,7 +59,9 @@ while(<>) {
     if ($ftot == 0) { $nongen = 1; last; }
     $pgen += log($ftot) - log($elen);
   }
-  unless ($nongen) { push @scores, "RGood=1"; } else { push @scores, "RBad=1"; }
+  my $bad = 0;
+  my $good = 0;
+  unless ($nongen) { push @scores, "RGood=1"; $good++; } else { push @scores, "RBad=1"; $bad++; }
 
   $nongen = 0;
   $pgen = 0;
@@ -75,7 +80,14 @@ while(<>) {
     if ($etot == 0) { $nongen = 1; last; }
     $pgen += log($etot) - log($flen);
   }
-  unless ($nongen) { push @scores, "FGood=1"; } else { push @scores, "FBad=1"; }
-  print "$l ||| $f ||| $e ||| @scores ||| $al\n";
+  unless ($nongen) {
+    push @scores, "FGood=1";
+    if ($good) { push @scores, "BothGood=1"; } else { push @scores, "SusDel=1"; }
+  } else {
+    push @scores, "FBad=1";
+    if ($bad) { push @scores, "BothBad=1"; } else { push @scores, "SusHall=1"; }
+  }
+  print "$l ||| $f ||| $e ||| @scores";
+  if (defined $al) { print " ||| $al\n"; } else { print "\n"; }
 }
 
