@@ -57,7 +57,7 @@ void SpanFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   if (edge.rule_->lhs_ == kS)
     features->set_value(span_feats_(edge.i_,edge.j_).second, 1);
   else
-    features->set_value(span_feats_(edge.i_,edge.j_).second, 1);
+    features->set_value(span_feats_(edge.i_,edge.j_).first, 1);
   if (edge.Arity() == 2) {
     const TRule& rule = *edge.rule_;
     if (rule.f_[0] == kS && rule.f_[1] == kX) {
