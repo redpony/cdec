@@ -263,7 +263,7 @@ while (1){
 
 
 	#decode
-	print STDERR "DECODE\n";
+	print STDERR "RUNNING DECODER AT ";
 	print STDERR `date`;
 	my $im1 = $iteration - 1;
 	my $weightsFile="$dir/weights.$im1";
@@ -289,7 +289,8 @@ while (1){
 		die;
 	}
         my $num_hgs = `ls $dir/hgs/*.gz | wc -l`;
-        print STDERR "HGs: $num_hgs\n";
+        print STDERR "NUMBER OF HGs: $num_hgs\n";
+	die "Dev set contains $devSize sentences! Decoder failure?\n" if ($devSize != $num_hgs);
 	my $dec_score = `cat $runFile | $SCORER $refs_comma_sep -l $metric`;
 	chomp $dec_score;
 	print STDERR "DECODER SCORE: $dec_score\n";
@@ -299,6 +300,7 @@ while (1){
 	`gzip -f $decoderLog`;
 
 	# run optimizer
+	print STDERR "RUNNING OPTIMIZER AT ";
 	print STDERR `date`;
 	my $mergeLog="$logdir/prune-merge.log.$iteration";
 
@@ -309,9 +311,9 @@ while (1){
 		print STDERR "\nGENERATE OPTIMIZATION STRATEGY (OPT-ITERATION $opt_iter/$optimization_iters)\n";
 		print STDERR `date`;
 		$icc++;
-        my $nop=$noprimary?"--no_primary":"";
-        my $targs=$oraclen ? "--decoder_translations='$runFile.gz' ".get_comma_sep_refs('-references',$refFiles):"";
-        my $bwargs=$bleu_weight!=1 ? "--bleu_weight=$bleu_weight":"";
+		my $nop=$noprimary?"--no_primary":"";
+		my $targs=$oraclen ? "--decoder_translations='$runFile.gz' ".get_comma_sep_refs('-references',$refFiles):"";
+		my $bwargs=$bleu_weight!=1 ? "--bleu_weight=$bleu_weight":"";
 		$cmd="$MAPINPUT -w $inweights -r $dir/hgs $bwargs -s $devSize -d $rand_directions --max_similarity=$maxsim --oracle_directions=$oraclen --oracle_batch=$oracleb $targs $dirargs > $dir/agenda.$im1-$opt_iter";
 		print STDERR "COMMAND:\n$cmd\n";
 		$result = system($cmd);
