@@ -22,7 +22,7 @@ class SpanFeatures : public FeatureFunction {
   WordID MapIfNecessary(const WordID& w) const;
   const int kS;
   const int kX;
-  Array2D<int> span_feats_;
+  Array2D<std::pair<int,int> > span_feats_; // first for X, second for S
   std::vector<int> end_span_ids_;
   std::vector<int> beg_span_ids_;
   std::map<WordID, WordID> word2class_;  // optional projection to coarser class

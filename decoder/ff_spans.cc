@@ -54,7 +54,10 @@ void SpanFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   assert(edge.i_ < beg_span_ids_.size());
   assert(edge.i_ >= 0);
   features->set_value(beg_span_ids_[edge.i_], 1);
-  features->set_value(span_feats_(edge.i_,edge.j_), 1);
+  if (edge.rule_->lhs_ == kS)
+    features->set_value(span_feats_(edge.i_,edge.j_).second, 1);
+  else
+    features->set_value(span_feats_(edge.i_,edge.j_).second, 1);
   if (edge.Arity() == 2) {
     const TRule& rule = *edge.rule_;
     if (rule.f_[0] == kS && rule.f_[1] == kX) {
@@ -105,7 +108,8 @@ void SpanFeatures::PrepareForInput(const SentenceMetadata& smeta) {
       word = MapIfNecessary(word);
       ostringstream pf;
       pf << "SS:" << TD::Convert(bword) << "_" << TD::Convert(word);
-      span_feats_(i,j) = FD::Convert(pf.str());
+      span_feats_(i,j).first = FD::Convert(pf.str());
+      span_feats_(i,j).second = FD::Convert("S_" + pf.str());
     }
   } 
 }
