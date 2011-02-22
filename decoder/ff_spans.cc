@@ -20,7 +20,7 @@ SpanFeatures::SpanFeatures(const string& param) :
   string valfile;
   vector<string> toks;
   Tokenize(param, ' ', &toks);
-  if (toks.size() == 2) { mapfile = param[0]; valfile = param[1]; }
+  if (toks.size() == 2) { mapfile = toks[0]; valfile = toks[1]; }
   if (mapfile.size() > 0) {
     int lc = 0;
     if (!SILENT) { cerr << "Reading word map for SpanFeatures from " << param << endl; }
