@@ -26,6 +26,18 @@ class SpanFeatures : public FeatureFunction {
   std::vector<int> end_span_ids_;
   std::vector<int> beg_span_ids_;
   std::map<WordID, WordID> word2class_;  // optional projection to coarser class
+
+  // collapsed feature values
+  bool use_collapsed_features_;
+  int fid_beg_;
+  int fid_end_;
+  int fid_span_s_;
+  int fid_span_;
+  std::map<std::string, double> feat2val_;
+  std::vector<double> end_span_vals_;
+  std::vector<double> beg_span_vals_;
+  Array2D<std::pair<double,double> > span_vals_;
+
   WordID oov_;
 };
 
