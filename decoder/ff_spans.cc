@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <cassert>
+#include <cmath>
 
 #include "filelib.h"
 #include "stringlib.h"
@@ -153,5 +154,66 @@ void SpanFeatures::PrepareForInput(const SentenceMetadata& smeta) {
       }
     }
   } 
+}
+
+inline bool IsArity2RuleReordered(const TRule& rule) {
+  const vector<WordID>& e = rule.e_;
+  for (int i = 0; i < e.size(); ++i) {
+    if (e[i] <= 0) { return e[i] < 0; }
+  }
+  cerr << "IsArity2RuleReordered failed on:\n" << rule.AsString() << endl;
+  abort();
+}
+
+// Chiang, Marton, Resnik 2008 "fine-grained" reordering features
+CMR2008ReorderingFeatures::CMR2008ReorderingFeatures(const std::string& param) :
+    kS(TD::Convert("S") * -1),
+    use_collapsed_features_(false) {
+  if (param.size() > 0) {
+    use_collapsed_features_ = true;
+    assert(!"not implemented"); // TODO
+  } else {
+    unconditioned_fids_.first = FD::Convert("CMRMono");
+    unconditioned_fids_.second = FD::Convert("CMRReorder");
+    fids_.resize(16); fids_[0].first = fids_[0].second = -1;
+    // since I use a log transform, I go a bit higher than David, who bins everything > 10
+    for (int span_size = 1; span_size <= 15; ++span_size) {
+      ostringstream m, r;
+      m << "CMRMono_" << SpanSizeTransform(span_size);
+      fids_[span_size].first = FD::Convert(m.str());
+      r << "CMRReorder_" << SpanSizeTransform(span_size);
+      fids_[span_size].second = FD::Convert(r.str());
+    }
+  }
+}
+
+int CMR2008ReorderingFeatures::SpanSizeTransform(unsigned span_size) {
+  if (!span_size) return 0;
+  return static_cast<int>(log(span_size+1) / log(1.39)) - 1;
+}
+
+void CMR2008ReorderingFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                         const Hypergraph::Edge& edge,
+                                         const vector<const void*>& ant_contexts,
+                                         SparseVector<double>* features,
+                                         SparseVector<double>* estimated_features,
+                                         void* context) const {
+  if (edge.Arity() != 2) return;
+  if (edge.rule_->lhs_ == kS) return;
+  assert(edge.i_ >= 0);
+  assert(edge.j_ > edge.i_);
+  const bool is_reordered = IsArity2RuleReordered(*edge.rule_);
+  const unsigned span_size = edge.j_ - edge.i_;
+  if (use_collapsed_features_) {
+    assert(!"not impl"); // TODO
+  } else {
+    if (is_reordered) {
+      features->set_value(unconditioned_fids_.second, 1.0);
+      features->set_value(fids_[span_size].second, 1.0);
+    } else {
+      features->set_value(unconditioned_fids_.first, 1.0);
+      features->set_value(fids_[span_size].first, 1.0);
+    }
+  }
 }
 
