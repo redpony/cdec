@@ -41,4 +41,29 @@ class SpanFeatures : public FeatureFunction {
   WordID oov_;
 };
 
+class CMR2008ReorderingFeatures : public FeatureFunction {
+ public:
+  CMR2008ReorderingFeatures(const std::string& param);
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const;
+ private:
+  static int SpanSizeTransform(unsigned span_size);
+
+  const int kS;
+  std::pair<int, int> unconditioned_fids_;  // first = monotone
+                                            // second = inverse
+  std::vector<std::pair<int, int> > fids_;  // index=(j-i)
+
+  // collapsed feature values
+  bool use_collapsed_features_;
+  int fid_reorder_;
+  std::pair<double, double> uncoditioned_vals_;
+  std::vector<std::pair<double, double> > fvals_;
+};
+
 #endif
