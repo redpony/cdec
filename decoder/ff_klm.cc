@@ -82,7 +82,7 @@ class KLanguageModelImpl {
           const lm::WordIndex cur_word = IthUnscoredWord(k, astate);
           double p = 0;
           if (cur_word == kSOS_) {
-            if (state.ValidLength() > 0) { p = -100; cerr << rule << endl; }
+            if (state.ValidLength() > 0) { p = -100; }
             state = ngram_->BeginSentenceState();
           } else {
             const lm::ngram::State scopy(state);
