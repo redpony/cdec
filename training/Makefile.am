@@ -10,7 +10,8 @@ bin_PROGRAMS = \
   collapse_weights \
   cllh_filter_grammar \
   mpi_online_optimize \
-  mpi_batch_optimize
+  mpi_batch_optimize \
+  augment_grammar
 
 noinst_PROGRAMS = \
   lbfgs_test \
@@ -33,6 +34,9 @@ endif
 
 cllh_filter_grammar_SOURCES = cllh_filter_grammar.cc
 cllh_filter_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+
+augment_grammar_SOURCES = augment_grammar.cc
+augment_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 atools_SOURCES = atools.cc
 atools_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
@@ -67,4 +71,4 @@ mr_em_adapted_reduce_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils
 plftools_SOURCES = plftools.cc
 plftools_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I$(top_srcdir)/decoder -I$(top_srcdir)/utils -I$(top_srcdir)/mteval
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I$(top_srcdir)/decoder -I$(top_srcdir)/utils -I$(top_srcdir)/mteval -I../klm
