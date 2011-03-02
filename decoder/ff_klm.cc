@@ -84,6 +84,7 @@ class KLanguageModelImpl {
           if (cur_word == kSOS_) {
             if (state.ValidLength() > 0) { p = -100; }
             state = ngram_->BeginSentenceState();
+            context_complete = true;
           } else {
             const lm::ngram::State scopy(state);
             p = ngram_->Score(scopy, cur_word, state);
@@ -111,6 +112,7 @@ class KLanguageModelImpl {
         if (cur_word == kSOS_) {
           if (state.ValidLength() > 0) p = -100;
           state = ngram_->BeginSentenceState();
+          context_complete = true;
         } else {
           const lm::ngram::State scopy(state);
           p = ngram_->Score(scopy, cur_word, state);
