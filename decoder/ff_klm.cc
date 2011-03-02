@@ -100,9 +100,13 @@ class KLanguageModelImpl {
           const lm::WordIndex cur_word = IthUnscoredWord(k, astate);
           double p = 0;
           if (cur_word == kSOS_) {
-            if (has_some_history) { p = -100; }
             state = ngram_->BeginSentenceState();
-            if (!context_complete && num_scored < (order_ - 2)) num_scored = order_ - 2;
+            if (has_some_history) {  // this is immediately fully scored, and bad
+              p = -100;
+              context_complete = true;
+            } else {  // this might be a real <s>
+              num_scored = max(0, order_ - 2);
+            }
           } else {
             const lm::ngram::State scopy(state);
             p = ngram_->Score(scopy, cur_word, state);
@@ -132,9 +136,13 @@ class KLanguageModelImpl {
         const lm::WordIndex cur_word = MapWord(e[j]);
         double p = 0;
         if (cur_word == kSOS_) {
-          if (has_some_history) p = -100;
           state = ngram_->BeginSentenceState();
-          if (!context_complete && num_scored < (order_ - 2)) num_scored = order_ - 2;
+          if (has_some_history) {  // this is immediately fully scored, and bad
+            p = -100;
+            context_complete = true;
+          } else {  // this might be a real <s>
+            num_scored = max(0, order_ - 2);
+          }
         } else {
           const lm::ngram::State scopy(state);
           p = ngram_->Score(scopy, cur_word, state);
