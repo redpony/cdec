@@ -175,18 +175,24 @@ class KLanguageModelImpl {
     return sum;
   }
 
-  //FIXME: this assumes no target words on final unary -> goal rule.  is that ok?
+  // this assumes no target words on final unary -> goal rule.  is that ok?
   // for <s> (n-1 left words) and (n-1 right words) </s>
   double FinalTraversalCost(const void* state) {
-    if (add_sos_eos_) {
+    if (add_sos_eos_) {  // rules do not produce <s> </s>, so do it here
       SetRemnantLMState(ngram_->BeginSentenceState(), dummy_state_);
       SetHasFullContext(1, dummy_state_);
       SetUnscoredSize(0, dummy_state_);
       dummy_ants_[1] = state;
       return LookupWords(*dummy_rule_, dummy_ants_, NULL, NULL);
-    } else {
-      // TODO, figure out whether spans are correct
-      return 0;
+    } else {  // rules DO produce <s> ... </s>
+      double p = 0;
+      if (!GetFlag(state, HAS_EOS_ON_RIGHT)) { p -= 100; }
+      if (UnscoredSize(state) > 0) {  // are there unscored words
+        if (kSOS_ != IthUnscoredWord(0, state)) {
+          p -= 100 * UnscoredSize(state);
+        }
+      }
+      return p;
     }
   }
 
