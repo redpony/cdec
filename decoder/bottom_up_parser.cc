@@ -219,8 +219,10 @@ void PassiveChart::ApplyUnaryRules(const int i, const int j) {
 }
 
 bool PassiveChart::Parse() {
-  forest_->nodes_.reserve(input_.size() * input_.size() * 2);
-  forest_->edges_.reserve(input_.size() * input_.size() * 1000);  // TODO: reservation??
+  size_t in_size_2 = input_.size() * input_.size();
+  forest_->nodes_.reserve(in_size_2 * 2);
+  size_t res = min(2000000ul, in_size_2 * 1000);
+  forest_->edges_.reserve(res);
   goal_idx_ = -1;
   for (int gi = 0; gi < grammars_.size(); ++gi)
     act_chart_[gi]->SeedActiveChart(*grammars_[gi]);
