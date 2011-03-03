@@ -201,36 +201,6 @@ LogVal<T> pow(const LogVal<T>& b, const T& e) {
 }
 
 template <class T>
-bool operator<(const LogVal<T>& lhs, const LogVal<T>& rhs) {
-  if (lhs.s_ == rhs.s_) {
-    return (lhs.v_ < rhs.v_);
-  } else {
-    return lhs.s_ > rhs.s_;
-  }
-}
-
-#if 0
-template <class T>
-bool operator<=(const LogVal<T>& lhs, const LogVal<T>& rhs) {
-  return (lhs.v_ <= rhs.v_);
-}
-
-template <class T>
-bool operator>(const LogVal<T>& lhs, const LogVal<T>& rhs) {
-  return (lhs.v_ > rhs.v_);
-}
-
-template <class T>
-bool operator>=(const LogVal<T>& lhs, const LogVal<T>& rhs) {
-  return (lhs.v_ >= rhs.v_);
-}
-#endif
-
-
-template <class T>
-std::size_t hash_value(const LogVal<T>& x) { return x.hash_impl(); }
-
-template <class T>
 bool operator==(const LogVal<T>& lhs, const LogVal<T>& rhs) {
   return (lhs.v_ == rhs.v_) && (lhs.s_ == rhs.s_);
 }
@@ -239,5 +209,32 @@ template <class T>
 bool operator!=(const LogVal<T>& lhs, const LogVal<T>& rhs) {
   return !(lhs == rhs);
 }
+
+template <class T>
+bool operator<(const LogVal<T>& lhs, const LogVal<T>& rhs) {
+  if (lhs.s_ == rhs.s_) {
+    return (lhs.v_ < rhs.v_);
+  } else {
+    return lhs.s_ > rhs.s_;
+  }
+}
+
+template <class T>
+bool operator<=(const LogVal<T>& lhs, const LogVal<T>& rhs) {
+  return (lhs < rhs) || (lhs == rhs);
+}
+
+template <class T>
+bool operator>(const LogVal<T>& lhs, const LogVal<T>& rhs) {
+  return !(lhs <= rhs);
+}
+
+template <class T>
+bool operator>=(const LogVal<T>& lhs, const LogVal<T>& rhs) {
+  return !(lhs < rhs);
+}
+
+template <class T>
+std::size_t hash_value(const LogVal<T>& x) { return x.hash_impl(); }
 
 #endif
