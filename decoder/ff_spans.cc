@@ -13,6 +13,13 @@
 
 using namespace std;
 
+// log transform to make long spans cluster together
+// but preserve differences
+int SpanSizeTransform(unsigned span_size) {
+  if (!span_size) return 0;
+  return static_cast<int>(log(span_size+1) / log(1.39)) - 1;
+}
+
 SpanFeatures::SpanFeatures(const string& param) :
     kS(TD::Convert("S") * -1),
     kX(TD::Convert("X") * -1),
@@ -41,8 +48,8 @@ SpanFeatures::SpanFeatures(const string& param) :
       }
       word2class_[v[0]] = v[1];
     }
-    word2class_[TD::Convert("<s>")] = TD::Convert("BOS");
-    word2class_[TD::Convert("</s>")] = TD::Convert("EOS");
+    word2class_[TD::Convert("BOS")] = TD::Convert("BOS");
+    word2class_[TD::Convert("EOS")] = TD::Convert("EOS");
     oov_ = TD::Convert("OOV");
   }
 
@@ -88,10 +95,15 @@ void SpanFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   } else {  // non-collapsed features:
     features->set_value(end_span_ids_[edge.j_], 1);
     features->set_value(beg_span_ids_[edge.i_], 1);
-    if (edge.rule_->lhs_ == kS)
+    features->set_value(end_bigram_ids_[edge.j_], 1);
+    features->set_value(beg_bigram_ids_[edge.i_], 1);
+    if (edge.rule_->lhs_ == kS) {
       features->set_value(span_feats_(edge.i_,edge.j_).second, 1);
-    else
+      features->set_value(len_span_feats_(edge.i_,edge.j_).second, 1);
+    } else {
       features->set_value(span_feats_(edge.i_,edge.j_).first, 1);
+      features->set_value(len_span_feats_(edge.i_,edge.j_).first, 1);
+    }
   }
 }
 
@@ -104,11 +116,14 @@ WordID SpanFeatures::MapIfNecessary(const WordID& w) const {
 
 void SpanFeatures::PrepareForInput(const SentenceMetadata& smeta) {
   const Lattice& lattice = smeta.GetSourceLattice();
-  const WordID eos = TD::Convert("</s>");
-  const WordID bos = TD::Convert("<s>");
+  const WordID eos = TD::Convert("EOS");  // right of the last source word
+  const WordID bos = TD::Convert("BOS");  // left of the first source word
   beg_span_ids_.resize(lattice.size() + 1);
   end_span_ids_.resize(lattice.size() + 1);
   span_feats_.resize(lattice.size() + 1, lattice.size() + 1);
+  beg_bigram_ids_.resize(lattice.size() + 1);
+  end_bigram_ids_.resize(lattice.size() + 1);
+  len_span_feats_.resize(lattice.size() + 1, lattice.size() + 1);
   if (use_collapsed_features_) {
     beg_span_vals_.resize(lattice.size() + 1);
     end_span_vals_.resize(lattice.size() + 1);
@@ -126,6 +141,12 @@ void SpanFeatures::PrepareForInput(const SentenceMetadata& smeta) {
     ostringstream sfid;
     sfid << "ES:" << TD::Convert(word);
     end_span_ids_[i] = FD::Convert(sfid.str());
+    ostringstream esbiid;
+    esbiid << "EBI:" << TD::Convert(bword) << "_" << TD::Convert(word);
+    end_bigram_ids_[i] = FD::Convert(esbiid.str());
+    ostringstream bsbiid;
+    bsbiid << "BBI:" << TD::Convert(bword) << "_" << TD::Convert(word);
+    beg_bigram_ids_[i] = FD::Convert(bsbiid.str());
     ostringstream bfid;
     bfid << "BS:" << TD::Convert(bword);
     beg_span_ids_[i] = FD::Convert(bfid.str());
@@ -145,9 +166,14 @@ void SpanFeatures::PrepareForInput(const SentenceMetadata& smeta) {
         word = lattice[j][0].label;
       word = MapIfNecessary(word);
       ostringstream pf;
-      pf << "SS:" << TD::Convert(bword) << "_" << TD::Convert(word);
+      pf << "S:" << TD::Convert(bword) << "_" << TD::Convert(word);
       span_feats_(i,j).first = FD::Convert(pf.str());
       span_feats_(i,j).second = FD::Convert("S_" + pf.str());
+      ostringstream lf;
+      const unsigned span_size = (i < j ? j - i : i - j);
+      lf << "LS:" << SpanSizeTransform(span_size) << "_" << TD::Convert(bword) << "_" << TD::Convert(word);
+      len_span_feats_(i,j).first = FD::Convert(lf.str());
+      len_span_feats_(i,j).second = FD::Convert("S_" + lf.str());
       if (use_collapsed_features_) {
         span_vals_(i,j).first = feat2val_[pf.str()];
         span_vals_(i,j).second = feat2val_["S_" + pf.str()];
@@ -185,11 +211,6 @@ CMR2008ReorderingFeatures::CMR2008ReorderingFeatures(const std::string& param) :
       fids_[span_size].second = FD::Convert(r.str());
     }
   }
-}
-
-int CMR2008ReorderingFeatures::SpanSizeTransform(unsigned span_size) {
-  if (!span_size) return 0;
-  return static_cast<int>(log(span_size+1) / log(1.39)) - 1;
 }
 
 void CMR2008ReorderingFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
