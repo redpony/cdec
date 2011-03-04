@@ -23,8 +23,11 @@ class SpanFeatures : public FeatureFunction {
   const int kS;
   const int kX;
   Array2D<std::pair<int,int> > span_feats_; // first for X, second for S
+  Array2D<std::pair<int,int> > len_span_feats_; // first for X, second for S, including length
   std::vector<int> end_span_ids_;
+  std::vector<int> end_bigram_ids_;
   std::vector<int> beg_span_ids_;
+  std::vector<int> beg_bigram_ids_;
   std::map<WordID, WordID> word2class_;  // optional projection to coarser class
 
   // collapsed feature values
@@ -35,7 +38,9 @@ class SpanFeatures : public FeatureFunction {
   int fid_span_;
   std::map<std::string, double> feat2val_;
   std::vector<double> end_span_vals_;
+  std::vector<double> end_bigram_vals_;
   std::vector<double> beg_span_vals_;
+  std::vector<double> beg_bigram_vals_;
   Array2D<std::pair<double,double> > span_vals_;
 
   WordID oov_;
@@ -52,8 +57,6 @@ class CMR2008ReorderingFeatures : public FeatureFunction {
                                      SparseVector<double>* estimated_features,
                                      void* context) const;
  private:
-  static int SpanSizeTransform(unsigned span_size);
-
   const int kS;
   std::pair<int, int> unconditioned_fids_;  // first = monotone
                                             // second = inverse
