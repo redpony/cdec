@@ -38,9 +38,7 @@ class SpanFeatures : public FeatureFunction {
   int fid_span_;
   std::map<std::string, double> feat2val_;
   std::vector<double> end_span_vals_;
-  std::vector<double> end_bigram_vals_;
   std::vector<double> beg_span_vals_;
-  std::vector<double> beg_bigram_vals_;
   Array2D<std::pair<double,double> > span_vals_;
 
   WordID oov_;

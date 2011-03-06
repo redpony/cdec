@@ -151,8 +151,8 @@ void SpanFeatures::PrepareForInput(const SentenceMetadata& smeta) {
     bfid << "BS:" << TD::Convert(bword);
     beg_span_ids_[i] = FD::Convert(bfid.str());
     if (use_collapsed_features_) {
-      end_span_vals_[i] = feat2val_[sfid.str()];
-      beg_span_vals_[i] = feat2val_[bfid.str()];
+      end_span_vals_[i] = feat2val_[sfid.str()] + feat2val_[esbiid.str()];
+      beg_span_vals_[i] = feat2val_[bfid.str()] + feat2val_[bsbiid.str()];
     }
   }
   for (int i = 0; i <= lattice.size(); ++i) {
@@ -175,8 +175,8 @@ void SpanFeatures::PrepareForInput(const SentenceMetadata& smeta) {
       len_span_feats_(i,j).first = FD::Convert(lf.str());
       len_span_feats_(i,j).second = FD::Convert("S_" + lf.str());
       if (use_collapsed_features_) {
-        span_vals_(i,j).first = feat2val_[pf.str()];
-        span_vals_(i,j).second = feat2val_["S_" + pf.str()];
+        span_vals_(i,j).first = feat2val_[pf.str()] + feat2val_[lf.str()];
+        span_vals_(i,j).second = feat2val_["S_" + pf.str()] + feat2val_["S_" + lf.str()];
       }
     }
   } 
