@@ -30,6 +30,7 @@ class KLanguageModel : public FeatureFunction {
                                      void* out_context) const;
  private:
   int fid_; // conceptually const; mutable only to simplify constructor
+  int oov_fid_; // will be zero if extra OOV feature is not configured by decoder
   KLanguageModelImpl<Model>* pimpl_;
 };
 
