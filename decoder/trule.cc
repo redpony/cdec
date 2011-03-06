@@ -272,6 +272,11 @@ string TRule::AsString(bool verbose) const {
   }
   if (!scores_.empty() && verbose) {
     os << " ||| " << scores_;
+    if (!a_.empty()) {
+      os << " |||";
+      for (int i = 0; i < a_.size(); ++i)
+        os << ' ' << a_[i];
+    }
   }
   return os.str();
 }
