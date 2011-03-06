@@ -139,7 +139,7 @@ inline shared_ptr<FsaFeatureFunction> make_fsa_ff(string const& ffp,bool verbose
 // with the rules. To add other features (like language models, etc), cdec applies one or
 // more "rescoring passes", which compute new features and optionally apply new weights
 // and then prune the resulting (rescored) hypergraph. All feature values from previous
-// passes are present in future passes (although their weights may change).
+// passes are carried over into subsequent passes (where they may have different weights).
 struct RescoringPass {
   RescoringPass() : density_prune(), beam_prune() {}
   shared_ptr<ModelSet> models;
