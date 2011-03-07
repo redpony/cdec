@@ -23,7 +23,7 @@ struct AlignmentPoint {
   short t_;
 };
 inline std::ostream& operator<<(std::ostream& os, const AlignmentPoint& p) {
-  return os << '(' << static_cast<int>(p.s_) << '-' << static_cast<int>(p.t_) << ')';
+  return os << static_cast<int>(p.s_) << '-' << static_cast<int>(p.t_);
 }
 
 
@@ -45,7 +45,7 @@ class TRule {
     e_(e), f_(f), lhs_(lhs), prev_i(-1), prev_j(-1) {}
 
   TRule(const TRule& other) :
-    e_(other.e_), f_(other.f_), lhs_(other.lhs_), scores_(other.scores_), arity_(other.arity_), prev_i(-1), prev_j(-1) {}
+    e_(other.e_), f_(other.f_), lhs_(other.lhs_), scores_(other.scores_), arity_(other.arity_), prev_i(-1), prev_j(-1), a_(other.a_) {}
 
   // if mono or strict is true, then lexer won't be used, and //FIXME: > 9 variables won't work
   explicit TRule(const std::string& text, bool strict = false, bool mono = false) : prev_i(-1), prev_j(-1) {
