@@ -282,7 +282,8 @@ bool HypergraphIO::WriteToJSON(const Hypergraph& hg, bool remove_rules, ostream*
   if (use_fdict) {
     o << "\"features\":[";
     for (int i = 1; i < FD::NumFeats(); ++i) {
-      o << (i==1 ? "":",") << '"' << FD::Convert(i) << '"';
+      o << (i==1 ? "":",");
+      JSONParser::WriteEscapedString(FD::Convert(i), &o);
     }
     o << "],";
   }
@@ -314,9 +315,10 @@ bool HypergraphIO::WriteToJSON(const Hypergraph& hg, bool remove_rules, ostream*
         if (!first) o << ',';
         if (use_fdict)
           o << (it->first - 1);
-        else
-          o << '"' << FD::Convert(it->first) << '"';
-        o << ',' << it->second;
+        else {
+	  JSONParser::WriteEscapedString(FD::Convert(it->first), &o);
+        }
+	o << ',' << it->second;
         first = false;
       }
       o << "]";
