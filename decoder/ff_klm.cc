@@ -318,7 +318,7 @@ class KLanguageModelImpl {
     vector<WordID> dummy;
     int lc = 0;
     cerr << "  Loading word classes from " << file << " ...\n";
-    AddWordToClassMapping_(TD::Convert("<s>"), TD::Convert("</s>"));
+    AddWordToClassMapping_(TD::Convert("<s>"), TD::Convert("<s>"));
     AddWordToClassMapping_(TD::Convert("</s>"), TD::Convert("</s>"));
     while(in) {
       getline(in, line);
@@ -339,7 +339,7 @@ class KLanguageModelImpl {
       word2class_map_.resize((word + 10) * 1.1, kCDEC_UNK);
       assert(word2class_map_.size() > word);
     }
-    if(word2class_map_[word] == kCDEC_UNK) {
+    if(word2class_map_[word] != kCDEC_UNK) {
       cerr << "Multiple classes for symbol " << TD::Convert(word) << endl;
       abort();
     }
