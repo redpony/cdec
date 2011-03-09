@@ -743,11 +743,13 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   translator->SentenceComplete();
 
   if (!translation_successful) {
-    if (!SILENT) cerr << "  NO PARSE FOUND.\n";
+    if (!SILENT) { cerr << "  NO PARSE FOUND.\n"; }
     o->NotifySourceParseFailure(smeta);
     o->NotifyDecodingComplete(smeta);
     if (conf.count("show_conditional_prob")) {
       cout << "-Inf" << endl << flush;
+    } else if (!SILENT) {
+      cout << endl;
     }
     return false;
   }
