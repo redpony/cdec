@@ -29,7 +29,7 @@ bool fl = true;
 #define MAX_TOKEN_SIZE 255
 std::string scfglex_tmp_token(MAX_TOKEN_SIZE, '\0');
 
-#define MAX_RULE_SIZE 48
+#define MAX_RULE_SIZE 200
 WordID scfglex_src_rhs[MAX_RULE_SIZE];
 WordID scfglex_trg_rhs[MAX_RULE_SIZE];
 int scfglex_src_rhs_size;
@@ -43,7 +43,7 @@ int scfglex_feat_ids[MAX_FEATS];
 double scfglex_feat_vals[MAX_FEATS];
 int scfglex_num_feats;
 
-#define MAX_ARITY 20
+#define MAX_ARITY 200
 int scfglex_nt_sanity[MAX_ARITY];
 int scfglex_src_nts[MAX_ARITY];
 // float scfglex_nt_size_means[MAX_ARITY];
@@ -51,7 +51,7 @@ int scfglex_src_nts[MAX_ARITY];
 std::stack<TRulePtr> ctf_rule_stack;
 unsigned int ctf_level = 0;
 
-#define MAX_ALS 50
+#define MAX_ALS 200
 AlignmentPoint scfglex_als[MAX_ALS];
 int scfglex_num_als;
 
