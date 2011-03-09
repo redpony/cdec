@@ -83,9 +83,10 @@ namespace detail {
 
 template <class MiddleT, class LongestT> template <class Voc> void TemplateHashedSearch<MiddleT, LongestT>::InitializeFromARPA(const char * /*file*/, util::FilePiece &f, const std::vector<uint64_t> &counts, const Config &config, Voc &vocab, Backing &backing) {
   // TODO: fix sorted.
-  SetupMemory(GrowForSearch(config, HASH_PROBING, counts, Size(counts, config), backing), counts, config);
+  SetupMemory(GrowForSearch(config, Size(counts, config), backing), counts, config);
 
-  Read1Grams(f, counts[0], vocab, unigram.Raw());  
+  Read1Grams(f, counts[0], vocab, unigram.Raw());
+  CheckSpecials(config, vocab);
 
   try {
     if (counts.size() > 2) {

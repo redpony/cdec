@@ -3,6 +3,7 @@
 
 #include "util/ersatz_progress.hh"
 #include "util/exception.hh"
+#include "util/have.hh"
 #include "util/mmap.hh"
 #include "util/scoped.hh"
 #include "util/string_piece.hh"
@@ -10,8 +11,6 @@
 #include <string>
 
 #include <cstddef>
-
-#define HAVE_ZLIB
 
 namespace util {
 
@@ -100,19 +99,7 @@ class FilePiece {
       return ret;
     }
 
-    const char *FindDelimiterOrEOF(const bool *delim = kSpaces) throw (GZException, EndOfFileException) {
-      for (const char *i = position_; i < position_end_; ++i) {
-        if (delim[static_cast<unsigned char>(*i)]) return i;
-      }
-      while (!at_end_) {
-        size_t skip = position_end_ - position_;
-        Shift();
-        for (const char *i = position_ + skip; i < position_end_; ++i) {
-          if (delim[static_cast<unsigned char>(*i)]) return i;
-        }
-      }
-      return position_end_;
-    }
+    const char *FindDelimiterOrEOF(const bool *delim = kSpaces) throw (GZException, EndOfFileException);
 
     void Shift() throw (EndOfFileException, GZException);
     // Backends to Shift().
