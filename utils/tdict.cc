@@ -5,92 +5,26 @@
 #include <stdlib.h>
 #include <cstring>
 #include <sstream>
-#include "Ngram.h"
 #include "dict.h"
 #include "tdict.h"
-#include "Vocab.h"
 #include "stringlib.h"
 #include "threadlocal.h"
 
 using namespace std;
 
-Vocab TD::dict_(0,TD::max_wordid);
-WordID TD::ss=dict_.ssIndex();
-WordID TD::se=dict_.seIndex();
-WordID TD::unk=dict_.unkIndex();
-char const*const TD::ss_str=Vocab_SentStart;
-char const*const TD::se_str=Vocab_SentEnd;
-char const*const TD::unk_str=Vocab_Unknown;
-
-// pre+(i-base)+">" for i in [base,e)
-inline void pad(std::string const& pre,int base,int e) {
-  assert(base<=e);
-  ostringstream o;
-  for (int i=base;i<e;++i) {
-    o.str(pre);
-    o<<(i-base)<<'>';
-    WordID id=TD::Convert(o.str());
-    assert(id==i); // this fails.  why?
-  }
-}
-
-
-namespace {
-struct TD_init {
-  TD_init() {
-    /*
-      // disabled for now since it's breaking trunk
-    assert(TD::Convert(TD::ss_str)==TD::ss);
-    assert(TD::Convert(TD::se_str)==TD::se);
-    assert(TD::Convert(TD::unk_str)==TD::unk);
-    assert(TD::none==Vocab_None);
-    pad("<FILLER",TD::end(),TD::reserved_begin);
-    assert(TD::end()==TD::reserved_begin);
-    int reserved_end=TD::begin();
-    pad("<RESERVED",TD::end(),reserved_end);
-    assert(TD::end()==reserved_end);
-    */
-  }
-};
-
-TD_init td_init;
-}
-
-unsigned int TD::NumWords() {
-  return dict_.numWords();
-}
-WordID TD::end() {
-  return dict_.highIndex();
-}
+Dict TD::dict_;
 
 WordID TD::Convert(const std::string& s) {
-  return dict_.addWord((VocabString)s.c_str());
+  return dict_.Convert(s);
 }
 
 WordID TD::Convert(char const* s) {
-  return dict_.addWord((VocabString)s);
+  return dict_.Convert(string(s));
 }
-
-
-#if TD_ALLOW_UNDEFINED_WORDIDS
-# include "static_utoa.h"
-char undef_prefix[]="UNDEF_";
-static const int undefpre_n=sizeof(undef_prefix)/sizeof(undef_prefix[0]);
-THREADLOCAL char undef_buf[]="UNDEF_________________";
-inline char const* undef_token(WordID w)
-{
-  append_utoa(undef_buf+undefpre_n,w);
-  return undef_buf;
-}
-#endif
 
 const char* TD::Convert(WordID w) {
-#if TD_ALLOW_UNDEFINED_WORDIDS
-  if (w>=dict_.highIndex()) return undef_token(w);
-#endif
-  return dict_.getWord((VocabIndex)w);
+  return dict_.Convert(w).c_str();
 }
-
 
 void TD::GetWordIDs(const std::vector<std::string>& strings, std::vector<WordID>* ids) {
   ids->clear();

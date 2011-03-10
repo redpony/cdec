@@ -59,8 +59,6 @@ char const* usage_verbose="-n determines the name of the feature (and its weight
 #include "fast_lexical_cast.hpp"
 
 #include "tdict.h"
-#include "Vocab.h"
-#include "Ngram.h"
 #include "hg.h"
 #include "stringlib.h"
 
@@ -80,40 +78,8 @@ string LanguageModel::usage(bool param,bool verbose) {
 }
 
 
-// NgramShare will keep track of all loaded lms and reuse them.
-//TODO: ref counting by shared_ptr?  for now, first one to load LM needs to stick around as long as all subsequent users.
-
 #include <boost/shared_ptr.hpp>
 using namespace boost;
-
-//WARNING: first person to add a pointer to ngram must keep it around until others are done using it.
-struct NgramShare
-{
-//  typedef shared_ptr<Ngram> NP;
-  typedef Ngram *NP;
-  map<string,NP> ns;
-  bool have(string const& file) const
-  {
-    return ns.find(file)!=ns.end();
-  }
-  NP get(string const& file) const
-  {
-    assert(have(file));
-    return ns.find(file)->second;
-  }
-  void set(string const& file,NP n)
-  {
-    ns[file]=n;
-  }
-  void add(string const& file,NP n)
-  {
-    assert(!have(file));
-    set(file,n);
-  }
-};
-
-//TODO: namespace or static?
-NgramShare ngs;
 
 namespace NgramCache {
   struct Cache {
@@ -215,37 +181,28 @@ class LanguageModelImpl : public LanguageModelInterface {
     state_size_ = OrderToStateSize(order)-1;
     unigram=(order<=1);
     floor_ = -100;
-    kSTART = TD::ss;
-    kSTOP = TD::se;
-    kUNKNOWN = TD::unk;
-    kNONE = TD::none;
+    kSTART = TD::Convert("<s>");
+    kSTOP = TD::Convert("</s>");
+    kUNKNOWN = TD::Convert("<unk>");
+    kNONE = 0;
     kSTAR = TD::Convert("<{STAR}>");
   }
 
  public:
-  explicit LanguageModelImpl(int order) : ngram_(TD::dict_, order)
+  explicit LanguageModelImpl(int order)
   {
     init(order);
   }
 
-
-//TODO: show that unigram special case (0 state) computes what it should.
-  LanguageModelImpl(int order, const string& f, int load_order=0) :
-    ngram_(TD::dict_, load_order ? load_order : order)
-  {
-    init(order);
-    File file(f.c_str(), "r", 0);
-    assert(file);
-    cerr << "Reading " << order_ << "-gram LM from " << f << endl;
-    ngram_.read(file, false);
-  }
 
   virtual ~LanguageModelImpl() {
   }
 
-  Ngram *get_lm() // for make_lm_impl ngs sharing only.
+  //Ngram *get_lm() // for make_lm_impl ngs sharing only.
+  void *get_lm() // for make_lm_impl ngs sharing only.
   {
-    return &ngram_;
+    //return &ngram_;
+    return 0;
   }
 
 
@@ -258,17 +215,19 @@ class LanguageModelImpl : public LanguageModelInterface {
   }
 
   virtual double WordProb(WordID word, WordID const* context) {
-    return ngram_.wordProb(word, (VocabIndex*)context);
+    return -100;
+    //return ngram_.wordProb(word, (VocabIndex*)context);
   }
 
   // may be shorter than actual null-terminated length.  context must be null terminated.  len is just to save effort for subclasses that don't support contextID
   virtual int ContextSize(WordID const* context,int len) {
     unsigned ret;
-    ngram_.contextID((VocabIndex*)context,ret);
+    //ngram_.contextID((VocabIndex*)context,ret);
     return ret;
   }
   virtual double ContextBOW(WordID const* context,int shortened_len) {
-    return ngram_.contextBOW((VocabIndex*)context,shortened_len);
+    //return ngram_.contextBOW((VocabIndex*)context,shortened_len);
+    return -100;
   }
 
   inline double LookupProbForBufferContents(int i) {
@@ -457,7 +416,6 @@ public:
   }
 
  protected:
-  Ngram ngram_;
   vector<WordID> buffer_;
   int order_;
   int state_size_;
@@ -470,8 +428,7 @@ public:
   bool unigram;
 };
 
-struct ClientLMI : public LanguageModelImpl
-{
+struct ClientLMI : public LanguageModelImpl {
   ClientLMI(int order,string const& server) : LanguageModelImpl(order), client_(server)
   {}
 
@@ -489,37 +446,13 @@ protected:
   LMClient client_;
 };
 
-struct ReuseLMI : public LanguageModelImpl
-{
-  ReuseLMI(int order, Ngram *ng) : LanguageModelImpl(order), ng(ng)
-  {}
-  double WordProb(int word, WordID const* context) {
-    return ng->wordProb(word, (VocabIndex*)context);
-  }
-  virtual int ContextSize(WordID const* context, int len) {
-    unsigned ret;
-    ng->contextID((VocabIndex*)context,ret);
-    return ret;
-  }
-  virtual double ContextBOW(WordID const* context,int shortened_len) {
-    return ng->contextBOW((VocabIndex*)context,shortened_len);
-  }
-protected:
-  Ngram *ng;
-};
-
 LanguageModelImpl *make_lm_impl(int order, string const& f, int load_order)
 {
   if (f.find("lm://") == 0) {
     return new ClientLMI(order,f.substr(5));
-  } else if (load_order==0 && ngs.have(f)) {
-    cerr<<"Reusing already loaded Ngram LM: "<<f<<endl;
-    return new ReuseLMI(order,ngs.get(f));
   } else {
-    LanguageModelImpl *r=new LanguageModelImpl(order,f,load_order);
-    if (!load_order || !ngs.have(f))
-      ngs.add(f,r->get_lm());
-    return r;
+    cerr << "LanguageModel no longer supports non-remote LMs. Please use KLanguageModel!\nPlease see http://cdec-decoder.org/index.php?title=Language_model_notes\n";
+    abort();
   }
 }
 
@@ -600,12 +533,12 @@ void LanguageModelFsa::set_ngram_order(int i) {
   WordID *ss=(WordID*)start.begin();
   WordID *hs=(WordID*)h_start.begin();
   if (ctxlen_) { // avoid segfault in case of unigram lm (0 state)
-    set_end_phrase(TD::se);
+    set_end_phrase(TD::Convert("</s>"));
 // se is pretty boring in unigram case, just adds constant prob.  check that this is what we want
-    ss[0]=TD::ss; // start-sentence context (length 1)
-    hs[0]=TD::none; // empty context
+    ss[0]=TD::Convert("<s>"); // start-sentence context (length 1)
+    hs[0]=0; // empty context
     for (int i=1;i<ctxlen_;++i) {
-      ss[i]=hs[i]=TD::none; // need this so storage is initialized for hashing.
+      ss[i]=hs[i]=0; // need this so storage is initialized for hashing.
       //TODO: reevaluate whether state space comes cleared by allocator or not.
     }
   }
@@ -627,7 +560,7 @@ void LanguageModelFsa::print_state(ostream &o,void const* st) const {
   for (int i=ctxlen_;i>0;sp=true) {
     --i;
     WordID w=wst[i];
-    if (w==TD::none) continue;
+    if (w==0) continue;
     if (sp) o<<' ';
     o << TD::Convert(w);
   }
