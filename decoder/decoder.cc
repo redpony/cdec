@@ -763,10 +763,6 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
              PRWeightFunction<double, EdgeProb, double, ELengthWeightFunction> >(forest);
     cerr << "  Expected length  (words): " << res.r / res.p << "\t" << res << endl;
   }
-  if (conf.count("show_partition")) {
-    const prob_t z = Inside<prob_t, EdgeProb>(forest);
-    cerr << "  Init. partition     log(Z): " << log(z) << endl;
-  }
 
   for (int pass = 0; pass < rescoring_passes.size(); ++pass) {
     const RescoringPass& rp = rescoring_passes[pass];
@@ -791,6 +787,11 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       forest.swap(rescored_forest);
       forest.Reweight(cur_weights);
       if (!SILENT) forest_stats(forest,"  " + passtr +" forest",show_tree_structure,show_features,cur_weights,oracle.show_derivation);
+    }
+
+    if (conf.count("show_partition")) {
+      const prob_t z = Inside<prob_t, EdgeProb>(forest);
+      cerr << "  " << passtr << " partition     log(Z): " << log(z) << endl;
     }
 
     string fullbp = "beam_prune" + StringSuffixForRescoringPass(pass);

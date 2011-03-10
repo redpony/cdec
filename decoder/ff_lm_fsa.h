@@ -21,8 +21,13 @@
 #include "ff_fsa.h"
 #include "ff_lm.h"
 
+#ifndef TD__none
+// replacing dependency on SRILM
+#define TD__none -1
+#endif
+
 namespace {
-WordID empty_context=TD::none;
+WordID empty_context=TD__none;
 }
 
 struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
@@ -40,7 +45,7 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
   }
   static inline WordID const* left_end(WordID const* left, WordID const* e) {
     for (;e>left;--e)
-      if (e[-1]!=TD::none) break;
+      if (e[-1]!=TD__none) break;
     //post: [left,e] are the seen left words
     return e;
   }
@@ -55,7 +60,7 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
     } else {
       WordID ctx[ngram_order_]; //alloca if you don't have C99
       state_copy(ctx,old_st);
-      ctx[ctxlen_]=TD::none;
+      ctx[ctxlen_]=TD__none;
       Featval p=floored(pimpl_->WordProb(w,ctx));
       FSALMDBG(de,"p("<<TD::Convert(w)<<"|"<<TD::Convert(ctx,ctx+ctxlen_)<<")="<<p);FSALMDBGnl(de);
       // states are srilm contexts so are in reverse order (most recent word is first, then 1-back comes next, etc.).
@@ -88,7 +93,7 @@ struct LanguageModelFsa : public FsaFeatureFunctionBase<LanguageModelFsa> {
     WP st_end=st+ctxlen_; // may include some null already (or none if full)
     int nboth=nw+ctxlen_;
     WordID ctx[nboth+1];
-    ctx[nboth]=TD::none;
+    ctx[nboth]=TD__none;
     // reverse order - state at very end of context, then [i,end) in rev order ending at ctx[0]
     W ctx_score_end=wordcpy_reverse(ctx,begin,end);
     wordcpy(ctx_score_end,st,st_end); // st already reversed.
