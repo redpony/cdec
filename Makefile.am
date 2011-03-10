@@ -5,5 +5,5 @@ SUBDIRS = utils mteval klm/util klm/lm decoder phrasinator training vest extools
 
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS =  -D_GLIBCXX_PARALLEL
+AM_CPPFLAGS = -D_GLIBCXX_PARALLEL
 

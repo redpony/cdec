@@ -26,7 +26,7 @@ hg_test_SOURCES = hg_test.cc
 hg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 trule_test_SOURCES = trule_test.cc
 trule_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I.. -I../mteval -I../utils -I../klm
+AM_CPPFLAGS = -W -Wno-sign-compare $(GTEST_CPPFLAGS) -I.. -I../mteval -I../utils -I../klm
 
 rule_lexer.cc: rule_lexer.l
 	$(LEX) -s -CF -8 -o$@ $<
@@ -82,5 +82,5 @@ libcdec_a_SOURCES = \
 
 if GLC
   # Until we build GLC as a library...
-  libcdec_a_SOURCES += ff_glc.cc
+  libcdec_a_SOURCES += ff_glc.cc string_util.cc feature-factory.cc
 endif
