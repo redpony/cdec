@@ -36,6 +36,10 @@ my $CCONFIG = {
     'HOST_REGEXP' => qr/^(blacklight.psc.edu|bl1.psc.teragrid.org|bl0.psc.teragrid.org)$/,
     'QSubMemFlag' => '-l pmem=',
   },
+  'Barrow/Chicago' => {
+    'HOST_REGEXP' => qr/^(barrow|chicago).lti.cs.cmu.edu$/,
+    'QSubMemFlag' => '-l pmem=',
+  },
   'LOCAL' => {
     'HOST_REGEXP' => qr/local\.net$/,
     'QSubMemFlag' => '',

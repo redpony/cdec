@@ -28,6 +28,12 @@ use IPC::Open2;
 use strict;
 use POSIX ":sys_wait_h";
 
+use File::Basename;
+my $myDir = dirname(__FILE__);
+print STDERR __FILE__." -> $myDir\n";
+push(@INC, $myDir);
+require "libcall.pl";
+
 my $tailn=5; # +0 = concatenate all the client logs.  5 = last 5 lines
 my $recycle_clients;    # spawn new clients when previous ones terminate
 my $stay_alive;      # dont let server die when having zero clients
@@ -76,7 +82,7 @@ sub preview_files {
     my @f=grep { ! ($skipempty && -z $_) } @$l;
     my $fn=join(' ',map {escape_shell($_)} @f);
     my $cmd="tail -n $n $fn";
-    `$cmd`.($footer?"\nNONEMPTY FILES:\n$fn\n":"");
+    check_output("$cmd").($footer?"\nNONEMPTY FILES:\n$fn\n":"");
 }
 sub prefix_dirname($) {
     #like `dirname but if ends in / then return the whole thing
@@ -105,7 +111,7 @@ sub extend_path($$;$$) {
             $dir=prefix_dirname($base);
         }
         my @cmd=("/bin/mkdir","-p",$dir);
-        system(@cmd) if $mkdir;
+        check_call(@cmd) if $mkdir;
     }
     return $base.$ext;
 }
@@ -142,7 +148,7 @@ my $prog=shift;
 if ($no_which) {
     $cmd=$prog;
 } else {
-    $cmd=`which $prog`;
+    $cmd=check_output("which $prog");
     chomp $cmd;
     die "$prog not found - $cmd" unless $cmd;
 }
@@ -156,7 +162,7 @@ my $cdcmd=$no_cd ? '' : ("cd ".escape_shell($abscwd)."\n");
 
 my $executable = $cmd;
 $executable =~ s/^\s*(\S+)($|\s.*)/$1/;
-$executable=`basename $executable`;
+$executable=check_output("basename $executable");
 chomp $executable;
 
 
@@ -192,10 +198,10 @@ sub launch_job_on_node;
 
 
 # vars
-my $mydir = `dirname $0`; chomp $mydir;
+my $mydir = check_output("dirname $0"); chomp $mydir;
 my $sentserver = "$mydir/sentserver";
 my $sentclient = "$mydir/sentclient";
-my $host = `hostname`;
+my $host = check_output("hostname");
 chomp $host;
 
 
@@ -205,7 +211,7 @@ my $port = 50300+int(rand($randp));
 my $endp=$port+$tryp;
 sub listening_port_lines {
     my $quiet=$verbose?'':'2>/dev/null';
-    `netstat -a -n $quiet | grep LISTENING | grep -i tcp`
+    return unchecked_output("netstat -a -n $quiet | grep LISTENING | grep -i tcp");
 }
 my $netstat=&listening_port_lines;
 
@@ -270,17 +276,14 @@ $cdcmd$sentclient $host:$port:$key $cmd
 #  my $todo = "$sentserver -k $key $multiflag $port ";
   my $todo = "$sentserver -k $key $multiflag $port $stay_alive_flag ";
   if ($verbose){ print STDERR "Running: $todo\n"; }
-  my $rc = system($todo);
-  if ($rc){
-    die "Error: sentserver returned code $rc\n";
-  }
+  check_call($todo);
 }
 
 sub numof_live_jobs {
   if ($use_fork) {
     die "not implemented";
   } else {
-    my @livejobs = grep(/$joblist/, split(/\n/, `qstat`));
+    my @livejobs = grep(/$joblist/, split(/\n/, check_output("qstat")));
     return ($#livejobs + 1);
   }
 }
@@ -320,7 +323,7 @@ sub launch_job {
             }
       if ($joblist == "") { $joblist = $jobid; }
       else {$joblist = $joblist . "\|" . $jobid; }
-            my $cleanfn="`qdel $jobid 2> /dev/null`";
+            my $cleanfn=check_output("qdel $jobid 2> /dev/null");
       push(@cleanup_cmds, $cleanfn);
     }
     close QOUT;
@@ -345,7 +348,7 @@ sub launch_job_fork {
     close $fh;
     my $todo = "/bin/sh $scr_name 1> $outfile 2> $errorfile";
     print STDERR "EXEC: $todo\n";
-    my $out = `$todo`;
+    my $out = check_output("$todo");
     print STDERR "RES: $out\n";
     unlink $scr_name or warn "Failed to remove $scr_name";
     exit 0;
@@ -377,7 +380,7 @@ sub cleanup {
 
 sub print_help
 {
-  my $name = `basename $0`; chomp $name;
+  my $name = check_output("basename $0"); chomp $name;
   print << "Help";
 
 usage: $name [options]

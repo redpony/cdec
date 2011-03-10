@@ -1,15 +1,17 @@
 #!/usr/bin/env perl
-
 use strict;
 my @ORIG_ARGV=@ARGV;
 use Cwd qw(getcwd);
 my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../environment"; }
+
+# Skip local config (used for distributing jobs) if we're running in local-only mode
 use LocalConfig;
 use Getopt::Long;
 use IPC::Open2;
-use strict;
 use POSIX ":sys_wait_h";
 my $QSUB_CMD = qsub_args(mert_memory());
+
+require "libcall.pl";
 
 # Default settings
 my $srcFile;
@@ -22,6 +24,7 @@ my $MAPINPUT = "$bin_dir/mr_vest_generate_mapper_input";
 my $MAPPER = "$bin_dir/mr_vest_map";
 my $REDUCER = "$bin_dir/mr_vest_reduce";
 my $parallelize = "$bin_dir/parallelize.pl";
+my $libcall = "$bin_dir/libcall.pl";
 my $sentserver = "$bin_dir/sentserver";
 my $sentclient = "$bin_dir/sentclient";
 my $LocalConfig = "$SCRIPT_DIR/../environment/LocalConfig.pm";
@@ -31,6 +34,7 @@ die "Can't find $MAPPER" unless -x $MAPPER;
 my $cdec = "$bin_dir/../decoder/cdec";
 die "Can't find decoder in $cdec" unless -x $cdec;
 die "Can't find $parallelize" unless -x $parallelize;
+die "Can't find $libcall" unless -e $libcall;
 my $decoder = $cdec;
 my $lines_per_mapper = 400;
 my $rand_directions = 15;
@@ -124,7 +128,7 @@ sub enseg;
 sub print_help;
 
 my $nodelist;
-my $host =`hostname`; chomp $host;
+my $host =check_output("hostname"); chomp $host;
 my $bleu;
 my $interval_count = 0;
 my $logfile;
@@ -142,7 +146,7 @@ unless ($dir){
 	$dir = "vest";
 }
 unless ($dir =~ /^\//){  # convert relative path to absolute path
-	my $basedir = `pwd`;
+	my $basedir = check_output("pwd");
 	chomp $basedir;
 	$dir = "$basedir/$dir";
 }
@@ -158,15 +162,18 @@ my @cleanupcmds = ();
 
 sub cleanup {
 	print STDERR "Cleanup...\n";
-	for my $pid (@childpids){ `kill $pid`; }
-	for my $cmd (@cleanupcmds){`$cmd`; }
+	for my $pid (@childpids){ unchecked_call("kill $pid"); }
+	for my $cmd (@cleanupcmds){ unchecked_call("$cmd"); }
 	exit 1;
 };
+# Always call cleanup, no matter how we exit
+*CORE::GLOBAL::exit = 
+    sub{ cleanup(); }; 
 $SIG{INT} = "cleanup";
 $SIG{TERM} = "cleanup";
 $SIG{HUP} = "cleanup";
 
-my $decoderBase = `basename $decoder`; chomp $decoderBase;
+my $decoderBase = check_output("basename $decoder"); chomp $decoderBase;
 my $newIniFile = "$dir/$decoderBase.ini";
 my $inputFileName = "$dir/input";
 my $user = $ENV{"USER"};
@@ -181,12 +188,12 @@ use File::Basename qw(basename);
 sub modbin {
     local $_;
     my $bindir=shift;
-    `mkdir -p $bindir`;
+    check_call("mkdir -p $bindir");
     -d $bindir || die "couldn't make bindir $bindir";
     for (@_) {
         my $src=$$_;
         $$_="$bindir/".basename($src);
-        `cp -p $src $$_`;
+        check_call("cp -p $src $$_");
         die "cp $src $$_ failed: $!" unless $? == 0;
     }
 }
@@ -203,7 +210,7 @@ if ($dryrun){
 	} else {
 		-e $dir || mkdir $dir;
 		mkdir "$dir/hgs";
-        modbin("$dir/bin",\$LocalConfig,\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize,\$sentserver,\$sentclient) if $cpbin;
+        modbin("$dir/bin",\$LocalConfig,\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize,\$sentserver,\$sentclient,\$libcall) if $cpbin;
     mkdir "$dir/scripts";
         my $cmdfile="$dir/rerun-vest.sh";
         open CMD,'>',$cmdfile;
@@ -219,7 +226,7 @@ if ($dryrun){
 			print_help();
 			exit;
 		}
-		`cp $initialWeights $dir/weights.0`;
+		check_call("cp $initialWeights $dir/weights.0");
 		die "Can't find weights.0" unless (-e "$dir/weights.0");
 	}
 	write_config(*STDERR);
@@ -227,7 +234,7 @@ if ($dryrun){
 
 
 # Generate initial files and values
-`cp $iniFile $newIniFile`;
+check_call("cp $iniFile $newIniFile");
 $iniFile = $newIniFile;
 
 my $newsrc = "$dir/dev.input";
@@ -259,12 +266,12 @@ while (1){
 	my $logdir="$dir/logs.$iteration";
 	my $decoderLog="$logdir/decoder.sentserver.log.$iteration";
 	my $scorerLog="$logdir/scorer.log.$iteration";
-	`mkdir -p $logdir`;
+	check_call("mkdir -p $logdir");
 
 
 	#decode
 	print STDERR "RUNNING DECODER AT ";
-	print STDERR `date`;
+	print STDERR unchecked_output("date");
 	my $im1 = $iteration - 1;
 	my $weightsFile="$dir/weights.$im1";
 	my $decoder_cmd = "$decoder -c $iniFile --weights$pass_suffix $weightsFile -O $dir/hgs";
@@ -275,33 +282,28 @@ while (1){
 	if ($run_local) {
 		$pcmd = "cat $srcFile |";
 	} elsif ($use_make) {
-		$pcmd = "cat $srcFile | $parallelize --use-fork -p $pmem -e $logdir -j $decode_nodes --";
+	    # TODO: Throw error when decode_nodes is specified along with use_make
+		$pcmd = "cat $srcFile | $parallelize --use-fork -p $pmem -e $logdir -j $use_make --";
 	} else {
 		$pcmd = "cat $srcFile | $parallelize $usefork -p $pmem -e $logdir -j $decode_nodes --";
 	}
 	my $cmd = "$pcmd $decoder_cmd 2> $decoderLog 1> $runFile";
 	print STDERR "COMMAND:\n$cmd\n";
-	my $result = 0;
-	$result = system($cmd);
-	unless ($result == 0){
-		cleanup();
-		print STDERR "ERROR: Parallel decoder returned non-zero exit code $result\n";
-		die;
-	}
-        my $num_hgs = `ls $dir/hgs/*.gz | wc -l`;
+	check_bash_call($cmd);
+        my $num_hgs = check_output("ls $dir/hgs/*.gz | wc -l");
         print STDERR "NUMBER OF HGs: $num_hgs\n";
 	die "Dev set contains $devSize sentences! Decoder failure?\n" if ($devSize != $num_hgs);
-	my $dec_score = `cat $runFile | $SCORER $refs_comma_sep -l $metric`;
+	my $dec_score = check_output("cat $runFile | $SCORER $refs_comma_sep -l $metric");
 	chomp $dec_score;
 	print STDERR "DECODER SCORE: $dec_score\n";
 
 	# save space
-	`gzip -f $runFile`;
-	`gzip -f $decoderLog`;
+	check_call("gzip -f $runFile");
+	check_call("gzip -f $decoderLog");
 
 	# run optimizer
 	print STDERR "RUNNING OPTIMIZER AT ";
-	print STDERR `date`;
+	print STDERR unchecked_output("date");
 	my $mergeLog="$logdir/prune-merge.log.$iteration";
 
 	my $score = 0;
@@ -309,28 +311,18 @@ while (1){
 	my $inweights="$dir/weights.$im1";
 	for (my $opt_iter=1; $opt_iter<$optimization_iters; $opt_iter++) {
 		print STDERR "\nGENERATE OPTIMIZATION STRATEGY (OPT-ITERATION $opt_iter/$optimization_iters)\n";
-		print STDERR `date`;
+		print STDERR unchecked_output("date");
 		$icc++;
 		my $nop=$noprimary?"--no_primary":"";
 		my $targs=$oraclen ? "--decoder_translations='$runFile.gz' ".get_comma_sep_refs('-references',$refFiles):"";
 		my $bwargs=$bleu_weight!=1 ? "--bleu_weight=$bleu_weight":"";
 		$cmd="$MAPINPUT -w $inweights -r $dir/hgs $bwargs -s $devSize -d $rand_directions --max_similarity=$maxsim --oracle_directions=$oraclen --oracle_batch=$oracleb $targs $dirargs > $dir/agenda.$im1-$opt_iter";
 		print STDERR "COMMAND:\n$cmd\n";
-		$result = system($cmd);
-		unless ($result == 0){
-			cleanup();
-			die "ERROR: mapinput command returned non-zero exit code $result\n";
-		}
-
-		`mkdir -p $dir/splag.$im1`;
+		check_call($cmd);
+		check_call("mkdir -p $dir/splag.$im1");
 		$cmd="split -a 3 -l $lines_per_mapper $dir/agenda.$im1-$opt_iter $dir/splag.$im1/mapinput.";
 		print STDERR "COMMAND:\n$cmd\n";
-		$result = system($cmd);
-		unless ($result == 0){
-			cleanup();
-			print STDERR "ERROR: split command returned non-zero exit code $result\n";
-			die;
-		}
+		check_call($cmd);
 		opendir(DIR, "$dir/splag.$im1") or die "Can't open directory: $!";
 		my @shards = grep { /^mapinput\./ } readdir(DIR);
 		closedir DIR;
@@ -360,11 +352,7 @@ while (1){
 			my $script = "$MAPPER -s $srcFile -l $metric $refs_comma_sep < $dir/splag.$im1/$shard | sort -t \$'\\t' -k 1 > $dir/splag.$im1/$mapoutput";
 			if ($run_local) {
 				print STDERR "COMMAND:\n$script\n";
-				$result = system($script);
-				unless ($result == 0){
-					cleanup();
-					die "ERROR: mapper returned non-zero exit code $result\n";
-				}
+				check_bash_call($script);
 			} elsif ($use_make) {
 				my $script_file = "$dir/scripts/map.$shard";
 				open F, ">$script_file" or die "Can't write $script_file: $!";
@@ -384,13 +372,13 @@ while (1){
 				if ($first_shard) { print STDERR "$script\n"; $first_shard=0; }
 
 				$nmappers++;
-				my $qcmd = "$QSUB_CMD -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file";
-				my $jobid = `$qcmd`;
+				my $qcmd = "QSUB_CMD -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file";
+				my $jobid = check_output("$qcmd");
 				die "qsub failed: $!\nCMD was: $qcmd" unless $? == 0;
 				chomp $jobid;
 				$jobid =~ s/^(\d+)(.*?)$/\1/g;
 				$jobid =~ s/^Your job (\d+) .*$/\1/;
-		 	 	push(@cleanupcmds, "`qdel $jobid 2> /dev/null`");
+		 	 	push(@cleanupcmds, check_output("qdel $jobid 2> /dev/null"));
 				print STDERR " $jobid";
 				if ($joblist == "") { $joblist = $jobid; }
 				else {$joblist = $joblist . "\|" . $jobid; }
@@ -403,18 +391,14 @@ while (1){
 			close $mkfile;
 			my $mcmd = "make -j $use_make -f $mkfilename";
 			print STDERR "\nExecuting: $mcmd\n";
-			$result = system($mcmd);
-			unless ($result == 0){
-				cleanup();
-				die "ERROR: make command returned non-zero exit code $result\n";
-			}
+			check_call($mcmd);
 		} else {
 			print STDERR "\nLaunched $nmappers mappers.\n";
       			sleep 8;
 			print STDERR "Waiting for mappers to complete...\n";
 			while ($nmappers > 0) {
 			  sleep 5;
-			  my @livejobs = grep(/$joblist/, split(/\n/, `qstat | grep -v ' C '`));
+			  my @livejobs = grep(/$joblist/, split(/\n/, check_output("qstat | grep -v ' C '")));
 			  $nmappers = scalar @livejobs;
 			}
 			print STDERR "All mappers complete.\n";
@@ -430,16 +414,12 @@ while (1){
 		}
 		print STDERR "Results for $tol/$til lines\n";
 		print STDERR "\nSORTING AND RUNNING VEST REDUCER\n";
-		print STDERR `date`;
+		print STDERR unchecked_output("date");
 		$cmd="sort -t \$'\\t' -k 1 @mapoutputs | $REDUCER -l $metric > $dir/redoutput.$im1";
 		print STDERR "COMMAND:\n$cmd\n";
-		$result = system($cmd);
-		unless ($result == 0){
-			cleanup();
-			die "ERROR: reducer command returned non-zero exit code $result\n";
-		}
+		check_bash_call($cmd);
 		$cmd="sort -nk3 $DIR_FLAG '-t|' $dir/redoutput.$im1 | head -1";
-		my $best=`$cmd`; chomp $best;
+		my $best=check_bash_output("$cmd"); chomp $best;
 		print STDERR "$best\n";
 		my ($oa, $x, $xscore) = split /\|/, $best;
 		$score = $xscore;
@@ -472,11 +452,11 @@ while (1){
 			my $v = ($ori{$k} + $axi{$k} * $x) / $norm;
 			print W "$k $v\n";
 		}
-		`rm -rf $dir/splag.$im1`;
+		check_call("rm -rf $dir/splag.$im1");
 		$inweights = $finalFile;
 	}
 	$lastWeightsFile = "$dir/weights.$iteration";
-	`cp $inweights $lastWeightsFile`;
+	check_call("cp $inweights $lastWeightsFile");
 	if ($icc < 2) {
 		print STDERR "\nREACHED STOPPING CRITERION: score change too little\n";
 		last;
@@ -520,7 +500,7 @@ sub get_lines {
 
 sub get_comma_sep_refs {
   my ($r,$p) = @_;
-  my $o = `echo $p`;
+  my $o = check_output("echo $p");
   chomp $o;
   my @files = split /\s+/, $o;
   return "-$r " . join(" -$r ", @files);
@@ -607,7 +587,7 @@ sub enseg {
 
 sub print_help {
 
-	my $executable = `basename $0`; chomp $executable;
+	my $executable = check_output("basename $0"); chomp $executable;
     print << "Help";
 
 Usage: $executable [options] <ini file>
