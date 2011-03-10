@@ -12,6 +12,10 @@ my $host = domainname;
 
 # keys are: HOST_REGEXP, MERTMem, QSubQueue, QSubMemFlag, QSubExtraFlags
 my $CCONFIG = {
+  'StarCluster' => {
+    'HOST_REGEXP' => qr/compute-\d+\.internal$/,
+    'QSubMemFlag' => '-l mem',
+  },
   'LTICluster' => {
     'HOST_REGEXP' => qr/^cluster\d+\.lti\.cs\.cmu\.edu$/,
     'QSubMemFlag' => '-l h_vmem=',
@@ -37,8 +41,8 @@ my $CCONFIG = {
     'QSubMemFlag' => '-l pmem=',
   },
   'LOCAL' => {
-    'HOST_REGEXP' => qr/local\.net$/,
-    'QSubMemFlag' => '',
+    'HOST_REGEXP' => qr/local\./,
+    'QSubMemFlag' => ' ',
   },
 };
 
