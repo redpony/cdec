@@ -36,13 +36,6 @@ then
   LIBS="$LIBS -lboost_mpi $BOOST_SERIALIZATION_LIBS -lmpi++ -lmpi"
 fi
 
-AM_CONDITIONAL([SRI_LM], false)
-AC_ARG_WITH(srilm,
-            [AC_HELP_STRING([--with-srilm=PATH], [(optional) path to SRI's LM toolkit])],
-            [with_srilm=$withval],
-            [with_srilm=no]
-           )
-
 AM_CONDITIONAL([RAND_LM], false)
 AC_ARG_WITH(randlm,
             [AC_HELP_STRING([--with-randlm=PATH], [(optional) path to RandLM toolkit])],
@@ -57,26 +50,6 @@ AC_ARG_WITH(glc,
             [with_glc=no]
            )
 FF_GLC=""
-
-if test "x$with_srilm" != 'xno'
-then
-  SAVE_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS -I${with_srilm}/include"
-
-  AC_CHECK_HEADER(Ngram.h,
-                 [AC_DEFINE([HAVE_SRILM], [], [flag for SRILM])],
-                 [AC_MSG_ERROR([Cannot find SRILM!])])
-
-  LIB_SRILM="-loolm -ldstruct -lmisc"
-  # ROOT/lib/i686-m64/liboolm.a
-  # ROOT/lib/i686-m64/libdstruct.a
-  # ROOT/lib/i686-m64/libmisc.a
-  MY_ARCH=`${with_srilm}/sbin/machine-type`
-  LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH}"
-  LIBS="$LIBS $LIB_SRILM"
-  FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
-  AM_CONDITIONAL([SRI_LM], true)
-fi
 
 if test "x$with_randlm" != 'xno'
 then

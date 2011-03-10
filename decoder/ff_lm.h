@@ -8,6 +8,9 @@
 #include "ff.h"
 #include "config.h"
 
+// everything in this file is deprecated and may be broken.
+// Chris Dyer, Mar 2011
+
 class LanguageModelInterface {
  public:
   double floor_;
@@ -29,7 +32,7 @@ class LanguageModelInterface {
     double p=ContextBOW(context,slen);
     while (len>slen) {
       --len;
-      context[len]=TD::none;
+      context[len]=0;
     }
     return p;
   }

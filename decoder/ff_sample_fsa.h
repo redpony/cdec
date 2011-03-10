@@ -114,7 +114,7 @@ struct LongerThanPrev : public FsaFeatureFunctionBase<LongerThanPrev> {
 // similar example feature; base type exposes stateful type, defines markov_order 1, state size = sizeof(State)
 struct ShorterThanPrev : FsaTypedBase<int,ShorterThanPrev> {
   ShorterThanPrev(std::string const& param)
-    : FsaTypedBase<int,ShorterThanPrev>(-1,4,singleton_sentence(TD::se)) // start, h_start, end_phrase
+    : FsaTypedBase<int,ShorterThanPrev>(-1,4,singleton_sentence(TD::Convert("</s>"))) // start, h_start, end_phrase
     // h_start estimate state: anything <4 chars is usually shorter than previous
   { Init(); }
   static std::string usage(bool param,bool verbose) {
