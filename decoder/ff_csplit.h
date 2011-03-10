@@ -4,6 +4,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ff.h"
+#include "klm/lm/model.hh"
 
 class BasicCSplitFeaturesImpl;
 class BasicCSplitFeatures : public FeatureFunction {
@@ -20,7 +21,7 @@ class BasicCSplitFeatures : public FeatureFunction {
   boost::shared_ptr<BasicCSplitFeaturesImpl> pimpl_;
 };
 
-class ReverseCharLMCSplitFeatureImpl;
+template <class M> class ReverseCharLMCSplitFeatureImpl;
 class ReverseCharLMCSplitFeature : public FeatureFunction {
  public:
   ReverseCharLMCSplitFeature(const std::string& param);
@@ -32,7 +33,7 @@ class ReverseCharLMCSplitFeature : public FeatureFunction {
                                      SparseVector<double>* estimated_features,
                                      void* out_context) const;
  private:
-  boost::shared_ptr<ReverseCharLMCSplitFeatureImpl> pimpl_;
+  boost::shared_ptr<ReverseCharLMCSplitFeatureImpl<lm::ngram::ProbingModel> > pimpl_;
   const int fid_;
 };
 

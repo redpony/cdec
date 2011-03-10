@@ -3,6 +3,11 @@
 
 #include "ff_fsa.h"
 
+#ifndef TD__none
+// replacing dependency on SRILM
+#define TD__none -1
+#endif
+
 #ifndef FSA_FF_DEBUG
 # define FSA_FF_DEBUG 0
 #endif
@@ -94,7 +99,7 @@ public:
       return;
     }
 
-    // bear with me, because this is hard to understand.  reminder: ant_contexts and out_state are left-words first (up to M, TD::none padded).  if all M words are present, then FSA state follows.  otherwise 0 bytes to keep memcmp/hash happy.
+    // bear with me, because this is hard to understand.  reminder: ant_contexts and out_state are left-words first (up to M, TD__none padded).  if all M words are present, then FSA state follows.  otherwise 0 bytes to keep memcmp/hash happy.
 
 //why do we compute heuristic in so many places?  well, because that's how we know what state we should score words in once we're full on our left context (because of markov order bound, we know the score will be the same no matter what came before that left context)
     // these left_* refer to our output (out_state):
@@ -163,7 +168,7 @@ public:
     if (left_out<left_full) { // finally: partial heuristic for unfilled items
 //      fsa.reset(ff.heuristic_start_state());      fsa.scan(left_begin,left_out,&h_accum);
       ff.ScanPhraseAccumOnly(smeta,edge,left_begin,left_out,ff.heuristic_start_state(),&h_accum);
-      do { *left_out++=TD::none; } while(left_out<left_full); // none-terminate so left_end(out_state) will know how many words
+      do { *left_out++=TD__none; } while(left_out<left_full); // none-terminate so left_end(out_state) will know how many words
       ff.state_zero(out_fsa_state); // so we compare / hash correctly. don't know state yet because left context isn't full
     } else // or else store final right-state.  heuristic was already assigned
       ff.state_copy(out_fsa_state,fsa.cs);
@@ -233,7 +238,7 @@ public:
   static void test() {
     WordID w1[1],w1b[1],w2[2];
     w1[0]=w2[0]=TD::Convert("hi");
-    w2[1]=w1b[0]=TD::none;
+    w2[1]=w1b[0]=TD__none;
     assert(left_end(w1,w1+1)==w1+1);
     assert(left_end(w1b,w1b+1)==w1b);
     assert(left_end(w2,w2+2)==w2+1);
@@ -262,12 +267,12 @@ private:
   /*
     state layout: left WordIds, followed by fsa state
     left words have never been scored.  last ones remaining will be scored on FinalTraversalFeatures only.
-    right state is unknown until we have all M left words (less than M means TD::none will pad out right end).  unk right state will be zeroed out for proper hash/equal recombination.
+    right state is unknown until we have all M left words (less than M means TD__none will pad out right end).  unk right state will be zeroed out for proper hash/equal recombination.
   */
 
   static inline WordID const* left_end(WordID const* left, WordID const* e) {
     for (;e>left;--e)
-      if (e[-1]!=TD::none) break;
+      if (e[-1]!=TD__none) break;
     //post: [left,e] are the seen left words
     return e;
   }

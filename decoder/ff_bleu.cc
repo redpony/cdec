@@ -13,8 +13,6 @@ char const* bleu_usage_verbose="Uses feature id 0!  Make sure there are no other
 
 #include "ff_bleu.h"
 #include "tdict.h"
-#include "Vocab.h"
-#include "Ngram.h"
 #include "hg.h"
 #include "stringlib.h"
 #include "sentence_metadata.h"
@@ -25,7 +23,7 @@ using namespace std;
 class BLEUModelImpl {
  public:
   explicit BLEUModelImpl(int order) :
-      ngram_(TD::dict_, order), buffer_(), order_(order), state_size_(OrderToStateSize(order) - 1),
+      buffer_(), order_(order), state_size_(OrderToStateSize(order) - 1),
       floor_(-100.0),
       kSTART(TD::Convert("<s>")),
       kSTOP(TD::Convert("</s>")),
@@ -219,7 +217,6 @@ class BLEUModelImpl {
   }
 
  protected:
-  Ngram ngram_;
   vector<WordID> buffer_;
   const int order_;
   const int state_size_;

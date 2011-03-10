@@ -201,6 +201,11 @@ public:
     return found==values_.end() || !found->second;
   }
 
+  void remove_zeros() {
+    typename MapType::iterator it = values_.begin();
+    for (; it != values_.end(); ++it)
+      if (!it->second) values_.erase(it);
+  }
 
   T get(int index) const {
     typename MapType::const_iterator found = values_.find(index);
