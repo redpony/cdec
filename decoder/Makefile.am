@@ -82,5 +82,5 @@ libcdec_a_SOURCES = \
 
 if GLC
   # Until we build GLC as a library...
-  libcdec_a_SOURCES += ff_glc.cc
+  libcdec_a_SOURCES += ff_glc.cc feature-factory.cc string_util.cc
 endif
