@@ -1,4 +1,4 @@
-#grep!/usr/bin/env perl
+#!/usr/bin/env perl
 use strict;
 my @ORIG_ARGV=@ARGV;
 use Cwd qw(getcwd);
