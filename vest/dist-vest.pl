@@ -371,12 +371,12 @@ while (1){
 				if ($first_shard) { print STDERR "$script\n"; $first_shard=0; }
 
 				$nmappers++;
-				my $qcmd = "QSUB_CMD -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file";
+				my $qcmd = "$QSUB_CMD -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file";
 				my $jobid = check_output("$qcmd");
 				chomp $jobid;
 				$jobid =~ s/^(\d+)(.*?)$/\1/g;
 				$jobid =~ s/^Your job (\d+) .*$/\1/;
-		 	 	push(@cleanupcmds, check_output("qdel $jobid 2> /dev/null"));
+		 	 	push(@cleanupcmds, "qdel $jobid 2> /dev/null");
 				print STDERR " $jobid";
 				if ($joblist == "") { $joblist = $jobid; }
 				else {$joblist = $joblist . "\|" . $jobid; }
