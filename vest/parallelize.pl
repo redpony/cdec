@@ -347,7 +347,7 @@ sub launch_job_fork {
     my ($fh, $scr_name) = get_temp_script();
     print $fh $script;
     close $fh;
-    my $todo = "/bin/sh $scr_name 1> $outfile 2> $errorfile";
+    my $todo = "/bin/bash -xeo pipefail $scr_name 1> $outfile 2> $errorfile";
     print STDERR "EXEC: $todo\n";
     my $out = check_output("$todo");
     print STDERR "RES: $out\n";
