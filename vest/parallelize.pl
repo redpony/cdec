@@ -82,7 +82,7 @@ sub preview_files {
     my @f=grep { ! ($skipempty && -z $_) } @$l;
     my $fn=join(' ',map {escape_shell($_)} @f);
     my $cmd="tail -n $n $fn";
-    check_output("$cmd").($footer?"\nNONEMPTY FILES:\n$fn\n":"");
+    unchecked_output("$cmd").($footer?"\nNONEMPTY FILES:\n$fn\n":"");
 }
 sub prefix_dirname($) {
     #like `dirname but if ends in / then return the whole thing
@@ -323,7 +323,7 @@ sub launch_job {
             }
       if ($joblist == "") { $joblist = $jobid; }
       else {$joblist = $joblist . "\|" . $jobid; }
-            my $cleanfn=check_output("qdel $jobid 2> /dev/null");
+      my $cleanfn="qdel $jobid 2> /dev/null";
       push(@cleanup_cmds, $cleanfn);
     }
     close QOUT;
