@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#grep!/usr/bin/env perl
 use strict;
 my @ORIG_ARGV=@ARGV;
 use Cwd qw(getcwd);
@@ -396,7 +396,7 @@ while (1){
 			print STDERR "Waiting for mappers to complete...\n";
 			while ($nmappers > 0) {
 			  sleep 5;
-			  my @livejobs = grep(/$joblist/, split(/\n/, check_output("qstat | grep -v ' C '")));
+			  my @livejobs = grep(/$joblist/, split(/\n/, check_output("qstat | awk '{if($0 !~ \" C \"){print}}'")));
 			  $nmappers = scalar @livejobs;
 			}
 			print STDERR "All mappers complete.\n";
