@@ -283,7 +283,8 @@ sub numof_live_jobs {
   if ($use_fork) {
     die "not implemented";
   } else {
-    my @livejobs = grep(/$joblist/, split(/\n/, check_output("qstat")));
+    # We can probably continue decoding if the qstat error is only temporary
+    my @livejobs = grep(/$joblist/, split(/\n/, unchecked_output("qstat")));
     return ($#livejobs + 1);
   }
 }
