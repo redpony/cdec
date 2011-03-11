@@ -194,7 +194,6 @@ sub modbin {
         my $src=$$_;
         $$_="$bindir/".basename($src);
         check_call("cp -p $src $$_");
-        die "cp $src $$_ failed: $!" unless $? == 0;
     }
 }
 sub dirsize {
@@ -374,7 +373,6 @@ while (1){
 				$nmappers++;
 				my $qcmd = "QSUB_CMD -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file";
 				my $jobid = check_output("$qcmd");
-				die "qsub failed: $!\nCMD was: $qcmd" unless $? == 0;
 				chomp $jobid;
 				$jobid =~ s/^(\d+)(.*?)$/\1/g;
 				$jobid =~ s/^Your job (\d+) .*$/\1/;
