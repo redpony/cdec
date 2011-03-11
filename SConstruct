@@ -1,3 +1,7 @@
+#!/usr/bin/python
+
+# EXPERIMENTAL and HACKY version of cdec build in scons
+
 AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', 
 		      help='installation prefix')
 AddOption('--with-boost', dest='boost', type='string', nargs=1, action='store', metavar='DIR',
