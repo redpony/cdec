@@ -396,7 +396,7 @@ while (1){
 			print STDERR "Waiting for mappers to complete...\n";
 			while ($nmappers > 0) {
 			  sleep 5;
-			  my @livejobs = grep(/$joblist/, split(/\n/, check_output("qstat | awk '{if($0 !~ \" C \"){print}}'")));
+			  my @livejobs = grep(/$joblist/, split(/\n/, unchecked_output("qstat | grep -v ' C '")));
 			  $nmappers = scalar @livejobs;
 			}
 			print STDERR "All mappers complete.\n";
