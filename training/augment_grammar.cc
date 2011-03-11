@@ -36,6 +36,7 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("source_lm,l",po::value<string>(),"Source language LM (KLM)")
         ("collapse_weights,w",po::value<string>(), "Collapse weights into a single feature X using the coefficients from this weights file")
         ("add_shape_types,s", "Add rule shape types")
+        ("extra_lex_feature,x", "Experimental nonlinear lexical weighting feature")
         ("replace_files,r", "Replace files with transformed variants (requires loading full grammar into memory)")
         ("grammar,g", po::value<vector<string> >(), "Input (also output) grammar file(s)");
   po::options_description clo("Command line options");
@@ -85,6 +86,7 @@ template <class Model> float Score(const vector<WordID>& str, const Model &model
   return total;
 }
 
+bool extra_feature;
 int kSrcLM;
 vector<double> col_weights;
 bool gather_rules;
@@ -94,9 +96,15 @@ static void RuleHelper(const TRulePtr& new_rule, const unsigned int ctf_level, c
   static const int kSrcLM = FD::Convert("SrcLM");
   static const int kPC = FD::Convert("PC");
   static const int kX = FD::Convert("X");
+  static const int kPhraseModel2 = FD::Convert("PhraseModel_1");
+  static const int kNewLex = FD::Convert("NewLex");
   TRulePtr r; r.reset(new TRule(*new_rule));
   if (ngram) r->scores_.set_value(kSrcLM, Score(r->f_, *ngram));
   r->scores_.set_value(kPC, 1.0);
+  if (extra_feature) {
+    float v = r->scores_.value(kPhraseModel2);
+    r->scores_.set_value(kNewLex, v*(v+1));
+  }
   if (col_weights.size()) {
     double score = r->scores_.dot(col_weights);
     r->scores_.clear();
@@ -122,6 +130,7 @@ int main(int argc, char** argv) {
     cerr << "Loaded " << (int)ngram->Order() << "-gram KenLM (MapSize=" << word_map.size() << ")\n";
     cerr << "  <s> = " << kSOS << endl;
   } else { ngram = NULL; }
+  extra_feature = conf.count("extra_lex_feature") > 0;
   if (conf.count("collapse_weights")) {
     Weights w;
     w.InitFromFile(conf["collapse_weights"].as<string>());
