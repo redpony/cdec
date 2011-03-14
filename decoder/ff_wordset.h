@@ -32,6 +32,7 @@ class WordSet : public FeatureFunction {
   ~WordSet() {
   }
 
+  Features features() const { return single_feature(fid_); }
 
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
