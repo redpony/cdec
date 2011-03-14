@@ -573,7 +573,11 @@ sub enseg {
 	while (my $line=<SRC>){
 		chomp $line;
 		if ($line =~ /^\s*<seg/i) {
+		    if($line =~ /id="[0-9]+"/) {
 			print NEWSRC "$line\n";
+		    } else {
+			die "When using segments with pre-generated <seg> tags, you must include a zero-based id attribute";
+		    }
 		} else {
 			print NEWSRC "<seg id=\"$i\">$line</seg>\n";
 		}
