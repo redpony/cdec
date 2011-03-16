@@ -21,7 +21,7 @@ static const unsigned char MASK             = 7;
 // -n NAME : feature id is NAME
 bool ParseLMArgs(string const& in, string* filename, string* mapfile, bool* explicit_markers, string* featname) {
   vector<string> const& argv=SplitOnWhitespace(in);
-  *explicit_markers = true;
+  *explicit_markers = false;
   *featname="LanguageModel";
   *mapfile = "";
 #define LMSPEC_NEXTARG if (i==argv.end()) {            \
