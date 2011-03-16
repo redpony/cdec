@@ -120,3 +120,4 @@ gi/posterior-regularisation/prjava/lib/prjava-20100715.jar
 *.dvi
 *.ps
 *.toc
+*~
