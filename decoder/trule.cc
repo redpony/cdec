@@ -145,7 +145,9 @@ bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
       getline(is, ss);
       //cerr << "L: " << ss << endl;
       int start = 0;
-      const int len = ss.size();
+      int len = ss.size();
+      const size_t ppos = ss.find(" |||");
+      if (ppos != string::npos) { len = ppos; }
       while (start < len) {
         while(start < len && (ss[start] == ' ' || ss[start] == ';'))
           ++start;
