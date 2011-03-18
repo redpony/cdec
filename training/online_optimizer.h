@@ -92,7 +92,11 @@ class CumulativeL1OnlineOptimizer : public OnlineOptimizer {
   void ResetEpochImpl() { u_ = 0; }
   void UpdateWeightsImpl(const double& eta, const SparseVector<double>& approx_g, int max_feat, SparseVector<double>* weights) {
     u_ += eta * C_ / N_;
-    (*weights) += eta * approx_g;
+    for (SparseVector<double>::const_iterator it = approx_g.begin(); 
+         it != approx_g.end(); ++it) {
+      if (frozen_.count(it->first) == 0)
+        weights->add_value(it->first, eta * it->second);
+    }
     for (int i = 1; i < max_feat; ++i)
       if (frozen_.count(i) == 0) ApplyPenalty(i, weights);
   }
