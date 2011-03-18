@@ -299,7 +299,7 @@ int main(int argc, char** argv) {
     const string omethod = conf["optimization_method"].as<string>();
     if (omethod == "sgd") {
       const double C = conf["regularization_strength"].as<double>();
-      o.reset(new CumulativeL1OnlineOptimizer(lr, total_corpus_size, C));
+      o.reset(new CumulativeL1OnlineOptimizer(lr, total_corpus_size, C, frozen_fids));
     } else {
       assert(!"fail");
     }
@@ -377,8 +377,6 @@ int main(int argc, char** argv) {
       g.swap(local_grad);
 #endif
       local_grad.clear();
-      for (int i = 0; i < frozen_fids.size(); ++i)
-        g.erase(frozen_fids[i]);
       if (rank == 0) {
         g /= (size_per_proc * size);
         o->UpdateWeights(g, FD::NumFeats(), &x);
