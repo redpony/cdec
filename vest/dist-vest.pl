@@ -417,7 +417,8 @@ while (1){
 		print STDERR "COMMAND:\n$cmd\n";
 		check_bash_call($cmd);
 		$cmd="sort -nk3 $DIR_FLAG '-t|' $dir/redoutput.$im1 | head -1";
-		my $best=check_bash_output("$cmd"); chomp $best;
+		# sort returns failure even when it doesn't fail for some reason
+		my $best=unchecked_output("$cmd"); chomp $best;
 		print STDERR "$best\n";
 		my ($oa, $x, $xscore) = split /\|/, $best;
 		$score = $xscore;
@@ -450,7 +451,7 @@ while (1){
 			my $v = ($ori{$k} + $axi{$k} * $x) / $norm;
 			print W "$k $v\n";
 		}
-		check_call("rm -rf $dir/splag.$im1");
+		check_call("rm $dir/splag.$im1/*");
 		$inweights = $finalFile;
 	}
 	$lastWeightsFile = "$dir/weights.$iteration";
