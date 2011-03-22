@@ -821,6 +821,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
 
           forest.edges_[i].feature_values_.set_value(rp.fid_summary, log_prob_transition);
         }
+        forest.Reweight(cur_weights);  // reset weights
       }
     }
 
