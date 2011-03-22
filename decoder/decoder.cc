@@ -810,8 +810,12 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       const prob_t z = forest.ComputeEdgePosteriors(1.0, &posteriors);
       if (!SILENT) { cerr << "  " << passtr << " adding summary feature " << FD::Convert(rp.fid_summary) << " log(Z)=" << log(z) << endl; }
       assert(forest.edges_.size() == posteriors.size());
-      for (int i = 0; i < posteriors.size(); ++i)
-        forest.edges_[i].feature_values_.set_value(rp.fid_summary, log(posteriors[i] / z));
+      if (!isfinite(log(z)) || isnan(log(z))) {
+        cerr << "  " << passtr << " !!! Invalid partition detected, abandoning.\n";
+      } else {
+        for (int i = 0; i < posteriors.size(); ++i)
+          forest.edges_[i].feature_values_.set_value(rp.fid_summary, log(posteriors[i] / z));
+      }
     }
 
     string fullbp = "beam_prune" + StringSuffixForRescoringPass(pass);
