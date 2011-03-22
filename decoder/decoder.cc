@@ -806,15 +806,21 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     }
 
     if (rp.fid_summary) {
-      Hypergraph::EdgeProbs posteriors;
-      const prob_t z = forest.ComputeEdgePosteriors(1.0, &posteriors);
+      const prob_t z = forest.PushWeightsToGoal(1.0);
       if (!SILENT) { cerr << "  " << passtr << " adding summary feature " << FD::Convert(rp.fid_summary) << " log(Z)=" << log(z) << endl; }
-      assert(forest.edges_.size() == posteriors.size());
       if (!isfinite(log(z)) || isnan(log(z))) {
         cerr << "  " << passtr << " !!! Invalid partition detected, abandoning.\n";
       } else {
-        for (int i = 0; i < posteriors.size(); ++i)
-          forest.edges_[i].feature_values_.set_value(rp.fid_summary, log(posteriors[i] / z));
+        for (int i = 0; i < forest.edges_.size(); ++i) {
+          const double log_prob_transition = log(forest.edges_[i].edge_prob_); // locally normalized by the edge
+                                                                            // head node by forest.PushWeightsToGoal
+          if (!isfinite(log_prob_transition) || isnan(log_prob_transition)) {
+            cerr << "Edge: i=" << i << " got bad inside prob: " << *forest.edges_[i].rule_ << endl;
+            abort();
+          }
+
+          forest.edges_[i].feature_values_.set_value(rp.fid_summary, log_prob_transition);
+        }
       }
     }
 
