@@ -806,6 +806,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     }
 
     if (rp.fid_summary) {
+#if 0
       const prob_t z = forest.PushWeightsToGoal(1.0);
       if (!SILENT) { cerr << "  " << passtr << " adding summary feature " << FD::Convert(rp.fid_summary) << " log(Z)=" << log(z) << endl; }
       if (!isfinite(log(z)) || isnan(log(z))) {
@@ -822,6 +823,26 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
           forest.edges_[i].feature_values_.set_value(rp.fid_summary, log_prob_transition);
         }
         forest.Reweight(cur_weights);  // reset weights
+      }
+#endif
+      Hypergraph::EdgeProbs posts;
+      const prob_t z = forest.ComputeEdgePosteriors(1.0, &posts);
+      if (!isfinite(log(z)) || isnan(log(z))) {
+        cerr << "  " << passtr << " !!! Invalid partition detected, abandoning.\n";
+      } else {
+        for (int i = 0; i < forest.nodes_.size(); ++i) {
+          const Hypergraph::EdgesVector& in_edges = forest.nodes_[i].in_edges_;
+          prob_t node_post = prob_t(0);
+          for (int j = 0; j < in_edges.size(); ++j)
+            node_post += (posts[in_edges[j]] / z);
+          const double log_np = log(node_post);
+          if (!isfinite(log_np) || isnan(log_np)) {
+            cerr << "got bad posterior prob for node " << i << endl;
+            abort();
+          }
+          for (int j = 0; j < in_edges.size(); ++j)
+            forest.edges_[in_edges[j]].feature_values_.set_value(rp.fid_summary, exp(log_np));
+        }
       }
     }
 
