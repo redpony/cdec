@@ -7,7 +7,7 @@
 namespace {
 static const int utoa_bufsize=40; // 64bit safe.
 static const int utoa_bufsizem1=utoa_bufsize-1; // 64bit safe.
-THREADLOCAL char utoa_buf[utoa_bufsize]; // to put end of string character at buf[20]
+static char utoa_buf[utoa_bufsize]; // to put end of string character at buf[20]
 }
 
 inline char *static_utoa(unsigned n) {

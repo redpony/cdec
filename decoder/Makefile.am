@@ -6,16 +6,13 @@ noinst_PROGRAMS = \
   hg_test \
   ff_test \
   parser_test \
-  grammar_test \
-  cfg_test
-TESTS = trule_test ff_test parser_test grammar_test hg_test cfg_test
-endif
-
-cdec_SOURCES = cdec.cc
-cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
-
-cfg_test_SOURCES = cfg_test.cc
-cfg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
+  grammar_test
+ 
+ # cfg_test
+TESTS = trule_test ff_test parser_test grammar_test hg_test
+# cfg_test
+#cfg_test_SOURCES = cfg_test.cc
+#cfg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 parser_test_SOURCES = parser_test.cc
 parser_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 ff_test_SOURCES = ff_test.cc
@@ -26,7 +23,12 @@ hg_test_SOURCES = hg_test.cc
 hg_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 trule_test_SOURCES = trule_test.cc
 trule_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I.. -I../mteval -I../utils -I../klm
+endif
+
+cdec_SOURCES = cdec.cc
+cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+
+AM_CPPFLAGS = -W -Wno-sign-compare $(GTEST_CPPFLAGS) -I.. -I../mteval -I../utils -I../klm
 
 rule_lexer.cc: rule_lexer.l
 	$(LEX) -s -CF -8 -o$@ $<
@@ -82,5 +84,5 @@ libcdec_a_SOURCES = \
 
 if GLC
   # Until we build GLC as a library...
-  libcdec_a_SOURCES += ff_glc.cc
+  libcdec_a_SOURCES += ff_glc.cc string_util.cc feature-factory.cc
 endif

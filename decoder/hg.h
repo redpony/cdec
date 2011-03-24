@@ -449,7 +449,7 @@ public:
   void PushWeightsToSource(double scale = 1.0);
   // same, except weights are pushed to the goal, works for HGs,
   // not just lattices
-  void PushWeightsToGoal(double scale = 1.0);
+  prob_t PushWeightsToGoal(double scale = 1.0);
 
   // contrary to PushWeightsToGoal, use viterbi semiring; store log(p) to fid.  note that p_viterbi becomes 1; k*p_viterbi becomes k.  also modifies edge_prob_ (note that the fid stored log(p) will stick around even if you reweight)
   // afterwards, product of edge_prob_ for a derivation will equal 1 for the viterbi (p_v before, 1 after), and in general (k*p_v before, k after).  returns inside(goal)

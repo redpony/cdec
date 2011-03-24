@@ -64,6 +64,7 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()
         ("input_weights,w",po::value<string>(),"Input feature weights file")
+        ("frozen_features,z",po::value<string>(), "List of features not to optimize")
         ("training_data,t",po::value<string>(),"Training data corpus")
         ("training_agenda,a",po::value<string>(), "Text file listing a series of configuration files and the number of iterations to train using each configuration successively")
         ("minibatch_size_per_proc,s", po::value<unsigned>()->default_value(5), "Number of training instances evaluated per processor in each minibatch")
@@ -254,6 +255,20 @@ int main(int argc, char** argv) {
   if (conf.count("input_weights"))
     weights.InitFromFile(conf["input_weights"].as<string>());
 
+  vector<int> frozen_fids;
+  if (conf.count("frozen_features")) {
+    ReadFile rf(conf["frozen_features"].as<string>());
+    istream& in = *rf.stream();
+    string line;
+    while(in) {
+      getline(in, line);
+      if (line.empty()) continue;
+      if (line[0] == ' ' || line[line.size() - 1] == ' ') { line = Trim(line); }
+      frozen_fids.push_back(FD::Convert(line));
+    }
+    if (rank == 0) cerr << "Freezing " << frozen_fids.size() << " features.\n";
+  }
+
   vector<string> corpus;
   vector<int> ids;
   ReadTrainingCorpus(conf["training_data"].as<string>(), rank, size, &corpus, &ids);
@@ -284,7 +299,7 @@ int main(int argc, char** argv) {
     const string omethod = conf["optimization_method"].as<string>();
     if (omethod == "sgd") {
       const double C = conf["regularization_strength"].as<double>();
-      o.reset(new CumulativeL1OnlineOptimizer(lr, total_corpus_size, C));
+      o.reset(new CumulativeL1OnlineOptimizer(lr, total_corpus_size, C, frozen_fids));
     } else {
       assert(!"fail");
     }

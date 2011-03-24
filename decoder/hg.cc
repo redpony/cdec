@@ -226,9 +226,9 @@ prob_t Hypergraph::PushViterbiWeightsToGoal(int fid) {
 }
 
 
-void Hypergraph::PushWeightsToGoal(double scale) {
+prob_t Hypergraph::PushWeightsToGoal(double scale) {
   vector<prob_t> posts;
-  ComputeEdgePosteriors(scale, &posts);
+  const prob_t inside_z = ComputeEdgePosteriors(scale, &posts);
   for (int i = 0; i < nodes_.size(); ++i) {
     const Hypergraph::Node& node = nodes_[i];
     prob_t z = prob_t::Zero();
@@ -238,6 +238,7 @@ void Hypergraph::PushWeightsToGoal(double scale) {
       edges_[node.in_edges_[j]].edge_prob_ = posts[node.in_edges_[j]] / z;
     }
   }
+  return inside_z;
 }
 
 struct EdgeExistsWeightFunction {
