@@ -104,7 +104,7 @@ void TestOnline() {
   double eta0 = 0.2;
   shared_ptr<LearningRateSchedule> r(new ExponentialDecayLearningRate(N, eta0, 0.85));
   //shared_ptr<LearningRateSchedule> r(new StandardLearningRate(N, eta0));
-  CumulativeL1OnlineOptimizer opt(r, N, C);
+  CumulativeL1OnlineOptimizer opt(r, N, C, std::vector<int>());
   assert(r->eta(10) < r->eta(1));
 }
 

@@ -82,7 +82,7 @@ sub preview_files {
     my @f=grep { ! ($skipempty && -z $_) } @$l;
     my $fn=join(' ',map {escape_shell($_)} @f);
     my $cmd="tail -n $n $fn";
-    check_output("$cmd").($footer?"\nNONEMPTY FILES:\n$fn\n":"");
+    unchecked_output("$cmd").($footer?"\nNONEMPTY FILES:\n$fn\n":"");
 }
 sub prefix_dirname($) {
     #like `dirname but if ends in / then return the whole thing
@@ -283,7 +283,8 @@ sub numof_live_jobs {
   if ($use_fork) {
     die "not implemented";
   } else {
-    my @livejobs = grep(/$joblist/, split(/\n/, check_output("qstat")));
+    # We can probably continue decoding if the qstat error is only temporary
+    my @livejobs = grep(/$joblist/, split(/\n/, unchecked_output("qstat")));
     return ($#livejobs + 1);
   }
 }
@@ -323,7 +324,7 @@ sub launch_job {
             }
       if ($joblist == "") { $joblist = $jobid; }
       else {$joblist = $joblist . "\|" . $jobid; }
-            my $cleanfn=check_output("qdel $jobid 2> /dev/null");
+      my $cleanfn="qdel $jobid 2> /dev/null";
       push(@cleanup_cmds, $cleanfn);
     }
     close QOUT;
@@ -346,7 +347,7 @@ sub launch_job_fork {
     my ($fh, $scr_name) = get_temp_script();
     print $fh $script;
     close $fh;
-    my $todo = "/bin/sh $scr_name 1> $outfile 2> $errorfile";
+    my $todo = "/bin/bash -xeo pipefail $scr_name 1> $outfile 2> $errorfile";
     print STDERR "EXEC: $todo\n";
     my $out = check_output("$todo");
     print STDERR "RES: $out\n";

@@ -194,7 +194,6 @@ sub modbin {
         my $src=$$_;
         $$_="$bindir/".basename($src);
         check_call("cp -p $src $$_");
-        die "cp $src $$_ failed: $!" unless $? == 0;
     }
 }
 sub dirsize {
@@ -372,13 +371,12 @@ while (1){
 				if ($first_shard) { print STDERR "$script\n"; $first_shard=0; }
 
 				$nmappers++;
-				my $qcmd = "QSUB_CMD -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file";
+				my $qcmd = "$QSUB_CMD -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file";
 				my $jobid = check_output("$qcmd");
-				die "qsub failed: $!\nCMD was: $qcmd" unless $? == 0;
 				chomp $jobid;
 				$jobid =~ s/^(\d+)(.*?)$/\1/g;
 				$jobid =~ s/^Your job (\d+) .*$/\1/;
-		 	 	push(@cleanupcmds, check_output("qdel $jobid 2> /dev/null"));
+		 	 	push(@cleanupcmds, "qdel $jobid 2> /dev/null");
 				print STDERR " $jobid";
 				if ($joblist == "") { $joblist = $jobid; }
 				else {$joblist = $joblist . "\|" . $jobid; }
@@ -398,7 +396,7 @@ while (1){
 			print STDERR "Waiting for mappers to complete...\n";
 			while ($nmappers > 0) {
 			  sleep 5;
-			  my @livejobs = grep(/$joblist/, split(/\n/, check_output("qstat | grep -v ' C '")));
+			  my @livejobs = grep(/$joblist/, split(/\n/, unchecked_output("qstat | grep -v ' C '")));
 			  $nmappers = scalar @livejobs;
 			}
 			print STDERR "All mappers complete.\n";
@@ -419,7 +417,8 @@ while (1){
 		print STDERR "COMMAND:\n$cmd\n";
 		check_bash_call($cmd);
 		$cmd="sort -nk3 $DIR_FLAG '-t|' $dir/redoutput.$im1 | head -1";
-		my $best=check_bash_output("$cmd"); chomp $best;
+		# sort returns failure even when it doesn't fail for some reason
+		my $best=unchecked_output("$cmd"); chomp $best;
 		print STDERR "$best\n";
 		my ($oa, $x, $xscore) = split /\|/, $best;
 		$score = $xscore;
@@ -452,7 +451,7 @@ while (1){
 			my $v = ($ori{$k} + $axi{$k} * $x) / $norm;
 			print W "$k $v\n";
 		}
-		check_call("rm -rf $dir/splag.$im1");
+		check_call("rm $dir/splag.$im1/*");
 		$inweights = $finalFile;
 	}
 	$lastWeightsFile = "$dir/weights.$iteration";
@@ -575,7 +574,11 @@ sub enseg {
 	while (my $line=<SRC>){
 		chomp $line;
 		if ($line =~ /^\s*<seg/i) {
+		    if($line =~ /id="[0-9]+"/) {
 			print NEWSRC "$line\n";
+		    } else {
+			die "When using segments with pre-generated <seg> tags, you must include a zero-based id attribute";
+		    }
 		} else {
 			print NEWSRC "<seg id=\"$i\">$line</seg>\n";
 		}

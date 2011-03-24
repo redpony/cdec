@@ -5,7 +5,6 @@
 #include "stringlib.h"
 #include "tdict.h"
 #include "rule_lexer.h"
-#include "threadlocal.h"
 
 using namespace std;
 
@@ -99,7 +98,7 @@ TRule* TRule::CreateRuleMonolingual(const string& rule) {
 
 namespace {
 // callback for lexer
-THREADLOCAL int n_assigned=0;
+int n_assigned=0;
 void assign_trule(const TRulePtr& new_rule, const unsigned int ctf_level, const TRulePtr& coarse_rule, void* extra) {
   TRule *assignto=(TRule *)extra;
   *assignto=*new_rule;
@@ -145,7 +144,9 @@ bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
       getline(is, ss);
       //cerr << "L: " << ss << endl;
       int start = 0;
-      const int len = ss.size();
+      int len = ss.size();
+      const size_t ppos = ss.find(" |||");
+      if (ppos != string::npos) { len = ppos; }
       while (start < len) {
         while(start < len && (ss[start] == ' ' || ss[start] == ';'))
           ++start;
