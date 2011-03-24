@@ -13,13 +13,12 @@
 
 class WordSet : public FeatureFunction {
  public:
-
 // we depend on the order of the initializer list
 // to call member constructurs in the proper order
 // modify this carefully!
 //
 // Usage: "WordSet -v vocab.txt [--oov]"
-  WordSet(const std::string& param) {
+ WordSet(const std::string& param) {
     std::string vocabFile;
     std::string featName;
     parseArgs(param, &featName, &vocabFile, &oovMode_);
@@ -28,6 +27,9 @@ class WordSet : public FeatureFunction {
 
     std::cerr << "Loading vocab for " << param << " from " << vocabFile << std::endl;
     loadVocab(vocabFile, &vocab_);
+  }
+
+  ~WordSet() {
   }
 
 

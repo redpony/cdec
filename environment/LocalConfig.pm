@@ -12,6 +12,10 @@ my $host = domainname;
 
 # keys are: HOST_REGEXP, MERTMem, QSubQueue, QSubMemFlag, QSubExtraFlags
 my $CCONFIG = {
+  'StarCluster' => {
+    'HOST_REGEXP' => qr/compute-\d+\.internal$/,
+    'QSubMemFlag' => '-l mem',
+  },
   'LTICluster' => {
     'HOST_REGEXP' => qr/^cluster\d+\.lti\.cs\.cmu\.edu$/,
     'QSubMemFlag' => '-l h_vmem=',
@@ -36,9 +40,13 @@ my $CCONFIG = {
     'HOST_REGEXP' => qr/^(tg-login1.blacklight.psc.teragrid.org|blacklight.psc.edu|bl1.psc.teragrid.org|bl0.psc.teragrid.org)$/,
     'QSubMemFlag' => '-l pmem=',
   },
+  'Barrow/Chicago' => {
+    'HOST_REGEXP' => qr/^(barrow|chicago).lti.cs.cmu.edu$/,
+    'QSubMemFlag' => '-l pmem=',
+  },
   'LOCAL' => {
-    'HOST_REGEXP' => qr/local\.net$/,
-    'QSubMemFlag' => '',
+    'HOST_REGEXP' => qr/local\./,
+    'QSubMemFlag' => ' ',
   },
 };
 
@@ -63,6 +71,7 @@ sub environment_name {
 sub qsub_args {
   my $mem = shift @_;
   die "qsub_args requires a memory amount as a parameter, e.g. 4G" unless $mem;
+  return 'qsub -V -cwd' if environment_name() eq 'StarCluster';
   my $mf = $CONFIG{'QSubMemFlag'} or die "QSubMemFlag not set for $senvironment_name";
   my $cmd = "qsub -S /bin/bash ${mf}${mem}";
   if ($CONFIG{'QSubQueue'}) { $cmd .= ' ' . $CONFIG{'QSubQueue'}; }
