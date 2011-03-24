@@ -35,6 +35,7 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("source_lm,l",po::value<string>(),"Source language LM (KLM)")
         ("collapse_weights,w",po::value<string>(), "Collapse weights into a single feature X using the coefficients from this weights file")
+        ("clear_features_after_collapse,c", "After collapse_weights, clear the features except for X")
         ("add_shape_types,s", "Add rule shape types")
         ("extra_lex_feature,x", "Experimental nonlinear lexical weighting feature")
         ("replace_files,r", "Replace files with transformed variants (requires loading full grammar into memory)")
@@ -90,6 +91,7 @@ bool extra_feature;
 int kSrcLM;
 vector<double> col_weights;
 bool gather_rules;
+bool clear_features = false;
 vector<TRulePtr> rules;
 
 static void RuleHelper(const TRulePtr& new_rule, const unsigned int ctf_level, const TRulePtr& coarse_rule, void* extra) {
@@ -107,7 +109,7 @@ static void RuleHelper(const TRulePtr& new_rule, const unsigned int ctf_level, c
   }
   if (col_weights.size()) {
     double score = r->scores_.dot(col_weights);
-    r->scores_.clear();
+    if (clear_features) r->scores_.clear();
     r->scores_.set_value(kX, score);
   }
   if (gather_rules) {
@@ -136,6 +138,7 @@ int main(int argc, char** argv) {
     w.InitFromFile(conf["collapse_weights"].as<string>());
     w.InitVector(&col_weights);
   }
+  clear_features = conf.count("clear_features_after_collapse") > 0;
   gather_rules = false;
   bool replace_files = conf.count("replace_files");
   if (replace_files) gather_rules = true;
