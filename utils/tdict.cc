@@ -8,7 +8,6 @@
 #include "dict.h"
 #include "tdict.h"
 #include "stringlib.h"
-#include "threadlocal.h"
 
 using namespace std;
 
