@@ -37,7 +37,7 @@ my $CCONFIG = {
     'HOST_REGEXP' => qr/^(thor|tyr)\.inf\.ed\.ac\.uk$/,
   },
   'Blacklight' => {
-    'HOST_REGEXP' => qr/^(blacklight.psc.edu|bl1.psc.teragrid.org|bl0.psc.teragrid.org)$/,
+    'HOST_REGEXP' => qr/^(tg-login1.blacklight.psc.teragrid.org|blacklight.psc.edu|bl1.psc.teragrid.org|bl0.psc.teragrid.org)$/,
     'QSubMemFlag' => '-l pmem=',
   },
   'Barrow/Chicago' => {
