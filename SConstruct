@@ -29,7 +29,8 @@ env = Environment(PREFIX=GetOption('prefix'),
 boost = GetOption('boost')
 if boost:
    print 'Using Boost at {0}'.format(boost)
-   env.Append(CPPPATH=boost+'/include',
+   env.Append(CCFLAGS='-DHAVE_BOOST',
+              CPPPATH=boost+'/include',
 	      LIBPATH=boost+'/lib')
 
 if GetOption('efence'):
@@ -45,6 +46,8 @@ if glc:
    env.Append(CCFLAGS='-DHAVE_GLC',
 	      CPPPATH=[glc, glc+'/cdec'])
    srcs.append(glc+'/string_util.cc')
+   srcs.append(glc+'/sys_util.cc')
+   srcs.append(glc+'/debug.cc')
    srcs.append(glc+'/feature-factory.cc')
    srcs.append(glc+'/cdec/ff_glc.cc')
 
