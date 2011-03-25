@@ -289,9 +289,23 @@ while (1){
 	my $cmd = "$pcmd $decoder_cmd 2> $decoderLog 1> $runFile";
 	print STDERR "COMMAND:\n$cmd\n";
 	check_bash_call($cmd);
-        my $num_hgs = check_output("ls $dir/hgs/*.gz | wc -l");
-        print STDERR "NUMBER OF HGs: $num_hgs\n";
-	die "Dev set contains $devSize sentences! Decoder failure?\n" if ($devSize != $num_hgs);
+        my $num_hgs;
+        my $num_topbest;
+        my $retries = 0;
+	while($retries < 5) {
+	    $num_hgs = check_output("ls $dir/hgs/*.gz | wc -l");
+	    $num_topbest = check_output("wc -l < $runFile");
+	    print STDERR "NUMBER OF HGs: $num_hgs\n";
+	    print STDERR "NUMBER OF TOP-BEST HYPs: $num_topbest\n";
+	    if($devSize == $num_hgs && $devSize == $num_topbest) {
+		last;
+	    } else {
+		print STDERR "Incorrect number of hypergraphs or topbest. Waiting for distributed filesystem and retrying...\n";
+		sleep(3);
+	    }
+	    $retries++;
+	}
+	die "Dev set contains $devSize sentences, but we don't have topbest and hypergraphs for all these! Decoder failure? Check $decoderLog\n" if ($devSize != $num_hgs || $devSize != $num_topbest);
 	my $dec_score = check_output("cat $runFile | $SCORER $refs_comma_sep -l $metric");
 	chomp $dec_score;
 	print STDERR "DECODER SCORE: $dec_score\n";
