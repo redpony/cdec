@@ -9,11 +9,14 @@
 using namespace std;
 
 Tagger_BigramIndicator::Tagger_BigramIndicator(const std::string& param) :
-  FeatureFunction(sizeof(WordID)) {}
+  FeatureFunction(sizeof(WordID)) {
+   no_uni_ = (LowercaseString(param) == "no_uni");
+}
 
 void Tagger_BigramIndicator::FireFeature(const WordID& left,
                                  const WordID& right,
                                  SparseVector<double>* features) const {
+  if (no_uni_ && right == 0) return;
   int& fid = fmap_[left][right];
   if (!fid) {
     ostringstream os;
@@ -41,6 +44,8 @@ void Tagger_BigramIndicator::TraversalFeaturesImpl(const SentenceMetadata& smeta
   if (arity == 0) {
     out_context = edge.rule_->e_[0];
     FireFeature(out_context, 0, features);
+  } else if (arity == 1) {
+    out_context = *static_cast<const WordID*>(ant_contexts[0]);
   } else if (arity == 2) {
     WordID left = *static_cast<const WordID*>(ant_contexts[0]);
     WordID right = *static_cast<const WordID*>(ant_contexts[1]);
@@ -50,6 +55,8 @@ void Tagger_BigramIndicator::TraversalFeaturesImpl(const SentenceMetadata& smeta
     if (edge.i_ == 0 && edge.j_ == smeta.GetSourceLength())
       FireFeature(right, -1, features);
     out_context = right;
+  } else {
+    assert(!"shouldn't happen");
   }
 }
 
