@@ -373,6 +373,11 @@ void SourceBigram::TraversalFeaturesImpl(const SentenceMetadata& smeta,
     out_word_count = edge.rule_->EWords();
     assert(out_word_count == 1); // this is only defined for lex translation!
     // revisit this if you want to translate into null words
+  } else if (arity == 1) {
+    WordID left = *static_cast<const WordID*>(ant_contexts[0]);
+    int left_wc = *(static_cast<const int*>(ant_contexts[0]) + 1);
+    out_context = left;
+    out_word_count = left_wc;
   } else if (arity == 2) {
     WordID left = *static_cast<const WordID*>(ant_contexts[0]);
     WordID right = *static_cast<const WordID*>(ant_contexts[1]);
