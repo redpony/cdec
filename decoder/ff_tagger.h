@@ -28,6 +28,7 @@ class Tagger_BigramIndicator : public FeatureFunction {
                    const WordID& right,
                    SparseVector<double>* features) const;
   mutable Class2Class2FID fmap_;
+  bool no_uni_;
 };
 
 // for each pair of symbols cooccuring in a lexicalized rule, fire
