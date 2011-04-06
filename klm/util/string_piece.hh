@@ -48,10 +48,7 @@
 #ifndef BASE_STRING_PIECE_H__
 #define BASE_STRING_PIECE_H__
 
-//Uncomment this line if you use ICU in your code.  
-//#define HAVE_ICU
-//Uncomment this line if you want boost hashing for your StringPieces.
-//#define HAVE_BOOST
+#include "util/have.hh"
 
 #ifdef HAVE_BOOST
 #include <boost/functional/hash/hash.hpp>
@@ -67,6 +64,7 @@ U_NAMESPACE_BEGIN
 #else
 
 #include <algorithm>
+#include <cstddef>
 #include <string>
 #include <string.h>
 
