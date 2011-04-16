@@ -12,6 +12,7 @@ bin_PROGRAMS = \
   mpi_online_optimize \
   mpi_batch_optimize \
   mpi_em_optimize \
+  compute_cllh \
   augment_grammar
 
 noinst_PROGRAMS = \
@@ -29,12 +30,8 @@ mpi_batch_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/
 mpi_em_optimize_SOURCES = mpi_em_optimize.cc optimize.cc
 mpi_em_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
-if MPI
-bin_PROGRAMS += compute_cllh
-
 compute_cllh_SOURCES = compute_cllh.cc
 compute_cllh_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
-endif
 
 cllh_filter_grammar_SOURCES = cllh_filter_grammar.cc
 cllh_filter_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
