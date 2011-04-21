@@ -1,6 +1,8 @@
 #ifndef _SPARSE_VECTOR_H_
 #define _SPARSE_VECTOR_H_
 
+#undef USE_FAST_SPARSE_VECTOR
+#ifndef USE_FAST_SPARSE_VECTOR
 /*
 TODO: specialize for int value types, where it probably makes sense to check if adding/subtracting brings a value to 0, and remove it from the map (e.g. in a gibbs sampler).  or add a separate policy argument for that.
  */
@@ -666,6 +668,13 @@ std::ostream &operator<<(std::ostream &out, const SparseVector<T> &vec)
 {
     return vec.operator<<(out);
 }
+
+#else
+
+#include "fast_sparse_vector.h"
+#define SparseVector FastSparseVector
+
+#endif
 
 namespace B64 {
   void Encode(double objective, const SparseVector<double>& v, std::ostream* out);
