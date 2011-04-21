@@ -1,12 +1,14 @@
+noinst_PROGRAMS = ts
+TESTS = ts
+
 if HAVE_GTEST
-noinst_PROGRAMS = \
+noinst_PROGRAMS += \
   dict_test \
   weights_test \
   logval_test \
   small_vector_test
 
-TESTS = small_vector_test logval_test weights_test dict_test
-
+TESTS += small_vector_test logval_test weights_test dict_test
 endif
 
 noinst_LIBRARIES = libutils.a
@@ -25,6 +27,7 @@ libutils_a_SOURCES = \
   verbose.cc \
   weights.cc
 
+ts_SOURCES = ts.cc
 dict_test_SOURCES = dict_test.cc
 dict_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
 weights_test_SOURCES = weights_test.cc
