@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstring>
 
+#include "fdict.h"
 #include "b64tools.h"
 
 using namespace std;
@@ -10,7 +11,7 @@ using namespace std;
 namespace B64 {
 
 void Encode(double objective, const SparseVector<double>& v, ostream* out) {
-  const int num_feats = v.num_active();
+  const int num_feats = v.size();
   size_t tot_size = 0;
   const size_t off_objective = tot_size;
   tot_size += sizeof(double);                   // objective
