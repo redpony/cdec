@@ -250,7 +250,7 @@ void AlignerTools::WriteAlignment(const Lattice& src_lattice,
       SparseVector<prob_t> posts;
       const prob_t z = InsideOutside<prob_t, EdgeProb, SparseVector<prob_t>, TransitionEventWeightFunction>(*g, &posts);
       for (int i = 0; i < edge_posteriors.size(); ++i)
-        edge_posteriors[i] = posts[i] / z;
+        edge_posteriors[i] = posts.value(i) / z;
     }
     vector<set<int> > src_cov(g->edges_.size());
     vector<set<int> > trg_cov(g->edges_.size());

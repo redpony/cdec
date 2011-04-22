@@ -132,7 +132,7 @@ class TRule {
   int Arity() const { return arity_; }
   bool IsUnary() const { return (Arity() == 1) && (f_.size() == 1); }
   const SparseVector<double>& GetFeatureValues() const { return scores_; }
-  double Score(int i) const { return scores_.get(i); }
+  double Score(int i) const { return scores_.value(i); }
   WordID GetLHS() const { return lhs_; }
   void ComputeArity();
 

@@ -53,7 +53,7 @@ void Maximize(const bool use_vb,
   const SparseVector<double>& counts = *pc;
 
   if (use_vb)
-    assert(total_event_types >= counts.num_active());
+    assert(total_event_types >= counts.size());
 
   double tot = 0;
   for (SparseVector<double>::const_iterator it = counts.begin();
@@ -73,7 +73,7 @@ void Maximize(const bool use_vb,
     }
   }
 #if 0
-  if (counts.num_active() < 50) {
+  if (counts.size() < 50) {
     for (SparseVector<double>::const_iterator it = counts.begin();
          it != counts.end(); ++it) {
       cerr << " p(" << FD::Convert(it->first) << ")=" << exp(it->second);
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
       if  (cur_key.size() > 0) {
         // TODO shouldn't be num_active, should be total number
         // of events
-        Maximize(use_vb, alpha, acc.num_active(), &acc);
+        Maximize(use_vb, alpha, acc.size(), &acc);
         cout << cur_key << '\t';
         if (use_b64)
           B64::Encode(0.0, acc, &cout);
@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
   }
   // TODO shouldn't be num_active, should be total number
   // of events
-  Maximize(use_vb, alpha, acc.num_active(), &acc);
+  Maximize(use_vb, alpha, acc.size(), &acc);
   cout << cur_key << '\t';
   if (use_b64)
     B64::Encode(0.0, acc, &cout);

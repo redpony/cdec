@@ -95,7 +95,7 @@ void TestSparseVector() {
   assert(B64::Decode(&obj, &v, &data[0], data.size()));
   cerr << obj << "\t" << v << endl;
   assert(obj == iobj);
-  assert(g.num_active() == v.num_active());
+  assert(g.size() == v.size());
 }
 
 int main() {

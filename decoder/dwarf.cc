@@ -3064,7 +3064,7 @@ void Alignment::SetCurrAlVector() {
   }
 }
 
-const void CountTable::print() {
+void CountTable::print() const {
   cerr << "+++ Model +++" << endl;
   for (map<WordID,int*>::const_iterator iter=model.begin(); iter!=model.end(); iter++) {
     cerr << TD::Convert(iter->first) << " ";

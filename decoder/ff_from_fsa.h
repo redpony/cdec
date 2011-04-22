@@ -295,7 +295,7 @@ private:
 # include "ff_sample_fsa.h"
 int main() {
   std::cerr<<"Testing left_end...\n";
-  std::cerr<<"sizeof(FeatureVector)="<<sizeof(FeatureVector)<<"\nsizeof(FeatureVectorList)="<<sizeof(FeatureVectorList)<<"\n";
+  std::cerr<<"sizeof(FeatureVector)="<<sizeof(FeatureVector)<<"\n";
   WordPenaltyFromFsa::test();
   return 0;
 }
