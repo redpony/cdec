@@ -682,6 +682,8 @@ SparseVector<T> operator/(const SparseVector<T>& a, const T& b) {
   return result *= b;
 }
 
+#include "fdict.h"
+
 template <class O, typename T>
 inline void print(O &o,const SparseVector<T>& v, const char* kvsep="=",const char* pairsep=" ",const char* pre="",const char* post="") {
   o << pre;
