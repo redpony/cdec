@@ -1,7 +1,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ff.h"
-#include "ff_identity.h"
 #include "ff_spans.h"
 #include "ff_lm.h"
 #include "ff_klm.h"
@@ -71,7 +70,6 @@ void register_feature_functions() {
   ff_registry.Register("LexicalPairIndicator", new FFFactory<LexicalPairIndicator>);
   ff_registry.Register("OutputIndicator", new FFFactory<OutputIndicator>);
   ff_registry.Register("IdentityCycleDetector", new FFFactory<IdentityCycleDetector>);
-  ff_registry.Register("FEIdentity", new FFFactory<FEIdentity>);
   ff_registry.Register("InputIndicator", new FFFactory<InputIndicator>);
   ff_registry.Register("LexicalTranslationTrigger", new FFFactory<LexicalTranslationTrigger>);
   ff_registry.Register("WordPairFeatures", new FFFactory<WordPairFeatures>);
