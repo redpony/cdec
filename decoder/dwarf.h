@@ -27,7 +27,7 @@ public:
         map<WordID,int*> model;
         int mode;
         int numColumn;
-        const void print();
+        void print() const;
         void setup(int _numcolumn, int _mode) {
           mode = _mode; numColumn = _numcolumn;
         }

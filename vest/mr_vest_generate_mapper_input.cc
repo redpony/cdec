@@ -87,9 +87,9 @@ struct oracle_directions {
     for (int i = 0; i < dev_set_size; ++i)
       for (int j = 0; j < directions.size(); ++j) {
         cout << forest_file(i) <<" " << i<<" ";
-        origin.print(cout,"=",";");
+        print(cout,origin,"=",";");
         cout<<" ";
-        directions[j].print(cout,"=",";");
+        print(cout,directions[j],"=",";");
         cout<<"\n";
       }
   }

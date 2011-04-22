@@ -646,6 +646,19 @@ SparseVector<T> operator+(const SparseVector<T>& a, const SparseVector<T>& b) {
 }
 
 template <class T>
+SparseVector<T> operator*(const double& a, const SparseVector<T>& b) {
+  SparseVector<T> result = b;
+  return result *= a;
+}
+
+#else
+
+#include "fast_sparse_vector.h"
+#define SparseVector FastSparseVector
+
+#endif
+
+template <class T>
 SparseVector<T> operator*(const SparseVector<T>& a, const double& b) {
   SparseVector<T> result = a;
   return result *= b;
@@ -658,23 +671,36 @@ SparseVector<T> operator*(const SparseVector<T>& a, const T& b) {
 }
 
 template <class T>
-SparseVector<T> operator*(const double& a, const SparseVector<T>& b) {
-  SparseVector<T> result = b;
-  return result *= a;
+SparseVector<T> operator/(const SparseVector<T>& a, const double& b) {
+  SparseVector<T> result = a;
+  return result *= b;
 }
 
 template <class T>
-std::ostream &operator<<(std::ostream &out, const SparseVector<T> &vec)
-{
-    return vec.operator<<(out);
+SparseVector<T> operator/(const SparseVector<T>& a, const T& b) {
+  SparseVector<T> result = a;
+  return result *= b;
 }
 
-#else
+template <class O, typename T>
+inline void print(O &o,const SparseVector<T>& v, const char* kvsep="=",const char* pairsep=" ",const char* pre="",const char* post="") {
+  o << pre;
+  bool first=true;
+  for (typename SparseVector<T>::const_iterator i=v.begin(),e=v.end();i!=e;++i) {
+    if (first)
+      first=false;
+    else
+      o<<pairsep;
+    o<<FD::Convert(i->first)<<kvsep<<i->second;
+  }
+  o << post;
+}
 
-#include "fast_sparse_vector.h"
-#define SparseVector FastSparseVector
-
-#endif
+template <typename T>
+inline std::ostream& operator<<(std::ostream& out, const SparseVector<T>& v) {
+  print(out, v);
+  return out;
+}
 
 namespace B64 {
   void Encode(double objective, const SparseVector<double>& v, std::ostream* out);

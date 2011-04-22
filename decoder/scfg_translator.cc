@@ -226,7 +226,7 @@ struct SCFGTranslatorImpl {
             new_edge->j_ = edge.j_;
             new_edge->feature_values_ = fine_rule_ptr->GetFeatureValues();
             new_edge->feature_values_.set_value(FD::Convert("LatticeCost"),
-              edge.feature_values_[FD::Convert("LatticeCost")]);
+              edge.feature_values_.value(FD::Convert("LatticeCost")));
             Hypergraph::Node* head_node;
             Split2Node::iterator it = s2n.find(StateSplit(node.id_, cat));
             if (it == s2n.end()){

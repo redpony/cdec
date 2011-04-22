@@ -132,9 +132,9 @@ int main(int argc, char** argv) {
     for (SparseVector<double>::const_iterator it = cg.begin(); it != cg.end(); ++it) {
       const int cond_var = event_mapper->Map(it->first);
       SparseVector<double>& cond_counts = counts[cond_var];
-      int delta = cond_counts.num_active();
+      int delta = cond_counts.size();
       cond_counts.add_value(it->first, it->second);
-      delta = cond_counts.num_active() - delta;
+      delta = cond_counts.size() - delta;
       total += delta;
     }
     if (total > buffer_size) {

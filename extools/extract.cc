@@ -105,8 +105,8 @@ void Extract::LoosenPhraseBounds(const AnnotatedParallelSentence& sentence,
       const int ilim = min(i2_max, i1 + max_base_phrase_size);
       for (int i2 = max(i1+1,i2_min); i2 <= ilim; ++i2) {
         for (int j1 = j1_min; j1 <= j1_max; ++j1) {
-          const int jlim = min(j2_max, j1 + max_base_phrase_size);
-          for (int j2 = max(j1+1, j2_min); j2 <= jlim; ++j2) {
+          const int jlim = std::min(j2_max, j1 + max_base_phrase_size);
+          for (int j2 = std::max(j1+1, j2_min); j2 <= jlim; ++j2) {
             bool& seen = marker[i1][i2][j1][j2];
             if (!seen)
               phrases->push_back(ParallelSpan(i1,i2,j1,j2));

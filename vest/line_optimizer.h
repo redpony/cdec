@@ -3,10 +3,10 @@
 
 #include <vector>
 
+#include "sparse_vector.h"
 #include "error_surface.h"
 #include "sampler.h"
 
-template <typename T> class SparseVector;
 class Weights;
 
 struct LineOptimizer {

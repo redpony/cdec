@@ -7,15 +7,15 @@
 
 struct SparseFeatureAccumulator : public FeatureVector {
   typedef FeatureVector State;
-  SparseFeatureAccumulator() {  }
+  SparseFeatureAccumulator() { assert(!"this code is disabled");  }
   template <class FF>
   FeatureVector const& describe(FF const& ) { return *this; }
   void Store(FeatureVector *fv) const {
-    fv->set_from(*this);
+//NO    fv->set_from(*this);
   }
   template <class FF>
   void Store(FF const& /* ff */,FeatureVector *fv) const {
-    fv->set_from(*this);
+//NO    fv->set_from(*this);
   }
   template <class FF>
   void Add(FF const& /* ff */,FeatureVector const& fv) {
@@ -33,10 +33,10 @@ struct SparseFeatureAccumulator : public FeatureVector {
   }
   */
   void Add(int i,Featval v) {
-    (*this)[i]+=v;
+//NO    (*this)[i]+=v;
   }
   void Add(Features const& fids,int i,Featval v) {
-    (*this)[i]+=v;
+//NO    (*this)[i]+=v;
   }
 };
 
