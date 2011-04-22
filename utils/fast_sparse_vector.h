@@ -368,26 +368,4 @@ namespace performance_checks {
   BOOST_STATIC_ASSERT(sizeof(FastSparseVector<float>) == L2_CACHE_LINE);
 };
 
-#include "fdict.h"
-
-template <class O, typename T>
-inline void print(O &o,const FastSparseVector<T>& v, const char* kvsep="=",const char* pairsep=" ",const char* pre="",const char* post="") {
-  o << pre;
-  bool first=true;
-  for (typename FastSparseVector<T>::const_iterator i=v.begin(),e=v.end();i!=e;++i) {
-    if (first)
-      first=false;
-    else
-      o<<pairsep;
-    o<<FD::Convert(i->first)<<kvsep<<i->second;
-  }
-  o << post;
-}
-
-template <typename T>
-inline std::ostream& operator<<(std::ostream& out, const FastSparseVector<T>& v) {
-  print(out, v);
-  return out;
-}
-
 #endif
