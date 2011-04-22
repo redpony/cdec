@@ -3,8 +3,7 @@ bin_PROGRAMS = \
   mr_vest_reduce \
   mr_vest_generate_mapper_input \
   sentserver \
-  sentclient \
-  nbest2hg
+  sentclient
 
 if HAVE_GTEST
 noinst_PROGRAMS = \
@@ -21,8 +20,8 @@ sentclient_LDFLAGS = -all-static -pthread
 mr_vest_generate_mapper_input_SOURCES = mr_vest_generate_mapper_input.cc line_optimizer.cc
 mr_vest_generate_mapper_input_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
 
-nbest2hg_SOURCES = nbest2hg.cc
-nbest2hg_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lfst -lz
+# nbest2hg_SOURCES = nbest2hg.cc
+# nbest2hg_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lfst -lz
 
 mr_vest_map_SOURCES = viterbi_envelope.cc ces.cc error_surface.cc mr_vest_map.cc line_optimizer.cc
 mr_vest_map_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
