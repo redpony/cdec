@@ -297,6 +297,7 @@ class KLanguageModelImpl {
 
     // special handling of beginning / ending sentence markers
     dummy_state_ = new char[state_size_];
+    memset(dummy_state_, 0, state_size_);
     dummy_ants_.push_back(dummy_state_);
     dummy_ants_.push_back(NULL);
     dummy_rule_.reset(new TRule("[DUMMY] ||| [BOS] [DUMMY] ||| [1] [2] </s> ||| X=0"));
