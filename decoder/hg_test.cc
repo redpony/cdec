@@ -327,8 +327,8 @@ TEST_F(HGTest,TestAddExpectations) {
   SparseVector<prob_t> feat_exps;
   prob_t z = InsideOutside<prob_t, EdgeProb,
                   SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>(hg, &feat_exps);
-  EXPECT_FLOAT_EQ(-2.5439765, feat_exps[FD::Convert("f1")] / z);
-  EXPECT_FLOAT_EQ(-2.6357865, feat_exps[FD::Convert("f2")] / z);
+  EXPECT_FLOAT_EQ(-2.5439765, feat_exps.value(FD::Convert("f1")) / z);
+  EXPECT_FLOAT_EQ(-2.6357865, feat_exps.value(FD::Convert("f2")) / z);
   cerr << feat_exps << endl;
   cerr << "Z=" << z << endl;
 }

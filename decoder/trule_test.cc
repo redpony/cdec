@@ -35,7 +35,7 @@ TEST_F(TRuleTest,TestFSubstitute) {
 TEST_F(TRuleTest,TestPhrasetableRule) {
   TRulePtr t(TRule::CreateRulePhrasetable("gato ||| cat ||| PhraseModel_0=-23.2;Foo=1;Bar=12"));
   cerr << t->AsString() << endl;
-  assert(t->scores_.num_active() == 3);
+  assert(t->scores_.size() == 3);
 };
 
 
