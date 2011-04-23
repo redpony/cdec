@@ -181,24 +181,9 @@ struct DecoderImpl {
   }
   void SetId(int next_sent_id) { sent_id = next_sent_id - 1; }
 
-  void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,WeightVector *weights=0,bool show_deriv=false) {
+  void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_deriv=false) {
     cerr << viterbi_stats(forest,name,true,show_tree,show_deriv);
-    if (show_features) {
-      cerr << name<<"     features: ";
-/*      Hypergraph::Edge const* best=forest.ViterbiGoalEdge();
-      if (!best)
-        cerr << name<<" has no goal edge.";
-      else
-        cerr<<best->feature_values_;
-*/
-    cerr << ViterbiFeatures(forest,weights);
     cerr << endl;
-    }
-  }
-
-  void forest_stats(Hypergraph &forest,string name,bool show_tree,bool show_features,DenseWeightVector const& weights, bool sd=false) {
-      WeightVector fw(weights);
-      forest_stats(forest,name,show_tree,show_features,&fw,sd);
   }
 
   bool beam_param(po::variables_map const& conf,string const& name,double *val,bool scale_srclen=false,double srclen=1) {
@@ -223,7 +208,7 @@ struct DecoderImpl {
       }
       forest.PruneInsideOutside(beam_prune,density_prune,pm,false,1);
       if (!forestname.empty()) forestname=" "+forestname;
-      forest_stats(forest,"  Pruned "+forestname+" forest",false,false,0,false);
+      forest_stats(forest,"  Pruned "+forestname+" forest",false,false);
       cerr << "  Pruned "<<forestname<<" forest portion of edges kept: "<<forest.edges_.size()/presize<<endl;
     }
   }
@@ -415,7 +400,6 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
         ("show_partition,z", "Compute and show the partition (inside score)")
         ("show_conditional_prob", "Output the conditional log prob to STDOUT instead of a translation")
         ("show_cfg_search_space", "Show the search space as a CFG")
-        ("show_features","Show the feature vector for the viterbi translation")
         ("coarse_to_fine_beam_prune", po::value<double>(), "Prune paths from coarse parse forest before fine parse, keeping paths within exp(alpha>=0)")
         ("ctf_beam_widen", po::value<double>()->default_value(2.0), "Expand coarse pass beam by this factor if no fine parse is found")
         ("ctf_num_widenings", po::value<int>()->default_value(2), "Widen coarse beam this many times before backing off to full parse")
@@ -775,8 +759,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   }
 
   const bool show_tree_structure=conf.count("show_tree_structure");
-  const bool show_features=conf.count("show_features");
-  if (!SILENT) forest_stats(forest,"  Init. forest",show_tree_structure,show_features,init_weights,oracle.show_derivation);
+  if (!SILENT) forest_stats(forest,"  Init. forest",show_tree_structure,oracle.show_derivation);
   if (conf.count("show_expected_length")) {
     const PRPair<double, double> res =
       Inside<PRPair<double, double>,
@@ -818,7 +801,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
                   &rescored_forest);
       forest.swap(rescored_forest);
       forest.Reweight(cur_weights);
-      if (!SILENT) forest_stats(forest,"  " + passtr +" forest",show_tree_structure,show_features,cur_weights,oracle.show_derivation);
+      if (!SILENT) forest_stats(forest,"  " + passtr +" forest",show_tree_structure,oracle.show_derivation);
     }
 
     if (conf.count("show_partition")) {
@@ -908,7 +891,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       ApplyFsaModels(hgcfg,smeta,*fsa_ffs[0],pass0_weights,cfg,&fsa_forest);
       forest.swap(fsa_forest);
       forest.Reweight(pass0_weights);
-      if (!SILENT) forest_stats(forest,"  +FSA forest",show_tree_structure,show_features,pass0_weights,oracle.show_derivation);
+      if (!SILENT) forest_stats(forest,"  +FSA forest",show_tree_structure,oracle.show_derivation);
     }
 #endif
   }
@@ -1001,7 +984,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
 //        for (int i = 0; i < forest.edges_.size(); ++i)
 //          forest.edges_[i].edge_prob_=prob_t::One(); }
       forest.Reweight(last_weights);
-      if (!SILENT) forest_stats(forest,"  Constr. forest",show_tree_structure,show_features,last_weights,oracle.show_derivation);
+      if (!SILENT) forest_stats(forest,"  Constr. forest",show_tree_structure,oracle.show_derivation);
       if (!SILENT) cerr << "  Constr. VitTree: " << ViterbiFTree(forest) << endl;
       if (conf.count("show_partition")) {
          const prob_t z = Inside<prob_t, EdgeProb>(forest);
