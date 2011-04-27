@@ -660,7 +660,7 @@ struct Featurizer {
       cout << " ||| ";
       WriteAnonymous(it->first, &cout);
       cout << " ||| ";
-      feats.Write(false, &cout);
+      print(cout,feats,"=");
       cout << endl;
     }
   }
