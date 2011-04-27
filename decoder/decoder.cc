@@ -544,9 +544,6 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
     w_init_weights.InitFromFile(str("weights",conf));
     w_init_weights.InitVector(&init_weights);
     init_weights.resize(FD::NumFeats());
-
-    if (show_weights)
-      cerr << "Initial weights: " << WeightVector(init_weights)<<endl;
   }
 
   // cube pruning pop-limit: we may want to configure this on a per-pass basis
@@ -900,7 +897,8 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
 
   // Oracle Rescoring
   if(get_oracle_forest) {
-    Oracle oc=oracle.ComputeOracle(smeta,&forest,FeatureVector(last_weights),10,conf["forest_output"].as<std::string>());
+    assert(!"this is broken"); FeatureVector dummy; // = last_weights
+    Oracle oc=oracle.ComputeOracle(smeta,&forest,dummy,10,conf["forest_output"].as<std::string>());
     if (!SILENT) cerr << "  +Oracle BLEU forest (nodes/edges): " << forest.nodes_.size() << '/' << forest.edges_.size() << endl;
     if (!SILENT) cerr << "  +Oracle BLEU (paths): " << forest.NumberOfPaths() << endl;
     oc.hope.Print(cerr,"  +Oracle BLEU");
