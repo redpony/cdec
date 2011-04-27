@@ -335,6 +335,7 @@ int main(int argc, char** argv) {
   while (!converged) {
     observer.Reset();
 #ifdef HAVE_MPI
+    mpi::timer timer;
     world.barrier();
 #endif
     if (rank == 0) {
@@ -404,6 +405,7 @@ int main(int argc, char** argv) {
 #ifdef HAVE_MPI
     mpi::broadcast(world, &lambdas[0], lambdas.size(), 0);
     mpi::broadcast(world, cint, 0);
+    if (rank == 0) { cerr << "  ELAPSED TIME THIS ITERATION=" << timer.elapsed() << endl; }
 #endif
     converged = cint;
   }
