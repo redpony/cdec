@@ -25,8 +25,8 @@
 // I have to avoid this since I want to use unions and c++-98
 // does not let unions have types with constructors in them
 // this type bypasses default constructors. use with caution!
-// this should work as long as T is in a acceptable state to
-// have its destructor called when initialized with all zeros
+// this should work as long as T does have a destructor that
+// does anything
 template <typename T>
 struct PairIntT {
   const PairIntT& operator=(const std::pair<const int, T>& v) {
@@ -104,9 +104,6 @@ class FastSparseVector {
   };
  public:
   FastSparseVector() : local_size_(0), is_remote_(false) { std::memset(&data_, 0, sizeof(data_)); }
-  explicit FastSparseVector(const std::vector<T>& init) : local_size_(0), is_remote_(false) {
-    for (int i = 0; i < init.size(); ++i) set_value(i, init[i]);
-  }
   ~FastSparseVector() {
     clear();
   }
@@ -128,8 +125,8 @@ class FastSparseVector {
       }
     }
   }
-  const FastSparseVector& operator=(const FastSparseVector& other) {
-    if (is_remote_) delete data_.rbmap;
+  const FastSparseVector<T>& operator=(const FastSparseVector<T>& other) {
+    if (&other == this) return *this;
     std::memcpy(this, &other, sizeof(FastSparseVector));
     if (is_remote_)
       data_.rbmap = new std::map<int, T>(*data_.rbmap);
@@ -186,6 +183,7 @@ class FastSparseVector {
   }
   inline void clear() {
     if (is_remote_) delete data_.rbmap;
+    is_remote_ = false;
     local_size_ = 0;
   }
   inline bool empty() const {
