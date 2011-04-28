@@ -40,6 +40,19 @@ void test_logv() {
   MPrint(x);
   x -= x;
   MPrint(x);
+  FastSparseVector<prob_t> y;
+  y = x;
+  for (int i = 1; i < 10; ++i) {
+    x.set_value(i, prob_t(i*1.3));
+    y.set_value(i*2, prob_t(i*1.4));
+  }
+  swap(x,y);
+  MPrint(y);
+  MPrint(x);
+  x = y;
+  y = y;
+  x = x;
+  MPrint(y);
 }
 
 int main() {
