@@ -292,7 +292,6 @@ void SCFGTranslator::ProcessMarkupHintsImpl(const map<string, string>& kv) {
     return;
   }
   //Create sentence specific grammar from specified file name and load grammar into list of grammars
-  cerr << "Loading sentence grammar from:" << it->second <<  endl;
   usingSentenceGrammar = true;
   TextGrammar* sentGrammar = new TextGrammar(it->second);
   sentGrammar->SetMaxSpan(pimpl_->max_span_limit);
@@ -309,7 +308,6 @@ void SCFGTranslator::SentenceCompleteImpl() {
 
   if(usingSentenceGrammar)      // Drop the last sentence grammar from the list of grammars
     {
-      cerr << "Clearing grammar" << endl;
       pimpl_->grammars.pop_back();
     }
 }
