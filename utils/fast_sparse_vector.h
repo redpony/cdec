@@ -127,6 +127,7 @@ class FastSparseVector {
   }
   const FastSparseVector<T>& operator=(const FastSparseVector<T>& other) {
     if (&other == this) return *this;
+    clear();
     std::memcpy(this, &other, sizeof(FastSparseVector));
     if (is_remote_)
       data_.rbmap = new std::map<int, T>(*data_.rbmap);
