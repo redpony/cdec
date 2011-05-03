@@ -28,6 +28,8 @@ using namespace std;
 using boost::shared_ptr;
 namespace po = boost::program_options;
 
+bool invert_score;
+
 void SanityCheck(const vector<double>& w) {
   for (int i = 0; i < w.size(); ++i) {
     assert(!isnan(w[i]));
@@ -62,10 +64,12 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("input_weights,w",po::value<string>(),"Input feature weights file")
         ("source,i",po::value<string>(),"Source file for development set")
+        ("passes,p", po::value<int>()->default_value(15), "Number of passes through the training data")
         ("reference,r",po::value<vector<string> >(), "[REQD] Reference translation(s) (tokenized text file)")
-        ("mt_metric,m",po::value<string>()->default_value("ter"), "Scoring metric (ibm_bleu, nist_bleu, koehn_bleu, ter, combi)")
-        ("max_step_size,C", po::value<double>()->default_value(0.0001), "maximum step size (C)")
+        ("mt_metric,m",po::value<string>()->default_value("ibm_bleu"), "Scoring metric (ibm_bleu, nist_bleu, koehn_bleu, ter, combi)")
+        ("max_step_size,C", po::value<double>()->default_value(0.001), "maximum step size (C)")
         ("mt_metric_scale,s", po::value<double>()->default_value(1.0), "Amount to scale MT loss function by")
+        ("k_best_size,k", po::value<int>()->default_value(250), "Size of hypothesis list to evaluate")
         ("decoder_config,c",po::value<string>(),"Decoder configuration file");
   po::options_description clo("Command line options");
   clo.add_options()
@@ -102,10 +106,11 @@ struct GoodBadOracle {
 };
 
 struct TrainingObserver : public DecoderObserver {
-  TrainingObserver(const DocScorer& d, vector<GoodBadOracle>* o) : ds(d), oracles(*o) {}
+  TrainingObserver(const int k, const DocScorer& d, vector<GoodBadOracle>* o) : ds(d), oracles(*o), kbest_size(k) {}
   const DocScorer& ds;
   vector<GoodBadOracle>& oracles;
   shared_ptr<HypothesisInfo> cur_best;
+  const int kbest_size;
 
   const HypothesisInfo& GetCurrentBestHypothesis() const {
     return *cur_best;
@@ -123,7 +128,6 @@ struct TrainingObserver : public DecoderObserver {
   }
 
   void UpdateOracles(int sent_id, const Hypergraph& forest) {
-    int kbest_size = 330;
     shared_ptr<HypothesisInfo>& cur_good = oracles[sent_id].good;
     shared_ptr<HypothesisInfo>& cur_bad = oracles[sent_id].bad;
     cur_bad.reset();  // TODO get rid of??
@@ -133,17 +137,18 @@ struct TrainingObserver : public DecoderObserver {
         kbest.LazyKthBest(forest.nodes_.size() - 1, i);
       if (!d) break;
       float sentscore = ds[sent_id]->ScoreCandidate(d->yield)->ComputeScore();
-//      cerr << TD::GetString(d->yield) << " ||| " << d->score << " ||| " << sentscore << endl;
+      if (invert_score) sentscore *= -1.0;
+      // cerr << TD::GetString(d->yield) << " ||| " << d->score << " ||| " << sentscore << endl;
       if (i == 0)
         cur_best = MakeHypothesisInfo(d->feature_values, sentscore);
-      if (!cur_good || sentscore < cur_good->mt_metric)
+      if (!cur_good || sentscore > cur_good->mt_metric)
         cur_good = MakeHypothesisInfo(d->feature_values, sentscore);
-      if (!cur_bad || sentscore > cur_bad->mt_metric)
+      if (!cur_bad || sentscore < cur_bad->mt_metric)
         cur_bad = MakeHypothesisInfo(d->feature_values, sentscore);
     }
-    cerr << "GOOD: " << cur_good->mt_metric << endl;
-    cerr << " BAD: " << cur_bad->mt_metric << endl;
-    cerr << "  #1: " << cur_best->mt_metric << endl;
+    //cerr << "GOOD: " << cur_good->mt_metric << endl;
+    //cerr << " CUR: " << cur_best->mt_metric << endl;
+    //cerr << " BAD: " << cur_bad->mt_metric << endl;
   }
 };
 
@@ -165,7 +170,7 @@ bool ApproxEqual(double a, double b) {
 
 int main(int argc, char** argv) {
   register_feature_functions();
-  //SetSilent(true);  // turn off verbose decoder output
+  SetSilent(true);  // turn off verbose decoder output
 
   po::variables_map conf;
   if (!InitCommandLine(argc, argv, &conf)) return 1;
@@ -174,6 +179,11 @@ int main(int argc, char** argv) {
   ReadTrainingCorpus(conf["source"].as<string>(), &corpus);
   const string metric_name = conf["mt_metric"].as<string>();
   ScoreType type = ScoreTypeFromString(metric_name);
+  if (type == TER) {
+    invert_score = true;
+  } else {
+    invert_score = false;
+  }
   DocScorer ds(type, conf["reference"].as<vector<string> >(), "");
   cerr << "Loaded " << ds.size() << " references for scoring with " << metric_name << endl;
   if (ds.size() != corpus.size()) {
@@ -186,10 +196,6 @@ int main(int argc, char** argv) {
   SparseVector<double> lambdas;
   weights.InitSparseVector(&lambdas);
 
-  // freeze feature set (should be optional?)
-  const bool freeze_feature_set = true;
-  if (freeze_feature_set) FD::Freeze();
-
   ReadFile ini_rf(conf["decoder_config"].as<string>());
   Decoder decoder(ini_rf.stream());
   const double max_step_size = conf["max_step_size"].as<double>();
@@ -198,25 +204,46 @@ int main(int argc, char** argv) {
   assert(corpus.size() > 0);
   vector<GoodBadOracle> oracles(corpus.size());
 
-  TrainingObserver observer(ds, &oracles);
+  TrainingObserver observer(conf["k_best_size"].as<int>(), ds, &oracles);
   int cur_sent = 0;
+  int lcount = 0;
+  double tot_loss = 0;
+  int dots = 0;
+  int cur_pass = 0;
   bool converged = false;
   vector<double> dense_weights;
-  while (!converged) {
+  SparseVector<double> tot;
+  tot += lambdas;          // initial weights
+  lcount++;                // count for initial weights
+  int max_iteration = conf["passes"].as<int>() * corpus.size();
+  string msg = "# MIRA tuned weights";
+  while (lcount <= max_iteration) {
     dense_weights.clear();
     weights.InitFromVector(lambdas);
     weights.InitVector(&dense_weights);
     decoder.SetWeights(dense_weights);
-    if (corpus.size() == cur_sent) cur_sent = 0;
+    if ((cur_sent * 40 / corpus.size()) > dots) { ++dots; cerr << '.'; }
+    if (corpus.size() == cur_sent) {
+      cur_sent = 0;
+      cerr << " [AVG METRIC LAST PASS=" << (tot_loss / corpus.size()) << "]\n";
+      tot_loss = 0;
+      dots = 0;
+      ostringstream os;
+      os << "weights.mira-pass" << (cur_pass < 10 ? "0" : "") << cur_pass << ".gz";
+      weights.WriteToFile(os.str(), true, &msg);
+      ++cur_pass;
+    }
+    if (cur_sent == 0) { cerr << "PASS " << (lcount / corpus.size() + 1) << endl << lambdas << endl; }
     decoder.SetId(cur_sent);
     decoder.Decode(corpus[cur_sent], &observer);  // update oracles
     const HypothesisInfo& cur_hyp = observer.GetCurrentBestHypothesis();
     const HypothesisInfo& cur_good = *oracles[cur_sent].good;
     const HypothesisInfo& cur_bad = *oracles[cur_sent].bad;
+    tot_loss += cur_hyp.mt_metric;
     if (!ApproxEqual(cur_hyp.mt_metric, cur_good.mt_metric)) {
       const double loss = cur_bad.features.dot(dense_weights) - cur_good.features.dot(dense_weights) +
           mt_metric_scale * (cur_good.mt_metric - cur_bad.mt_metric);
-      cerr << "LOSS: " << loss << endl;
+      //cerr << "LOSS: " << loss << endl;
       if (loss > 0.0) {
         SparseVector<double> diff = cur_good.features;
         diff -= cur_bad.features;
@@ -228,10 +255,17 @@ int main(int argc, char** argv) {
         //cerr << "L: " << lambdas << endl;
       }
     }
+    tot += lambdas;
+    ++lcount;
     ++cur_sent;
-    static int cc = 0; ++cc; if (cc==250) converged = true;
   }
-  weights.WriteToFile("-");
+  cerr << endl;
+  weights.WriteToFile("weights.mira-final.gz", true, &msg);
+  tot /= lcount;
+  weights.InitFromVector(tot);
+  msg = "# MIRA tuned weights (averaged vector)";
+  weights.WriteToFile("weights.mira-final-avg.gz", true, &msg);
+  cerr << "Optimization complete.\\AVERAGED WEIGHTS: weights.mira-final-avg.gz\n";
   return 0;
 }
 
