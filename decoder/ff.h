@@ -264,6 +264,9 @@ class ModelSet {
   ModelSet(const std::vector<double>& weights,
            const std::vector<const FeatureFunction*>& models);
 
+  // TODO stop stupid copy
+  void SetWeights(const std::vector<double>& w) { weights_ = w; }
+
   // sets edge->feature_values_ and edge->edge_prob_
   // NOTE: edge must not necessarily be in hg.edges_ but its TAIL nodes
   // must be.  edge features are supposed to be overwritten, not added to (possibly because rule features aren't in ModelSet so need to be left alone
