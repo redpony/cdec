@@ -42,14 +42,14 @@ BOOST_CLASS_TRACKING(SparseVector<double>,track_never)
 #include "fast_sparse_vector.h"
 #define SparseVector FastSparseVector
 
-template <class T>
-SparseVector<T> operator*(const SparseVector<T>& a, const double& b) {
+template <class T, typename S>
+SparseVector<T> operator*(const SparseVector<T>& a, const S& b) {
   SparseVector<T> result = a;
   return result *= b;
 }
 
 template <class T>
-SparseVector<T> operator*(const SparseVector<T>& a, const T& b) {
+SparseVector<T> operator*(const SparseVector<T>& a, const double& b) {
   SparseVector<T> result = a;
   return result *= b;
 }

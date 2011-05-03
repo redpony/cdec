@@ -942,7 +942,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     } else if (csplit_output_plf) {
       cout << HypergraphIO::AsPLF(forest, false) << endl;
     } else {
-      if (!graphviz && !has_ref && !joshua_viz) {
+      if (!graphviz && !has_ref && !joshua_viz && !SILENT) {
         vector<WordID> trans;
         ViterbiESentence(forest, &trans);
         cout << TD::GetString(trans) << endl << flush;
