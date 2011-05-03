@@ -410,8 +410,7 @@ void BLEUScore::ScoreDetails(string* details) const {
   float bleu = ComputeScore(&precs, &bp);
   for (int i=N();i<4;++i)
     precs[i]=0.;
-  char *bufn;
-  bufn=buf+sprintf(buf, "BLEU = %.2f, %.1f|%.1f|%.1f|%.1f (brev=%.3f)",
+  sprintf(buf, "BLEU = %.2f, %.1f|%.1f|%.1f|%.1f (brev=%.3f)",
        bleu*100.0,
        precs[0]*100.0,
        precs[1]*100.0,
@@ -427,7 +426,10 @@ float BLEUScore::ComputeScore(vector<float>* precs, float* bp) const {
   int count = 0;
   for (int i = 0; i < N(); ++i) {
     if (hyp_ngram_counts[i] > 0) {
-      float lprec = log(correct_ngram_hit_counts[i]) - log(hyp_ngram_counts[i]);
+      float cor_count = correct_ngram_hit_counts[i];
+      // smooth bleu
+      if (!cor_count) { cor_count = 0.01; }
+      float lprec = log(cor_count) - log(hyp_ngram_counts[i]);
       if (precs) precs->push_back(exp(lprec));
       log_bleu += lprec;
       ++count;
