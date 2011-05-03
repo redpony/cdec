@@ -129,10 +129,15 @@ int main(int argc, char** argv) {
         likelihood += log(sum) + src_logprob;
       }
     }
+
+    // log(e) = 1.0
+    double base2_likelihood = likelihood / log(2);
+
     if (flag) { cerr << endl; }
-    cerr << "  log likelihood: " << likelihood << endl;
-    cerr << "   cross entropy: " << (-likelihood / denom) << endl;
-    cerr << "      perplexity: " << pow(2.0, -likelihood / denom) << endl;
+    cerr << "  log_e likelihood: " << likelihood << endl;
+    cerr << "  log_2 likelihood: " << base2_likelihood << endl;
+    cerr << "   cross entropy: " << (-base2_likelihood / denom) << endl;
+    cerr << "      perplexity: " << pow(2.0, -base2_likelihood / denom) << endl;
     if (!final_iteration) {
       if (variational_bayes)
         tt.NormalizeVB(alpha);
