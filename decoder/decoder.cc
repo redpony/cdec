@@ -176,8 +176,11 @@ struct DecoderImpl {
   bool Decode(const string& input, DecoderObserver*);
   void SetWeights(const vector<double>& weights) {
     init_weights = weights;
-    for (int i = 0; i < rescoring_passes.size(); ++i)
+    for (int i = 0; i < rescoring_passes.size(); ++i) {
+      if (rescoring_passes[i].models)
+        rescoring_passes[i].models->SetWeights(weights);
       rescoring_passes[i].weight_vector = weights;
+    }
   }
   void SetId(int next_sent_id) { sent_id = next_sent_id - 1; }
 
