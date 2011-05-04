@@ -67,9 +67,9 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("passes,p", po::value<int>()->default_value(15), "Number of passes through the training data")
         ("reference,r",po::value<vector<string> >(), "[REQD] Reference translation(s) (tokenized text file)")
         ("mt_metric,m",po::value<string>()->default_value("ibm_bleu"), "Scoring metric (ibm_bleu, nist_bleu, koehn_bleu, ter, combi)")
-        ("max_step_size,C", po::value<double>()->default_value(0.001), "maximum step size (C)")
+        ("max_step_size,C", po::value<double>()->default_value(0.01), "regularization strength (C)")
         ("mt_metric_scale,s", po::value<double>()->default_value(1.0), "Amount to scale MT loss function by")
-        ("k_best_size,k", po::value<int>()->default_value(250), "Size of hypothesis list to evaluate")
+        ("k_best_size,k", po::value<int>()->default_value(250), "Size of hypothesis list to search for oracles")
         ("decoder_config,c",po::value<string>(),"Decoder configuration file");
   po::options_description clo("Command line options");
   clo.add_options()
@@ -210,7 +210,6 @@ int main(int argc, char** argv) {
   double tot_loss = 0;
   int dots = 0;
   int cur_pass = 0;
-  bool converged = false;
   vector<double> dense_weights;
   SparseVector<double> tot;
   tot += lambdas;          // initial weights
