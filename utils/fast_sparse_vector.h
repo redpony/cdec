@@ -361,10 +361,12 @@ std::size_t hash_value(FastSparseVector<T> const& x) {
   return 0;
 }
 
+#if 0
 namespace performance_checks {
   // if you get a failure on the next line, you should adjust LOCAL_MAX for
   // your architecture
   BOOST_STATIC_ASSERT(sizeof(FastSparseVector<float>) == L2_CACHE_LINE);
 };
+#endif
 
 #endif
