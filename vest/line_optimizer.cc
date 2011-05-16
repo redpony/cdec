@@ -81,7 +81,7 @@ void LineOptimizer::RandomUnitVector(const vector<int>& features_to_optimize,
                                      RandomNumberGenerator<boost::mt19937>* rng) {
   axis->clear();
   for (int i = 0; i < features_to_optimize.size(); ++i)
-    axis->set_value(features_to_optimize[i], rng->next() - 0.5);
+    axis->set_value(features_to_optimize[i], rng->NextNormal(0.0,1.0));
   (*axis) /= axis->l2norm();
 }
 
