@@ -127,7 +127,8 @@ bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
       if (cur > 0) {
         f[j] = cur;
       } else {
-        tn[ntc++] = cur;
+        tn[-cur] = -ntc;
+        ++ntc;
         f[j] = cats[edge.tail_nodes_[-cur]];
       }
     }
