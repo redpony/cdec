@@ -53,7 +53,6 @@ void register_feature_functions() {
   ff_registry.Register("SpanFeatures", new FFFactory<SpanFeatures>());
   ff_registry.Register("CMR2008ReorderingFeatures", new FFFactory<CMR2008ReorderingFeatures>());
   ff_registry.Register("KLanguageModel", new FFFactory<KLanguageModel<lm::ngram::ProbingModel> >());
-  ff_registry.Register("KLanguageModel_Sorted", new FFFactory<KLanguageModel<lm::ngram::SortedModel> >());
   ff_registry.Register("KLanguageModel_Trie", new FFFactory<KLanguageModel<lm::ngram::TrieModel> >());
   ff_registry.Register("KLanguageModel_Probing", new FFFactory<KLanguageModel<lm::ngram::ProbingModel> >());
   ff_registry.Register("NonLatinCount", new FFFactory<NonLatinCount>);

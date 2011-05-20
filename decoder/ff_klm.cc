@@ -426,6 +426,5 @@ void KLanguageModel<Model>::FinalTraversalFeatures(const void* ant_state,
 
 // instantiate templates
 template class KLanguageModel<lm::ngram::ProbingModel>;
-template class KLanguageModel<lm::ngram::SortedModel>;
 template class KLanguageModel<lm::ngram::TrieModel>;
 
