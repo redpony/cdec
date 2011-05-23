@@ -1,5 +1,6 @@
 bin_PROGRAMS = \
   model1 \
+  test_ngram \
   mr_em_map_adapter \
   mr_em_adapted_reduce \
   mr_reduce_to_weights \
@@ -38,6 +39,9 @@ cllh_filter_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval
 
 augment_grammar_SOURCES = augment_grammar.cc
 augment_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+
+test_ngram_SOURCES = test_ngram.cc
+test_ngram_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 atools_SOURCES = atools.cc
 atools_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
