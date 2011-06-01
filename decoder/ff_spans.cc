@@ -182,6 +182,45 @@ void SpanFeatures::PrepareForInput(const SentenceMetadata& smeta) {
   } 
 }
 
+RuleNgramFeatures::RuleNgramFeatures(const std::string& param) {
+}
+
+void RuleNgramFeatures::PrepareForInput(const SentenceMetadata& smeta) {
+//  std::map<const TRule*, SparseVector<double> >
+  rule2_feats_.clear();
+}
+
+void RuleNgramFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                         const Hypergraph::Edge& edge,
+                                         const vector<const void*>& ant_contexts,
+                                         SparseVector<double>* features,
+                                         SparseVector<double>* estimated_features,
+                                         void* context) const {
+  map<const TRule*, SparseVector<double> >::iterator it = rule2_feats_.find(edge.rule_.get());
+  if (it == rule2_feats_.end()) {
+    const TRule& rule = *edge.rule_;
+    it = rule2_feats_.insert(make_pair(&rule, SparseVector<double>())).first;
+    SparseVector<double>& f = it->second;
+    string prev = "<r>";
+    for (int i = 0; i < rule.f_.size(); ++i) {
+      WordID w = rule.f_[i];
+      if (w < 0) w = -w;
+      assert(w > 0);
+      const string& cur = TD::Convert(w);
+      ostringstream os;
+      os << "RB:" << prev << '_' << cur;
+      const int fid = FD::Convert(os.str());
+      if (fid <= 0) return;
+      f.add_value(fid, 1.0);
+      prev = cur;
+    }
+    ostringstream os;
+    os << "RB:" << prev << '_' << "</r>";
+    f.set_value(FD::Convert(os.str()), 1.0);
+  }
+  (*features) += it->second;
+}
+
 inline bool IsArity2RuleReordered(const TRule& rule) {
   const vector<WordID>& e = rule.e_;
   for (int i = 0; i < e.size(); ++i) {
