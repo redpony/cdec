@@ -385,7 +385,12 @@ KLanguageModel<Model>::KLanguageModel(const string& param) {
   if (!ParseLMArgs(param, &filename, &mapfile, &explicit_markers, &featname)) {
     abort();
   }
-  pimpl_ = new KLanguageModelImpl<Model>(filename, mapfile, explicit_markers);
+  try {
+    pimpl_ = new KLanguageModelImpl<Model>(filename, mapfile, explicit_markers);
+  } catch (std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    abort();
+  }
   fid_ = FD::Convert(featname);
   oov_fid_ = FD::Convert(featname+"_OOV");
   cerr << "FID: " << oov_fid_ << endl;
