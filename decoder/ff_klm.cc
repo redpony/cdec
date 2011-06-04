@@ -282,11 +282,10 @@ class KLanguageModelImpl {
   KLanguageModelImpl(const string& filename, const string& mapfile, bool explicit_markers) :
       kCDEC_UNK(TD::Convert("<unk>")) ,
       add_sos_eos_(!explicit_markers) {
-    if (true) {
-      boost::scoped_ptr<lm::ngram::EnumerateVocab> vm;
-      vm.reset(new VMapper(&cdec2klm_map_));
+    {
+      VMapper vm(&cdec2klm_map_);
       lm::ngram::Config conf;
-      conf.enumerate_vocab = vm.get(); 
+      conf.enumerate_vocab = &vm;
       ngram_ = new Model(filename.c_str(), conf);
     }
     order_ = ngram_->Order();
