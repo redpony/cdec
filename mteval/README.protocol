@@ -1,0 +1,57 @@
+TEXT PROTOCOL FOR EXTERNAL EVALUATION CODE
+
+External evaluators may be supplied that use a simple text-based protocol
+that reads commands on STDIN and writes the responses to STDOUT. Commands
+and responses are newline (\n) delimited lines. Important: the evaluator
+process must flush output after processing each line of input.
+
+The evaluator must respond to two kinds of messages: SCORE and EVAL, named
+after the first field.
+
+
+1. SCORE messages
+
+A SCORE message includes a set of one or more
+reference translations of a segment as well as a hypothesis translation of
+the same segment and indicates the evaluator should return a vector of sufficient
+statistics.
+
+  Examples:
+   SCORE ||| this is reference 1 ||| this is reference 2 ||| this is reference 3 ||| this is the hypothesis
+   SCORE ||| this is a single reference . ||| here is the hypothesis !
+
+1.1. SCORE response
+
+The response to a score message is a vector of floats representing the
+sufficient statistics. *The framework code assumes that sufficient statistics
+linearly decompose across hypothesis*, that is, that they may be vector
+added. Furthermore, a single evaluator must always return the same
+number of values, since each position in the vector is assumed to have a fixed
+semantics. (For example, a BLEU evaluator might define position to be the
+counts of 1-gram hits.)
+
+  Examples responses:
+    8 6 3 2 10 10 10 10 12.7 10
+    -2 1.32421 54 3 -1.2e-13
+
+
+2. EVAL messages
+
+An EVAL message requests that the evaluator convert a vector of sufficient
+statistics into a scalar metric (typically between 0 and 1, but this is not
+enforced).  The order of the sufficient statistics will be the same 
+  Examples:
+    EVAL ||| 8 6 3 2 10 10 10 10 12.7 10
+    EVAL ||| 0 0 -2 1.32 0
+
+2.1 EVAL response
+
+The eval response is a single float value. Output must be flushed after
+writing it.
+
+  Example responses:
+    0.67
+    0.445323324
+    0
+    1.245e-12
+
