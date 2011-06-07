@@ -282,11 +282,10 @@ class KLanguageModelImpl {
   KLanguageModelImpl(const string& filename, const string& mapfile, bool explicit_markers) :
       kCDEC_UNK(TD::Convert("<unk>")) ,
       add_sos_eos_(!explicit_markers) {
-    if (true) {
-      boost::scoped_ptr<lm::ngram::EnumerateVocab> vm;
-      vm.reset(new VMapper(&cdec2klm_map_));
+    {
+      VMapper vm(&cdec2klm_map_);
       lm::ngram::Config conf;
-      conf.enumerate_vocab = vm.get(); 
+      conf.enumerate_vocab = &vm;
       ngram_ = new Model(filename.c_str(), conf);
     }
     order_ = ngram_->Order();
@@ -385,7 +384,12 @@ KLanguageModel<Model>::KLanguageModel(const string& param) {
   if (!ParseLMArgs(param, &filename, &mapfile, &explicit_markers, &featname)) {
     abort();
   }
-  pimpl_ = new KLanguageModelImpl<Model>(filename, mapfile, explicit_markers);
+  try {
+    pimpl_ = new KLanguageModelImpl<Model>(filename, mapfile, explicit_markers);
+  } catch (std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    abort();
+  }
   fid_ = FD::Convert(featname);
   oov_fid_ = FD::Convert(featname+"_OOV");
   cerr << "FID: " << oov_fid_ << endl;
