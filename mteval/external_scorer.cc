@@ -2,20 +2,42 @@
 
 #include <cstdio> // popen
 #include <cstdlib>
+#include <cstring>
 #include <sstream>
 #include <iostream>
 #include <cassert>
 
+#include "stringlib.h"
 #include "tdict.h"
 
 using namespace std;
 
+map<string, boost::shared_ptr<ScoreServer> > ScoreServerManager::servers_;
+
+class METEORServer : public ScoreServer {
+ public:
+  METEORServer() : ScoreServer("java -Xmx1024m -jar /Users/cdyer/software/meteor/meteor-1.3.jar - - -mira -lower -t tune -l en") {}
+};
+
+ScoreServer* ScoreServerManager::Instance(const string& score_type) {
+  boost::shared_ptr<ScoreServer>& s = servers_[score_type];
+  if (!s) {
+    if (score_type == "meteor") {
+      s.reset(new METEORServer);
+    } else {
+      cerr << "Don't know how to create score server for type '" << score_type << "'\n";
+      abort();
+    }
+  }
+  return s.get();
+}
+
 ScoreServer::ScoreServer(const string& cmd) : pipe_() {
   cerr << "Invoking " << cmd << " ..." << endl;
   pipe_ = popen(cmd.c_str(), "r+");
-  assert(pipe_);
+  if (!pipe_) { perror("popen"); abort(); }
   string dummy;
-  RequestResponse("EVAL ||| Reference initialization string . ||| Testing initialization string .\n", &dummy);
+  RequestResponse("SCORE ||| Reference initialization string . ||| Testing initialization string .", &dummy);
   assert(dummy.size() > 0);
   cerr << "Connection established.\n";
 }
@@ -24,12 +46,11 @@ ScoreServer::~ScoreServer() {
   pclose(pipe_);
 }
 
-double ScoreServer::ComputeScore(const vector<float>& fields) {
+float ScoreServer::ComputeScore(const vector<float>& fields) {
   ostringstream os;
-  os << "EVAL";
+  os << "EVAL |||";
   for (unsigned i = 0; i < fields.size(); ++i)
     os << ' ' << fields[i];
-  os << endl;
   string sres;
   RequestResponse(os.str(), &sres);
   return strtod(sres.c_str(), NULL);
@@ -48,46 +69,42 @@ void ScoreServer::Evaluate(const vector<vector<WordID> >& refs, const vector<Wor
   for (unsigned i = 0; i < hyp.size(); ++i) {
     os << ' ' << TD::Convert(hyp[i]);
   }
-  os << endl;
   string sres;
   RequestResponse(os.str(), &sres);
   istringstream is(sres);
-  double val;
+  float val;
   fields->clear();
-  while(is >> val) {
+  while(is >> val)
     fields->push_back(val);
-  }
 }
 
 #define MAX_BUF 16000
 
 void ScoreServer::RequestResponse(const string& request, string* response) {
-  fprintf(pipe_, "%s", request.c_str());
+  //cerr << "@SERVER: " << request << endl;
+  fputs(request.c_str(), pipe_);
+  fputc('\n', pipe_);
   fflush(pipe_);
   char buf[MAX_BUF];
-  size_t cr = fread(buf, 1, MAX_BUF, pipe_);
-  if (cr == 0) {
+  if (NULL == fgets(buf, MAX_BUF, pipe_)) {
     cerr << "Read error. Request: " << request << endl;
     abort();
   }
-  while (buf[cr-1] != '\n') {
-    size_t n = fread(&buf[cr], 1, MAX_BUF-cr, pipe_);
-    assert(n > 0);
-    cr += n;
-    assert(cr < MAX_BUF);
+  size_t len = strlen(buf);
+  if (len < 2) {
+    cerr << "Malformed response: " << buf << endl;
   }
-  buf[cr - 1] = 0;
-  *response = buf;
+  *response = Trim(buf, " \t\n");
+  //cerr << "@RESPONSE: '" << *response << "'\n";
 }
 
 struct ExternalScore : public ScoreBase<ExternalScore> {
   ExternalScore() : score_server() {}
-  explicit ExternalScore(const ScoreServer* s) : score_server(s), fields() {}
-  ExternalScore(const ScoreServer* s, const vector<float>& f) : score_server(s), fields(f) {}
+  explicit ExternalScore(ScoreServer* s) : score_server(s), fields() {}
+  ExternalScore(ScoreServer* s, const vector<float>& f) : score_server(s), fields(f) {}
   float ComputePartialScore() const { return 0.0;}
   float ComputeScore() const {
-    // TODO make EVAL call
-    assert(!"not implemented");
+    return score_server->ComputeScore(fields);
   }
   void ScoreDetails(string* details) const {
     ostringstream os;
@@ -127,14 +144,17 @@ struct ExternalScore : public ScoreBase<ExternalScore> {
   }
   void Encode(string* out) const {
     ostringstream os;
+    for (unsigned i = 0; i < fields.size(); ++i)
+      os << (i == 0 ? "" : " ") << fields[i];
+    *out = os.str();
   }
   bool IsAdditiveIdentity() const {
-    for (int i = 0; i < fields.size(); ++i)
+    for (unsigned i = 0; i < fields.size(); ++i)
       if (fields[i]) return false;
     return true;
   }
 
-  const ScoreServer* score_server;
+  mutable ScoreServer* score_server;
   vector<float> fields;
 };
 
@@ -146,5 +166,14 @@ ScoreP ExternalSentenceScorer::ScoreCandidate(const Sentence& hyp) const {
 
 ScoreP ExternalSentenceScorer::ScoreCCandidate(const Sentence& hyp) const {
   assert(!"not implemented");
+}
+
+ScoreP ExternalSentenceScorer::ScoreFromString(ScoreServer* s, const string& data) {
+  istringstream is(data);
+  vector<float> fields;
+  float val;
+  while(is >> val)
+    fields.push_back(val);
+  return ScoreP(new ExternalScore(s, fields));
 }
 
