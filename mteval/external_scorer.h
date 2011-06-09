@@ -3,15 +3,20 @@
 
 #include <vector>
 #include <cstdio>
+#include <string>
+#include <map>
+#include <boost/shared_ptr.hpp>
 
 #include "scorer.h"
 
 class ScoreServer {
- public:
+  friend class ScoreServerManager;
+ protected:
   explicit ScoreServer(const std::string& cmd);
   virtual ~ScoreServer();
 
-  double ComputeScore(const std::vector<float>& fields);
+ public:
+  float ComputeScore(const std::vector<float>& fields);
   void Evaluate(const std::vector<std::vector<WordID> >& refs, const std::vector<WordID>& hyp, std::vector<float>* fields);
 
  private:
@@ -19,17 +24,22 @@ class ScoreServer {
   FILE* pipe_;
 };
 
-class ExternalSentenceScorer : public SentenceScorer {
- public:
-  virtual ScoreP ScoreCandidate(const Sentence& hyp) const = 0;
-  virtual ScoreP ScoreCCandidate(const Sentence& hyp) const =0;
- protected:
-  ScoreServer* eval_server;
+struct ScoreServerManager {
+  static ScoreServer* Instance(const std::string& score_type);
+ private:
+  static std::map<std::string, boost::shared_ptr<ScoreServer> > servers_;
 };
 
-class METEORServer : public ScoreServer {
+class ExternalSentenceScorer : public SentenceScorer {
  public:
-  METEORServer() : ScoreServer("java -Xmx1024m -jar meteor-1.3.jar - - -mira -lower") {}
+  ExternalSentenceScorer(ScoreServer* server, const std::vector<std::vector<WordID> >& r) :
+    SentenceScorer("External", r), eval_server(server) {}
+  virtual ScoreP ScoreCandidate(const Sentence& hyp) const;
+  virtual ScoreP ScoreCCandidate(const Sentence& hyp) const;
+  static ScoreP ScoreFromString(ScoreServer* s, const std::string& data);
+
+ protected:
+  ScoreServer* eval_server;
 };
 
 #endif

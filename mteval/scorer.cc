@@ -17,11 +17,12 @@
 #include "comb_scorer.h"
 #include "tdict.h"
 #include "stringlib.h"
+#include "external_scorer.h"
 
 using boost::shared_ptr;
 using namespace std;
 
-void Score::TimesEquals(float scale) {
+void Score::TimesEquals(float /*scale*/) {
   cerr<<"UNIMPLEMENTED except for BLEU (for MIRA): Score::TimesEquals"<<endl;abort();
 }
 
@@ -43,12 +44,14 @@ ScoreType ScoreTypeFromString(const string& st) {
     return Koehn_BLEU;
   if (sl == "combi")
     return BLEU_minus_TER_over_2;
+  if (sl == "meteor")
+    return METEOR;
   cerr << "Don't understand score type '" << st << "', defaulting to ibm_bleu.\n";
   return IBM_BLEU;
 }
 
 static char const* score_names[]={
-  "IBM_BLEU", "NIST_BLEU", "Koehn_BLEU", "TER", "BLEU_minus_TER_over_2", "SER", "AER", "IBM_BLEU_3"
+  "IBM_BLEU", "NIST_BLEU", "Koehn_BLEU", "TER", "BLEU_minus_TER_over_2", "SER", "AER", "IBM_BLEU_3", "METEOR"
 };
 
 std::string StringFromScoreType(ScoreType st) {
@@ -356,6 +359,7 @@ ScorerP SentenceScorer::CreateSentenceScorer(const ScoreType type,
     case TER: r = new TERScorer(refs);break;
     case SER: r = new SERScorer(refs);break;
     case BLEU_minus_TER_over_2: r = new BLEUTERCombinationScorer(refs);break;
+    case METEOR: r = new ExternalSentenceScorer(ScoreServerManager::Instance("meteor"), refs); break;
     default:
       assert(!"Not implemented!");
   }
@@ -398,6 +402,8 @@ ScoreP SentenceScorer::CreateScoreFromString(const ScoreType type, const string&
       return SERScorer::ScoreFromString(in);
     case BLEU_minus_TER_over_2:
       return BLEUTERCombinationScorer::ScoreFromString(in);
+    case METEOR:
+      return ExternalSentenceScorer::ScoreFromString(ScoreServerManager::Instance("meteor"), in);
     default:
       assert(!"Not implemented!");
   }

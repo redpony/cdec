@@ -118,6 +118,8 @@ if ($usefork) { $usefork = "--use-fork"; } else { $usefork = ''; }
 
 if ($metric =~ /^(combi|ter)$/i) {
   $lines_per_mapper = 40;
+} elsif ($metric =~ /^meteor$/i) {
+  $lines_per_mapper = 2000;   # start up time is really high
 }
 
 ($iniFile) = @ARGV;

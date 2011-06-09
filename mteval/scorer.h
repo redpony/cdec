@@ -17,7 +17,7 @@ class ErrorSurface;
 class Hypergraph;  // needed for alignment
 
 //TODO: BLEU N (N separate arg, not part of enum)?
-enum ScoreType { IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, BLEU_minus_TER_over_2, SER, AER, IBM_BLEU_3 };
+enum ScoreType { IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, BLEU_minus_TER_over_2, SER, AER, IBM_BLEU_3, METEOR };
 ScoreType ScoreTypeFromString(const std::string& st);
 std::string StringFromScoreType(ScoreType st);
 
@@ -66,7 +66,7 @@ class SentenceScorer {
   typedef std::vector<Sentence> Sentences;
   std::string desc;
   Sentences refs;
-  SentenceScorer(std::string desc="SentenceScorer_unknown", Sentences const& refs=Sentences()) : desc(desc),refs(refs) {  }
+  explicit SentenceScorer(std::string desc="SentenceScorer_unknown", Sentences const& refs=Sentences()) : desc(desc),refs(refs) {  }
   std::string verbose_desc() const;
   virtual float ComputeRefLength(const Sentence& hyp) const; // default: avg of refs.length
   virtual ~SentenceScorer();
