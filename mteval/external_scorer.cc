@@ -3,6 +3,7 @@
 #include <cstdio> // popen
 #include <cstdlib>
 #include <cstring>
+#include <unistd.h>
 #include <sstream>
 #include <iostream>
 #include <cassert>
@@ -16,7 +17,7 @@ map<string, boost::shared_ptr<ScoreServer> > ScoreServerManager::servers_;
 
 class METEORServer : public ScoreServer {
  public:
-  METEORServer() : ScoreServer("java -Xmx1024m -jar /Users/cdyer/software/meteor/meteor-1.3.jar - - -mira -lower -t tune -l en") {}
+  METEORServer() : ScoreServer("java -Xmx1024m -jar /usr0/cdyer/meteor/meteor-1.3.jar - - -mira -lower -t tune -l en") {}
 };
 
 ScoreServer* ScoreServerManager::Instance(const string& score_type) {
@@ -32,10 +33,30 @@ ScoreServer* ScoreServerManager::Instance(const string& score_type) {
   return s.get();
 }
 
-ScoreServer::ScoreServer(const string& cmd) : pipe_() {
+ScoreServer::ScoreServer(const string& cmd) {
   cerr << "Invoking " << cmd << " ..." << endl;
-  pipe_ = popen(cmd.c_str(), "r+");
-  if (!pipe_) { perror("popen"); abort(); }
+  if (pipe(p2c) < 0) { perror("pipe"); exit(1); }
+  if (pipe(c2p) < 0) { perror("pipe"); exit(1); }
+  pid_t cpid = fork();
+  if (cpid < 0) { perror("fork"); exit(1); }
+  if (cpid == 0) {  // child
+    close(p2c[1]);
+    close(c2p[0]);
+    dup2(p2c[0], 0);
+    close(p2c[0]);
+    dup2(c2p[1], 1);
+    close(c2p[1]);
+    cerr << "Exec'ing from child " << cmd << endl;
+    vector<string> vargs;
+    SplitOnWhitespace(cmd, &vargs);
+    const char** cargv = static_cast<const char**>(malloc(sizeof(const char*) * vargs.size()));
+    for (unsigned i = 1; i < vargs.size(); ++i) cargv[i-1] = vargs[i].c_str();
+    cargv[vargs.size() - 1] = NULL;
+    execvp(vargs[0].c_str(), (char* const*)cargv);
+  } else { // parent
+    close(c2p[1]);
+    close(p2c[0]);
+  }
   string dummy;
   RequestResponse("SCORE ||| Reference initialization string . ||| Testing initialization string .", &dummy);
   assert(dummy.size() > 0);
@@ -43,7 +64,7 @@ ScoreServer::ScoreServer(const string& cmd) : pipe_() {
 }
 
 ScoreServer::~ScoreServer() {
-  pclose(pipe_);
+  // TODO close stuff, join stuff
 }
 
 float ScoreServer::ComputeScore(const vector<float>& fields) {
@@ -81,21 +102,20 @@ void ScoreServer::Evaluate(const vector<vector<WordID> >& refs, const vector<Wor
 #define MAX_BUF 16000
 
 void ScoreServer::RequestResponse(const string& request, string* response) {
-  //cerr << "@SERVER: " << request << endl;
-  fputs(request.c_str(), pipe_);
-  fputc('\n', pipe_);
-  fflush(pipe_);
+//  cerr << "@SERVER: " << request << endl;
+  string x = request + "\n";
+  write(p2c[1], x.c_str(), x.size());
   char buf[MAX_BUF];
-  if (NULL == fgets(buf, MAX_BUF, pipe_)) {
-    cerr << "Read error. Request: " << request << endl;
-    abort();
-  }
-  size_t len = strlen(buf);
-  if (len < 2) {
+  size_t n = read(c2p[0], buf, MAX_BUF);
+  while (n < MAX_BUF && buf[n-1] != '\n')
+    n += read(c2p[0], &buf[n], MAX_BUF - n);
+
+  buf[n-1] = 0;
+  if (n < 2) {
     cerr << "Malformed response: " << buf << endl;
   }
   *response = Trim(buf, " \t\n");
-  //cerr << "@RESPONSE: '" << *response << "'\n";
+//  cerr << "@RESPONSE: '" << *response << "'\n";
 }
 
 struct ExternalScore : public ScoreBase<ExternalScore> {
