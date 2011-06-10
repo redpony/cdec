@@ -2,7 +2,6 @@
 #define _EXTERNAL_SCORER_H_
 
 #include <vector>
-#include <cstdio>
 #include <string>
 #include <map>
 #include <boost/shared_ptr.hpp>
@@ -21,7 +20,8 @@ class ScoreServer {
 
  private:
   void RequestResponse(const std::string& request, std::string* response);
-  FILE* pipe_;
+  int p2c[2];
+  int c2p[2];
 };
 
 struct ScoreServerManager {
