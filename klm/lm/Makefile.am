@@ -15,6 +15,7 @@ libklm_a_SOURCES = \
   binary_format.cc \
   config.cc \
   lm_exception.cc \
+	quantize.cc \
   model.cc \
   ngram_query.cc \
   read_arpa.cc \
