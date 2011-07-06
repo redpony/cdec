@@ -1,6 +1,5 @@
 To build cdec, you'll need:
 
- * SRILM (register and download from http://www.speech.sri.com/projects/srilm/)
  * Google c++ testing framework (http://code.google.com/p/googletest/)
  * boost headers & boost program_options (you may need to install a package
     like boost-devel)
@@ -9,7 +8,7 @@ To build cdec, you'll need:
 Instructions for building
 -----------------------------------
 
- 1) Download and build SRILM
+ 1) Optional: Download and build SRILM
 
  2) Download, build, and install Google Test (optional, this is necessary
     to build unit tests that may be useful in development; system tests
@@ -22,7 +21,7 @@ Instructions for building
 
  4) Configure and build.  Your command will look something like this.
 
-        ./configure --with-srilm=/home/me/software/srilm-1.5.9 --disable-gtest
+        ./configure --disable-gtest
         make
 
     If you get errors during configure about missing BOOST macros, then step 3
