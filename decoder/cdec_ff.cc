@@ -4,6 +4,7 @@
 #include "ff_spans.h"
 #include "ff_lm.h"
 #include "ff_klm.h"
+#include "ff_ngrams.h"
 #include "ff_csplit.h"
 #include "ff_wordalign.h"
 #include "ff_tagger.h"
@@ -51,6 +52,7 @@ void register_feature_functions() {
   ff_registry.Register("RandLM", new FFFactory<LanguageModelRandLM>);
 #endif
   ff_registry.Register("SpanFeatures", new FFFactory<SpanFeatures>());
+  ff_registry.Register("NgramFeatures", new FFFactory<NgramDetector>());
   ff_registry.Register("RuleNgramFeatures", new FFFactory<RuleNgramFeatures>());
   ff_registry.Register("CMR2008ReorderingFeatures", new FFFactory<CMR2008ReorderingFeatures>());
   ff_registry.Register("KLanguageModel", new FFFactory<KLanguageModel<lm::ngram::ProbingModel> >());
