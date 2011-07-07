@@ -14,6 +14,7 @@ bin_PROGRAMS = \
   mpi_batch_optimize \
   mpi_em_optimize \
   compute_cllh \
+  feature_expectations \
   augment_grammar
 
 noinst_PROGRAMS = \
@@ -27,6 +28,9 @@ mpi_online_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval
 
 mpi_batch_optimize_SOURCES = mpi_batch_optimize.cc optimize.cc
 mpi_batch_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+
+feature_expectations_SOURCES = feature_expectations.cc
+feature_expectations_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 mpi_em_optimize_SOURCES = mpi_em_optimize.cc optimize.cc
 mpi_em_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
