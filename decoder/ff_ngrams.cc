@@ -103,27 +103,29 @@ class NgramDetectorImpl {
     SetFlag(flag, HAS_FULL_CONTEXT, state);
   }
 
-  void FireFeatures(const State<5>& state, const WordID cur, SparseVector<double>* feats) {
-    assert(order_ == 2);
-    if (cur >= unimap_.size())
-      unimap_.resize(cur + 10, 0);
-    int& uf = unimap_[cur];
-    if (!uf) {
-      ostringstream os;
-      os << "U:" << TD::Convert(cur);
-      uf = FD::Convert(os.str());
-    }
-    feats->set_value(uf, 1.0);
-    if (state.state[0]) {
-      if (state.state[0] >= bimap_.size())
-        bimap_.resize(state.state[0] + 10);
-      int& bf = bimap_[state.state[0]][cur];
-      if (!bf) {
+  void FireFeatures(const State<5>& state, WordID cur, SparseVector<double>* feats) {
+    FidTree* ft = &fidroot_;
+    int n = 0;
+    WordID buf[10];
+    int ci = order_ - 1;
+    WordID curword = cur;
+    while(curword) {
+      buf[n] = curword;
+      int& fid = ft->fids[curword];
+      ++n;
+      if (!fid) {
+        const char* code="_UBT456789";
         ostringstream os;
-        os << "B:" << TD::Convert(state[0]) << '_' << TD::Convert(cur);
-        bf = FD::Convert(os.str());
+        os << code[n] << ':';
+        for (int i = n-1; i >= 0; --i)
+          os << (i != n-1 ? "_" : "") << TD::Convert(buf[i]);
+        fid = FD::Convert(os.str());
       }
-      feats->set_value(bf, 1.0);
+      feats->set_value(fid, 1);
+      ft = &ft->levels[curword];
+      --ci;
+      if (ci < 0) break;
+      curword = state[ci];
     }
   }
 
@@ -248,7 +250,7 @@ class NgramDetectorImpl {
   explicit NgramDetectorImpl(bool explicit_markers) :
       kCDEC_UNK(TD::Convert("<unk>")) ,
       add_sos_eos_(!explicit_markers) {
-    order_ = 2;
+    order_ = 3;
     state_size_ = (order_ - 1) * sizeof(WordID) + 2 + (order_ - 1) * sizeof(WordID);
     unscored_size_offset_ = (order_ - 1) * sizeof(WordID);
     is_complete_offset_ = unscored_size_offset_ + 1;
@@ -288,8 +290,11 @@ class NgramDetectorImpl {
   char* dummy_state_;
   vector<const void*> dummy_ants_;
   TRulePtr dummy_rule_;
-  mutable std::vector<int> unimap_;  // [left][right]
-  mutable std::vector<std::map<WordID, int> > bimap_;  // [left][right]
+  struct FidTree {
+    map<WordID, int> fids;
+    map<WordID, FidTree> levels;
+  };
+  mutable FidTree fidroot_;
 };
 
 NgramDetector::NgramDetector(const string& param) {
