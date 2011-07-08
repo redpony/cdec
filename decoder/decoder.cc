@@ -357,7 +357,7 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
 
         ("weights,w",po::value<string>(),"Feature weights file (initial forest / pass 1)")
         ("feature_function,F",po::value<vector<string> >()->composing(), "Pass 1 additional feature function(s) (-L for list)")
-        ("intersection_strategy,I",po::value<string>()->default_value("cube_pruning"), "Pass 1 intersection strategy for incorporating finite-state features; values include Cube_pruning, Full")
+        ("intersection_strategy,I",po::value<string>()->default_value("cube_pruning"), "Pass 1 intersection strategy for incorporating finite-state features; values include Cube_pruning, Full, Fast_cube_pruning, Fast_cube_pruning_2")
         ("summary_feature", po::value<string>(), "Compute a 'summary feature' at the end of the pass (before any pruning) with name=arg and value=inside-outside/Z")
         ("summary_feature_type", po::value<string>()->default_value("node_risk"), "Summary feature types: node_risk, edge_risk, edge_prob")
         ("density_prune", po::value<double>(), "Pass 1 pruning: keep no more than this many times the number of edges used in the best derivation tree (>=1.0)")
@@ -596,6 +596,14 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
       string isn = "intersection_strategy" + StringSuffixForRescoringPass(pass);
       if (LowercaseString(str(isn.c_str(),conf)) == "full") {
         palg = 0;
+      }
+      if (LowercaseString(conf["intersection_strategy"].as<string>()) == "fast_cube_pruning") {
+        palg = 2;
+        cerr << "Using Fast Cube Pruning intersection (see Algorithm 2 described in: Gesmundo A., Henderson J,. Faster Cube Pruning, IWSLT 2010).\n";
+      }
+      if (LowercaseString(conf["intersection_strategy"].as<string>()) == "fast_cube_pruning_2") {
+        palg = 3;
+        cerr << "Using Fast Cube Pruning 2 intersection (see Algorithm 3 described in: Gesmundo A., Henderson J,. Faster Cube Pruning, IWSLT 2010).\n";
       }
       rp.inter_conf.reset(new IntersectionConfiguration(palg, pop_limit));
     } else {
