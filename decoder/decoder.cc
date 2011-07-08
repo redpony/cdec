@@ -46,6 +46,13 @@
 #include "cfg_options.h"
 #endif
 
+#ifdef CP_TIME
+    clock_t CpTime::time_;
+	void CpTime::Add(clock_t x){time_+=x;}
+	void CpTime::Sub(clock_t x){time_-=x;}
+	double CpTime::Get(){return (double)(time_)/CLOCKS_PER_SEC;}
+#endif
+
 static const double kMINUS_EPSILON = -1e-6;  // don't be too strict
 
 using namespace std;
@@ -806,11 +813,17 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       Timer t("Forest rescoring:");
       rp.models->PrepareForInput(smeta);
       Hypergraph rescored_forest;
+#ifdef CP_TIME
+      CpTime::Sub(clock());
+#endif
       ApplyModelSet(forest,
                   smeta,
                   *rp.models,
                   *rp.inter_conf,
                   &rescored_forest);
+#ifdef CP_TIME
+      CpTime::Add(clock());
+#endif
       forest.swap(rescored_forest);
       forest.Reweight(cur_weights);
       if (!SILENT) forest_stats(forest,"  " + passtr +" forest",show_tree_structure,oracle.show_derivation);
