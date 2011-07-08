@@ -19,11 +19,19 @@ int main(int argc, char** argv) {
   assert(*in);
 
   string buf;
+#ifdef CP_TIME
+    clock_t time_cp(0);//, end_cp;
+#endif
   while(*in) {
     getline(*in, buf);
     if (buf.empty()) continue;
     decoder.Decode(buf);
   }
+#ifdef CP_TIME
+    cerr << "Time required for Cube Pruning execution: "
+    << CpTime::Get()
+    << " seconds." << "\n\n";
+#endif
   if (show_feature_dictionary) {
     int num = FD::NumFeats();
     for (int i = 1; i < num; ++i) {
