@@ -92,4 +92,4 @@ then
   AM_CONDITIONAL([GLC], true)
 fi
 
-AC_OUTPUT(Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile phrasinator/Makefile training/Makefile vest/Makefile klm/util/Makefile klm/lm/Makefile mira/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile)
+AC_OUTPUT(Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile phrasinator/Makefile training/Makefile vest/Makefile pro-train/Makefile klm/util/Makefile klm/lm/Makefile mira/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile)
