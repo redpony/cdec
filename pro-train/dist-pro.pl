@@ -21,7 +21,7 @@ my $bin_dir = $SCRIPT_DIR;
 die "Bin directory $bin_dir missing/inaccessible" unless -d $bin_dir;
 my $FAST_SCORE="$bin_dir/../mteval/fast_score";
 die "Can't execute $FAST_SCORE" unless -x $FAST_SCORE;
-my $MAPINPUT = "$bin_dir/mr_pro_generate_mapper_input";
+my $MAPINPUT = "$bin_dir/mr_pro_generate_mapper_input.pl";
 my $MAPPER = "$bin_dir/mr_pro_map";
 my $REDUCER = "$bin_dir/mr_pro_reduce";
 my $parallelize = "$VEST_DIR/parallelize.pl";
@@ -37,8 +37,7 @@ die "Can't find decoder in $cdec" unless -x $cdec;
 die "Can't find $parallelize" unless -x $parallelize;
 die "Can't find $libcall" unless -e $libcall;
 my $decoder = $cdec;
-my $lines_per_mapper = 400;
-my $rand_directions = 15;
+my $lines_per_mapper = 100;
 my $iteration = 1;
 my $run_local = 0;
 my $best_weights;
@@ -58,7 +57,6 @@ my $metric = "ibm_bleu";
 my $dir;
 my $iniFile;
 my $weights;
-my $initialWeights;
 my $decoderOpt;
 my $noprimary;
 my $maxsim=0;
@@ -67,7 +65,6 @@ my $oracleb=20;
 my $bleu_weight=1;
 my $use_make;  # use make to parallelize line search
 my $dirargs='';
-my $density_prune;
 my $usefork;
 my $pass_suffix = '';
 my $cpbin=1;
@@ -76,7 +73,6 @@ Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
 	"decoder=s" => \$decoderOpt,
 	"decode-nodes=i" => \$decode_nodes,
-	"density-prune=f" => \$density_prune,
 	"dont-clean" => \$disable_clean,
 	"pass-suffix=s" => \$pass_suffix,
         "use-fork" => \$usefork,
@@ -91,8 +87,6 @@ if (GetOptions(
 	"normalize=s" => \$normalize,
 	"pmem=s" => \$pmem,
         "cpbin!" => \$cpbin,
-	"rand-directions=i" => \$rand_directions,
-	"random_directions=i" => \$rand_directions,
         "bleu_weight=s" => \$bleu_weight,
         "no-primary!" => \$noprimary,
         "max-similarity=s" => \$maxsim,
@@ -103,16 +97,10 @@ if (GetOptions(
 	"ref-files=s" => \$refFiles,
 	"metric=s" => \$metric,
 	"source-file=s" => \$srcFile,
-	"weights=s" => \$initialWeights,
 	"workdir=s" => \$dir,
-    "opt-iterations=i" => \$optimization_iters,
 ) == 0 || @ARGV!=1 || $help) {
 	print_help();
 	exit;
-}
-
-if (defined $density_prune) {
-  die "--density_prune n: n must be greater than 1.0\n" unless $density_prune > 1.0;
 }
 
 if ($usefork) { $usefork = "--use-fork"; } else { $usefork = ''; }
@@ -146,7 +134,7 @@ if ($metric =~ /^ter$|^aer$/i) {
 my $refs_comma_sep = get_comma_sep_refs('r',$refFiles);
 
 unless ($dir){
-	$dir = "vest";
+	$dir = "protrain";
 }
 unless ($dir =~ /^\//){  # convert relative path to absolute path
 	my $basedir = check_output("pwd");
@@ -203,18 +191,19 @@ sub dirsize {
     opendir ISEMPTY,$_[0];
     return scalar(readdir(ISEMPTY))-1;
 }
+my @allweights;
 if ($dryrun){
 	write_config(*STDERR);
 	exit 0;
 } else {
-	if (-e $dir && dirsize($dir)>1 && -e "$dir/hgs" ){ # allow preexisting logfile, binaries, but not dist-vest.pl outputs
+	if (-e $dir && dirsize($dir)>1 && -e "$dir/hgs" ){ # allow preexisting logfile, binaries, but not dist-pro.pl outputs
 	  die "ERROR: working dir $dir already exists\n\n";
 	} else {
 		-e $dir || mkdir $dir;
 		mkdir "$dir/hgs";
         modbin("$dir/bin",\$LocalConfig,\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize,\$sentserver,\$sentclient,\$libcall) if $cpbin;
     mkdir "$dir/scripts";
-        my $cmdfile="$dir/rerun-vest.sh";
+        my $cmdfile="$dir/rerun-pro.sh";
         open CMD,'>',$cmdfile;
         print CMD "cd ",&getcwd,"\n";
 #        print CMD &escaped_cmdline,"\n"; #buggy - last arg is quoted.
@@ -223,13 +212,8 @@ if ($dryrun){
         close CMD;
         print STDERR $cline;
         chmod(0755,$cmdfile);
-		unless (-e $initialWeights) {
-			print STDERR "Please specify an initial weights file with --initial-weights\n";
-			print_help();
-			exit;
-		}
-		check_call("cp $initialWeights $dir/weights.0");
-		die "Can't find weights.0" unless (-e "$dir/weights.0");
+	check_call("touch $dir/weights.0");
+	die "Can't find weights.0" unless (-e "$dir/weights.0");
 	}
 	write_config(*STDERR);
 }
@@ -255,6 +239,7 @@ my $random_seed = int(time / 1000);
 my $lastWeightsFile;
 my $lastPScore = 0;
 # main optimization loop
+my @mapoutputs = (); # aggregate map outputs over all iters
 while (1){
 	print STDERR "\n\nITERATION $iteration\n==========\n";
 
@@ -276,10 +261,8 @@ while (1){
 	print STDERR unchecked_output("date");
 	my $im1 = $iteration - 1;
 	my $weightsFile="$dir/weights.$im1";
+        push @allweights, "-w $dir/weights.$im1";
 	my $decoder_cmd = "$decoder -c $iniFile --weights$pass_suffix $weightsFile -O $dir/hgs";
-	if ($density_prune) {
-		$decoder_cmd .= " --density_prune $density_prune";
-	}
 	my $pcmd;
 	if ($run_local) {
 		$pcmd = "cat $srcFile |";
@@ -320,163 +303,111 @@ while (1){
 	# run optimizer
 	print STDERR "RUNNING OPTIMIZER AT ";
 	print STDERR unchecked_output("date");
+	print STDERR " - GENERATE TRAINING EXEMPLARS\n";
 	my $mergeLog="$logdir/prune-merge.log.$iteration";
 
 	my $score = 0;
 	my $icc = 0;
 	my $inweights="$dir/weights.$im1";
-	for (my $opt_iter=1; $opt_iter<$optimization_iters; $opt_iter++) {
-		print STDERR "\nGENERATE OPTIMIZATION STRATEGY (OPT-ITERATION $opt_iter/$optimization_iters)\n";
-		print STDERR unchecked_output("date");
-		$icc++;
-		my $nop=$noprimary?"--no_primary":"";
-		my $targs=$oraclen ? "--decoder_translations='$runFile.gz' ".get_comma_sep_refs('-references',$refFiles):"";
-		my $bwargs=$bleu_weight!=1 ? "--bleu_weight=$bleu_weight":"";
-		$cmd="$MAPINPUT -w $inweights -r $dir/hgs $bwargs -s $devSize -d $rand_directions --max_similarity=$maxsim --oracle_directions=$oraclen --oracle_batch=$oracleb $targs $dirargs > $dir/agenda.$im1-$opt_iter";
-		print STDERR "COMMAND:\n$cmd\n";
-		check_call($cmd);
-		check_call("mkdir -p $dir/splag.$im1");
-		$cmd="split -a 3 -l $lines_per_mapper $dir/agenda.$im1-$opt_iter $dir/splag.$im1/mapinput.";
-		print STDERR "COMMAND:\n$cmd\n";
-		check_call($cmd);
-		opendir(DIR, "$dir/splag.$im1") or die "Can't open directory: $!";
-		my @shards = grep { /^mapinput\./ } readdir(DIR);
-		closedir DIR;
-		die "No shards!" unless scalar @shards > 0;
-		my $joblist = "";
-		my $nmappers = 0;
-		my @mapoutputs = ();
-		@cleanupcmds = ();
-		my %o2i = ();
-		my $first_shard = 1;
-		my $mkfile; # only used with makefiles
-		my $mkfilename;
-		if ($use_make) {
-			$mkfilename = "$dir/splag.$im1/domap.mk";
-			open $mkfile, ">$mkfilename" or die "Couldn't write $mkfilename: $!";
-			print $mkfile "all: $dir/splag.$im1/map.done\n\n";
-		}
-		my @mkouts = ();  # only used with makefiles
-		for my $shard (@shards) {
-			my $mapoutput = $shard;
-			my $client_name = $shard;
-			$client_name =~ s/mapinput.//;
-			$client_name = "vest.$client_name";
-			$mapoutput =~ s/mapinput/mapoutput/;
-			push @mapoutputs, "$dir/splag.$im1/$mapoutput";
-			$o2i{"$dir/splag.$im1/$mapoutput"} = "$dir/splag.$im1/$shard";
-			my $script = "$MAPPER -s $srcFile -l $metric $refs_comma_sep < $dir/splag.$im1/$shard | sort -t \$'\\t' -k 1 > $dir/splag.$im1/$mapoutput";
-			if ($run_local) {
-				print STDERR "COMMAND:\n$script\n";
-				check_bash_call($script);
-			} elsif ($use_make) {
-				my $script_file = "$dir/scripts/map.$shard";
-				open F, ">$script_file" or die "Can't write $script_file: $!";
-				print F "#!/bin/bash\n";
-				print F "$script\n";
-				close F;
-				my $output = "$dir/splag.$im1/$mapoutput";
-				push @mkouts, $output;
-				chmod(0755, $script_file) or die "Can't chmod $script_file: $!";
-				if ($first_shard) { print STDERR "$script\n"; $first_shard=0; }
-				print $mkfile "$output: $dir/splag.$im1/$shard\n\t$script_file\n\n";
-			} else {
-				my $script_file = "$dir/scripts/map.$shard";
-				open F, ">$script_file" or die "Can't write $script_file: $!";
-				print F "$script\n";
-				close F;
-				if ($first_shard) { print STDERR "$script\n"; $first_shard=0; }
-
-				$nmappers++;
-				my $qcmd = "$QSUB_CMD -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file";
-				my $jobid = check_output("$qcmd");
-				chomp $jobid;
-				$jobid =~ s/^(\d+)(.*?)$/\1/g;
-				$jobid =~ s/^Your job (\d+) .*$/\1/;
-		 	 	push(@cleanupcmds, "qdel $jobid 2> /dev/null");
-				print STDERR " $jobid";
-				if ($joblist == "") { $joblist = $jobid; }
-				else {$joblist = $joblist . "\|" . $jobid; }
-			}
-		}
+	$cmd="$MAPINPUT $dir/hgs > $dir/agenda.$im1";
+	print STDERR "COMMAND:\n$cmd\n";
+	check_call($cmd);
+	check_call("mkdir -p $dir/splag.$im1");
+	$cmd="split -a 3 -l $lines_per_mapper $dir/agenda.$im1 $dir/splag.$im1/mapinput.";
+	print STDERR "COMMAND:\n$cmd\n";
+	check_call($cmd);
+	opendir(DIR, "$dir/splag.$im1") or die "Can't open directory: $!";
+	my @shards = grep { /^mapinput\./ } readdir(DIR);
+	closedir DIR;
+	die "No shards!" unless scalar @shards > 0;
+	my $joblist = "";
+	my $nmappers = 0;
+	@cleanupcmds = ();
+	my %o2i = ();
+	my $first_shard = 1;
+	my $mkfile; # only used with makefiles
+	my $mkfilename;
+	if ($use_make) {
+		$mkfilename = "$dir/splag.$im1/domap.mk";
+		open $mkfile, ">$mkfilename" or die "Couldn't write $mkfilename: $!";
+		print $mkfile "all: $dir/splag.$im1/map.done\n\n";
+	}
+	my @mkouts = ();  # only used with makefiles
+	for my $shard (@shards) {
+		my $mapoutput = $shard;
+		my $client_name = $shard;
+		$client_name =~ s/mapinput.//;
+		$client_name = "pro.$client_name";
+		$mapoutput =~ s/mapinput/mapoutput/;
+		push @mapoutputs, "$dir/splag.$im1/$mapoutput";
+		$o2i{"$dir/splag.$im1/$mapoutput"} = "$dir/splag.$im1/$shard";
+		my $script = "$MAPPER -s $srcFile -l $metric $refs_comma_sep @allweights < $dir/splag.$im1/$shard > $dir/splag.$im1/$mapoutput";
 		if ($run_local) {
-			print STDERR "\nProcessing line search complete.\n";
+			print STDERR "COMMAND:\n$script\n";
+			check_bash_call($script);
 		} elsif ($use_make) {
-			print $mkfile "$dir/splag.$im1/map.done: @mkouts\n\ttouch $dir/splag.$im1/map.done\n\n";
-			close $mkfile;
-			my $mcmd = "make -j $use_make -f $mkfilename";
-			print STDERR "\nExecuting: $mcmd\n";
-			check_call($mcmd);
+			my $script_file = "$dir/scripts/map.$shard";
+			open F, ">$script_file" or die "Can't write $script_file: $!";
+			print F "#!/bin/bash\n";
+			print F "$script\n";
+			close F;
+			my $output = "$dir/splag.$im1/$mapoutput";
+			push @mkouts, $output;
+			chmod(0755, $script_file) or die "Can't chmod $script_file: $!";
+			if ($first_shard) { print STDERR "$script\n"; $first_shard=0; }
+			print $mkfile "$output: $dir/splag.$im1/$shard\n\t$script_file\n\n";
 		} else {
-			print STDERR "\nLaunched $nmappers mappers.\n";
-      			sleep 8;
-			print STDERR "Waiting for mappers to complete...\n";
-			while ($nmappers > 0) {
-			  sleep 5;
-			  my @livejobs = grep(/$joblist/, split(/\n/, unchecked_output("qstat | grep -v ' C '")));
-			  $nmappers = scalar @livejobs;
-			}
-			print STDERR "All mappers complete.\n";
-		}
-		my $tol = 0;
-		my $til = 0;
-		for my $mo (@mapoutputs) {
-		  my $olines = get_lines($mo);
-		  my $ilines = get_lines($o2i{$mo});
-		  $tol += $olines;
-		  $til += $ilines;
-		  die "$mo: output lines ($olines) doesn't match input lines ($ilines)" unless $olines==$ilines;
-		}
-		print STDERR "Results for $tol/$til lines\n";
-		print STDERR "\nSORTING AND RUNNING VEST REDUCER\n";
-		print STDERR unchecked_output("date");
-		$cmd="sort -t \$'\\t' -k 1 @mapoutputs | $REDUCER -l $metric > $dir/redoutput.$im1";
-		print STDERR "COMMAND:\n$cmd\n";
-		check_bash_call($cmd);
-		$cmd="sort -nk3 $DIR_FLAG '-t|' $dir/redoutput.$im1 | head -1";
-		# sort returns failure even when it doesn't fail for some reason
-		my $best=unchecked_output("$cmd"); chomp $best;
-		print STDERR "$best\n";
-		my ($oa, $x, $xscore) = split /\|/, $best;
-		$score = $xscore;
-		print STDERR "PROJECTED SCORE: $score\n";
-		if (abs($x) < $epsilon) {
-			print STDERR "\nOPTIMIZER: no score improvement: abs($x) < $epsilon\n";
-			last;
-		}
-                my $psd = $score - $last_score;
-                $last_score = $score;
-		if (abs($psd) < $epsilon) {
-			print STDERR "\nOPTIMIZER: no score improvement: abs($psd) < $epsilon\n";
-			last;
-		}
-		my ($origin, $axis) = split /\s+/, $oa;
+			my $script_file = "$dir/scripts/map.$shard";
+			open F, ">$script_file" or die "Can't write $script_file: $!";
+			print F "$script\n";
+			close F;
+			if ($first_shard) { print STDERR "$script\n"; $first_shard=0; }
 
-		my %ori = convert($origin);
-		my %axi = convert($axis);
-
-		my $finalFile="$dir/weights.$im1-$opt_iter";
-		open W, ">$finalFile" or die "Can't write: $finalFile: $!";
-                my $norm = 0;
-		for my $k (sort keys %ori) {
-			my $dd = $ori{$k} + $axi{$k} * $x;
-                        $norm += $dd * $dd;
+			$nmappers++;
+			my $qcmd = "$QSUB_CMD -N $client_name -o /dev/null -e $logdir/$client_name.ER $script_file";
+			my $jobid = check_output("$qcmd");
+			chomp $jobid;
+			$jobid =~ s/^(\d+)(.*?)$/\1/g;
+			$jobid =~ s/^Your job (\d+) .*$/\1/;
+		 	push(@cleanupcmds, "qdel $jobid 2> /dev/null");
+			print STDERR " $jobid";
+			if ($joblist == "") { $joblist = $jobid; }
+			else {$joblist = $joblist . "\|" . $jobid; }
 		}
-                $norm = sqrt($norm);
-		$norm = 1;
-		for my $k (sort keys %ori) {
-			my $v = ($ori{$k} + $axi{$k} * $x) / $norm;
-			print W "$k $v\n";
-		}
-		check_call("rm $dir/splag.$im1/*");
-		$inweights = $finalFile;
 	}
+	if ($run_local) {
+		print STDERR "\nCompleted extraction of training exemplars.\n";
+	} elsif ($use_make) {
+		print $mkfile "$dir/splag.$im1/map.done: @mkouts\n\ttouch $dir/splag.$im1/map.done\n\n";
+		close $mkfile;
+		my $mcmd = "make -j $use_make -f $mkfilename";
+		print STDERR "\nExecuting: $mcmd\n";
+		check_call($mcmd);
+	} else {
+		print STDERR "\nLaunched $nmappers mappers.\n";
+      		sleep 8;
+		print STDERR "Waiting for mappers to complete...\n";
+		while ($nmappers > 0) {
+		  sleep 5;
+		  my @livejobs = grep(/$joblist/, split(/\n/, unchecked_output("qstat | grep -v ' C '")));
+		  $nmappers = scalar @livejobs;
+		}
+		print STDERR "All mappers complete.\n";
+	}
+	my $tol = 0;
+	my $til = 0;
+        print STDERR "MO: @mapoutputs\n";
+	for my $mo (@mapoutputs) {
+		#my $olines = get_lines($mo);
+		#my $ilines = get_lines($o2i{$mo});
+		#die "$mo: no training instances generated!" if $olines == 0;
+	}
+	print STDERR "\nRUNNING CLASSIFIER (REDUCER)\n";
+	print STDERR unchecked_output("date");
+	$cmd="cat @mapoutputs | $REDUCER -w $dir/weights.$im1 > $dir/weights.$iteration";
+	print STDERR "COMMAND:\n$cmd\n";
+	check_bash_call($cmd);
 	$lastWeightsFile = "$dir/weights.$iteration";
-	check_call("cp $inweights $lastWeightsFile");
-	if ($icc < 2) {
-		print STDERR "\nREACHED STOPPING CRITERION: score change too little\n";
-		last;
-	}
 	$lastPScore = $score;
 	$iteration++;
 	print STDERR "\n==========\n";
@@ -487,24 +418,6 @@ print STDERR "\nFINAL WEIGHTS: $lastWeightsFile\n(Use -w <this file> with the de
 print STDOUT "$lastWeightsFile\n";
 
 exit 0;
-
-sub normalize_weights {
-  my ($rfn, $rpts, $feat) = @_;
-  my @feat_names = @$rfn;
-  my @pts = @$rpts;
-  my $z = 1.0;
-  for (my $i=0; $i < scalar @feat_names; $i++) {
-    if ($feat_names[$i] eq $feat) {
-      $z = $pts[$i];
-      last;
-    }
-  }
-  for (my $i=0; $i < scalar @feat_names; $i++) {
-    $pts[$i] /= $z;
-  }
-  print STDERR " NORM WEIGHTS: @pts\n";
-  return @pts;
-}
 
 sub get_lines {
   my $fn = shift @_;
@@ -563,7 +476,6 @@ sub write_config {
 	print $fh "HEAD NODE:        $host\n";
 	print $fh "PMEM (DECODING):  $pmem\n";
 	print $fh "CLEANUP:          $cleanup\n";
-	print $fh "INITIAL WEIGHTS:  $initialWeights\n";
 }
 
 sub update_weights_file {
@@ -603,6 +515,7 @@ sub enseg {
 	}
 	close SRC;
 	close NEWSRC;
+	die "Empty dev set!" if ($i == 0);
 }
 
 sub print_help {
@@ -634,10 +547,6 @@ Options:
 	--decoder <decoder path>
 		Decoder binary to use.
 
-	--density-prune <N>
-		Limit the density of the hypergraph on each iteration to N times
-		the number of edges on the Viterbi path.
-
 	--help
 		Print this message and exit.
 
@@ -668,17 +577,8 @@ Options:
 		After each iteration, rescale all feature weights such that feature-
 		name has a weight of 1.0.
 
-	--rand-directions <num>
-		MERT will attempt to optimize along all of the principle directions,
-		set this parameter to explore other directions. Defaults to 5.
-
 	--source-file <file>
 		Dev set source file.
-
-	--weights <file>
-		A file specifying initial feature weights.  The format is
-		FeatureName_1 value1
-		FeatureName_2 value2
 
 	--workdir <dir>
 		Directory for intermediate and output files.  If not specified, the
