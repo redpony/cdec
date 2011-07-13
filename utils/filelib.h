@@ -12,6 +12,7 @@
 
 bool FileExists(const std::string& file_name);
 bool DirectoryExists(const std::string& dir_name);
+void MkDirP(const std::string& dir_name);
 
 // reads from standard in if filename is -
 // uncompresses if file ends with .gz

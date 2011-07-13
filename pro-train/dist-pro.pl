@@ -66,6 +66,7 @@ my $bleu_weight=1;
 my $use_make;  # use make to parallelize line search
 my $dirargs='';
 my $usefork;
+my $initial_weights;
 my $pass_suffix = '';
 my $cpbin=1;
 # Process command-line options
@@ -79,6 +80,7 @@ if (GetOptions(
 	"dry-run" => \$dryrun,
 	"epsilon=s" => \$epsilon,
 	"help" => \$help,
+        "weights=s" => \$initial_weights,
 	"interval" => \$interval,
 	"iteration=i" => \$iteration,
 	"local" => \$run_local,
@@ -212,7 +214,7 @@ if ($dryrun){
         close CMD;
         print STDERR $cline;
         chmod(0755,$cmdfile);
-	check_call("touch $dir/weights.0");
+	check_call("cp $initial_weights $dir/weights.0");
 	die "Can't find weights.0" unless (-e "$dir/weights.0");
 	}
 	write_config(*STDERR);
@@ -239,7 +241,6 @@ my $random_seed = int(time / 1000);
 my $lastWeightsFile;
 my $lastPScore = 0;
 # main optimization loop
-my @mapoutputs = (); # aggregate map outputs over all iters
 while (1){
 	print STDERR "\n\nITERATION $iteration\n==========\n";
 
@@ -262,6 +263,7 @@ while (1){
 	my $im1 = $iteration - 1;
 	my $weightsFile="$dir/weights.$im1";
         push @allweights, "-w $dir/weights.$im1";
+        `rm -f $dir/hgs/*.gz`;
 	my $decoder_cmd = "$decoder -c $iniFile --weights$pass_suffix $weightsFile -O $dir/hgs";
 	my $pcmd;
 	if ($run_local) {
@@ -333,6 +335,7 @@ while (1){
 		print $mkfile "all: $dir/splag.$im1/map.done\n\n";
 	}
 	my @mkouts = ();  # only used with makefiles
+	my @mapoutputs = ();
 	for my $shard (@shards) {
 		my $mapoutput = $shard;
 		my $client_name = $shard;
@@ -341,7 +344,7 @@ while (1){
 		$mapoutput =~ s/mapinput/mapoutput/;
 		push @mapoutputs, "$dir/splag.$im1/$mapoutput";
 		$o2i{"$dir/splag.$im1/$mapoutput"} = "$dir/splag.$im1/$shard";
-		my $script = "$MAPPER -s $srcFile -l $metric $refs_comma_sep @allweights < $dir/splag.$im1/$shard > $dir/splag.$im1/$mapoutput";
+		my $script = "$MAPPER -s $srcFile -l $metric $refs_comma_sep -w $inweights -K $dir/kbest < $dir/splag.$im1/$shard > $dir/splag.$im1/$mapoutput";
 		if ($run_local) {
 			print STDERR "COMMAND:\n$script\n";
 			check_bash_call($script);
