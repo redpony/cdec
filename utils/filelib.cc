@@ -20,3 +20,15 @@ bool DirectoryExists(const string& dir) {
   return false;
 }
 
+void MkDirP(const string& dir) {
+  if (DirectoryExists(dir)) return;
+  if (mkdir(dir.c_str(), 0777)) {
+    perror(dir.c_str());
+    abort();
+  }
+  if (chmod(dir.c_str(), 07777)) {
+    perror(dir.c_str());
+    abort();
+  }
+}
+
