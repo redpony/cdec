@@ -235,6 +235,13 @@ class FastSparseVector {
     }
     return *this;
   }
+  FastSparseVector<T> erase_zeros(const T& EPSILON = 1e-4) const {
+    FastSparseVector<T> o;
+    for (const_iterator it = begin(); it != end(); ++it) {
+      if (fabs(it->second) > EPSILON) o.set_value(it->first, it->second);
+    }
+    return o;
+  }
   const_iterator begin() const {
     return const_iterator(*this, false);
   }
@@ -344,15 +351,9 @@ const FastSparseVector<T> operator+(const FastSparseVector<T>& x, const FastSpar
 
 template <typename T>
 const FastSparseVector<T> operator-(const FastSparseVector<T>& x, const FastSparseVector<T>& y) {
-  if (x.size() > y.size()) {
-    FastSparseVector<T> res(x);
-    res -= y;
-    return res;
-  } else {
-    FastSparseVector<T> res(y);
-    res -= x;
-    return res;
-  }
+  FastSparseVector<T> res(x);
+  res -= y;
+  return res;
 }
 
 template <class T>
