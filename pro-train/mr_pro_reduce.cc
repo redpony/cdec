@@ -149,18 +149,20 @@ int main(int argc, char** argv) {
 #endif
     cll += reg;
     cerr << cll << " (REG=" << reg << ")\tPPL=" << ppl << "\t";
-    bool failed = false;
     try {
-      opt.Optimize(cll, vg, &x);
+      vector<double> old_x = x;
+      do {
+        opt.Optimize(cll, vg, &x);
+        converged = opt.HasConverged();
+      } while (!converged && x == old_x);
     } catch (...) {
       cerr << "Exception caught, assuming convergence is close enough...\n";
-      failed = true;
+      converged = true;
     }
     if (fabs(x[0]) > MAX_BIAS) {
       cerr << "Biased model learned. Are your training instances wrong?\n";
       cerr << "  BIAS: " << x[0] << endl;
     }
-    converged = failed || opt.HasConverged();
   }
   Weights w;
   if (conf.count("weights")) {
