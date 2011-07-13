@@ -46,6 +46,17 @@ struct State {
 };
 }
 
+namespace {
+  string Escape(const string& x) {
+    string y = x;
+    for (int i = 0; i < y.size(); ++i) {
+      if (y[i] == '=') y[i]='_';
+      if (y[i] == ';') y[i]='_';
+    }
+    return y;
+  }
+}
+
 class NgramDetectorImpl {
 
   // returns the number of unscored words at the left edge of a span
@@ -114,11 +125,17 @@ class NgramDetectorImpl {
       int& fid = ft->fids[curword];
       ++n;
       if (!fid) {
-        const char* code="_UBT456789";
+        const char* code="_UBT456789"; // prefix code (unigram, bigram, etc.)
         ostringstream os;
         os << code[n] << ':';
-        for (int i = n-1; i >= 0; --i)
-          os << (i != n-1 ? "_" : "") << TD::Convert(buf[i]);
+        for (int i = n-1; i >= 0; --i) {
+          os << (i != n-1 ? "_" : "");
+          const string& tok = TD::Convert(buf[i]);
+          if (tok.find('=') == string::npos)
+            os << tok;
+          else
+            os << Escape(tok);
+        }
         fid = FD::Convert(os.str());
       }
       feats->set_value(fid, 1);
