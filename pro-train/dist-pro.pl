@@ -37,42 +37,36 @@ die "Can't find decoder in $cdec" unless -x $cdec;
 die "Can't find $parallelize" unless -x $parallelize;
 die "Can't find $libcall" unless -e $libcall;
 my $decoder = $cdec;
-my $lines_per_mapper = 100;
+my $lines_per_mapper = 30;
 my $iteration = 1;
 my $run_local = 0;
 my $best_weights;
-my $max_iterations = 15;
-my $optimization_iters = 6;
+my $max_iterations = 30;
 my $decode_nodes = 15;   # number of decode nodes
-my $pmem = "9g";
+my $pmem = "4g";
 my $disable_clean = 0;
 my %seen_weights;
-my $normalize;
 my $help = 0;
 my $epsilon = 0.0001;
-my $interval = 5;
 my $dryrun = 0;
 my $last_score = -10000000;
 my $metric = "ibm_bleu";
 my $dir;
 my $iniFile;
 my $weights;
-my $decoderOpt;
-my $noprimary;
-my $maxsim=0;
-my $oraclen=0;
-my $oracleb=20;
-my $bleu_weight=1;
-my $use_make;  # use make to parallelize line search
-my $dirargs='';
+my $use_make;  # use make to parallelize
 my $usefork;
 my $initial_weights;
 my $pass_suffix = '';
 my $cpbin=1;
+
+# regularization strength
+my $tune_regularizer = 0;
+my $reg = 1e-2;
+
 # Process command-line options
 Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
-	"decoder=s" => \$decoderOpt,
 	"decode-nodes=i" => \$decode_nodes,
 	"dont-clean" => \$disable_clean,
 	"pass-suffix=s" => \$pass_suffix,
@@ -81,21 +75,13 @@ if (GetOptions(
 	"epsilon=s" => \$epsilon,
 	"help" => \$help,
         "weights=s" => \$initial_weights,
-	"interval" => \$interval,
-	"iteration=i" => \$iteration,
+	"tune-regularizer" => \$tune_regularizer,
+	"reg=f" => \$reg,
 	"local" => \$run_local,
 	"use-make=i" => \$use_make,
 	"max-iterations=i" => \$max_iterations,
-	"normalize=s" => \$normalize,
 	"pmem=s" => \$pmem,
         "cpbin!" => \$cpbin,
-        "bleu_weight=s" => \$bleu_weight,
-        "no-primary!" => \$noprimary,
-        "max-similarity=s" => \$maxsim,
-        "oracle-directions=i" => \$oraclen,
-        "n-oracle=i" => \$oraclen,
-        "oracle-batch=i" => \$oracleb,
-        "directions-args=s" => \$dirargs,
 	"ref-files=s" => \$refFiles,
 	"metric=s" => \$metric,
 	"source-file=s" => \$srcFile,
@@ -108,9 +94,7 @@ if (GetOptions(
 if ($usefork) { $usefork = "--use-fork"; } else { $usefork = ''; }
 
 if ($metric =~ /^(combi|ter)$/i) {
-  $lines_per_mapper = 40;
-} elsif ($metric =~ /^meteor$/i) {
-  $lines_per_mapper = 2000;   # start up time is really high
+  $lines_per_mapper = 5;
 }
 
 ($iniFile) = @ARGV;
@@ -143,8 +127,6 @@ unless ($dir =~ /^\//){  # convert relative path to absolute path
 	chomp $basedir;
 	$dir = "$basedir/$dir";
 }
-
-if ($decoderOpt){ $decoder = $decoderOpt; }
 
 
 # Initializations and helper functions
@@ -378,6 +360,22 @@ while (1){
 			else {$joblist = $joblist . "\|" . $jobid; }
 		}
 	}
+	my @dev_outs = ();
+	my @devtest_outs = ();
+	if ($tune_regularizer) {
+		for (my $i = 0; $i < scalar @mapoutputs; $i++) {
+			if ($i % 3 == 1) {
+				push @devtest_outs, $mapoutputs[$i];
+			} else {
+				push @dev_outs, $mapoutputs[$i];
+			}
+		}
+		if (scalar @devtest_outs == 0) {
+			die "Not enough training instances for regularization tuning! Rerun without --tune-regularizer\n";
+		}
+	} else {
+		@dev_outs = @mapoutputs;
+	}
 	if ($run_local) {
 		print STDERR "\nCompleted extraction of training exemplars.\n";
 	} elsif ($use_make) {
@@ -399,7 +397,13 @@ while (1){
 	}
 	my $tol = 0;
 	my $til = 0;
-        print STDERR "MO: @mapoutputs\n";
+	my $dev_test_file = "$dir/splag.$im1/devtest.gz";
+	if ($tune_regularizer) {
+		my $cmd = "cat @devtest_outs | gzip > $dev_test_file";
+		check_bash_call($cmd);
+		die "Can't find file $dev_test_file" unless -f $dev_test_file;
+	}
+        #print STDERR "MO: @mapoutputs\n";
 	for my $mo (@mapoutputs) {
 		#my $olines = get_lines($mo);
 		#my $ilines = get_lines($o2i{$mo});
@@ -407,10 +411,24 @@ while (1){
 	}
 	print STDERR "\nRUNNING CLASSIFIER (REDUCER)\n";
 	print STDERR unchecked_output("date");
-	$cmd="cat @mapoutputs | $REDUCER -w $dir/weights.$im1 > $dir/weights.$iteration";
+	$cmd="cat @dev_outs | $REDUCER -w $dir/weights.$im1 -s $reg";
+	if ($tune_regularizer) {
+		$cmd .= " -T -t $dev_test_file";
+	}
+        $cmd .= " > $dir/weights.$iteration";
 	print STDERR "COMMAND:\n$cmd\n";
 	check_bash_call($cmd);
 	$lastWeightsFile = "$dir/weights.$iteration";
+	if ($tune_regularizer) {
+		open W, "<$lastWeightsFile" or die "Can't read $lastWeightsFile: $!";
+		my $line = <W>;
+		close W;
+		my ($sharp, $label, $nreg) = split /\s|=/, $line;
+		print STDERR "REGULARIZATION STRENGTH ($label) IS $nreg\n";
+		$reg = $nreg;
+		# only tune regularizer on first iteration?
+		$tune_regularizer = 0;
+	}
 	$lastPScore = $score;
 	$iteration++;
 	print STDERR "\n==========\n";
@@ -473,7 +491,6 @@ sub write_config {
 	print $fh "SOURCE (DEV):     $srcFile\n";
 	print $fh "REFS (DEV):       $refFiles\n";
 	print $fh "EVAL METRIC:      $metric\n";
-	print $fh "START ITERATION:  $iteration\n";
 	print $fh "MAX ITERATIONS:   $max_iterations\n";
 	print $fh "DECODE NODES:     $decode_nodes\n";
 	print $fh "HEAD NODE:        $host\n";
@@ -535,30 +552,37 @@ Usage: $executable [options] <ini file>
 		based on certain conventions.  For details, refer to descriptions
 		of the options --decoder, --weights, and --workdir.
 
-Options:
+Required:
+
+	--ref-files <files>
+		Dev set ref files.  This option takes only a single string argument.
+		To use multiple files (including file globbing), this argument should
+		be quoted.
+
+	--source-file <file>
+		Dev set source file.
+
+	--weights <file>
+		Initial weights file (use empty file to start from 0)
+
+General options:
 
 	--local
 		Run the decoder and optimizer locally with a single thread.
 
-	--use-make <I>
-		Use make -j <I> to run the optimizer commands (useful on large
-		shared-memory machines where qsub is unavailable).
-
 	--decode-nodes <I>
 		Number of decoder processes to run in parallel. [default=15]
-
-	--decoder <decoder path>
-		Decoder binary to use.
 
 	--help
 		Print this message and exit.
 
-	--iteration <I>
-		Starting iteration number.  If not specified, defaults to 1.
-
 	--max-iterations <M>
 		Maximum number of iterations to run.  If not specified, defaults
 		to 10.
+
+	--metric <method>
+		Metric to optimize.
+		Example values: IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, Combi
 
 	--pass-suffix <S>
 		If the decoder is doing multi-pass decoding, the pass suffix "2",
@@ -567,21 +591,9 @@ Options:
 	--pmem <N>
 		Amount of physical memory requested for parallel decoding jobs.
 
-	--ref-files <files>
-		Dev set ref files.  This option takes only a single string argument.
-		To use multiple files (including file globbing), this argument should
-		be quoted.
-
-	--metric <method>
-		Metric to optimize.
-		Example values: IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, Combi
-
-	--normalize <feature-name>
-		After each iteration, rescale all feature weights such that feature-
-		name has a weight of 1.0.
-
-	--source-file <file>
-		Dev set source file.
+	--use-make <I>
+		Use make -j <I> to run the optimizer commands (useful on large
+		shared-memory machines where qsub is unavailable).
 
 	--workdir <dir>
 		Directory for intermediate and output files.  If not specified, the
@@ -590,6 +602,14 @@ Options:
 		name of the working directory is inferred from the middle part of
 		the filename.  E.g. an ini file named decoder.foo.ini would have
 		a default working directory name foo.
+
+Regularization options:
+
+	--tune-regularizer
+		Hold out one third of the tuning data and used this to tune the
+		regularization parameter.
+
+	--reg <F>
 
 Help
 }
@@ -604,7 +624,6 @@ sub convert {
   }
   return %dict;
 }
-
 
 
 sub cmdline {

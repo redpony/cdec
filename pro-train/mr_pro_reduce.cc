@@ -16,7 +16,7 @@ using namespace std;
 namespace po = boost::program_options;
 
 // since this is a ranking model, there should be equal numbers of
-// positive and negative examples so the bias should be 0
+// positive and negative examples, so the bias should be 0
 static const double MAX_BIAS = 1e-10;
 
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
@@ -25,8 +25,11 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("weights,w", po::value<string>(), "Weights from previous iteration (used as initialization and interpolation")
         ("interpolation,p",po::value<double>()->default_value(0.9), "Output weights are p*w + (1-p)*w_prev")
         ("memory_buffers,m",po::value<unsigned>()->default_value(200), "Number of memory buffers (LBFGS)")
-        ("sigma_squared,s",po::value<double>()->default_value(1.0), "Sigma squared for Gaussian prior")
-        ("testset,t",po::value<string>(), "Optional held-out test set to tune regularizer")
+        ("sigma_squared,s",po::value<double>()->default_value(0.1), "Sigma squared for Gaussian prior")
+        ("min_reg,r",po::value<double>()->default_value(1e-8), "When tuning (-T) regularization strength, minimum regularization strenght")
+        ("max_reg,R",po::value<double>()->default_value(10.0), "When tuning (-T) regularization strength, maximum regularization strenght")
+        ("testset,t",po::value<string>(), "Optional held-out test set")
+        ("tune_regularizer,T", "Use the held out test set (-t) to tune the regularization strength")
         ("help,h", "Help");
   po::options_description dcmdline_options;
   dcmdline_options.add(opts);
@@ -95,8 +98,6 @@ void GradAdd(const SparseVector<double>& v, const double scale, vector<double>* 
 double TrainingInference(const vector<double>& x,
                          const vector<pair<bool, SparseVector<double> > >& corpus,
                          vector<double>* g = NULL) {
-  if (g) fill(g->begin(), g->end(), 0.0);
-
   double cll = 0;
   for (int i = 0; i < corpus.size(); ++i) {
     const double dotprod = corpus[i].second.dot(x) + x[0]; // x[0] is bias
@@ -130,39 +131,23 @@ double TrainingInference(const vector<double>& x,
   return cll;
 }
 
-int main(int argc, char** argv) {
-  po::variables_map conf;
-  InitCommandLine(argc, argv, &conf);
-  string line;
-  vector<pair<bool, SparseVector<double> > > training, testing;
-  SparseVector<double> old_weights;
-  const double psi = conf["interpolation"].as<double>();
-  if (psi < 0.0 || psi > 1.0) { cerr << "Invalid interpolation weight: " << psi << endl; }
-  if (conf.count("weights")) {
-    Weights w;
-    w.InitFromFile(conf["weights"].as<string>());
-    w.InitSparseVector(&old_weights);
-  }
-  ReadCorpus(&cin, &training);
-  if (conf.count("testset")) {
-    ReadFile rf(conf["testset"].as<string>());
-    ReadCorpus(rf.stream(), &testing);
-  }
-
-  cerr << "Number of features: " << FD::NumFeats() << endl;
-  vector<double> x(FD::NumFeats(), 0.0);  // x[0] is bias
-  for (SparseVector<double>::const_iterator it = old_weights.begin();
-       it != old_weights.end(); ++it)
-    x[it->first] = it->second;
+// return held-out log likelihood
+double LearnParameters(const vector<pair<bool, SparseVector<double> > >& training,
+                       const vector<pair<bool, SparseVector<double> > >& testing,
+                       const double sigsq,
+                       const unsigned memory_buffers,
+                       vector<double>* px) {
+  vector<double>& x = *px;
   vector<double> vg(FD::NumFeats(), 0.0);
   bool converged = false;
-  LBFGSOptimizer opt(FD::NumFeats(), conf["memory_buffers"].as<unsigned>());
+  LBFGSOptimizer opt(FD::NumFeats(), memory_buffers);
+  double tppl = 0.0;
   while(!converged) {
+    fill(vg.begin(), vg.end(), 0.0);
     double cll = TrainingInference(x, training, &vg);
     double ppl = cll / log(2);
     ppl /= training.size();
     ppl = pow(2.0, ppl);
-    double tppl = 0.0;
 
     // evaluate optional held-out test set
     if (testing.size()) {
@@ -173,7 +158,6 @@ int main(int argc, char** argv) {
 
     // handle regularizer
 #if 1
-    const double sigsq = conf["sigma_squared"].as<double>();
     double norm = 0;
     for (int i = 1; i < x.size(); ++i) {
       const double mean_i = 0.0;
@@ -202,10 +186,90 @@ int main(int argc, char** argv) {
       cerr << "  BIAS: " << x[0] << endl;
     }
   }
+  return tppl;
+}
+
+int main(int argc, char** argv) {
+  po::variables_map conf;
+  InitCommandLine(argc, argv, &conf);
+  string line;
+  vector<pair<bool, SparseVector<double> > > training, testing;
+  SparseVector<double> old_weights;
+  const bool tune_regularizer = conf.count("tune_regularizer");
+  if (tune_regularizer && !conf.count("testset")) {
+    cerr << "--tune_regularizer requires --testset to be set\n";
+    return 1;
+  }
+  const double min_reg = conf["min_reg"].as<double>();
+  const double max_reg = conf["max_reg"].as<double>();
+  double sigsq = conf["sigma_squared"].as<double>();
+  assert(sigsq > 0.0);
+  assert(min_reg > 0.0);
+  assert(max_reg > 0.0);
+  assert(max_reg > min_reg);
+  const double psi = conf["interpolation"].as<double>();
+  if (psi < 0.0 || psi > 1.0) { cerr << "Invalid interpolation weight: " << psi << endl; }
+  if (conf.count("weights")) {
+    Weights w;
+    w.InitFromFile(conf["weights"].as<string>());
+    w.InitSparseVector(&old_weights);
+  }
+  ReadCorpus(&cin, &training);
+  if (conf.count("testset")) {
+    ReadFile rf(conf["testset"].as<string>());
+    ReadCorpus(rf.stream(), &testing);
+  }
+  cerr << "Number of features: " << FD::NumFeats() << endl;
+  vector<double> x(FD::NumFeats(), 0.0);  // x[0] is bias
+  for (SparseVector<double>::const_iterator it = old_weights.begin();
+       it != old_weights.end(); ++it)
+    x[it->first] = it->second;
+  double tppl = 0.0;
+  vector<pair<double,double> > sp;
+  vector<double> smoothed;
+  if (tune_regularizer) {
+    sigsq = min_reg;
+    const double steps = 18;
+    double sweep_factor = exp((log(max_reg) - log(min_reg)) / steps);
+    cerr << "SWEEP FACTOR: " << sweep_factor << endl;
+    while(sigsq < max_reg) {
+      tppl = LearnParameters(training, testing, sigsq, conf["memory_buffers"].as<unsigned>(), &x);
+      sp.push_back(make_pair(sigsq, tppl));
+      sigsq *= sweep_factor;
+    }
+    smoothed.resize(sp.size(), 0);
+    smoothed[0] = sp[0].second;
+    smoothed.back() = sp.back().second; 
+    for (int i = 1; i < sp.size()-1; ++i) {
+      double prev = sp[i-1].second;
+      double next = sp[i+1].second;
+      double cur = sp[i].second;
+      smoothed[i] = (prev*0.2) + cur * 0.6 + (0.2*next);
+    }
+    double best_ppl = 9999999;
+    unsigned best_i = 0;
+    for (unsigned i = 0; i < sp.size(); ++i) {
+      if (smoothed[i] < best_ppl) {
+        best_ppl = smoothed[i];
+        best_i = i;
+      }
+    }
+    sigsq = sp[best_i].first;
+    tppl = LearnParameters(training, testing, sigsq, conf["memory_buffers"].as<unsigned>(), &x);
+  }
   Weights w;
   if (conf.count("weights")) {
     for (int i = 1; i < x.size(); ++i)
       x[i] = (x[i] * psi) + old_weights.get(i) * (1.0 - psi);
+  }
+  cout.precision(15);
+  cout << "# sigma^2=" << sigsq << "\theld out perplexity=";
+  if (tppl) { cout << tppl << endl; } else { cout << "N/A\n"; }
+  if (sp.size()) {
+    cout << "# Parameter sweep:\n";
+    for (int i = 0; i < sp.size(); ++i) {
+      cout << "# " << sp[i].first << "\t" << sp[i].second << "\t" << smoothed[i] << endl;
+    }
   }
   w.InitFromVector(x);
   w.WriteToFile("-");

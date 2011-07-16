@@ -430,6 +430,7 @@ float BLEUScore::ComputeScore(vector<float>* precs, float* bp) const {
   float log_bleu = 0;
   if (precs) precs->clear();
   int count = 0;
+  vector<float> total_precs(N());
   for (int i = 0; i < N(); ++i) {
     if (hyp_ngram_counts[i] > 0) {
       float cor_count = correct_ngram_hit_counts[i];
@@ -440,14 +441,21 @@ float BLEUScore::ComputeScore(vector<float>* precs, float* bp) const {
       log_bleu += lprec;
       ++count;
     }
+    total_precs[i] = log_bleu;
   }
-  log_bleu /= static_cast<float>(count);
+  vector<float> bleus(N());
   float lbp = 0.0;
   if (hyp_len < ref_len)
     lbp = (hyp_len - ref_len) / hyp_len;
   log_bleu += lbp;
   if (bp) *bp = exp(lbp);
-  return exp(log_bleu);
+  float wb = 0;
+  for (int i = 0; i < N(); ++i) {
+    bleus[i] = exp(total_precs[i] / (i+1) + lbp);
+    wb += bleus[i] / pow(2.0, 4.0 - i);
+  }
+  //return wb;
+  return bleus.back();
 }
 
 
