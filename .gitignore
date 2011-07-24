@@ -121,3 +121,13 @@ gi/posterior-regularisation/prjava/lib/prjava-20100715.jar
 *.ps
 *.toc
 *~
+*/.deps/
+mira/kbest_mira
+phrasinator/gibbs_train_plm
+training/augment_grammar
+training/mpi_batch_optimize
+training/mpi_em_optimize
+training/test_ngram
+utils/ts
+training/compute_cllh
+
