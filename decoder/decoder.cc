@@ -708,6 +708,10 @@ void Decoder::SetSupplementalGrammar(const std::string& grammar_string) {
   assert(pimpl_->translator->GetDecoderType() == "SCFG");
   static_cast<SCFGTranslator&>(*pimpl_->translator).SetSupplementalGrammar(grammar_string);
 }
+void Decoder::SetSentenceGrammar(const std::string& grammar_string) {
+  assert(pimpl_->translator->GetDecoderType() == "SCFG");
+  static_cast<SCFGTranslator&>(*pimpl_->translator).SetSentenceGrammar(grammar_string);
+}
 
 
 bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {

@@ -1,8 +1,7 @@
 # warning - the subdirectories in the following list should
 # be kept in topologically sorted order. Also, DO NOT introduce
 # cyclic dependencies between these directories!
-SUBDIRS = utils mteval klm/util klm/lm decoder phrasinator training mira vest extools
-
+SUBDIRS = utils mteval klm/util klm/lm decoder phrasinator training mira dtrain vest extools
 #gi/pyp-topics/src gi/clda/src gi/posterior-regularisation/prjava
 
 AUTOMAKE_OPTIONS = foreign

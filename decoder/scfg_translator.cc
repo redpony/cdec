@@ -103,6 +103,20 @@ struct SCFGTranslatorImpl {
     grammars.push_back(sup_grammar_);
   }
 
+  struct NameEquals { NameEquals(const string name) : name_(name) {}
+                      bool operator()(const GrammarPtr& x) const { return x->GetGrammarName() == name_; } const string name_; };
+
+  void SetSentenceGrammar(const std::string& grammar_string) {
+    if (!SILENT) cerr << "Setting sentence grammar" << endl;
+    usingSentenceGrammar = true;
+    istringstream in(grammar_string);
+    TextGrammar* sent_grammar = new TextGrammar(&in);
+    sent_grammar->SetMaxSpan(max_span_limit);
+    sent_grammar->SetGrammarName("__psg");
+    grammars.erase (remove_if(grammars.begin(), grammars.end(), NameEquals("__psg")), grammars.end());
+    grammars.push_back(GrammarPtr(sent_grammar));
+  }
+
   bool Translate(const string& input,
                  SentenceMetadata* smeta,
                  const vector<double>& weights,
@@ -302,6 +316,10 @@ void SCFGTranslator::ProcessMarkupHintsImpl(const map<string, string>& kv) {
 
 void SCFGTranslator::SetSupplementalGrammar(const std::string& grammar) {
   pimpl_->SetSupplementalGrammar(grammar);
+}
+
+void SCFGTranslator::SetSentenceGrammar(const std::string& grammar) {
+  pimpl_->SetSentenceGrammar(grammar);
 }
 
 void SCFGTranslator::SentenceCompleteImpl() {
