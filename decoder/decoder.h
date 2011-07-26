@@ -7,6 +7,20 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#undef CP_TIME
+//#define CP_TIME
+#ifdef CP_TIME
+#include <time.h>
+struct CpTime{
+public:
+	static void Add(clock_t x);
+	static void Sub(clock_t x);
+	static double Get();
+private:
+    static clock_t time_;
+};
+#endif
+
 class SentenceMetadata;
 struct Hypergraph;
 struct DecoderImpl;
