@@ -11,6 +11,10 @@ struct FD {
   static void Freeze() {
     frozen_ = true;
   }
+  static void UnFreeze() {
+    frozen_ = false;
+  }
+
   static inline int NumFeats() {
     return dict_.max() + 1;
   }

@@ -40,14 +40,15 @@ init(int argc, char** argv, boostpo::variables_map* conf)
   boostpo::options_description opts( "Options" );
   opts.add_options()
     ( "decoder-config,c", boostpo::value<string>(), "configuration file for cdec" )
-    ( "kbest,k",          boostpo::value<int>(),    "k for kbest" )
+    ( "kbest,k",          boostpo::value<size_t>(), "k for kbest" )
     ( "ngrams,n",         boostpo::value<int>(),    "n for Ngrams" )
-    ( "filter,f",         boostpo::value<string>(), "filter kbest list" );
+    ( "filter,f",         boostpo::value<string>(), "filter kbest list" )
+    ( "test",                                       "run tests and exit");
   boostpo::options_description cmdline_options;
   cmdline_options.add(opts);
   boostpo::store( parse_command_line(argc, argv, cmdline_options), *conf );
   boostpo::notify( *conf );
-  if ( ! conf->count("decoder-config") ) {
+  if ( ! (conf->count("decoder-config") || conf->count("test")) ) {
     cerr << cmdline_options << endl;
     return false;
   }
@@ -67,7 +68,7 @@ struct KBestList {
 struct KBestGetter : public DecoderObserver
 {
   KBestGetter( const size_t k ) : k_(k) {}
-  size_t k_;
+  const size_t k_;
   KBestList kb;
 
   virtual void
@@ -164,7 +165,7 @@ struct NgramCounts
   map<size_t, size_t> clipped;
   map<size_t, size_t> sum;
 
-  NgramCounts&
+  void
   operator+=( const NgramCounts& rhs )
   {
     assert( N_ == rhs.N_ );
@@ -247,6 +248,7 @@ brevity_penaly( const size_t hyp_len, const size_t ref_len )
 /*
  * bleu
  * as in "BLEU: a Method for Automatic Evaluation of Machine Translation" (Papineni et al. '02)
+ * page TODO
  * 0 if for N one of the counts = 0
  */
 double
@@ -272,6 +274,7 @@ bleu( NgramCounts& counts, const size_t hyp_len, const size_t ref_len,
 /*
  * stupid_bleu
  * as in "ORANGE: a Method for Evaluating Automatic Evaluation Metrics for Machine Translation (Lin & Och '04)
+ * page TODO
  * 0 iff no 1gram match
  */
 double
@@ -298,6 +301,7 @@ stupid_bleu( NgramCounts& counts, const size_t hyp_len, const size_t ref_len,
 /*
  * smooth_bleu
  * as in "An End-to-End Discriminative Approach to Machine Translation" (Liang et al. '06)
+ * page TODO
  * max. 0.9375
  */
 double
@@ -324,6 +328,7 @@ smooth_bleu( NgramCounts& counts, const size_t hyp_len, const size_t ref_len,
 /*
  * approx_bleu
  * as in "Online Large-Margin Training for Statistical Machine Translation" (Watanabe et al. '07)
+ * page TODO
  *
  */
 double
@@ -348,11 +353,16 @@ register_and_convert(const vector<string>& strs, vector<WordID>& ids)
 }
 
 
+/*
+ *
+ *
+ */
 void
 test_ngrams()
 {
   cout << "Testing ngrams..." << endl << endl;
   size_t N = 5;
+  cout << "N = " << N << endl;
   vector<int> a; // hyp
   vector<int> b; // ref
   cout << "a ";
@@ -373,18 +383,28 @@ test_ngrams()
   c += c;
   cout << endl;
   c.print();
+  cout << endl;
 }
 
+
+/*
+ *
+ *
+ */
 double
 approx_equal( double x, double y )
 {
   const double EPSILON = 1E-5;
-  if ( x == 0 ) return fabs(y) <= EPSILON;
-  if ( y == 0 ) return fabs(x) <= EPSILON;
+  if ( x == 0 ) return fabs( y ) <= EPSILON;
+  if ( y == 0 ) return fabs( x ) <= EPSILON;
   return fabs( x - y ) / max( fabs(x), fabs(y) ) <= EPSILON;
 }
 
 
+/*
+ *
+ *
+ */
 #include <boost/assign/std/vector.hpp>
 #include <iomanip>
 void
@@ -423,6 +443,53 @@ test_metrics()
     cout << setw(14) << "smooth bleu = " << smooth << endl;
     cout << setw(14) << "stupid bleu = " << stupid << endl << endl;
   }
+  cout << endl;
+}
+
+/*
+ *
+ *
+ */
+void
+test_SetWeights()
+{
+  cout << "Testing Weights::SetWeight..." << endl << endl;
+  Weights weights;
+  SparseVector<double> lambdas;
+  weights.InitSparseVector( &lambdas );
+  weights.SetWeight( &lambdas, "test", 0 );
+  weights.SetWeight( &lambdas, "test1", 1 );
+  WordID fid = FD::Convert( "test2" );
+  weights.SetWeight( &lambdas, fid, 2 );
+  string fn = "weights-test";
+  cout << "FD::NumFeats() " << FD::NumFeats() << endl;
+  assert( FD::NumFeats() == 4 );
+  weights.WriteToFile( fn, true );
+  cout << endl;
+}
+
+
+/*
+ *
+ *
+ */
+void
+run_tests()
+{
+  cout << endl;
+  test_ngrams();
+  cout << endl;
+  test_metrics();
+  cout << endl;
+  test_SetWeights();
+  exit(0);
+}
+
+
+void
+print_FD()
+{
+  for ( size_t i = 0; i < FD::NumFeats(); i++ ) cout << FD::Convert(i)<< endl;
 }
 
 
@@ -433,94 +500,105 @@ test_metrics()
 int
 main(int argc, char** argv)
 {
-  /*vector<string> v;
-  for (int i = 0; i <= 10; i++) {
-      v.push_back("asdf");
-  }
-  vector<vector<string> > ng = ngrams(v, 5);
-  for (int i = 0; i < ng.size(); i++) {
-    for (int j = 0; j < ng[i].size(); j++) {
-        cout << " " << ng[i][j];
-    }
-    cout << endl;
-  }*/
-
-  test_metrics();
-
-
-  //NgramCounts counts2 = make_ngram_counts( ref_ids, ref_ids, 4);
-  //counts += counts2;
-  //cout << counts.cNipped[1] << endl;
-
-  //size_t c, r; // c length of candidates, r of references
-  //c += cand.size();
-  //r += ref.size();
-  /*NgramMatches ngm; // for approx bleu
-  ngm.sum = 1;
-  ngm.clipped = 1;
-
-  NgramMatches x;
-  x.clipped = 1;
-  x.sum = 1;
-
-  x += ngm;
-  x += x;
-  x+= ngm;
-
-  cout << x.clipped << " " << x.sum << endl;*/
-
-
-  /*register_feature_functions();
-  SetSilent(true);
-
-  boost::program_options::variables_map conf;
+  //SetSilent(true);
+  boostpo::variables_map conf;
   if (!init(argc, argv, &conf)) return 1;
+  if ( conf.count("test") ) run_tests(); 
+  register_feature_functions();
+  size_t k = conf["kbest"].as<size_t>();
   ReadFile ini_rf(conf["decoder-config"].as<string>());
   Decoder decoder(ini_rf.stream());
+  KBestGetter observer(k);
+  
+  // for approx. bleu
+  //NgramCounts global_counts;
+  //size_t global_hyp_len;
+  //size_t global_ref_len;
+
   Weights weights;
   SparseVector<double> lambdas;
   weights.InitSparseVector(&lambdas);
+  vector<double> dense_weights;
 
-  int k = conf["kbest"].as<int>();
+  lambdas.set_value(FD::Convert("logp"), 0);
 
-  KBestGetter observer(k);
-  string in, psg;
+ 
   vector<string> strs;
-  int i = 0;
-  while(getline(cin, in)) {
-    if (!SILENT) cerr << "getting kbest for sentence #" << i << endl;
+  string in, psg;
+  size_t i = 0;
+  while( getline(cin, in) ) {
+    if ( !SILENT ) cerr << endl << endl << "Getting kbest for sentence #" << i << endl;
+    // why? why!?
+    dense_weights.clear();
+    weights.InitFromVector( lambdas );
+    weights.InitVector( &dense_weights );
+    decoder.SetWeights( dense_weights );
+    //cout << "use_shell " << dense_weights[FD::Convert("use_shell")] << endl;
     strs.clear();
-    boost::split(strs, in, boost::is_any_of("\t"));
-    psg = boost::replace_all_copy(strs[2], " __NEXT_RULE__ ", "\n"); psg += "\n";
+    boost::split( strs, in, boost::is_any_of("\t") );
+    psg = boost::replace_all_copy( strs[2], " __NEXT_RULE__ ", "\n" ); psg += "\n";
+    //decoder.SetId(i);
     decoder.SetSentenceGrammar( psg );
     decoder.Decode( strs[0], &observer );
     KBestList* kb = observer.getkb();
-    // FIXME not pretty iterating twice over k
-    for (int i = 0; i < k; i++) {
-      for (int j = 0; j < kb->sents[i].size(); ++j) {
-        cout << TD::Convert(kb->sents[i][j]) << endl;
+    for ( size_t i = 0; i < k; i++ ) {
+      cout << i << " ";
+      for (size_t j = 0; j < kb->sents[i].size(); ++j ) {
+        cout << TD::Convert( kb->sents[i][j] ) << " ";
       }
+      cout << kb->scores[i];
+      cout << endl;
     }
+    lambdas.set_value( FD::Convert("use_shell"), 1 );
+    lambdas.set_value( FD::Convert("use_a"), 1 );
+    //print_FD();
   }
+  
+  weights.WriteToFile( "weights-final", true );
 
-  return 0;*/
+  return 0;
 }
+
+    // next: FMap, ->sofia, ->FMap, -> Weights
+    // learner gets all used features (binary! and dense (logprob is sum of logprobs!))
+    // only for those feats with weight > 0 after learning
+    // see decoder line 548
 
 
 /*
  * TODO
- *  for t =1..T
- *  mapper, reducer (average, handle ngram statistics for approx bleu)
- *    1st streaming
- *  batch, non-batch in the mapper (what sofia gets)
- *  filter yes/no
+ *  iterate over training set, for t=1..T
+ *  mapred impl
+ *   mapper:  main
+ *   reducer: average weights, global NgramCounts for approx. bleu
+ *  1st cut: hadoop streaming?
+ *  batch, non-batch in the mapper (what sofia gets, regenerated Kbest lists)
+ *  filter kbest yes/no
  *  sofia: --eta_type explicit
- *  psg preparation
- *  set ref?
- *  shared LM?
+ *  psg preparation source\tref\tpsg
+ *  set reference for cdec?
+ *  LM
+ *   shared?
+ *   startup?
  *  X reference(s) for *bleu!?
- *  kbest nicer!? shared_ptr
- *  multipartite
+ *  kbest nicer (do not iterate twice)!? -> shared_ptr
+ *  multipartite ranking
  *  weights! global, per sentence from global, featuremap
- * todo const
+ *  const decl...
+ *  sketch: batch/iter options
+ *  weights.cc: why wv_?
+ *  --weights cmd line (for iterations): script to call again/hadoop streaming?
+ *  I do not need to remember features, cdec does
+ *  resocre hg?
+ *  do not use Decoder::Decode!?
+ *  what happens if feature not in FD? 0???
  */
+
+/*
+ * PROBLEMS
+ *  cdec kbest vs 1best (no -k param)
+ *  FD, Weights::wv_ grow too large, see utils/weights.cc; decoder/hg.h; decoder/scfg_translator.cc; utils/fdict.cc!?
+ *  sparse vector instead of vector<double> for weights in Decoder?
+ *  PhraseModel_* features for psg!? (seem to be generated)
+ */
+

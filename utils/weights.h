@@ -15,6 +15,10 @@ class Weights {
   void InitSparseVector(SparseVector<double>* w) const;
   void InitFromVector(const std::vector<double>& w);
   void InitFromVector(const SparseVector<double>& w);
+  void SetWeight(SparseVector<double>* v, const std::string f, const double w);
+  void SetWeight(SparseVector<double>* v, const WordID fid, const double w);
+  std::vector<double>* getw() { return &wv_; }; // probably a hack
+  void sz();
  private:
   std::vector<double> wv_;
 };

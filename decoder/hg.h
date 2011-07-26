@@ -399,6 +399,8 @@ public:
   template <class V>
   void Reweight(const V& weights) {
     for (int i = 0; i < edges_.size(); ++i) {
+      SparseVector<double> v;
+      //v.set_value(FD::Convert("use_shell"), 1000);
       Edge& e = edges_[i];
       e.edge_prob_.logeq(e.feature_values_.dot(weights));
     }
