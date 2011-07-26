@@ -88,3 +88,21 @@ void Weights::InitFromVector(const SparseVector<double>& w) {
   for (int i = 1; i < FD::NumFeats(); ++i)
     wv_[i] = w.value(i);
 }
+
+void Weights::SetWeight(SparseVector<double>* v, const string fname, const double w) {
+  WordID fid = FD::Convert(fname);
+  cout << "fid " << fid << endl;
+  SetWeight(v, fid, w);
+}
+
+void Weights::SetWeight(SparseVector<double>* v, const WordID fid, const double w) {
+  wv_.resize(FD::NumFeats(), 0.0);
+  wv_[fid] = w;
+  //v->set_value(fid, w); 
+}
+
+void Weights::sz()
+{
+  cout << "wv_.size() " << wv_.size() << endl;
+}
+
