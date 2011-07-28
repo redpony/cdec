@@ -1,4 +1,4 @@
 #!/bin/sh
 
-./dtrain -c cdec.ini -k 4 < in.toy
+./dtrain -c data/cdec.ini -k 4 < data/in.blunsom08 #< data/in.toy
 
