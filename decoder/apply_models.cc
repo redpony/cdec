@@ -190,8 +190,12 @@ public:
     if (num_nodes > 100) every = 10;
     assert(in.nodes_[pregoal].out_edges_.size() == 1);
     if (!SILENT) cerr << "    ";
+    int has = 0;
     for (int i = 0; i < in.nodes_.size(); ++i) {
-      if (!SILENT && i % every == 0) cerr << '.';
+      if (!SILENT) {
+        int needs = (50 * i / in.nodes_.size());
+        while (has < needs) { cerr << '.'; ++has; }
+      }
       if (strategy_==NORMAL_CP){
         KBest(i, i == goal_id);
       }
