@@ -2,7 +2,11 @@
 
 
 
-/*
+
+/******************************************************************************
+ * NGRAMS
+ *
+ *
  * make_ngrams
  *
  */
@@ -21,9 +25,6 @@ make_ngrams( vector<WordID>& s, size_t N )
   }
   return ngrams;
 }
-
-
-
 
 
 /*
@@ -50,7 +51,12 @@ make_ngram_counts( vector<WordID> hyp, vector<WordID> ref, size_t N )
 }
 
 
-/*
+
+
+/******************************************************************************
+ * SCORES
+ *
+ *
  * brevity_penaly
  *
  */
@@ -156,7 +162,12 @@ approx_bleu( NgramCounts& counts, const size_t hyp_len, const size_t ref_len,
 }
 
 
-/*
+
+
+/******************************************************************************
+ * UTILS
+ *
+ *
  * register_and_convert
  *
  */
@@ -170,10 +181,38 @@ register_and_convert(const vector<string>& strs, vector<WordID>& ids)
 }
 
 
+/*
+ * approx_equal
+ *
+ */
+double
+approx_equal( double x, double y )
+{
+  const double EPSILON = 1E-5;
+  if ( x == 0 ) return fabs( y ) <= EPSILON;
+  if ( y == 0 ) return fabs( x ) <= EPSILON;
+  return fabs( x - y ) / max( fabs(x), fabs(y) ) <= EPSILON;
+}
 
 
 /*
+ * print_FD
  *
+ */
+void
+print_FD()
+{
+  for ( size_t i = 0; i < FD::NumFeats(); i++ ) cout << FD::Convert(i)<< endl;
+}
+
+
+
+
+/******************************************************************************
+ * TESTS
+ *
+ *
+ * test_ngrams
  *
  */
 void
@@ -207,21 +246,7 @@ test_ngrams()
 
 
 /*
- *
- *
- */
-double
-approx_equal( double x, double y )
-{
-  const double EPSILON = 1E-5;
-  if ( x == 0 ) return fabs( y ) <= EPSILON;
-  if ( y == 0 ) return fabs( x ) <= EPSILON;
-  return fabs( x - y ) / max( fabs(x), fabs(y) ) <= EPSILON;
-}
-
-
-/*
- *
+ * test_metrics
  *
  */
 void
@@ -263,8 +288,9 @@ test_metrics()
   cout << endl;
 }
 
+
 /*
- *
+ * test_SetWeights
  *
  */
 void
@@ -287,7 +313,7 @@ test_SetWeights()
 
 
 /*
- *
+ * run_tests
  *
  */
 void
@@ -300,12 +326,5 @@ run_tests()
   cout << endl;
   test_SetWeights();
   exit(0);
-}
-
-
-void
-print_FD()
-{
-  for ( size_t i = 0; i < FD::NumFeats(); i++ ) cout << FD::Convert(i)<< endl;
 }
 
