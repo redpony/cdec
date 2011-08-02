@@ -1,6 +1,6 @@
-#include "dcommon.h"
-
-
+#include "common.h"
+#include "kbestget.h"
+#include "util.h"
 
 
 /*
@@ -14,10 +14,10 @@ init(int argc, char** argv, po::variables_map* conf)
   bool q;
   po::options_description opts( "Options" );
   opts.add_options()
-    ( "decoder-config,c", po::value<string>(),                      "configuration file for cdec" )
-    ( "weights,w",        po::value<string>(),                      "weights file")
-    ( "ngrams,n",         po::value<int>(&N)->default_value(4),     "N for Ngrams (default 5)" )
-    ( "quiet,q",          po::value<bool>(&q)->default_value(true), "do not output translations" );
+    ( "decoder-config,c", po::value<string>(),                              "configuration file for cdec" )
+    ( "weights,w",        po::value<string>(),                                             "weights file" )
+    ( "ngrams,n",         po::value<int>(&N)->default_value(DTRAIN_DEFAULT_N), "N for Ngrams (default 5)" )
+    ( "quiet,q",          po::value<bool>(&q)->default_value(true),          "do not output translations" );
   po::options_description cmdline_options;
   cmdline_options.add(opts);
   po::store( parse_command_line(argc, argv, cmdline_options), *conf );
@@ -57,17 +57,17 @@ main(int argc, char** argv)
   vector<string> strs, ref_strs;
   vector<WordID> ref_ids;
   string in, psg;
-  size_t sid = 0;
-  double overall = 0.0;
+  size_t sn = 0;
+  double overall  = 0.0;
   double overall1 = 0.0;
   double overall2 = 0.0;
-  cerr << "(a dot equals 100 lines of input)" << endl;
+  cerr << "(A dot equals " << DTRAIN_DOTOUT << " lines of input.)" << endl;
   while( getline(cin, in) ) {
-    if ( (sid+1) % 100 == 0 ) {
+    if ( (sn+1) % DTRAIN_DOTOUT == 0 ) {
         cerr << ".";
-        if ( (sid+1)%1000 == 0 ) cerr << endl;
+        if ( (sn+1) % (20*DTRAIN_DOTOUT) == 0 ) cerr << endl;
     }
-    //if ( sid > 5000 ) break;
+    //if ( sn > 5000 ) break;
     strs.clear();
     boost::split( strs, in, boost::is_any_of("\t") );
     // grammar
@@ -80,25 +80,22 @@ main(int argc, char** argv)
     boost::split( ref_strs, strs[1], boost::is_any_of(" ") );
     register_and_convert( ref_strs, ref_ids );
     // scoring kbest
-    double score = 0.0;
+    double score  = 0.0;
     double score1 = 0.0;
     double score2 = 0.0;
     NgramCounts counts = make_ngram_counts( ref_ids, kb->sents[0], 4 );
-    score = smooth_bleu( counts,
-                         ref_ids.size(),
-                         kb->sents[0].size(), N );
-    score1 = stupid_bleu( counts, ref_ids.size(), kb->sents[0].size(), N) ;
-    score2 = bleu( counts, ref_ids.size(), kb->sents[0].size(), N );
-    //if ( ! quiet )
-    cout << TD::GetString( kb->sents[0] ) << endl;
+    score =  smooth_bleu( counts, ref_ids.size(), kb->sents[0].size(), N );
+    score1 = stupid_bleu( counts, ref_ids.size(), kb->sents[0].size(), N );
+    score2 =        bleu( counts, ref_ids.size(), kb->sents[0].size(), N );
+    if ( ! quiet ) cout << TD::GetString( kb->sents[0] ) << endl;
     overall += score;
     overall1 += score1;
     overall2 += score2;
-    sid += 1;
+    sn += 1;
   }
-  cerr << "Average score (smooth): " << overall/(double)(sid+1) << endl;
-  cerr << "Average score (stupid): " << overall1/(double)(sid+1) << endl;
-  cerr << "Average score (normal): " << overall2/(double)(sid+1) << endl;
+  cerr << "Average score (smooth) : " << overall/(double)(sn+1) << endl;
+  cerr << "Average score (stupid) : " << overall1/(double)(sn+1) << endl;
+  cerr << "Average score (vanilla): " << overall2/(double)(sn+1) << endl;
   cerr << endl;
 
   return 0;
