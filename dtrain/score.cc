@@ -151,6 +151,8 @@ smooth_bleu( NgramCounts& counts, const size_t hyp_len, const size_t ref_len,
 /*
  * approx_bleu
  * as in "Online Large-Margin Training for Statistical Machine Translation" (Watanabe et al. '07)
+ * CHIANG, RESNIK, synt struct features
+ * .9*
  * page TODO
  *
  */
