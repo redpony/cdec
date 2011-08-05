@@ -25,16 +25,17 @@ init(int argc, char** argv, po::variables_map* conf)
     ( "ngrams,n",         po::value<size_t>(&N)->default_value(DTRAIN_DEFAULT_N),      "n for Ngrams" )
     ( "filter,f",         po::value<string>(),                                    "filter kbest list" ) // FIXME
     ( "epochs,t",         po::value<size_t>(&T)->default_value(DTRAIN_DEFAULT_T), "# of iterations T" ) 
+    ( "input,i",          po::value<string>(),                                           "input file" )
 #ifndef DTRAIN_DEBUG
     ;
 #else
-    ( "test",                                  "run tests and exit");
+    ( "test", "run tests and exit");
 #endif
   po::options_description cmdline_options;
   cmdline_options.add(opts);
   po::store( parse_command_line(argc, argv, cmdline_options), *conf );
   po::notify( *conf );
-  if ( ! conf->count("decoder-config") ) { 
+  if ( ! conf->count("decoder-config") || ! conf->count("input") ) { 
     cerr << cmdline_options << endl;
     return false;
   }
@@ -83,15 +84,21 @@ main(int argc, char** argv)
   vector<WordID> ref_ids;
   string in, psg;
   size_t sn = 0;
-  cerr << "(A dot equals " << DTRAIN_DOTOUT << " lines of input.)" << endl;
+  cerr << "(A dot represents " << DTRAIN_DOTOUT << " lines of input.)" << endl;
+
+  string fname = conf["input"].as<string>();
+  ifstream input;
+  input.open( fname.c_str() );
 
   for ( size_t t = 0; t < T; t++ )
   {
+  input.seekg(0);
+  cerr << "Iteration #" << t+1 << " of " << T << "." << endl;
 
-  while( getline(cin, in) ) {
+  while( getline(input, in) ) {
     if ( (sn+1) % DTRAIN_DOTOUT == 0 ) {
         cerr << ".";
-        if ( (sn+1) % (20*DTRAIN_DOTOUT) == 0 ) cerr << endl;
+        if ( (sn+1) % (20*DTRAIN_DOTOUT) == 0 ) cerr << " " << sn+1 << endl;
     }
     //if ( sn > 5000 ) break;
     // weights
@@ -146,7 +153,7 @@ main(int argc, char** argv)
   } // outer loop
 
   cerr << endl;
-  weights.WriteToFile( "data/weights-vanilla", false );
+  weights.WriteToFile( "output/weights-vanilla", true );
 
   return 0;
 }

@@ -61,11 +61,11 @@ main(int argc, char** argv)
   double overall  = 0.0;
   double overall1 = 0.0;
   double overall2 = 0.0;
-  cerr << "(A dot equals " << DTRAIN_DOTOUT << " lines of input.)" << endl;
+  cerr << "(A dot represents " << DTRAIN_DOTOUT << " lines of input.)" << endl;
   while( getline(cin, in) ) {
     if ( (sn+1) % DTRAIN_DOTOUT == 0 ) {
         cerr << ".";
-        if ( (sn+1) % (20*DTRAIN_DOTOUT) == 0 ) cerr << endl;
+        if ( (sn+1) % (20*DTRAIN_DOTOUT) == 0 ) cerr << " " << sn+1 << endl;
     }
     //if ( sn > 5000 ) break;
     strs.clear();
