@@ -4,8 +4,8 @@
 #include <vector>
 #include <string>
 
+#include "ff_factory.h"
 #include "ff.h"
-#include "lm/model.hh"
 
 template <class Model> struct KLanguageModelImpl;
 
@@ -32,6 +32,11 @@ class KLanguageModel : public FeatureFunction {
   int fid_; // conceptually const; mutable only to simplify constructor
   int oov_fid_; // will be zero if extra OOV feature is not configured by decoder
   KLanguageModelImpl<Model>* pimpl_;
+};
+
+struct KLanguageModelFactory : public FactoryBase<FeatureFunction> {
+  FP Create(std::string param) const;
+  std::string usage(bool params,bool verbose) const;
 };
 
 #endif
