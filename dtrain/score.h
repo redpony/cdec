@@ -29,6 +29,7 @@ struct ScorePair
   double GetScore() { return score_; }
 };
 
+
 typedef vector<ScorePair> Scores;
 
 
@@ -53,6 +54,14 @@ struct NgramCounts
       this->clipped[i] += rhs.clipped.find(i)->second;
       this->sum[i] += rhs.sum.find(i)->second;
     }
+  }
+
+  const NgramCounts
+  operator+( const NgramCounts &other ) const
+  {
+    NgramCounts result = *this;
+    result += other;
+    return result;
   }
 
   void

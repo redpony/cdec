@@ -1,6 +1,7 @@
 #ifndef _DTRAIN_KBESTGET_H_
 #define _DTRAIN_KBESTGET_H_
 
+#include "kbest.h"
 
 namespace dtrain
 {
@@ -36,14 +37,15 @@ struct KBestGetter : public DecoderObserver
   KBestList* GetKBest() { return &kb; }
 
   void
-  GetKBest(int sent_id, const Hypergraph& forest)
+  GetKBest(int sid, const Hypergraph& forest)
   {
     kb.scores.clear();
     kb.sents.clear();
     kb.feats.clear();
-    KBest::KBestDerivations<vector<WordID>, ESentenceTraversal> kbest( forest, k_ );
+    // FIXME TODO FIXME TODO
+    KBest::KBestDerivations<vector<WordID>, ESentenceTraversal, KBest::FilterUnique, prob_t, EdgeProb> kbest( forest, k_ );
     for ( size_t i = 0; i < k_; ++i ) {
-      const KBest::KBestDerivations<vector<WordID>, ESentenceTraversal>::Derivation* d =
+      const KBest::KBestDerivations<vector<WordID>, ESentenceTraversal, KBest::FilterUnique, prob_t, EdgeProb>::Derivation* d =
         kbest.LazyKthBest( forest.nodes_.size() - 1, i );
       if (!d) break;
       kb.sents.push_back( d->yield);

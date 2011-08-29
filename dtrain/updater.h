@@ -13,7 +13,7 @@ namespace dtrain
 {
 
 
-class Learner
+class Updater
 {
   public:
     virtual void Init( const vector<SparseVector<double> >& kbest, const Scores& scores,
@@ -22,20 +22,21 @@ class Learner
 };
 
 
-class SofiaLearner : public Learner
+class SofiaUpdater : public Updater
 {
   public:
     void
-    Init( const size_t sid, const vector<SparseVector<double> >& kbest, /*const FIXME*/ Scores& scores,
+    Init( const size_t sid, const vector<SparseVector<double> >& kbest, /*const FIXME operator[]*/ Scores& scores,
           const bool invert_score = false )
     {
       assert( kbest.size() == scores.size() );
       ofstream o;
-      unlink( "/tmp/sofia_ml_training" );
-      o.open( "/tmp/sofia_ml_training", ios::trunc ); // TODO randomize, filename exists
+      char tmp[] = DTRAIN_TMP_DIR"/dtrain-sofia-data-XXXXXX";
+      mkstemp( tmp );
+      tmp_data_fn = tmp;
+      o.open( tmp_data_fn.c_str(), ios::trunc );
       int fid = 0;
       map<int,int>::iterator ff;
-
       double score;
       for ( size_t k = 0; k < kbest.size(); ++k ) {
         map<int,double> m;
@@ -64,15 +65,19 @@ class SofiaLearner : public Learner
     void
     Update(SparseVector<double>& lambdas)
     {
-      string call = "./sofia-ml --training_file /tmp/sofia_ml_training --model_out /tmp/sofia_ml_model --loop_type stochastic --lambda 100 --dimensionality ";
+      char tmp[] = DTRAIN_TMP_DIR"/dtrain-sofia-model-XXXXXX";
+      mkstemp(tmp);
+      tmp_model_fn = tmp;
+      string call = "./sofia-ml --training_file " + tmp_data_fn;
+      call += " --model_out " + tmp_model_fn;
+      call += " --loop_type stochastic --lambda 100 --dimensionality ";
       std::stringstream out;
       out << fmap.size();
       call += out.str();
       call += " &>/dev/null";
       system ( call.c_str() );
       ifstream i;
-      unlink( "/tmp/sofia_ml_model" );
-      i.open( "/tmp/sofia_ml_model", ios::in );
+      i.open( tmp_model_fn.c_str(), ios::in );
       string model;
       getline( i, model );
       vector<string> strs;
@@ -82,9 +87,14 @@ class SofiaLearner : public Learner
         lambdas.set_value(fmap1[j], atof( it->c_str() ) );
         j++;
       }
+      i.close();
+      unlink( tmp_data_fn.c_str() );
+      unlink( tmp_model_fn.c_str() );
     }
 
   private:
+    string tmp_data_fn;
+    string tmp_model_fn;
     map<int,int> fmap;
     map<int,int> fmap1;
 };

@@ -7,6 +7,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "grammar.h"
+
 class SentenceMetadata;
 struct Hypergraph;
 struct DecoderImpl;
@@ -34,7 +36,7 @@ struct Decoder {
   // that will be used on subsequent calls to Decode. rules should be in standard
   // text format. This function does NOT read from a file.
   void SetSupplementalGrammar(const std::string& grammar);
-  void SetSentenceGrammar(const std::string& grammar);
+  void SetSentenceGrammarFromString(const std::string& grammar_str);
  private:
   boost::program_options::variables_map conf;
   boost::shared_ptr<DecoderImpl> pimpl_;
