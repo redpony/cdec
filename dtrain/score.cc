@@ -54,7 +54,7 @@ make_ngram_counts( vector<WordID> hyp, vector<WordID> ref, size_t N )
 
 
 /******************************************************************************
- * SCORES
+ * SCORERS
  *
  *
  * brevity_penaly
