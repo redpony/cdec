@@ -19,8 +19,7 @@
 #include <boost/static_assert.hpp>
 
 #if HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/map.hpp>
 #endif
 
 #include "fdict.h"
