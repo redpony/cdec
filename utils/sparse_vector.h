@@ -1,44 +1,6 @@
 #ifndef _SPARSE_VECTOR_H_
 #define _SPARSE_VECTOR_H_
 
-#if 0
-
-#if HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP
-  friend class boost::serialization::access;
-  template<class Archive>
-  void save(Archive & ar, const unsigned int version) const {
-    (void) version;
-    int eff_size = values_.size();
-    const_iterator it = this->begin();
-    if (values_.find(0) != values_.end()) { ++it; --eff_size; }
-    ar & eff_size;
-    while (it != this->end()) {
-      const std::pair<const std::string&, const T&> wire_pair(FD::Convert(it->first), it->second);
-      ar & wire_pair;
-      ++it;
-    }
-  }
-  template<class Archive>
-  void load(Archive & ar, const unsigned int version) {
-    (void) version;
-    this->clear();
-    int sz; ar & sz;
-    for (int i = 0; i < sz; ++i) {
-      std::pair<std::string, T> wire_pair;
-      ar & wire_pair;
-      this->set_value(FD::Convert(wire_pair.first), wire_pair.second);
-    }
-  }
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
-#endif
-};
-
-#if HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP
-BOOST_CLASS_TRACKING(SparseVector<double>,track_never)
-#endif
-
-#endif /// FIX
-
 #include "fast_sparse_vector.h"
 #define SparseVector FastSparseVector
 
