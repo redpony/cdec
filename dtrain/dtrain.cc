@@ -25,18 +25,20 @@ init(int argc, char** argv, po::variables_map* cfg)
 {
   po::options_description conff( "Configuration File Options" );
   size_t k, N, T, stop;
-  string s;
+  string s, f;
   conff.add_options()
     ( "decoder_config", po::value<string>(),                            "configuration file for cdec" )
     ( "kbest",          po::value<size_t>(&k)->default_value(DTRAIN_DEFAULT_K),         "k for kbest" )
-    ( "ngrams",         po::value<size_t>(&N)->default_value(DTRAIN_DEFAULT_N),        "n for Ngrams" )
-    ( "filter",         po::value<string>(),                                      "filter kbest list" ) // FIXME
+    ( "ngrams",         po::value<size_t>(&N)->default_value(DTRAIN_DEFAULT_N),        "N for Ngrams" )
+    ( "filter",         po::value<string>(&f)->default_value("unique"),           "filter kbest list" )
     ( "epochs",         po::value<size_t>(&T)->default_value(DTRAIN_DEFAULT_T),   "# of iterations T" ) 
     ( "input",          po::value<string>(),                                             "input file" )
     ( "scorer",         po::value<string>(&s)->default_value(DTRAIN_DEFAULT_SCORER), "scoring metric" )
     ( "output",         po::value<string>(),                                    "output weights file" )
     ( "stop_after",     po::value<size_t>(&stop)->default_value(0),    "stop after X input sentences" )
-    ( "weights_file",   po::value<string>(),       "input weights file (e.g. from previous iteration" );
+    ( "weights_file",   po::value<string>(),      "input weights file (e.g. from previous iteration)" )
+    ( "wprint",         po::value<string>(),                     "weights to print on each iteration" )
+    ( "noup",           po::value<bool>()->zero_tokens(),                     "do not update weights" );
 
   po::options_description clo("Command Line Options");
   clo.add_options()
@@ -64,6 +66,14 @@ init(int argc, char** argv, po::variables_map* cfg)
   if ( !cfg->count("decoder_config") || !cfg->count("input") ) { 
     cerr << cmdline_options << endl;
     return false;
+  }
+  if ( cfg->count("noup") && cfg->count("decode") ) {
+    cerr << "You can't use 'noup' and 'decode' at once." << endl;
+    return false;
+  }
+  if ( cfg->count("filter") && (*cfg)["filter"].as<string>() != "unique"
+       && (*cfg)["filter"].as<string>() != "no" ) {
+    cerr << "Wrong 'filter' type: '" << (*cfg)["filter"].as<string>() << "'." << endl;
   }
   #ifdef DTRAIN_DEBUG       
   if ( !cfg->count("test") ) {
@@ -98,20 +108,29 @@ main(int argc, char** argv)
   if ( cfg.count("quiet") ) quiet = true;
   bool verbose = false;  
   if ( cfg.count("verbose") ) verbose = true;
+  bool noup = false;
+  if ( cfg.count("noup") ) noup = true;
   const size_t k = cfg["kbest"].as<size_t>();
   const size_t N = cfg["ngrams"].as<size_t>(); 
   const size_t T = cfg["epochs"].as<size_t>();
   const size_t stop_after = cfg["stop_after"].as<size_t>();
+  const string filter_type = cfg["filter"].as<string>();
   if ( !quiet ) {
     cout << endl << "dtrain" << endl << "Parameters:" << endl;
-    cout << setw(16) << "k " << k << endl;
-    cout << setw(16) << "N " << N << endl;
-    cout << setw(16) << "T " << T << endl;
+    cout << setw(25) << "k " << k << endl;
+    cout << setw(25) << "N " << N << endl;
+    cout << setw(25) << "T " << T << endl;
     if ( cfg.count("stop-after") )
-      cout << setw(16) << "stop_after " << stop_after << endl;
+      cout << setw(25) << "stop_after " << stop_after << endl;
     if ( cfg.count("weights") )
-      cout << setw(16) << "weights " << cfg["weights"].as<string>() << endl;
-    cout << setw(16) << "input " << "'" << cfg["input"].as<string>() << "'" << endl;
+      cout << setw(25) << "weights " << cfg["weights"].as<string>() << endl;
+    cout << setw(25) << "input " << "'" << cfg["input"].as<string>() << "'" << endl;
+    cout << setw(25) << "filter " << "'" << filter_type << "'" << endl;
+  }
+
+  vector<string> wprint;
+  if ( cfg.count("wprint") ) {
+    boost::split( wprint, cfg["wprint"].as<string>(), boost::is_any_of(" ") );
   }
 
   // setup decoder, observer
@@ -119,9 +138,9 @@ main(int argc, char** argv)
   SetSilent(true);
   ReadFile ini_rf( cfg["decoder_config"].as<string>() );
   if ( !quiet )
-    cout << setw(16) << "cdec cfg " << "'" << cfg["decoder_config"].as<string>() << "'" << endl;
-  Decoder decoder(ini_rf.stream());
-  KBestGetter observer( k );
+    cout << setw(25) << "cdec cfg " << "'" << cfg["decoder_config"].as<string>() << "'" << endl;
+  Decoder decoder( ini_rf.stream() );
+  KBestGetter observer( k, filter_type );
 
   // scoring metric/scorer
   string scorer_str = cfg["scorer"].as<string>();
@@ -144,13 +163,13 @@ main(int argc, char** argv)
   size_t global_ref_len = 0;      // sum reference lengths
   // this is all BLEU implmentations
   vector<float> bleu_weights; // we leave this empty -> 1/N; TODO? 
-  if ( !quiet ) cout << setw(16) << "scorer '" << scorer_str << "'" << endl << endl;
+  if ( !quiet ) cout << setw(26) << "scorer '" << scorer_str << "'" << endl << endl;
 
   // init weights
   Weights weights;
   if ( cfg.count("weights") ) weights.InitFromFile( cfg["weights"].as<string>() );
   SparseVector<double> lambdas;
-  weights.InitSparseVector(&lambdas);
+  weights.InitSparseVector( &lambdas );
   vector<double> dense_weights;
 
   // input
@@ -203,12 +222,14 @@ main(int argc, char** argv)
 
   // reset average scores
   acc_1best_score = acc_1best_model = 0.;
-
-  sid = 0;                   // reset sentence counter
+  
+  // reset sentence counter
+  sid = 0;
   
   if ( !quiet ) cout << "Iteration #" << t+1 << " of " << T << "." << endl;
   
-  while( true ) {
+  while( true )
+  {
 
     // get input from stdin or file
     in.clear();
@@ -262,26 +283,32 @@ main(int argc, char** argv)
         // handling input
         in_split.clear();
         boost::split( in_split, in, boost::is_any_of("\t") );
+        // in_split[0] is id
         // getting reference
         ref_tok.clear(); ref_ids.clear();
-        boost::split( ref_tok, in_split[1], boost::is_any_of(" ") );
+        boost::split( ref_tok, in_split[2], boost::is_any_of(" ") );
         register_and_convert( ref_tok, ref_ids );
         ref_ids_buf.push_back( ref_ids );
         // process and set grammar
-        grammar_buf << in_split[2] << endl;
-        grammar_str = boost::replace_all_copy( in_split[2], " __NEXT_RULE__ ", "\n" );
-        grammar_str += "\n";
+        //grammar_buf << in_split[3] << endl;
+        grammar_str = boost::replace_all_copy( in_split[3], " __NEXT__RULE__ ", "\n" ) + "\n";
+        grammar_buf << grammar_str << DTRAIN_GRAMMAR_DELIM << endl;
         decoder.SetSentenceGrammarFromString( grammar_str );
         // decode, kbest
-        src_str_buf.push_back( in_split[0] );
-        decoder.Decode( in_split[0], &observer );
+        src_str_buf.push_back( in_split[1] );
+        decoder.Decode( in_split[1], &observer );
         break;
       default:
         // get buffered grammar
-        string g;
-        getline(grammar_buf_in, g);
-        grammar_str = boost::replace_all_copy( g, " __NEXT_RULE__ ", "\n" );
-        grammar_str += "\n";
+        grammar_str.clear();
+        int i = 1;
+        while ( true ) {
+          string g;  
+          getline( grammar_buf_in, g );
+          if ( g == DTRAIN_GRAMMAR_DELIM ) break;
+          grammar_str += g+"\n";
+          i += 1;
+        }
         decoder.SetSentenceGrammarFromString( grammar_str );
         // decode, kbest
         decoder.Decode( src_str_buf[sid], &observer );
@@ -308,9 +335,9 @@ main(int argc, char** argv)
             cand_len = kb->sents[i].size();
         }
         NgramCounts counts_tmp = global_counts + counts;
-        score = scorer( counts_tmp,
-                        global_ref_len,
-                        global_hyp_len + cand_len, N, bleu_weights );
+        score = 0.9 * scorer( counts_tmp,
+                              global_ref_len,
+                              global_hyp_len + cand_len, N, bleu_weights );
       } else {
         // other scorers
         cand_len = kb->sents[i].size();
@@ -332,15 +359,17 @@ main(int argc, char** argv)
         cout << "k=" << i+1 << " '" << TD::GetString( ref_ids ) << "'[ref] vs '";
         cout << _prec5 << _nopos << TD::GetString( kb->sents[i] ) << "'[hyp]";
         cout << " [SCORE=" << score << ",model="<< kb->scores[i] << "]" << endl;
-        //cout << kb->feats[i] << endl; this is maybe too verbose
+        //cout << kb->feats[i] << endl; // this is maybe too verbose
       }
     } // Nbest loop
     if ( verbose ) cout << endl;
 
-    // update weights; FIXME others
-    SofiaUpdater updater;
-    updater.Init( sid, kb->feats, scores );
-    updater.Update( lambdas );
+    // update weights; TODO other updaters
+    if ( !noup ) {
+      SofiaUpdater updater;
+      updater.Init( sid, kb->feats, scores );
+      updater.Update( lambdas );
+    }
 
     ++sid;
 
@@ -359,12 +388,15 @@ main(int argc, char** argv)
     avg_1best_score_diff = avg_1best_score;
     avg_1best_model_diff = avg_1best_model;
   }
-  cout << _prec5 << _nopos << "(sanity weights Glue=" << dense_weights[FD::Convert( "Glue" )];
-  cout << " LexEF=" << dense_weights[FD::Convert( "LexEF" )];
-  cout << " LexFE=" << dense_weights[FD::Convert( "LexFE" )] << ")" << endl;
-  cout << "     avg score: " << avg_1best_score;
+  cout << _prec5 << _pos << "WEIGHTS" << endl;
+  for (vector<string>::iterator it = wprint.begin(); it != wprint.end(); it++) {
+    cout << setw(16) << *it << " = " << dense_weights[FD::Convert( *it )] << endl;
+  }
+
+  cout << "        ---" << endl;
+  cout << _nopos << "      avg score: " << avg_1best_score;
   cout << _pos << " (" << avg_1best_score_diff << ")" << endl;
-  cout << _nopos << "avg modelscore: " << avg_1best_model;
+  cout << _nopos << "avg model score: " << avg_1best_model;
   cout << _pos << " (" << avg_1best_model_diff << ")" << endl;
   vector<double> remember_scores;
   remember_scores.push_back( avg_1best_score );
@@ -390,18 +422,27 @@ main(int argc, char** argv)
   
   if ( t+1 != T ) cout << endl;
 
+  if ( noup ) break;
+
   } // outer loop
 
-  unlink( grammar_buf_tmp_fn );
-  if ( !quiet ) cout << endl << "writing weights file '" << cfg["output"].as<string>() << "' ...";
-  weights.WriteToFile( cfg["output"].as<string>(), true );
-  if ( !quiet ) cout << "done" << endl;
+  //unlink( grammar_buf_tmp_fn );
+  if ( !noup ) {
+    if ( !quiet ) cout << endl << "writing weights file '" << cfg["output"].as<string>() << "' ...";
+    weights.WriteToFile( cfg["output"].as<string>(), true );
+    if ( !quiet ) cout << "done" << endl;
+  }
   
   if ( !quiet ) {
     cout << _prec5 << _nopos << endl << "---" << endl << "Best iteration: ";
     cout << best_t+1 << " [SCORE '" << scorer_str << "'=" << max_score << "]." << endl;
     cout << _prec2 << "This took " << overall_time/60. << " min." << endl;
   }
+
+  // don't do this with many features...
+  /*for ( size_t i = 0; i < FD::NumFeats(); i++ ) {
+      cout << FD::Convert(i) << " " << dense_weights[i] << endl;
+  }*/
 
   return 0;
 }

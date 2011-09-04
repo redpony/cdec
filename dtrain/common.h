@@ -31,6 +31,7 @@
 #define DTRAIN_DEFAULT_SCORER "stupid_bleu" // scorer
 #define DTRAIN_DOTS 100                     // when to display a '.'
 #define DTRAIN_TMP_DIR "/tmp"               // put this on a SSD?
+#define DTRAIN_GRAMMAR_DELIM "########EOS########"
 
 
 using namespace std;

@@ -68,9 +68,10 @@ class SofiaUpdater : public Updater
       char tmp[] = DTRAIN_TMP_DIR"/dtrain-sofia-model-XXXXXX";
       mkstemp(tmp);
       tmp_model_fn = tmp;
-      string call = "./sofia-ml --training_file " + tmp_data_fn;
+      //--random_seed 123456789010
+      string call = "./sofia-ml  --training_file " + tmp_data_fn;
       call += " --model_out " + tmp_model_fn;
-      call += " --loop_type stochastic --lambda 100 --dimensionality ";
+      call += " --loop_type rank --lambda 100 --eta_type constant --dimensionality ";
       std::stringstream out;
       out << fmap.size();
       call += out.str();
