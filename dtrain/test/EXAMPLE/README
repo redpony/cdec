@@ -1,0 +1,5 @@
+run with (from cdec/dtrain)
+./dtrain -c test/EXAMPLE/dtrain.ini
+(dowload http://hadoop.cl.uni-heidelberg.de/mtm/dtrain.nc-1k.gz and ungzip into test/EXAMPLE)
+Note: sofia-ml binary needs to be in cdec/dtrain/
+
