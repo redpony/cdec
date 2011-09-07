@@ -18,22 +18,6 @@ namespace dtrain
 
 
 /*
- * ScorePair
- *
- */
-struct ScorePair
-{
-  ScorePair(double modelscore, double score) : modelscore_(modelscore), score_(score) {} 
-  double modelscore_, score_;
-  double GetModelScore() { return modelscore_; }
-  double GetScore() { return score_; }
-};
-
-
-typedef vector<ScorePair> Scores;
-
-
-/*
  * NgramCounts
  *
  */

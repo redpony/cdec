@@ -1,7 +1,7 @@
 #include "common.h"
 #include "kbestget.h"
-#include "updater.h"
 #include "util.h"
+#include "sample.h"
 
 // boost compression
 #include <boost/iostreams/device/file.hpp> 
@@ -85,18 +85,21 @@ init(int argc, char** argv, po::variables_map* cfg)
 }
 
 
+// output formatting
 ostream& _nopos( ostream& out ) { return out << resetiosflags( ios::showpos ); }
 ostream& _pos( ostream& out ) { return out << setiosflags( ios::showpos ); }
 ostream& _prec2( ostream& out ) { return out << setprecision(2); }
 ostream& _prec5( ostream& out ) { return out << setprecision(5); }
 
 
+
+
 /*
- * main
+ * dtrain
  *
  */
 int
-main(int argc, char** argv)
+main( int argc, char** argv )
 {
   // handle most parameters
   po::variables_map cfg;
@@ -202,10 +205,13 @@ main(int argc, char** argv)
   bool next = false, stop = false;
   double score = 0.;
   size_t cand_len = 0;
-  Scores scores;
   double overall_time = 0.;
 
   cout << setprecision( 5 );
+
+  // for the perceptron
+  double eta = 0.5; // TODO as parameter
+  lambdas.add_value( FD::Convert("__bias"), 0 );
 
 
   for ( size_t t = 0; t < T; t++ ) // T epochs
@@ -278,12 +284,15 @@ main(int argc, char** argv)
     weights.InitVector( &dense_weights );
     decoder.SetWeights( dense_weights );
 
+    srand ( time(NULL) );
+
     switch ( t ) {
       case 0:
         // handling input
         in_split.clear();
         boost::split( in_split, in, boost::is_any_of("\t") );
         // in_split[0] is id
+        //cout << in_split[0] << endl;
         // getting reference
         ref_tok.clear(); ref_ids.clear();
         boost::split( ref_tok, in_split[2], boost::is_any_of(" ") );
@@ -291,7 +300,7 @@ main(int argc, char** argv)
         ref_ids_buf.push_back( ref_ids );
         // process and set grammar
         //grammar_buf << in_split[3] << endl;
-        grammar_str = boost::replace_all_copy( in_split[3], " __NEXT__RULE__ ", "\n" ) + "\n";
+        grammar_str = boost::replace_all_copy( in_split[3], " __NEXT__RULE__ ", "\n" ) + "\n"; // FIXME copy, __
         grammar_buf << grammar_str << DTRAIN_GRAMMAR_DELIM << endl;
         decoder.SetSentenceGrammarFromString( grammar_str );
         // decode, kbest
@@ -316,14 +325,16 @@ main(int argc, char** argv)
     }
 
     // get kbest list
-    KBestList* kb = observer.GetKBest();
+    KBestList* kb;
+    //if ( ) { // TODO get from forest
+      kb = observer.GetKBest();
+    //}
 
     // scoring kbest
-    scores.clear();
     if ( t > 0 ) ref_ids = ref_ids_buf[sid];
-    for ( size_t i = 0; i < kb->sents.size(); i++ ) {
+    for ( size_t i = 0; i < kb->GetSize(); i++ ) {
       NgramCounts counts = make_ngram_counts( ref_ids, kb->sents[i], N );
-      // for approx bleu
+      // this is for approx bleu
       if ( scorer_str == "approx_bleu" ) {
         if ( i == 0 ) { // 'context of 1best translations'
           global_counts  += counts;
@@ -346,29 +357,54 @@ main(int argc, char** argv)
                         kb->sents[i].size(), N, bleu_weights );
       }
 
+      kb->scores.push_back( score );
+
       if ( i == 0 ) {
         acc_1best_score += score;
-        acc_1best_model += kb->scores[i];
+        acc_1best_model += kb->model_scores[i];
       }
-
-      // scorer score and model score
-      ScorePair sp( kb->scores[i], score );
-      scores.push_back( sp );
 
       if ( verbose ) {
-        cout << "k=" << i+1 << " '" << TD::GetString( ref_ids ) << "'[ref] vs '";
-        cout << _prec5 << _nopos << TD::GetString( kb->sents[i] ) << "'[hyp]";
-        cout << " [SCORE=" << score << ",model="<< kb->scores[i] << "]" << endl;
-        //cout << kb->feats[i] << endl; // this is maybe too verbose
+        if ( i == 0 ) cout << "'" << TD::GetString( ref_ids ) << "' [ref]" << endl;
+        cout << _prec5 << _nopos << "[hyp " << i << "] " << "'" << TD::GetString( kb->sents[i] ) << "'";
+        cout << " [SCORE=" << score << ",model="<< kb->model_scores[i] << "]" << endl;
+        cout << kb->feats[i] << endl; // this is maybe too verbose
       }
     } // Nbest loop
+
     if ( verbose ) cout << endl;
 
-    // update weights; TODO other updaters
+
+    // UPDATE WEIGHTS
     if ( !noup ) {
-      SofiaUpdater updater;
-      updater.Init( sid, kb->feats, scores );
-      updater.Update( lambdas );
+
+      TrainingInstances pairs;
+
+      sample_all(kb, pairs);
+            
+      for ( TrainingInstances::iterator ti = pairs.begin();
+            ti != pairs.end(); ti++ ) {
+        // perceptron
+        SparseVector<double> dv;
+        if ( ti->type == -1 ) {
+          dv = ti->second - ti->first;
+        } else {
+          dv = ti->first - ti->second;
+        }
+        dv.add_value(FD::Convert("__bias"), -1);
+        lambdas += dv * eta;
+
+        /*if ( verbose ) {
+          cout << "{{ f(i) > f(j) but g(i) < g(j), so update" << endl;
+          cout << " i  " << TD::GetString(kb->sents[ii]) << endl;
+          cout << "    " << kb->feats[ii] << endl;
+          cout << " j  " << TD::GetString(kb->sents[jj]) << endl;
+          cout << "    " << kb->feats[jj] << endl; 
+          cout << " dv " << dv << endl;
+          cout << "}}" << endl;
+        }*/
+      }
+
     }
 
     ++sid;
@@ -426,7 +462,7 @@ main(int argc, char** argv)
 
   } // outer loop
 
-  //unlink( grammar_buf_tmp_fn );
+  unlink( grammar_buf_tmp_fn );
   if ( !noup ) {
     if ( !quiet ) cout << endl << "writing weights file '" << cfg["output"].as<string>() << "' ...";
     weights.WriteToFile( cfg["output"].as<string>(), true );
@@ -438,11 +474,6 @@ main(int argc, char** argv)
     cout << best_t+1 << " [SCORE '" << scorer_str << "'=" << max_score << "]." << endl;
     cout << _prec2 << "This took " << overall_time/60. << " min." << endl;
   }
-
-  // don't do this with many features...
-  /*for ( size_t i = 0; i < FD::NumFeats(); i++ ) {
-      cout << FD::Convert(i) << " " << dense_weights[i] << endl;
-  }*/
 
   return 0;
 }
