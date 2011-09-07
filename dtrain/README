@@ -1,7 +1,7 @@
 NOTES
  learner gets all used features (binary! and dense (logprob is sum of logprobs!))
  weights: see decoder/decoder.cc line 548
- 40k sents, k=100 = ~400M mem, 1 iteration 45min
+ (40k sents, k=100 = ~400M mem, 1 iteration 45min)?
  utils/weights.cc: why wv_?
  FD, Weights::wv_ grow too large, see utils/weights.cc;
      decoder/hg.h; decoder/scfg_translator.cc; utils/fdict.cc
@@ -15,25 +15,26 @@ TODO
  GENERATED data? (multi-task, ability to learn, perfect translation in nbest, at first all modelscore 1)
  CACHING (ngrams for scoring)
  hadoop PIPES imlementation
- SHARED LM?
+ SHARED LM (kenlm actually does this!)?
  ITERATION variants
   once -> average
   shuffle resulting weights
  weights AVERAGING in reducer (global Ngram counts)
  BATCH implementation (no update after each Kbest list)
- SOFIA --eta_type explicit
  set REFERENCE for cdec (rescoring)?
  MORE THAN ONE reference for BLEU?
  kbest NICER (do not iterate twice)!? -> shared_ptr?
  DO NOT USE Decoder::Decode (input caching as WordID)!?
   sparse vector instead of vector<double> for weights in Decoder(::SetWeights)?
  reactivate DTEST and tests
- non deterministic, high variance, RANDOWM RESTARTS
+ non deterministic, high variance, RANDOM RESTARTS
  use separate TEST SET
 
 KNOWN BUGS PROBLEMS
- does probably OVERFIT
- cdec kbest vs 1best (no -k param) fishy!
+ cdec kbest vs 1best (no -k param), rescoring? => ok(?)
+ no sparse vector in decoder => ok
+ ? ok
  sh: error while loading shared libraries: libreadline.so.6: cannot open shared object file: Error 24
- PhraseModel_* features (0..99 seem to be generated, default?)
+ PhraseModel_* features (0..99 seem to be generated, why 99?)
+ flex scanner jams on malicious input, we could skip that
 

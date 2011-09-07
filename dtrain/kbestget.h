@@ -14,7 +14,9 @@ namespace dtrain
 struct KBestList {
   vector<SparseVector<double> > feats;
   vector<vector<WordID> > sents;
+  vector<double> model_scores;
   vector<double> scores;
+  size_t GetSize() { return sents.size(); }
 };
 
 
@@ -52,9 +54,10 @@ struct KBestGetter : public DecoderObserver
   void
   KBestUnique( const Hypergraph& forest )
   {
-    kb.scores.clear();
     kb.sents.clear();
     kb.feats.clear();
+    kb.model_scores.clear();
+    kb.scores.clear();
     KBest::KBestDerivations<vector<WordID>, ESentenceTraversal, KBest::FilterUnique, prob_t, EdgeProb> kbest( forest, k_ );
     for ( size_t i = 0; i < k_; ++i ) {
       const KBest::KBestDerivations<vector<WordID>, ESentenceTraversal, KBest::FilterUnique, prob_t, EdgeProb>::Derivation* d =
@@ -62,16 +65,17 @@ struct KBestGetter : public DecoderObserver
       if (!d) break;
       kb.sents.push_back( d->yield);
       kb.feats.push_back( d->feature_values );
-      kb.scores.push_back( d->score );
+      kb.model_scores.push_back( d->score );
     }
   }
 
   void
   KBestNoFilter( const Hypergraph& forest )
   {
-    kb.scores.clear();
     kb.sents.clear();
     kb.feats.clear();
+    kb.model_scores.clear();
+    kb.scores.clear();
     KBest::KBestDerivations<vector<WordID>, ESentenceTraversal> kbest( forest, k_ );
     for ( size_t i = 0; i < k_; ++i ) {
       const KBest::KBestDerivations<vector<WordID>, ESentenceTraversal>::Derivation* d =
@@ -79,7 +83,7 @@ struct KBestGetter : public DecoderObserver
       if (!d) break;
       kb.sents.push_back( d->yield);
       kb.feats.push_back( d->feature_values );
-      kb.scores.push_back( d->score );
+      kb.model_scores.push_back( d->score );
     }
   }
 };
