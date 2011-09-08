@@ -1,7 +1,7 @@
 # TODO I'm sure I can leave something out.
 bin_PROGRAMS = dtrain dtest
 
-dtrain_SOURCES = dtrain.cc score.cc tests.cc util.cc
+dtrain_SOURCES = dtrain.cc score.cc tests.cc util.cc sample_hg.cc
 dtrain_LDADD   = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz -lboost_filesystem -lboost_iostreams
 
 dtest_SOURCES = dtest.cc score.cc util.cc
