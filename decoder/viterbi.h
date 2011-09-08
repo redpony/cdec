@@ -25,7 +25,7 @@ typename WeightFunction::Weight Viterbi(const Hypergraph& hg,
   typedef typename WeightFunction::Weight WeightType;
   const int num_nodes = hg.nodes_.size();
   std::vector<T> vit_result(num_nodes);
-  std::vector<WeightType> vit_weight(num_nodes, WeightType::Zero());
+  std::vector<WeightType> vit_weight(num_nodes, WeightType());
 
   for (int i = 0; i < num_nodes; ++i) {
     const Hypergraph::Node& cur_node = hg.nodes_[i];

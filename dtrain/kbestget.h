@@ -1,7 +1,9 @@
 #ifndef _DTRAIN_KBESTGET_H_
 #define _DTRAIN_KBESTGET_H_
 
+
 #include "kbest.h"
+
 
 namespace dtrain
 {
@@ -65,7 +67,7 @@ struct KBestGetter : public DecoderObserver
       if (!d) break;
       kb.sents.push_back( d->yield);
       kb.feats.push_back( d->feature_values );
-      kb.model_scores.push_back( d->score );
+      kb.model_scores.push_back( log(d->score) );
     }
   }
 
@@ -83,7 +85,7 @@ struct KBestGetter : public DecoderObserver
       if (!d) break;
       kb.sents.push_back( d->yield);
       kb.feats.push_back( d->feature_values );
-      kb.model_scores.push_back( d->score );
+      kb.model_scores.push_back( log(d->score) );
     }
   }
 };
