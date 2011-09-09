@@ -16,7 +16,12 @@
 namespace lm {
 namespace ngram {
 
-typedef enum {HASH_PROBING=0, HASH_SORTED=1, TRIE_SORTED=2, QUANT_TRIE_SORTED=3} ModelType;
+/* Not the best numbering system, but it grew this way for historical reasons
+ * and I want to preserve existing binary files. */
+typedef enum {HASH_PROBING=0, HASH_SORTED=1, TRIE_SORTED=2, QUANT_TRIE_SORTED=3, ARRAY_TRIE_SORTED=4, QUANT_ARRAY_TRIE_SORTED=5} ModelType;
+
+const static ModelType kQuantAdd = static_cast<ModelType>(QUANT_TRIE_SORTED - TRIE_SORTED);
+const static ModelType kArrayAdd = static_cast<ModelType>(ARRAY_TRIE_SORTED - TRIE_SORTED);
 
 /*Inspect a file to determine if it is a binary lm.  If not, return false.  
  * If so, return true and set recognized to the type.  This is the only API in
@@ -55,7 +60,7 @@ void AdvanceOrThrow(int fd, off_t off);
 // Create just enough of a binary file to write vocabulary to it.  
 uint8_t *SetupJustVocab(const Config &config, uint8_t order, std::size_t memory_size, Backing &backing);
 // Grow the binary file for the search data structure and set backing.search, returning the memory address where the search data structure should begin.  
-uint8_t *GrowForSearch(const Config &config, std::size_t memory_size, Backing &backing);
+uint8_t *GrowForSearch(const Config &config, std::size_t vocab_pad, std::size_t memory_size, Backing &backing);
 
 // Write header to binary file.  This is done last to prevent incomplete files
 // from loading.   

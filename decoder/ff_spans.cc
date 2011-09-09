@@ -13,6 +13,17 @@
 
 using namespace std;
 
+namespace {
+  string Escape(const string& x) {
+    string y = x;
+    for (int i = 0; i < y.size(); ++i) {
+      if (y[i] == '=') y[i]='_';
+      if (y[i] == ';') y[i]='_';
+    }
+    return y;
+  }
+}
+
 // log transform to make long spans cluster together
 // but preserve differences
 int SpanSizeTransform(unsigned span_size) {
@@ -140,19 +151,19 @@ void SpanFeatures::PrepareForInput(const SentenceMetadata& smeta) {
     word = MapIfNecessary(word);
     ostringstream sfid;
     sfid << "ES:" << TD::Convert(word);
-    end_span_ids_[i] = FD::Convert(sfid.str());
+    end_span_ids_[i] = FD::Convert(Escape(sfid.str()));
     ostringstream esbiid;
     esbiid << "EBI:" << TD::Convert(bword) << "_" << TD::Convert(word);
-    end_bigram_ids_[i] = FD::Convert(esbiid.str());
+    end_bigram_ids_[i] = FD::Convert(Escape(esbiid.str()));
     ostringstream bsbiid;
     bsbiid << "BBI:" << TD::Convert(bword) << "_" << TD::Convert(word);
-    beg_bigram_ids_[i] = FD::Convert(bsbiid.str());
+    beg_bigram_ids_[i] = FD::Convert(Escape(bsbiid.str()));
     ostringstream bfid;
     bfid << "BS:" << TD::Convert(bword);
-    beg_span_ids_[i] = FD::Convert(bfid.str());
+    beg_span_ids_[i] = FD::Convert(Escape(bfid.str()));
     if (use_collapsed_features_) {
-      end_span_vals_[i] = feat2val_[sfid.str()] + feat2val_[esbiid.str()];
-      beg_span_vals_[i] = feat2val_[bfid.str()] + feat2val_[bsbiid.str()];
+      end_span_vals_[i] = feat2val_[Escape(sfid.str())] + feat2val_[Escape(esbiid.str())];
+      beg_span_vals_[i] = feat2val_[Escape(bfid.str())] + feat2val_[Escape(bsbiid.str())];
     }
   }
   for (int i = 0; i <= lattice.size(); ++i) {
@@ -167,58 +178,19 @@ void SpanFeatures::PrepareForInput(const SentenceMetadata& smeta) {
       word = MapIfNecessary(word);
       ostringstream pf;
       pf << "S:" << TD::Convert(bword) << "_" << TD::Convert(word);
-      span_feats_(i,j).first = FD::Convert(pf.str());
-      span_feats_(i,j).second = FD::Convert("S_" + pf.str());
+      span_feats_(i,j).first = FD::Convert(Escape(pf.str()));
+      span_feats_(i,j).second = FD::Convert(Escape("S_" + pf.str()));
       ostringstream lf;
       const unsigned span_size = (i < j ? j - i : i - j);
       lf << "LS:" << SpanSizeTransform(span_size) << "_" << TD::Convert(bword) << "_" << TD::Convert(word);
-      len_span_feats_(i,j).first = FD::Convert(lf.str());
-      len_span_feats_(i,j).second = FD::Convert("S_" + lf.str());
+      len_span_feats_(i,j).first = FD::Convert(Escape(lf.str()));
+      len_span_feats_(i,j).second = FD::Convert(Escape("S_" + lf.str()));
       if (use_collapsed_features_) {
-        span_vals_(i,j).first = feat2val_[pf.str()] + feat2val_[lf.str()];
-        span_vals_(i,j).second = feat2val_["S_" + pf.str()] + feat2val_["S_" + lf.str()];
+        span_vals_(i,j).first = feat2val_[Escape(pf.str())] + feat2val_[Escape(lf.str())];
+        span_vals_(i,j).second = feat2val_[Escape("S_" + pf.str())] + feat2val_[Escape("S_" + lf.str())];
       }
     }
   } 
-}
-
-RuleNgramFeatures::RuleNgramFeatures(const std::string& param) {
-}
-
-void RuleNgramFeatures::PrepareForInput(const SentenceMetadata& smeta) {
-//  std::map<const TRule*, SparseVector<double> >
-  rule2_feats_.clear();
-}
-
-void RuleNgramFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                         const Hypergraph::Edge& edge,
-                                         const vector<const void*>& ant_contexts,
-                                         SparseVector<double>* features,
-                                         SparseVector<double>* estimated_features,
-                                         void* context) const {
-  map<const TRule*, SparseVector<double> >::iterator it = rule2_feats_.find(edge.rule_.get());
-  if (it == rule2_feats_.end()) {
-    const TRule& rule = *edge.rule_;
-    it = rule2_feats_.insert(make_pair(&rule, SparseVector<double>())).first;
-    SparseVector<double>& f = it->second;
-    string prev = "<r>";
-    for (int i = 0; i < rule.f_.size(); ++i) {
-      WordID w = rule.f_[i];
-      if (w < 0) w = -w;
-      assert(w > 0);
-      const string& cur = TD::Convert(w);
-      ostringstream os;
-      os << "RB:" << prev << '_' << cur;
-      const int fid = FD::Convert(os.str());
-      if (fid <= 0) return;
-      f.add_value(fid, 1.0);
-      prev = cur;
-    }
-    ostringstream os;
-    os << "RB:" << prev << '_' << "</r>";
-    f.set_value(FD::Convert(os.str()), 1.0);
-  }
-  (*features) += it->second;
 }
 
 inline bool IsArity2RuleReordered(const TRule& rule) {

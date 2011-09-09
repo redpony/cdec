@@ -12,6 +12,7 @@ build_binary_LDADD = libklm.a ../util/libklm_util.a -lz
 noinst_LIBRARIES = libklm.a
 
 libklm_a_SOURCES = \
+  bhiksha.cc \
   binary_format.cc \
   config.cc \
   lm_exception.cc \

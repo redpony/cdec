@@ -37,20 +37,20 @@ sample_all( KBestList* kb, TrainingInstances &training )
 }
 
 void
-sample_all_rand( KBestList* kb, TrainingInstances &training )
+sample_rand( KBestList* kb, TrainingInstances &training )
 {
   srand( time(NULL) );
   for ( size_t i = 0; i < kb->GetSize()-1; i++ ) {
     for ( size_t j = i+1; j < kb->GetSize(); j++ ) {
       if ( rand() % 2 ) {
-      TPair p;
-      p.first = kb->feats[i];
-      p.second = kb->feats[j];
-      p.first_rank = i;
-      p.second_rank = j;
-      p.first_score = kb->scores[i];
-      p.second_score = kb->scores[j];
-      training.push_back( p );
+        TPair p;
+        p.first = kb->feats[i];
+        p.second = kb->feats[j];
+        p.first_rank = i;
+        p.second_rank = j;
+        p.first_score = kb->scores[i];
+        p.second_score = kb->scores[j];
+        training.push_back( p );
       }
     }
   }
