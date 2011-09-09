@@ -9,6 +9,7 @@
 #include "ff_wordalign.h"
 #include "ff_tagger.h"
 #include "ff_factory.h"
+#include "ff_rules.h"
 #include "ff_ruleshape.h"
 #include "ff_bleu.h"
 #include "ff_lm_fsa.h"
@@ -53,6 +54,7 @@ void register_feature_functions() {
 #endif
   ff_registry.Register("SpanFeatures", new FFFactory<SpanFeatures>());
   ff_registry.Register("NgramFeatures", new FFFactory<NgramDetector>());
+  ff_registry.Register("RuleIdentityFeatures", new FFFactory<RuleIdentityFeatures>());
   ff_registry.Register("RuleNgramFeatures", new FFFactory<RuleNgramFeatures>());
   ff_registry.Register("CMR2008ReorderingFeatures", new FFFactory<CMR2008ReorderingFeatures>());
   ff_registry.Register("KLanguageModel", new KLanguageModelFactory());
