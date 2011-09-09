@@ -9,6 +9,7 @@
 #include "stringlib.h"
 #include "hg.h"
 #include "tdict.h"
+#include "lm/model.hh"
 #include "lm/enumerate_vocab.hh"
 
 using namespace std;
@@ -434,8 +435,37 @@ void KLanguageModel<Model>::FinalTraversalFeatures(const void* ant_state,
     features->set_value(oov_fid_, oovs);
 }
 
-// instantiate templates
-template class KLanguageModel<lm::ngram::ProbingModel>;
-template class KLanguageModel<lm::ngram::TrieModel>;
-template class KLanguageModel<lm::ngram::QuantTrieModel>;
+template <class Model> boost::shared_ptr<FeatureFunction> CreateModel(const std::string &param) {
+  KLanguageModel<Model> *ret = new KLanguageModel<Model>(param);
+  ret->Init();
+  return boost::shared_ptr<FeatureFunction>(ret);
+}
 
+boost::shared_ptr<FeatureFunction> KLanguageModelFactory::Create(std::string param) const {
+  using namespace lm::ngram;
+  std::string filename, ignored_map;
+  bool ignored_markers;
+  std::string ignored_featname;
+  ParseLMArgs(param, &filename, &ignored_map, &ignored_markers, &ignored_featname);
+  ModelType m;
+  if (!RecognizeBinary(filename.c_str(), m)) m = HASH_PROBING;
+
+  switch (m) {
+    case HASH_PROBING:
+      return CreateModel<ProbingModel>(param);
+    case TRIE_SORTED:
+      return CreateModel<TrieModel>(param);
+    case ARRAY_TRIE_SORTED:
+      return CreateModel<ArrayTrieModel>(param);
+    case QUANT_TRIE_SORTED:
+      return CreateModel<QuantTrieModel>(param);
+    case QUANT_ARRAY_TRIE_SORTED:
+      return CreateModel<QuantArrayTrieModel>(param);
+    default:
+      UTIL_THROW(util::Exception, "Unrecognized kenlm binary file type " << (unsigned)m);
+  }
+}
+
+std::string  KLanguageModelFactory::usage(bool params,bool verbose) const {
+  return KLanguageModel<lm::ngram::Model>::usage(params, verbose);
+}

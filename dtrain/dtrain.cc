@@ -215,7 +215,7 @@ main( int argc, char** argv )
 
   // for the perceptron/SVM; TODO as params
   double eta = 0.0005;
-  double gamma = 0.01; // -> SVM
+  double gamma = 0.;//01; // -> SVM
   lambdas.add_value( FD::Convert("__bias"), 0 );
   
   // for random sampling
@@ -388,10 +388,8 @@ main( int argc, char** argv )
     if ( !noup ) {
 
       TrainingInstances pairs;
-
-      sample_all_rand(kb, pairs);
-      cout << pairs.size() << endl;
-            
+      sample_all( kb, pairs );
+       
       for ( TrainingInstances::iterator ti = pairs.begin();
             ti != pairs.end(); ti++ ) {
 
@@ -401,31 +399,29 @@ main( int argc, char** argv )
       //} else {
         //dv = ti->first - ti->second;
       //}
-        dv.add_value( FD::Convert("__bias"), -1 );
+          dv.add_value( FD::Convert("__bias"), -1 );
         
-        SparseVector<double> reg;
-        reg = lambdas * ( 2 * gamma );
-        dv -= reg;
-        lambdas += dv * eta;
+          //SparseVector<double> reg;
+          //reg = lambdas * ( 2 * gamma );
+          //dv -= reg;
+          lambdas += dv * eta;
 
-        if ( verbose ) {
-          cout << "{{ f("<< ti->first_rank <<") > f(" << ti->second_rank << ") but g(i)="<< ti->first_score <<" < g(j)="<< ti->second_score << " so update" << endl;
-          cout << " i  " << TD::GetString(kb->sents[ti->first_rank]) << endl;
-          cout << "    " << kb->feats[ti->first_rank] << endl;
-          cout << " j  " << TD::GetString(kb->sents[ti->second_rank]) << endl;
-          cout << "    " << kb->feats[ti->second_rank] << endl; 
-          cout << " diff vec: " << dv << endl;
-          cout << " lambdas after update: " << lambdas << endl;
-          cout << "}}" << endl;
-        }
-
+          if ( verbose ) {
+            cout << "{{ f("<< ti->first_rank <<") > f(" << ti->second_rank << ") but g(i)="<< ti->first_score <<" < g(j)="<< ti->second_score << " so update" << endl;
+            cout << " i  " << TD::GetString(kb->sents[ti->first_rank]) << endl;
+            cout << "    " << kb->feats[ti->first_rank] << endl;
+            cout << " j  " << TD::GetString(kb->sents[ti->second_rank]) << endl;
+            cout << "    " << kb->feats[ti->second_rank] << endl; 
+            cout << " diff vec: " << dv << endl;
+            cout << " lambdas after update: " << lambdas << endl;
+            cout << "}}" << endl;
+          }
         } else {
-            //if ( 0 ) {
-            SparseVector<double> reg;
-            reg = lambdas * ( gamma * 2 );
-            lambdas += reg * ( -eta );
-            //}
+          //SparseVector<double> reg;
+          //reg = lambdas * ( 2 * gamma );
+          //lambdas += reg * ( -eta );
         }
+
       }
 
       //double l2 = lambdas.l2norm();
