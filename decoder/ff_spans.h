@@ -44,21 +44,6 @@ class SpanFeatures : public FeatureFunction {
   WordID oov_;
 };
 
-class RuleNgramFeatures : public FeatureFunction {
- public:
-  RuleNgramFeatures(const std::string& param);
- protected:
-  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
-                                     const std::vector<const void*>& ant_contexts,
-                                     SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
-                                     void* context) const;
-  virtual void PrepareForInput(const SentenceMetadata& smeta);
- private:
-  mutable std::map<const TRule*, SparseVector<double> > rule2_feats_;
-};
-
 class CMR2008ReorderingFeatures : public FeatureFunction {
  public:
   CMR2008ReorderingFeatures(const std::string& param);

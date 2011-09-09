@@ -61,6 +61,7 @@ libcdec_a_SOURCES = \
   phrasetable_fst.cc \
   trule.cc \
   ff.cc \
+  ff_rules.cc \
   ff_wordset.cc \
   ff_charset.cc \
   ff_lm.cc \
