@@ -32,7 +32,7 @@ struct RandomNumberGenerator {
       std::cerr << "Warning: could not read from /dev/urandom. Seeding from clock" << std::endl;
       seed = std::time(NULL);
     }
-    std::cerr << "Seeding random number sequence to " << seed << std::endl;
+    //std::cerr << "Seeding random number sequence to " << seed << std::endl;
     return seed;
   }
 

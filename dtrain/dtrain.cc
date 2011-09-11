@@ -13,6 +13,8 @@
 //#include <boost/iostreams/filter/bzip2.hpp>
 using namespace boost::iostreams;
 
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/lexical_cast.hpp>
 
 #ifdef DTRAIN_DEBUG
 #include "tests.h"
@@ -311,7 +313,7 @@ main( int argc, char** argv )
       }
       if ( broken_grammar ) continue;
       grammar_str = boost::replace_all_copy( in_split[3], " __NEXT__RULE__ ", "\n" ) + "\n"; // FIXME copy, __
-      grammar_buf << grammar_str << DTRAIN_GRAMMAR_DELIM << endl;
+      grammar_buf << grammar_str << DTRAIN_GRAMMAR_DELIM << " " << in_split[0] << endl;
       decoder.SetSentenceGrammarFromString( grammar_str );
       // decode, kbest
       src_str_buf.push_back( in_split[1] );
@@ -323,7 +325,8 @@ main( int argc, char** argv )
       while ( true ) {
         string g;  
         getline( grammar_buf_in, g );
-        if ( g == DTRAIN_GRAMMAR_DELIM ) break;
+        //if ( g == DTRAIN_GRAMMAR_DELIM ) break;
+        if (boost::starts_with(g, DTRAIN_GRAMMAR_DELIM)) break;
         grammar_str += g+"\n";
         i += 1;
       }
@@ -430,6 +433,7 @@ main( int argc, char** argv )
     }
 
     ++sid;
+    cerr << "reporter:counter:dtrain,sent," << sid << endl;
 
   } // input loop
 
@@ -446,6 +450,7 @@ main( int argc, char** argv )
     avg_1best_score_diff = avg_1best_score;
     avg_1best_model_diff = avg_1best_model;
   }
+  if ( !quiet ) {
   cout << _prec5 << _pos << "WEIGHTS" << endl;
   for (vector<string>::iterator it = wprint.begin(); it != wprint.end(); it++) {
     cout << setw(16) << *it << " = " << dense_weights[FD::Convert( *it )] << endl;
@@ -456,6 +461,7 @@ main( int argc, char** argv )
   cout << _pos << " (" << avg_1best_score_diff << ")" << endl;
   cout << _nopos << "avg model score: " << avg_1best_model;
   cout << _pos << " (" << avg_1best_model_diff << ")" << endl;
+  }
   vector<double> remember_scores;
   remember_scores.push_back( avg_1best_score );
   remember_scores.push_back( avg_1best_model );
@@ -478,7 +484,7 @@ main( int argc, char** argv )
     cout << time_dif/(double)in_sz<< " s/S)" << endl;
   }
   
-  if ( t+1 != T ) cout << endl;
+  if ( t+1 != T && !quiet ) cout << endl;
 
   if ( noup ) break;
 
@@ -486,8 +492,21 @@ main( int argc, char** argv )
 
   unlink( grammar_buf_tmp_fn );
   if ( !noup ) {
+    // TODO BEST ITER
     if ( !quiet ) cout << endl << "writing weights file '" << cfg["output"].as<string>() << "' ...";
-    weights.WriteToFile( cfg["output"].as<string>(), true );
+    if ( cfg["output"].as<string>() == "-" ) {
+      for ( SparseVector<double>::const_iterator ti = lambdas.begin();
+            ti != lambdas.end(); ++ti ) {
+	if ( ti->second == 0 ) continue;
+        //if ( ti->first == "__bias" ) continue;
+        cout << setprecision(9);
+        cout << _nopos << FD::Convert(ti->first) << "\t" << ti->second << endl;
+        //cout << "__SHARD_COUNT__\t1" << endl;
+      }
+    } else {
+      weights.InitFromVector( lambdas );
+      weights.WriteToFile( cfg["output"].as<string>(), true );
+    }
     if ( !quiet ) cout << "done" << endl;
   }
   
