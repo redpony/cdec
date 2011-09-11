@@ -30,7 +30,7 @@
 #define DTRAIN_DEFAULT_T 1                  // iterations
 #define DTRAIN_DEFAULT_SCORER "stupid_bleu" // scorer
 #define DTRAIN_DOTS 100                     // when to display a '.'
-#define DTRAIN_TMP_DIR "/tmp"               // put this on a SSD?
+#define DTRAIN_TMP_DIR "/var/hadoop/mapred/local"               // put this on a SSD?
 #define DTRAIN_GRAMMAR_DELIM "########EOS########"
 
 
