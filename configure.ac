@@ -11,6 +11,45 @@ AC_PROG_CXX
 AC_LANG_CPLUSPLUS
 BOOST_REQUIRE
 BOOST_PROGRAM_OPTIONS
+AC_ARG_ENABLE(mpi,
+ [ --enable-mpi  Build MPI binaries, assumes mpi.h is present ],
+ [ mpi=yes
+ ])
+AM_CONDITIONAL([MPI], [test "x$mpi" = xyes])
+
+if test "x$mpi" = xyes
+then
+  BOOST_SERIALIZATION
+  AC_DEFINE([HAVE_MPI], [1], [flag for MPI])
+  # TODO BOOST_MPI needs to be implemented
+  LIBS="$LIBS -lboost_mpi $BOOST_SERIALIZATION_LIBS"
+fi
+
+AM_CONDITIONAL([CMPH], false)
+AC_ARG_WITH(cmph,
+            [AC_HELP_STRING([--with-cmph=PATH], [(optional) path to cmph perfect hashing library])],
+            [with_cmph=$withval],
+            [with_cmph=no]
+           )
+
+if test "x$with_cmph" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_cmph}/include"
+
+  AC_CHECK_HEADER(cmph.h,
+                 [AC_DEFINE([HAVE_CMPH], [], [flag for cmph perfect hashing library])],
+                 [AC_MSG_ERROR([Cannot find cmph library!])])
+
+  LDFLAGS="$LDFLAGS -L${with_cmph}/lib"
+  AC_CHECK_LIB(cmph, cmph_search)
+
+  #LIB_CMPH="-lcmph"
+  #LIBS="$LIBS $LIB_CMPH"
+  #FMTLIBS="$FMTLIBS libcmph.a"
+  AM_CONDITIONAL([CMPH], true)
+fi
+
 #BOOST_THREADS
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 LDFLAGS="$LDFLAGS $BOOST_PROGRAM_OPTIONS_LDFLAGS"
@@ -26,20 +65,6 @@ AC_CHECK_HEADER(google/dense_hash_map,
 
 AC_PROG_INSTALL
 GTEST_LIB_CHECK
-
-AC_ARG_ENABLE(mpi,
- [ --enable-mpi  Build MPI binaries, assumes mpi.h is present ],
- [ mpi=yes
- ])
-AM_CONDITIONAL([MPI], [test "x$mpi" = xyes])
-
-if test "x$mpi" = xyes
-then
-  BOOST_SERIALIZATION
-  AC_DEFINE([HAVE_MPI], [1], [flag for MPI])
-  # TODO BOOST_MPI needs to be implemented
-  LIBS="$LIBS -lboost_mpi $BOOST_SERIALIZATION_LIBS -lmpi++ -lmpi"
-fi
 
 AM_CONDITIONAL([RAND_LM], false)
 AC_ARG_WITH(randlm,
