@@ -72,6 +72,7 @@ libcdec_a_SOURCES = \
   ff_wordalign.cc \
   ff_csplit.cc \
   ff_tagger.cc \
+  ff_source_syntax.cc \
   ff_bleu.cc \
   ff_factory.cc \
   freqdict.cc \

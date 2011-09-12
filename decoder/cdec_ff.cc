@@ -14,6 +14,7 @@
 #include "ff_bleu.h"
 #include "ff_lm_fsa.h"
 #include "ff_sample_fsa.h"
+#include "ff_source_syntax.h"
 #include "ff_register.h"
 #include "ff_charset.h"
 #include "ff_wordset.h"
@@ -55,6 +56,7 @@ void register_feature_functions() {
   ff_registry.Register("SpanFeatures", new FFFactory<SpanFeatures>());
   ff_registry.Register("NgramFeatures", new FFFactory<NgramDetector>());
   ff_registry.Register("RuleIdentityFeatures", new FFFactory<RuleIdentityFeatures>());
+  ff_registry.Register("SourceSyntaxFeatures", new FFFactory<SourceSyntaxFeatures>);
   ff_registry.Register("RuleNgramFeatures", new FFFactory<RuleNgramFeatures>());
   ff_registry.Register("CMR2008ReorderingFeatures", new FFFactory<CMR2008ReorderingFeatures>());
   ff_registry.Register("KLanguageModel", new KLanguageModelFactory());
