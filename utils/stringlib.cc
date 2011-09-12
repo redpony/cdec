@@ -32,7 +32,12 @@ void ParseTranslatorInput(const string& line, string* input, string* ref) {
 void ProcessAndStripSGML(string* pline, map<string, string>* out) {
   map<string, string>& meta = *out;
   string& line = *pline;
-  string lline = LowercaseString(line);
+  string lline = *pline;
+  if (lline.find("<SEG")==0 || lline.find("<Seg")==0) {
+    cerr << "Segment tags <seg> must be lowercase!\n";
+    cerr << "  " << *pline << endl;
+    abort();
+  } 
   if (lline.find("<seg")!=0) return;
   size_t close = lline.find(">");
   if (close == string::npos) return; // error
