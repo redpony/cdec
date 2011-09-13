@@ -25,12 +25,10 @@ struct SourceSyntaxFeaturesImpl {
 
   void InitializeGrids(const string& tree, unsigned src_len) {
     assert(tree.size() > 0);
-    fids_cat.clear();
-    fids_fonly.clear();
+    //fids_cat.clear();
     fids_ef.clear();
     src_tree.clear();
-    fids_cat.resize(src_len, src_len + 1);
-    fids_fonly.resize(src_len, src_len + 1);
+    //fids_cat.resize(src_len, src_len + 1);
     fids_ef.resize(src_len, src_len + 1);
     src_tree.resize(src_len, src_len + 1, TD::Convert("XX"));
     ParseTreeString(tree, src_len);
@@ -89,15 +87,14 @@ struct SourceSyntaxFeaturesImpl {
   WordID FireFeatures(const TRule& rule, const int i, const int j, const WordID* ants, SparseVector<double>* feats) {
     //cerr << "fire features: " << rule.AsString() << " for " << i << "," << j << endl;
     const WordID lhs = src_tree(i,j);
-    int& fid_cat = fids_cat(i,j);
-    int& fid_fonly = fids_fonly(i,j)[&rule];
+    //int& fid_cat = fids_cat(i,j);
     int& fid_ef = fids_ef(i,j)[&rule];
     if (fid_ef <= 0) {
       ostringstream os;
-      ostringstream os2;
+      //ostringstream os2;
       os << "SYN:" << TD::Convert(lhs);
-      os2 << "SYN:" << TD::Convert(lhs) << '_' << SpanSizeTransform(j - i);
-      fid_cat = FD::Convert(os2.str());
+      //os2 << "SYN:" << TD::Convert(lhs) << '_' << SpanSizeTransform(j - i);
+      //fid_cat = FD::Convert(os2.str());
       os << ':';
       unsigned ntc = 0;
       for (unsigned k = 0; k < rule.f_.size(); ++k) {
@@ -109,7 +106,6 @@ struct SourceSyntaxFeaturesImpl {
           os << TD::Convert(fj);
         }
       }
-      fid_fonly = FD::Convert(os.str());
       os << ':';
       for (unsigned k = 0; k < rule.e_.size(); ++k) {
         const int ei = rule.e_[k];
@@ -121,18 +117,15 @@ struct SourceSyntaxFeaturesImpl {
       }
       fid_ef = FD::Convert(os.str());
     }
-    if (fid_cat > 0)
-      feats->set_value(fid_cat, 1.0);
-    if (fid_fonly > 0)
-      feats->set_value(fid_fonly, 1.0);
+    //if (fid_cat > 0)
+    //  feats->set_value(fid_cat, 1.0);
     if (fid_ef > 0)
       feats->set_value(fid_ef, 1.0);
     return lhs;
   }
 
   Array2D<WordID> src_tree;  // src_tree(i,j) NT = type
-  mutable Array2D<int> fids_cat;   // fires for an LHS match
-  mutable Array2D<map<const TRule*, int> > fids_fonly; // fires for an f-string
+  // mutable Array2D<int> fids_cat;   // this tends to overfit baddly
   mutable Array2D<map<const TRule*, int> > fids_ef;    // fires for fully lexicalized
 };
 
