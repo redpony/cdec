@@ -1,5 +1,5 @@
-noinst_PROGRAMS = ts
-TESTS = ts
+noinst_PROGRAMS = ts phmt
+TESTS = ts phmt
 
 if HAVE_GTEST
 noinst_PROGRAMS += \
@@ -27,6 +27,11 @@ libutils_a_SOURCES = \
   verbose.cc \
   weights.cc
 
+if HAVE_CMPH
+  libutils_a_SOURCES += perfect_hash.cc
+endif
+
+phmt_SOURCES = phmt.cc
 ts_SOURCES = ts.cc
 dict_test_SOURCES = dict_test.cc
 dict_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
