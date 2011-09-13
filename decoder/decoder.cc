@@ -328,6 +328,7 @@ struct DecoderImpl {
   bool write_gradient; // TODO Observer
   bool feature_expectations; // TODO Observer
   bool output_training_vector; // TODO Observer
+  bool remove_intersected_rule_annotations;
 
   static void ConvertSV(const SparseVector<prob_t>& src, SparseVector<double>* trg) {
     for (SparseVector<prob_t>::const_iterator it = src.begin(); it != src.end(); ++it)
@@ -361,6 +362,9 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
         ("grammar,g",po::value<vector<string> >()->composing(),"Either SCFG grammar file(s) or phrase tables file(s)")
         ("per_sentence_grammar_file", po::value<string>(), "Optional (and possibly not implemented) per sentence grammar file enables all per sentence grammars to be stored in a single large file and accessed by offset")
         ("list_feature_functions,L","List available feature functions")
+#ifdef HAVE_CMPH
+        ("cmph_perfect_feature_hash,h", po::value<string>(), "Load perfect hash function for features")
+#endif
 
         ("weights,w",po::value<string>(),"Feature weights file (initial forest / pass 1)")
         ("feature_function,F",po::value<vector<string> >()->composing(), "Pass 1 additional feature function(s) (-L for list)")
@@ -433,7 +437,8 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
         ("feature_expectations","Write feature expectations for all features in chart (**OBJ** will be the partition)")
         ("vector_format",po::value<string>()->default_value("b64"), "Sparse vector serialization format for feature expectations or gradients, includes (text or b64)")
         ("combine_size,C",po::value<int>()->default_value(1), "When option -G is used, process this many sentence pairs before writing the gradient (1=emit after every sentence pair)")
-        ("forest_output,O",po::value<string>(),"Directory to write forests to");
+        ("forest_output,O",po::value<string>(),"Directory to write forests to")
+        ("remove_intersected_rule_annotations", "After forced decoding is completed, remove nonterminal annotations (i.e., the source side spans)");
 
   // ob.AddOptions(&opts);
 #ifdef FSA_RESCORING
@@ -443,7 +448,7 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
   po::options_description clo("Command line options");
   clo.add_options()
     ("config,c", po::value<vector<string> >(&cfg_files), "Configuration file(s) - latest has priority")
-        ("help,h", "Print this help message and exit")
+        ("help,?", "Print this help message and exit")
     ("usage,u", po::value<string>(), "Describe a feature function type")
     ("compgen", "Print just option names suitable for bash command line completion builtin 'compgen'")
     ;
@@ -645,6 +650,12 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
     FD::Freeze(); // this means we can't see the feature names of not-weighted features
   }
 
+  if (conf.count("cmph_perfect_feature_hash")) {
+    cerr << "Loading perfect hash function from " << conf["cmph_perfect_feature_hash"].as<string>() << " ...\n";
+    FD::EnableHash(conf["cmph_perfect_feature_hash"].as<string>());
+    cerr << "  " << FD::NumFeats() << " features in map\n";
+  }
+
   // set up translation back end
   if (formalism == "scfg")
     translator.reset(new SCFGTranslator(conf));
@@ -695,6 +706,7 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
   unique_kbest = conf.count("unique_k_best");
   get_oracle_forest = conf.count("get_oracle_forest");
   oracle.show_derivation=conf.count("show_derivations");
+  remove_intersected_rule_annotations = conf.count("remove_intersected_rule_annotations");
 
 #ifdef FSA_RESCORING
   cfg_options.Validate();
@@ -1010,6 +1022,12 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
 //        if (!SILENT) cerr << "  USING UNIFORM WEIGHTS\n";
 //        for (int i = 0; i < forest.edges_.size(); ++i)
 //          forest.edges_[i].edge_prob_=prob_t::One(); }
+      if (remove_intersected_rule_annotations) {
+        for (unsigned i = 0; i < forest.edges_.size(); ++i)
+          if (forest.edges_[i].rule_ &&
+              forest.edges_[i].rule_->parent_rule_)
+            forest.edges_[i].rule_ = forest.edges_[i].rule_->parent_rule_;
+      }
       forest.Reweight(last_weights);
       if (!SILENT) forest_stats(forest,"  Constr. forest",show_tree_structure,oracle.show_derivation);
       if (!SILENT) cerr << "  Constr. VitTree: " << ViterbiFTree(forest) << endl;
