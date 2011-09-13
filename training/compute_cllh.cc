@@ -148,15 +148,6 @@ int main(int argc, char** argv) {
   if (!InitCommandLine(argc, argv, &conf))
     return false;
 
-  // load initial weights
-  Weights weights;
-  if (conf.count("weights"))
-    weights.InitFromFile(conf["weights"].as<string>());
-
-  // freeze feature set
-  //const bool freeze_feature_set = conf.count("freeze_feature_set");
-  //if (freeze_feature_set) FD::Freeze();
-
   // load cdec.ini and set up decoder
   ReadFile ini_rf(conf["decoder_config"].as<string>());
   Decoder decoder(ini_rf.stream());
@@ -165,17 +156,22 @@ int main(int argc, char** argv) {
     abort();
   }
 
+  // load weights
+  vector<weight_t>& weights = decoder.CurrentWeightVector();
+  if (conf.count("weights"))
+    Weights::InitFromFile(conf["weights"].as<string>(), &weights);
+
+  // freeze feature set
+  //const bool freeze_feature_set = conf.count("freeze_feature_set");
+  //if (freeze_feature_set) FD::Freeze();
+
   vector<string> corpus; vector<int> ids;
   ReadTrainingCorpus(conf["training_data"].as<string>(), rank, size, &corpus, &ids);
   assert(corpus.size() > 0);
   assert(corpus.size() == ids.size());
 
-  vector<double> wv;
-  weights.InitVector(&wv);
-  decoder.SetWeights(wv);
   TrainingObserver observer;
   double objective = 0;
-  bool converged = false;
 
   observer.Reset();
   if (rank == 0)
@@ -197,3 +193,4 @@ int main(int argc, char** argv) {
 
   return 0;
 }
+

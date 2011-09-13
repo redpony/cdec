@@ -223,16 +223,16 @@ struct oracle_directions {
     cerr << "Forest repo: " << forest_repository << endl;
     assert(DirectoryExists(forest_repository));
     vector<string> features;
-    weights.InitFromFile(weights_file, &features);
+    vector<weight_t> dorigin;
+    Weights::InitFromFile(weights_file, &dorigin, &features);
     if (optimize_features.size())
       features=optimize_features;
-    weights.InitSparseVector(&origin);
+    Weights::InitSparseVector(dorigin, &origin);
     fids.clear();
     AddFeatureIds(features);
     oracles.resize(dev_set_size);
   }
 
-  Weights weights;
   void AddFeatureIds(vector<string> const& features) {
     int i = fids.size();
     fids.resize(fids.size()+features.size());
