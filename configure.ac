@@ -25,7 +25,7 @@ then
   LIBS="$LIBS -lboost_mpi $BOOST_SERIALIZATION_LIBS"
 fi
 
-AM_CONDITIONAL([CMPH], false)
+AM_CONDITIONAL([HAVE_CMPH], false)
 AC_ARG_WITH(cmph,
             [AC_HELP_STRING([--with-cmph=PATH], [(optional) path to cmph perfect hashing library])],
             [with_cmph=$withval],
@@ -43,11 +43,7 @@ then
 
   LDFLAGS="$LDFLAGS -L${with_cmph}/lib"
   AC_CHECK_LIB(cmph, cmph_search)
-
-  #LIB_CMPH="-lcmph"
-  #LIBS="$LIBS $LIB_CMPH"
-  #FMTLIBS="$FMTLIBS libcmph.a"
-  AM_CONDITIONAL([CMPH], true)
+  AM_CONDITIONAL([HAVE_CMPH], true)
 fi
 
 #BOOST_THREADS
