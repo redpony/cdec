@@ -1,3 +1,6 @@
+
+bin_PROGRAMS = reconstruct_weights
+
 noinst_PROGRAMS = ts phmt
 TESTS = ts phmt
 
@@ -10,6 +13,8 @@ noinst_PROGRAMS += \
 
 TESTS += small_vector_test logval_test weights_test dict_test
 endif
+
+reconstruct_weights_SOURCES = reconstruct_weights.cc
 
 noinst_LIBRARIES = libutils.a
 
