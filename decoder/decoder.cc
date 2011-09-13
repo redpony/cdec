@@ -181,7 +181,7 @@ struct DecoderImpl {
   ~DecoderImpl();
   bool Decode(const string& input, DecoderObserver*);
   vector<weight_t>& CurrentWeightVector() {
-    return *rescoring_passes.back().weight_vector;
+    return (rescoring_passes.empty() ? *init_weights : *rescoring_passes.back().weight_vector);
   }
   void SetId(int next_sent_id) { sent_id = next_sent_id - 1; }
 
