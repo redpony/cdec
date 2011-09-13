@@ -23,7 +23,7 @@ void Weights::InitFromFile(const string& filename,
     istream& hi = *hdrrf.stream();
     assert(hi);
     char buf[10];
-    hi.get(buf, 6);
+    hi.read(buf, 5);
     assert(hi.good());
     if (strncmp(buf, "_PHWf", 5) == 0) {
       read_text = false;
@@ -72,18 +72,20 @@ void Weights::InitFromFile(const string& filename,
     }
   } else {   // !read_text
     char buf[6];
-    in.get(buf, 6);
-    size_t num_keys[2];
-    in.get(reinterpret_cast<char*>(&num_keys[0]), sizeof(size_t) + 1);
-    if (num_keys[0] != FD::NumFeats()) {
-      cerr << "Hash function reports " << FD::NumFeats() << " keys but weights file contains " << num_keys[0] << endl;
+    in.read(buf, 5);
+    size_t num_keys;
+    in.read(reinterpret_cast<char*>(&num_keys), sizeof(size_t));
+    if (num_keys != FD::NumFeats()) {
+      cerr << "Hash function reports " << FD::NumFeats() << " keys but weights file contains " << num_keys << endl;
       abort();
     }
-    weights.resize(num_keys[0]);
-    in.get(reinterpret_cast<char*>(&weights[0]), num_keys[0] * sizeof(weight_t));
+    weights.resize(num_keys);
+    in.read(reinterpret_cast<char*>(&weights.front()), num_keys * sizeof(weight_t));
     if (!in.good()) {
       cerr << "Error loading weights!\n";
       abort();
+    } else {
+      cerr << "  Successfully loaded " << (num_keys * sizeof(weight_t)) << " bytes\n";
     }
   }
 }
