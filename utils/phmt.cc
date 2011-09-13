@@ -19,22 +19,18 @@ int main(int argc, char** argv) {
   cerr << "LexFE = " << FD::Convert("LexFE") << endl;
   cerr << "LexEF = " << FD::Convert("LexEF") << endl;
   {
-    Weights w;
     vector<weight_t> v(FD::NumFeats());
     v[FD::Convert("LexFE")] = 1.0;
     v[FD::Convert("LexEF")] = 0.5;
-    w.InitFromVector(v);
     cerr << "Writing...\n";
-    w.WriteToFile("weights.bin");
+    Weights::WriteToFile("weights.bin", v);
     cerr << "Done.\n";
   }
   {
-    Weights w;
     vector<weight_t> v(FD::NumFeats());
     cerr << "Reading...\n";
-    w.InitFromFile("weights.bin");
+    Weights::InitFromFile("weights.bin", &v);
     cerr << "Done.\n";
-    w.InitVector(&v);
     assert(v[FD::Convert("LexFE")] == 1.0);
     assert(v[FD::Convert("LexEF")] == 0.5);
   }

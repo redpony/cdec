@@ -251,12 +251,10 @@ int main(int argc, char **argv) {
   const bool is_split_input = (conf["format"].as<string>() == "split");
   const bool is_json_input = is_split_input || (conf["format"].as<string>() == "json");
   const bool collapse_weights = conf.count("collapse_weights");
-  Weights wts;
   vector<double> w;
-  if (conf.count("weights")) {
-    wts.InitFromFile(conf["weights"].as<string>());
-    wts.InitVector(&w);
-  }
+  if (conf.count("weights"))
+    Weights::InitFromFile(conf["weights"].as<string>(), &w);
+
   if (collapse_weights && !w.size()) {
     cerr << "--collapse_weights requires a weights file to be specified!\n";
     exit(1);

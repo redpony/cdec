@@ -8,7 +8,10 @@
 
 using namespace std;
 
-void Weights::InitFromFile(const std::string& filename, vector<string>* feature_list) {
+void Weights::InitFromFile(const string& filename,
+                           vector<weight_t>* pweights,
+                           vector<string>* feature_list) {
+  vector<weight_t>& weights = *pweights;
   if (!SILENT) cerr << "Reading weights from " << filename << endl;
   ReadFile in_file(filename);
   istream& in = *in_file.stream();
@@ -47,16 +50,16 @@ void Weights::InitFromFile(const std::string& filename, vector<string>* feature_
       int end = 0;
       while(end < buf.size() && buf[end] != ' ') ++end;
       const int fid = FD::Convert(buf.substr(start, end - start));
+      if (feature_list) { feature_list->push_back(buf.substr(start, end - start)); }
       while(end < buf.size() && buf[end] == ' ') ++end;
       val = strtod(&buf.c_str()[end], NULL);
       if (isnan(val)) {
         cerr << FD::Convert(fid) << " has weight NaN!\n";
         abort();
       }
-      if (wv_.size() <= fid)
-        wv_.resize(fid + 1);
-      wv_[fid] = val;
-      if (feature_list) { feature_list->push_back(FD::Convert(fid)); }
+      if (weights.size() <= fid)
+        weights.resize(fid + 1);
+      weights[fid] = val;
       ++weight_count;
       if (!SILENT) {
         if (weight_count %   50000 == 0) { cerr << '.' << flush; fl = true; }
@@ -76,8 +79,8 @@ void Weights::InitFromFile(const std::string& filename, vector<string>* feature_
       cerr << "Hash function reports " << FD::NumFeats() << " keys but weights file contains " << num_keys[0] << endl;
       abort();
     }
-    wv_.resize(num_keys[0]);
-    in.get(reinterpret_cast<char*>(&wv_[0]), num_keys[0] * sizeof(weight_t));
+    weights.resize(num_keys[0]);
+    in.get(reinterpret_cast<char*>(&weights[0]), num_keys[0] * sizeof(weight_t));
     if (!in.good()) {
       cerr << "Error loading weights!\n";
       abort();
@@ -85,7 +88,10 @@ void Weights::InitFromFile(const std::string& filename, vector<string>* feature_
   }
 }
 
-void Weights::WriteToFile(const std::string& fname, bool hide_zero_value_features, const string* extra) const {
+void Weights::WriteToFile(const string& fname,
+                          const vector<weight_t>& weights,
+                          bool hide_zero_value_features,
+                          const string* extra) {
   WriteFile out(fname);
   ostream& o = *out.stream();
   assert(o);
@@ -96,41 +102,54 @@ void Weights::WriteToFile(const std::string& fname, bool hide_zero_value_feature
     o.precision(17);
     const int num_feats = FD::NumFeats();
     for (int i = 1; i < num_feats; ++i) {
-      const weight_t val = (i < wv_.size() ? wv_[i] : 0.0);
+      const weight_t val = (i < weights.size() ? weights[i] : 0.0);
       if (hide_zero_value_features && val == 0.0) continue;
       o << FD::Convert(i) << ' ' << val << endl;
     }
   } else {
     o.write("_PHWf", 5);
     const size_t keys = FD::NumFeats();
-    assert(keys <= wv_.size());
+    assert(keys <= weights.size());
     o.write(reinterpret_cast<const char*>(&keys), sizeof(keys));
-    o.write(reinterpret_cast<const char*>(&wv_[0]), keys * sizeof(weight_t));
+    o.write(reinterpret_cast<const char*>(&weights[0]), keys * sizeof(weight_t));
   }
 }
 
-void Weights::InitVector(std::vector<weight_t>* w) const {
-  *w = wv_;
-}
-
-void Weights::InitSparseVector(SparseVector<weight_t>* w) const {
-  for (int i = 1; i < wv_.size(); ++i) {
-    const weight_t& weight = wv_[i];
-    if (weight) w->set_value(i, weight);
+void Weights::InitSparseVector(const vector<weight_t>& dv,
+                               SparseVector<weight_t>* sv) {
+  sv->clear();
+  for (unsigned i = 1; i < dv.size(); ++i) {
+    if (dv[i]) sv->set_value(i, dv[i]);
   }
 }
 
-void Weights::InitFromVector(const std::vector<weight_t>& w) {
-  wv_ = w;
-  if (wv_.size() > FD::NumFeats())
-    cerr << "WARNING: initializing weight vector has more features than the global feature dictionary!\n";
-  wv_.resize(FD::NumFeats(), 0);
+void Weights::SanityCheck(const vector<weight_t>& w) {
+  for (int i = 0; i < w.size(); ++i) {
+    assert(!isnan(w[i]));
+    assert(!isinf(w[i]));
+  }
 }
 
-void Weights::InitFromVector(const SparseVector<weight_t>& w) {
-  wv_.clear();
-  wv_.resize(FD::NumFeats(), 0.0);
-  for (int i = 1; i < FD::NumFeats(); ++i)
-    wv_[i] = w.value(i);
+struct FComp {
+  const vector<weight_t>& w_;
+  FComp(const vector<weight_t>& w) : w_(w) {}
+  bool operator()(int a, int b) const {
+    return fabs(w_[a]) > fabs(w_[b]);
+  }
+};
+
+void Weights::ShowLargestFeatures(const vector<weight_t>& w) {
+  vector<int> fnums(w.size());
+  for (int i = 0; i < w.size(); ++i)
+    fnums[i] = i;
+  vector<int>::iterator mid = fnums.begin();
+  mid += (w.size() > 10 ? 10 : w.size());
+  partial_sort(fnums.begin(), mid, fnums.end(), FComp(w));
+  cerr << "TOP FEATURES:";
+  for (vector<int>::iterator i = fnums.begin(); i != mid; ++i) {
+    cerr << ' ' << FD::Convert(*i) << '=' << w[*i];
+  }
+  cerr << endl;
 }
+
 

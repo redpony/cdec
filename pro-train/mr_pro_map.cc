@@ -301,12 +301,8 @@ int main(int argc, char** argv) {
   const unsigned gamma = conf["candidate_pairs"].as<unsigned>();
   const unsigned xi = conf["best_pairs"].as<unsigned>();
   string weightsf = conf["weights"].as<string>();
-  vector<double> weights;
-  {
-    Weights w;
-    w.InitFromFile(weightsf);
-    w.InitVector(&weights);
-  }
+  vector<weight_t> weights;
+  Weights::InitFromFile(weightsf, &weights);
   string kbest_repo = conf["kbest_repository"].as<string>();
   MkDirP(kbest_repo);
   while(in) {

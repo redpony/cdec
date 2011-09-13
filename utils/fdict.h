@@ -28,6 +28,8 @@ struct FD {
   }
   static void EnableHash(const std::string& cmph_file) {
 #ifdef HAVE_CMPH
+    assert(dict_.max() == 0);  // dictionary must not have
+                               // been added to
     hash_ = new PerfectHashFunction(cmph_file);
 #endif
   }
