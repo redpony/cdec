@@ -11,6 +11,7 @@ bin_PROGRAMS = \
   collapse_weights \
   cllh_filter_grammar \
   mpi_online_optimize \
+  mpi_extract_features \
   mpi_batch_optimize \
   compute_cllh \
   augment_grammar
@@ -23,6 +24,9 @@ TESTS = lbfgs_test optimize_test
 
 mpi_online_optimize_SOURCES = mpi_online_optimize.cc online_optimizer.cc
 mpi_online_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+
+mpi_extract_features_SOURCES = mpi_extract_features.cc
+mpi_extract_features_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 mpi_batch_optimize_SOURCES = mpi_batch_optimize.cc optimize.cc
 mpi_batch_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
