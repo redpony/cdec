@@ -13,6 +13,13 @@ using namespace std;
 // source trees must be represented in Penn Treebank format, e.g.
 //     (S (NP John) (VP (V left)))
 
+// log transform to make long spans cluster together
+// but preserve differences
+inline int SpanSizeTransform(unsigned span_size) {
+  if (!span_size) return 0;
+  return static_cast<int>(log(span_size+1) / log(1.39)) - 1;
+}
+
 struct SourceSyntaxFeaturesImpl {
   SourceSyntaxFeaturesImpl() {}
 
@@ -87,8 +94,10 @@ struct SourceSyntaxFeaturesImpl {
     int& fid_ef = fids_ef(i,j)[&rule];
     if (fid_ef <= 0) {
       ostringstream os;
+      ostringstream os2;
       os << "SYN:" << TD::Convert(lhs);
-      fid_cat = FD::Convert(os.str());
+      os2 << "SYN:" << TD::Convert(lhs) << '_' << SpanSizeTransform(j - i);
+      fid_cat = FD::Convert(os2.str());
       os << ':';
       unsigned ntc = 0;
       for (unsigned k = 0; k < rule.f_.size(); ++k) {
