@@ -27,7 +27,7 @@ namespace po = boost::program_options;
 struct ApproxVectorHasher {
   static const size_t MASK = 0xFFFFFFFFull;
   union UType {
-    double f;
+    double f;   // leave as double
     size_t i;
   };
   static inline double round(const double x) {
@@ -40,9 +40,9 @@ struct ApproxVectorHasher {
       t.i &= (1ull - MASK);
     return t.f;
   }
-  size_t operator()(const SparseVector<double>& x) const {
+  size_t operator()(const SparseVector<weight_t>& x) const {
     size_t h = 0x573915839;
-    for (SparseVector<double>::const_iterator it = x.begin(); it != x.end(); ++it) {
+    for (SparseVector<weight_t>::const_iterator it = x.begin(); it != x.end(); ++it) {
       UType t;
       t.f = it->second;
       if (t.f) {
@@ -56,9 +56,9 @@ struct ApproxVectorHasher {
 };
 
 struct ApproxVectorEquals {
-  bool operator()(const SparseVector<double>& a, const SparseVector<double>& b) const {
-    SparseVector<double>::const_iterator bit = b.begin();
-    for (SparseVector<double>::const_iterator ait = a.begin(); ait != a.end(); ++ait) {
+  bool operator()(const SparseVector<weight_t>& a, const SparseVector<weight_t>& b) const {
+    SparseVector<weight_t>::const_iterator bit = b.begin();
+    for (SparseVector<weight_t>::const_iterator ait = a.begin(); ait != a.end(); ++ait) {
       if (bit == b.end() ||
           ait->first != bit->first ||
           ApproxVectorHasher::round(ait->second) != ApproxVectorHasher::round(bit->second))
@@ -105,18 +105,18 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
 }
 
 struct HypInfo {
-  HypInfo() : g_(-100.0) {}
-  HypInfo(const vector<WordID>& h, const SparseVector<double>& feats) : hyp(h), g_(-100.0), x(feats) {}
+  HypInfo() : g_(-100.0f) {}
+  HypInfo(const vector<WordID>& h, const SparseVector<weight_t>& feats) : hyp(h), g_(-100.0f), x(feats) {}
 
   // lazy evaluation
   double g(const SentenceScorer& scorer) const {
-    if (g_ == -100.0)
+    if (g_ == -100.0f)
       g_ = scorer.ScoreCandidate(hyp)->ComputeScore();
     return g_;
   }
   vector<WordID> hyp;
-  mutable double g_;
-  SparseVector<double> x;
+  mutable float g_;
+  SparseVector<weight_t> x;
 };
 
 struct HypInfoCompare {
@@ -146,8 +146,8 @@ void WriteKBest(const string& file, const vector<HypInfo>& kbest) {
   }
 }
 
-void ParseSparseVector(string& line, size_t cur, SparseVector<double>* out) {
-  SparseVector<double>& x = *out;
+void ParseSparseVector(string& line, size_t cur, SparseVector<weight_t>* out) {
+  SparseVector<weight_t>& x = *out;
   size_t last_start = cur;
   size_t last_comma = string::npos;
   while(cur <= line.size()) {
@@ -211,15 +211,15 @@ struct ThresholdAlpha {
 };
 
 struct TrainingInstance {
-  TrainingInstance(const SparseVector<double>& feats, bool positive, double diff) : x(feats), y(positive), gdiff(diff) {}
-  SparseVector<double> x;
+  TrainingInstance(const SparseVector<weight_t>& feats, bool positive, float diff) : x(feats), y(positive), gdiff(diff) {}
+  SparseVector<weight_t> x;
 #undef DEBUGGING_PRO
 #ifdef DEBUGGING_PRO
   vector<WordID> a;
   vector<WordID> b;
 #endif
   bool y;
-  double gdiff;
+  float gdiff;
 };
 #ifdef DEBUGGING_PRO
 ostream& operator<<(ostream& os, const TrainingInstance& d) {
@@ -235,19 +235,19 @@ struct DiffOrder {
 
 void Sample(const unsigned gamma, const unsigned xi, const vector<HypInfo>& J_i, const SentenceScorer& scorer, const bool invert_score, vector<TrainingInstance>* pv) {
   vector<TrainingInstance> v1, v2;
-  double avg_diff = 0;
+  float avg_diff = 0;
   for (unsigned i = 0; i < gamma; ++i) {
     const size_t a = rng->inclusive(0, J_i.size() - 1)();
     const size_t b = rng->inclusive(0, J_i.size() - 1)();
     if (a == b) continue;
-    double ga = J_i[a].g(scorer);
-    double gb = J_i[b].g(scorer);
+    float ga = J_i[a].g(scorer);
+    float gb = J_i[b].g(scorer);
     bool positive = gb < ga;
     if (invert_score) positive = !positive;
-    const double gdiff = fabs(ga - gb);
+    const float gdiff = fabs(ga - gb);
     if (!gdiff) continue;
     avg_diff += gdiff;
-    SparseVector<double> xdiff = (J_i[a].x - J_i[b].x).erase_zeros();
+    SparseVector<weight_t> xdiff = (J_i[a].x - J_i[b].x).erase_zeros();
     if (xdiff.empty()) {
       cerr << "Empty diff:\n  " << TD::GetString(J_i[a].hyp) << endl << "x=" << J_i[a].x << endl;
       cerr << "  " << TD::GetString(J_i[b].hyp) << endl << "x=" << J_i[b].x << endl;

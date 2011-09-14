@@ -40,8 +40,8 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
 }
 
-void ParseSparseVector(string& line, size_t cur, SparseVector<double>* out) {
-  SparseVector<double>& x = *out;
+void ParseSparseVector(string& line, size_t cur, SparseVector<weight_t>* out) {
+  SparseVector<weight_t>& x = *out;
   size_t last_start = cur;
   size_t last_comma = string::npos;
   while(cur <= line.size()) {
@@ -52,7 +52,7 @@ void ParseSparseVector(string& line, size_t cur, SparseVector<double>* out) {
       }
       const int fid = FD::Convert(line.substr(last_start, last_comma - last_start));
       if (cur < line.size()) line[cur] = 0;
-      const double val = strtod(&line[last_comma + 1], NULL);
+      const weight_t val = strtod(&line[last_comma + 1], NULL);
       x.set_value(fid, val);
 
       last_comma = string::npos;
@@ -65,13 +65,13 @@ void ParseSparseVector(string& line, size_t cur, SparseVector<double>* out) {
   }
 }
 
-void ReadCorpus(istream* pin, vector<pair<bool, SparseVector<double> > >* corpus) {
+void ReadCorpus(istream* pin, vector<pair<bool, SparseVector<weight_t> > >* corpus) {
   istream& in = *pin;
   corpus->clear();
   bool flag = false;
   int lc = 0;
   string line;
-  SparseVector<double> x;
+  SparseVector<weight_t> x;
   while(getline(in, line)) {
     ++lc;
     if (lc % 1000 == 0) { cerr << '.'; flag = true; }
@@ -88,16 +88,16 @@ void ReadCorpus(istream* pin, vector<pair<bool, SparseVector<double> > >* corpus
   if (flag) cerr << endl;
 }
 
-void GradAdd(const SparseVector<double>& v, const double scale, vector<double>* acc) {
-  for (SparseVector<double>::const_iterator it = v.begin();
+void GradAdd(const SparseVector<weight_t>& v, const double scale, vector<weight_t>* acc) {
+  for (SparseVector<weight_t>::const_iterator it = v.begin();
        it != v.end(); ++it) {
     (*acc)[it->first] += it->second * scale;
   }
 }
 
-double TrainingInference(const vector<double>& x,
-                         const vector<pair<bool, SparseVector<double> > >& corpus,
-                         vector<double>* g = NULL) {
+double TrainingInference(const vector<weight_t>& x,
+                         const vector<pair<bool, SparseVector<weight_t> > >& corpus,
+                         vector<weight_t>* g = NULL) {
   double cll = 0;
   for (int i = 0; i < corpus.size(); ++i) {
     const double dotprod = corpus[i].second.dot(x) + x[0]; // x[0] is bias
@@ -132,13 +132,13 @@ double TrainingInference(const vector<double>& x,
 }
 
 // return held-out log likelihood
-double LearnParameters(const vector<pair<bool, SparseVector<double> > >& training,
-                       const vector<pair<bool, SparseVector<double> > >& testing,
+double LearnParameters(const vector<pair<bool, SparseVector<weight_t> > >& training,
+                       const vector<pair<bool, SparseVector<weight_t> > >& testing,
                        const double sigsq,
                        const unsigned memory_buffers,
-                       vector<double>* px) {
-  vector<double>& x = *px;
-  vector<double> vg(FD::NumFeats(), 0.0);
+                       vector<weight_t>* px) {
+  vector<weight_t>& x = *px;
+  vector<weight_t> vg(FD::NumFeats(), 0.0);
   bool converged = false;
   LBFGSOptimizer opt(FD::NumFeats(), memory_buffers);
   double tppl = 0.0;
@@ -172,7 +172,7 @@ double LearnParameters(const vector<pair<bool, SparseVector<double> > >& trainin
     cll += reg;
     cerr << cll << " (REG=" << reg << ")\tPPL=" << ppl << "\t TEST_PPL=" << tppl << "\t";
     try {
-      vector<double> old_x = x;
+      vector<weight_t> old_x = x;
       do {
         opt.Optimize(cll, vg, &x);
         converged = opt.HasConverged();
@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
   po::variables_map conf;
   InitCommandLine(argc, argv, &conf);
   string line;
-  vector<pair<bool, SparseVector<double> > > training, testing;
+  vector<pair<bool, SparseVector<weight_t> > > training, testing;
   SparseVector<weight_t> old_weights;
   const bool tune_regularizer = conf.count("tune_regularizer");
   if (tune_regularizer && !conf.count("testset")) {
