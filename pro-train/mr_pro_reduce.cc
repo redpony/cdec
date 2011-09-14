@@ -100,7 +100,7 @@ double TrainingInference(const vector<weight_t>& x,
                          vector<weight_t>* g = NULL) {
   double cll = 0;
   for (int i = 0; i < corpus.size(); ++i) {
-    const double dotprod = corpus[i].second.dot(x) + x[0]; // x[0] is bias
+    const double dotprod = corpus[i].second.dot(x) + (x.size() ? x[0] : weight_t()); // x[0] is bias
     double lp_false = dotprod;
     double lp_true = -dotprod;
     if (0 < lp_true) {
