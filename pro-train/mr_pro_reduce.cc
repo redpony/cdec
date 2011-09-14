@@ -218,6 +218,10 @@ int main(int argc, char** argv) {
   vector<weight_t> x, prev_x;  // x[0] is bias
   if (conf.count("weights")) {
     Weights::InitFromFile(conf["weights"].as<string>(), &x);
+    x.resize(FD::NumFeats());
+    prev_x = x;
+  } else {
+    x.resize(FD::NumFeats());
     prev_x = x;
   }
   cerr << "         Number of features: " << x.size() << endl;
