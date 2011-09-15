@@ -49,16 +49,14 @@ public:
   // TODO get rid of cat_?
   // TODO keep cat_ and add span and/or state? :)
   struct Node {
-    Node() : id_(), cat_(), promise(1) {}
+    Node() : id_(), cat_() {}
     int id_; // equal to this object's position in the nodes_ vector
     WordID cat_;  // non-terminal category if <0, 0 if not set
     WordID NT() const { return -cat_; }
     EdgesVector in_edges_;   // an in edge is an edge with this node as its head.  (in edges come from the bottom up to us)  indices in edges_
     EdgesVector out_edges_;  // an out edge is an edge with this node as its tail.  (out edges leave us up toward the top/goal). indices in edges_
-    double promise; // set in global pruning; in [0,infty) so that mean is 1.  use: e.g. scale cube poplimit.  //TODO: appears to be useless, compile without this?  on the other hand, pretty cheap.
     void copy_fixed(Node const& o) { // nonstructural fields only - structural ones are managed by sorting/pruning/subsetting
       cat_=o.cat_;
-      promise=o.promise;
     }
     void copy_reindex(Node const& o,indices_after const& n2,indices_after const& e2) {
       copy_fixed(o);
@@ -81,7 +79,7 @@ public:
     int head_node_;               // refers to a position in nodes_
     TailNodeVector tail_nodes_;   // contents refer to positions in nodes_
     TRulePtr rule_;
-    FeatureVector feature_values_;
+    SparseVector<weight_t> feature_values_;
     prob_t edge_prob_;             // dot product of weights and feat_values
     int id_;   // equal to this object's position in the edges_ vector
 
@@ -468,7 +466,7 @@ public:
   /// drop edge i if edge_margin[i] < prune_below, unless preserve_mask[i]
   void MarginPrune(EdgeProbs const& edge_margin,prob_t prune_below,EdgeMask const* preserve_mask=0,bool safe_inside=false,bool verbose=false);
 
-  //TODO: in my opinion, looking at the ratio of logprobs (features \dot weights) rather than the absolute difference generalizes more nicely across sentence lengths and weight vectors that are constant multiples of one another.  at least make that an option.  i worked around this a little in cdec by making "beam alpha per source word" but that's not helping with different tuning runs.  this would also make me more comfortable about allocating Node.promise
+  //TODO: in my opinion, looking at the ratio of logprobs (features \dot weights) rather than the absolute difference generalizes more nicely across sentence lengths and weight vectors that are constant multiples of one another.  at least make that an option.  i worked around this a little in cdec by making "beam alpha per source word" but that's not helping with different tuning runs.
 
   // beam_alpha=0 means don't beam prune, otherwise drop things that are e^beam_alpha times worse than best -   // prunes any edge whose prob_t on the best path taking that edge is more than e^alpha times
   //density=0 means don't density prune:   // for density>=1.0, keep this many times the edges needed for the 1best derivation
