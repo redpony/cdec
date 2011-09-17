@@ -13,7 +13,7 @@ bin_PROGRAMS = \
   mpi_extract_features \
   mpi_online_optimize \
   mpi_batch_optimize \
-  compute_cllh \
+  mpi_compute_cllh \
   augment_grammar
 
 noinst_PROGRAMS = \
@@ -34,8 +34,8 @@ mpi_extract_features_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteva
 mpi_batch_optimize_SOURCES = mpi_batch_optimize.cc optimize.cc
 mpi_batch_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
-compute_cllh_SOURCES = compute_cllh.cc
-compute_cllh_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+mpi_compute_cllh_SOURCES = mpi_compute_cllh.cc
+mpi_compute_cllh_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 augment_grammar_SOURCES = augment_grammar.cc
 augment_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
