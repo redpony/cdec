@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 #include <cassert>
 #include <iostream>
 #include <map>
@@ -104,11 +105,11 @@ public:
   typedef unsigned int size_type; // must be 32bit
 
   MD5();
-  MD5(const std::string& text);
+  MD5(const string& text);
   void update(const unsigned char *buf, size_type length);
   void update(const char *buf, size_type length);
   MD5& finalize();
-  std::string hexdigest() const;
+  string hexdigest() const;
 
 private:
   void init();
@@ -209,7 +210,7 @@ MD5::MD5()
 //////////////////////////////////////////////
 
 // nifty shortcut ctor, compute MD5 for string and finalize it right away
-MD5::MD5(const std::string &text)
+MD5::MD5(const string &text)
 {
   init();
   update(text.c_str(), text.length());
@@ -433,8 +434,7 @@ MD5& MD5::finalize()
 //////////////////////////////
 
 // return hex representation of digest as string
-std::string MD5::hexdigest() const
-{
+string MD5::hexdigest() const {
   if (!finalized)
     return "";
 
@@ -443,12 +443,12 @@ std::string MD5::hexdigest() const
     sprintf(buf+i*2, "%02x", digest[i]);
   buf[32]=0;
 
-  return std::string(buf);
+  return string(buf);
 }
 
 //////////////////////////////
 
-std::string md5(const std::string& str) {
+string md5(const string& str) {
     MD5 md5 = MD5(str);
     return md5.hexdigest();
 }
