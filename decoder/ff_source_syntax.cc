@@ -166,24 +166,26 @@ struct SourceSpanSizeFeaturesImpl {
   }
 
   int FireFeatures(const TRule& rule, const int i, const int j, const WordID* ants, SparseVector<double>* feats) {
-    int& fid = fids(i,j)[&rule];
-    if (fid <= 0) {
-      ostringstream os;
-      os << "SSS:";
-      unsigned ntc = 0;
-      for (unsigned k = 0; k < rule.f_.size(); ++k) {
-        if (k > 0) os << '_';
-        int fj = rule.f_[k];
-        if (fj <= 0) {
-          os << '[' << TD::Convert(-fj) << ants[ntc++] << ']';
-        } else {
-          os << TD::Convert(fj);
+    if (rule.Arity() > 0) {
+      int& fid = fids(i,j)[&rule];
+      if (fid <= 0) {
+        ostringstream os;
+        os << "SSS:";
+        unsigned ntc = 0;
+        for (unsigned k = 0; k < rule.f_.size(); ++k) {
+          if (k > 0) os << '_';
+          int fj = rule.f_[k];
+          if (fj <= 0) {
+            os << '[' << TD::Convert(-fj) << ants[ntc++] << ']';
+          } else {
+            os << TD::Convert(fj);
+          }
         }
+        fid = FD::Convert(os.str());
       }
-      fid = FD::Convert(os.str());
+      if (fid > 0)
+        feats->set_value(fid, 1.0);
     }
-    if (fid > 0)
-      feats->set_value(fid, 1.0);
     return SpanSizeTransform(j - i);
   }
 
