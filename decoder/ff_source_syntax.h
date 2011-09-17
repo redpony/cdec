@@ -21,4 +21,21 @@ class SourceSyntaxFeatures : public FeatureFunction {
   SourceSyntaxFeaturesImpl* impl;
 };
 
+struct SourceSpanSizeFeaturesImpl;
+class SourceSpanSizeFeatures : public FeatureFunction {
+ public:
+  SourceSpanSizeFeatures(const std::string& param);
+  ~SourceSpanSizeFeatures();
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const;
+  virtual void PrepareForInput(const SentenceMetadata& smeta);
+ private:
+  SourceSpanSizeFeaturesImpl* impl;
+};
+
 #endif
