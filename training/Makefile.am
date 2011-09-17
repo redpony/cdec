@@ -9,9 +9,9 @@ bin_PROGRAMS = \
   atools \
   plftools \
   collapse_weights \
-  cllh_filter_grammar \
-  mpi_online_optimize \
+  mpi_extract_reachable \
   mpi_extract_features \
+  mpi_online_optimize \
   mpi_batch_optimize \
   compute_cllh \
   augment_grammar
@@ -25,6 +25,9 @@ TESTS = lbfgs_test optimize_test
 mpi_online_optimize_SOURCES = mpi_online_optimize.cc online_optimizer.cc
 mpi_online_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
+mpi_extract_reachable_SOURCES = mpi_extract_reachable.cc
+mpi_extract_reachable_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+
 mpi_extract_features_SOURCES = mpi_extract_features.cc
 mpi_extract_features_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
@@ -33,9 +36,6 @@ mpi_batch_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/
 
 compute_cllh_SOURCES = compute_cllh.cc
 compute_cllh_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
-
-cllh_filter_grammar_SOURCES = cllh_filter_grammar.cc
-cllh_filter_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 augment_grammar_SOURCES = augment_grammar.cc
 augment_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
