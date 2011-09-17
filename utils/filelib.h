@@ -113,9 +113,6 @@ inline void CopyFile(std::string const& inf,std::ostream &out) {
   CopyFile(*r,out);
 }
 
-inline void CopyFile(std::string const& inf,std::string const& outf) {
-  WriteFile w(outf);
-  CopyFile(inf,*w);
-}
+void CopyFile(std::string const& inf,std::string const& outf);
 
 #endif

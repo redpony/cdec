@@ -2,6 +2,12 @@
 
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <cstdlib>
+#include <cstdio>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 using namespace std;
 
@@ -31,4 +37,17 @@ void MkDirP(const string& dir) {
     abort();
   }
 }
+
+#if 0
+void CopyFile(const string& inf, const string& outf) {
+  WriteFile w(outf);
+  CopyFile(inf,*w);
+}
+#else
+void CopyFile(const string& inf, const string& outf) {
+  ofstream of(outf.c_str(), fstream::trunc|fstream::binary);
+  ifstream in(inf.c_str(), fstream::binary);
+  of << in.rdbuf();
+}
+#endif
 
