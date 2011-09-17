@@ -157,3 +157,65 @@ void SourceSyntaxFeatures::PrepareForInput(const SentenceMetadata& smeta) {
   impl->InitializeGrids(smeta.GetSGMLValue("src_tree"), smeta.GetSourceLength());
 }
 
+struct SourceSpanSizeFeaturesImpl {
+  SourceSpanSizeFeaturesImpl() {}
+
+  void InitializeGrids(unsigned src_len) {
+    fids.clear();
+    fids.resize(src_len, src_len + 1);
+  }
+
+  int FireFeatures(const TRule& rule, const int i, const int j, const WordID* ants, SparseVector<double>* feats) {
+    int& fid = fids(i,j)[&rule];
+    if (fid <= 0) {
+      ostringstream os;
+      os << "SSS:";
+      unsigned ntc = 0;
+      for (unsigned k = 0; k < rule.f_.size(); ++k) {
+        if (k > 0) os << '_';
+        int fj = rule.f_[k];
+        if (fj <= 0) {
+          os << '[' << TD::Convert(-fj) << ants[ntc++] << ']';
+        } else {
+          os << TD::Convert(fj);
+        }
+      }
+      fid = FD::Convert(os.str());
+    }
+    if (fid > 0)
+      feats->set_value(fid, 1.0);
+    return SpanSizeTransform(j - i);
+  }
+
+  mutable Array2D<map<const TRule*, int> > fids;
+};
+
+SourceSpanSizeFeatures::SourceSpanSizeFeatures(const string& param) :
+    FeatureFunction(sizeof(char)) {
+  impl = new SourceSpanSizeFeaturesImpl;
+}
+
+SourceSpanSizeFeatures::~SourceSpanSizeFeatures() {
+  delete impl;
+  impl = NULL;
+}
+
+void SourceSpanSizeFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const {
+  int ants[8];
+  for (unsigned i = 0; i < ant_contexts.size(); ++i)
+    ants[i] = *static_cast<const char*>(ant_contexts[i]);
+
+  *static_cast<char*>(context) =
+     impl->FireFeatures(*edge.rule_, edge.i_, edge.j_, ants, features);
+}
+
+void SourceSpanSizeFeatures::PrepareForInput(const SentenceMetadata& smeta) {
+  impl->InitializeGrids(smeta.GetSourceLength());
+}
+
+
