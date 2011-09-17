@@ -181,6 +181,15 @@ struct SourceSpanSizeFeaturesImpl {
             os << TD::Convert(fj);
           }
         }
+        os << ':';
+        for (unsigned k = 0; k < rule.e_.size(); ++k) {
+          const int ei = rule.e_[k];
+          if (k > 0) os << '_';
+          if (ei <= 0)
+            os << '[' << (1-ei) << ']';
+          else
+            os << TD::Convert(ei);
+        }
         fid = FD::Convert(os.str());
       }
       if (fid > 0)
