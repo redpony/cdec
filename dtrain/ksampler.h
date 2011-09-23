@@ -2,7 +2,7 @@
 #define _DTRAIN_KSAMPLER_H_
 
 #include "kbest.h"
-#include "sample_hg.h"
+#include "hgsampler.h"
 #include "sampler.h"
 
 namespace dtrain

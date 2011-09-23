@@ -347,10 +347,9 @@ main( int argc, char** argv )
             cand_len = kb->sents[i].size();
         }
         NgramCounts counts_tmp = global_counts + counts;
-        // TODO as param
-        score = 0.9 * scorer( counts_tmp,
-                              global_ref_len,
-                              global_hyp_len + cand_len, N, bleu_weights );
+        score = .9*scorer( counts_tmp,
+                        global_ref_len,
+                        global_hyp_len + cand_len, N, bleu_weights );
       } else {
         // other scorers
         cand_len = kb->sents[i].size();
@@ -381,7 +380,8 @@ main( int argc, char** argv )
     if ( !noup ) {
 
       TrainingInstances pairs;
-      sample_all( kb, pairs );
+      sample_all_pairs(kb, pairs);
+      //sample_rand_pairs( kb, pairs, &rng );
        
       for ( TrainingInstances::iterator ti = pairs.begin();
             ti != pairs.end(); ti++ ) {
