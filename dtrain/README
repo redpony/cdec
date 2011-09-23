@@ -31,6 +31,7 @@ TODO
  use separate TEST SET
 
 KNOWN BUGS PROBLEMS
+ if size of candidate < N => 0 score
  cdec kbest vs 1best (no -k param), rescoring? => ok(?)
  no sparse vector in decoder => ok
  ? ok
