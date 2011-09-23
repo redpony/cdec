@@ -130,3 +130,4 @@ training/mpi_em_optimize
 training/test_ngram
 utils/ts
 training/compute_cllh
+dtrain/dtrain

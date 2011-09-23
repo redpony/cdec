@@ -1,24 +1,19 @@
-#include "common.h"
-#include "kbestget.h"
-#include "util.h"
-#include "sample.h"
+#include "dtrain.h"
 
-#include "ksampler.h"
 
-// boost compression
-#include <boost/iostreams/device/file.hpp> 
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-//#include <boost/iostreams/filter/zlib.hpp>
-//#include <boost/iostreams/filter/bzip2.hpp>
-using namespace boost::iostreams;
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/lexical_cast.hpp>
-
-#ifdef DTRAIN_DEBUG
-#include "tests.h"
-#endif
+/*
+ * register_and_convert
+ *
+ */
+void
+register_and_convert(const vector<string>& strs, vector<WordID>& ids)
+{
+  vector<string>::const_iterator it;
+  for ( it = strs.begin(); it < strs.end(); it++ ) {
+    ids.push_back( TD::Convert( *it ) );
+  }
+}
 
 
 /*
@@ -49,12 +44,7 @@ init(int argc, char** argv, po::variables_map* cfg)
   clo.add_options()
     ( "config,c",         po::value<string>(),              "dtrain config file" )
     ( "quiet,q",          po::value<bool>()->zero_tokens(),           "be quiet" )
-    ( "verbose,v",        po::value<bool>()->zero_tokens(),         "be verbose" )
-#ifndef DTRAIN_DEBUG
-    ;
-#else
-    ( "test", "run tests and exit");
-#endif
+    ( "verbose,v",        po::value<bool>()->zero_tokens(),         "be verbose" );
   po::options_description config_options, cmdline_options;
 
   config_options.add(conff);
@@ -149,9 +139,9 @@ main( int argc, char** argv )
   if ( !quiet )
     cout << setw(25) << "cdec cfg " << "'" << cfg["decoder_config"].as<string>() << "'" << endl;
   Decoder decoder( ini_rf.stream() );
-  //KBestGetter observer( k, filter_type );
+  KBestGetter observer( k, filter_type );
   MT19937 rng;
-  KSampler observer( k, &rng );
+  //KSampler observer( k, &rng );
 
   // scoring metric/scorer
   string scorer_str = cfg["scorer"].as<string>();
@@ -433,7 +423,7 @@ main( int argc, char** argv )
     }
 
     ++sid;
-    cerr << "reporter:counter:dtrain,sent," << sid << endl;
+    //cerr << "reporter:counter:dtrain,sent," << sid << endl;
 
   } // input loop
 
