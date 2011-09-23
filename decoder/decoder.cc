@@ -794,6 +794,11 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     cerr << "  Expected length  (words): " << res.r / res.p << "\t" << res << endl;
   }
 
+  if (conf.count("show_partition")) {
+    const prob_t z = Inside<prob_t, EdgeProb>(forest);
+    cerr << "  Partition         log(Z): " << log(z) << endl;
+  }
+
   SummaryFeature summary_feature_type = kNODE_RISK;
   if (conf["summary_feature_type"].as<string>() == "edge_risk")
     summary_feature_type = kEDGE_RISK;
