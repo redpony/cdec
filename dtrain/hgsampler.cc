@@ -1,4 +1,4 @@
-#include "sample_hg.h"
+#include "hgsampler.h"
 
 #include <queue>
 

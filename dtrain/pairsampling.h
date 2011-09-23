@@ -1,9 +1,8 @@
-#ifndef _DTRAIN_SAMPLE_H_
-#define _DTRAIN_SAMPLE_H_
-
+#ifndef _DTRAIN_PAIRSAMPLING_H_
+#define _DTRAIN_PAIRSAMPLING_H_
 
 #include "kbestget.h"
-
+#include "sampler.h" // cdec MT19937
 
 namespace dtrain
 {
@@ -11,19 +10,18 @@ namespace dtrain
 
 struct TPair
 {
-  SparseVector<double> first, second;
-  size_t first_rank, second_rank;
-  double first_score, second_score;
+  SparseVector<double> first,       second;
+  size_t               first_rank,  second_rank;
+  double               first_score, second_score;
 };
 
 typedef vector<TPair> TrainingInstances;
 
-
 void
-sample_all( KBestList* kb, TrainingInstances &training )
+sample_all_pairs(KBestList* kb, TrainingInstances &training)
 {
-  for ( size_t i = 0; i < kb->GetSize()-1; i++ ) {
-    for ( size_t j = i+1; j < kb->GetSize(); j++ ) {
+  for (size_t i = 0; i < kb->GetSize()-1; i++) {
+    for (size_t j = i+1; j < kb->GetSize(); j++) {
       TPair p;
       p.first = kb->feats[i];
       p.second = kb->feats[j];
@@ -31,18 +29,18 @@ sample_all( KBestList* kb, TrainingInstances &training )
       p.second_rank = j;
       p.first_score = kb->scores[i];
       p.second_score = kb->scores[j];
-      training.push_back( p );
+      training.push_back(p);
     }
   }
 }
 
 void
-sample_rand( KBestList* kb, TrainingInstances &training )
+sample_rand_pairs(KBestList* kb, TrainingInstances &training, MT19937* prng)
 {
-  srand( time(NULL) );
-  for ( size_t i = 0; i < kb->GetSize()-1; i++ ) {
-    for ( size_t j = i+1; j < kb->GetSize(); j++ ) {
-      if ( rand() % 2 ) {
+  srand(time(NULL));
+  for (size_t i = 0; i < kb->GetSize()-1; i++) {
+    for (size_t j = i+1; j < kb->GetSize(); j++) {
+      if (prng->next() < .5) {
         TPair p;
         p.first = kb->feats[i];
         p.second = kb->feats[j];
@@ -50,10 +48,11 @@ sample_rand( KBestList* kb, TrainingInstances &training )
         p.second_rank = j;
         p.first_score = kb->scores[i];
         p.second_score = kb->scores[j];
-        training.push_back( p );
+        training.push_back(p);
       }
     }
   }
+  cout << training.size() << " sampled" << endl;
 }
 
 
