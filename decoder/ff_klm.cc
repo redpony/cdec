@@ -92,10 +92,9 @@ class KLanguageModelImpl {
 
  public:
   double LookupWords(const TRule& rule, const vector<const void*>& ant_states, double* oovs, void* remnant) {
-    if (oovs) *oovs = 0;
+    *oovs = 0;
     const vector<WordID>& e = rule.e();
-    lm::ngram::ChartState state;
-    lm::ngram::RuleScore<Model> ruleScore(*ngram_, remnant ? *static_cast<lm::ngram::ChartState*>(remnant) : state);
+    lm::ngram::RuleScore<Model> ruleScore(*ngram_, *static_cast<lm::ngram::ChartState*>(remnant));
     unsigned i = 0;
     if (e.size()) {
       if (e[i] == kCDEC_SOS) {
@@ -115,13 +114,12 @@ class KLanguageModelImpl {
         const WordID cdec_word_or_class = ClassifyWordIfNecessary(e[i]);  // in future,
                                                                           // maybe handle emission
         const lm::WordIndex cur_word = MapWord(cdec_word_or_class); // map to LM's id
-        const bool is_oov = (cur_word == 0);
-        if (is_oov && oovs) (*oovs) += 1.0;
+        if (cur_word == 0) (*oovs) += 1.0;
         ruleScore.Terminal(cur_word);
       }
     }
     double ret = ruleScore.Finish();
-    state.ZeroRemaining();
+    static_cast<lm::ngram::ChartState*>(remnant)->ZeroRemaining();
     return ret;
   }
 
