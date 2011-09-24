@@ -2,7 +2,7 @@
 #define _DTRAIN_PAIRSAMPLING_H_
 
 #include "kbestget.h"
-#include "sampler.h" // cdec MT19937
+#include "sampler.h" // cdec, MT19937
 
 namespace dtrain
 {
@@ -17,7 +17,7 @@ struct TPair
 
 typedef vector<TPair> TrainingInstances;
 
-void
+inline void
 sample_all_pairs(KBestList* kb, TrainingInstances &training)
 {
   for (size_t i = 0; i < kb->GetSize()-1; i++) {
@@ -30,14 +30,13 @@ sample_all_pairs(KBestList* kb, TrainingInstances &training)
       p.first_score = kb->scores[i];
       p.second_score = kb->scores[j];
       training.push_back(p);
-    }
-  }
+    } // j
+  } // i
 }
 
-void
+inline void
 sample_rand_pairs(KBestList* kb, TrainingInstances &training, MT19937* prng)
 {
-  srand(time(NULL));
   for (size_t i = 0; i < kb->GetSize()-1; i++) {
     for (size_t j = i+1; j < kb->GetSize(); j++) {
       if (prng->next() < .5) {
@@ -50,14 +49,12 @@ sample_rand_pairs(KBestList* kb, TrainingInstances &training, MT19937* prng)
         p.second_score = kb->scores[j];
         training.push_back(p);
       }
-    }
-  }
-  cout << training.size() << " sampled" << endl;
+    } // j
+  } // i
 }
 
 
 } // namespace
-
 
 #endif
 

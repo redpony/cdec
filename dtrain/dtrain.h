@@ -2,59 +2,56 @@
 #define _DTRAIN_COMMON_H_
 
 
-#include <sstream>
-#include <iostream>
-#include <vector>
-#include <cassert>
-#include <cmath>
 #include <iomanip>
 
-// cdec includes
-#include "sentence_metadata.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/program_options.hpp>
+
 #include "verbose.h"
 #include "viterbi.h"
-#include "kbest.h"
 #include "ff_register.h"
 #include "decoder.h"
 #include "weights.h"
 
-// boost includes
-#include <boost/algorithm/string.hpp>
-#include <boost/program_options.hpp>
-
-// own headers
 #include "score.h"
-
-#define DTRAIN_DEFAULT_K 100                // k for kbest lists
-#define DTRAIN_DEFAULT_N 4                  // N for ngrams (e.g. BLEU)
-#define DTRAIN_DEFAULT_T 1                  // iterations
-#define DTRAIN_DEFAULT_SCORER "stupid_bleu" // scorer
-#define DTRAIN_DOTS 100                     // when to display a '.'
-#define DTRAIN_TMP_DIR "/tmp"               // put this on a SSD?
-#define DTRAIN_GRAMMAR_DELIM "########EOS########"
-
-
 #include "kbestget.h"
+#include "ksampler.h"
 #include "pairsampling.h"
 
-#include "ksampler.h"
-
-// boost compression
-#include <boost/iostreams/device/file.hpp> 
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-//#include <boost/iostreams/filter/zlib.hpp>
-//#include <boost/iostreams/filter/bzip2.hpp>
-using namespace boost::iostreams;
-
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/lexical_cast.hpp>
-
+#define DTRAIN_DOTS 100                     // when to display a '.'
+#define DTRAIN_TMP_DIR "/var/hadoop/mapred/local"               // put this on a SSD?
+#define DTRAIN_GRAMMAR_DELIM "########EOS########"
 
 using namespace std;
 using namespace dtrain;
 namespace po = boost::program_options;
 
+inline void register_and_convert(const vector<string>& strs, vector<WordID>& ids) {
+  vector<string>::const_iterator it;
+  for (it = strs.begin(); it < strs.end(); it++)
+    ids.push_back(TD::Convert(*it));
+}
+inline ostream& _np(ostream& out) { return out << resetiosflags(ios::showpos); }
+inline ostream& _p(ostream& out)  { return out << setiosflags(ios::showpos); }
+inline ostream& _p2(ostream& out) { return out << setprecision(2); }
+inline ostream& _p5(ostream& out) { return out << setprecision(5); }
+inline ostream& _p9(ostream& out) { return out << setprecision(9); }
+inline void strsplit(string &s, vector<string>& v, char d = '\t', size_t parts = 0) { 
+  stringstream ss(s);
+  string t;
+  size_t c = 0;
+  while(true)
+  {
+    if (parts > 0 && c == parts-1) {
+      getline(ss, t);
+      v.push_back(t);
+      break;
+    }
+    if (!getline(ss, t, d)) break;
+    v.push_back(t);
+    c++;
+  }
+}
 
 #endif
 
