@@ -1,2 +1,3 @@
-0	vorrichtung	means	[X] ||| vorrichtung ||| apparatus ||| LogP=-200 ||| 0-0 __NEXT_RULE__ [X] ||| vorrichtung ||| means ||| LogP=-101 ||| 0-0
-1	eintest	test	[X] ||| eintest ||| test ||| LogP=-200 ||| 0-0 __NEXT_RULE__ [X] ||| eintest ||| xxx ||| LogP=-101 ||| 0-0
+0	vorrichtung	means	[X] ||| vorrichtung ||| apparatus ||| LogP=0 ||| 0-0 __NEXT_RULE__ [X] ||| vorrichtung ||| means ||| LogP=-100 ||| 0-0
+1	Test	test	[X] ||| Test ||| test ||| LogP=0 ||| 0-0 __NEXT_RULE__ [X] ||| Test ||| xxx ||| LogP=-100 ||| 0-0
+2	kaputt	broken	
