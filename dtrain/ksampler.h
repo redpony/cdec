@@ -13,34 +13,33 @@ namespace dtrain
  * KSampler
  *
  */
-struct KSampler : public HypoSampler
+struct KSampler : public HypSampler
 {
   const size_t k_;
-  Samples s;
-  MT19937* rng;
+  vector<ScoredHyp> s_;
+  MT19937* prng_;
 
-  explicit KSampler( const size_t k, MT19937* prng ) :
-    k_(k), rng(prng) {}
+  explicit KSampler(const size_t k, MT19937* prng) :
+    k_(k), prng_(prng) {}
 
   virtual void
-  NotifyTranslationForest( const SentenceMetadata& smeta, Hypergraph* hg )
+  NotifyTranslationForest(const SentenceMetadata& smeta, Hypergraph* hg)
   {
-    Sample( *hg );
+    Sample(*hg);
   }
 
-  Samples* GetSamples() { return &s; }
+  vector<ScoredHyp>* GetSamples() { return &s_; }
 
-  void Sample( const Hypergraph& forest ) {
-    s.sents.clear();
-    s.feats.clear();
-    s.model_scores.clear();
-    s.scores.clear();
+  void Sample(const Hypergraph& forest) {
+    s_.clear();
     std::vector<HypergraphSampler::Hypothesis> samples;
-    HypergraphSampler::sample_hypotheses(forest, k_, rng, &samples);
+    HypergraphSampler::sample_hypotheses(forest, k_, prng_, &samples);
     for ( size_t i = 0; i < k_; ++i ) {
-      s.sents.push_back( samples[i].words );
-      s.feats.push_back( samples[i].fmap );
-      s.model_scores.push_back( log(samples[i].model_score) );
+      ScoredHyp h;
+      h.w = samples[i].words;
+      h.f = samples[i].fmap;
+      h.model = log(samples[i].model_score); 
+      s_.push_back(h);
     }
   }
 };
