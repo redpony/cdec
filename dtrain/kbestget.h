@@ -22,11 +22,11 @@ struct HypSampler : public DecoderObserver
 
 struct KBestGetter : public HypSampler
 {
-  const size_t k_;
+  const unsigned k_;
   const string filter_type_;
   vector<ScoredHyp> s_;
 
-  KBestGetter(const size_t k, const string filter_type) :
+  KBestGetter(const unsigned k, const string filter_type) :
     k_(k), filter_type_(filter_type) {}
 
   virtual void
@@ -51,9 +51,11 @@ struct KBestGetter : public HypSampler
   KBestUnique(const Hypergraph& forest)
   {
     s_.clear();
-    KBest::KBestDerivations<vector<WordID>, ESentenceTraversal, KBest::FilterUnique, prob_t, EdgeProb> kbest(forest, k_);
-    for (size_t i = 0; i < k_; ++i) {
-      const KBest::KBestDerivations<vector<WordID>, ESentenceTraversal, KBest::FilterUnique, prob_t, EdgeProb>::Derivation* d =
+    KBest::KBestDerivations<vector<WordID>, ESentenceTraversal,
+      KBest::FilterUnique, prob_t, EdgeProb> kbest(forest, k_);
+    for (unsigned i = 0; i < k_; ++i) {
+      const KBest::KBestDerivations<vector<WordID>, ESentenceTraversal, KBest::FilterUnique,
+              prob_t, EdgeProb>::Derivation* d =
             kbest.LazyKthBest(forest.nodes_.size() - 1, i);
       if (!d) break;
       ScoredHyp h;
@@ -69,7 +71,7 @@ struct KBestGetter : public HypSampler
   {
     s_.clear();
     KBest::KBestDerivations<vector<WordID>, ESentenceTraversal> kbest(forest, k_);
-    for (size_t i = 0; i < k_; ++i) {
+    for (unsigned i = 0; i < k_; ++i) {
       const KBest::KBestDerivations<vector<WordID>, ESentenceTraversal>::Derivation* d =
             kbest.LazyKthBest(forest.nodes_.size() - 1, i);
       if (!d) break;

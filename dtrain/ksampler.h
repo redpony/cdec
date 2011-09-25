@@ -11,11 +11,11 @@ namespace dtrain
 
 struct KSampler : public HypSampler
 {
-  const size_t k_;
+  const unsigned k_;
   vector<ScoredHyp> s_;
   MT19937* prng_;
 
-  explicit KSampler(const size_t k, MT19937* prng) :
+  explicit KSampler(const unsigned k, MT19937* prng) :
     k_(k), prng_(prng) {}
 
   virtual void
@@ -30,7 +30,7 @@ struct KSampler : public HypSampler
     s_.clear();
     std::vector<HypergraphSampler::Hypothesis> samples;
     HypergraphSampler::sample_hypotheses(forest, k_, prng_, &samples);
-    for (size_t i = 0; i < k_; ++i) {
+    for (unsigned i = 0; i < k_; ++i) {
       ScoredHyp h;
       h.w = samples[i].words;
       h.f = samples[i].fmap;

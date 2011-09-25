@@ -5,13 +5,13 @@ namespace dtrain
 
 
 Ngrams
-make_ngrams(vector<WordID>& s, size_t N)
+make_ngrams(vector<WordID>& s, unsigned N)
 {
   Ngrams ngrams;
   vector<WordID> ng;
   for (size_t i = 0; i < s.size(); i++) {
     ng.clear();
-    for (size_t j = i; j < min(i+N, s.size()); j++) {
+    for (unsigned j = i; j < min(i+N, s.size()); j++) {
       ng.push_back(s[j]);
       ngrams[ng]++;
     }
@@ -20,7 +20,7 @@ make_ngrams(vector<WordID>& s, size_t N)
 }
 
 NgramCounts
-make_ngram_counts(vector<WordID> hyp, vector<WordID> ref, size_t N)
+make_ngram_counts(vector<WordID> hyp, vector<WordID> ref, unsigned N)
 {
   Ngrams hyp_ngrams = make_ngrams(hyp, N);
   Ngrams ref_ngrams = make_ngrams(ref, N);
@@ -48,26 +48,22 @@ make_ngram_counts(vector<WordID> hyp, vector<WordID> ref, size_t N)
  * NOTE: 0 if one n in {1..N} has 0 count
  */
 score_t
-brevity_penaly(const size_t hyp_len, const size_t ref_len)
+brevity_penaly(const unsigned hyp_len, const unsigned ref_len)
 {
   if (hyp_len > ref_len) return 1;
-  return exp(1 - (score_t)ref_len/(score_t)hyp_len);
+  return exp(1 - (score_t)ref_len/hyp_len);
 }
 score_t
-bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len,
-      size_t N, vector<score_t> weights )
+bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len,
+      unsigned N, vector<score_t> weights )
 {
   if (hyp_len == 0 || ref_len == 0) return 0;
   if (ref_len < N) N = ref_len;
-  score_t N_ = (score_t)N;
-  if (weights.empty())
-  {
-    for (size_t i = 0; i < N; i++) weights.push_back(1/N_);
-  }
+  if (weights.empty()) for (unsigned i = 0; i < N; i++) weights.push_back(1./N);
   score_t sum = 0;
-  for (size_t i = 0; i < N; i++) {
+  for (unsigned i = 0; i < N; i++) {
     if (counts.clipped[i] == 0 || counts.sum[i] == 0) return 0;
-    sum += weights[i] * log((score_t)counts.clipped[i] / (score_t)counts.sum[i]);
+    sum += weights[i] * log((score_t)counts.clipped[i] / counts.sum[i]);
   }
   return brevity_penaly(hyp_len, ref_len) * exp(sum);
 }
@@ -83,21 +79,16 @@ bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len,
  * NOTE: 0 iff no 1gram match
  */
 score_t
-stupid_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len,
-             size_t N, vector<score_t> weights )
+stupid_bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len,
+             unsigned N, vector<score_t> weights )
 {
   if (hyp_len == 0 || ref_len == 0) return 0;
   if (ref_len < N) N = ref_len;
-  score_t N_ = (score_t)N;
-  if (weights.empty())
-  {
-    for (size_t i = 0; i < N; i++) weights.push_back(1/N_);
-  }
-  score_t sum = 0;
-  score_t add = 0;
-  for (size_t i = 0; i < N; i++) {
+  if (weights.empty()) for (unsigned i = 0; i < N; i++) weights.push_back(1./N);
+  score_t sum = 0, add = 0;
+  for (unsigned i = 0; i < N; i++) {
     if (i == 1) add = 1;
-    sum += weights[i] * log(((score_t)counts.clipped[i] + add) / ((score_t)counts.sum[i] + add));
+    sum += weights[i] * log(((score_t)counts.clipped[i] + add) / ((counts.sum[i] + add)));
   }
   return brevity_penaly(hyp_len, ref_len) * exp(sum);
 }
@@ -112,20 +103,16 @@ stupid_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len,
  * NOTE: max is 0.9375
  */
 score_t
-smooth_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len,
-            const size_t N, vector<score_t> weights )
+smooth_bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len,
+            const unsigned N, vector<score_t> weights )
 {
   if (hyp_len == 0 || ref_len == 0) return 0;
-  score_t N_ = (score_t)N;
-  if (weights.empty())
-  {
-    for (size_t i = 0; i < N; i++) weights.push_back(1/N_);
-  }
+  if (weights.empty()) for (unsigned i = 0; i < N; i++) weights.push_back(1./N);
   score_t sum = 0;
-  score_t j = 1;
-  for (size_t i = 0; i < N; i++) {
+  unsigned j = 1;
+  for (unsigned i = 0; i < N; i++) {
     if (counts.clipped[i] == 0 || counts.sum[i] == 0) continue;
-    sum += exp((weights[i] * log((score_t)counts.clipped[i]/(score_t)counts.sum[i]))) / pow(2, N_-j+1);
+    sum += exp((weights[i] * log((score_t)counts.clipped[i]/counts.sum[i]))) / pow(2, N-j+1);
     j++;
   }
   return brevity_penaly(hyp_len, ref_len) * sum;
@@ -139,11 +126,11 @@ smooth_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len,
  * (Chiang et al. '08)
  */
 score_t
-approx_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len,
-            const size_t N, vector<score_t> weights)
+approx_bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len,
+            const unsigned N, vector<score_t> weights)
 {
   return brevity_penaly(hyp_len, ref_len) 
-         * 0.9 * bleu(counts, hyp_len, ref_len, N, weights);
+           * 0.9 * bleu(counts, hyp_len, ref_len, N, weights);
 }
 
 
