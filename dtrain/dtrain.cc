@@ -91,7 +91,7 @@ main(int argc, char** argv)
   SetSilent(true);
   ReadFile ini_rf(cfg["decoder_config"].as<string>());
   if (!quiet)
-    cout << setw(25) << "cdec cfg " << "'" << cfg["decoder_config"].as<string>() << "'" << endl;
+    cerr << setw(25) << "cdec cfg " << "'" << cfg["decoder_config"].as<string>() << "'" << endl;
   Decoder decoder(ini_rf.stream());
 
   MT19937 rng; // random number generator
@@ -123,7 +123,7 @@ main(int argc, char** argv)
   size_t global_ref_len = 0;    // sum reference lengths
   // ^^^ global_* for approx_bleu
   vector<score_t> bleu_weights;   // we leave this empty -> 1/N 
-  if (!quiet) cout << setw(26) << "scorer '" << scorer_str << "'" << endl << endl;
+  if (!quiet) cerr << setw(26) << "scorer '" << scorer_str << "'" << endl << endl;
 
   // init weights
   Weights weights;
@@ -157,24 +157,24 @@ main(int argc, char** argv)
 
   // output cfg
   if (!quiet) {
-    cout << _p5;
-    cout << endl << "dtrain" << endl << "Parameters:" << endl;
-    cout << setw(25) << "k " << k << endl;
-    cout << setw(25) << "N " << N << endl;
-    cout << setw(25) << "T " << T << endl;
+    cerr << _p5;
+    cerr << endl << "dtrain" << endl << "Parameters:" << endl;
+    cerr << setw(25) << "k " << k << endl;
+    cerr << setw(25) << "N " << N << endl;
+    cerr << setw(25) << "T " << T << endl;
     if (cfg.count("stop-after"))
-      cout << setw(25) << "stop_after " << stop_after << endl;
+      cerr << setw(25) << "stop_after " << stop_after << endl;
     if (cfg.count("input_weights"))
-      cout << setw(25) << "weights in" << cfg["input_weights"].as<string>() << endl;
-    cout << setw(25) << "input " << "'" << cfg["input"].as<string>() << "'" << endl;
-    cout << setw(25) << "output " << "'" << cfg["output"].as<string>() << "'" << endl;
+      cerr << setw(25) << "weights in" << cfg["input_weights"].as<string>() << endl;
+    cerr << setw(25) << "input " << "'" << cfg["input"].as<string>() << "'" << endl;
+    cerr << setw(25) << "output " << "'" << cfg["output"].as<string>() << "'" << endl;
     if (sample_from == "kbest")
-      cout << setw(25) << "filter " << "'" << filter_type << "'" << endl;
-    cout << setw(25) << "learning rate " << eta << endl;
-    cout << setw(25) << "gamma " << gamma << endl;
-    cout << setw(25) << "sample from " << "'" << sample_from << "'" << endl;
-    cout << setw(25) << "pairs " << "'" << pair_sampling << "'" << endl;
-    if (!verbose) cout << "(a dot represents " << DTRAIN_DOTS << " lines of input)" << endl;
+      cerr << setw(25) << "filter " << "'" << filter_type << "'" << endl;
+    cerr << setw(25) << "learning rate " << eta << endl;
+    cerr << setw(25) << "gamma " << gamma << endl;
+    cerr << setw(25) << "sample from " << "'" << sample_from << "'" << endl;
+    cerr << setw(25) << "pairs " << "'" << pair_sampling << "'" << endl;
+    if (!verbose) cerr << "(a dot represents " << DTRAIN_DOTS << " lines of input)" << endl;
   }
 
 
@@ -187,7 +187,7 @@ main(int argc, char** argv)
   if (t > 0) grammar_buf_in.open(grammar_buf_fn);
   score_t score_sum = 0., model_sum = 0.;
   size_t ii = 0;
-  if (!quiet) cout << "Iteration #" << t+1 << " of " << T << "." << endl;
+  if (!quiet) cerr << "Iteration #" << t+1 << " of " << T << "." << endl;
   
   while(true)
   {
@@ -204,21 +204,21 @@ main(int argc, char** argv)
     
     // produce some pretty output
     if (!quiet && !verbose) {
-      if (ii == 0) cout << " ";
+      if (ii == 0) cerr << " ";
       if ((ii+1) % (DTRAIN_DOTS) == 0) {
-        cout << ".";
-        cout.flush();
+        cerr << ".";
+        cerr.flush();
       }
       if ((ii+1) % (20*DTRAIN_DOTS) == 0) {
-        cout << " " << ii+1 << endl;
-        if (!next && !stop) cout << " ";
+        cerr << " " << ii+1 << endl;
+        if (!next && !stop) cerr << " ";
       }
       if (stop) {
-        if (ii % (20*DTRAIN_DOTS) != 0) cout << " " << ii << endl;
-        cout << "Stopping after " << stop_after << " input sentences." << endl;
+        if (ii % (20*DTRAIN_DOTS) != 0) cerr << " " << ii << endl;
+        cerr << "Stopping after " << stop_after << " input sentences." << endl;
       } else {
         if (next) {
-          if (ii % (20*DTRAIN_DOTS) != 0) cout << " " << ii << endl;
+          if (ii % (20*DTRAIN_DOTS) != 0) cerr << " " << ii << endl;
         }
       }
     }
@@ -309,14 +309,14 @@ main(int argc, char** argv)
       }
 
       if (verbose) {
-        if (i == 0) cout << "'" << TD::GetString(ref_ids) << "' [ref]" << endl;
-        cout << _p5 << _np << "[hyp " << i << "] " << "'" << TD::GetString((*samples)[i].w) << "'";
-        cout << " [SCORE=" << score << ",model="<< (*samples)[i].model << "]" << endl;
-        cout << (*samples)[i].f << endl;
+        if (i == 0) cerr << "'" << TD::GetString(ref_ids) << "' [ref]" << endl;
+        cerr << _p5 << _np << "[hyp " << i << "] " << "'" << TD::GetString((*samples)[i].w) << "'";
+        cerr << " [SCORE=" << score << ",model="<< (*samples)[i].model << "]" << endl;
+        cerr << (*samples)[i].f << endl;
       }
     } // sample/scoring loop
 
-    if (verbose) cout << endl;
+    if (verbose) cerr << endl;
 
 //////////////////////////////////////////////////////////
     // UPDATE WEIGHTS
@@ -344,14 +344,14 @@ main(int argc, char** argv)
           lambdas += dv * eta;
 
           if (verbose) {
-            /*cout << "{{ f("<< ti->first_rank <<") > f(" << ti->second_rank << ") but g(i)="<< ti->first_score <<" < g(j)="<< ti->second_score << " so update" << endl;
-            cout << " i  " << TD::GetString(samples->sents[ti->first_rank]) << endl;
-            cout << "    " << samples->feats[ti->first_rank] << endl;
-            cout << " j  " << TD::GetString(samples->sents[ti->second_rank]) << endl;
-            cout << "    " << samples->feats[ti->second_rank] << endl; 
-            cout << " diff vec: " << dv << endl;
-            cout << " lambdas after update: " << lambdas << endl;
-            cout << "}}" << endl;*/
+            /*cerr << "{{ f("<< ti->first_rank <<") > f(" << ti->second_rank << ") but g(i)="<< ti->first_score <<" < g(j)="<< ti->second_score << " so update" << endl;
+            cerr << " i  " << TD::GetString(samples->sents[ti->first_rank]) << endl;
+            cerr << "    " << samples->feats[ti->first_rank] << endl;
+            cerr << " j  " << TD::GetString(samples->sents[ti->second_rank]) << endl;
+            cerr << "    " << samples->feats[ti->second_rank] << endl; 
+            cerr << " diff vec: " << dv << endl;
+            cerr << " lambdas after update: " << lambdas << endl;
+            cerr << "}}" << endl;*/
           }
         } else {
           //SparseVector<double> reg;
@@ -391,15 +391,15 @@ main(int argc, char** argv)
     model_diff = model_avg;
   }
   if (!quiet) {
-  cout << _p5 << _p << "WEIGHTS" << endl;
+  cerr << _p5 << _p << "WEIGHTS" << endl;
   for (vector<string>::iterator it = print_weights.begin(); it != print_weights.end(); it++) {
-    cout << setw(16) << *it << " = " << lambdas.get(FD::Convert(*it)) << endl;
+    cerr << setw(16) << *it << " = " << lambdas.get(FD::Convert(*it)) << endl;
   }
-  cout << "        ---" << endl;
-  cout << _np << "      1best avg score: " << score_avg;
-  cout << _p << " (" << score_diff << ")" << endl;
-  cout << _np << "1best avg model score: " << model_avg;
-  cout << _p << " (" << model_diff << ")" << endl;
+  cerr << "        ---" << endl;
+  cerr << _np << "      1best avg score: " << score_avg;
+  cerr << _p << " (" << score_diff << ")" << endl;
+  cerr << _np << "1best avg model score: " << model_avg;
+  cerr << _p << " (" << model_diff << ")" << endl;
   }
   pair<score_t,score_t> remember;
   remember.first = score_avg;
@@ -413,10 +413,10 @@ main(int argc, char** argv)
   float time_diff = difftime(end, start);
   overall_time += time_diff;
   if (!quiet) {
-    cout << _p2 << _np << "(time " << time_diff/60. << " min, ";
-    cout << time_diff/(float)in_sz<< " s/S)" << endl;
+    cerr << _p2 << _np << "(time " << time_diff/60. << " min, ";
+    cerr << time_diff/(float)in_sz<< " s/S)" << endl;
   }
-  if (t+1 != T && !quiet) cout << endl;
+  if (t+1 != T && !quiet) cerr << endl;
 
   if (noup) break;
 
@@ -425,12 +425,12 @@ main(int argc, char** argv)
   unlink(grammar_buf_fn);
 
   if (!noup) {
-    if (!quiet) cout << endl << "writing weights file '" << cfg["output"].as<string>() << "' ...";
+    if (!quiet) cerr << endl << "writing weights file '" << cfg["output"].as<string>() << "' ...";
     if (cfg["output"].as<string>() == "-") {
+      cout << _p9;
       for (SparseVector<double>::const_iterator ti = lambdas.begin();
             ti != lambdas.end(); ++ti) {
 	if (ti->second == 0) continue;
-        cout << _p9;
         cout << _np << FD::Convert(ti->first) << "\t" << ti->second << endl;
       }
       if (hstreaming) cout << "__SHARD_COUNT__\t1" << endl;
@@ -438,13 +438,13 @@ main(int argc, char** argv)
       weights.InitFromVector(lambdas);
       weights.WriteToFile(cfg["output"].as<string>(), true);
     }
-    if (!quiet) cout << "done" << endl;
+    if (!quiet) cerr << "done" << endl;
   }
   
   if (!quiet) {
-    cout << _p5 << _np << endl << "---" << endl << "Best iteration: ";
-    cout << best_it+1 << " [SCORE '" << scorer_str << "'=" << max_score << "]." << endl;
-    cout << _p2 << "This took " << overall_time/60. << " min." << endl;
+    cerr << _p5 << _np << endl << "---" << endl << "Best iteration: ";
+    cerr << best_it+1 << " [SCORE '" << scorer_str << "'=" << max_score << "]." << endl;
+    cerr << _p2 << "This took " << overall_time/60. << " min." << endl;
   }
 
   return 0;
