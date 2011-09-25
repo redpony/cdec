@@ -253,7 +253,7 @@ main(int argc, char** argv)
         }
       }
       if (broken_grammar) continue;
-      boost::replace_all(in_split[3], " __NEXT__RULE__ ", "\n");
+      boost::replace_all(in_split[3], " __NEXT__RULE__ ", "\n"); // TODO
       in_split[3] += "\n";
       grammar_buf_out << in_split[3] << DTRAIN_GRAMMAR_DELIM << " " << in_split[0] << endl;
       decoder.SetSentenceGrammarFromString(in_split[3]);
