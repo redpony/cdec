@@ -8,21 +8,19 @@ namespace dtrain
 {
 
 
-struct TPair
+struct Pair
 {
   SparseVector<double> first,       second;
   size_t               first_rank,  second_rank;
   double               first_score, second_score;
 };
 
-typedef vector<TPair> TrainingInstances;
-
 inline void
-sample_all_pairs(KBestList* kb, TrainingInstances &training)
+sample_all_pairs(Samples* kb, vector<Pair> &training)
 {
   for (size_t i = 0; i < kb->GetSize()-1; i++) {
     for (size_t j = i+1; j < kb->GetSize(); j++) {
-      TPair p;
+      Pair p;
       p.first = kb->feats[i];
       p.second = kb->feats[j];
       p.first_rank = i;
@@ -35,12 +33,12 @@ sample_all_pairs(KBestList* kb, TrainingInstances &training)
 }
 
 inline void
-sample_rand_pairs(KBestList* kb, TrainingInstances &training, MT19937* prng)
+sample_rand_pairs(Samples* kb, vector<Pair> &training, MT19937* prng)
 {
   for (size_t i = 0; i < kb->GetSize()-1; i++) {
     for (size_t j = i+1; j < kb->GetSize(); j++) {
       if (prng->next() < .5) {
-        TPair p;
+        Pair p;
         p.first = kb->feats[i];
         p.second = kb->feats[j];
         p.first_rank = i;

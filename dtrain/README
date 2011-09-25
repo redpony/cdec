@@ -1,13 +1,4 @@
-NOTES
- learner gets all used features (binary! and dense (logprob is sum of logprobs!))
- weights: see decoder/decoder.cc line 548
- (40k sents, k=100 = ~400M mem, 1 iteration 45min)?
- utils/weights.cc: why wv_?
- FD, Weights::wv_ grow too large, see utils/weights.cc;
-     decoder/hg.h; decoder/scfg_translator.cc; utils/fdict.cc
-
 TODO
- enable kbest FILTERING (nofiler vs unique)
  MULTIPARTITE ranking (108010, 1 vs all, cluster modelscore;score)
  what about RESCORING?
  REMEMBER kbest (merge) weights?
@@ -30,7 +21,7 @@ TODO
  non deterministic, high variance, RANDOM RESTARTS
  use separate TEST SET
 
-KNOWN BUGS PROBLEMS
+KNOWN BUGS, PROBLEMS
  doesn't select best iteration for weigts
  if size of candidate < N => 0 score
  cdec kbest vs 1best (no -k param), rescoring? => ok(?)
