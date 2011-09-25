@@ -9,10 +9,6 @@ namespace dtrain
 {
 
 
-/*
- * KSampler
- *
- */
 struct KSampler : public HypSampler
 {
   const size_t k_;
@@ -34,7 +30,7 @@ struct KSampler : public HypSampler
     s_.clear();
     std::vector<HypergraphSampler::Hypothesis> samples;
     HypergraphSampler::sample_hypotheses(forest, k_, prng_, &samples);
-    for ( size_t i = 0; i < k_; ++i ) {
+    for (size_t i = 0; i < k_; ++i) {
       ScoredHyp h;
       h.w = samples[i].words;
       h.f = samples[i].fmap;
