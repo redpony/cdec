@@ -19,17 +19,17 @@ typedef double score_t; // float
 
 struct NgramCounts
 {
-  size_t N_;
-  map<size_t, size_t> clipped;
-  map<size_t, size_t> sum;
+  unsigned N_;
+  map<unsigned, unsigned> clipped;
+  map<unsigned, unsigned> sum;
 
-  NgramCounts(const size_t N) : N_(N) { reset(); } 
+  NgramCounts(const unsigned N) : N_(N) { reset(); } 
 
   void
   operator+=(const NgramCounts& rhs)
   {
     assert(N_ == rhs.N_);
-    for (size_t i = 0; i < N_; i++) {
+    for (unsigned i = 0; i < N_; i++) {
       this->clipped[i] += rhs.clipped.find(i)->second;
       this->sum[i] += rhs.sum.find(i)->second;
     }
@@ -44,7 +44,7 @@ struct NgramCounts
   }
 
   void
-  add(size_t count, size_t ref_count, size_t i)
+  add(unsigned count, unsigned ref_count, unsigned i)
   {
     assert(i < N_);
     if (count > ref_count) {
@@ -59,7 +59,7 @@ struct NgramCounts
   void
   reset()
   {
-    size_t i;
+    unsigned i;
     for (i = 0; i < N_; i++) {
       clipped[i] = 0;
       sum[i] = 0;
@@ -69,26 +69,26 @@ struct NgramCounts
   void
   print()
   {
-    for (size_t i = 0; i < N_; i++) {
+    for (unsigned i = 0; i < N_; i++) {
       cout << i+1 << "grams (clipped):\t" << clipped[i] << endl;
       cout << i+1 << "grams:\t\t\t" << sum[i] << endl;
     }
   }
 };
 
-typedef map<vector<WordID>, size_t> Ngrams;
+typedef map<vector<WordID>, unsigned> Ngrams;
 
-Ngrams make_ngrams(vector<WordID>& s, size_t N);
-NgramCounts make_ngram_counts(vector<WordID> hyp, vector<WordID> ref, size_t N);
+Ngrams make_ngrams(vector<WordID>& s, unsigned N);
+NgramCounts make_ngram_counts(vector<WordID> hyp, vector<WordID> ref, unsigned N);
 
-score_t brevity_penaly(const size_t hyp_len, const size_t ref_len);
-score_t bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len, const size_t N,
+score_t brevity_penaly(const unsigned hyp_len, const unsigned ref_len);
+score_t bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len, const unsigned N,
              vector<score_t> weights = vector<score_t>());
-score_t stupid_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len, size_t N,
+score_t stupid_bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len, unsigned N,
                     vector<score_t> weights = vector<score_t>());
-score_t smooth_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len, const size_t N,
+score_t smooth_bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len, const unsigned N,
                     vector<score_t> weights = vector<score_t>());
-score_t approx_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len, const size_t N,
+score_t approx_bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len, const unsigned N,
                     vector<score_t> weights = vector<score_t>());
 
 
