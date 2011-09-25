@@ -1,21 +1,22 @@
 #ifndef _DTRAIN_KSAMPLER_H_
 #define _DTRAIN_KSAMPLER_H_
 
-#include "kbest.h"
 #include "hgsampler.h"
+#include "kbest.h" // cdec
 #include "sampler.h"
 
 namespace dtrain
 {
 
+
 /*
  * KSampler
  *
  */
-struct KSampler : public DecoderObserver
+struct KSampler : public HypoSampler
 {
   const size_t k_;
-  KBestList kb;
+  Samples s;
   MT19937* rng;
 
   explicit KSampler( const size_t k, MT19937* prng ) :
@@ -27,26 +28,25 @@ struct KSampler : public DecoderObserver
     Sample( *hg );
   }
 
-  KBestList* GetKBest() { return &kb; }
+  Samples* GetSamples() { return &s; }
 
   void Sample( const Hypergraph& forest ) {
-    kb.sents.clear();
-    kb.feats.clear();
-    kb.model_scores.clear();
-    kb.scores.clear();
+    s.sents.clear();
+    s.feats.clear();
+    s.model_scores.clear();
+    s.scores.clear();
     std::vector<HypergraphSampler::Hypothesis> samples;
     HypergraphSampler::sample_hypotheses(forest, k_, rng, &samples);
     for ( size_t i = 0; i < k_; ++i ) {
-      kb.sents.push_back( samples[i].words );
-      kb.feats.push_back( samples[i].fmap );
-      kb.model_scores.push_back( log(samples[i].model_score) );
+      s.sents.push_back( samples[i].words );
+      s.feats.push_back( samples[i].fmap );
+      s.model_scores.push_back( log(samples[i].model_score) );
     }
   }
 };
 
 
 } // namespace
-
 
 #endif
 

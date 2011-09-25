@@ -4,64 +4,66 @@
 bool
 dtrain_init(int argc, char** argv, po::variables_map* cfg)
 {
-  po::options_description conff("Configuration File Options");
-  conff.add_options()
-    ("decoder_config", po::value<string>(),                       "configuration file for cdec")
-    ("kbest",          po::value<size_t>()->default_value(100),                   "k for kbest")
-    ("ngrams",         po::value<size_t>()->default_value(3),                    "N for Ngrams")
-    ("filter",         po::value<string>()->default_value("unique"),        "filter kbest list")
-    ("epochs",         po::value<size_t>()->default_value(2),               "# of iterations T") 
-    ("input",          po::value<string>()->default_value("-"),                    "input file")
-    ("output",         po::value<string>()->default_value("-"),           "output weights file")
-    ("scorer",         po::value<string>()->default_value("stupid_bleu"),      "scoring metric")
-    ("stop_after",     po::value<size_t>()->default_value(0),    "stop after X input sentences")
-    ("input_weights",  po::value<string>(), "input weights file (e.g. from previous iteration)")
-    ("wprint",         po::value<string>(),                "weights to print on each iteration")
-    ("hstreaming",     po::value<bool>()->zero_tokens(),         "run in hadoop streaming mode")
-    ("noup",           po::value<bool>()->zero_tokens(),                "do not update weights");
-
-  po::options_description clo("Command Line Options");
-  clo.add_options()
+  po::options_description ini("Configuration File Options");
+  ini.add_options()
+    ("input",          po::value<string>()->default_value("-"),                          "input file")
+    ("output",         po::value<string>()->default_value("-"),       "output weights file (or VOID)")
+    ("input_weights",  po::value<string>(),       "input weights file (e.g. from previous iteration)")
+    ("decoder_config", po::value<string>(),                             "configuration file for cdec")
+    ("ksamples",       po::value<size_t>()->default_value(100), "size of kbest or sample from forest")
+    ("sample_from",    po::value<string>()->default_value("kbest"),  "where to get translations from")
+    ("filter",         po::value<string>()->default_value("unique"),              "filter kbest list")
+    ("pair_sampling",  po::value<string>()->default_value("all"),    "how to sample pairs: all, rand")
+    ("ngrams",         po::value<size_t>()->default_value(3),                          "N for Ngrams")
+    ("epochs",         po::value<size_t>()->default_value(2),                     "# of iterations T") 
+    ("scorer",         po::value<string>()->default_value("stupid_bleu"),            "scoring metric")
+    ("stop_after",     po::value<size_t>()->default_value(0),          "stop after X input sentences")
+    ("print_weights",  po::value<string>(),                      "weights to print on each iteration")
+    ("hstreaming",     po::value<bool>()->zero_tokens(),               "run in hadoop streaming mode")
+    ("learning_rate",  po::value<double>()->default_value(0.0005),                    "learning rate")
+    ("gamma",          po::value<double>()->default_value(0.),     "gamma for SVM (0 for perceptron)")
+    ("noup",           po::value<bool>()->zero_tokens(),                      "do not update weights");
+  po::options_description cl("Command Line Options");
+  cl.add_options()
     ("config,c",         po::value<string>(),              "dtrain config file")
     ("quiet,q",          po::value<bool>()->zero_tokens(),           "be quiet")
     ("verbose,v",        po::value<bool>()->zero_tokens(),         "be verbose");
-  po::options_description config_options, cmdline_options;
-
-  config_options.add(conff);
-  cmdline_options.add(clo);
-  cmdline_options.add(conff);
-
-  po::store(parse_command_line(argc, argv, cmdline_options), *cfg);
+  cl.add(ini);
+  po::store(parse_command_line(argc, argv, cl), *cfg);
   if (cfg->count("config")) {
-    ifstream config((*cfg)["config"].as<string>().c_str());
-    po::store(po::parse_config_file(config, config_options), *cfg);
+    ifstream ini_f((*cfg)["config"].as<string>().c_str());
+    po::store(po::parse_config_file(ini_f, ini), *cfg);
   }
   po::notify(*cfg);
-
   if (!cfg->count("decoder_config")) { 
-    cerr << cmdline_options << endl;
+    cerr << cl << endl;
     return false;
   }
   if (cfg->count("hstreaming") && (*cfg)["output"].as<string>() != "-") {
     cerr << "When using 'hstreaming' the 'output' param should be '-'.";
     return false;
   }
-  if (cfg->count("filter") && (*cfg)["filter"].as<string>() != "unique"
+  if ((*cfg)["filter"].as<string>() != "unique"
        && (*cfg)["filter"].as<string>() != "no") {
-    cerr << "Wrong 'filter' type: '" << (*cfg)["filter"].as<string>() << "'." << endl;
+    cerr << "Wrong 'filter' param: '" << (*cfg)["filter"].as<string>() << "', use 'unique' or 'no'." << endl;
+  }
+  if ((*cfg)["pair_sampling"].as<string>() != "all"
+       && (*cfg)["pair_sampling"].as<string>() != "rand") {
+    cerr << "Wrong 'pair_sampling' param: '" << (*cfg)["pair_sampling"].as<string>() << "', use 'all' or 'rand'." << endl;
+  }
+  if ((*cfg)["sample_from"].as<string>() != "kbest"
+       && (*cfg)["sample_from"].as<string>() != "forest") {
+    cerr << "Wrong 'sample_from' param: '" << (*cfg)["sample_from"].as<string>() << "', use 'kbest' or 'forest'." << endl;
   }
   return true;
 }
 
-#include "filelib.h"
-
 int
 main(int argc, char** argv)
 {
-  cout << _p5;
   // handle most parameters
   po::variables_map cfg;
-  if (! dtrain_init(argc, argv, &cfg)) exit(1); // something is wrong 
+  if (!dtrain_init(argc, argv, &cfg)) exit(1); // something is wrong 
   bool quiet = false;
   if (cfg.count("quiet")) quiet = true;
   bool verbose = false;  
@@ -73,43 +75,37 @@ main(int argc, char** argv)
     hstreaming = true;
     quiet = true;
   }
-  const size_t k = cfg["kbest"].as<size_t>();
+  const size_t k = cfg["ksamples"].as<size_t>();
   const size_t N = cfg["ngrams"].as<size_t>(); 
   const size_t T = cfg["epochs"].as<size_t>();
   const size_t stop_after = cfg["stop_after"].as<size_t>();
   const string filter_type = cfg["filter"].as<string>();
-  if (!quiet) {
-    cout << endl << "dtrain" << endl << "Parameters:" << endl;
-    cout << setw(25) << "k " << k << endl;
-    cout << setw(25) << "N " << N << endl;
-    cout << setw(25) << "T " << T << endl;
-    if (cfg.count("stop-after"))
-      cout << setw(25) << "stop_after " << stop_after << endl;
-    if (cfg.count("input_weights"))
-      cout << setw(25) << "weights " << cfg["weights"].as<string>() << endl;
-    cout << setw(25) << "input " << "'" << cfg["input"].as<string>() << "'" << endl;
-    cout << setw(25) << "filter " << "'" << filter_type << "'" << endl;
-  }
+  const string sample_from = cfg["sample_from"].as<string>();
+  const string pair_sampling = cfg["pair_sampling"].as<string>();
+  vector<string> print_weights;
+  if (cfg.count("print_weights"))
+    boost::split(print_weights, cfg["print_weights"].as<string>(), boost::is_any_of(" "));
 
-  vector<string> wprint;
-  if (cfg.count("wprint")) {
-    boost::split(wprint, cfg["wprint"].as<string>(), boost::is_any_of(" "));
-  }
-
-  // setup decoder, observer
+  // setup decoder
   register_feature_functions();
   SetSilent(true);
   ReadFile ini_rf(cfg["decoder_config"].as<string>());
   if (!quiet)
     cout << setw(25) << "cdec cfg " << "'" << cfg["decoder_config"].as<string>() << "'" << endl;
   Decoder decoder(ini_rf.stream());
-  KBestGetter observer(k, filter_type);
-  MT19937 rng;
-  //KSampler observer(k, &rng);
+
+  MT19937 rng; // random number generator
+  // setup decoder observer
+  HypoSampler* observer;
+  if (sample_from == "kbest") {
+    observer = dynamic_cast<KBestGetter*>(new KBestGetter(k, filter_type));
+  } else {
+    observer = dynamic_cast<KSampler*>(new KSampler(k, &rng));
+  }
 
   // scoring metric/scorer
   string scorer_str = cfg["scorer"].as<string>();
-  double (*scorer)(NgramCounts&, const size_t, const size_t, size_t, vector<float>);
+  score_t (*scorer)(NgramCounts&, const size_t, const size_t, size_t, vector<score_t>);
   if (scorer_str == "bleu") {
     scorer = &bleu;
   } else if (scorer_str == "stupid_bleu") {
@@ -122,58 +118,64 @@ main(int argc, char** argv)
     cerr << "Don't know scoring metric: '" << scorer_str << "', exiting." << endl;
     exit(1);
   }
-  // for approx_bleu
   NgramCounts global_counts(N); // counts for 1 best translations
-  size_t global_hyp_len = 0;      // sum hypothesis lengths
-  size_t global_ref_len = 0;      // sum reference lengths
-  // this is all BLEU implmentations
-  vector<float> bleu_weights; // we leave this empty -> 1/N; TODO? 
+  size_t global_hyp_len = 0;    // sum hypothesis lengths
+  size_t global_ref_len = 0;    // sum reference lengths
+  // ^^^ global_* for approx_bleu
+  vector<score_t> bleu_weights;   // we leave this empty -> 1/N 
   if (!quiet) cout << setw(26) << "scorer '" << scorer_str << "'" << endl << endl;
 
   // init weights
   Weights weights;
-  if (cfg.count("weights")) weights.InitFromFile(cfg["weights"].as<string>());
+  if (cfg.count("input_weights")) weights.InitFromFile(cfg["input_weights"].as<string>());
   SparseVector<double> lambdas;
   weights.InitSparseVector(&lambdas);
   vector<double> dense_weights;
 
-  // input
-  if (!quiet && !verbose)
-    cout << "(a dot represents " << DTRAIN_DOTS << " lines of input)" << endl;
-  string input_fn = cfg["input"].as<string>();
-  ifstream input;
-  if (input_fn != "-") input.open(input_fn.c_str());
-  string in;
-  vector<string> in_split; // input: src\tref\tpsg
-  vector<string> ref_tok;  // tokenized reference
-  vector<WordID> ref_ids;  // reference as vector of WordID
+  // meta params for perceptron, SVM
+  double eta = cfg["learning_rate"].as<double>();
+  double gamma = cfg["gamma"].as<double>();
+  lambdas.add_value(FD::Convert("__bias"), 0);
 
-  // buffer input for t > 0
-  vector<string> src_str_buf;           // source strings, TODO? memory
-  vector<vector<WordID> > ref_ids_buf;  // references as WordID vecs
+  // input
+  string input_fn = cfg["input"].as<string>();
+  ReadFile input(input_fn);
+    // buffer input for t > 0
+  vector<string> src_str_buf;          // source strings
+  vector<vector<WordID> > ref_ids_buf; // references as WordID vecs
   // this is for writing the grammar buffer file
   char grammar_buf_fn[] = DTRAIN_TMP_DIR"/dtrain-grammars-XXXXXX";
   mkstemp(grammar_buf_fn);
   ogzstream grammar_buf_out;
   grammar_buf_out.open(grammar_buf_fn);
   
-  size_t sid = 0, in_sz = 99999999; // sentence id, input size
-  double acc_1best_score = 0., acc_1best_model = 0.;
-  vector<vector<double> > scores_per_iter;
-  double max_score = 0.;
-  size_t best_t = 0;
-  bool next = false, stop = false;
-  double score = 0.;
-  size_t cand_len = 0;
-  double overall_time = 0.;
+  size_t in_sz = 999999999; // input index, input size
+  vector<pair<score_t,score_t> > all_scores;
+  score_t max_score = 0.;
+  size_t best_it = 0;
+  float overall_time = 0.;
 
-  // for the perceptron/SVM; TODO as params
-  double eta = 0.0005;
-  double gamma = 0.;//01; // -> SVM
-  lambdas.add_value(FD::Convert("__bias"), 0);
-  
-  // for random sampling
-  srand (time(NULL));
+  // output cfg
+  if (!quiet) {
+    cout << _p5;
+    cout << endl << "dtrain" << endl << "Parameters:" << endl;
+    cout << setw(25) << "k " << k << endl;
+    cout << setw(25) << "N " << N << endl;
+    cout << setw(25) << "T " << T << endl;
+    if (cfg.count("stop-after"))
+      cout << setw(25) << "stop_after " << stop_after << endl;
+    if (cfg.count("input_weights"))
+      cout << setw(25) << "weights in" << cfg["input_weights"].as<string>() << endl;
+    cout << setw(25) << "input " << "'" << cfg["input"].as<string>() << "'" << endl;
+    cout << setw(25) << "output " << "'" << cfg["output"].as<string>() << "'" << endl;
+    if (sample_from == "kbest")
+      cout << setw(25) << "filter " << "'" << filter_type << "'" << endl;
+    cout << setw(25) << "learning rate " << eta << endl;
+    cout << setw(25) << "gamma " << gamma << endl;
+    cout << setw(25) << "sample from " << "'" << sample_from << "'" << endl;
+    cout << setw(25) << "pairs " << "'" << pair_sampling << "'" << endl;
+    if (!verbose) cout << "(a dot represents " << DTRAIN_DOTS << " lines of input)" << endl;
+  }
 
 
   for (size_t t = 0; t < T; t++) // T epochs
@@ -181,58 +183,44 @@ main(int argc, char** argv)
 
   time_t start, end;  
   time(&start);
-
-  // actually, we need only need this if t > 0 FIXME
   igzstream grammar_buf_in;
   if (t > 0) grammar_buf_in.open(grammar_buf_fn);
-
-  // reset average scores
-  acc_1best_score = acc_1best_model = 0.;
-  
-  // reset sentence counter
-  sid = 0;
-  
+  score_t score_sum = 0., model_sum = 0.;
+  size_t ii = 0;
   if (!quiet) cout << "Iteration #" << t+1 << " of " << T << "." << endl;
   
   while(true)
   {
 
-    // get input from stdin or file
-    in.clear();
-    next = stop = false; // next iteration, premature stop
-    if (t == 0) {    
-      if (input_fn == "-") {
-        if (!getline(cin, in)) next = true;
-      } else {
-        if (!getline(input, in)) next = true; 
-      }
+    string in;
+    bool next = false, stop = false; // next iteration or premature stop
+    if (t == 0) {
+      if(!getline(*input, in)) next = true;
     } else {
-      if (sid == in_sz) next = true; // stop if we reach the end of our input
+      if (ii == in_sz) next = true; // stop if we reach the end of our input
     }
     // stop after X sentences (but still iterate for those)
-    if (stop_after > 0 && stop_after == sid && !next) stop = true;
+    if (stop_after > 0 && stop_after == ii && !next) stop = true;
     
     // produce some pretty output
     if (!quiet && !verbose) {
-        if (sid == 0) cout << " ";
-        if ((sid+1) % (DTRAIN_DOTS) == 0) {
-            cout << ".";
-            cout.flush();
+      if (ii == 0) cout << " ";
+      if ((ii+1) % (DTRAIN_DOTS) == 0) {
+        cout << ".";
+        cout.flush();
+      }
+      if ((ii+1) % (20*DTRAIN_DOTS) == 0) {
+        cout << " " << ii+1 << endl;
+        if (!next && !stop) cout << " ";
+      }
+      if (stop) {
+        if (ii % (20*DTRAIN_DOTS) != 0) cout << " " << ii << endl;
+        cout << "Stopping after " << stop_after << " input sentences." << endl;
+      } else {
+        if (next) {
+          if (ii % (20*DTRAIN_DOTS) != 0) cout << " " << ii << endl;
         }
-        if ((sid+1) % (20*DTRAIN_DOTS) == 0) {
-            cout << " " << sid+1 << endl;
-            if (!next && !stop) cout << " ";
-        }
-        if (stop) {
-          if (sid % (20*DTRAIN_DOTS) != 0) cout << " " << sid << endl;
-          cout << "Stopping after " << stop_after << " input sentences." << endl;
-        } else {
-          if (next) {
-            if (sid % (20*DTRAIN_DOTS) != 0) {
-              cout << " " << sid << endl;
-            }
-          }
-        }
+      }
     }
     
     // next iteration
@@ -244,12 +232,15 @@ main(int argc, char** argv)
     weights.InitVector(&dense_weights);
     decoder.SetWeights(dense_weights);
 
+    // getting input
+    vector<string> in_split; // input: sid\tsrc\tref\tpsg
+    vector<WordID> ref_ids;  // reference as vector<WordID>
     if (t == 0) {
       // handling input
-      in_split.clear();
       strsplit(in, in_split, '\t', 4);
       // getting reference
-      ref_tok.clear(); ref_ids.clear();
+      ref_ids.clear();
+      vector<string> ref_tok;
       strsplit(in_split[2], ref_tok, ' ');
       register_and_convert(ref_tok, ref_ids);
       ref_ids_buf.push_back(ref_ids);
@@ -268,7 +259,7 @@ main(int argc, char** argv)
       decoder.SetSentenceGrammarFromString(in_split[3]);
       // decode
       src_str_buf.push_back(in_split[1]);
-      decoder.Decode(in_split[1], &observer);
+      decoder.Decode(in_split[1], observer);
     } else {
       // get buffered grammar
       string grammar_str;
@@ -280,73 +271,67 @@ main(int argc, char** argv)
       }
       decoder.SetSentenceGrammarFromString(grammar_str);
       // decode
-      decoder.Decode(src_str_buf[sid], &observer);
+      decoder.Decode(src_str_buf[ii], observer);
     }
 
-    // get kbest list
-    KBestList* kb;
-    //if () { // TODO get from forest
-      kb = observer.GetKBest();
-    //}
+    Samples* samples = observer->GetSamples();
 
     // (local) scoring
-    if (t > 0) ref_ids = ref_ids_buf[sid];
-    for (size_t i = 0; i < kb->GetSize(); i++) {
-      NgramCounts counts = make_ngram_counts(ref_ids, kb->sents[i], N);
+    if (t > 0) ref_ids = ref_ids_buf[ii];
+    score_t score = 0.;
+    for (size_t i = 0; i < samples->GetSize(); i++) {
+      NgramCounts counts = make_ngram_counts(ref_ids, samples->sents[i], N);
       if (scorer_str == "approx_bleu") {
+        size_t hyp_len = 0;
         if (i == 0) { // 'context of 1best translations'
           global_counts  += counts;
-          global_hyp_len += kb->sents[i].size();
+          global_hyp_len += samples->sents[i].size();
           global_ref_len += ref_ids.size();
           counts.reset();
-          cand_len = 0;
         } else {
-            cand_len = kb->sents[i].size();
+            hyp_len = samples->sents[i].size();
         }
         NgramCounts counts_tmp = global_counts + counts;
-        score = .9*scorer(counts_tmp,
-                        global_ref_len,
-                        global_hyp_len + cand_len, N, bleu_weights);
+        score = .9 * scorer(counts_tmp,
+                            global_ref_len,
+                            global_hyp_len + hyp_len, N, bleu_weights);
       } else {
-        cand_len = kb->sents[i].size();
         score = scorer(counts,
-                        ref_ids.size(),
-                        kb->sents[i].size(), N, bleu_weights);
+                       ref_ids.size(),
+                       samples->sents[i].size(), N, bleu_weights);
       }
 
-      kb->scores.push_back(score);
+      samples->scores.push_back(score);
 
       if (i == 0) {
-        acc_1best_score += score;
-        acc_1best_model += kb->model_scores[i];
+        score_sum += score;
+        model_sum += samples->model_scores[i];
       }
 
       if (verbose) {
         if (i == 0) cout << "'" << TD::GetString(ref_ids) << "' [ref]" << endl;
-        cout << _p5 << _np << "[hyp " << i << "] " << "'" << TD::GetString(kb->sents[i]) << "'";
-        cout << " [SCORE=" << score << ",model="<< kb->model_scores[i] << "]" << endl;
-        //cout << kb->feats[i] << endl; // too verbose
+        cout << _p5 << _np << "[hyp " << i << "] " << "'" << TD::GetString(samples->sents[i]) << "'";
+        cout << " [SCORE=" << score << ",model="<< samples->model_scores[i] << "]" << endl;
+        cout << samples->feats[i] << endl;
       }
-    } // Nbest loop
+    } // sample/scoring loop
 
     if (verbose) cout << endl;
 
 //////////////////////////////////////////////////////////
     // UPDATE WEIGHTS
     if (!noup) {
-
-      int up = 0;
-
-      TrainingInstances pairs;
-      sample_all_pairs(kb, pairs);
-      //sample_rand_pairs(kb, pairs, &rng);
+      vector<Pair> pairs;
+      if (pair_sampling == "all")
+        sample_all_pairs(samples, pairs);
+      if (pair_sampling == "rand")
+        sample_rand_pairs(samples, pairs, &rng);
        
-      for (TrainingInstances::iterator ti = pairs.begin();
+      for (vector<Pair>::iterator ti = pairs.begin();
             ti != pairs.end(); ti++) {
 
         SparseVector<double> dv;
         if (ti->first_score - ti->second_score < 0) {
-            up++;
           dv = ti->second - ti->first;
       //} else {
         //dv = ti->first - ti->second;
@@ -360,10 +345,10 @@ main(int argc, char** argv)
 
           if (verbose) {
             cout << "{{ f("<< ti->first_rank <<") > f(" << ti->second_rank << ") but g(i)="<< ti->first_score <<" < g(j)="<< ti->second_score << " so update" << endl;
-            cout << " i  " << TD::GetString(kb->sents[ti->first_rank]) << endl;
-            cout << "    " << kb->feats[ti->first_rank] << endl;
-            cout << " j  " << TD::GetString(kb->sents[ti->second_rank]) << endl;
-            cout << "    " << kb->feats[ti->second_rank] << endl; 
+            cout << " i  " << TD::GetString(samples->sents[ti->first_rank]) << endl;
+            cout << "    " << samples->feats[ti->first_rank] << endl;
+            cout << " j  " << TD::GetString(samples->sents[ti->second_rank]) << endl;
+            cout << "    " << samples->feats[ti->second_rank] << endl; 
             cout << " diff vec: " << dv << endl;
             cout << " lambdas after update: " << lambdas << endl;
             cout << "}}" << endl;
@@ -378,69 +363,66 @@ main(int argc, char** argv)
 
       //double l2 = lambdas.l2norm();
       //if (l2) lambdas /= lambdas.l2norm();
-      //cout << up << endl;
     }
 //////////////////////////////////////////////////////////
 
-    ++sid;
+    ++ii;
 
-    if (hstreaming) cerr << "reporter:counter:dtrain,sid," << sid << endl;
+    if (hstreaming) cerr << "reporter:counter:dtrain,sid," << in_split[0] << endl;
 
   } // input loop
 
   if (t == 0) {
-    in_sz = sid; // remember size (lines) of input
+    in_sz = ii; // remember size of input (# lines)
     grammar_buf_out.close();
-    if (input_fn != "-") input.close();
   } else {
     grammar_buf_in.close();
   }
 
   // print some stats
-  double avg_1best_score = acc_1best_score/(double)in_sz;
-  double avg_1best_model = acc_1best_model/(double)in_sz;
-  double avg_1best_score_diff, avg_1best_model_diff;
+  score_t score_avg = score_sum/(score_t)in_sz;
+  score_t model_avg = model_sum/(score_t)in_sz;
+  score_t score_diff, model_diff;
   if (t > 0) {
-    avg_1best_score_diff = avg_1best_score - scores_per_iter[t-1][0];
-    avg_1best_model_diff = avg_1best_model - scores_per_iter[t-1][1];
+    score_diff = score_avg - all_scores[t-1].first;
+    model_diff = model_avg - all_scores[t-1].second;
   } else {
-    avg_1best_score_diff = avg_1best_score;
-    avg_1best_model_diff = avg_1best_model;
+    score_diff = score_avg;
+    model_diff = model_avg;
   }
   if (!quiet) {
   cout << _p5 << _p << "WEIGHTS" << endl;
-  for (vector<string>::iterator it = wprint.begin(); it != wprint.end(); it++) {
-    cout << setw(16) << *it << " = " << dense_weights[FD::Convert(*it)] << endl;
+  for (vector<string>::iterator it = print_weights.begin(); it != print_weights.end(); it++) {
+    cout << setw(16) << *it << " = " << lambdas.get(FD::Convert(*it)) << endl;
   }
   cout << "        ---" << endl;
-  cout << _np << "      avg score: " << avg_1best_score;
-  cout << _p << " (" << avg_1best_score_diff << ")" << endl;
-  cout << _np << "avg model score: " << avg_1best_model;
-  cout << _p << " (" << avg_1best_model_diff << ")" << endl;
+  cout << _np << "      1best avg score: " << score_avg;
+  cout << _p << " (" << score_diff << ")" << endl;
+  cout << _np << "1best avg model score: " << model_avg;
+  cout << _p << " (" << model_diff << ")" << endl;
   }
-  vector<double> remember_scores;
-  remember_scores.push_back(avg_1best_score);
-  remember_scores.push_back(avg_1best_model);
-  scores_per_iter.push_back(remember_scores);
-  if (avg_1best_score > max_score) {
-    max_score = avg_1best_score;
-    best_t = t;
+  pair<score_t,score_t> remember;
+  remember.first = score_avg;
+  remember.second = model_avg;
+  all_scores.push_back(remember);
+  if (score_avg > max_score) {
+    max_score = score_avg;
+    best_it = t;
   }
   time (&end);
-  double time_dif = difftime(end, start);
-  overall_time += time_dif;
+  float time_diff = difftime(end, start);
+  overall_time += time_diff;
   if (!quiet) {
-    cout << _p2 << _np << "(time " << time_dif/60. << " min, ";
-    cout << time_dif/(double)in_sz<< " s/S)" << endl;
+    cout << _p2 << _np << "(time " << time_diff/60. << " min, ";
+    cout << time_diff/(float)in_sz<< " s/S)" << endl;
   }
-  
   if (t+1 != T && !quiet) cout << endl;
 
   if (noup) break;
 
   } // outer loop
 
-  //unlink(grammar_buf_fn);
+  unlink(grammar_buf_fn);
 
   if (!noup) {
     if (!quiet) cout << endl << "writing weights file '" << cfg["output"].as<string>() << "' ...";
@@ -452,7 +434,7 @@ main(int argc, char** argv)
         cout << _np << FD::Convert(ti->first) << "\t" << ti->second << endl;
       }
       if (hstreaming) cout << "__SHARD_COUNT__\t1" << endl;
-    } else {
+    } else if (cfg["output"].as<string>() != "VOID") {
       weights.InitFromVector(lambdas);
       weights.WriteToFile(cfg["output"].as<string>(), true);
     }
@@ -461,7 +443,7 @@ main(int argc, char** argv)
   
   if (!quiet) {
     cout << _p5 << _np << endl << "---" << endl << "Best iteration: ";
-    cout << best_t+1 << " [SCORE '" << scorer_str << "'=" << max_score << "]." << endl;
+    cout << best_it+1 << " [SCORE '" << scorer_str << "'=" << max_score << "]." << endl;
     cout << _p2 << "This took " << overall_time/60. << " min." << endl;
   }
 

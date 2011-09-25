@@ -15,14 +15,15 @@ namespace dtrain
 {
 
 
+typedef double score_t; // float
+
 struct NgramCounts
 {
-  NgramCounts(const size_t N) : N_(N) {
-    reset();
-  } 
   size_t N_;
   map<size_t, size_t> clipped;
   map<size_t, size_t> sum;
+
+  NgramCounts(const size_t N) : N_(N) { reset(); } 
 
   void
   operator+=(const NgramCounts& rhs)
@@ -76,22 +77,22 @@ struct NgramCounts
 };
 
 typedef map<vector<WordID>, size_t> Ngrams;
+
 Ngrams make_ngrams(vector<WordID>& s, size_t N);
 NgramCounts make_ngram_counts(vector<WordID> hyp, vector<WordID> ref, size_t N);
 
-double brevity_penaly(const size_t hyp_len, const size_t ref_len);
-double bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len, const size_t N,
-             vector<float> weights = vector<float>());
-double stupid_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len, size_t N,
-                    vector<float> weights = vector<float>());
-double smooth_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len, const size_t N,
-                    vector<float> weights = vector<float>());
-double approx_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len, const size_t N,
-                    vector<float> weights = vector<float>());
+score_t brevity_penaly(const size_t hyp_len, const size_t ref_len);
+score_t bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len, const size_t N,
+             vector<score_t> weights = vector<score_t>());
+score_t stupid_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len, size_t N,
+                    vector<score_t> weights = vector<score_t>());
+score_t smooth_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len, const size_t N,
+                    vector<score_t> weights = vector<score_t>());
+score_t approx_bleu(NgramCounts& counts, const size_t hyp_len, const size_t ref_len, const size_t N,
+                    vector<score_t> weights = vector<score_t>());
 
 
 } // namespace
-
 
 #endif
 
