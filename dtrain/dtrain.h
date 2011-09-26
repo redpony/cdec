@@ -3,6 +3,7 @@
 
 
 #include <iomanip>
+#include <string.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
@@ -11,7 +12,6 @@
 #include "pairsampling.h"
 
 #define DTRAIN_DOTS 100 // when to display a '.'
-#define DTRAIN_TMP_DIR "/tmp"
 #define DTRAIN_GRAMMAR_DELIM "########EOS########"
 
 using namespace std;

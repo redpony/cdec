@@ -22,7 +22,7 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     ("hstreaming",     po::value<bool>()->zero_tokens(),                 "run in hadoop streaming mode")
     ("learning_rate",  po::value<double>()->default_value(0.0005),                      "learning rate")
     ("gamma",          po::value<double>()->default_value(0.),       "gamma for SVM (0 for perceptron)")
-    ("tmp",            po::value<string>()->default_value("/tmp"),                    "temp dir to use") // FIXME
+    ("tmp",            po::value<string>()->default_value("/tmp"),                    "temp dir to use")
     ("noup",           po::value<bool>()->zero_tokens(),                        "do not update weights");
   po::options_description cl("Command Line Options");
   cl.add_options()
@@ -141,7 +141,9 @@ main(int argc, char** argv)
   vector<string> src_str_buf;          // source strings
   vector<vector<WordID> > ref_ids_buf; // references as WordID vecs
   // this is for writing the grammar buffer file
-  char grammar_buf_fn[] = DTRAIN_TMP_DIR"/dtrain-grammars-XXXXXX";
+  char grammar_buf_fn[1024];
+  strcpy(grammar_buf_fn, cfg["tmp"].as<string>().c_str());
+  strcat(grammar_buf_fn, "/dtrain-grammars-XXXXXX");
   mkstemp(grammar_buf_fn);
   ogzstream grammar_buf_out;
   grammar_buf_out.open(grammar_buf_fn);
@@ -337,7 +339,7 @@ main(int argc, char** argv)
 
     ++ii;
 
-    if (hstreaming) cerr << "reporter:counter:dtrain,sid," << in_split[0] << endl;
+    if (hstreaming) cerr << "reporter:counter:dtrain,sid," << ii << endl;
 
   } // input loop
 
