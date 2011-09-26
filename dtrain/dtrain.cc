@@ -337,7 +337,7 @@ main(int argc, char** argv)
 
     ++ii;
 
-    if (hstreaming) cerr << "reporter:counter:dtrain,sid," << in_split[0] << endl;
+    if (hstreaming) cerr << "reporter:counter:dtrain,sid," << ii << endl;
 
   } // input loop
 
