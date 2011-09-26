@@ -1,15 +1,9 @@
 #ifndef _DTRAIN_KSAMPLER_H_
 #define _DTRAIN_KSAMPLER_H_
 
-#include "kbestget.h"
 #include "hgsampler.h"
-#include <vector>
-#include <string>
-
-using namespace std;
-
-#include "kbest.h" // cdec
-#include "sampler.h"
+#include "kbestget.h"
+#include "score.h"
 
 namespace dtrain
 {
@@ -43,6 +37,7 @@ struct KSampler : public HypSampler
       h.f = samples[i].fmap;
       h.model = log(samples[i].model_score); 
       h.rank = i;
+      h.score = scorer_->Score(h.w, *ref_);
       s_.push_back(h);
     }
   }
