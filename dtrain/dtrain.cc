@@ -106,7 +106,7 @@ main(int argc, char** argv)
 
   // scoring metric/scorer
   string scorer_str = cfg["scorer"].as<string>();
-  score_t (*scorer)(NgramCounts&, const unsigned, const unsigned, unsigned, vector<score_t>);
+  /*score_t (*scorer)(NgramCounts&, const unsigned, const unsigned, unsigned, vector<score_t>);
   if (scorer_str == "bleu") {
     scorer = &bleu;
   } else if (scorer_str == "stupid_bleu") {
@@ -122,9 +122,11 @@ main(int argc, char** argv)
   NgramCounts global_counts(N); // counts for 1 best translations
   unsigned global_hyp_len = 0;    // sum hypothesis lengths
   unsigned global_ref_len = 0;    // sum reference lengths
-  // ^^^ global_* for approx_bleu
+  // ^^^ global_* for approx_bleu*/
   vector<score_t> bleu_weights;   // we leave this empty -> 1/N 
-  if (!quiet) cerr << setw(26) << "scorer '" << scorer_str << "'" << endl << endl;
+  //if (!quiet) cerr << setw(26) << "scorer '" << scorer_str << "'" << endl << endl;
+  StupidBleuScorer scorer;
+  scorer.Init(N, bleu_weights);
 
   // init weights
   Weights weights;
@@ -240,7 +242,6 @@ main(int argc, char** argv)
       // handling input
       strsplit(in, in_split, '\t', 4);
       // getting reference
-      ref_ids.clear();
       vector<string> ref_tok;
       strsplit(in_split[2], ref_tok, ' ');
       register_and_convert(ref_tok, ref_ids);
@@ -279,43 +280,23 @@ main(int argc, char** argv)
 
     // (local) scoring
     if (t > 0) ref_ids = ref_ids_buf[ii];
-    score_t score = 0.;
     for (unsigned i = 0; i < samples->size(); i++) {
-      NgramCounts counts = make_ngram_counts(ref_ids, (*samples)[i].w, N);
-      if (scorer_str == "approx_bleu") {
-        unsigned hyp_len = 0;
-        if (i == 0) { // 'context of 1best translations'
-          global_counts  += counts;
-          global_hyp_len += (*samples)[i].w.size();
-          global_ref_len += ref_ids.size();
-          counts.reset();
-        } else {
-            hyp_len = (*samples)[i].w.size();
-        }
-        NgramCounts _c = global_counts + counts;
-        score = .9 * scorer(_c,
-                            global_ref_len,
-                            global_hyp_len + hyp_len, N, bleu_weights);
-      } else {
-        score = scorer(counts,
-                       ref_ids.size(),
-                       (*samples)[i].w.size(), N, bleu_weights);
-      }
+        //cout << ii << " " << i << endl;
 
-      (*samples)[i].score = (score);
-
+        cout << _p9;
+      (*samples)[i].score = scorer.Score((*samples)[i], ref_ids, ii);
       if (i == 0) {
-        score_sum += score;
+        score_sum += (*samples)[i].score;
         model_sum += (*samples)[i].model;
       }
 
       if (verbose) {
         if (i == 0) cerr << "'" << TD::GetString(ref_ids) << "' [ref]" << endl;
         cerr << _p5 << _np << "[hyp " << i << "] " << "'" << TD::GetString((*samples)[i].w) << "'";
-        cerr << " [SCORE=" << score << ",model="<< (*samples)[i].model << "]" << endl;
+        cerr << " [SCORE=" << (*samples)[i].score << ",model="<< (*samples)[i].model << "]" << endl;
         cerr << (*samples)[i].f << endl;
       }
-    } // sample/scoring loop
+    }
 
     if (verbose) cerr << endl;
 

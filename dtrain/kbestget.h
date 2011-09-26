@@ -1,10 +1,23 @@
 #ifndef _DTRAIN_KBESTGET_H_
 #define _DTRAIN_KBESTGET_H_
 
-#include "kbest.h"
+
+#include <vector>
+#include <string>
+
+using namespace std;
+
+#include "kbest.h" // cdec
+#include "verbose.h"
+#include "viterbi.h"
+#include "ff_register.h"
+#include "decoder.h"
+#include "weights.h"
 
 namespace dtrain
 {
+
+typedef double score_t; // float
 
 
 struct ScoredHyp
@@ -13,11 +26,12 @@ struct ScoredHyp
   SparseVector<double> f;
   score_t model;
   score_t score;
+  unsigned rank;
 };
 
 struct HypSampler : public DecoderObserver
 {
-  virtual vector<ScoredHyp>* GetSamples() {}
+  virtual vector<ScoredHyp>* GetSamples()=0;
 };
 
 struct KBestGetter : public HypSampler
@@ -62,6 +76,7 @@ struct KBestGetter : public HypSampler
       h.w = d->yield;
       h.f = d->feature_values;
       h.model = log(d->score);
+      h.rank = i;
       s_.push_back(h);
     }
   }
@@ -79,6 +94,7 @@ struct KBestGetter : public HypSampler
       h.w = d->yield;
       h.f = d->feature_values;
       h.model = log(d->score);
+      h.rank = i;
       s_.push_back(h);
     }
   }

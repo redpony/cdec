@@ -4,40 +4,6 @@ namespace dtrain
 {
 
 
-Ngrams
-make_ngrams(vector<WordID>& s, unsigned N)
-{
-  Ngrams ngrams;
-  vector<WordID> ng;
-  for (size_t i = 0; i < s.size(); i++) {
-    ng.clear();
-    for (unsigned j = i; j < min(i+N, s.size()); j++) {
-      ng.push_back(s[j]);
-      ngrams[ng]++;
-    }
-  }
-  return ngrams;
-}
-
-NgramCounts
-make_ngram_counts(vector<WordID> hyp, vector<WordID> ref, unsigned N)
-{
-  Ngrams hyp_ngrams = make_ngrams(hyp, N);
-  Ngrams ref_ngrams = make_ngrams(ref, N);
-  NgramCounts counts(N);
-  Ngrams::iterator it;
-  Ngrams::iterator ti;
-  for (it = hyp_ngrams.begin(); it != hyp_ngrams.end(); it++) {
-    ti = ref_ngrams.find(it->first);
-    if (ti != ref_ngrams.end()) {
-      counts.add(it->second, ti->second, it->first.size() - 1);
-    } else {
-      counts.add(it->second, 0, it->first.size() - 1);
-    }
-  }
-  return counts;
-}
-
 /*
  * bleu
  *
@@ -48,24 +14,26 @@ make_ngram_counts(vector<WordID> hyp, vector<WordID> ref, unsigned N)
  * NOTE: 0 if one n in {1..N} has 0 count
  */
 score_t
-brevity_penaly(const unsigned hyp_len, const unsigned ref_len)
-{
-  if (hyp_len > ref_len) return 1;
-  return exp(1 - (score_t)ref_len/hyp_len);
-}
-score_t
-bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len,
-      unsigned N, vector<score_t> weights )
+BleuScorer::Bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len)
 {
   if (hyp_len == 0 || ref_len == 0) return 0;
-  if (ref_len < N) N = ref_len;
-  if (weights.empty()) for (unsigned i = 0; i < N; i++) weights.push_back(1./N);
+  unsigned M = N_;
+  if (ref_len < N_) M = ref_len;
   score_t sum = 0;
-  for (unsigned i = 0; i < N; i++) {
+  for (unsigned i = 0; i < M; i++) {
     if (counts.clipped[i] == 0 || counts.sum[i] == 0) return 0;
-    sum += weights[i] * log((score_t)counts.clipped[i] / counts.sum[i]);
+    sum += w_[i] * log((score_t)counts.clipped[i] / counts.sum[i]);
   }
   return brevity_penaly(hyp_len, ref_len) * exp(sum);
+}
+
+score_t
+BleuScorer::Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id)
+{
+  unsigned hyp_len = hyp.w.size(), ref_len = ref_ids.size();
+  if (hyp_len == 0 || ref_len == 0) return 0;
+  NgramCounts counts = make_ngram_counts(hyp.w, ref_ids, N_);
+  return Bleu(counts, hyp_len, ref_len);
 }
 
 /*
@@ -79,18 +47,31 @@ bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len,
  * NOTE: 0 iff no 1gram match
  */
 score_t
-stupid_bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len,
-             unsigned N, vector<score_t> weights )
+StupidBleuScorer::Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id)
 {
+  unsigned hyp_len = hyp.w.size(), ref_len = ref_ids.size();
   if (hyp_len == 0 || ref_len == 0) return 0;
-  if (ref_len < N) N = ref_len;
-  if (weights.empty()) for (unsigned i = 0; i < N; i++) weights.push_back(1./N);
+  NgramCounts counts = make_ngram_counts(hyp.w, ref_ids, N_);
+  unsigned M = N_;
+  if (ref_len < N_) M = ref_len;
   score_t sum = 0, add = 0;
-  for (unsigned i = 0; i < N; i++) {
+  for (unsigned i = 0; i < M; i++) {
     if (i == 1) add = 1;
-    sum += weights[i] * log(((score_t)counts.clipped[i] + add) / ((counts.sum[i] + add)));
+    //cout << ((score_t)counts.clipped[i] + add) << "/" << counts.sum[i] +add << "." << endl;
+    //cout << "w_[i] " << w_[i] << endl;
+    sum += w_[i] * log(((score_t)counts.clipped[i] + add) / ((counts.sum[i] + add)));
+    //cout << "sum += "<< w_[i] * log(((score_t)counts.clipped[i] + add) / ((counts.sum[i] + add))) << endl;
   }
-  return brevity_penaly(hyp_len, ref_len) * exp(sum);
+  /*cout << ref_ids << endl;
+  cout << hyp.w << endl;
+  cout << "ref_len " << ref_len << endl;
+  cout << "hyp_len " << hyp_len << endl;
+  cout << "bp " << brevity_penaly(hyp_len, ref_len) << endl;
+  cout << "exp(sum) " << exp(sum) << endl;
+  counts.Print();
+  cout << brevity_penaly(hyp_len, ref_len) * exp(sum) << endl;
+  cout << "---" << endl;*/
+  return  brevity_penaly(hyp_len, ref_len) * exp(sum);
 }
 
 /*
@@ -103,16 +84,16 @@ stupid_bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len,
  * NOTE: max is 0.9375
  */
 score_t
-smooth_bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len,
-            const unsigned N, vector<score_t> weights )
+SmoothBleuScorer::Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id)
 {
+  unsigned hyp_len = hyp.w.size(), ref_len = ref_ids.size();
   if (hyp_len == 0 || ref_len == 0) return 0;
-  if (weights.empty()) for (unsigned i = 0; i < N; i++) weights.push_back(1./N);
+  NgramCounts counts = make_ngram_counts(hyp.w, ref_ids, N_);
   score_t sum = 0;
   unsigned j = 1;
-  for (unsigned i = 0; i < N; i++) {
+  for (unsigned i = 0; i < N_; i++) {
     if (counts.clipped[i] == 0 || counts.sum[i] == 0) continue;
-    sum += exp((weights[i] * log((score_t)counts.clipped[i]/counts.sum[i]))) / pow(2, N-j+1);
+    sum += exp((w_[i] * log((score_t)counts.clipped[i]/counts.sum[i]))) / pow(2, N_-j+1);
     j++;
   }
   return brevity_penaly(hyp_len, ref_len) * sum;
@@ -125,13 +106,38 @@ smooth_bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len,
  *        and Structural Translation Features"
  * (Chiang et al. '08)
  */
-score_t
-approx_bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len,
-            const unsigned N, vector<score_t> weights)
+/*void
+ApproxBleuScorer::Prep(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len)
 {
-  return brevity_penaly(hyp_len, ref_len) 
-           * 0.9 * bleu(counts, hyp_len, ref_len, N, weights);
+  glob_onebest_counts += counts;
+  glob_hyp_len += hyp_len;
+  glob_ref_len += ref_len;
 }
+
+void
+ApproxBleuScorer::Reset()
+{
+  glob_onebest_counts.Zero();
+  glob_hyp_len = 0;
+  glob_ref_len = 0;
+}
+
+score_t
+ApproxBleuScorer::Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id)
+{
+  NgramCounts counts = make_ngram_counts(hyp.w, ref_ids, N_);
+  if (id == 0) reset();
+  unsigned hyp_len = 0, ref_len = 0;
+  if (hyp.rank == 0) { // 'context of 1best translations'
+    scorer->prep(counts, hyp.w.size(), ref_ids.size()); 
+    counts.reset();
+  } else {
+    hyp_len = hyp.w.size();
+    ref_len = ref_ids.size();
+  }
+  return 0.9 * BleuScorer::Bleu(glob_onebest_counts + counts,
+                                glob_hyp_len + hyp_len, glob_ref_len + ref_len);
+}*/
 
 
 } // namespace

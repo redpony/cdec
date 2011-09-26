@@ -2,6 +2,10 @@
 #define _DTRAIN_PAIRSAMPLING_H_
 
 #include "kbestget.h"
+#include "score.h"
+#include <vector>
+#include <string>
+using namespace std;
 #include "sampler.h" // cdec, MT19937
 
 namespace dtrain
