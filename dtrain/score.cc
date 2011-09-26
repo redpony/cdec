@@ -22,17 +22,17 @@ BleuScorer::Bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref
   score_t sum = 0;
   for (unsigned i = 0; i < M; i++) {
     if (counts.clipped[i] == 0 || counts.sum[i] == 0) return 0;
-    sum += w_[i] * log((score_t)counts.clipped[i] / counts.sum[i]);
+    sum += w_[i] * log((score_t)counts.clipped[i]/counts.sum[i]);
   }
   return brevity_penaly(hyp_len, ref_len) * exp(sum);
 }
 
 score_t
-BleuScorer::Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id)
+BleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref)
 {
-  unsigned hyp_len = hyp.w.size(), ref_len = ref_ids.size();
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
   if (hyp_len == 0 || ref_len == 0) return 0;
-  NgramCounts counts = make_ngram_counts(hyp.w, ref_ids, N_);
+  NgramCounts counts = make_ngram_counts(hyp, ref, N_);
   return Bleu(counts, hyp_len, ref_len);
 }
 
@@ -47,30 +47,18 @@ BleuScorer::Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id)
  * NOTE: 0 iff no 1gram match
  */
 score_t
-StupidBleuScorer::Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id)
+StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref)
 {
-  unsigned hyp_len = hyp.w.size(), ref_len = ref_ids.size();
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
   if (hyp_len == 0 || ref_len == 0) return 0;
-  NgramCounts counts = make_ngram_counts(hyp.w, ref_ids, N_);
+  NgramCounts counts = make_ngram_counts(hyp, ref, N_);
   unsigned M = N_;
   if (ref_len < N_) M = ref_len;
   score_t sum = 0, add = 0;
   for (unsigned i = 0; i < M; i++) {
     if (i == 1) add = 1;
-    //cout << ((score_t)counts.clipped[i] + add) << "/" << counts.sum[i] +add << "." << endl;
-    //cout << "w_[i] " << w_[i] << endl;
-    sum += w_[i] * log(((score_t)counts.clipped[i] + add) / ((counts.sum[i] + add)));
-    //cout << "sum += "<< w_[i] * log(((score_t)counts.clipped[i] + add) / ((counts.sum[i] + add))) << endl;
+    sum += w_[i] * log(((score_t)counts.clipped[i] + add)/((counts.sum[i] + add)));
   }
-  /*cout << ref_ids << endl;
-  cout << hyp.w << endl;
-  cout << "ref_len " << ref_len << endl;
-  cout << "hyp_len " << hyp_len << endl;
-  cout << "bp " << brevity_penaly(hyp_len, ref_len) << endl;
-  cout << "exp(sum) " << exp(sum) << endl;
-  counts.Print();
-  cout << brevity_penaly(hyp_len, ref_len) * exp(sum) << endl;
-  cout << "---" << endl;*/
   return  brevity_penaly(hyp_len, ref_len) * exp(sum);
 }
 
@@ -84,21 +72,22 @@ StupidBleuScorer::Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id)
  * NOTE: max is 0.9375
  */
 score_t
-SmoothBleuScorer::Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id)
+SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref)
 {
-  unsigned hyp_len = hyp.w.size(), ref_len = ref_ids.size();
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
   if (hyp_len == 0 || ref_len == 0) return 0;
-  NgramCounts counts = make_ngram_counts(hyp.w, ref_ids, N_);
+  NgramCounts counts = make_ngram_counts(hyp, ref, N_);
   score_t sum = 0;
   unsigned j = 1;
   for (unsigned i = 0; i < N_; i++) {
     if (counts.clipped[i] == 0 || counts.sum[i] == 0) continue;
-    sum += exp((w_[i] * log((score_t)counts.clipped[i]/counts.sum[i]))) / pow(2, N_-j+1);
+    sum += exp((w_[i] * log((score_t)counts.clipped[i]/counts.sum[i])))/pow(2, N_-j+1);
     j++;
   }
   return brevity_penaly(hyp_len, ref_len) * sum;
 }
 
+// FIXME
 /*
  * approx. bleu
  *

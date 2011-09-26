@@ -1,15 +1,7 @@
 #ifndef _DTRAIN_SCORE_H_
 #define _DTRAIN_SCORE_H_
 
-#include <iostream>
-#include <vector>
-#include <map>
-#include <cassert>
-#include <cmath>
-
 #include "kbestget.h"
-
-#include "wordid.h" // cdec
 
 using namespace std;
 
@@ -111,51 +103,28 @@ make_ngram_counts(const vector<WordID>& hyp, const vector<WordID>& ref, const un
   return counts;
 }
 
-struct LocalScorer
-{
-  unsigned N_;
-  vector<score_t> w_;
-
-  virtual score_t
-  Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id)=0;
-
-  void
-  Init(unsigned N, vector<score_t> weights)
-  {
-    assert(N > 0);
-    N_ = N;
-    if (weights.empty()) for (unsigned i = 0; i < N_; i++) w_.push_back(1./N_);
-    else w_ = weights;
-  }
-
-  score_t
-  brevity_penaly(const unsigned hyp_len, const unsigned ref_len)
-  {
-    if (hyp_len > ref_len) return 1;
-    return exp(1 - (score_t)ref_len/hyp_len);
-  }
-};
-
 struct BleuScorer : public LocalScorer
 {
   score_t Bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len);
-  score_t Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id);
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref_ids);
 };
 
 struct StupidBleuScorer : public LocalScorer
 {
-  score_t Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id);
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref);
 };
 
 struct SmoothBleuScorer : public LocalScorer
 {
-  score_t Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id);
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref);
 };
 
 // FIXME
 /*struct ApproxBleuScorer : public LocalScorer
 {
-  NgramCounts glob_onebest_counts;
+  bool prepped;
+
+  NgramCounts* glob_onebest_counts;
   unsigned glob_hyp_len, glob_ref_len;
 
   void Prep(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len);
@@ -169,7 +138,6 @@ struct SmoothBleuScorer : public LocalScorer
     glob_ref_len = 0;
   }
 };*/
-
 
 
 } // namespace
