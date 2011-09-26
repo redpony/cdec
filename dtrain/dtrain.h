@@ -11,7 +11,7 @@
 #include "pairsampling.h"
 
 #define DTRAIN_DOTS 100 // when to display a '.'
-#define DTRAIN_TMP_DIR "/tmp"
+#define DTRAIN_TMP_DIR "/var/hadoop/mapred/local"
 #define DTRAIN_GRAMMAR_DELIM "########EOS########"
 
 using namespace std;
