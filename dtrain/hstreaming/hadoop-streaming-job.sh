@@ -5,16 +5,15 @@ JAR=contrib/streaming/hadoop-streaming-0.20.2-cdh3u1.jar
 HSTREAMING="$HADOOP_HOME/bin/hadoop jar $HADOOP_HOME/$JAR"
 
 IN=in/nc-wmt11-de-en-dyer-cs-joshua.tok.lc.fixamp1.loo.psg.dtrain.1400m
-OUT=out/nc-wmt11-de-en-dyer-cs-joshua.tok.lc.fixamp1.loo.psg.dtrain-weights-1400m
+OUT=out/nc-wmt11-de-en-dyer-cs-joshua.tok.lc.fixamp1.loo.psg.dtrain-weights-1400m-NEW
 
 $HSTREAMING \
-    -mapper "dtrain.sh" \
-    -reducer "avgweights.rb" \
+    -mapper "dtrain -c dtrain.ini --hstreaming" \
+    -reducer "red-avg.rb" \
     -input $IN \
     -output $OUT \
-    -file avgweights.rb \
-    -file dtrain.sh \
-    -file dtrain \
+    -file red-avg.rb \
+    -file ../dtrain \
     -file dtrain.ini \
     -file cdec.ini \
     -file nc-wmt11.en.srilm.3.gz \
