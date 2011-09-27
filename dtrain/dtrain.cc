@@ -297,6 +297,8 @@ main(int argc, char** argv)
         sample_all_pairs(samples, pairs);
       if (pair_sampling == "rand")
         sample_rand_pairs(samples, pairs, &rng);
+      if (pair_sampling == "108010")
+        sample108010(samples, pairs);
        
       for (vector<pair<ScoredHyp,ScoredHyp> >::iterator ti = pairs.begin();
             ti != pairs.end(); ti++) {
