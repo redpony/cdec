@@ -60,7 +60,7 @@ AC_CHECK_HEADER(google/dense_hash_map,
                [AC_DEFINE([HAVE_SPARSEHASH], [], [flag for google::dense_hash_map])])
 
 AC_PROG_INSTALL
-GTEST_LIB_CHECK
+GTEST_LIB_CHECK(1.0)
 
 AM_CONDITIONAL([RAND_LM], false)
 AC_ARG_WITH(randlm,
@@ -113,4 +113,4 @@ then
   AM_CONDITIONAL([GLC], true)
 fi
 
-AC_OUTPUT(Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile phrasinator/Makefile training/Makefile vest/Makefile pro-train/Makefile klm/util/Makefile klm/lm/Makefile mira/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile)
+AC_OUTPUT(Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile phrasinator/Makefile training/Makefile vest/Makefile pro-train/Makefile klm/util/Makefile klm/lm/Makefile mira/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile gi/cbgi/Makefile gi/ml/Makefile)
