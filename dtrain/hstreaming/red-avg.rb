@@ -19,8 +19,6 @@ shard_count = w["__SHARD_COUNT__"]
 
 w.each_key { |k|
   if k == shard_count_key then next end
-  puts "#{k}\t{w[k]/shard_count}"
+  puts "#{k}\t#{w[k]/shard_count}"
 }
-
-puts "#{shard_count_key}\t#{w[shard_count_key]}"
 
