@@ -131,3 +131,4 @@ training/test_ngram
 utils/ts
 training/compute_cllh
 dtrain/dtrain
+weights.gz
