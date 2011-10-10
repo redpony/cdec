@@ -31,3 +31,8 @@ KNOWN BUGS, PROBLEMS
  PhraseModel_* features (0..99 seem to be generated, why 99?)
  flex scanner jams on malicious input, we could skip that
 
+FIX
+  approx BLEU fix
+  merge
+  ep data
+  r\tr\tr\tr\tr
