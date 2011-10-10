@@ -241,7 +241,7 @@ main(int argc, char** argv)
     vector<WordID> ref_ids;  // reference as vector<WordID>
     if (t == 0) {
       // handling input
-      boost::split(in_split, in, boost::is_any_of("\t"));
+      split_in(in, in_split); 
       // getting reference
       vector<string> ref_tok;
       boost::split(ref_tok, in_split[2], boost::is_any_of(" "));
@@ -249,17 +249,17 @@ main(int argc, char** argv)
       ref_ids_buf.push_back(ref_ids);
       // process and set grammar
       bool broken_grammar = true;
-      for (string::iterator it = in_split[3].begin(); it != in_split[3].end(); it++) {
+      for (string::iterator it = in.begin(); it != in.end(); it++) {
         if (!isspace(*it)) {
           broken_grammar = false;
           break;
         }
       }
       if (broken_grammar) continue;
-      boost::replace_all(in_split[3], " __NEXT__RULE__ ", "\n"); // TODO
-      in_split[3] += "\n";
-      grammar_buf_out << in_split[3] << DTRAIN_GRAMMAR_DELIM << " " << in_split[0] << endl;
-      decoder.SetSentenceGrammarFromString(in_split[3]);
+      boost::replace_all(in, "\t", "\n");
+      in += "\n";
+      grammar_buf_out << in << DTRAIN_GRAMMAR_DELIM << " " << in_split[0] << endl;
+      decoder.SetSentenceGrammarFromString(in);
       src_str_buf.push_back(in_split[1]);
       // decode
       observer->SetRef(ref_ids);

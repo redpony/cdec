@@ -38,6 +38,18 @@ inline string gettmpf(const string path, const string infix, const string suffix
   return string(fn);
 }
 
+inline void split_in(string& s, vector<string>& parts)
+{
+  unsigned f = 0;
+  for(unsigned i = 0; i < 3; i++) {
+    unsigned e = f;
+    f = s.find("\t", f+1);
+    if (e != 0) parts.push_back(s.substr(e+1, f-e-1));
+    else parts.push_back(s.substr(0, f)); 
+  }
+  s.erase(0, f+1);
+}
+
 inline ostream& _np(ostream& out) { return out << resetiosflags(ios::showpos); }
 inline ostream& _p(ostream& out)  { return out << setiosflags(ios::showpos); }
 inline ostream& _p2(ostream& out) { return out << setprecision(2); }
