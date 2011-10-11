@@ -24,17 +24,6 @@ namespace po = boost::program_options;
 
 shared_ptr<MT19937> prng;
 
-size_t hash_value(const TRule& r) {
-  size_t h = boost::hash_value(r.e_);
-  boost::hash_combine(h, -r.lhs_);
-  boost::hash_combine(h, boost::hash_value(r.f_));
-  return h;
-}
-
-bool operator==(const TRule& a, const TRule& b) {
-  return (a.lhs_ == b.lhs_ && a.e_ == b.e_ && a.f_ == b.f_);
-}
-
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()

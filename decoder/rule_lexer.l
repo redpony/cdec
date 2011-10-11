@@ -220,6 +220,8 @@ NT [^\t \[\],]+
                   std::cerr << "Line " << lex_line << ": LHS and RHS arity mismatch!\n";
                   abort();
                 }
+		// const bool ignore_grammar_features = false;
+		// if (ignore_grammar_features) scfglex_num_feats = 0;
 		TRulePtr rp(new TRule(scfglex_lhs, scfglex_src_rhs, scfglex_src_rhs_size, scfglex_trg_rhs, scfglex_trg_rhs_size, scfglex_feat_ids, scfglex_feat_vals, scfglex_num_feats, scfglex_src_arity, scfglex_als, scfglex_num_als));
     check_and_update_ctf_stack(rp);
     TRulePtr coarse_rp = ((ctf_level == 0) ? TRulePtr() : ctf_rule_stack.top());

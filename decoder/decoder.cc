@@ -325,7 +325,7 @@ struct DecoderImpl {
 
   static void ConvertSV(const SparseVector<prob_t>& src, SparseVector<double>* trg) {
     for (SparseVector<prob_t>::const_iterator it = src.begin(); it != src.end(); ++it)
-      trg->set_value(it->first, it->second);
+      trg->set_value(it->first, it->second.as_float());
   }
 };
 
@@ -788,10 +788,10 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   const bool show_tree_structure=conf.count("show_tree_structure");
   if (!SILENT) forest_stats(forest,"  Init. forest",show_tree_structure,oracle.show_derivation);
   if (conf.count("show_expected_length")) {
-    const PRPair<double, double> res =
-      Inside<PRPair<double, double>,
-             PRWeightFunction<double, EdgeProb, double, ELengthWeightFunction> >(forest);
-    cerr << "  Expected length  (words): " << res.r / res.p << "\t" << res << endl;
+    const PRPair<prob_t, prob_t> res =
+      Inside<PRPair<prob_t, prob_t>,
+             PRWeightFunction<prob_t, EdgeProb, prob_t, ELengthWeightFunction> >(forest);
+    cerr << "  Expected length  (words): " << (res.r / res.p).as_float() << "\t" << res << endl;
   }
 
   if (conf.count("show_partition")) {

@@ -27,16 +27,6 @@ double log_decay(unsigned x, const double& b) {
   return log(b - 1) - x * log(b);
 }
 
-size_t hash_value(const TRule& r) {
-  // TODO fix hash function
-  size_t h = boost::hash_value(r.e_) * boost::hash_value(r.f_) * r.lhs_;
-  return h;
-}
-
-bool operator==(const TRule& a, const TRule& b) {
-  return (a.lhs_ == b.lhs_ && a.e_ == b.e_ && a.f_ == b.f_);
-}
-
 struct SimpleBase {
   SimpleBase(unsigned esize, unsigned fsize, unsigned ntsize = 144) :
     uniform_e(-log(esize)),
