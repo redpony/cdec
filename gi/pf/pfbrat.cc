@@ -25,17 +25,6 @@ static unsigned kMAX_SRC_PHRASE;
 static unsigned kMAX_TRG_PHRASE;
 struct FSTState;
 
-size_t hash_value(const TRule& r) {
-  size_t h = 2 - r.lhs_;
-  boost::hash_combine(h, boost::hash_value(r.e_));
-  boost::hash_combine(h, boost::hash_value(r.f_));
-  return h;
-}
-
-bool operator==(const TRule& a, const TRule& b) {
-  return (a.lhs_ == b.lhs_ && a.e_ == b.e_ && a.f_ == b.f_);
-}
-
 double log_poisson(unsigned x, const double& lambda) {
   assert(lambda > 0.0);
   return log(lambda) * x - lgamma(x + 1) - lambda;

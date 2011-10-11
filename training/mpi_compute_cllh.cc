@@ -1,6 +1,4 @@
-#include <sstream>
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <cassert>
 #include <cmath>
@@ -12,6 +10,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "sentence_metadata.h"
 #include "verbose.h"
 #include "hg.h"
 #include "prob.h"
@@ -52,7 +51,8 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   return true;
 }
 
-void ReadTrainingCorpus(const string& fname, int rank, int size, vector<string>* c, vector<int>* ids) {
+void ReadInstances(const string& fname, int rank, int size, vector<string>* c) {
+  assert(fname != "-");
   ReadFile rf(fname);
   istream& in = *rf.stream();
   string line;
@@ -60,20 +60,16 @@ void ReadTrainingCorpus(const string& fname, int rank, int size, vector<string>*
   while(in) {
     getline(in, line);
     if (!in) break;
-    if (lc % size == rank) {
-      c->push_back(line);
-      ids->push_back(lc);
-    }
+    if (lc % size == rank) c->push_back(line);
     ++lc;
   }
 }
 
 static const double kMINUS_EPSILON = -1e-6;
 
-struct TrainingObserver : public DecoderObserver {
-  void Reset() {
-    acc_obj = 0;
-  } 
+struct ConditionalLikelihoodObserver : public DecoderObserver {
+
+  ConditionalLikelihoodObserver() : trg_words(), acc_obj(), cur_obj() {}
 
   virtual void NotifyDecodingStart(const SentenceMetadata&) {
     cur_obj = 0;
@@ -120,8 +116,10 @@ struct TrainingObserver : public DecoderObserver {
     }
     assert(!isnan(log_ref_z));
     acc_obj += (cur_obj - log_ref_z);
+    trg_words += smeta.GetReference().size();
   }
 
+  unsigned trg_words;
   double acc_obj;
   double cur_obj;
   int state;
@@ -161,35 +159,32 @@ int main(int argc, char** argv) {
   if (conf.count("weights"))
     Weights::InitFromFile(conf["weights"].as<string>(), &weights);
 
-  // freeze feature set
-  //const bool freeze_feature_set = conf.count("freeze_feature_set");
-  //if (freeze_feature_set) FD::Freeze();
-
-  vector<string> corpus; vector<int> ids;
-  ReadTrainingCorpus(conf["training_data"].as<string>(), rank, size, &corpus, &ids);
+  vector<string> corpus;
+  ReadInstances(conf["training_data"].as<string>(), rank, size, &corpus);
   assert(corpus.size() > 0);
-  assert(corpus.size() == ids.size());
 
-  TrainingObserver observer;
-  double objective = 0;
-
-  observer.Reset();
   if (rank == 0)
-    cerr << "Each processor is decoding " << corpus.size() << " training examples...\n";
+    cerr << "Each processor is decoding ~" << corpus.size() << " training examples...\n";
 
-  for (int i = 0; i < corpus.size(); ++i) {
-    decoder.SetId(ids[i]);
+  ConditionalLikelihoodObserver observer;
+  for (int i = 0; i < corpus.size(); ++i)
     decoder.Decode(corpus[i], &observer);
-  }
 
+  double objective = 0;
+  unsigned total_words = 0;
 #ifdef HAVE_MPI
   reduce(world, observer.acc_obj, objective, std::plus<double>(), 0);
+  reduce(world, observer.trg_words, total_words, std::plus<unsigned>(), 0);
 #else
   objective = observer.acc_obj;
 #endif
 
-  if (rank == 0)
-    cout << "OBJECTIVE: " << objective << endl;
+  if (rank == 0) {
+    cout << "CONDITIONAL LOG_e LIKELIHOOD: " << objective << endl;
+    cout << "CONDITIONAL LOG_2 LIKELIHOOD: " << (objective/log(2)) << endl;
+    cout << "         CONDITIONAL ENTROPY: " << (objective/log(2) / total_words) << endl;
+    cout << "                  PERPLEXITY: " << pow(2, (objective/log(2) / total_words)) << endl;
+  }
 
   return 0;
 }

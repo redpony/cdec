@@ -32,7 +32,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
 }
 
 struct LossComparer {
-  bool operator()(const pair<vector<WordID>, double>& a, const pair<vector<WordID>, double>& b) const {
+  bool operator()(const pair<vector<WordID>, prob_t>& a, const pair<vector<WordID>, prob_t>& b) const {
     return a.second < b.second;
   }
 };
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
           ScoreP s = scorer->ScoreCandidate(list[j].first);
           double loss = 1.0 - s->ComputeScore();
           if (type == TER || type == AER) loss = 1.0 - loss;
-          double weighted_loss = loss * (joints[j] / marginal);
+          double weighted_loss = loss * (joints[j] / marginal).as_float();
           wl_acc += weighted_loss;
           if ((!output_list) && wl_acc > mbr_loss) break;
         }

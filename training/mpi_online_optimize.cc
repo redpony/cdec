@@ -94,7 +94,7 @@ struct TrainingObserver : public DecoderObserver {
   void SetLocalGradientAndObjective(vector<double>* g, double* o) const {
     *o = acc_obj;
     for (SparseVector<prob_t>::const_iterator it = acc_grad.begin(); it != acc_grad.end(); ++it)
-      (*g)[it->first] = it->second;
+      (*g)[it->first] = it->second.as_float();
   }
 
   virtual void NotifyDecodingStart(const SentenceMetadata& smeta) {
@@ -158,7 +158,7 @@ struct TrainingObserver : public DecoderObserver {
   void GetGradient(SparseVector<double>* g) const {
     g->clear();
     for (SparseVector<prob_t>::const_iterator it = acc_grad.begin(); it != acc_grad.end(); ++it)
-      g->set_value(it->first, it->second);
+      g->set_value(it->first, it->second.as_float());
   }
 
   int total_complete;
