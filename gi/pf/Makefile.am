@@ -1,7 +1,7 @@
 bin_PROGRAMS = cbgi brat dpnaive pfbrat pfdist itg pfnaive
 
 noinst_LIBRARIES = libpf.a
-libpf_a_SOURCES = base_measures.cc reachability.cc cfg_wfst_composer.cc
+libpf_a_SOURCES = base_measures.cc reachability.cc cfg_wfst_composer.cc corpus.cc
 
 itg_SOURCES = itg.cc
 
