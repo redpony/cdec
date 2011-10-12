@@ -7,12 +7,14 @@
 #include <boost/program_options/variables_map.hpp>
 
 #include "base_measures.h"
+#include "monotonic_pseg.h"
 #include "trule.h"
 #include "tdict.h"
 #include "filelib.h"
 #include "dict.h"
 #include "sampler.h"
 #include "ccrp_nt.h"
+#include "corpus.h"
 
 using namespace std;
 using namespace std::tr1;
@@ -52,57 +54,12 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
 }
 
-void ReadParallelCorpus(const string& filename,
-                vector<vector<WordID> >* f,
-                vector<vector<int> >* e,
-                set<int>* vocab_e,
-                set<int>* vocab_f) {
-  f->clear();
-  e->clear();
-  vocab_f->clear();
-  vocab_e->clear();
-  istream* in;
-  if (filename == "-")
-    in = &cin;
-  else
-    in = new ifstream(filename.c_str());
-  assert(*in);
-  string line;
-  const WordID kDIV = TD::Convert("|||");
-  vector<WordID> tmp;
-  while(*in) {
-    getline(*in, line);
-    if (line.empty() && !*in) break;
-    e->push_back(vector<int>());
-    f->push_back(vector<int>());
-    vector<int>& le = e->back();
-    vector<int>& lf = f->back();
-    tmp.clear();
-    TD::ConvertSentence(line, &tmp);
-    bool isf = true;
-    for (unsigned i = 0; i < tmp.size(); ++i) {
-      const int cur = tmp[i];
-      if (isf) {
-        if (kDIV == cur) { isf = false; } else {
-          lf.push_back(cur);
-          vocab_f->insert(cur);
-        }
-      } else {
-        assert(cur != kDIV);
-        le.push_back(cur);
-        vocab_e->insert(cur);
-      }
-    }
-    assert(isf == false);
-  }
-  if (in != &cin) delete in;
-}
-
 shared_ptr<MT19937> prng;
 
 template <typename Base>
 struct ModelAndData {
-  explicit ModelAndData(const Base& b, const vector<vector<int> >& ce, const vector<vector<int> >& cf, const set<int>& ve, const set<int>& vf) :
+  explicit ModelAndData(MonotonicParallelSegementationModel& m, const Base& b, const vector<vector<int> >& ce, const vector<vector<int> >& cf, const set<int>& ve, const set<int>& vf) :
+     model(m),
      rng(&*prng),
      p0(b),
      baseprob(prob_t::One()),
@@ -110,14 +67,12 @@ struct ModelAndData {
      corpusf(cf),
      vocabe(ve),
      vocabf(vf),
-     rules(1,1),
      mh_samples(),
      mh_rejects(),
      kX(-TD::Convert("X")),
      derivations(corpuse.size()) {}
 
   void ResampleHyperparameters() {
-    rules.resample_hyperparameters(&*prng);
   }
 
   void InstantiateRule(const pair<short,short>& from,
@@ -139,12 +94,10 @@ struct ModelAndData {
     TRule x;
     for (int i = 1; i < d.size(); ++i) {
       InstantiateRule(d[i], d[i-1], sentf, sente, &x);
-      //cerr << "REMOVE: " << x.AsString() << endl;
-      if (rules.decrement(x)) {
-        baseprob /= p0(x);
-        //cerr << "  (REMOVED ONLY INSTANCE)\n";
-      }
+      model.DecrementRule(x);
+      model.DecrementContinue();
     }
+    model.DecrementStop();
   }
 
   void PrintDerivation(const vector<pair<short,short> >& d, const vector<int>& sentf, const vector<int>& sente) {
@@ -161,39 +114,38 @@ struct ModelAndData {
     TRule x;
     for (int i = 1; i < d.size(); ++i) {
       InstantiateRule(d[i], d[i-1], sentf, sente, &x);
-      if (rules.increment(x)) {
-        baseprob *= p0(x);
-      }
+      model.IncrementRule(x);
+      model.IncrementContinue();
     }
+    model.IncrementStop();
   }
 
   prob_t Likelihood() const {
-    prob_t p;
-    p.logeq(rules.log_crp_prob());
-    return p * baseprob;
+    return model.Likelihood();
   }
 
   prob_t DerivationProposalProbability(const vector<pair<short,short> >& d, const vector<int>& sentf, const vector<int>& sente) const {
-    prob_t p = prob_t::One();
+    prob_t p = model.StopProbability();
     if (d.size() < 2) return p;
     TRule x;
+    const prob_t p_cont = model.ContinueProbability();
     for (int i = 1; i < d.size(); ++i) {
       InstantiateRule(d[i], d[i-1], sentf, sente, &x);
-      prob_t rp; rp.logeq(rules.logprob(x, log(p0(x))));
-      p *= rp;
+      p *= p_cont;
+      p *= model.RuleProbability(x);
     }
     return p;
   }
 
   void Sample();
 
+  MonotonicParallelSegementationModel& model;
   MT19937* rng;
   const Base& p0;
   prob_t baseprob; // cached value of generating the table table labels from p0
                    // this can't be used if we go to a hierarchical prior!
   const vector<vector<int> >& corpuse, corpusf;
   const set<int>& vocabe, vocabf;
-  CCRP_NoTable<TRule> rules;
   unsigned mh_samples, mh_rejects;
   const int kX;
   vector<vector<pair<short, short> > > derivations;
@@ -201,8 +153,8 @@ struct ModelAndData {
 
 template <typename Base>
 void ModelAndData<Base>::Sample() {
-  unsigned MAXK = 4;
-  unsigned MAXL = 4;
+  unsigned MAXK = kMAX_SRC_PHRASE;
+  unsigned MAXL = kMAX_TRG_PHRASE;
   TRule x;
   x.lhs_ = -TD::Convert("X");
   for (int samples = 0; samples < 1000; ++samples) {
@@ -228,6 +180,8 @@ void ModelAndData<Base>::Sample() {
       boost::multi_array<prob_t, 2> a(boost::extents[sentf.size() + 1][sente.size() + 1]);
       boost::multi_array<prob_t, 4> trans(boost::extents[sentf.size() + 1][sente.size() + 1][MAXK][MAXL]);
       a[0][0] = prob_t::One();
+      const prob_t q_stop = model.StopProbability();
+      const prob_t q_cont = model.ContinueProbability();
       for (int i = 0; i < sentf.size(); ++i) {
         for (int j = 0; j < sente.size(); ++j) {
           const prob_t src_a = a[i][j];
@@ -239,7 +193,9 @@ void ModelAndData<Base>::Sample() {
             for (int l = 1; l <= MAXL; ++l) {
               if (j + l > sente.size()) break;
               x.e_.push_back(sente[j + l - 1]);
-              trans[i][j][k - 1][l - 1].logeq(rules.logprob(x, log(p0(x))));
+              const bool stop_now = ((j + l) == sente.size()) && ((i + k) == sentf.size());
+              const prob_t& cp = stop_now ? q_stop : q_cont;
+              trans[i][j][k - 1][l - 1] = model.RuleProbability(x) * cp;
               a[i + k][j + l] += src_a * trans[i][j][k - 1][l - 1];
             }
           }
@@ -319,7 +275,7 @@ int main(int argc, char** argv) {
 
   vector<vector<int> > corpuse, corpusf;
   set<int> vocabe, vocabf;
-  ReadParallelCorpus(conf["input"].as<string>(), &corpusf, &corpuse, &vocabf, &vocabe);
+  corpus::ReadParallelCorpus(conf["input"].as<string>(), &corpusf, &corpuse, &vocabf, &vocabe);
   cerr << "f-Corpus size: " << corpusf.size() << " sentences\n";
   cerr << "f-Vocabulary size: " << vocabf.size() << " types\n";
   cerr << "f-Corpus size: " << corpuse.size() << " sentences\n";
@@ -328,8 +284,9 @@ int main(int argc, char** argv) {
 
   Model1 m1(conf["model1"].as<string>());
   PhraseJointBase lp0(m1, conf["model1_interpolation_weight"].as<double>(), vocabe.size(), vocabf.size());
+  MonotonicParallelSegementationModel m(lp0);
 
-  ModelAndData<PhraseJointBase> posterior(lp0, corpuse, corpusf, vocabe, vocabf);
+  ModelAndData<PhraseJointBase> posterior(m, lp0, corpuse, corpusf, vocabe, vocabf);
   posterior.Sample();
 
   return 0;

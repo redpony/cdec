@@ -7,6 +7,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #include "base_measures.h"
+#include "monotonic_pseg.h"
 #include "reachability.h"
 #include "viterbi.h"
 #include "hg.h"
@@ -17,6 +18,7 @@
 #include "sampler.h"
 #include "ccrp_nt.h"
 #include "ccrp_onetable.h"
+#include "corpus.h"
 
 using namespace std;
 using namespace tr1;
@@ -57,101 +59,6 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
     exit(1);
   }
 }
-
-void ReadParallelCorpus(const string& filename,
-                vector<vector<WordID> >* f,
-                vector<vector<WordID> >* e,
-                set<WordID>* vocab_f,
-                set<WordID>* vocab_e) {
-  f->clear();
-  e->clear();
-  vocab_f->clear();
-  vocab_e->clear();
-  istream* in;
-  if (filename == "-")
-    in = &cin;
-  else
-    in = new ifstream(filename.c_str());
-  assert(*in);
-  string line;
-  const WordID kDIV = TD::Convert("|||");
-  vector<WordID> tmp;
-  while(*in) {
-    getline(*in, line);
-    if (line.empty() && !*in) break;
-    e->push_back(vector<int>());
-    f->push_back(vector<int>());
-    vector<int>& le = e->back();
-    vector<int>& lf = f->back();
-    tmp.clear();
-    TD::ConvertSentence(line, &tmp);
-    bool isf = true;
-    for (unsigned i = 0; i < tmp.size(); ++i) {
-      const int cur = tmp[i];
-      if (isf) {
-        if (kDIV == cur) { isf = false; } else {
-          lf.push_back(cur);
-          vocab_f->insert(cur);
-        }
-      } else {
-        assert(cur != kDIV);
-        le.push_back(cur);
-        vocab_e->insert(cur);
-      }
-    }
-    assert(isf == false);
-  }
-  if (in != &cin) delete in;
-}
-
-struct MyJointModel {
-  MyJointModel(PhraseJointBase& rcp0) :
-    rp0(rcp0), base(prob_t::One()), rules(1,1) {}
-
-  void DecrementRule(const TRule& rule) {
-    if (rules.decrement(rule))
-      base /= rp0(rule);
-  }
-
-  void IncrementRule(const TRule& rule) {
-    if (rules.increment(rule))
-      base *= rp0(rule);
-  }
-
-  void IncrementRules(const vector<TRulePtr>& rules) {
-    for (int i = 0; i < rules.size(); ++i)
-      IncrementRule(*rules[i]);
-  }
-
-  void DecrementRules(const vector<TRulePtr>& rules) {
-    for (int i = 0; i < rules.size(); ++i)
-      DecrementRule(*rules[i]);
-  }
-
-  prob_t RuleProbability(const TRule& rule) const {
-    prob_t p; p.logeq(rules.logprob(rule, log(rp0(rule))));
-    return p;
-  }
-
-  prob_t Likelihood() const {
-    prob_t p = base;
-    prob_t q; q.logeq(rules.log_crp_prob());
-    p *= q;
-    for (unsigned l = 1; l < src_jumps.size(); ++l) {
-      if (src_jumps[l].num_customers() > 0) {
-        prob_t q;
-        q.logeq(src_jumps[l].log_crp_prob());
-        p *= q;
-      }
-    }
-    return p;
-  }
-
-  const PhraseJointBase& rp0;
-  prob_t base;
-  CCRP_NoTable<TRule> rules;
-  vector<CCRP_NoTable<int> > src_jumps;
-};
 
 struct BackwardEstimateSym {
   BackwardEstimateSym(const Model1& m1,
@@ -264,7 +171,7 @@ int main(int argc, char** argv) {
   vector<vector<WordID> > corpuse, corpusf;
   set<WordID> vocabe, vocabf;
   cerr << "Reading corpus...\n";
-  ReadParallelCorpus(conf["input"].as<string>(), &corpusf, &corpuse, &vocabf, &vocabe);
+  corpus::ReadParallelCorpus(conf["input"].as<string>(), &corpusf, &corpuse, &vocabf, &vocabe);
   cerr << "F-corpus size: " << corpusf.size() << " sentences\t (" << vocabf.size() << " word types)\n";
   cerr << "E-corpus size: " << corpuse.size() << " sentences\t (" << vocabe.size() << " word types)\n";
   assert(corpusf.size() == corpuse.size());
@@ -273,13 +180,8 @@ int main(int argc, char** argv) {
   Model1 m1(conf["model1"].as<string>());
   Model1 invm1(conf["inverse_model1"].as<string>());
 
-#if 0
-  PhraseConditionalBase lp0(m1, conf["model1_interpolation_weight"].as<double>(), vocabe.size());
-  MyConditionalModel m(lp0);
-#else
   PhraseJointBase lp0(m1, conf["model1_interpolation_weight"].as<double>(), vocabe.size(), vocabf.size());
-  MyJointModel m(lp0);
-#endif
+  MonotonicParallelSegementationModel m(lp0);
 
   cerr << "Initializing reachability limits...\n";
   vector<Particle> ps(corpusf.size());
@@ -296,7 +198,10 @@ int main(int argc, char** argv) {
     for (int ci = 0; ci < corpusf.size(); ++ci) {
       vector<int>& src = corpusf[ci];
       vector<int>& trg = corpuse[ci];
-      m.DecrementRules(ps[ci].rules);
+      m.DecrementRulesAndStops(ps[ci].rules);
+      const prob_t q_stop = m.StopProbability();
+      const prob_t q_cont = m.ContinueProbability();
+      cerr << "P(stop)=" << q_stop << "\tP(continue)=" <<q_cont << endl;
 
       BackwardEstimateSym be(m1, invm1, src, trg);
       const Reachability& r = reaches[ci];
@@ -336,7 +241,8 @@ int main(int argc, char** argv) {
                   x.f_.push_back(src[i + j]);
                 np.src_cov += x.f_.size();
                 np.trg_cov += x.e_.size();
-                prob_t rp = m.RuleProbability(x);
+                const bool stop_now = (np.src_cov == src_len && np.trg_cov == trg_len);
+                prob_t rp = m.RuleProbability(x) * (stop_now ? q_stop : q_cont);
                 np.gamma_last = rp;
                 const prob_t u = pow(np.gamma_last * pow(be(np.src_cov, np.trg_cov), 1.2), 0.1);
                 //cerr << "**rule=" << x << endl;
@@ -363,7 +269,7 @@ int main(int argc, char** argv) {
         pfss.add(lps[i].weight);
       const int sampled = rng.SelectSample(pfss);
       ps[ci] = lps[sampled];
-      m.IncrementRules(lps[sampled].rules);
+      m.IncrementRulesAndStops(lps[sampled].rules);
       for (int i = 0; i < lps[sampled].rules.size(); ++i) { cerr << "S:\t" << lps[sampled].rules[i]->AsString() << "\n"; }
       cerr << "tmp-LLH: " << log(m.Likelihood()) << endl;
     }
