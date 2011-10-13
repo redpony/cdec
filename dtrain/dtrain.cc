@@ -6,25 +6,25 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
 {
   po::options_description ini("Configuration File Options");
   ini.add_options()
-    ("input",          po::value<string>()->default_value("-"),                            "input file")
-    ("output",         po::value<string>()->default_value("-"),         "output weights file (or VOID)")
-    ("input_weights",  po::value<string>(),         "input weights file (e.g. from previous iteration)")
-    ("decoder_config", po::value<string>(),                               "configuration file for cdec")
-    ("k",              po::value<unsigned>()->default_value(100), "size of kbest or sample from forest")
-    ("sample_from",    po::value<string>()->default_value("kbest"),    "where to get translations from")
-    ("filter",         po::value<string>()->default_value("unique"),                "filter kbest list")
-    ("pair_sampling",  po::value<string>()->default_value("all"),      "how to sample pairs: all, rand")
-    ("N",              po::value<unsigned>()->default_value(3),                          "N for Ngrams")
-    ("epochs",         po::value<unsigned>()->default_value(2),                     "# of iterations T") 
-    ("scorer",         po::value<string>()->default_value("stupid_bleu"),              "scoring metric")
-    ("stop_after",     po::value<unsigned>()->default_value(0),          "stop after X input sentences")
-    ("print_weights",  po::value<string>(),                        "weights to print on each iteration")
-    ("hstreaming",     po::value<bool>()->zero_tokens(),                 "run in hadoop streaming mode")
-    ("learning_rate",  po::value<double>()->default_value(0.0005),                      "learning rate")
-    ("gamma",          po::value<double>()->default_value(0.),       "gamma for SVM (0 for perceptron)")
-    ("tmp",            po::value<string>()->default_value("/tmp"),                    "temp dir to use")
-    ("select_weights", po::value<string>()->default_value("last"),    "output 'best' or 'last' weights")
-    ("noup",           po::value<bool>()->zero_tokens(),                        "do not update weights");
+    ("input",          po::value<string>()->default_value("-"),                                                "input file")
+    ("output",         po::value<string>()->default_value("-"),                                       "output weights file")
+    ("input_weights",  po::value<string>(),                             "input weights file (e.g. from previous iteration)")
+    ("decoder_config", po::value<string>(),                                                   "configuration file for cdec")
+    ("k",              po::value<unsigned>()->default_value(100),                     "size of kbest or sample from forest")
+    ("sample_from",    po::value<string>()->default_value("kbest"),                        "where to get translations from")
+    ("filter",         po::value<string>()->default_value("unique"),                                    "filter kbest list")
+    ("pair_sampling",  po::value<string>()->default_value("all"),                          "how to sample pairs: all, rand")
+    ("N",              po::value<unsigned>()->default_value(3),                                              "N for Ngrams")
+    ("epochs",         po::value<unsigned>()->default_value(2),                                         "# of iterations T") 
+    ("scorer",         po::value<string>()->default_value("stupid_bleu"),                                  "scoring metric")
+    ("stop_after",     po::value<unsigned>()->default_value(0),                              "stop after X input sentences")
+    ("print_weights",  po::value<string>(),                                            "weights to print on each iteration")
+    ("hstreaming",     po::value<bool>()->zero_tokens(),                                     "run in hadoop streaming mode")
+    ("learning_rate",  po::value<double>()->default_value(0.0005),                                          "learning rate")
+    ("gamma",          po::value<double>()->default_value(0),                            "gamma for SVM (0 for perceptron)")
+    ("tmp",            po::value<string>()->default_value("/tmp"),                                        "temp dir to use")
+    ("select_weights", po::value<string>()->default_value("last"), "output 'best' or 'last' weights ('VOID' to throw away)")
+    ("noup",           po::value<bool>()->zero_tokens(),                                            "do not update weights");
   po::options_description cl("Command Line Options");
   cl.add_options()
     ("config,c",         po::value<string>(),              "dtrain config file")
@@ -108,9 +108,9 @@ main(int argc, char** argv)
   } else if (scorer_str == "stupid_bleu") {
     scorer = dynamic_cast<StupidBleuScorer*>(new StupidBleuScorer);
   } else if (scorer_str == "smooth_bleu") {
-      scorer = dynamic_cast<SmoothBleuScorer*>(new SmoothBleuScorer);
+    scorer = dynamic_cast<SmoothBleuScorer*>(new SmoothBleuScorer);
   } else if (scorer_str == "approx_bleu") {
-      scorer = dynamic_cast<StupidBleuScorer*>(new StupidBleuScorer); // FIXME
+    scorer = dynamic_cast<StupidBleuScorer*>(new StupidBleuScorer); // FIXME
   } else {
     cerr << "Don't know scoring metric: '" << scorer_str << "', exiting." << endl;
     exit(1);
@@ -138,8 +138,10 @@ main(int argc, char** argv)
   // meta params for perceptron, SVM
   double eta = cfg["learning_rate"].as<double>();
   double gamma = cfg["gamma"].as<double>();
-  lambdas.add_value(FD::Convert("__bias"), 0);
+  WordID __bias = FD::Convert("__bias");
+  lambdas.add_value(__bias, 0);
 
+  string output_fn = cfg["output"].as<string>();
   // input
   string input_fn = cfg["input"].as<string>();
   ReadFile input(input_fn);
@@ -169,8 +171,8 @@ main(int argc, char** argv)
       cerr << setw(25) << "stop_after " << stop_after << endl;
     if (cfg.count("input_weights"))
       cerr << setw(25) << "weights in" << cfg["input_weights"].as<string>() << endl;
-    cerr << setw(25) << "input " << "'" << cfg["input"].as<string>() << "'" << endl;
-    cerr << setw(25) << "output " << "'" << cfg["output"].as<string>() << "'" << endl;
+    cerr << setw(25) << "input " << "'" << input_fn << "'" << endl;
+    cerr << setw(25) << "output " << "'" << output_fn << "'" << endl;
     if (sample_from == "kbest")
       cerr << setw(25) << "filter " << "'" << filter_type << "'" << endl;
     cerr << setw(25) << "learning rate " << eta << endl;
@@ -190,9 +192,9 @@ main(int argc, char** argv)
   igzstream grammar_buf_in;
   if (t > 0) grammar_buf_in.open(grammar_buf_fn.c_str());
   score_t score_sum = 0., model_sum = 0.;
-  unsigned ii = 0;
+  unsigned ii = 0, nup = 0, npairs = 0;
   if (!quiet) cerr << "Iteration #" << t+1 << " of " << T << "." << endl;
-  
+
   while(true)
   {
 
@@ -294,8 +296,7 @@ main(int argc, char** argv)
     score_sum += (*samples)[0].score;
     model_sum += (*samples)[0].model;
 
-//////////////////////////////////////////////////////////
-    // UPDATE WEIGHTS
+    // weight updates
     if (!noup) {
       vector<pair<ScoredHyp,ScoredHyp> > pairs;
       if (pair_sampling == "all")
@@ -304,45 +305,35 @@ main(int argc, char** argv)
         sample_rand_pairs(samples, pairs, &rng);
       if (pair_sampling == "108010")
         sample108010(samples, pairs);
+      npairs += pairs.size();
        
       for (vector<pair<ScoredHyp,ScoredHyp> >::iterator it = pairs.begin();
            it != pairs.end(); it++) {
-
-        SparseVector<double> dv;
-        if (it->first.score - it->second.score < 0) {
-          dv = it->second.f - it->first.f;
-      //} else {
-        //dv = it->first - it->second;
-      //}
-          dv.add_value(FD::Convert("__bias"), -1);
-        
-          //SparseVector<double> reg;
-          //reg = lambdas * (2 * gamma);
-          //dv -= reg;
-          lambdas += dv * eta;
-
-          if (verbose) {
-            /*cerr << "{{ f("<< it->first_rank <<") > f(" << it->second_rank << ") but g(i)="<< it->first_score <<" < g(j)="<< it->second_score << " so update" << endl;
-            cerr << " i  " << TD::GetString(samples->sents[ti->first_rank]) << endl;
-            cerr << "    " << samples->feats[ti->first_rank] << endl;
-            cerr << " j  " << TD::GetString(samples->sents[ti->second_rank]) << endl;
-            cerr << "    " << samples->feats[ti->second_rank] << endl; 
-            cerr << " diff vec: " << dv << endl;
-            cerr << " lambdas after update: " << lambdas << endl;
-            cerr << "}}" << endl;*/
+        if (!gamma) {
+          // perceptron
+          if (it->first.score - it->second.score < 0) { // rank error
+            SparseVector<double> dv = it->second.f - it->first.f;
+            dv.add_value(__bias, -1);
+            lambdas.plus_eq_v_times_s(dv, eta);
+            nup++;
           }
         } else {
-          //SparseVector<double> reg;
-          //reg = lambdas * (2 * gamma);
-          //lambdas += reg * (-eta);
+          // SVM
+          double rank_error = it->second.score - it->first.score;
+          if (rank_error > 0) {
+            SparseVector<double> dv = it->second.f - it->first.f;
+            dv.add_value(__bias, -1);
+            lambdas.plus_eq_v_times_s(dv, eta);
+          }
+          // regularization
+          double margin = it->first.model - it->second.model;
+          if (rank_error || margin < 1) {
+            lambdas.plus_eq_v_times_s(lambdas, -2*gamma*eta); // reg /= #EXAMPLES or #UPDATES ?
+            nup++;
+          }
         }
-
       }
-
-      //double l2 = lambdas.l2norm();
-      //if (l2) lambdas /= lambdas.l2norm();
     }
-//////////////////////////////////////////////////////////
 
     ++ii;
 
@@ -369,15 +360,19 @@ main(int argc, char** argv)
     model_diff = model_avg;
   }
   if (!quiet) {
-  cerr << _p5 << _p << "WEIGHTS" << endl;
-  for (vector<string>::iterator it = print_weights.begin(); it != print_weights.end(); it++) {
-    cerr << setw(16) << *it << " = " << lambdas.get(FD::Convert(*it)) << endl;
-  }
-  cerr << "        ---" << endl;
-  cerr << _np << "      1best avg score: " << score_avg;
-  cerr << _p << " (" << score_diff << ")" << endl;
-  cerr << _np << "1best avg model score: " << model_avg;
-  cerr << _p << " (" << model_diff << ")" << endl;
+    cerr << _p5 << _p << "WEIGHTS" << endl;
+    for (vector<string>::iterator it = print_weights.begin(); it != print_weights.end(); it++) {
+      cerr << setw(18) << *it << " = " << lambdas.get(FD::Convert(*it)) << endl;
+    }
+    cerr << "        ---" << endl;
+    cerr << _np << "      1best avg score: " << score_avg;
+    cerr << _p << " (" << score_diff << ")" << endl;
+    cerr << _np << "1best avg model score: " << model_avg;
+    cerr << _p << " (" << model_diff << ")" << endl;
+    cerr << "           avg #pairs: ";
+    cerr << _np << npairs/(float)in_sz << endl;
+    cerr << "              avg #up: ";
+    cerr << nup/(float)in_sz << endl;
   }
   pair<score_t,score_t> remember;
   remember.first = score_avg;
@@ -412,9 +407,9 @@ main(int argc, char** argv)
   unlink(grammar_buf_fn.c_str());
 
   if (!noup) {
-    if (!quiet) cerr << endl << "writing weights file to '" << cfg["output"].as<string>() << "' ...";
+    if (!quiet) cerr << endl << "writing weights file to '" << output_fn << "' ..." << endl;
     if (select_weights == "last") { // last
-      WriteFile out(cfg["output"].as<string>());
+      WriteFile out(output_fn);
       ostream& o = *out.stream();
       o.precision(17);
       o << _np;
@@ -423,9 +418,10 @@ main(int argc, char** argv)
         o << FD::Convert(it->first) << '\t' << it->second << endl;
       }
       if (hstreaming) cout << "__SHARD_COUNT__\t1" << endl;
+    } else if (select_weights == "VOID") { // do nothing
     } else { // best
-      if (cfg["output"].as<string>() != "-") {
-        CopyFile(weights_files[best_it], cfg["output"].as<string>()); 
+      if (output_fn != "-") {
+        CopyFile(weights_files[best_it], output_fn); 
       } else {
         ReadFile(weights_files[best_it]);
         string o;

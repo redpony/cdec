@@ -214,6 +214,14 @@ class FastSparseVector {
     }
     return *this;
   }
+  template <typename O>
+  inline FastSparseVector<O>& plus_eq_v_times_s(const FastSparseVector<O>& other, const O scalar) {
+    const typename FastSparseVector<O>::const_iterator end = other.end();
+    for (typename FastSparseVector<O>::const_iterator it = other.begin(); it != end; ++it) {
+      get_or_create_bin(it->first) += it->second * scalar;
+    }
+    return *this;
+  }
   inline FastSparseVector& operator-=(const FastSparseVector& other) {
     const typename FastSparseVector::const_iterator end = other.end();
     for (typename FastSparseVector::const_iterator it = other.begin(); it != end; ++it) {
