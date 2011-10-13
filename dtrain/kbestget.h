@@ -14,7 +14,7 @@ namespace dtrain
 {
 
 
-typedef double score_t; // float
+typedef double score_t;
 
 struct ScoredHyp
 {
@@ -31,9 +31,11 @@ struct LocalScorer
   vector<score_t> w_;
 
   virtual score_t
-  Score(vector<WordID>& hyp, vector<WordID>& ref)=0;
+  Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank)=0;
 
-  void
+  void Reset() {} // only for approx bleu
+
+  inline void
   Init(unsigned N, vector<score_t> weights)
   {
     assert(N > 0);
@@ -42,7 +44,7 @@ struct LocalScorer
     else w_ = weights;
   }
 
-  score_t
+  inline score_t
   brevity_penaly(const unsigned hyp_len, const unsigned ref_len)
   {
     if (hyp_len > ref_len) return 1;
@@ -55,11 +57,10 @@ struct HypSampler : public DecoderObserver
   LocalScorer* scorer_;
   vector<WordID>* ref_;
   virtual vector<ScoredHyp>* GetSamples()=0;
-  void SetScorer(LocalScorer* scorer) { scorer_ = scorer; }
-  void SetRef(vector<WordID>& ref) { ref_ = &ref; } 
+  inline void SetScorer(LocalScorer* scorer) { scorer_ = scorer; }
+  inline void SetRef(vector<WordID>& ref) { ref_ = &ref; } 
 };
-/////////////////////////////////////////////////////////////////////
-// wtf
+///////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -107,7 +108,7 @@ struct KBestGetter : public HypSampler
       h.f = d->feature_values;
       h.model = log(d->score);
       h.rank = i;
-      h.score = scorer_->Score(h.w, *ref_);
+      h.score = scorer_->Score(h.w, *ref_, i);
       s_.push_back(h);
     }
   }
@@ -126,7 +127,7 @@ struct KBestGetter : public HypSampler
       h.f = d->feature_values;
       h.model = log(d->score);
       h.rank = i;
-      h.score = scorer_->Score(h.w, *ref_);
+      h.score = scorer_->Score(h.w, *ref_, i);
       s_.push_back(h);
     }
   }

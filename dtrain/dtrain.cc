@@ -105,12 +105,13 @@ main(int argc, char** argv)
   string scorer_str = cfg["scorer"].as<string>();
   LocalScorer* scorer;
   if (scorer_str == "bleu") {
+    scorer = dynamic_cast<BleuScorer*>(new BleuScorer);
   } else if (scorer_str == "stupid_bleu") {
     scorer = dynamic_cast<StupidBleuScorer*>(new StupidBleuScorer);
   } else if (scorer_str == "smooth_bleu") {
     scorer = dynamic_cast<SmoothBleuScorer*>(new SmoothBleuScorer);
   } else if (scorer_str == "approx_bleu") {
-    scorer = dynamic_cast<StupidBleuScorer*>(new StupidBleuScorer); // FIXME
+    scorer = dynamic_cast<ApproxBleuScorer*>(new ApproxBleuScorer(N));
   } else {
     cerr << "Don't know scoring metric: '" << scorer_str << "', exiting." << endl;
     exit(1);
@@ -145,7 +146,7 @@ main(int argc, char** argv)
   // input
   string input_fn = cfg["input"].as<string>();
   ReadFile input(input_fn);
-    // buffer input for t > 0
+  // buffer input for t > 0
   vector<string> src_str_buf;          // source strings
   vector<vector<WordID> > ref_ids_buf; // references as WordID vecs
   vector<string> weights_files;        // remember weights for each iteration
@@ -340,6 +341,8 @@ main(int argc, char** argv)
     if (hstreaming) cerr << "reporter:counter:dtrain,sid," << ii << endl;
 
   } // input loop
+
+  if (scorer_str == "approx_bleu") scorer->Reset();
 
   if (t == 0) {
     in_sz = ii; // remember size of input (# lines)

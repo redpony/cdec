@@ -28,7 +28,8 @@ BleuScorer::Bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref
 }
 
 score_t
-BleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref)
+BleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                  const unsigned rank)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
   if (hyp_len == 0 || ref_len == 0) return 0;
@@ -47,7 +48,8 @@ BleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref)
  * NOTE: 0 iff no 1gram match
  */
 score_t
-StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref)
+StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                        const unsigned rank)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
   if (hyp_len == 0 || ref_len == 0) return 0;
@@ -72,7 +74,8 @@ StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref)
  * NOTE: max is 0.9375
  */
 score_t
-SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref)
+SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                        const unsigned rank)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
   if (hyp_len == 0 || ref_len == 0) return 0;
@@ -87,7 +90,6 @@ SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref)
   return brevity_penaly(hyp_len, ref_len) * sum;
 }
 
-// FIXME
 /*
  * approx. bleu
  *
@@ -95,38 +97,28 @@ SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref)
  *        and Structural Translation Features"
  * (Chiang et al. '08)
  */
-/*void
-ApproxBleuScorer::Prep(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len)
-{
-  glob_onebest_counts += counts;
-  glob_hyp_len += hyp_len;
-  glob_ref_len += ref_len;
-}
-
-void
-ApproxBleuScorer::Reset()
-{
-  glob_onebest_counts.Zero();
-  glob_hyp_len = 0;
-  glob_ref_len = 0;
-}
-
 score_t
-ApproxBleuScorer::Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id)
+ApproxBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                        const unsigned rank)
 {
-  NgramCounts counts = make_ngram_counts(hyp.w, ref_ids, N_);
-  if (id == 0) reset();
-  unsigned hyp_len = 0, ref_len = 0;
-  if (hyp.rank == 0) { // 'context of 1best translations'
-    scorer->prep(counts, hyp.w.size(), ref_ids.size()); 
-    counts.reset();
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
+  if (hyp_len == 0 || ref_len == 0) return 0;
+  NgramCounts counts = make_ngram_counts(hyp, ref, N_);
+  NgramCounts tmp(N_);
+  if (rank == 0) { // 'context of 1best translations'
+    glob_onebest_counts += counts;
+    glob_hyp_len += hyp_len;
+    glob_ref_len += ref_len;
+    hyp_len = glob_hyp_len;
+    ref_len = glob_ref_len;
+    tmp = glob_onebest_counts;
   } else {
-    hyp_len = hyp.w.size();
-    ref_len = ref_ids.size();
+    hyp_len = hyp.size();
+    ref_len = ref.size();
+    tmp = glob_onebest_counts + counts;
   }
-  return 0.9 * BleuScorer::Bleu(glob_onebest_counts + counts,
-                                glob_hyp_len + hyp_len, glob_ref_len + ref_len);
-}*/
+  return 0.9 * Bleu(tmp, hyp_len, ref_len);
+}
 
 
 } // namespace
