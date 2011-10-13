@@ -17,7 +17,7 @@ struct NgramCounts
 
   NgramCounts(const unsigned N) : N_(N) { Zero(); } 
 
-  void
+  inline void
   operator+=(const NgramCounts& rhs)
   {
     assert(N_ == rhs.N_);
@@ -27,7 +27,7 @@ struct NgramCounts
     }
   }
 
-  const NgramCounts
+  inline const NgramCounts
   operator+(const NgramCounts &other) const
   {
     NgramCounts result = *this;
@@ -35,8 +35,8 @@ struct NgramCounts
     return result;
   }
 
-  void
-  Add(unsigned count, unsigned ref_count, unsigned i)
+  inline void
+  Add(const unsigned count, const unsigned ref_count, const unsigned i)
   {
     assert(i < N_);
     if (count > ref_count) {
@@ -47,7 +47,7 @@ struct NgramCounts
     sum[i] += count;
   }
 
-  void
+  inline void
   Zero()
   {
     unsigned i;
@@ -57,7 +57,7 @@ struct NgramCounts
     }
   }
 
-  void
+  inline void
   Print()
   {
     for (unsigned i = 0; i < N_; i++) {
@@ -106,38 +106,36 @@ make_ngram_counts(const vector<WordID>& hyp, const vector<WordID>& ref, const un
 struct BleuScorer : public LocalScorer
 {
   score_t Bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len);
-  score_t Score(vector<WordID>& hyp, vector<WordID>& ref_ids);
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank);
 };
 
 struct StupidBleuScorer : public LocalScorer
 {
-  score_t Score(vector<WordID>& hyp, vector<WordID>& ref);
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank);
 };
 
 struct SmoothBleuScorer : public LocalScorer
 {
-  score_t Score(vector<WordID>& hyp, vector<WordID>& ref);
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank);
 };
 
-// FIXME
-/*struct ApproxBleuScorer : public LocalScorer
+struct ApproxBleuScorer : public BleuScorer
 {
-  bool prepped;
-
-  NgramCounts* glob_onebest_counts;
+  NgramCounts glob_onebest_counts;
   unsigned glob_hyp_len, glob_ref_len;
 
-  void Prep(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len);
-  void Reset();
-  score_t Score(ScoredHyp& hyp, vector<WordID>& ref_ids, unsigned id);
-
-  ApproxBleuScorer() 
+  ApproxBleuScorer(unsigned N) : glob_onebest_counts(NgramCounts(N))
   {
-    glob_onebest_counts.Zero();
-    glob_hyp_len = 0;
-    glob_ref_len = 0;
+    glob_hyp_len = glob_ref_len = 0;
   }
-};*/
+
+  inline void Reset() {
+    glob_onebest_counts.Zero();
+    glob_hyp_len = glob_ref_len = 0;
+  }
+
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank);
+};
 
 
 } // namespace

@@ -37,7 +37,7 @@ struct KSampler : public HypSampler
       h.f = samples[i].fmap;
       h.model = log(samples[i].model_score); 
       h.rank = i;
-      h.score = scorer_->Score(h.w, *ref_);
+      h.score = scorer_->Score(h.w, *ref_, i);
       s_.push_back(h);
     }
   }
