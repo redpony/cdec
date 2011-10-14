@@ -1,4 +1,5 @@
-TODO
+IDEAS
+=====
  MULTIPARTITE ranking (108010, 1 vs all, cluster modelscore;score)
  what about RESCORING?
  REMEMBER kbest (merge) weights?
@@ -21,16 +22,29 @@ TODO
  non deterministic, high variance, RANDOM RESTARTS
  use separate TEST SET
 
-KNOWN BUGS, PROBLEMS
- doesn't select best iteration for weigts
- if size of candidate < N => 0 score
- cdec kbest vs 1best (no -k param), rescoring? => ok(?)
- no sparse vector in decoder => ok
- ? ok
- sh: error while loading shared libraries: libreadline.so.6: cannot open shared object file: Error 24
- PhraseModel_* features (0..99 seem to be generated, why 99?)
- flex scanner jams on malicious input, we could skip that
+Uncertain, known bugs, problems
+===============================
+* cdec kbest vs 1best (no -k param), rescoring? => ok(?)
+* no sparse vector in decoder => ok/fixed
+* PhraseModel_* features (0..99 seem to be generated, why 99?)
+* flex scanner jams on malicious input, we could skip that
 
-FIX
-  merge
-  ep data
+FIXME
+=====
+* merge
+* ep data
+
+Data
+====
+<pre>
+nc-v6.de-en             peg
+nc-v6.de-en.loo         peg
+nc-v6.de-en.giza.loo    peg
+nc-v6.de-en.symgiza.loo pe
+nv-v6.de-en.cs          pe
+nc-v6.de-en.cs.loo      pe
+--
+ep-v6.de-en.cs          p
+ep-v6.de-en.cs.loo      p
+</pre>
+
