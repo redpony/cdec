@@ -12,8 +12,6 @@
 #include "ff_rules.h"
 #include "ff_ruleshape.h"
 #include "ff_bleu.h"
-#include "ff_lm_fsa.h"
-#include "ff_sample_fsa.h"
 #include "ff_source_syntax.h"
 #include "ff_register.h"
 #include "ff_charset.h"
@@ -31,23 +29,12 @@ void register_feature_functions() {
   }
   registered = true;
 
-  //TODO: these are worthless example target FSA ffs.  remove later
-  RegisterFsaImpl<SameFirstLetter>(true);
-  RegisterFsaImpl<LongerThanPrev>(true);
-  RegisterFsaImpl<ShorterThanPrev>(true);
-//  ff_registry.Register("LanguageModelFsaDynamic",new FFFactory<FeatureFunctionFromFsa<FsaFeatureFunctionDynamic<LanguageModelFsa> > >); // to test correctness of FsaFeatureFunctionDynamic erasure
-  RegisterFsaDynToFF<LanguageModelFsa>();
-  RegisterFsaImpl<LanguageModelFsa>(true); // same as LM but using fsa wrapper
-  RegisterFsaDynToFF<SameFirstLetter>();
-
   RegisterFF<LanguageModel>();
 
   RegisterFF<WordPenalty>();
   RegisterFF<SourceWordPenalty>();
   RegisterFF<ArityPenalty>();
   RegisterFF<BLEUModel>();
-
-  ff_registry.Register(new FFFactory<WordPenaltyFromFsa>); // same as WordPenalty, but implemented using ff_fsa
 
   //TODO: use for all features the new Register which requires static FF::usage(false,false) give name
 #ifdef HAVE_RANDLM
