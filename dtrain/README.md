@@ -51,11 +51,11 @@ Data
 nc-v6.de-en             peg
 nc-v6.de-en.loo         peg
 nc-v6.de-en.giza.loo    peg
-nc-v6.de-en.symgiza.loo pe
-nv-v6.de-en.cs          pe
-nc-v6.de-en.cs.loo      pe
+nc-v6.de-en.symgiza.loo peg
+nv-v6.de-en.cs          peg
+nc-v6.de-en.cs.loo      peg
 --
-ep-v6.de-en.cs          p
+ep-v6.de-en.cs          pe
 ep-v6.de-en.cs.loo      p
 
 p: prep, e: extract, g: grammar, d: dtrain
