@@ -1,6 +1,25 @@
 dtrain
 ======
 
+Build & run
+-----------
+On a hadoop cluster do:
+```sh
+git clone git://github.com/qlt/cdec-dtrain.git
+cd cdec_dtrain
+autoreconf -ifv
+./configure
+make
+```
+then
+```sh
+cd dtrain/hstreaming/
+(edit ini files)
+edit hadoop-streaming-job.sh $IN and $OUT
+./hadoop-streaming-job.sh
+```
+
+
 Ideas
 -----
 * *MULTIPARTITE* ranking (1 vs all, cluster model/score)
