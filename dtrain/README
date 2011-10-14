@@ -32,7 +32,5 @@ KNOWN BUGS, PROBLEMS
  flex scanner jams on malicious input, we could skip that
 
 FIX
-  approx BLEU fix
   merge
   ep data
-  r\tr\tr\tr\tr
