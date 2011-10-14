@@ -42,7 +42,6 @@ libcdec_a_SOURCES = \
   cfg.cc \
   dwarf.cc \
   ff_dwarf.cc \
-  apply_fsa_models.cc \
   rule_lexer.cc \
   fst_translator.cc \
   csplit.cc \

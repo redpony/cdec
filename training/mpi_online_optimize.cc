@@ -9,6 +9,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "stringlib.h"
 #include "verbose.h"
 #include "hg.h"
 #include "prob.h"
@@ -204,6 +205,7 @@ bool LoadAgenda(const string& file, vector<pair<string, int> >* a) {
 }
 
 int main(int argc, char** argv) {
+  cerr << "THIS SOFTWARE IS DEPRECATED YOU SHOULD USE mpi_flex_optimize\n";
 #ifdef HAVE_MPI
   mpi::environment env(argc, argv);
   mpi::communicator world;
