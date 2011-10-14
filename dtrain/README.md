@@ -3,21 +3,21 @@ dtrain
 
 Build & run
 -----------
-On a hadoop cluster do:
-```sh
+build ..
+<pre>
 git clone git://github.com/qlt/cdec-dtrain.git
 cd cdec_dtrain
 autoreconf -ifv
 ./configure
 make
-```
-then
-```sh
+</pre>
+and run:
+<pre>
 cd dtrain/hstreaming/
 (edit ini files)
 edit hadoop-streaming-job.sh $IN and $OUT
 ./hadoop-streaming-job.sh
-```
+</pre>
 
 
 Ideas
