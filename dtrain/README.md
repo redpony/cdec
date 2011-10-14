@@ -1,9 +1,9 @@
 dtrain
 ======
 
-IDEAS
+Ideas
 -----
-* MULTIPARTITE ranking (108010, 1 vs all, cluster modelscore;score)
+* *MULTIPARTITE* ranking (108010, 1 vs all, cluster modelscore;score)
 * what about RESCORING?
 * REMEMBER kbest (merge) weights?
 * SELECT iteration with highest (real) BLEU?
@@ -37,7 +37,7 @@ FIXME
 * merge with cdec master
 
 Data
-====
+----
 <pre>
 nc-v6.de-en             peg
 nc-v6.de-en.loo         peg
@@ -48,5 +48,7 @@ nc-v6.de-en.cs.loo      pe
 --
 ep-v6.de-en.cs          p
 ep-v6.de-en.cs.loo      p
+
+p: prep, e: extract, g: grammar, d: dtrain
 </pre>
 
