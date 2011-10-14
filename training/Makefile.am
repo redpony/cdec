@@ -12,6 +12,7 @@ bin_PROGRAMS = \
   mpi_extract_reachable \
   mpi_extract_features \
   mpi_online_optimize \
+  mpi_flex_optimize \
   mpi_batch_optimize \
   mpi_compute_cllh \
   augment_grammar
@@ -24,6 +25,9 @@ TESTS = lbfgs_test optimize_test
 
 mpi_online_optimize_SOURCES = mpi_online_optimize.cc online_optimizer.cc
 mpi_online_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+
+mpi_flex_optimize_SOURCES = mpi_flex_optimize.cc online_optimizer.cc optimize.cc
+mpi_flex_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 mpi_extract_reachable_SOURCES = mpi_extract_reachable.cc
 mpi_extract_reachable_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
