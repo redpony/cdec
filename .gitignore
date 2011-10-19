@@ -155,3 +155,6 @@ training/compute_cllh
 dtrain/dtrain
 weights.gz
 dtrain/test/eval/
+phrasinator/gibbs_train_plm_notables
+training/mpi_flex_optimize
+utils/phmt
