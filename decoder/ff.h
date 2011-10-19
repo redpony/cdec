@@ -259,13 +259,8 @@ typedef std::vector<FFState> FFStates;
 // etc. a (translation?) forest
 class ModelSet {
  public:
-  ModelSet() : state_size_(0) {}
-
   ModelSet(const std::vector<double>& weights,
            const std::vector<const FeatureFunction*>& models);
-
-  // TODO stop stupid copy
-  void SetWeights(const std::vector<double>& w) { weights_ = w; }
 
   // sets edge->feature_values_ and edge->edge_prob_
   // NOTE: edge must not necessarily be in hg.edges_ but its TAIL nodes
@@ -294,7 +289,7 @@ class ModelSet {
 
  private:
   std::vector<const FeatureFunction*> models_;
-  std::vector<double> weights_;
+  const std::vector<double>& weights_;
   int state_size_;
   std::vector<int> model_state_pos_;
 };
