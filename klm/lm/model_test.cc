@@ -264,14 +264,6 @@ template <class M> void NoUnkCheck(const M &model) {
   BOOST_CHECK_CLOSE(-100.0, ret.prob, 0.001);
 }
 
-template <class M> void NoUnkCheck(const M &model) {
-  WordIndex unk_index = 0;
-  State state;
-
-  FullScoreReturn ret = model.FullScoreForgotState(&unk_index, &unk_index + 1, unk_index, state);
-  BOOST_CHECK_CLOSE(-100.0, ret.prob, 0.001);
-}
-
 template <class M> void Everything(const M &m) {
   Starters(m);
   Continuation(m);
