@@ -76,8 +76,6 @@ void MatchCheck(ModelType model_type, unsigned int search_version, const Paramet
 
 void SeekPastHeader(int fd, const Parameters &params);
 
-void SeekPastHeader(int fd, const Parameters &params);
-
 uint8_t *SetupBinary(const Config &config, const Parameters &params, std::size_t memory_size, Backing &backing);
 
 void ComplainAboutARPA(const Config &config, ModelType model_type);

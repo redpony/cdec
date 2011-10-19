@@ -188,15 +188,6 @@ main(int argc, char** argv)
   }
 
 
-  //LogVal<double> a(2.2);
-  //LogVal<double> b(2.1);
-  //cout << a << endl;
-  //cout << log(a) << endl;
-  //LogVal<double> c = a - b;
-  //cout << log(c) << endl;
-  //exit(0);
-
-
   for (unsigned t = 0; t < T; t++) // T epochs
   {
 
@@ -298,7 +289,7 @@ main(int argc, char** argv)
     // FIXME
     /*if (verbose) {
       cout << "[ref: '";
-      if (t > 0) cout << ref_ids_buf[ii];
+      if (t > 0) cout << ref_ids_buf[ii]; <---
       else cout << ref_ids;
       cout << endl;
       cout << _p5 << _np << "1best: " << "'" << (*samples)[0].w << "'" << endl;
@@ -355,14 +346,16 @@ main(int argc, char** argv)
       }
     }
     
-
+    // DEBUG
     vector<weight_t> x;
     lambdas.init_vector(&x);
-    for (int q = 0; q < x.size(); q++) {
-      if (x[q] < -10 && x[q] != 0)
-        cout << FD::Convert(q) << " " << x[q] << endl; 
+    cout << "[" << ii << "]" << endl;
+    for (int jj = 0; jj < x.size(); jj++) {
+      if (x[jj] != 0)
+        cout << FD::Convert(jj) << " " << x[jj] << endl; 
     }
     cout << " --- " << endl;
+    // /DEBUG
 
     ++ii;
 
