@@ -42,7 +42,6 @@ libcdec_a_SOURCES = \
   cfg.cc \
   dwarf.cc \
   ff_dwarf.cc \
-  apply_fsa_models.cc \
   rule_lexer.cc \
   fst_translator.cc \
   csplit.cc \
@@ -72,6 +71,7 @@ libcdec_a_SOURCES = \
   ff_wordalign.cc \
   ff_csplit.cc \
   ff_tagger.cc \
+  ff_source_syntax.cc \
   ff_bleu.cc \
   ff_factory.cc \
   freqdict.cc \

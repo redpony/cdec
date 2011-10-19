@@ -22,6 +22,7 @@ namespace mpi = boost::mpi;
 #include "ff_register.h"
 #include "decoder.h"
 #include "filelib.h"
+#include "stringlib.h"
 #include "optimize.h"
 #include "fdict.h"
 #include "weights.h"
@@ -31,47 +32,18 @@ using namespace std;
 using boost::shared_ptr;
 namespace po = boost::program_options;
 
-void SanityCheck(const vector<double>& w) {
-  for (int i = 0; i < w.size(); ++i) {
-    assert(!isnan(w[i]));
-    assert(!isinf(w[i]));
-  }
-}
-
-struct FComp {
-  const vector<double>& w_;
-  FComp(const vector<double>& w) : w_(w) {}
-  bool operator()(int a, int b) const {
-    return fabs(w_[a]) > fabs(w_[b]);
-  }
-};
-
-void ShowLargestFeatures(const vector<double>& w) {
-  vector<int> fnums(w.size());
-  for (int i = 0; i < w.size(); ++i)
-    fnums[i] = i;
-  vector<int>::iterator mid = fnums.begin();
-  mid += (w.size() > 10 ? 10 : w.size());
-  partial_sort(fnums.begin(), mid, fnums.end(), FComp(w));
-  cerr << "TOP FEATURES:";
-  for (vector<int>::iterator i = fnums.begin(); i != mid; ++i) {
-    cerr << ' ' << FD::Convert(*i) << '=' << w[*i];
-  }
-  cerr << endl;
-}
-
 bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()
         ("input_weights,w",po::value<string>(),"Input feature weights file")
         ("training_data,t",po::value<string>(),"Training data")
         ("decoder_config,d",po::value<string>(),"Decoder configuration file")
-        ("sharded_input,s",po::value<string>(), "Corpus and grammar files are 'sharded' so each processor loads its own input and grammar file. Argument is the directory containing the shards.")
         ("output_weights,o",po::value<string>()->default_value("-"),"Output feature weights file")
         ("optimization_method,m", po::value<string>()->default_value("lbfgs"), "Optimization method (sgd, lbfgs, rprop)")
 	("correction_buffers,M", po::value<int>()->default_value(10), "Number of gradients for LBFGS to maintain in memory")
         ("gaussian_prior,p","Use a Gaussian prior on the weights")
         ("means,u", po::value<string>(), "File containing the means for Gaussian prior")
+        ("per_sentence_grammar_scratch,P", po::value<string>(), "(Optional) location of scratch space to copy per-sentence grammars for fast access, useful if a RAM disk is available")
         ("sigma_squared", po::value<double>()->default_value(1.0), "Sigma squared term for spherical Gaussian prior");
   po::options_description clo("Command line options");
   clo.add_options()
@@ -88,12 +60,8 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
   po::notify(*conf);
 
-  if (conf->count("help") || !conf->count("input_weights") || !(conf->count("training_data") | conf->count("sharded_input")) || !conf->count("decoder_config")) {
+  if (conf->count("help") || !conf->count("input_weights") || !(conf->count("training_data")) || !conf->count("decoder_config")) {
     cerr << dcmdline_options << endl;
-    return false;
-  }
-  if (conf->count("training_data") && conf->count("sharded_input")) {
-    cerr << "Cannot specify both --training_data and --sharded_input\n";
     return false;
   }
   return true;
@@ -124,7 +92,7 @@ struct TrainingObserver : public DecoderObserver {
   void SetLocalGradientAndObjective(vector<double>* g, double* o) const {
     *o = acc_obj;
     for (SparseVector<prob_t>::const_iterator it = acc_grad.begin(); it != acc_grad.end(); ++it)
-      (*g)[it->first] = it->second;
+      (*g)[it->first] = it->second.as_float();
   }
 
   virtual void NotifyDecodingStart(const SentenceMetadata& smeta) {
@@ -220,6 +188,36 @@ struct VectorPlus : public binary_function<vector<T>, vector<T>, vector<T> >  {
   } 
 }; 
 
+void MovePerSentenceGrammars(const string& root, int size, int rank, vector<string>* c) {
+  if (!DirectoryExists(root)) {
+    cerr << "Can't find scratch space at " << root << endl;
+    abort();
+  }
+  ostringstream os;
+  os << root << "/psg." << size << "_of_" << rank;
+  const string path = os.str();
+  MkDirP(path);
+  string sent;
+  map<string, string> attr;
+  for (unsigned i = 0; i < c->size(); ++i) {
+    sent = (*c)[i];
+    attr.clear();
+    ProcessAndStripSGML(&sent, &attr);
+    map<string, string>::iterator it = attr.find("grammar");
+    if (it != attr.end()) {
+      string src_file = it->second;
+      bool is_gzipped = (src_file.size() > 3) && (src_file.rfind(".gz") == (src_file.size() - 3));
+      string new_name = path + "/" + md5(sent);
+      if (is_gzipped) new_name += ".gz";
+      CopyFile(src_file, new_name);
+      it->second = new_name;
+    }
+    ostringstream ns;
+    ns << SGMLOpenSegTag(attr) << ' ' << sent << " </seg>";
+    (*c)[i] = ns.str();
+  }
+}
+
 int main(int argc, char** argv) {
 #ifdef HAVE_MPI
   mpi::environment env(argc, argv);
@@ -236,42 +234,9 @@ int main(int argc, char** argv) {
   po::variables_map conf;
   if (!InitCommandLine(argc, argv, &conf)) return 1;
 
-  string shard_dir;
-  if (conf.count("sharded_input")) {
-    shard_dir = conf["sharded_input"].as<string>();
-    if (!DirectoryExists(shard_dir)) {
-      if (rank == 0) cerr << "Can't find shard directory: " << shard_dir << endl;
-      return 1;
-    }
-    if (rank == 0)
-      cerr << "Shard directory: " << shard_dir << endl;
-  }
-
-  // load initial weights
-  Weights weights;
-  if (rank == 0) { cerr << "Loading weights...\n"; }
-  weights.InitFromFile(conf["input_weights"].as<string>());
-  if (rank == 0) { cerr << "Done loading weights.\n"; }
-
-  // freeze feature set (should be optional?)
-  const bool freeze_feature_set = true;
-  if (freeze_feature_set) FD::Freeze();
-
   // load cdec.ini and set up decoder
   vector<string> cdec_ini;
   ReadConfig(conf["decoder_config"].as<string>(), &cdec_ini);
-  if (shard_dir.size()) {
-    if (rank == 0) {
-      for (int i = 0; i < cdec_ini.size(); ++i) {
-        if (cdec_ini[i].find("grammar=") == 0) {
-          cerr << "!!! using sharded input and " << conf["decoder_config"].as<string>() << " contains a grammar specification:\n" << cdec_ini[i] << "\n  VERIFY THAT THIS IS CORRECT!\n";
-        }
-      }
-    }
-    ostringstream g;
-    g << "grammar=" << shard_dir << "/grammar." << rank << "_of_" << size << ".gz";
-    cdec_ini.push_back(g.str());
-  }
   istringstream ini;
   StoreConfig(cdec_ini, &ini);
   if (rank == 0) cerr << "Loading grammar...\n";
@@ -282,22 +247,28 @@ int main(int argc, char** argv) {
   }
   if (rank == 0) cerr << "Done loading grammar!\n";
 
+  // load initial weights
+  if (rank == 0) { cerr << "Loading weights...\n"; }
+  vector<weight_t>& lambdas = decoder->CurrentWeightVector();
+  Weights::InitFromFile(conf["input_weights"].as<string>(), &lambdas);
+  if (rank == 0) { cerr << "Done loading weights.\n"; }
+
+  // freeze feature set (should be optional?)
+  const bool freeze_feature_set = true;
+  if (freeze_feature_set) FD::Freeze();
+
   const int num_feats = FD::NumFeats();
   if (rank == 0) cerr << "Number of features: " << num_feats << endl;
+  lambdas.resize(num_feats);
+
   const bool gaussian_prior = conf.count("gaussian_prior");
-  vector<double> means(num_feats, 0);
+  vector<weight_t> means(num_feats, 0);
   if (conf.count("means")) {
     if (!gaussian_prior) {
       cerr << "Don't use --means without --gaussian_prior!\n";
       exit(1);
     }
-    Weights wm; 
-    wm.InitFromFile(conf["means"].as<string>());
-    if (num_feats != FD::NumFeats()) {
-      cerr << "[ERROR] Means file had unexpected features!\n";
-      exit(1);
-    }
-    wm.InitVector(&means);
+    Weights::InitFromFile(conf["means"].as<string>(), &means);
   }
   shared_ptr<BatchOptimizer> o;
   if (rank == 0) {
@@ -309,27 +280,17 @@ int main(int argc, char** argv) {
     cerr << "Optimizer: " << o->Name() << endl;
   }
   double objective = 0;
-  vector<double> lambdas(num_feats, 0.0);
-  weights.InitVector(&lambdas);
-  if (lambdas.size() != num_feats) {
-    cerr << "Initial weights file did not have all features specified!\n  feats="
-         << num_feats << "\n  weights file=" << lambdas.size() << endl;
-    lambdas.resize(num_feats, 0.0);
-  }
   vector<double> gradient(num_feats, 0.0);
-  vector<double> rcv_grad(num_feats, 0.0);
+  vector<double> rcv_grad;
+  rcv_grad.clear();
   bool converged = false;
 
   vector<string> corpus;
-  if (shard_dir.size()) {
-    ostringstream os; os << shard_dir << "/corpus." << rank << "_of_" << size;
-    ReadTrainingCorpus(os.str(), 0, 1, &corpus);
-    cerr << os.str() << " has " << corpus.size() << " training examples. " << endl;
-    if (corpus.size() > 500) { corpus.resize(500); cerr << "  TRUNCATING\n"; }
-  } else {
-    ReadTrainingCorpus(conf["training_data"].as<string>(), rank, size, &corpus);
-  }
+  ReadTrainingCorpus(conf["training_data"].as<string>(), rank, size, &corpus);
   assert(corpus.size() > 0);
+
+  if (conf.count("per_sentence_grammar_scratch"))
+    MovePerSentenceGrammars(conf["per_sentence_grammar_scratch"].as<string>(), rank, size, &corpus);
 
   TrainingObserver observer;
   while (!converged) {
@@ -341,19 +302,20 @@ int main(int argc, char** argv) {
     if (rank == 0) {
       cerr << "Starting decoding... (~" << corpus.size() << " sentences / proc)\n";
     }
-    decoder->SetWeights(lambdas);
     for (int i = 0; i < corpus.size(); ++i)
       decoder->Decode(corpus[i], &observer);
     cerr << "  process " << rank << '/' << size << " done\n";
     fill(gradient.begin(), gradient.end(), 0);
-    fill(rcv_grad.begin(), rcv_grad.end(), 0);
     observer.SetLocalGradientAndObjective(&gradient, &objective);
 
     double to = 0;
 #ifdef HAVE_MPI
+    rcv_grad.resize(num_feats, 0.0);
     mpi::reduce(world, &gradient[0], gradient.size(), &rcv_grad[0], plus<double>(), 0);
-    mpi::reduce(world, objective, to, plus<double>(), 0);
     swap(gradient, rcv_grad);
+    rcv_grad.clear();
+
+    mpi::reduce(world, objective, to, plus<double>(), 0);
     objective = to;
 #endif
 
@@ -378,7 +340,7 @@ int main(int argc, char** argv) {
       for (int i = 0; i < gradient.size(); ++i)
         gnorm += gradient[i] * gradient[i];
       cerr << "  GNORM=" << sqrt(gnorm) << endl;
-      vector<double> old = lambdas;
+      vector<weight_t> old = lambdas;
       int c = 0;
       while (old == lambdas) {
         ++c;
@@ -387,9 +349,8 @@ int main(int argc, char** argv) {
         assert(c < 5);
       }
       old.clear();
-      SanityCheck(lambdas);
-      ShowLargestFeatures(lambdas);
-      weights.InitFromVector(lambdas);
+      Weights::SanityCheck(lambdas);
+      Weights::ShowLargestFeatures(lambdas);
 
       converged = o->HasConverged();
       if (converged) { cerr << "OPTIMIZER REPORTS CONVERGENCE!\n"; }
@@ -399,7 +360,7 @@ int main(int argc, char** argv) {
       ostringstream vv;
       vv << "Objective = " << objective << "  (eval count=" << o->EvaluationCount() << ")";
       const string svv = vv.str();
-      weights.WriteToFile(fname, true, &svv);
+      Weights::WriteToFile(fname, lambdas, true, &svv);
     }  // rank == 0
     int cint = converged;
 #ifdef HAVE_MPI
@@ -411,3 +372,4 @@ int main(int argc, char** argv) {
   }
   return 0;
 }
+

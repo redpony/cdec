@@ -7,6 +7,7 @@
 #include "prob.h"
 #include "sparse_vector.h"
 #include "fast_sparse_vector.h"
+#include "stringlib.h"
 
 using namespace std;
 
@@ -79,6 +80,11 @@ int main() {
     y -= y;
   }
   cerr << "Counted " << c << " times\n";
+
+  cerr << md5("this is a test") << endl;
+  cerr << md5("some other ||| string is") << endl;
+  map<string,string> x; x["id"] = "12"; x["grammar"] = "/path/to/grammar.gz";
+  cerr << SGMLOpenSegTag(x) << endl;
   return 0;
 }
 

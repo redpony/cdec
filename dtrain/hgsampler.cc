@@ -1,3 +1,4 @@
+// Chris Dyer
 #include "hgsampler.h"
 
 #include <queue>

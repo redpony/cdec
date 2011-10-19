@@ -157,14 +157,14 @@ prob_t Hypergraph::ComputeEdgePosteriors(double scale, vector<prob_t>* posts) co
   const ScaledEdgeProb weight(scale);
   const ScaledTransitionEventWeightFunction w2(scale);
   SparseVector<prob_t> pv;
-  const double inside = InsideOutside<prob_t,
+  const prob_t inside = InsideOutside<prob_t,
                   ScaledEdgeProb,
                   SparseVector<prob_t>,
                   ScaledTransitionEventWeightFunction>(*this, &pv, weight, w2);
   posts->resize(edges_.size());
   for (int i = 0; i < edges_.size(); ++i)
     (*posts)[i] = prob_t(pv.value(i));
-  return prob_t(inside);
+  return inside;
 }
 
 prob_t Hypergraph::ComputeBestPathThroughEdges(vector<prob_t>* post) const {
