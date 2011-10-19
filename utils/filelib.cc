@@ -2,6 +2,12 @@
 
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <cstdlib>
+#include <cstdio>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 using namespace std;
 
@@ -19,4 +25,29 @@ bool DirectoryExists(const string& dir) {
   }
   return false;
 }
+
+void MkDirP(const string& dir) {
+  if (DirectoryExists(dir)) return;
+  if (mkdir(dir.c_str(), 0777)) {
+    perror(dir.c_str());
+    abort();
+  }
+  if (chmod(dir.c_str(), 07777)) {
+    perror(dir.c_str());
+    abort();
+  }
+}
+
+#if 0
+void CopyFile(const string& inf, const string& outf) {
+  WriteFile w(outf);
+  CopyFile(inf,*w);
+}
+#else
+void CopyFile(const string& inf, const string& outf) {
+  ofstream of(outf.c_str(), fstream::trunc|fstream::binary);
+  ifstream in(inf.c_str(), fstream::binary);
+  of << in.rdbuf();
+}
+#endif
 

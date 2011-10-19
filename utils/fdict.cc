@@ -9,6 +9,10 @@ using namespace std;
 Dict FD::dict_;
 bool FD::frozen_ = false;
 
+#ifdef HAVE_CMPH
+PerfectHashFunction* FD::hash_ = NULL;
+#endif
+
 std::string FD::Convert(std::vector<WordID> const& v) {
     return Convert(&*v.begin(),&*v.end());
 }

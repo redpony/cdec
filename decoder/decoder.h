@@ -7,7 +7,21 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/program_options/variables_map.hpp>
 
-#include "grammar.h"
+#include "weights.h"  // weight_t
+
+#undef CP_TIME
+//#define CP_TIME
+#ifdef CP_TIME
+#include <time.h>
+struct CpTime{
+public:
+	static void Add(clock_t x);
+	static void Sub(clock_t x);
+	static double Get();
+private:
+    static clock_t time_;
+};
+#endif
 
 class SentenceMetadata;
 struct Hypergraph;
@@ -27,7 +41,12 @@ struct Decoder {
   Decoder(int argc, char** argv);
   Decoder(std::istream* config_file);
   bool Decode(const std::string& input, DecoderObserver* observer = NULL);
-  void SetWeights(const std::vector<double>& weights);
+
+  // access this to either *read* or *write* to the decoder's last
+  // weight vector (i.e., the weights of the finest past)
+  std::vector<weight_t>& CurrentWeightVector();
+  const std::vector<weight_t>& CurrentWeightVector() const;
+
   void SetId(int id);
   ~Decoder();
   const boost::program_options::variables_map& GetConf() const { return conf; }

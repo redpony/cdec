@@ -1,9 +1,7 @@
-#include <sstream>
 #include <iostream>
-#include <fstream>
+#include <sstream>
 #include <vector>
 #include <cassert>
-#include <cmath>
 
 #include "config.h"
 #ifdef HAVE_MPI
@@ -12,13 +10,11 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
-#include "verbose.h"
-#include "hg.h"
-#include "prob.h"
-#include "inside_outside.h"
 #include "ff_register.h"
-#include "decoder.h"
+#include "verbose.h"
 #include "filelib.h"
+#include "fdict.h"
+#include "decoder.h"
 #include "weights.h"
 
 using namespace std;
@@ -27,9 +23,10 @@ namespace po = boost::program_options;
 bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()
-        ("weights,w",po::value<string>(),"Input feature weights file")
         ("training_data,t",po::value<string>(),"Training data corpus")
-        ("decoder_config,c",po::value<string>(),"Decoder configuration file");
+        ("decoder_config,c",po::value<string>(),"Decoder configuration file")
+        ("weights,w", po::value<string>(), "(Optional) weights file; weights may affect what features are encountered in pruning configurations")
+        ("output_prefix,o",po::value<string>()->default_value("features"),"Output path prefix");
   po::options_description clo("Command line options");
   clo.add_options()
         ("config", po::value<string>(), "Configuration file")
@@ -46,13 +43,14 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::notify(*conf);
 
   if (conf->count("help") || !conf->count("training_data") || !conf->count("decoder_config")) {
+    cerr << "Decode an input set (optionally in parallel using MPI) and write\nout the feature strings encountered.\n";
     cerr << dcmdline_options << endl;
     return false;
   }
   return true;
 }
 
-void ReadTrainingCorpus(const string& fname, int rank, int size, vector<string>* c, vector<int>* ids) {
+void ReadTrainingCorpus(const string& fname, int rank, int size, vector<string>* c) {
   ReadFile rf(fname);
   istream& in = *rf.stream();
   string line;
@@ -60,10 +58,7 @@ void ReadTrainingCorpus(const string& fname, int rank, int size, vector<string>*
   while(in) {
     getline(in, line);
     if (!in) break;
-    if (lc % size == rank) {
-      c->push_back(line);
-      ids->push_back(lc);
-    }
+    if (lc % size == rank) c->push_back(line);
     ++lc;
   }
 }
@@ -71,60 +66,17 @@ void ReadTrainingCorpus(const string& fname, int rank, int size, vector<string>*
 static const double kMINUS_EPSILON = -1e-6;
 
 struct TrainingObserver : public DecoderObserver {
-  void Reset() {
-    acc_obj = 0;
-  } 
 
   virtual void NotifyDecodingStart(const SentenceMetadata&) {
-    cur_obj = 0;
-    state = 1;
   }
 
   // compute model expectations, denominator of objective
   virtual void NotifyTranslationForest(const SentenceMetadata&, Hypergraph* hg) {
-    assert(state == 1);
-    state = 2;
-    SparseVector<prob_t> cur_model_exp;
-    const prob_t z = InsideOutside<prob_t,
-                                   EdgeProb,
-                                   SparseVector<prob_t>,
-                                   EdgeFeaturesAndProbWeightFunction>(*hg, &cur_model_exp);
-    cur_obj = log(z);
   }
 
   // compute "empirical" expectations, numerator of objective
   virtual void NotifyAlignmentForest(const SentenceMetadata& smeta, Hypergraph* hg) {
-    assert(state == 2);
-    state = 3;
-    SparseVector<prob_t> ref_exp;
-    const prob_t ref_z = InsideOutside<prob_t,
-                                       EdgeProb,
-                                       SparseVector<prob_t>,
-                                       EdgeFeaturesAndProbWeightFunction>(*hg, &ref_exp);
-
-    double log_ref_z;
-#if 0
-    if (crf_uniform_empirical) {
-      log_ref_z = ref_exp.dot(feature_weights);
-    } else {
-      log_ref_z = log(ref_z);
-    }
-#else
-    log_ref_z = log(ref_z);
-#endif
-
-    // rounding errors means that <0 is too strict
-    if ((cur_obj - log_ref_z) < kMINUS_EPSILON) {
-      cerr << "DIFF. ERR! log_model_z < log_ref_z: " << cur_obj << " " << log_ref_z << endl;
-      exit(1);
-    }
-    assert(!isnan(log_ref_z));
-    acc_obj += (cur_obj - log_ref_z);
   }
-
-  double acc_obj;
-  double cur_obj;
-  int state;
 };
 
 #ifdef HAVE_MPI
@@ -148,15 +100,6 @@ int main(int argc, char** argv) {
   if (!InitCommandLine(argc, argv, &conf))
     return false;
 
-  // load initial weights
-  Weights weights;
-  if (conf.count("weights"))
-    weights.InitFromFile(conf["weights"].as<string>());
-
-  // freeze feature set
-  //const bool freeze_feature_set = conf.count("freeze_feature_set");
-  //if (freeze_feature_set) FD::Freeze();
-
   // load cdec.ini and set up decoder
   ReadFile ini_rf(conf["decoder_config"].as<string>());
   Decoder decoder(ini_rf.stream());
@@ -165,35 +108,44 @@ int main(int argc, char** argv) {
     abort();
   }
 
-  vector<string> corpus; vector<int> ids;
-  ReadTrainingCorpus(conf["training_data"].as<string>(), rank, size, &corpus, &ids);
+  if (FD::UsingPerfectHashFunction()) {
+    cerr << "Your configuration file has enabled a cmph hash function. Please disable.\n";
+    return 1;
+  }
+
+  // load optional weights
+  if (conf.count("weights"))
+    Weights::InitFromFile(conf["weights"].as<string>(), &decoder.CurrentWeightVector());
+
+  vector<string> corpus;
+  ReadTrainingCorpus(conf["training_data"].as<string>(), rank, size, &corpus);
   assert(corpus.size() > 0);
-  assert(corpus.size() == ids.size());
 
-  vector<double> wv;
-  weights.InitVector(&wv);
-  decoder.SetWeights(wv);
   TrainingObserver observer;
-  double objective = 0;
-  bool converged = false;
 
-  observer.Reset();
   if (rank == 0)
-    cerr << "Each processor is decoding " << corpus.size() << " training examples...\n";
+    cerr << "Each processor is decoding ~" << corpus.size() << " training examples...\n";
 
-  for (int i = 0; i < corpus.size(); ++i) {
-    decoder.SetId(ids[i]);
+  for (int i = 0; i < corpus.size(); ++i)
     decoder.Decode(corpus[i], &observer);
+
+  {
+    ostringstream os;
+    os << conf["output_prefix"].as<string>() << '.' << rank << "_of_" << size;
+    WriteFile wf(os.str());
+    ostream& out = *wf.stream();
+    const unsigned num_feats = FD::NumFeats();
+    for (unsigned i = 1; i < num_feats; ++i) {
+      out << FD::Convert(i) << endl;
+    }
+    cerr << "Wrote " << os.str() << endl;
   }
 
 #ifdef HAVE_MPI
-  reduce(world, observer.acc_obj, objective, std::plus<double>(), 0);
+  world.barrier();
 #else
-  objective = observer.acc_obj;
 #endif
-
-  if (rank == 0)
-    cout << "OBJECTIVE: " << objective << endl;
 
   return 0;
 }
+

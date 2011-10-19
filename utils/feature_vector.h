@@ -3,9 +3,9 @@
 
 #include <vector>
 #include "sparse_vector.h"
-#include "fdict.h"
+#include "weights.h"
 
-typedef double Featval;
+typedef weight_t Featval;
 typedef SparseVector<Featval> FeatureVector;
 typedef SparseVector<Featval> WeightVector;
 typedef std::vector<Featval> DenseWeightVector;
