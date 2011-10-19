@@ -33,7 +33,6 @@ struct FD {
     hash_ = new PerfectHashFunction(cmph_file);
 #endif
   }
->>>>>>> upstream/master
   static inline int NumFeats() {
 #ifdef HAVE_CMPH
     if (hash_) return hash_->number_of_keys();

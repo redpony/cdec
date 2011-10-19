@@ -392,22 +392,3 @@ std::string  KLanguageModelFactory::usage(bool params,bool verbose) const {
   return KLanguageModel<lm::ngram::Model>::usage(params, verbose);
 }
 
-  switch (m) {
-    case HASH_PROBING:
-      return CreateModel<ProbingModel>(param);
-    case TRIE_SORTED:
-      return CreateModel<TrieModel>(param);
-    case ARRAY_TRIE_SORTED:
-      return CreateModel<ArrayTrieModel>(param);
-    case QUANT_TRIE_SORTED:
-      return CreateModel<QuantTrieModel>(param);
-    case QUANT_ARRAY_TRIE_SORTED:
-      return CreateModel<QuantArrayTrieModel>(param);
-    default:
-      UTIL_THROW(util::Exception, "Unrecognized kenlm binary file type " << (unsigned)m);
-  }
-}
-
-std::string  KLanguageModelFactory::usage(bool params,bool verbose) const {
-  return KLanguageModel<lm::ngram::Model>::usage(params, verbose);
-}

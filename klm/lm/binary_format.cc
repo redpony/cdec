@@ -182,10 +182,6 @@ void SeekPastHeader(int fd, const Parameters &params) {
   SeekOrThrow(fd, TotalHeaderSize(params.counts.size()));
 }
 
-void SeekPastHeader(int fd, const Parameters &params) {
-  SeekOrThrow(fd, TotalHeaderSize(params.counts.size()));
-}
-
 uint8_t *SetupBinary(const Config &config, const Parameters &params, std::size_t memory_size, Backing &backing) {
   const off_t file_size = util::SizeFile(backing.file.get());
   // The header is smaller than a page, so we have to map the whole header as well.  

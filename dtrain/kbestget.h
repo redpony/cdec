@@ -7,6 +7,7 @@
 #include "ff_register.h"
 #include "decoder.h"
 #include "weights.h"
+#include "logval.h"
 
 using namespace std;
 
@@ -106,7 +107,8 @@ struct KBestGetter : public HypSampler
       ScoredHyp h;
       h.w = d->yield;
       h.f = d->feature_values;
-      h.model = log(d->score);
+      h.model = d->score;
+      cout << i << ". "<< h.model << endl;
       h.rank = i;
       h.score = scorer_->Score(h.w, *ref_, i);
       s_.push_back(h);
@@ -125,7 +127,7 @@ struct KBestGetter : public HypSampler
       ScoredHyp h;
       h.w = d->yield;
       h.f = d->feature_values;
-      h.model = log(d->score);
+      h.model = -1*log(d->score);
       h.rank = i;
       h.score = scorer_->Score(h.w, *ref_, i);
       s_.push_back(h);
