@@ -43,7 +43,7 @@ Uncertain, known bugs, problems
 
 FIXME
 -----
-* merge with cdec master
+none
 
 Data
 ----

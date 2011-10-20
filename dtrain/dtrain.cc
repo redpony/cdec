@@ -349,12 +349,12 @@ main(int argc, char** argv)
     // DEBUG
     vector<weight_t> x;
     lambdas.init_vector(&x);
-    cout << "[" << ii << "]" << endl;
+    //cout << "[" << ii << "]" << endl;
     for (int jj = 0; jj < x.size(); jj++) {
-      if (x[jj] != 0)
-        cout << FD::Convert(jj) << " " << x[jj] << endl; 
+      //if (x[jj] != 0)
+        //cout << FD::Convert(jj) << " " << x[jj] << endl; 
     }
-    cout << " --- " << endl;
+    //cout << " --- " << endl;
     // /DEBUG
 
     ++ii;

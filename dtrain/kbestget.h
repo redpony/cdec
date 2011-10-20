@@ -107,10 +107,7 @@ struct KBestGetter : public HypSampler
       ScoredHyp h;
       h.w = d->yield;
       h.f = d->feature_values;
-      h.model = d->score.as_float();
-      // DEBUG
-      cout << i+1 << ". "<< h.model << endl;
-      // /DEBUG
+      h.model = log(d->score);
       h.rank = i;
       h.score = scorer_->Score(h.w, *ref_, i);
       s_.push_back(h);
@@ -129,7 +126,7 @@ struct KBestGetter : public HypSampler
       ScoredHyp h;
       h.w = d->yield;
       h.f = d->feature_values;
-      h.model = d->score.as_float();
+      h.model = log(d->score);
       h.rank = i;
       h.score = scorer_->Score(h.w, *ref_, i);
       s_.push_back(h);
