@@ -181,7 +181,17 @@ int main(int argc, char** argv) {
   Model1 invm1(conf["inverse_model1"].as<string>());
 
   PhraseJointBase lp0(m1, conf["model1_interpolation_weight"].as<double>(), vocabe.size(), vocabf.size());
-  MonotonicParallelSegementationModel m(lp0);
+  PhraseJointBase_BiDir alp0(m1, invm1, conf["model1_interpolation_weight"].as<double>(), vocabe.size(), vocabf.size());
+  MonotonicParallelSegementationModel<PhraseJointBase_BiDir> m(alp0);
+  TRule xx("[X] ||| ms. kimura ||| MS. KIMURA ||| X=0");
+  cerr << xx << endl << lp0(xx) << " " << alp0(xx) << endl;
+  TRule xx12("[X] ||| . ||| PHARMACY . ||| X=0");
+  TRule xx21("[X] ||| pharmacy . ||| . ||| X=0");
+//  TRule xx22("[X] ||| . ||| . ||| X=0");
+  TRule xx22("[X] ||| . ||| THE . ||| X=0");
+  cerr << xx12 << "\t" << lp0(xx12) << " " << alp0(xx12) << endl;
+  cerr << xx21 << "\t" << lp0(xx21) << " " << alp0(xx21) << endl;
+  cerr << xx22 << "\t" << lp0(xx22) << " " << alp0(xx22) << endl;
 
   cerr << "Initializing reachability limits...\n";
   vector<Particle> ps(corpusf.size());

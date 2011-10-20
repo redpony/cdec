@@ -8,8 +8,9 @@
 #include "trule.h"
 #include "base_measures.h"
 
+template <typename BaseMeasure>
 struct MonotonicParallelSegementationModel {
-  explicit MonotonicParallelSegementationModel(PhraseJointBase& rcp0) :
+  explicit MonotonicParallelSegementationModel(BaseMeasure& rcp0) :
     rp0(rcp0), base(prob_t::One()), rules(1,1), stop(1.0) {}
 
   void DecrementRule(const TRule& rule) {
@@ -78,7 +79,7 @@ struct MonotonicParallelSegementationModel {
     return prob_t(stop.prob(false, 0.5));
   }
 
-  const PhraseJointBase& rp0;
+  const BaseMeasure& rp0;
   prob_t base;
   CCRP_NoTable<TRule> rules;
   CCRP_NoTable<bool> stop;
