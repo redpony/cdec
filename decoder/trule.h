@@ -5,7 +5,9 @@
 #include <vector>
 #include <cassert>
 #include <iostream>
-#include <boost/shared_ptr.hpp>
+
+#include "boost/shared_ptr.hpp"
+#include "boost/functional/hash.hpp"
 
 #include "sparse_vector.h"
 #include "wordid.h"
@@ -161,5 +163,16 @@ class TRule {
   TRule(const WordID& src, const WordID& trg) : e_(1, trg), f_(1, src), lhs_(), arity_(), prev_i(), prev_j() {}
   bool SanityCheck() const;
 };
+
+inline size_t hash_value(const TRule& r) {
+  size_t h = boost::hash_value(r.e_);
+  boost::hash_combine(h, -r.lhs_);
+  boost::hash_combine(h, boost::hash_value(r.f_));
+  return h;
+}
+
+inline bool operator==(const TRule& a, const TRule& b) {
+  return (a.lhs_ == b.lhs_ && a.e_ == b.e_ && a.f_ == b.f_);
+}
 
 #endif

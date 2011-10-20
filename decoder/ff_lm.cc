@@ -46,7 +46,6 @@ char const* usage_verbose="-n determines the name of the feature (and its weight
 #endif
 
 #include "ff_lm.h"
-#include "ff_lm_fsa.h"
 
 #include <sstream>
 #include <unistd.h>
@@ -68,10 +67,6 @@ char const* usage_verbose="-n determines the name of the feature (and its weight
 #endif
 
 using namespace std;
-
-string LanguageModelFsa::usage(bool param,bool verbose) {
-  return FeatureFunction::usage_helper("LanguageModelFsa",usage_short,usage_verbose,param,verbose);
-}
 
 string LanguageModel::usage(bool param,bool verbose) {
   return FeatureFunction::usage_helper(usage_name,usage_short,usage_verbose,param,verbose);
@@ -522,49 +517,6 @@ LanguageModel::LanguageModel(const string& param) {
   pimpl_ = make_lm_impl(param,&order,&fid_);
   //TODO: see if it's actually possible to set order_ later to mutate an already used FF for e.g. multipass.  comment in ff.h says only to change state size in constructor.  clone instead?  differently -n named ones from same lm filename are already possible, so no urgency.
   SetStateSize(LanguageModelImpl::OrderToStateSize(order));
-}
-
-//TODO: decide whether to waste a word of space so states are always none-terminated for SRILM.  otherwise we have to copy
-void LanguageModelFsa::set_ngram_order(int i) {
-  assert(i>0);
-  ngram_order_=i;
-  ctxlen_=i-1;
-  set_state_bytes(ctxlen_*sizeof(WordID));
-  WordID *ss=(WordID*)start.begin();
-  WordID *hs=(WordID*)h_start.begin();
-  if (ctxlen_) { // avoid segfault in case of unigram lm (0 state)
-    set_end_phrase(TD::Convert("</s>"));
-// se is pretty boring in unigram case, just adds constant prob.  check that this is what we want
-    ss[0]=TD::Convert("<s>"); // start-sentence context (length 1)
-    hs[0]=0; // empty context
-    for (int i=1;i<ctxlen_;++i) {
-      ss[i]=hs[i]=0; // need this so storage is initialized for hashing.
-      //TODO: reevaluate whether state space comes cleared by allocator or not.
-    }
-  }
-  sync(); // for dynamic markov_order copy etc
-}
-
-LanguageModelFsa::LanguageModelFsa(string const& param) {
-  int lmorder;
-  pimpl_ = make_lm_impl(param,&lmorder,&fid_);
-  Init();
-  floor_=pimpl_->floor_;
-  set_ngram_order(lmorder);
-}
-
-void LanguageModelFsa::print_state(ostream &o,void const* st) const {
-  WordID const *wst=(WordID const*)st;
-  o<<'[';
-  bool sp=false;
-  for (int i=ctxlen_;i>0;sp=true) {
-    --i;
-    WordID w=wst[i];
-    if (w==0) continue;
-    if (sp) o<<' ';
-    o << TD::Convert(w);
-  }
-  o<<']';
 }
 
 Features LanguageModel::features() const {

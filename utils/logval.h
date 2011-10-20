@@ -25,12 +25,13 @@ class LogVal {
   typedef LogVal<T> Self;
 
   LogVal() : s_(), v_(LOGVAL_LOG0) {}
-  explicit LogVal(double x) : s_(std::signbit(x)), v_(s_ ? std::log(-x) : std::log(x)) {}
+  LogVal(double x) : s_(std::signbit(x)), v_(s_ ? std::log(-x) : std::log(x)) {}
+  const Self& operator=(double x) { s_ = std::signbit(x); v_ = s_ ? std::log(-x) : std::log(x); return *this; }
   LogVal(init_minus_1) : s_(true),v_(0) {  }
   LogVal(init_1) : s_(),v_(0) {  }
   LogVal(init_0) : s_(),v_(LOGVAL_LOG0) {  }
-  LogVal(int x) : s_(x<0), v_(s_ ? std::log(-x) : std::log(x)) {}
-  LogVal(unsigned x) : s_(0), v_(std::log(x)) { }
+  explicit LogVal(int x) : s_(x<0), v_(s_ ? std::log(-x) : std::log(x)) {}
+  explicit LogVal(unsigned x) : s_(0), v_(std::log(x)) { }
   LogVal(double lnx,bool sign) : s_(sign),v_(lnx) {}
   LogVal(double lnx,init_lnx) : s_(),v_(lnx) {}
   static Self exp(T lnx) { return Self(lnx,false); }
@@ -141,9 +142,6 @@ class LogVal {
     return pow(1/root);
   }
 
-  operator T() const {
-    if (s_) return -std::exp(v_); else return std::exp(v_);
-  }
   T as_float() const {
     if (s_) return -std::exp(v_); else return std::exp(v_);
   }

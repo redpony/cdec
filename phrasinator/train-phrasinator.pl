@@ -5,7 +5,7 @@ use Getopt::Long;
 use File::Spec qw (rel2abs);
 
 my $DECODER = "$script_dir/../decoder/cdec";
-my $TRAINER = "$script_dir/gibbs_train_plm";
+my $TRAINER = "$script_dir/gibbs_train_plm_notables";
 
 die "Can't find $TRAINER" unless -f $TRAINER;
 die "Can't execute $TRAINER" unless -x $TRAINER;

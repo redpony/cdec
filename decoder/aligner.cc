@@ -165,7 +165,7 @@ inline void WriteProbGrid(const Array2D<prob_t>& m, ostream* pos) {
       if (m(i,j) == prob_t::Zero()) {
         os << "\t---X---";
       } else {
-        snprintf(b, 1024, "%0.5f", static_cast<double>(m(i,j)));
+        snprintf(b, 1024, "%0.5f", m(i,j).as_float());
         os << '\t' << b;
       }
     }

@@ -11,6 +11,8 @@
 #include "ksampler.h"
 #include "pairsampling.h"
 
+#include "filelib.h"
+
 #define DTRAIN_DOTS 100 // when to display a '.'
 #define DTRAIN_GRAMMAR_DELIM "########EOS########"
 

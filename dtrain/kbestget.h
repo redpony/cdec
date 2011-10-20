@@ -7,6 +7,7 @@
 #include "ff_register.h"
 #include "decoder.h"
 #include "weights.h"
+#include "logval.h"
 
 using namespace std;
 

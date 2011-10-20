@@ -639,7 +639,7 @@ void CFG::Print(std::ostream &o,CFGFormat const& f) const {
     o << '['<<f.goal_nt_name <<']';
     WordID rhs=-goal_nt;
     f.print_rhs(o,*this,&rhs,&rhs+1);
-    if (pushed_inside!=1)
+    if (pushed_inside!=prob_t::One())
       f.print_features(o,pushed_inside);
     o<<'\n';
   }

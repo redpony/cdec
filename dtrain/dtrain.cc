@@ -20,8 +20,8 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     ("stop_after",     po::value<unsigned>()->default_value(0),                              "stop after X input sentences")
     ("print_weights",  po::value<string>(),                                            "weights to print on each iteration")
     ("hstreaming",     po::value<bool>()->zero_tokens(),                                     "run in hadoop streaming mode")
-    ("learning_rate",  po::value<double>()->default_value(0.0005),                                          "learning rate")
-    ("gamma",          po::value<double>()->default_value(0),                            "gamma for SVM (0 for perceptron)")
+    ("learning_rate",  po::value<weight_t>()->default_value(0.0005),                                          "learning rate")
+    ("gamma",          po::value<weight_t>()->default_value(0),                            "gamma for SVM (0 for perceptron)")
     ("tmp",            po::value<string>()->default_value("/tmp"),                                        "temp dir to use")
     ("select_weights", po::value<string>()->default_value("last"), "output 'best' or 'last' weights ('VOID' to throw away)")
     ("noup",           po::value<bool>()->zero_tokens(),                                            "do not update weights");
@@ -134,15 +134,14 @@ main(int argc, char** argv)
   observer->SetScorer(scorer);
 
   // init weights
-  Weights weights;
-  if (cfg.count("input_weights")) weights.InitFromFile(cfg["input_weights"].as<string>());
-  SparseVector<double> lambdas;
-  weights.InitSparseVector(&lambdas);
-  vector<double> dense_weights;
+  vector<weight_t>& dense_weights = decoder.CurrentWeightVector();
+  SparseVector<weight_t> lambdas;
+  if (cfg.count("input_weights")) Weights::InitFromFile(cfg["input_weights"].as<string>(), &dense_weights);
+  Weights::InitSparseVector(dense_weights, &lambdas);
 
   // meta params for perceptron, SVM
-  double eta = cfg["learning_rate"].as<double>();
-  double gamma = cfg["gamma"].as<double>();
+  weight_t eta = cfg["learning_rate"].as<weight_t>();
+  weight_t gamma = cfg["gamma"].as<weight_t>();
   WordID __bias = FD::Convert("__bias");
   lambdas.add_value(__bias, 0);
 
@@ -160,7 +159,7 @@ main(int argc, char** argv)
   grammar_buf_out.open(grammar_buf_fn.c_str());
   
   unsigned in_sz = 999999999; // input index, input size
-  vector<pair<score_t,score_t> > all_scores;
+  vector<pair<score_t, score_t> > all_scores;
   score_t max_score = 0.;
   unsigned best_it = 0;
   float overall_time = 0.;
@@ -196,7 +195,8 @@ main(int argc, char** argv)
   time(&start);
   igzstream grammar_buf_in;
   if (t > 0) grammar_buf_in.open(grammar_buf_fn.c_str());
-  score_t score_sum = 0., model_sum = 0.;
+  score_t score_sum = 0.;
+  score_t model_sum(0);
   unsigned ii = 0, nup = 0, npairs = 0;
   if (!quiet) cerr << "Iteration #" << t+1 << " of " << T << "." << endl;
 
@@ -238,10 +238,7 @@ main(int argc, char** argv)
     if (next || stop) break;
 
     // weights
-    dense_weights.clear();
-    weights.InitFromVector(lambdas);
-    weights.InitVector(&dense_weights);
-    decoder.SetWeights(dense_weights);
+    lambdas.init_vector(&dense_weights);
 
     // getting input
     vector<string> in_split; // input: sid\tsrc\tref\tpsg
@@ -289,15 +286,24 @@ main(int argc, char** argv)
     // get (scored) samples 
     vector<ScoredHyp>* samples = observer->GetSamples();
 
-    if (verbose) {
+    // FIXME
+    /*if (verbose) {
       cout << "[ref: '";
-      if (t > 0) cout << ref_ids_buf[ii];
+      if (t > 0) cout << ref_ids_buf[ii]; <---
       else cout << ref_ids;
       cout << endl;
       cout << _p5 << _np << "1best: " << "'" << (*samples)[0].w << "'" << endl;
       cout << "SCORE=" << (*samples)[0].score << ",model="<< (*samples)[0].model << endl;
       cout << "F{" << (*samples)[0].f << "} ]" << endl << endl;
-    }
+    }*/
+    /*cout << lambdas.get(FD::Convert("PhraseModel_0")) << endl;
+    cout << (*samples)[0].model << endl;
+    cout << "1best: ";
+    for (unsigned u = 0; u < (*samples)[0].w.size(); u++) cout << TD::Convert((*samples)[0].w[u]) << " ";
+    cout << endl;
+    cout << (*samples)[0].f << endl;
+    cout << "___" << endl;*/
+
     score_sum += (*samples)[0].score;
     model_sum += (*samples)[0].model;
 
@@ -317,21 +323,21 @@ main(int argc, char** argv)
         if (!gamma) {
           // perceptron
           if (it->first.score - it->second.score < 0) { // rank error
-            SparseVector<double> dv = it->second.f - it->first.f;
+            SparseVector<weight_t> dv = it->second.f - it->first.f;
             dv.add_value(__bias, -1);
             lambdas.plus_eq_v_times_s(dv, eta);
             nup++;
           }
         } else {
           // SVM
-          double rank_error = it->second.score - it->first.score;
+          score_t rank_error = it->second.score - it->first.score;
           if (rank_error > 0) {
-            SparseVector<double> dv = it->second.f - it->first.f;
+            SparseVector<weight_t> dv = it->second.f - it->first.f;
             dv.add_value(__bias, -1);
             lambdas.plus_eq_v_times_s(dv, eta);
           }
           // regularization
-          double margin = it->first.model - it->second.model;
+          score_t margin = it->first.model - it->second.model;
           if (rank_error || margin < 1) {
             lambdas.plus_eq_v_times_s(lambdas, -2*gamma*eta); // reg /= #EXAMPLES or #UPDATES ?
             nup++;
@@ -339,6 +345,17 @@ main(int argc, char** argv)
         }
       }
     }
+    
+    // DEBUG
+    vector<weight_t> x;
+    lambdas.init_vector(&x);
+    //cout << "[" << ii << "]" << endl;
+    for (int jj = 0; jj < x.size(); jj++) {
+      //if (x[jj] != 0)
+        //cout << FD::Convert(jj) << " " << x[jj] << endl; 
+    }
+    //cout << " --- " << endl;
+    // /DEBUG
 
     ++ii;
 
@@ -358,7 +375,8 @@ main(int argc, char** argv)
   // print some stats
   score_t score_avg = score_sum/(score_t)in_sz;
   score_t model_avg = model_sum/(score_t)in_sz;
-  score_t score_diff, model_diff;
+  score_t score_diff;
+  score_t model_diff;
   if (t > 0) {
     score_diff = score_avg - all_scores[t-1].first;
     model_diff = model_avg - all_scores[t-1].second;
@@ -402,10 +420,10 @@ main(int argc, char** argv)
 
   // write weights to file
   if (select_weights == "best") {
-    weights.InitFromVector(lambdas);
     string infix = "dtrain-weights-" + boost::lexical_cast<string>(t);
+    lambdas.init_vector(&dense_weights);
     string w_fn = gettmpf(tmp_path, infix, "gz");
-    weights.WriteToFile(w_fn, true); 
+    Weights::WriteToFile(w_fn, dense_weights, true); 
     weights_files.push_back(w_fn);
   }
 
@@ -420,7 +438,7 @@ main(int argc, char** argv)
       ostream& o = *of.stream();
       o.precision(17);
       o << _np;
-      for (SparseVector<double>::const_iterator it = lambdas.begin(); it != lambdas.end(); ++it) {
+      for (SparseVector<weight_t>::const_iterator it = lambdas.begin(); it != lambdas.end(); ++it) {
 	    if (it->second == 0) continue;
         o << FD::Convert(it->first) << '\t' << it->second << endl;
       }

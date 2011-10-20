@@ -1,3 +1,4 @@
+// Chris Dyer
 #ifndef _DTRAIN_HGSAMPLER_H_
 #define _DTRAIN_HGSAMPLER_H_
 

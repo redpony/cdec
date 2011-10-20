@@ -57,7 +57,7 @@ TEST_F(HGTest,Union) {
   c3 = ViterbiESentence(hg1, &t3);
   int l3 = ViterbiPathLength(hg1);
   cerr << c3 << "\t" << TD::GetString(t3) << endl;
-  EXPECT_FLOAT_EQ(c2, c3);
+  EXPECT_FLOAT_EQ(c2.as_float(), c3.as_float());
   EXPECT_EQ(TD::GetString(t2), TD::GetString(t3));
   EXPECT_EQ(l2, l3);
 
@@ -117,7 +117,7 @@ TEST_F(HGTest,InsideScore) {
   cerr << "cost: " << cost << "\n";
   hg.PrintGraphviz();
   prob_t inside = Inside<prob_t, EdgeProb>(hg);
-  EXPECT_FLOAT_EQ(1.7934048, inside);  // computed by hand
+  EXPECT_FLOAT_EQ(1.7934048, inside.as_float());  // computed by hand
   vector<prob_t> post;
   inside = hg.ComputeBestPathThroughEdges(&post);
   EXPECT_FLOAT_EQ(-0.3, log(inside));  // computed by hand
@@ -282,13 +282,13 @@ TEST_F(HGTest, TestGenericInside) {
   hg.Reweight(wts);
   vector<prob_t> inside;
   prob_t ins = Inside<prob_t, EdgeProb>(hg, &inside);
-  EXPECT_FLOAT_EQ(1.7934048, ins);  // computed by hand
+  EXPECT_FLOAT_EQ(1.7934048, ins.as_float());  // computed by hand
   vector<prob_t> outside;
   Outside<prob_t, EdgeProb>(hg, inside, &outside);
   EXPECT_EQ(3, outside.size());
-  EXPECT_FLOAT_EQ(1.7934048, outside[0]);
-  EXPECT_FLOAT_EQ(1.3114071, outside[1]);
-  EXPECT_FLOAT_EQ(1.0, outside[2]);
+  EXPECT_FLOAT_EQ(1.7934048, outside[0].as_float());
+  EXPECT_FLOAT_EQ(1.3114071, outside[1].as_float());
+  EXPECT_FLOAT_EQ(1.0, outside[2].as_float());
 }
 
 TEST_F(HGTest,TestGenericInside2) {
@@ -327,8 +327,8 @@ TEST_F(HGTest,TestAddExpectations) {
   SparseVector<prob_t> feat_exps;
   prob_t z = InsideOutside<prob_t, EdgeProb,
                   SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>(hg, &feat_exps);
-  EXPECT_FLOAT_EQ(-2.5439765, feat_exps.value(FD::Convert("f1")) / z);
-  EXPECT_FLOAT_EQ(-2.6357865, feat_exps.value(FD::Convert("f2")) / z);
+  EXPECT_FLOAT_EQ(-2.5439765, (feat_exps.value(FD::Convert("f1")) / z).as_float());
+  EXPECT_FLOAT_EQ(-2.6357865, (feat_exps.value(FD::Convert("f2")) / z).as_float());
   cerr << feat_exps << endl;
   cerr << "Z=" << z << endl;
 }
