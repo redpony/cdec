@@ -14,11 +14,10 @@ class WeightsTest : public testing::Test {
   virtual void TearDown() { }
 };
        
-
 TEST_F(WeightsTest,Load) {
-  Weights w;
-  w.InitFromFile("test_data/weights");
-  w.WriteToFile("-");
+  vector<weight_t> v;
+  Weights::InitFromFile("test_data/weights", &v);
+  Weights::WriteToFile("-", v);
 }
 
 int main(int argc, char **argv) {

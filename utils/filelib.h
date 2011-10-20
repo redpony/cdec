@@ -12,6 +12,7 @@
 
 bool FileExists(const std::string& file_name);
 bool DirectoryExists(const std::string& dir_name);
+void MkDirP(const std::string& dir_name);
 
 // reads from standard in if filename is -
 // uncompresses if file ends with .gz
@@ -112,9 +113,6 @@ inline void CopyFile(std::string const& inf,std::ostream &out) {
   CopyFile(*r,out);
 }
 
-inline void CopyFile(std::string const& inf,std::string const& outf) {
-  WriteFile w(outf);
-  CopyFile(inf,*w);
-}
+void CopyFile(std::string const& inf,std::string const& outf);
 
 #endif

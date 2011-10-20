@@ -30,13 +30,13 @@ TEST_F(LogValTest,Negate) {
   LogVal<double> x(-2.4);
   LogVal<double> y(2.4);
   y.negate();
-  EXPECT_FLOAT_EQ(x,y);
+  EXPECT_FLOAT_EQ(x.as_float(),y.as_float());
 }
 
 TEST_F(LogValTest,Inverse) {
   LogVal<double> x(1/2.4);
   LogVal<double> y(2.4);
-  EXPECT_FLOAT_EQ(x,y.inverse());
+  EXPECT_FLOAT_EQ(x.as_float(),y.inverse().as_float());
 }
 
 TEST_F(LogValTest,Minus) {
@@ -45,9 +45,9 @@ TEST_F(LogValTest,Minus) {
   LogVal<double> z1 = x - y;
   LogVal<double> z2 = x;
   z2 -= y;
-  EXPECT_FLOAT_EQ(z1, z2);
-  EXPECT_FLOAT_EQ(z1, 10.0);
-  EXPECT_FLOAT_EQ(y - x, -10.0);
+  EXPECT_FLOAT_EQ(z1.as_float(), z2.as_float());
+  EXPECT_FLOAT_EQ(z1.as_float(), 10.0);
+  EXPECT_FLOAT_EQ((y - x).as_float(), -10.0);
 }
 
 TEST_F(LogValTest,TestOps) {
@@ -62,8 +62,8 @@ TEST_F(LogValTest,TestOps) {
   LogVal<double> bb(-0.3);
   cerr << (aa + bb) << endl;
   cerr << (bb + aa) << endl;
-  EXPECT_FLOAT_EQ((aa + bb), (bb + aa));
-  EXPECT_FLOAT_EQ((aa + bb), -0.1);
+  EXPECT_FLOAT_EQ((aa + bb).as_float(), (bb + aa).as_float());
+  EXPECT_FLOAT_EQ((aa + bb).as_float(), -0.1);
 }
 
 TEST_F(LogValTest,TestSizes) {

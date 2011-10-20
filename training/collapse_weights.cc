@@ -59,10 +59,8 @@ int main(int argc, char** argv) {
   InitCommandLine(argc, argv, &conf);
   const string wfile = conf["weights"].as<string>();
   const string gfile = conf["grammar"].as<string>();
-  Weights wm;
-  wm.InitFromFile(wfile);
-  vector<double> w;
-  wm.InitVector(&w);
+  vector<weight_t> w;
+  Weights::InitFromFile(wfile, &w);
   MarginalMap e_tots;
   MarginalMap f_tots;
   prob_t tot;

@@ -134,9 +134,7 @@ int main(int argc, char** argv) {
   } else { ngram = NULL; }
   extra_feature = conf.count("extra_lex_feature") > 0;
   if (conf.count("collapse_weights")) {
-    Weights w;
-    w.InitFromFile(conf["collapse_weights"].as<string>());
-    w.InitVector(&col_weights);
+    Weights::InitFromFile(conf["collapse_weights"].as<string>(), &col_weights);
   }
   clear_features = conf.count("clear_features_after_collapse") > 0;
   gather_rules = false;

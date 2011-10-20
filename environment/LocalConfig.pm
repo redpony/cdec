@@ -44,6 +44,10 @@ my $CCONFIG = {
     'HOST_REGEXP' => qr/^(barrow|chicago).lti.cs.cmu.edu$/,
     'QSubMemFlag' => '-l pmem=',
   },
+  'OxfordDeathSnakes' => {
+    'HOST_REGEXP' => qr/^(taipan|tiger).cs.ox.ac.uk$/,
+    'QSubMemFlag' => '-l pmem=',
+  },
   'LOCAL' => {
     'HOST_REGEXP' => qr/local\./,
     'QSubMemFlag' => ' ',

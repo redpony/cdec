@@ -22,9 +22,9 @@ libklm_util_a_SOURCES = \
   ersatz_progress.cc \
   bit_packing.cc \
   exception.cc \
+	file.cc \
   file_piece.cc \
   mmap.cc \
-  murmur_hash.cc \
-  scoped.cc
+  murmur_hash.cc
 
 AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I..

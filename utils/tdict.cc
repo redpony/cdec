@@ -13,6 +13,10 @@ using namespace std;
 
 Dict TD::dict_;
 
+unsigned int TD::NumWords() {
+  return dict_.max();
+}
+
 WordID TD::Convert(const std::string& s) {
   return dict_.Convert(s);
 }

@@ -272,23 +272,31 @@ struct OracleBleu {
       }
       kbest_out<<endl<<flush;
       if (show_derivation) {
-        deriv_out<<"\nsent_id="<<sent_id<<"\n";
+        deriv_out<<"\nsent_id="<<sent_id<<"."<<i<<" ||| "; //where i is candidate #/k
+        deriv_out<<log(d->score)<<"\n";
         deriv_out<<kbest.derivation_tree(*d,true);
-        deriv_out<<flush;
+        deriv_out<<"\n"<<flush;
       }
     }
   }
 
 // TODO decoder output should probably be moved to another file - how about oracle_bleu.h
-  void DumpKBest(const int sent_id, const Hypergraph& forest, const int k, const bool unique, std::string const &kbest_out_filename_) {
+  void DumpKBest(const int sent_id, const Hypergraph& forest, const int k, const bool unique, std::string const &kbest_out_filename_, std::string const &deriv_out_filename_) {
 
     WriteFile ko(kbest_out_filename_);
-    std::cerr << "Output kbest to " << kbest_out_filename_<<std::endl;
+    std::cerr << "Output kbest to " << kbest_out_filename_ <<std::endl;
+    std::ostringstream sderiv;
+    sderiv << deriv_out_filename_;
+    if (show_derivation) {
+      sderiv << "/derivs." << sent_id;
+      std::cerr << "Output derivations to " << deriv_out_filename_ << std::endl;
+    }
+    WriteFile oderiv(sderiv.str());
 
     if (!unique)
-      kbest<KBest::NoFilter<std::vector<WordID> > >(sent_id,forest,k,ko.get(),std::cerr);
+      kbest<KBest::NoFilter<std::vector<WordID> > >(sent_id,forest,k,ko.get(),oderiv.get());
     else {
-      kbest<KBest::FilterUnique>(sent_id,forest,k,ko.get(),std::cerr);
+      kbest<KBest::FilterUnique>(sent_id,forest,k,ko.get(),oderiv.get());
     }
   }
 
@@ -296,7 +304,7 @@ void DumpKBest(std::string const& suffix,const int sent_id, const Hypergraph& fo
   {
     std::ostringstream kbest_string_stream;
     kbest_string_stream << forest_output << "/kbest_"<<suffix<< "." << sent_id;
-    DumpKBest(sent_id, forest, k, unique, kbest_string_stream.str());
+    DumpKBest(sent_id, forest, k, unique, kbest_string_stream.str(), "-");
   }
 
 };

@@ -37,7 +37,7 @@ Features FeatureFunction::single_feature(WordID feat) {
 }
 
 Features ModelSet::all_features(std::ostream *warn,bool warn0) {
-  return ::all_features(models_,weights_,warn,warn0);
+  //return ::all_features(models_,weights_,warn,warn0);
 }
 
 void show_features(Features const& ffs,DenseWeightVector const& weights_,std::ostream &out,std::ostream &warn,bool warn_zero_wt) {
@@ -55,7 +55,7 @@ void show_features(Features const& ffs,DenseWeightVector const& weights_,std::os
 void ModelSet::show_features(std::ostream &out,std::ostream &warn,bool warn_zero_wt)
 {
 //  ::show_features(all_features(),weights_,out,warn,warn_zero_wt);
-  show_all_features(models_,weights_,out,warn,warn_zero_wt,warn_zero_wt);
+  //show_all_features(models_,weights_,out,warn,warn_zero_wt,warn_zero_wt);
 }
 
 // Hiero and Joshua use log_10(e) as the value, so I do to
