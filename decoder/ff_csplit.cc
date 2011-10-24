@@ -155,7 +155,7 @@ void BasicCSplitFeatures::TraversalFeaturesImpl(
 }
 
 namespace {
-struct CSVMapper : public lm::ngram::EnumerateVocab {
+struct CSVMapper : public lm::EnumerateVocab {
   CSVMapper(vector<lm::WordIndex>* out) : out_(out), kLM_UNKNOWN_TOKEN(0) { out_->clear(); }
   void Add(lm::WordIndex index, const StringPiece &str) {
     const WordID cdec_id = TD::Convert(str.as_string());
