@@ -6,6 +6,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "pf.h"
 #include "base_measures.h"
 #include "monotonic_pseg.h"
 #include "reachability.h"
@@ -135,20 +136,6 @@ ostream& operator<<(ostream& o, const Particle& p) {
   return o;
 }
 
-void FilterCrapParticlesAndReweight(vector<Particle>* pps) {
-  vector<Particle>& ps = *pps;
-  SampleSet<prob_t> ss;
-  for (int i = 0; i < ps.size(); ++i)
-    ss.add(ps[i].weight);
-  vector<Particle> nps; nps.reserve(ps.size());
-  const prob_t uniform_weight(1.0 / ps.size());
-  for (int i = 0; i < ps.size(); ++i) {
-    nps.push_back(ps[prng->SelectSample(ss)]);
-    nps[i].weight = uniform_weight;
-  }
-  nps.swap(ps);
-}
-
 int main(int argc, char** argv) {
   po::variables_map conf;
   InitCommandLine(argc, argv, &conf);
@@ -204,6 +191,8 @@ int main(int argc, char** argv) {
   cerr << "Sampling...\n"; 
   vector<Particle> tmp_p(10000);  // work space
   SampleSet<prob_t> pfss;
+  SystematicResampleFilter<Particle> filter(&rng);
+  // MultinomialResampleFilter<Particle> filter(&rng);
   for (int SS=0; SS < samples; ++SS) {
     for (int ci = 0; ci < corpusf.size(); ++ci) {
       vector<int>& src = corpusf[ci];
@@ -223,7 +212,7 @@ int main(int argc, char** argv) {
 
         // all particles have now been extended a bit, we will reweight them now
         if (lps[0].trg_cov > 0)
-          FilterCrapParticlesAndReweight(&lps);
+          filter(&lps);
 
         // loop over all particles and extend them
         bool done_nothing = true;
@@ -273,6 +262,11 @@ int main(int argc, char** argv) {
           }
         } // loop over particles (pi = 0 .. particles)
         if (done_nothing) all_complete = true;
+        prob_t wv = prob_t::Zero();
+        for (int pp = 0; pp < lps.size(); ++pp)
+          wv += lps[pp].weight;
+        for (int pp = 0; pp < lps.size(); ++pp)
+          lps[pp].weight /= wv;
       }
       pfss.clear();
       for (int i = 0; i < lps.size(); ++i)

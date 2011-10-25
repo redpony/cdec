@@ -6,6 +6,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "pf.h"
 #include "base_measures.h"
 #include "reachability.h"
 #include "viterbi.h"
@@ -413,20 +414,6 @@ ostream& operator<<(ostream& o, const Particle& p) {
   return o;
 }
 
-void FilterCrapParticlesAndReweight(vector<Particle>* pps) {
-  vector<Particle>& ps = *pps;
-  SampleSet<prob_t> ss;
-  for (int i = 0; i < ps.size(); ++i)
-    ss.add(ps[i].weight);
-  vector<Particle> nps; nps.reserve(ps.size());
-  const prob_t uniform_weight(1.0 / ps.size());
-  for (int i = 0; i < ps.size(); ++i) {
-    nps.push_back(ps[prng->SelectSample(ss)]);
-    nps[i].weight = uniform_weight;
-  }
-  nps.swap(ps);
-}
-
 int main(int argc, char** argv) {
   po::variables_map conf;
   InitCommandLine(argc, argv, &conf);
@@ -466,6 +453,7 @@ int main(int argc, char** argv) {
   MyJointModel m(lp0);
 #endif
 
+  MultinomialResampleFilter<Particle> filter(&rng);
   cerr << "Initializing reachability limits...\n";
   vector<Particle> ps(corpusf.size());
   vector<Reachability> reaches; reaches.reserve(corpusf.size());
@@ -500,7 +488,7 @@ int main(int argc, char** argv) {
 
         // all particles have now been extended a bit, we will reweight them now
         if (lps[0].trg_cov > 0)
-          FilterCrapParticlesAndReweight(&lps);
+          filter(&lps);
 
         // loop over all particles and extend them
         bool done_nothing = true;
