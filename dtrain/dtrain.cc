@@ -7,21 +7,21 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
   po::options_description ini("Configuration File Options");
   ini.add_options()
     ("input",          po::value<string>()->default_value("-"),                                                "input file")
-    ("output",         po::value<string>()->default_value("-"),                                       "output weights file")
+    ("output",         po::value<string>()->default_value("-"),                       "output weights file, '-' for STDOUT")
     ("input_weights",  po::value<string>(),                             "input weights file (e.g. from previous iteration)")
     ("decoder_config", po::value<string>(),                                                   "configuration file for cdec")
-    ("k",              po::value<unsigned>()->default_value(100),                     "size of kbest or sample from forest")
-    ("sample_from",    po::value<string>()->default_value("kbest"),                        "where to get translations from")
-    ("filter",         po::value<string>()->default_value("unique"),                                    "filter kbest list")
-    ("pair_sampling",  po::value<string>()->default_value("all"),                          "how to sample pairs: all, rand")
-    ("N",              po::value<unsigned>()->default_value(3),                                              "N for Ngrams")
-    ("epochs",         po::value<unsigned>()->default_value(2),                                         "# of iterations T") 
-    ("scorer",         po::value<string>()->default_value("stupid_bleu"),                                  "scoring metric")
+    ("sample_from",    po::value<string>()->default_value("kbest"),      "where to sample translations from: kbest, forest")
+    ("k",              po::value<unsigned>()->default_value(100),                         "how many translations to sample")
+    ("filter",         po::value<string>()->default_value("unique"),                        "filter kbest list: no, unique")
+    ("pair_sampling",  po::value<string>()->default_value("all"),                  "how to sample pairs: all, rand, 108010")
+    ("N",              po::value<unsigned>()->default_value(3),                                       "N for Ngrams (BLEU)")
+    ("epochs",         po::value<unsigned>()->default_value(2),                             "# of iterations T (per shard)") 
+    ("scorer",         po::value<string>()->default_value("stupid_bleu"),     "scoring: bleu, stupid_*, smooth_*, approx_*")
     ("stop_after",     po::value<unsigned>()->default_value(0),                              "stop after X input sentences")
     ("print_weights",  po::value<string>(),                                            "weights to print on each iteration")
     ("hstreaming",     po::value<bool>()->zero_tokens(),                                     "run in hadoop streaming mode")
-    ("learning_rate",  po::value<weight_t>()->default_value(0.0005),                                          "learning rate")
-    ("gamma",          po::value<weight_t>()->default_value(0),                            "gamma for SVM (0 for perceptron)")
+    ("learning_rate",  po::value<weight_t>()->default_value(0.0005),                                        "learning rate")
+    ("gamma",          po::value<weight_t>()->default_value(0),                          "gamma for SVM (0 for perceptron)")
     ("tmp",            po::value<string>()->default_value("/tmp"),                                        "temp dir to use")
     ("select_weights", po::value<string>()->default_value("last"), "output 'best' or 'last' weights ('VOID' to throw away)")
     ("noup",           po::value<bool>()->zero_tokens(),                                            "do not update weights");
@@ -142,8 +142,6 @@ main(int argc, char** argv)
   // meta params for perceptron, SVM
   weight_t eta = cfg["learning_rate"].as<weight_t>();
   weight_t gamma = cfg["gamma"].as<weight_t>();
-  WordID __bias = FD::Convert("__bias");
-  lambdas.add_value(__bias, 0);
 
   string output_fn = cfg["output"].as<string>();
   // input
@@ -158,7 +156,7 @@ main(int argc, char** argv)
   ogzstream grammar_buf_out;
   grammar_buf_out.open(grammar_buf_fn.c_str());
   
-  unsigned in_sz = 999999999; // input index, input size
+  unsigned in_sz = UINT_MAX; // input index, input size
   vector<pair<score_t, score_t> > all_scores;
   score_t max_score = 0.;
   unsigned best_it = 0;
@@ -286,23 +284,18 @@ main(int argc, char** argv)
     // get (scored) samples 
     vector<ScoredHyp>* samples = observer->GetSamples();
 
-    // FIXME
-    /*if (verbose) {
-      cout << "[ref: '";
-      if (t > 0) cout << ref_ids_buf[ii]; <---
-      else cout << ref_ids;
-      cout << endl;
-      cout << _p5 << _np << "1best: " << "'" << (*samples)[0].w << "'" << endl;
-      cout << "SCORE=" << (*samples)[0].score << ",model="<< (*samples)[0].model << endl;
-      cout << "F{" << (*samples)[0].f << "} ]" << endl << endl;
-    }*/
-    /*cout << lambdas.get(FD::Convert("PhraseModel_0")) << endl;
-    cout << (*samples)[0].model << endl;
-    cout << "1best: ";
-    for (unsigned u = 0; u < (*samples)[0].w.size(); u++) cout << TD::Convert((*samples)[0].w[u]) << " ";
-    cout << endl;
-    cout << (*samples)[0].f << endl;
-    cout << "___" << endl;*/
+    if (verbose) {
+      cerr << "--- ref for " << ii << " ";
+      if (t > 0) printWordIDVec(ref_ids_buf[ii]);
+      else printWordIDVec(ref_ids);
+      for (unsigned u = 0; u < samples->size(); u++) {
+        cerr << _p5 << _np << "[" << u << ". '";
+        printWordIDVec((*samples)[u].w);
+        cerr << "'" << endl;
+        cerr << "SCORE=" << (*samples)[0].score << ",model="<< (*samples)[0].model << endl;
+        cerr << "F{" << (*samples)[0].f << "} ]" << endl << endl;
+      }
+    }
 
     score_sum += (*samples)[0].score;
     model_sum += (*samples)[0].model;
@@ -320,43 +313,28 @@ main(int argc, char** argv)
        
       for (vector<pair<ScoredHyp,ScoredHyp> >::iterator it = pairs.begin();
            it != pairs.end(); it++) {
+        score_t rank_error = it->second.score - it->first.score;
         if (!gamma) {
           // perceptron
-          if (it->first.score - it->second.score < 0) { // rank error
-            SparseVector<weight_t> dv = it->second.f - it->first.f;
-            dv.add_value(__bias, -1);
-            lambdas.plus_eq_v_times_s(dv, eta);
+          if (rank_error > 0) {
+            SparseVector<weight_t> diff_vec = it->second.f - it->first.f;
+            lambdas.plus_eq_v_times_s(diff_vec, eta);
             nup++;
           }
         } else {
           // SVM
-          score_t rank_error = it->second.score - it->first.score;
-          if (rank_error > 0) {
-            SparseVector<weight_t> dv = it->second.f - it->first.f;
-            dv.add_value(__bias, -1);
-            lambdas.plus_eq_v_times_s(dv, eta);
-          }
-          // regularization
           score_t margin = it->first.model - it->second.model;
-          if (rank_error || margin < 1) {
-            lambdas.plus_eq_v_times_s(lambdas, -2*gamma*eta); // reg /= #EXAMPLES or #UPDATES ?
+          if (rank_error > 0 || margin < 1) {
+            SparseVector<weight_t> diff_vec = it->second.f - it->first.f;
+            lambdas.plus_eq_v_times_s(diff_vec, eta);
             nup++;
           }
+          // regularization
+          lambdas.plus_eq_v_times_s(lambdas, -2*gamma*eta*(1./npairs));
         }
       }
     }
     
-    // DEBUG
-    vector<weight_t> x;
-    lambdas.init_vector(&x);
-    //cout << "[" << ii << "]" << endl;
-    for (int jj = 0; jj < x.size(); jj++) {
-      //if (x[jj] != 0)
-        //cout << FD::Convert(jj) << " " << x[jj] << endl; 
-    }
-    //cout << " --- " << endl;
-    // /DEBUG
-
     ++ii;
 
     if (hstreaming) cerr << "reporter:counter:dtrain,sid," << ii << endl;
@@ -375,8 +353,7 @@ main(int argc, char** argv)
   // print some stats
   score_t score_avg = score_sum/(score_t)in_sz;
   score_t model_avg = model_sum/(score_t)in_sz;
-  score_t score_diff;
-  score_t model_diff;
+  score_t score_diff, model_diff;
   if (t > 0) {
     score_diff = score_avg - all_scores[t-1].first;
     model_diff = model_avg - all_scores[t-1].second;
