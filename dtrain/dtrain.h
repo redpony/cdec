@@ -3,6 +3,7 @@
 
 
 #include <iomanip>
+#include <climits>
 #include <string.h>
 
 #include <boost/algorithm/string.hpp>
@@ -57,6 +58,14 @@ inline ostream& _p(ostream& out)  { return out << setiosflags(ios::showpos); }
 inline ostream& _p2(ostream& out) { return out << setprecision(2); }
 inline ostream& _p5(ostream& out) { return out << setprecision(5); }
 inline ostream& _p9(ostream& out) { return out << setprecision(9); }
+
+inline void printWordIDVec(vector<WordID>& v)
+{
+  for (unsigned i = 0; i < v.size(); i++) {
+    cerr << TD::Convert(v[i]);
+    if (i < v.size()-1) cerr << " ";
+  }
+}
 
 #endif
 
