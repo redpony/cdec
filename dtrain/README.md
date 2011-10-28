@@ -43,7 +43,9 @@ Uncertain, known bugs, problems
 
 FIXME
 -----
-none
+merge dtrain part-* files
+mapred count shard sents
+
 
 Data
 ----
@@ -60,4 +62,20 @@ ep-v6.de-en.cs.loo      p
 
 p: prep, e: extract, g: grammar, d: dtrain
 </pre>
+
+
+Experiments
+-----------
+features
+ TODO
+
+"lm open better than lm closed when tuned"
+
+mira100-10
+mira100-17
+
+baselines
+ mira
+ pro    
+ vest   
 
