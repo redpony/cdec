@@ -25,7 +25,7 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     ("tmp",            po::value<string>()->default_value("/tmp"),                                        "temp dir to use")
     ("select_weights", po::value<string>()->default_value("last"), "output 'best' or 'last' weights ('VOID' to throw away)")
 #ifdef DTRAIN_LOCAL
-    ("refs,r",         po::value<string>(),                                                     "references for local mode")
+    ("refs,r",         po::value<string>(),                                                      "references in local mode")
 #endif
     ("noup",           po::value<bool>()->zero_tokens(),                                            "do not update weights");
   po::options_description cl("Command Line Options");
