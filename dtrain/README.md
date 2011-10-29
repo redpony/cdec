@@ -45,7 +45,10 @@ FIXME
 -----
 merge dtrain part-* files
 mapred count shard sents
-
+250 forest sampling is real bad, bug?
+kenlm not portable (i7-2620M vs Intel(R) Xeon(R) CPU E5620 @ 2.40GHz)
+metric reporter of bleu for each shard
+mapred chaining? hamake?
 
 Data
 ----
@@ -66,16 +69,57 @@ p: prep, e: extract, g: grammar, d: dtrain
 
 Experiments
 -----------
-features
- TODO
+grammar stats
+ oov on dev/devtest/test
+ size
+ #rules (uniq)
+ time for building
+  ep: 1.5 days on 278 slots (30 nodes)
+  nc: ~2 hours ^^^
 
-"lm open better than lm closed when tuned"
+lm stats
+ oov on dev/devtest/test 
+ perplex on train/dev/devtest/test
 
-mira100-10
-mira100-17
+which word alignment?
+ berkeleyaligner
+ giza++ as of Sep 24 2011, mgizapp 0.6.3
+ symgiza as of Oct 1 2011
+ ---
+ randomly sample 100 from train.loo
+ run mira/dtrain for 50/60 iterations
+ w/o lm, wp
+ measure ibm_bleu on exact same sents
 
-baselines
- mira
- pro    
- vest   
+stability
+ mira: 100
+ pro: 100
+ vest: 100
+ dtrain: 100
+
+
+pro metaparam
+ (max) iter
+ regularization
+ 
+mira metaparam
+ (max) iter: 10 (nc???) vs 15 (ep???)
+
+lm?
+ 3-4-5
+ open
+ unk
+ nounk (-100 for unk)
+ --
+ tune or not???
+ lm oov weight pos?
+
+features to try
+ NgramFeatures -> target side ngrams
+ RuleIdentityFeatures
+ RuleNgramFeatures -> source side ngrams from rule
+ RuleShape -> relative orientation of X's and terminals
+ SpanFeatures -> http://www.cs.cmu.edu/~cdyer/wmt11-sysdesc.pdf
+ ArityPenalty -> Arity=0 Arity=1 and Arity=2
+
 
