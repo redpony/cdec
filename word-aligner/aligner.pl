@@ -27,11 +27,13 @@ die "Expected format corpus.l1-l2 where l1 & l2 are two-letter abbreviations\nfo
 my $f_lang = $1;
 my $e_lang = $2;
 
+print STDERR " Using mkcls in: $mkcls\n\n";
 print STDERR "Source language: $f_lang\n";
 print STDERR "Target language: $e_lang\n";
-print STDERR " Using mkcls in: $mkcls\n\n";
-die "Don't have an orthographic normalizer for $f_lang\n" unless -f "$SCRIPT_DIR/ortho-norm/$f_lang.pl";
-die "Don't have an orthographic normalizer for $e_lang\n" unless -f "$SCRIPT_DIR/ortho-norm/$e_lang.pl";
+die "Don't have an stemmer for $f_lang: please create $SCRIPT_DIR/stemmers/$f_lang.pl\n" unless -f "$SCRIPT_DIR/stemmers/$f_lang.pl";
+die "Don't have an stemmer for $e_lang: please create $SCRIPT_DIR/stemmers/$e_lang.pl\n" unless -f "$SCRIPT_DIR/stemmers/$e_lang.pl";
+die "Don't have an orthographic normalizer for $f_lang: please create $SCRIPT_DIR/ortho-norm/$f_lang.pl\n" unless -f "$SCRIPT_DIR/ortho-norm/$f_lang.pl";
+die "Don't have an orthographic normalizer for $e_lang: please create $SCRIPT_DIR/ortho-norm/$e_lang.pl\n" unless -f "$SCRIPT_DIR/ortho-norm/$e_lang.pl";
 
 my @directions = qw(f-e);
 
