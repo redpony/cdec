@@ -39,15 +39,12 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("weights,w",po::value<string>(),"Initial feature weights")
         ("training_data,d",po::value<string>(),"Training data")
         ("minibatch_size_per_proc,s", po::value<unsigned>()->default_value(6), "Number of training instances evaluated per processor in each minibatch")
-        ("optimization_method,m", po::value<string>()->default_value("lbfgs"), "Optimization method (options: lbfgs, sgd, rprop)")
-        ("minibatch_iterations,i", po::value<unsigned>()->default_value(10), "Number of optimization iterations per minibatch (1 = standard SGD)")
+        ("minibatch_iterations,i", po::value<unsigned>()->default_value(10), "Number of optimization iterations per minibatch")
         ("iterations,I", po::value<unsigned>()->default_value(50), "Number of passes through the training data before termination")
+        ("regularization_strength,C", po::value<double>()->default_value(0.2), "Regularization strength")
+        ("time_series_strength,T", po::value<double>()->default_value(0.0), "Time series regularization strength")
         ("random_seed,S", po::value<uint32_t>(), "Random seed (if not specified, /dev/random will be used)")
-        ("lbfgs_memory_buffers,M", po::value<unsigned>()->default_value(10), "Number of memory buffers for LBFGS history")
-        ("eta_0,e", po::value<double>()->default_value(0.1), "Initial learning rate for SGD")
-        ("L1,1","Use L1 regularization")
-        ("L2,2","Use L2 regularization")
-        ("regularization_strength,C", po::value<double>()->default_value(1.0), "Regularization strength (C)");
+        ("lbfgs_memory_buffers,M", po::value<unsigned>()->default_value(10), "Number of memory buffers for LBFGS history");
   po::options_description clo("Command line options");
   clo.add_options()
         ("config", po::value<string>(), "Configuration file")
@@ -64,7 +61,7 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::notify(*conf);
 
   if (conf->count("help") || !conf->count("training_data") || !conf->count("cdec_config")) {
-    cerr << "General-purpose minibatch online optimizer (MPI support "
+    cerr << "LBFGS minibatch online optimizer (MPI support "
 #if HAVE_MPI
          << "enabled"
 #else
@@ -166,6 +163,38 @@ void AddGrad(const SparseVector<prob_t> x, double s, SparseVector<double>* acc) 
     acc->add_value(it->first, it->second.as_float() * s);
 }
 
+double PNorm(const vector<double>& v, const double p) {
+  double acc = 0;
+  for (int i = 0; i < v.size(); ++i)
+    acc += pow(v[i], p);
+  return pow(acc, 1.0 / p);
+}
+
+void VV(ostream&os, const vector<double>& v) {
+  for (int i = 1; i < v.size(); ++i)
+    if (v[i]) os << FD::Convert(i) << "=" << v[i] << " ";
+}
+
+double ApplyRegularizationTerms(const double C,
+                                const double T,
+                                const vector<double>& weights,
+                                const vector<double>& prev_weights,
+                                vector<double>* g) {
+  assert(weights.size() == g->size());
+  double reg = 0;
+  for (size_t i = 0; i < weights.size(); ++i) {
+    const double prev_w_i = (i < prev_weights.size() ? prev_weights[i] : 0.0);
+    const double& w_i = weights[i];
+    double& g_i = (*g)[i];
+    reg += C * w_i * w_i;
+    g_i += 2 * C * w_i;
+
+    reg += T * (w_i - prev_w_i) * (w_i - prev_w_i);
+    g_i += 2 * T * (w_i - prev_w_i);
+  }
+  return reg;
+}
+
 int main(int argc, char** argv) {
 #ifdef HAVE_MPI
   mpi::environment env(argc, argv);
@@ -176,7 +205,7 @@ int main(int argc, char** argv) {
   const int size = 1;
   const int rank = 0;
 #endif
-  if (size > 1) SetSilent(true);  // turn off verbose decoder output
+  if (size > 0) SetSilent(true);  // turn off verbose decoder output
   register_feature_functions();
   MT19937* rng = NULL;
 
@@ -186,26 +215,37 @@ int main(int argc, char** argv) {
 
   boost::shared_ptr<BatchOptimizer> o;
   const unsigned lbfgs_memory_buffers = conf["lbfgs_memory_buffers"].as<unsigned>();
-
-  istringstream ins;
-  ReadConfig(conf["cdec_config"].as<string>(), &ins);
-  Decoder decoder(&ins);
-
-  // load initial weights
-  vector<weight_t> init_weights;
-  if (conf.count("weights"))
-    Weights::InitFromFile(conf["weights"].as<string>(), &init_weights);
+  const unsigned size_per_proc = conf["minibatch_size_per_proc"].as<unsigned>();
+  const unsigned minibatch_iterations = conf["minibatch_iterations"].as<unsigned>();
+  const double regularization_strength = conf["regularization_strength"].as<double>();
+  const double time_series_strength = conf["time_series_strength"].as<double>();
+  const bool use_time_series_reg = time_series_strength > 0.0;
+  const unsigned max_iteration = conf["iterations"].as<unsigned>();
 
   vector<string> corpus;
   vector<int> ids;
   ReadTrainingCorpus(conf["training_data"].as<string>(), rank, size, &corpus, &ids);
   assert(corpus.size() > 0);
 
-  const unsigned size_per_proc = conf["minibatch_size_per_proc"].as<unsigned>();
   if (size_per_proc > corpus.size()) {
-    cerr << "Minibatch size must be smaller than corpus size!\n";
+    cerr << "Minibatch size (per processor) must be smaller or equal to the local corpus size!\n";
     return 1;
   }
+
+  // initialize decoder (loads hash functions if necessary)
+  istringstream ins;
+  ReadConfig(conf["cdec_config"].as<string>(), &ins);
+  Decoder decoder(&ins);
+
+  // load initial weights
+  vector<weight_t> prev_weights;
+  if (conf.count("weights"))
+    Weights::InitFromFile(conf["weights"].as<string>(), &prev_weights);
+
+  if (conf.count("random_seed"))
+    rng = new MT19937(conf["random_seed"].as<uint32_t>());
+  else
+    rng = new MT19937;
 
   size_t total_corpus_size = 0;
 #ifdef HAVE_MPI
@@ -214,28 +254,21 @@ int main(int argc, char** argv) {
   total_corpus_size = corpus.size();
 #endif
 
-  if (conf.count("random_seed"))
-    rng = new MT19937(conf["random_seed"].as<uint32_t>());
-  else
-    rng = new MT19937;
-
-  const unsigned minibatch_iterations = conf["minibatch_iterations"].as<unsigned>();
-
-  if (rank == 0) {
+  if (rank == 0)
     cerr << "Total corpus size: " << total_corpus_size << endl;
-    const unsigned batch_size = size_per_proc * size;
-  }
 
-  SparseVector<double> x;
-  Weights::InitSparseVector(init_weights, &x);
   CopyHGsObserver observer;
 
   int write_weights_every_ith = 100; // TODO configure
   int titer = -1;
 
-  vector<weight_t>& lambdas = decoder.CurrentWeightVector();
-  lambdas.swap(init_weights);
-  init_weights.clear();
+  vector<weight_t>& cur_weights = decoder.CurrentWeightVector();
+  if (use_time_series_reg) {
+    cur_weights = prev_weights;
+  } else {
+    cur_weights.swap(prev_weights);
+    prev_weights.clear();
+  }
 
   int iter = -1;
   bool converged = false;
@@ -243,26 +276,20 @@ int main(int argc, char** argv) {
 #ifdef HAVE_MPI
     mpi::timer timer;
 #endif
-    x.init_vector(&lambdas);
     ++iter; ++titer;
-#if 0
     if (rank == 0) {
       converged = (iter == max_iteration);
-      Weights::SanityCheck(lambdas);
-      Weights::ShowLargestFeatures(lambdas);
         string fname = "weights.cur.gz";
         if (iter % write_weights_every_ith == 0) {
-          ostringstream o; o << "weights.epoch_" << (ai+1) << '.' << iter << ".gz";
+          ostringstream o; o << "weights.epoch_" << iter << ".gz";
           fname = o.str();
         }
-        if (converged && ((ai+1)==agenda.size())) { fname = "weights.final.gz"; }
+        if (converged) { fname = "weights.final.gz"; }
         ostringstream vv;
-        vv << "total iter=" << titer << " (of current config iter=" << iter << ")  minibatch=" << size_per_proc << " sentences/proc x " << size << " procs.   num_feats=" << x.size() << '/' << FD::NumFeats() << "   passes_thru_data=" << (titer * size_per_proc / static_cast<double>(corpus.size())) << "   eta=" << lr->eta(titer);
+        vv << "total iter=" << titer << " (of current config iter=" << iter << ")  minibatch=" << size_per_proc << " sentences/proc x " << size << " procs.   num_feats=" << FD::NumFeats() << "   passes_thru_data=" << (titer * size_per_proc / static_cast<double>(corpus.size()));
         const string svv = vv.str();
-        cerr << svv << endl;
-        Weights::WriteToFile(fname, lambdas, true, &svv);
+        Weights::WriteToFile(fname, cur_weights, true, &svv);
       }
-#endif
 
       vector<Hypergraph> hgs(size_per_proc);
       vector<Hypergraph> gold_hgs(size_per_proc);
@@ -287,8 +314,8 @@ int main(int argc, char** argv) {
           Hypergraph& hg_gold = gold_hgs[i];
           if (hg.edges_.size() < 2) continue;
 
-          hg.Reweight(lambdas);
-          hg_gold.Reweight(lambdas);
+          hg.Reweight(cur_weights);
+          hg_gold.Reweight(cur_weights);
           SparseVector<prob_t> model_exp, gold_exp;
           const prob_t z = InsideOutside<prob_t,
                                          EdgeProb,
@@ -324,23 +351,37 @@ int main(int argc, char** argv) {
 #endif
         local_grad.clear();
         if (rank == 0) {
-          g /= (size_per_proc * size);
+          // g /= (size_per_proc * size);
           if (!o)
             o.reset(new LBFGSOptimizer(FD::NumFeats(), lbfgs_memory_buffers));
           vector<double> gg(FD::NumFeats());
-          if (gg.size() != lambdas.size()) { lambdas.resize(gg.size()); }
+          if (gg.size() != cur_weights.size()) { cur_weights.resize(gg.size()); }
           for (SparseVector<double>::const_iterator it = g.begin(); it != g.end(); ++it)
             if (it->first) { gg[it->first] = it->second; }
-          cerr << "OBJ: " << obj << endl;
-          o->Optimize(obj, gg, &lambdas);
+          g.clear();
+          double r = ApplyRegularizationTerms(regularization_strength,
+                                time_series_strength * (iter == 0 ? 0.0 : 1.0),
+                                cur_weights,
+                                prev_weights,
+                                &gg);
+          obj += r;
+          if (mi == 0 || mi == (minibatch_iterations - 1)) {
+            if (!mi) cerr << iter << ' '; else cerr << ' ';
+            cerr << "OBJ=" << obj << " (REG=" << r << ")" << " |g|=" << PNorm(gg, 2) << " |w|=" << PNorm(cur_weights, 2); 
+            if (mi > 0) cerr << endl << flush; else cerr << ' ';
+          } else { cerr << '.' << flush; }
+          // cerr << "w = "; VV(cerr, cur_weights); cerr << endl;
+          // cerr << "g = "; VV(cerr, gg); cerr << endl;
+          o->Optimize(obj, gg, &cur_weights);
         }
 #ifdef HAVE_MPI
-        broadcast(world, x, 0);
+        // broadcast(world, x, 0);
         broadcast(world, converged, 0);
         world.barrier();
         if (rank == 0) { cerr << "  ELAPSED TIME THIS ITERATION=" << timer.elapsed() << endl; }
 #endif
     }
+    prev_weights = cur_weights;
   }
   return 0;
 }
