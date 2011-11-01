@@ -33,6 +33,8 @@ Ideas
 * use separate *TEST SET* for each shard
 * *REDUCE* training set (50k?)
 * *SYNTAX* features (CD)
+* distribute *DEV* set to all nodes, avg
+
 
 Uncertain, known bugs, problems
 -------------------------------
@@ -46,25 +48,31 @@ Uncertain, known bugs, problems
 
 FIXME, todo
 -----------
-* merge dtrain part-X files, for better blocks
+* merge dtrain part-X files, for better blocks (how to do this with 4.5tb ep)
 * mapred count shard sents
+* mapred stats for learning curve (output weights per iter for eval on devtest)
 * 250 forest sampling is real bad, bug?
 * metric reporter of bleu for each shard
 * kenlm not portable (i7-2620M vs Intel(R) Xeon(R) CPU E5620 @ 2.40GHz)
 * mapred chaining? hamake?
+* make our sigtest work with cdec
+* l1l2 red
+* tsuroke?
 
 Data
 ----
 <pre>
-nc-v6.de-en             peg
-nc-v6.de-en.loo         peg
-nc-v6.de-en.giza.loo    peg
-nc-v6.de-en.symgiza.loo peg
-nv-v6.de-en.cs          peg
-nc-v6.de-en.cs.loo      peg
+nc-v6.de-en             apegd
+nc-v6.de-en.loo         apegd
+nc-v6.de-en.giza        apegd
+nc-v6.de-en.giza.loo    apegd
+nc-v6.de-en.cs.giza     apegd
+nc-v6.de-en.cs.giza.loo apegd
+nv-v6.de-en.cs          apegd
+nc-v6.de-en.cs.loo      apegd
 --
-ep-v6.de-en.cs          pe
-ep-v6.de-en.cs.loo      p
+ep-v6.de-en.cs          apegd
+ep-v6.de-en.cs.loo      apegd
 
 a: alignment:, p: prep, e: extract,
 g: grammar, d: dtrain
@@ -82,7 +90,7 @@ Experiments
 
  lm stats
   oov on dev/devtest/test 
-  perplex on train/dev/devtest/test]
+  perplex on train/dev/devtest/test?]
 
 [0]
 which word alignment?
@@ -96,6 +104,7 @@ which word alignment?
  run dtrain for 100 iterations
  w/o all other feats (lm, wp, ...) +Glue
  measure ibm bleu on exact same sents
+ ep -> berkeleyaligner ??? (mb per sent, rules per sent)
 
 [1]
 lm?
@@ -126,6 +135,7 @@ stability
  dtrain: 100
 
 [undecided]
+do we even need loo for ep?
 pro metaparam
  (max) iter
  regularization
@@ -142,4 +152,18 @@ features to try
  SpanFeatures -> http://www.cs.cmu.edu/~cdyer/wmt11-sysdesc.pdf
  ArityPenalty -> Arity=0 Arity=1 and Arity=2
 
+---
+variables to control
+
+[alignment]
+
+[lm]
+
+[vest]
+
+[mira]
+
+[dtrain]
+
+[pro]
 
