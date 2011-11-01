@@ -104,7 +104,7 @@ lm?
  unk
  nounk (-100 for unk)
  --
- lm oov weight pos?
+ lm oov weight pos? -100
  no tuning, -100 prob for unk EXPECT: nounk
  tuning with dtrain EXPECT: open
 
