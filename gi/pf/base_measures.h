@@ -97,6 +97,37 @@ struct PhraseJointBase {
   const prob_t kUNIFORM_TARGET;
 };
 
+struct PhraseJointBase_BiDir {
+  explicit PhraseJointBase_BiDir(const Model1& m1,
+                                 const Model1& im1,
+                                 const double m1mixture,
+                                 const unsigned vocab_e_size,
+                                 const unsigned vocab_f_size) :
+      model1(m1),
+      invmodel1(im1),
+      kM1MIXTURE(m1mixture),
+      kUNIFORM_MIXTURE(1.0 - m1mixture),
+      kUNIFORM_SOURCE(1.0 / vocab_f_size),
+      kUNIFORM_TARGET(1.0 / vocab_e_size) {
+    assert(m1mixture >= 0.0 && m1mixture <= 1.0);
+    assert(vocab_e_size > 0);
+  }
+
+  // return p0 of rule.e_ | rule.f_
+  prob_t operator()(const TRule& rule) const {
+    return p0(rule.f_, rule.e_, 0, 0);
+  }
+
+  prob_t p0(const std::vector<WordID>& vsrc, const std::vector<WordID>& vtrg, int start_src, int start_trg) const;
+
+  const Model1& model1;
+  const Model1& invmodel1;
+  const prob_t kM1MIXTURE;  // Model 1 mixture component
+  const prob_t kUNIFORM_MIXTURE; // uniform mixture component
+  const prob_t kUNIFORM_SOURCE;
+  const prob_t kUNIFORM_TARGET;
+};
+
 // base distribution for jump size multinomials
 // basically p(0) = 0 and then, p(1) is max, and then
 // you drop as you move to the max jump distance

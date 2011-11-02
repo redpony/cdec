@@ -28,11 +28,14 @@ double TestOptimizer() {
     g[2] = 2 * x[2] + 6;
     obj = 4 * x[0]*x[0] + x[0] * x[1] + x[1]*x[1] + x[2]*x[2] + 6 * x[2] + 5;
     opt.run(x, obj, g);
-
+    if (!opt.requests_f_and_g()) {
+      if (converged(x,g)) break;
+      opt.run(x, obj, g);
+    }
     cerr << x[0] << " " << x[1] << " " << x[2] << endl;
     cerr << "   obj=" << obj << "\td/dx1=" << g[0] << " d/dx2=" << g[1] << " d/dx3=" << g[2] << endl;
     cerr << opt << endl;
-  } while (!converged(x, g));
+  } while (true);
   return obj;
 }
 

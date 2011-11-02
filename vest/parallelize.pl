@@ -240,12 +240,11 @@ my $node_count = 0;
 my $script = "";
 # fork == one thread runs the sentserver, while the
 # other spawns the sentclient commands.
-if (my $pid = fork) {
+my $pid = fork;
+if ($pid == 0) { # child
   sleep 8; # give other thread time to start sentserver
-  $script =
-      qq{wait
-$cdcmd$sentclient $host:$port:$key $cmd
-};
+  $script = "$cdcmd$sentclient $host:$port:$key $cmd";
+
   if ($verbose){
     print STDERR "Client script:\n====\n";
     print STDERR $script;
@@ -270,13 +269,18 @@ $cdcmd$sentclient $host:$port:$key $cmd
       }
     }
   }
-  waitpid($pid, 0);
-  cleanup();
+  print STDERR "CHILD PROCESSES SPAWNED ... WAITING\n";
+  for my $p (@pids) {
+    waitpid($p, 0);
+  }
 } else {
 #  my $todo = "$sentserver -k $key $multiflag $port ";
   my $todo = "$sentserver -k $key $multiflag $port $stay_alive_flag ";
   if ($verbose){ print STDERR "Running: $todo\n"; }
   check_call($todo);
+  print STDERR "Call to $sentserver returned.\n";
+  cleanup();
+  exit(0);
 }
 
 sub numof_live_jobs {
@@ -343,16 +347,18 @@ sub launch_job_fork {
     push @errors,$errorfile;
     push @outs,$outfile;
   }
-  if (my $pid = fork) {
+  my $pid = fork;
+  if ($pid == 0) {
     my ($fh, $scr_name) = get_temp_script();
     print $fh $script;
     close $fh;
     my $todo = "/bin/bash -xeo pipefail $scr_name 1> $outfile 2> $errorfile";
     print STDERR "EXEC: $todo\n";
     my $out = check_output("$todo");
-    print STDERR "RES: $out\n";
     unlink $scr_name or warn "Failed to remove $scr_name";
     exit 0;
+  } else {
+    push @pids, $pid;
   }
 }
 
