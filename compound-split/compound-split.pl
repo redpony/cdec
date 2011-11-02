@@ -32,7 +32,7 @@ $LANG = lc $LANG;
 die "Can't find $CDEC\n" unless -f $CDEC;
 die "Can't execute $CDEC\n" unless -x $CDEC;
 die "Don't know about language: $LANG\n" unless -d "./$LANG";
-my $CONFIG="cdec-$LANG.ini";
+my $CONFIG="/mnt/proj/developer/simianer/cdec_head/compound-split/cdec-$LANG.ini";
 die "Can't find $CONFIG" unless -f $CONFIG;
 die "--output must be '1best' or 'plf'\n" unless ($OUTPUT =~ /^(plf|1best)$/);
 print STDERR "(Run with --help for options)\n";
