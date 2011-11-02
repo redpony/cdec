@@ -31,6 +31,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("max_src_phrase",po::value<unsigned>()->default_value(4),"Maximum length of source language phrases")
         ("max_trg_phrase",po::value<unsigned>()->default_value(4),"Maximum length of target language phrases")
         ("model1,m",po::value<string>(),"Model 1 parameters (used in base distribution)")
+        ("inverse_model1,M",po::value<string>(),"Inverse Model 1 parameters (used in base distribution)")
         ("model1_interpolation_weight",po::value<double>()->default_value(0.95),"Mixing proportion of model 1 with uniform target distribution")
         ("random_seed,S",po::value<uint32_t>(), "Random seed");
   po::options_description clo("Command line options");
@@ -58,7 +59,7 @@ shared_ptr<MT19937> prng;
 
 template <typename Base>
 struct ModelAndData {
-  explicit ModelAndData(MonotonicParallelSegementationModel& m, const Base& b, const vector<vector<int> >& ce, const vector<vector<int> >& cf, const set<int>& ve, const set<int>& vf) :
+  explicit ModelAndData(MonotonicParallelSegementationModel<PhraseJointBase_BiDir>& m, const Base& b, const vector<vector<int> >& ce, const vector<vector<int> >& cf, const set<int>& ve, const set<int>& vf) :
      model(m),
      rng(&*prng),
      p0(b),
@@ -139,7 +140,7 @@ struct ModelAndData {
 
   void Sample();
 
-  MonotonicParallelSegementationModel& model;
+  MonotonicParallelSegementationModel<PhraseJointBase_BiDir>& model;
   MT19937* rng;
   const Base& p0;
   prob_t baseprob; // cached value of generating the table table labels from p0
@@ -267,6 +268,10 @@ int main(int argc, char** argv) {
     cerr << argv[0] << "Please use --model1 to specify model 1 parameters\n";
     return 1;
   }
+  if (!conf.count("inverse_model1")) {
+    cerr << argv[0] << "Please use --inverse_model1 to specify inverse model 1 parameters\n";
+    return 1;
+  }
   if (conf.count("random_seed"))
     prng.reset(new MT19937(conf["random_seed"].as<uint32_t>()));
   else
@@ -283,10 +288,12 @@ int main(int argc, char** argv) {
   assert(corpusf.size() == corpuse.size());
 
   Model1 m1(conf["model1"].as<string>());
-  PhraseJointBase lp0(m1, conf["model1_interpolation_weight"].as<double>(), vocabe.size(), vocabf.size());
-  MonotonicParallelSegementationModel m(lp0);
+  Model1 invm1(conf["inverse_model1"].as<string>());
+//  PhraseJointBase lp0(m1, conf["model1_interpolation_weight"].as<double>(), vocabe.size(), vocabf.size());
+  PhraseJointBase_BiDir alp0(m1, invm1, conf["model1_interpolation_weight"].as<double>(), vocabe.size(), vocabf.size());
+  MonotonicParallelSegementationModel<PhraseJointBase_BiDir> m(alp0);
 
-  ModelAndData<PhraseJointBase> posterior(m, lp0, corpuse, corpusf, vocabe, vocabf);
+  ModelAndData<PhraseJointBase_BiDir> posterior(m, alp0, corpuse, corpusf, vocabe, vocabf);
   posterior.Sample();
 
   return 0;

@@ -89,6 +89,62 @@ prob_t PhraseJointBase::p0(const vector<WordID>& vsrc,
   return p;
 }
 
+prob_t PhraseJointBase_BiDir::p0(const vector<WordID>& vsrc,
+                                 const vector<WordID>& vtrg,
+                                 int start_src, int start_trg) const {
+  const int flen = vsrc.size() - start_src;
+  const int elen = vtrg.size() - start_trg;
+  prob_t uniform_src_alignment; uniform_src_alignment.logeq(-log(flen + 1));
+  prob_t uniform_trg_alignment; uniform_trg_alignment.logeq(-log(elen + 1));
+
+  prob_t p1;
+  p1.logeq(log_poisson(flen, 1.0));               // flen                 ~Pois(1)
+                                                 // elen | flen          ~Pois(flen + 0.01)
+  prob_t ptrglen; ptrglen.logeq(log_poisson(elen, flen + 0.01));
+  p1 *= ptrglen;
+  p1 *= kUNIFORM_SOURCE.pow(flen);                // each f in F ~Uniform
+  for (int i = 0; i < elen; ++i) {               // for each position i in E
+    const WordID trg = vtrg[i + start_trg];
+    prob_t tp = prob_t::Zero();
+    for (int j = -1; j < flen; ++j) {
+      const WordID src = j < 0 ? 0 : vsrc[j + start_src];
+      tp += kM1MIXTURE * model1(src, trg);
+      tp += kUNIFORM_MIXTURE * kUNIFORM_TARGET;
+    }
+    tp *= uniform_src_alignment;                 //     draw a_i         ~uniform
+    p1 *= tp;                                     //     draw e_i         ~Model1(f_a_i) / uniform
+  }
+  if (p1.is_0()) {
+    cerr << "Zero! " << vsrc << "\nTRG=" << vtrg << endl;
+    abort();
+  }
+
+  prob_t p2;
+  p2.logeq(log_poisson(elen, 1.0));               // elen                 ~Pois(1)
+                                                 // flen | elen          ~Pois(flen + 0.01)
+  prob_t psrclen; psrclen.logeq(log_poisson(flen, elen + 0.01));
+  p2 *= psrclen;
+  p2 *= kUNIFORM_TARGET.pow(elen);                // each f in F ~Uniform
+  for (int i = 0; i < flen; ++i) {               // for each position i in E
+    const WordID src = vsrc[i + start_src];
+    prob_t tp = prob_t::Zero();
+    for (int j = -1; j < elen; ++j) {
+      const WordID trg = j < 0 ? 0 : vtrg[j + start_trg];
+      tp += kM1MIXTURE * invmodel1(trg, src);
+      tp += kUNIFORM_MIXTURE * kUNIFORM_SOURCE;
+    }
+    tp *= uniform_trg_alignment;                 //     draw a_i         ~uniform
+    p2 *= tp;                                     //     draw e_i         ~Model1(f_a_i) / uniform
+  }
+  if (p2.is_0()) {
+    cerr << "Zero! " << vsrc << "\nTRG=" << vtrg << endl;
+    abort();
+  }
+
+  static const prob_t kHALF(0.5);
+  return (p1 + p2) * kHALF;
+}
+
 JumpBase::JumpBase() : p(200) {
   for (unsigned src_len = 1; src_len < 200; ++src_len) {
     map<int, prob_t>& cpd = p[src_len];
