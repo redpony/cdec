@@ -52,7 +52,7 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("reference,r",po::value<vector<string> >(), "[REQD] Reference translation(s) (tokenized text file)")
         ("mt_metric,m",po::value<string>()->default_value("ibm_bleu"), "Scoring metric (ibm_bleu, nist_bleu, koehn_bleu, ter, combi)")
         ("max_step_size,C", po::value<double>()->default_value(0.01), "regularization strength (C)")
-        ("mt_metric_scale,s", po::value<double>()->default_value(1.0), "Amount to scale MT loss function by")
+        //("mt_metric_scale,s", po::value<double>()->default_value(1.0), "Amount to scale MT loss function by")
         ("k_best_size,k", po::value<int>()->default_value(250), "Size of hypothesis list to search for oracles")
         ("random_seed,S", po::value<uint32_t>(), "Random seed (if not specified, /dev/random will be used)")
         ("decoder_config,c",po::value<string>(),"Decoder configuration file");
@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
   Weights::InitSparseVector(dense_weights, &lambdas);
 
   const double max_step_size = conf["max_step_size"].as<double>();
-  const double mt_metric_scale = conf["mt_metric_scale"].as<double>();
+  const double mt_metric_scale = 1.0;//conf["mt_metric_scale"].as<double>();
 
   assert(corpus.size() > 0);
   vector<GoodBadOracle> oracles(corpus.size());
