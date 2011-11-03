@@ -96,6 +96,7 @@ void LBFGSOptimizer::OptimizeImpl(const double& obj,
                                   const vector<double>& g,
                                   vector<double>* x) {
   opt_.run(&(*x)[0], obj, &g[0]);
-  cerr << opt_ << endl;
+  if (!opt_.requests_f_and_g()) opt_.run(&(*x)[0], obj, &g[0]);
+  // cerr << opt_ << endl;
 }
 
