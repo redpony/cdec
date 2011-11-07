@@ -33,7 +33,7 @@ Instructions for building
     If you're building on cygwin, their libtool is buggy; this make command
     works for now:
 
-        make LIBS+="-loolm -ldstruct -lmisc -lz -lboost_program_options" \
+        make LIBS+="-lz -lboost_program_options" \
              CFLAGS+="-Wno-sign-compare"
 
  5) Test
