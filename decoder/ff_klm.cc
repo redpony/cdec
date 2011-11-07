@@ -70,7 +70,7 @@ string KLanguageModel<Model>::usage(bool /*param*/,bool /*verbose*/) {
 
 namespace {
 
-struct VMapper : public lm::ngram::EnumerateVocab {
+struct VMapper : public lm::EnumerateVocab {
   VMapper(vector<lm::WordIndex>* out) : out_(out), kLM_UNKNOWN_TOKEN(0) { out_->clear(); }
   void Add(lm::WordIndex index, const StringPiece &str) {
     const WordID cdec_id = TD::Convert(str.as_string());

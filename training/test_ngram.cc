@@ -12,7 +12,7 @@ namespace po = boost::program_options;
 using namespace std;
 
 lm::ngram::ProbingModel* ngram;
-struct GetVocab : public lm::ngram::EnumerateVocab {
+struct GetVocab : public lm::EnumerateVocab {
   GetVocab(vector<lm::WordIndex>* out) : out_(out) { }
   void Add(lm::WordIndex index, const StringPiece &str) {
     out_->push_back(index);
