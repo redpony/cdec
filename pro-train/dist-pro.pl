@@ -41,6 +41,7 @@ my $lines_per_mapper = 30;
 my $iteration = 1;
 my $run_local = 0;
 my $best_weights;
+my $psi = 1;
 my $max_iterations = 30;
 my $decode_nodes = 15;   # number of decode nodes
 my $pmem = "4g";
@@ -62,7 +63,8 @@ my $cpbin=1;
 
 # regularization strength
 my $tune_regularizer = 0;
-my $reg = 1e-2;
+my $reg = 10;
+my $reg_previous = 0;
 
 # Process command-line options
 Getopt::Long::Configure("no_auto_abbrev");
@@ -73,10 +75,12 @@ if (GetOptions(
         "use-fork" => \$usefork,
 	"dry-run" => \$dryrun,
 	"epsilon=s" => \$epsilon,
+	"interpolate-with-weights=f" => \$psi,
 	"help" => \$help,
         "weights=s" => \$initial_weights,
 	"tune-regularizer" => \$tune_regularizer,
 	"reg=f" => \$reg,
+	"reg-previous=f" => \$reg_previous,
 	"local" => \$run_local,
 	"use-make=i" => \$use_make,
 	"max-iterations=i" => \$max_iterations,
@@ -90,6 +94,8 @@ if (GetOptions(
 	print_help();
 	exit;
 }
+
+die "--tune-regularizer is no longer supported with --reg-previous and --reg. Please tune manually.\n" if $tune_regularizer;
 
 if ($usefork) { $usefork = "--use-fork"; } else { $usefork = ''; }
 
@@ -411,7 +417,7 @@ while (1){
 	}
 	print STDERR "\nRUNNING CLASSIFIER (REDUCER)\n";
 	print STDERR unchecked_output("date");
-	$cmd="cat @dev_outs | $REDUCER -w $dir/weights.$im1 -s $reg";
+	$cmd="cat @dev_outs | $REDUCER -w $dir/weights.$im1 -C $reg -y $reg_previous --interpolate_with_weights $psi";
 	if ($tune_regularizer) {
 		$cmd .= " -T -t $dev_test_file";
 	}
@@ -605,11 +611,21 @@ General options:
 
 Regularization options:
 
+	--interpolate-with-weights <F>
+		[deprecated] At each iteration the resulting weights are
+                interpolated with the weights from the previous iteration, with
+                this factor.
+
 	--tune-regularizer
 		Hold out one third of the tuning data and used this to tune the
-		regularization parameter.
+		regularization parameter. [this doesn't work well]
 
 	--reg <F>
+		l2 regularization strength
+
+	--reg-previous <F>
+		l2 penalty for moving away from the weights from the previous
+		iteration.
 
 Help
 }
