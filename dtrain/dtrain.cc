@@ -92,7 +92,6 @@ main(int argc, char** argv)
   bool hstreaming = false;
   if (cfg.count("hstreaming")) {
     hstreaming = true;
-    quiet = true;
   }
   const unsigned k = cfg["k"].as<unsigned>();
   const unsigned N = cfg["N"].as<unsigned>(); 
