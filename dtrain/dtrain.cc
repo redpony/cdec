@@ -231,7 +231,7 @@ main(int argc, char** argv)
     if (stop_after > 0 && stop_after == ii && !next) stop = true;
     
     // produce some pretty output
-    if (!quiet && !verbose) {
+    if (!hstreaming && !quiet && !verbose) {
       if (ii == 0) cerr << " ";
       if ((ii+1) % (DTRAIN_DOTS) == 0) {
         cerr << ".";
