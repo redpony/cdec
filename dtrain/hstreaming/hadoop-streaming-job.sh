@@ -7,8 +7,8 @@ HADOOP_HOME=/usr/lib/hadoop-0.20
 JAR=contrib/streaming/hadoop-streaming-0.20.2-cdh3u1.jar
 HSTREAMING="$HADOOP_HOME/bin/hadoop jar $HADOOP_HOME/$JAR"
 
-IN=in/nc-wmt11-de-en-dyer-cs-joshua.tok.lc.fixamp1.loo.psg.dtrain.1400m
-OUT=out/nc-wmt11-de-en-dyer-cs-joshua.tok.lc.fixamp1.loo.psg.dtrain-weights-1400m-weights
+IN=nc-v6.de-en/nc-v6.de-en-dtrain.1500m
+OUT=nc-v6.de-en/nc-v6.de-en-dtrain.1500m-weights
 
 $HSTREAMING \
     -mapper "dtrain -c dtrain.ini --hstreaming" \
