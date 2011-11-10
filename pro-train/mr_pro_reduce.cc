@@ -23,14 +23,14 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()
         ("weights,w", po::value<string>(), "Weights from previous iteration (used as initialization and interpolation")
-        ("regularize_to_weights,y",po::value<double>()->default_value(0.0), "Differences in learned weights to previous weights are penalized with an l2 penalty with this strength; 0.0 = no effect")
-        ("interpolate_with_weights,p",po::value<double>()->default_value(1.0), "Output weights are p*w + (1-p)*w_prev; 1.0 = no effect")
-        ("memory_buffers,m",po::value<unsigned>()->default_value(200), "Number of memory buffers (LBFGS)")
-        ("regularization_strength,C",po::value<double>()->default_value(1.0), "l2 regularization strength")
+        ("regularization_strength,C",po::value<double>()->default_value(500.0), "l2 regularization strength")
+        ("regularize_to_weights,y",po::value<double>()->default_value(5000.0), "Differences in learned weights to previous weights are penalized with an l2 penalty with this strength; 0.0 = no effect")
+        ("memory_buffers,m",po::value<unsigned>()->default_value(100), "Number of memory buffers (LBFGS)")
         ("min_reg,r",po::value<double>()->default_value(0.01), "When tuning (-T) regularization strength, minimum regularization strenght")
         ("max_reg,R",po::value<double>()->default_value(1e6), "When tuning (-T) regularization strength, maximum regularization strenght")
         ("testset,t",po::value<string>(), "Optional held-out test set")
         ("tune_regularizer,T", "Use the held out test set (-t) to tune the regularization strength")
+        ("interpolate_with_weights,p",po::value<double>()->default_value(1.0), "[deprecated] Output weights are p*w + (1-p)*w_prev; 1.0 = no effect")
         ("help,h", "Help");
   po::options_description dcmdline_options;
   dcmdline_options.add(opts);
