@@ -30,17 +30,13 @@ inline void register_and_convert(const vector<string>& strs, vector<WordID>& ids
     ids.push_back(TD::Convert(*it));
 }
 
-inline string gettmpf(const string path, const string infix, const string suffix="") {
+inline string gettmpf(const string path, const string infix) {
   char fn[1024];
   strcpy(fn, path.c_str());
   strcat(fn, "/");
   strcat(fn, infix.c_str());
   strcat(fn, "-XXXXXX");
   mkstemp(fn);
-  if (suffix != "") { // we will get 2 files
-    strcat(fn, ".");
-    strcat(fn, suffix.c_str());
-  }
   return string(fn);
 }
 
