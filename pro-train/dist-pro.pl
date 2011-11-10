@@ -63,8 +63,8 @@ my $cpbin=1;
 
 # regularization strength
 my $tune_regularizer = 0;
-my $reg = 10;
-my $reg_previous = 0;
+my $reg = 500;
+my $reg_previous = 5000;
 
 # Process command-line options
 Getopt::Long::Configure("no_auto_abbrev");
@@ -547,16 +547,12 @@ sub enseg {
 sub print_help {
 
 	my $executable = check_output("basename $0"); chomp $executable;
-    print << "Help";
+	print << "Help";
 
 Usage: $executable [options] <ini file>
 
 	$executable [options] <ini file>
-		Runs a complete MERT optimization and test set decoding, using
-		the decoder configuration in ini file.  Note that many of the
-		options have default values that are inferred automatically
-		based on certain conventions.  For details, refer to descriptions
-		of the options --decoder, --weights, and --workdir.
+		Runs a complete PRO optimization using the ini file specified.
 
 Required:
 
@@ -576,6 +572,10 @@ General options:
 	--local
 		Run the decoder and optimizer locally with a single thread.
 
+	--use-make <I>
+		Use make -j <I> to run the optimizer commands (useful on large
+		shared-memory machines where qsub is unavailable).
+
 	--decode-nodes <I>
 		Number of decoder processes to run in parallel. [default=15]
 
@@ -584,7 +584,7 @@ General options:
 
 	--max-iterations <M>
 		Maximum number of iterations to run.  If not specified, defaults
-		to 10.
+		to 30.
 
 	--metric <method>
 		Metric to optimize.
@@ -597,10 +597,6 @@ General options:
 	--pmem <N>
 		Amount of physical memory requested for parallel decoding jobs.
 
-	--use-make <I>
-		Use make -j <I> to run the optimizer commands (useful on large
-		shared-memory machines where qsub is unavailable).
-
 	--workdir <dir>
 		Directory for intermediate and output files.  If not specified, the
 		name is derived from the ini filename.  Assuming that the ini
@@ -611,21 +607,22 @@ General options:
 
 Regularization options:
 
-	--interpolate-with-weights <F>
-		[deprecated] At each iteration the resulting weights are
-                interpolated with the weights from the previous iteration, with
-                this factor.
-
-	--tune-regularizer
-		Hold out one third of the tuning data and used this to tune the
-		regularization parameter. [this doesn't work well]
-
 	--reg <F>
-		l2 regularization strength
+		l2 regularization strength [default=500]. The greater this value,
+		the closer to zero the weights will be.
 
 	--reg-previous <F>
 		l2 penalty for moving away from the weights from the previous
-		iteration.
+		iteration. [default=5000]. The greater this value, the closer
+		to the previous iteration's weights the next iteration's weights
+		will be.
+
+Deprecated options:
+
+	--interpolate-with-weights <F>
+		[deprecated] At each iteration the resulting weights are
+		interpolated with the weights from the previous iteration, with
+		this factor. [default=1.0, i.e., no effect]
 
 Help
 }

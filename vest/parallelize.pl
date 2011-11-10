@@ -396,7 +396,7 @@ usage: $name [options]
 
 options:
 
-  --fork
+  --use-fork
     Instead of using qsub, use fork.
 
   -e, --error-dir <dir>
