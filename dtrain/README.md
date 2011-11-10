@@ -45,6 +45,29 @@ Uncertain, known bugs, problems
 * input/grammar caching (strings -> WordIDs)
 * look at forest sampling...
 * devtest loo or not? why loo grammars larger? (sort psgs | uniq -> grammar)
+* lower beam size to be faster?
+* why is <unk> -100 in lm so good?
+* noise helps?
+
+random notes
+------------
+* learning rate tuned with perceptron
+* aer correlation with bleu?
+* dtrain (perc) used for some tests because no optimizer instability
+* http://www.ark.cs.cmu.edu/cdyer/dtrain/
+* repeat as often as max needed by any learner!
+* don't compare lms with diff vocab (stupid backoff paper)
+* what does mira/pro optimize?
+
+features
+--------
+* baseline features (take whatever cdec implements for VEST)
+* rule identifiers (feature name = rule as string)
+* rule discounts (taken from frequency i or frequency interval [i,j] of rule in extraction from parallel training data)
+* target ngrams (from nonterminals in rule rhs)
+* source-target unigrams (from word alignments used in rule extraction, if they are?)
+* lhs, rhs, rule length features
+* all other features depend on syntax annotation. 
 
 FIXME, todo
 -----------
@@ -52,12 +75,26 @@ FIXME, todo
 * mapred count shard sents
 * mapred stats for learning curve (output weights per iter for eval on devtest)
 * 250 forest sampling is real bad, bug?
-* metric reporter of bleu for each shard
+* metric reporter of bleu for each shard (reporters, status?)
+  to draw learning curves for all shards in 1 plot
 * kenlm not portable (i7-2620M vs Intel(R) Xeon(R) CPU E5620 @ 2.40GHz)
 * mapred chaining? hamake?
 * make our sigtest work with cdec
-* l1l2 red
-* tsuroke?
+* l1l2 red (tsuroke)?
+* epsilon stopping criterion
+* normalize weight vector to get proper model scores for forest sampling
+* 108010 with gap(s), and/or fix (same score in diff groups)
+* 108010: combine model score + bleu
+* visualize weight vector
+* *100 runs stats
+* correlation of *_bleu to ibm_bleu
+* ep: open lm, cutoff @1
+* tune regs
+* 3x3 4x4 5x5 .. 10x10 until standard dev ok
+* avg weight vector for dtrain? (mira non-avg)
+* repeat lm choose with mira/pro
+* shuffle training data
+
 
 Data
 ----
@@ -116,6 +153,8 @@ lm?
  lm oov weight pos? -100
  no tuning, -100 prob for unk EXPECT: nounk
  tuning with dtrain EXPECT: open
+ =>
+  lmtest on cs.giza.loo???
 
 [2]
 cs?
@@ -167,3 +206,40 @@ variables to control
 
 [pro]
 
+
+--------
+In PRO, a continually growing list of candidates is maintained for
+each sentence by concatenating k-best lists from each decoding run,
+and the training pairs are sampled from them. This is done to ensure
+that the optimizer doesn't forget about bad places in the parameter
+space that it visited previously (since some training samples will be
+selected from that space). Something like your approach should work
+well though, provided you don't overfit to the sentence pair you're
+looking at in each iteration. So I guess the question is: what are you
+doing in step 2 exactly? A complete optimization? Taking one step? The
+other thing is, do you maintain n-best hypotheses from previous
+iterations?
+
+--------
+good grammar? => ability to overfit
+ berkeley vs giza
+ not LOO
+ NO optimizer instability
+ 20+ iterations
+ approx_bleu-4
+ train on dev => test on dev
+ train on devtest => test on devtest
+ dev on dev better?
+ devtest on devtest better?
+ (train/test on loo? => lower!)
+ (test on others => real bad)
+
+
+loo vs non-loo? => generalization
+ (cs vs non-cs?)
+ giza||berkeley
+ LOO + non LOO
+ 2 fold cross validation 
+ train on dev, test on devtest
+ train on devtest, test on dev
+ as above ^^^
