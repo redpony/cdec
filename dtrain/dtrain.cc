@@ -387,7 +387,10 @@ main(int argc, char** argv)
     
     ++ii;
 
-    if (hstreaming) rep.update_counter("Seen", 1u);
+    if (hstreaming) {
+      rep.update_counter("Seen #"+boost::lexical_cast<string>(t+1), 1u);
+      rep.update_counter("Seen", 1u);
+    }
 
   } // input loop
 
@@ -398,6 +401,7 @@ main(int argc, char** argv)
     if (hstreaming) {
       rep.update_counter("|Input|", ii+1);
       rep.update_gcounter("|Input|", ii+1);
+      rep.update_gcounter("Shards", 1u);
     }
   }
 
@@ -438,10 +442,13 @@ main(int argc, char** argv)
   }
 
   if (hstreaming) {
-    rep.update_counter("Score avg #"+boost::lexical_cast<string>(t+1), score_avg); 
-    rep.update_counter("Model avg #"+boost::lexical_cast<string>(t+1), model_avg); 
+    rep.update_counter("Score 1best avg #"+boost::lexical_cast<string>(t+1), score_avg); 
+    rep.update_counter("Model 1best avg #"+boost::lexical_cast<string>(t+1), model_avg); 
     rep.update_counter("Pairs avg #"+boost::lexical_cast<string>(t+1), npairs/(weight_t)in_sz); 
     rep.update_counter("Updates avg #"+boost::lexical_cast<string>(t+1), nup/(weight_t)in_sz); 
+    unsigned nonz = (unsigned)lambdas.size_nonzero();
+    rep.update_counter("Non zero feature count #"+boost::lexical_cast<string>(t+1), nonz); 
+    rep.update_gcounter("Non zero feature count #"+boost::lexical_cast<string>(t+1), nonz);
   }
 
   pair<score_t,score_t> remember;

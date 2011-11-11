@@ -190,6 +190,14 @@ class FastSparseVector {
     else
       return local_size_;
   }
+  size_t size_nonzero() const {
+    size_t sz = 0;
+    const_iterator it = this->begin();
+    for (; it != this->end(); ++it) {
+      if (nonzero(it->first)) sz++; 
+    }
+    return sz;
+  }
   inline void clear() {
     if (is_remote_) delete data_.rbmap;
     is_remote_ = false;
