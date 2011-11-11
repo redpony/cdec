@@ -19,7 +19,7 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     ("scorer",         po::value<string>()->default_value("stupid_bleu"),     "scoring: bleu, stupid_*, smooth_*, approx_*")
     ("stop_after",     po::value<unsigned>()->default_value(0),                              "stop after X input sentences")
     ("print_weights",  po::value<string>(),                                            "weights to print on each iteration")
-    ("hstreaming",     po::value<bool>()->zero_tokens(),                                     "run in hadoop streaming mode")
+    ("hstreaming",     po::value<string>()->default_value("N/A"),          "run in hadoop streaming mode, arg is a task id")
     ("learning_rate",  po::value<weight_t>()->default_value(0.0005),                                        "learning rate")
     ("gamma",          po::value<weight_t>()->default_value(0),                          "gamma for SVM (0 for perceptron)")
     ("tmp",            po::value<string>()->default_value("/tmp"),                                        "temp dir to use")
@@ -91,11 +91,14 @@ main(int argc, char** argv)
   bool noup = false;
   if (cfg.count("noup")) noup = true;
   bool hstreaming = false;
+  string task_id;
   if (cfg.count("hstreaming")) {
     hstreaming = true;
     quiet = true;
+    task_id = cfg["hstreaming"].as<string>();
     cerr.precision(17);
   }
+  HSReporter rep(task_id);
   bool keep_w = false;
   if (cfg.count("keep_w")) keep_w = true;
 
@@ -384,16 +387,18 @@ main(int argc, char** argv)
     
     ++ii;
 
-    if (hstreaming) cerr << "reporter:counter:dtrain,count,1" << endl;
+    if (hstreaming) rep.update_counter("Seen", 1u);
 
   } // input loop
-
-  if (hstreaming && t == 0) cerr << "reporter:counter:dtrain,|input|," << ii+1 << endl;
 
   if (scorer_str == "approx_bleu") scorer->Reset();
 
   if (t == 0) {
     in_sz = ii; // remember size of input (# lines)
+    if (hstreaming) {
+      rep.update_counter("|Input|", ii+1);
+      rep.update_gcounter("|Input|", ii+1);
+    }
   }
 
 #ifndef DTRAIN_LOCAL
@@ -415,10 +420,6 @@ main(int argc, char** argv)
     score_diff = score_avg;
     model_diff = model_avg;
   }
-  if (hstreaming) {
-    cerr << "reporter:counter:dtrain,score avg it " << t+1 << "," << score_avg << endl;
-    cerr << "reporter:counter:dtrain,model avg it " << t+1 << "," << model_avg << endl;
-  }
 
   if (!quiet) {
     cerr << _p5 << _p << "WEIGHTS" << endl;
@@ -435,6 +436,14 @@ main(int argc, char** argv)
     cerr << "              avg #up: ";
     cerr << nup/(float)in_sz << endl;
   }
+
+  if (hstreaming) {
+    rep.update_counter("Score avg #"+boost::lexical_cast<string>(t+1), score_avg); 
+    rep.update_counter("Model avg #"+boost::lexical_cast<string>(t+1), model_avg); 
+    rep.update_counter("Pairs avg #"+boost::lexical_cast<string>(t+1), npairs/(weight_t)in_sz); 
+    rep.update_counter("Updates avg #"+boost::lexical_cast<string>(t+1), nup/(weight_t)in_sz); 
+  }
+
   pair<score_t,score_t> remember;
   remember.first = score_avg;
   remember.second = model_avg;

@@ -48,6 +48,9 @@ Uncertain, known bugs, problems
 * lower beam size to be faster?
 * why is <unk> -100 in lm so good?
 * noise helps?
+* what does srilm do with -unk but nothing mapped to unk (<unk> unigram)?
+  => this: http://www-speech.sri.com/pipermail/srilm-user/2007q4/000543.html
+* mira translation sampling?
 
 random notes
 ------------
