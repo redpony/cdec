@@ -16,6 +16,7 @@ require "libcall.pl";
 # Default settings
 my $srcFile;
 my $refFiles;
+my $default_jobs = env_default_jobs();
 my $bin_dir = $SCRIPT_DIR;
 die "Bin directory $bin_dir missing/inaccessible" unless -d $bin_dir;
 my $FAST_SCORE="$bin_dir/../mteval/fast_score";
@@ -39,11 +40,10 @@ my $decoder = $cdec;
 my $lines_per_mapper = 400;
 my $rand_directions = 15;
 my $iteration = 1;
-my $run_local = 0;
 my $best_weights;
 my $max_iterations = 15;
 my $optimization_iters = 6;
-my $decode_nodes = 15;   # number of decode nodes
+my $jobs = $default_jobs;   # number of decode nodes
 my $pmem = "9g";
 my $disable_clean = 0;
 my %seen_weights;
@@ -64,28 +64,25 @@ my $maxsim=0;
 my $oraclen=0;
 my $oracleb=20;
 my $bleu_weight=1;
-my $use_make;  # use make to parallelize line search
+my $use_make = 1;  # use make to parallelize line search
 my $dirargs='';
 my $density_prune;
-my $usefork;
+my $useqsub;
 my $pass_suffix = '';
 my $cpbin=1;
 # Process command-line options
 Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
 	"decoder=s" => \$decoderOpt,
-	"decode-nodes=i" => \$decode_nodes,
+	"jobs=i" => \$jobs,
 	"density-prune=f" => \$density_prune,
 	"dont-clean" => \$disable_clean,
 	"pass-suffix=s" => \$pass_suffix,
-        "use-fork" => \$usefork,
 	"dry-run" => \$dryrun,
 	"epsilon=s" => \$epsilon,
 	"help" => \$help,
 	"interval" => \$interval,
-	"iteration=i" => \$iteration,
-	"local" => \$run_local,
-	"use-make=i" => \$use_make,
+	"qsub" => \$useqsub,
 	"max-iterations=i" => \$max_iterations,
 	"normalize=s" => \$normalize,
 	"pmem=s" => \$pmem,
@@ -114,7 +111,16 @@ if (defined $density_prune) {
   die "--density_prune n: n must be greater than 1.0\n" unless $density_prune > 1.0;
 }
 
-if ($usefork) { $usefork = "--use-fork"; } else { $usefork = ''; }
+if ($useqsub) {
+  $use_make = 0;
+  die "LocalEnvironment.pm does not have qsub configuration for this host. Cannot run with --qsub!\n" unless has_qsub();
+}
+
+my @missing_args = ();
+if (!defined $srcFile) { push @missing_args, "--source-file"; }
+if (!defined $refFiles) { push @missing_args, "--ref-files"; }
+if (!defined $initialWeights) { push @missing_args, "--weights"; }
+die "Please specify missing arguments: " . join (', ', @missing_args) . "\n" if (@missing_args);
 
 if ($metric =~ /^(combi|ter)$/i) {
   $lines_per_mapper = 40;
@@ -276,17 +282,11 @@ while (1){
 	my $im1 = $iteration - 1;
 	my $weightsFile="$dir/weights.$im1";
 	my $decoder_cmd = "$decoder -c $iniFile --weights$pass_suffix $weightsFile -O $dir/hgs";
-	if ($density_prune) {
-		$decoder_cmd .= " --density_prune $density_prune";
-	}
 	my $pcmd;
-	if ($run_local) {
-		$pcmd = "cat $srcFile |";
-	} elsif ($use_make) {
-	    # TODO: Throw error when decode_nodes is specified along with use_make
-		$pcmd = "cat $srcFile | $parallelize --use-fork -p $pmem -e $logdir -j $use_make --";
+	if ($use_make) {
+		$pcmd = "cat $srcFile | $parallelize --use-fork -p $pmem -e $logdir -j $jobs --";
 	} else {
-		$pcmd = "cat $srcFile | $parallelize $usefork -p $pmem -e $logdir -j $decode_nodes --";
+		$pcmd = "cat $srcFile | $parallelize -p $pmem -e $logdir -j $jobs --";
 	}
 	my $cmd = "$pcmd $decoder_cmd 2> $decoderLog 1> $runFile";
 	print STDERR "COMMAND:\n$cmd\n";
@@ -365,10 +365,7 @@ while (1){
 			push @mapoutputs, "$dir/splag.$im1/$mapoutput";
 			$o2i{"$dir/splag.$im1/$mapoutput"} = "$dir/splag.$im1/$shard";
 			my $script = "$MAPPER -s $srcFile -l $metric $refs_comma_sep < $dir/splag.$im1/$shard | sort -t \$'\\t' -k 1 > $dir/splag.$im1/$mapoutput";
-			if ($run_local) {
-				print STDERR "COMMAND:\n$script\n";
-				check_bash_call($script);
-			} elsif ($use_make) {
+			if ($use_make) {
 				my $script_file = "$dir/scripts/map.$shard";
 				open F, ">$script_file" or die "Can't write $script_file: $!";
 				print F "#!/bin/bash\n";
@@ -398,12 +395,10 @@ while (1){
 				else {$joblist = $joblist . "\|" . $jobid; }
 			}
 		}
-		if ($run_local) {
-			print STDERR "\nProcessing line search complete.\n";
-		} elsif ($use_make) {
+		if ($use_make) {
 			print $mkfile "$dir/splag.$im1/map.done: @mkouts\n\ttouch $dir/splag.$im1/map.done\n\n";
 			close $mkfile;
-			my $mcmd = "make -j $use_make -f $mkfilename";
+			my $mcmd = "make -j $jobs -f $mkfilename";
 			print STDERR "\nExecuting: $mcmd\n";
 			check_call($mcmd);
 		} else {
@@ -558,7 +553,7 @@ sub write_config {
 	print $fh "EVAL METRIC:      $metric\n";
 	print $fh "START ITERATION:  $iteration\n";
 	print $fh "MAX ITERATIONS:   $max_iterations\n";
-	print $fh "DECODE NODES:     $decode_nodes\n";
+	print $fh "PARALLEL JOBS:    $jobs\n";
 	print $fh "HEAD NODE:        $host\n";
 	print $fh "PMEM (DECODING):  $pmem\n";
 	print $fh "CLEANUP:          $cleanup\n";
@@ -612,36 +607,14 @@ sub print_help {
 Usage: $executable [options] <ini file>
 
 	$executable [options] <ini file>
-		Runs a complete MERT optimization and test set decoding, using
-		the decoder configuration in ini file.  Note that many of the
-		options have default values that are inferred automatically
-		based on certain conventions.  For details, refer to descriptions
-		of the options --decoder, --weights, and --workdir.
+		Runs a complete MERT optimization using the decoder configuration
+                in <ini file>. Required options are --weights, --source-file, and
+		--ref-files.
 
 Options:
 
-	--local
-		Run the decoder and optimizer locally with a single thread.
-
-	--use-make <I>
-		Use make -j <I> to run the optimizer commands (useful on large
-		shared-memory machines where qsub is unavailable).
-
-	--decode-nodes <I>
-		Number of decoder processes to run in parallel. [default=15]
-
-	--decoder <decoder path>
-		Decoder binary to use.
-
-	--density-prune <N>
-		Limit the density of the hypergraph on each iteration to N times
-		the number of edges on the Viterbi path.
-
 	--help
 		Print this message and exit.
-
-	--iteration <I>
-		Starting iteration number.  If not specified, defaults to 1.
 
 	--max-iterations <M>
 		Maximum number of iterations to run.  If not specified, defaults
@@ -650,9 +623,6 @@ Options:
 	--pass-suffix <S>
 		If the decoder is doing multi-pass decoding, the pass suffix "2",
 		"3", etc., is used to control what iteration of weights is set.
-
-	--pmem <N>
-		Amount of physical memory requested for parallel decoding jobs.
 
 	--ref-files <files>
 		Dev set ref files.  This option takes only a single string argument.
@@ -678,6 +648,7 @@ Options:
 		A file specifying initial feature weights.  The format is
 		FeatureName_1 value1
 		FeatureName_2 value2
+		**All and only the weights listed in <file> will be optimized!**
 
 	--workdir <dir>
 		Directory for intermediate and output files.  If not specified, the
@@ -686,6 +657,19 @@ Options:
 		name of the working directory is inferred from the middle part of
 		the filename.  E.g. an ini file named decoder.foo.ini would have
 		a default working directory name foo.
+
+Job control options:
+
+	--jobs <I>
+		Number of decoder processes to run in parallel. [default=$default_jobs]
+
+	--qsub
+		Use qsub to run jobs in parallel (qsub must be configured in
+		environment/LocalEnvironment.pm)
+
+	--pmem <N>
+		Amount of physical memory requested for parallel decoding jobs
+		(used with qsub requests only)
 
 Help
 }
