@@ -10,6 +10,7 @@ use Getopt::Long;
 use IPC::Open2;
 use POSIX ":sys_wait_h";
 my $QSUB_CMD = qsub_args(mert_memory());
+my $default_jobs = env_default_jobs();
 
 my $VEST_DIR="$SCRIPT_DIR/../vest";
 require "$VEST_DIR/libcall.pl";
@@ -39,11 +40,11 @@ die "Can't find $libcall" unless -e $libcall;
 my $decoder = $cdec;
 my $lines_per_mapper = 30;
 my $iteration = 1;
-my $run_local = 0;
 my $best_weights;
 my $psi = 1;
-my $max_iterations = 30;
-my $decode_nodes = 15;   # number of decode nodes
+my $default_max_iter = 30;
+my $max_iterations = $default_max_iter;
+my $jobs = $default_jobs;   # number of decode nodes
 my $pmem = "4g";
 my $disable_clean = 0;
 my %seen_weights;
@@ -55,8 +56,8 @@ my $metric = "ibm_bleu";
 my $dir;
 my $iniFile;
 my $weights;
-my $use_make;  # use make to parallelize
-my $usefork;
+my $use_make = 1;  # use make to parallelize
+my $useqsub = 0;
 my $initial_weights;
 my $pass_suffix = '';
 my $cpbin=1;
@@ -69,10 +70,10 @@ my $reg_previous = 5000;
 # Process command-line options
 Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
-	"decode-nodes=i" => \$decode_nodes,
+	"jobs=i" => \$jobs,
 	"dont-clean" => \$disable_clean,
 	"pass-suffix=s" => \$pass_suffix,
-        "use-fork" => \$usefork,
+        "qsub" => \$useqsub,
 	"dry-run" => \$dryrun,
 	"epsilon=s" => \$epsilon,
 	"interpolate-with-weights=f" => \$psi,
@@ -81,7 +82,6 @@ if (GetOptions(
 	"tune-regularizer" => \$tune_regularizer,
 	"reg=f" => \$reg,
 	"reg-previous=f" => \$reg_previous,
-	"local" => \$run_local,
 	"use-make=i" => \$use_make,
 	"max-iterations=i" => \$max_iterations,
 	"pmem=s" => \$pmem,
@@ -97,7 +97,16 @@ if (GetOptions(
 
 die "--tune-regularizer is no longer supported with --reg-previous and --reg. Please tune manually.\n" if $tune_regularizer;
 
-if ($usefork) { $usefork = "--use-fork"; } else { $usefork = ''; }
+if ($useqsub) {
+  $use_make = 0;
+  die "LocalEnvironment.pm does not have qsub configuration for this host. Cannot run with --qsub!\n" unless has_qsub();
+}
+
+my @missing_args = ();
+if (!defined $srcFile) { push @missing_args, "--source-file"; }
+if (!defined $refFiles) { push @missing_args, "--ref-files"; }
+if (!defined $initial_weights) { push @missing_args, "--weights"; }
+die "Please specify missing arguments: " . join (', ', @missing_args) . "\n" if (@missing_args);
 
 if ($metric =~ /^(combi|ter)$/i) {
   $lines_per_mapper = 5;
@@ -254,13 +263,10 @@ while (1){
         `rm -f $dir/hgs/*.gz`;
 	my $decoder_cmd = "$decoder -c $iniFile --weights$pass_suffix $weightsFile -O $dir/hgs";
 	my $pcmd;
-	if ($run_local) {
-		$pcmd = "cat $srcFile |";
-	} elsif ($use_make) {
-	    # TODO: Throw error when decode_nodes is specified along with use_make
-		$pcmd = "cat $srcFile | $parallelize --use-fork -p $pmem -e $logdir -j $use_make --";
+	if ($use_make) {
+		$pcmd = "cat $srcFile | $parallelize --use-fork -p $pmem -e $logdir -j $jobs --";
 	} else {
-		$pcmd = "cat $srcFile | $parallelize $usefork -p $pmem -e $logdir -j $decode_nodes --";
+		$pcmd = "cat $srcFile | $parallelize -p $pmem -e $logdir -j $jobs --";
 	}
 	my $cmd = "$pcmd $decoder_cmd 2> $decoderLog 1> $runFile";
 	print STDERR "COMMAND:\n$cmd\n";
@@ -333,10 +339,7 @@ while (1){
 		push @mapoutputs, "$dir/splag.$im1/$mapoutput";
 		$o2i{"$dir/splag.$im1/$mapoutput"} = "$dir/splag.$im1/$shard";
 		my $script = "$MAPPER -s $srcFile -l $metric $refs_comma_sep -w $inweights -K $dir/kbest < $dir/splag.$im1/$shard > $dir/splag.$im1/$mapoutput";
-		if ($run_local) {
-			print STDERR "COMMAND:\n$script\n";
-			check_bash_call($script);
-		} elsif ($use_make) {
+		if ($use_make) {
 			my $script_file = "$dir/scripts/map.$shard";
 			open F, ">$script_file" or die "Can't write $script_file: $!";
 			print F "#!/bin/bash\n";
@@ -382,12 +385,10 @@ while (1){
 	} else {
 		@dev_outs = @mapoutputs;
 	}
-	if ($run_local) {
-		print STDERR "\nCompleted extraction of training exemplars.\n";
-	} elsif ($use_make) {
+	if ($use_make) {
 		print $mkfile "$dir/splag.$im1/map.done: @mkouts\n\ttouch $dir/splag.$im1/map.done\n\n";
 		close $mkfile;
-		my $mcmd = "make -j $use_make -f $mkfilename";
+		my $mcmd = "make -j $jobs -f $mkfilename";
 		print STDERR "\nExecuting: $mcmd\n";
 		check_call($mcmd);
 	} else {
@@ -498,7 +499,7 @@ sub write_config {
 	print $fh "REFS (DEV):       $refFiles\n";
 	print $fh "EVAL METRIC:      $metric\n";
 	print $fh "MAX ITERATIONS:   $max_iterations\n";
-	print $fh "DECODE NODES:     $decode_nodes\n";
+	print $fh "JOBS:             $jobs\n";
 	print $fh "HEAD NODE:        $host\n";
 	print $fh "PMEM (DECODING):  $pmem\n";
 	print $fh "CLEANUP:          $cleanup\n";
@@ -569,22 +570,12 @@ Required:
 
 General options:
 
-	--local
-		Run the decoder and optimizer locally with a single thread.
-
-	--use-make <I>
-		Use make -j <I> to run the optimizer commands (useful on large
-		shared-memory machines where qsub is unavailable).
-
-	--decode-nodes <I>
-		Number of decoder processes to run in parallel. [default=15]
-
 	--help
 		Print this message and exit.
 
 	--max-iterations <M>
 		Maximum number of iterations to run.  If not specified, defaults
-		to 30.
+		to $default_max_iter.
 
 	--metric <method>
 		Metric to optimize.
@@ -593,9 +584,6 @@ General options:
 	--pass-suffix <S>
 		If the decoder is doing multi-pass decoding, the pass suffix "2",
 		"3", etc., is used to control what iteration of weights is set.
-
-	--pmem <N>
-		Amount of physical memory requested for parallel decoding jobs.
 
 	--workdir <dir>
 		Directory for intermediate and output files.  If not specified, the
@@ -616,6 +604,19 @@ Regularization options:
 		iteration. [default=5000]. The greater this value, the closer
 		to the previous iteration's weights the next iteration's weights
 		will be.
+
+Job control options:
+
+	--jobs <I>
+		Number of decoder processes to run in parallel. [default=$default_jobs]
+
+	--qsub
+		Use qsub to run jobs in parallel (qsub must be configured in
+		environment/LocalEnvironment.pm)
+
+	--pmem <N>
+		Amount of physical memory requested for parallel decoding jobs
+		(used with qsub requests only)
 
 Deprecated options:
 
