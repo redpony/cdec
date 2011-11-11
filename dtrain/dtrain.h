@@ -52,6 +52,25 @@ inline void split_in(string& s, vector<string>& parts)
   s.erase(0, f+1);
 }
 
+struct HSReporter
+{
+  string task_id_;
+
+  HSReporter(string task_id) : task_id_(task_id) {}
+  inline void update_counter(string name, weight_t amount) {
+    cerr << "reporter:counter:" << task_id_ << "," << name << "," << amount << endl;
+  }
+  inline void update_counter(string name, unsigned amount) {
+    cerr << "reporter:counter:" << task_id_ << "," << name << "," << amount << endl;
+  }
+  inline void update_gcounter(string name, weight_t amount) {
+    cerr << "reporter:counter:Global," << name << "," << amount << endl;
+  }
+  inline void update_gcounter(string name, unsigned amount) {
+    cerr << "reporter:counter:Global," << name << "," << amount << endl;
+  }
+};
+
 inline ostream& _np(ostream& out) { return out << resetiosflags(ios::showpos); }
 inline ostream& _p(ostream& out)  { return out << setiosflags(ios::showpos); }
 inline ostream& _p2(ostream& out) { return out << setprecision(2); }
