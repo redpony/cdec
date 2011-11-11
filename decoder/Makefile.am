@@ -51,6 +51,7 @@ libcdec_a_SOURCES = \
   hg_io.cc \
   decoder.cc \
   hg_intersect.cc \
+  hg_sampler.cc \
   factored_lexicon_helper.cc \
   viterbi.cc \
   lattice.cc \
