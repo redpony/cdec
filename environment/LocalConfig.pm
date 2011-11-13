@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use base 'Exporter';
-our @EXPORT = qw( qsub_args mert_memory environment_name );
+our @EXPORT = qw( qsub_args mert_memory environment_name env_default_jobs has_qsub );
 
 use Net::Domain qw(hostname hostfqdn hostdomain domainname);
 
@@ -14,43 +14,58 @@ my $host = domainname;
 my $CCONFIG = {
   'StarCluster' => {
     'HOST_REGEXP' => qr/compute-\d+\.internal$/,
+    'JobControl'  => 'qsub',
     'QSubMemFlag' => '-l mem',
+    'DefaultJobs' => 20,
   },
   'LTICluster' => {
     'HOST_REGEXP' => qr/^cluster\d+\.lti\.cs\.cmu\.edu$/,
+    'JobControl'  => 'qsub',
     'QSubMemFlag' => '-l h_vmem=',
     'QSubExtraFlags' => '-l walltime=0:45:00',
+    'DefaultJobs' => 15,
     #'QSubQueue' => '-q long',
   },
   'UMIACS' => {
     'HOST_REGEXP' => qr/^d.*\.umiacs\.umd\.edu$/,
+    'JobControl'  => 'qsub',
     'QSubMemFlag' => '-l pmem=',
     'QSubQueue' => '-q batch',
     'QSubExtraFlags' => '-l walltime=144:00:00',
+    'DefaultJobs' => 15,
   },
   'CLSP' => {
     'HOST_REGEXP' => qr/\.clsp\.jhu\.edu$/,
+    'JobControl'  => 'qsub',
     'QSubMemFlag' => '-l mem_free=',
     'MERTMem' => '9G',
+    'DefaultJobs' => 15,
   },
   'Valhalla' => {
     'HOST_REGEXP' => qr/^(thor|tyr)\.inf\.ed\.ac\.uk$/,
+    'JobControl'  => 'fork',
+    'DefaultJobs' => 8,
   },
   'Blacklight' => {
     'HOST_REGEXP' => qr/^(tg-login1.blacklight.psc.teragrid.org|blacklight.psc.edu|bl1.psc.teragrid.org|bl0.psc.teragrid.org)$/,
-    'QSubMemFlag' => '-l pmem=',
+    'JobControl'  => 'fork',
+    'DefaultJobs' => 32,
   },
   'Barrow/Chicago' => {
     'HOST_REGEXP' => qr/^(barrow|chicago).lti.cs.cmu.edu$/,
-    'QSubMemFlag' => '-l pmem=',
+    'JobControl'  => 'fork',
+    'DefaultJobs' => 8,
   },
   'OxfordDeathSnakes' => {
     'HOST_REGEXP' => qr/^(taipan|tiger).cs.ox.ac.uk$/,
-    'QSubMemFlag' => '-l pmem=',
+    'JobControl'  => 'fork',
+    'DefaultJobs' => 12,
   },
-  'LOCALx' => {
-    'HOST_REGEXP' => qr/local\./,
+  'LOCAL' => {  # LOCAL must be last in the list!!!
+    'HOST_REGEXP' => qr//,
     'QSubMemFlag' => ' ',
+    'JobControl'  => 'fork',
+    'DefaultJobs' => 2,
   },
   'LOCAL' => {
     'HOST_REGEXP' => qr/coltrane/,
@@ -58,7 +73,7 @@ my $CCONFIG = {
   },
 };
 
-our $senvironment_name;
+our $senvironment_name = 'LOCAL';
 for my $config_key (keys %$CCONFIG) {
   my $re = $CCONFIG->{$config_key}->{'HOST_REGEXP'};
   die "Can't find HOST_REGEXP for $config_key" unless $re;
@@ -67,13 +82,21 @@ for my $config_key (keys %$CCONFIG) {
   }
 }
 
-die "NO ENVIRONMENT INFO FOR HOST: $host\nPLEASE EDIT LocalConfig.pm\n" unless $senvironment_name;
-
 our %CONFIG = %{$CCONFIG->{$senvironment_name}};
-print STDERR "**Environment: $senvironment_name\n";
+print STDERR "**Environment: $senvironment_name";
+print STDERR " (has qsub)" if has_qsub();
+print STDERR "\n";
+
+sub has_qsub {
+  return ($CONFIG{'JobControl'} eq 'qsub');
+}
 
 sub environment_name {
   return $senvironment_name;
+}
+
+sub env_default_jobs {
+  return 1 * $CONFIG{'DefaultJobs'};
 }
 
 sub qsub_args {
