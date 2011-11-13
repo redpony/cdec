@@ -374,7 +374,7 @@ main(int argc, char** argv)
             lambdas.plus_eq_v_times_s(diff_vec, eta);
             rank_errors++;
           }
-          if (margin < 1) margin_violations++;
+          if (it->first.model - it->second.model < 1) margin_violations++;
         } else {
           // SVM
           score_t margin = it->first.model - it->second.model;
