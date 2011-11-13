@@ -15,10 +15,10 @@
 
 namespace lm {
 class ProbBackoff;
+class EnumerateVocab;
 
 namespace ngram {
 class Config;
-class EnumerateVocab;
 
 namespace detail {
 uint64_t HashForVocab(const char *str, std::size_t len);
@@ -66,7 +66,6 @@ class SortedVocabulary : public base::Vocabulary {
     static size_t Size(std::size_t entries, const Config &config);
 
     // Vocab words are [0, Bound())  Only valid after FinishedLoading/LoadedBinary.  
-    // While this number is correct, ProbingVocabulary::Bound might not be correct in some cases.  
     WordIndex Bound() const { return bound_; }
 
     // Everything else is for populating.  I'm too lazy to hide and friend these, but you'll only get a const reference anyway.

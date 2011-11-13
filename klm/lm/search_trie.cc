@@ -358,6 +358,7 @@ template <class Doing> class BlankManager {
         // Mark that the probability is a blank so it shouldn't be used as the basis for a later n-gram.  
         basis_[blank - 1] = kBadProb;
       }
+      *pre = *cur;
       been_length_ = length;
     }
 
@@ -493,7 +494,7 @@ template <class Quant, class Bhiksha> void BuildTrie(const std::string &file_pre
   util::scoped_FILE unigram_file;
   {
     std::string name(file_prefix + "unigrams");
-    unigram_file.reset(OpenOrThrow(name.c_str(), "r"));
+    unigram_file.reset(OpenOrThrow(name.c_str(), "r+"));
     util::RemoveOrThrow(name.c_str());
   }
   sri.ObtainBackoffs(counts.size(), unigram_file.get(), inputs);
