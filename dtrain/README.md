@@ -34,6 +34,7 @@ Ideas
 * *REDUCE* training set (50k?)
 * *SYNTAX* features (CD)
 * distribute *DEV* set to all nodes, avg
+* *PARAPHRASES* for better approx BLEU?
 
 
 Uncertain, known bugs, problems
@@ -47,10 +48,11 @@ Uncertain, known bugs, problems
 * devtest loo or not? why loo grammars larger? (sort psgs | uniq -> grammar)
 * lower beam size to be faster?
 * why is <unk> -100 in lm so good?
-* noise helps?
+* noise helps for discriminative training?
 * what does srilm do with -unk but nothing mapped to unk (<unk> unigram)?
   => this: http://www-speech.sri.com/pipermail/srilm-user/2007q4/000543.html
-* mira translation sampling?
+* mira translation sampling? => done
+* does AER correlate with BLEU?
 
 random notes
 ------------
@@ -61,16 +63,25 @@ random notes
 * repeat as often as max needed by any learner!
 * don't compare lms with diff vocab (stupid backoff paper)
 * what does mira/pro optimize?
+* early stopping
+* 10-20k rules per sent normal
+* shard size 500 -> 2k
+* giza vs. berkeleyaligner: giza less noise?
+* compound splitting -> more rules?
+* loo => ref can't be reached? (jackknifing)
+* prune singletons -> less noise? (do I do this?)
+* random sample: take 100 at random
 
 features
 --------
 * baseline features (take whatever cdec implements for VEST)
 * rule identifiers (feature name = rule as string)
-* rule discounts (taken from frequency i or frequency interval [i,j] of rule in extraction from parallel training data)
-* target ngrams (from nonterminals in rule rhs)
+* rule discounts (taken from frequency i or frequency interval [i,j] of rule in extraction from parallel training data) bins
+* target ngrams (from nonterminals in rule rhs), with gaps?
 * source-target unigrams (from word alignments used in rule extraction, if they are?)
 * lhs, rhs, rule length features
 * all other features depend on syntax annotation. 
+* word alignment
 
 FIXME, todo
 -----------
@@ -93,10 +104,15 @@ FIXME, todo
 * correlation of *_bleu to ibm_bleu
 * ep: open lm, cutoff @1
 * tune regs
-* 3x3 4x4 5x5 .. 10x10 until standard dev ok
+* 3x3 4x4 5x5 .. 10x10 until standard dev ok, moving avg
 * avg weight vector for dtrain? (mira non-avg)
 * repeat lm choose with mira/pro
 * shuffle training data
+* learning rate dynamic (Duh? Tsuroka?)
+* divide updates by ?
+* mira: 5/10/15, pro: (5)/10/20/30 (on devtest!)
+* sample pairs like in pro
+* mira forest sampling
 
 
 Data
@@ -146,6 +162,8 @@ which word alignment?
  measure ibm bleu on exact same sents
  ep -> berkeleyaligner ??? (mb per sent, rules per sent)
 
+*100 -> triples, quadruples
+
 [1]
 lm?
  3-4-5
@@ -193,6 +211,16 @@ features to try
  RuleShape -> relative orientation of X's and terminals
  SpanFeatures -> http://www.cs.cmu.edu/~cdyer/wmt11-sysdesc.pdf
  ArityPenalty -> Arity=0 Arity=1 and Arity=2
+
+---
+shard size: 500-2k
+iterations, re-iterate (shuffle w): 10
+gamma, eta
+SVM, perceptron
+reducer: avg (feats/shard), l1l2, active on all shards
+sentence sampling: forest
+pair sampling: all, rand, 108010 (sort), PRO
+out of domain test?
 
 ---
 variables to control
