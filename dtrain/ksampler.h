@@ -1,7 +1,7 @@
 #ifndef _DTRAIN_KSAMPLER_H_
 #define _DTRAIN_KSAMPLER_H_
 
-#include "hgsampler.h"
+#include "hg_sampler.h" // cdec
 #include "kbestget.h"
 #include "score.h"
 
@@ -22,12 +22,12 @@ struct KSampler : public HypSampler
   virtual void
   NotifyTranslationForest(const SentenceMetadata& smeta, Hypergraph* hg)
   {
-    Sample(*hg);
+    ScoredSamples(*hg);
   }
 
   vector<ScoredHyp>* GetSamples() { return &s_; }
 
-  void Sample(const Hypergraph& forest) {
+  void ScoredSamples(const Hypergraph& forest) {
     s_.clear();
     std::vector<HypergraphSampler::Hypothesis> samples;
     HypergraphSampler::sample_hypotheses(forest, k_, prng_, &samples);

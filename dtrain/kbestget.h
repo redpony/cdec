@@ -78,13 +78,13 @@ struct KBestGetter : public HypSampler
   virtual void
   NotifyTranslationForest(const SentenceMetadata& smeta, Hypergraph* hg)
   {
-    KBest(*hg);
+    KBestScored(*hg);
   }
 
   vector<ScoredHyp>* GetSamples() { return &s_; }
 
   void
-  KBest(const Hypergraph& forest)
+  KBestScored(const Hypergraph& forest)
   {
     if (filter_type_ == "unique") {
       KBestUnique(forest);
