@@ -293,6 +293,7 @@ main(int argc, char** argv)
     if (t == 0) {
       // handling input
       split_in(in, in_split); 
+      if (hstreaming && ii == 0) cerr << "reporter:counter:" << task_id << ",First ID," << in_split[0] << endl;
       // getting reference
       vector<string> ref_tok;
       boost::split(ref_tok, in_split[2], boost::is_any_of(" "));
