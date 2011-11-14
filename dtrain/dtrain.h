@@ -85,5 +85,11 @@ inline void printWordIDVec(vector<WordID>& v)
   }
 }
 
+template<typename T>
+inline T sign(T z) {
+  if (z == 0) return 0;
+  return z < 0 ? -1 : +1;
+}
+
 #endif
 
