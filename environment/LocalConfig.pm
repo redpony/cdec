@@ -66,11 +66,7 @@ my $CCONFIG = {
     'QSubMemFlag' => ' ',
     'JobControl'  => 'fork',
     'DefaultJobs' => 2,
-  },
-  'LOCAL' => {
-    'HOST_REGEXP' => qr/coltrane/,
-    'QSubMemFlag' => ' ',
-  },
+  }
 };
 
 our $senvironment_name = 'LOCAL';
