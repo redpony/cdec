@@ -57,14 +57,9 @@ struct HSReporter
   string task_id_;
 
   HSReporter(string task_id) : task_id_(task_id) {}
-  inline void update_counter(string name, weight_t amount) {
-    cerr << "reporter:counter:" << task_id_ << "," << name << "," << amount << endl;
-  }
+
   inline void update_counter(string name, unsigned amount) {
     cerr << "reporter:counter:" << task_id_ << "," << name << "," << amount << endl;
-  }
-  inline void update_gcounter(string name, weight_t amount) {
-    cerr << "reporter:counter:Global," << name << "," << amount << endl;
   }
   inline void update_gcounter(string name, unsigned amount) {
     cerr << "reporter:counter:Global," << name << "," << amount << endl;

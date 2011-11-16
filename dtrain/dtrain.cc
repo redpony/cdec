@@ -456,8 +456,8 @@ main(int argc, char** argv)
   if (t == 0) {
     in_sz = ii; // remember size of input (# lines)
     if (hstreaming) {
-      rep.update_counter("|Input|", ii+1);
-      rep.update_gcounter("|Input|", ii+1);
+      rep.update_counter("|Input|", ii);
+      rep.update_gcounter("|Input|", ii);
       rep.update_gcounter("Shards", 1u);
     }
   }
@@ -482,7 +482,7 @@ main(int argc, char** argv)
     model_diff = model_avg;
   }
 
-  if (!quiet) {
+  if (true) {
     cerr << _p5 << _p << "WEIGHTS" << endl;
     for (vector<string>::iterator it = print_weights.begin(); it != print_weights.end(); it++) {
       cerr << setw(18) << *it << " = " << lambdas.get(FD::Convert(*it)) << endl;
@@ -501,11 +501,11 @@ main(int argc, char** argv)
   }
 
   if (hstreaming) {
-    rep.update_counter("Score 1best avg #"+boost::lexical_cast<string>(t+1), score_avg); 
-    rep.update_counter("Model 1best avg #"+boost::lexical_cast<string>(t+1), model_avg); 
-    rep.update_counter("Pairs avg #"+boost::lexical_cast<string>(t+1), npairs/(weight_t)in_sz); 
-    rep.update_counter("Rank errors avg #"+boost::lexical_cast<string>(t+1), rank_errors/(weight_t)in_sz); 
-    rep.update_counter("Margin violations avg #"+boost::lexical_cast<string>(t+1), margin_violations/(weight_t)in_sz); 
+    rep.update_counter("Score 1best avg #"+boost::lexical_cast<string>(t+1), (unsigned)(score_avg*100000)); 
+    rep.update_counter("Model 1best avg #"+boost::lexical_cast<string>(t+1), (unsigned)(model_avg*100000)); 
+    rep.update_counter("Pairs avg #"+boost::lexical_cast<string>(t+1), (unsigned)((npairs/(weight_t)in_sz)*100000)); 
+    rep.update_counter("Rank errors avg #"+boost::lexical_cast<string>(t+1), (unsigned)((rank_errors/(weight_t)in_sz)*100000)); 
+    rep.update_counter("Margin violations avg #"+boost::lexical_cast<string>(t+1), (unsigned)((margin_violations/(weight_t)in_sz)*100000)); 
     unsigned nonz = (unsigned)lambdas.size_nonzero();
     rep.update_counter("Non zero feature count #"+boost::lexical_cast<string>(t+1), nonz); 
     rep.update_gcounter("Non zero feature count #"+boost::lexical_cast<string>(t+1), nonz);
