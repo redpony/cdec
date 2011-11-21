@@ -1,8 +1,6 @@
 #ifndef _DTRAIN_COMMON_H_
 #define _DTRAIN_COMMON_H_
 
-
-
 #include <iomanip>
 #include <climits>
 #include <string.h>
@@ -19,7 +17,7 @@
 
 #define DTRAIN_DOTS 100 // when to display a '.'
 #define DTRAIN_GRAMMAR_DELIM "########EOS########"
-#define _SCALE 100000
+#define DTRAIN_SCALE 100000
 
 using namespace std;
 using namespace dtrain;

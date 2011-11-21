@@ -86,7 +86,7 @@ struct KBestGetter : public HypSampler
   void
   KBestScored(const Hypergraph& forest)
   {
-    if (filter_type_ == "unique") {
+    if (filter_type_ == "uniq") {
       KBestUnique(forest);
     } else if (filter_type_ == "no") {
       KBestNoFilter(forest);
