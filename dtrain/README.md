@@ -23,67 +23,60 @@ Ideas
 -----
 * *MULTIPARTITE* ranking (1 vs rest, cluster model/score)
 * *REMEMBER* sampled translations (merge kbest lists)
-* *SELECT* iteration with highest real BLEU on devtest?
-* *GENERATED* data? (perfect translation always in kbest)
+* *SELECT* iteration with highest _real_ BLEU on devtest?
+* *SYNTHETIC* data? (perfect translation always in kbest)
 * *CACHE* ngrams for scoring
-* hadoop *PIPES* imlementation
+* hadoop *PIPES* implementation
 * *ITERATION* variants (shuffle resulting weights, re-iterate)
-* *MORE THAN ONE* reference for BLEU?
-* *RANDOM RESTARTS* or directions
+* *MORE THAN ONE* reference for BLEU, paraphrases?
+* *RANDOM RESTARTS* or random directions
 * use separate *TEST SET* for each shard
 * *REDUCE* training set (50k?)
 * *SYNTAX* features (CD)
 * distribute *DEV* set to all nodes, avg
-* *PARAPHRASES* for better approx BLEU?
 
-
-Uncertain, known bugs, problems
+Notes
 -------------------------------
 * cdec kbest vs 1best (no -k param), rescoring (ref?)? => ok(?)
-* no sparse vector in decoder => ok/fixed
-* PhraseModel features, mapping?
+* no sparse vector in decoder => fixed/'ok'
+* PhraseModel features 0..99, mapping?
 * flex scanner jams on bad input, we could skip that
-* input/grammar caching (strings -> WordIDs)
-* look at forest sampling...
-* devtest loo or not? why loo grammars larger? (sort psgs | uniq -> grammar)
+* input/grammar caching (vector<string> -> vector<WordID>)
+* why loo grammars larger? are they? (sort psgs | uniq -> grammar)
 * lower beam size to be faster?
 * why is <unk> -100 in lm so good?
 * noise helps for discriminative training?
 * what does srilm do with -unk but nothing mapped to unk (<unk> unigram)?
   => this: http://www-speech.sri.com/pipermail/srilm-user/2007q4/000543.html
-* mira translation sampling? => done
-* does AER correlate with BLEU?
-
-random notes
-------------
-* learning rate tuned with perceptron
-* aer correlation with bleu?
-* dtrain (perc) used for some tests because no optimizer instability
+* does AER correlate with BLEU? paper?
+* learning rate tuned with perceptron?
+* dtrain (perceptron) used for some tests because no optimizer instability
 * http://www.ark.cs.cmu.edu/cdyer/dtrain/
 * repeat as often as max needed by any learner!
-* don't compare lms with diff vocab (stupid backoff paper)
-* what does mira/pro optimize?
-* early stopping
-* 10-20k rules per sent normal
-* shard size 500 -> 2k
-* giza vs. berkeleyaligner: giza less noise?
+* don't compare lms (perplex.) with diff vocab (see stupid backoff paper)
+* what does mira/pro optimize exactly?
+* early stopping (epsilon, no change in kbest list)
+* 10-20k rules per sent are normal
+* giza vs. berkeleyaligner: giza more/less noise?
 * compound splitting -> more rules?
-* loo => ref can't be reached? (jackknifing)
+* loo (jackknifing) => ref can't be reached?
 * prune singletons -> less noise? (do I do this?)
-* random sample: take 100 at random
+* random sample: take fixed X at random
+* scale of features/weights?
 
-features
+Features
 --------
 * baseline features (take whatever cdec implements for VEST)
 * rule identifiers (feature name = rule as string)
 * rule discounts (taken from frequency i or frequency interval [i,j] of rule in extraction from parallel training data) bins
+  => from PRO
 * target ngrams (from nonterminals in rule rhs), with gaps?
 * source-target unigrams (from word alignments used in rule extraction, if they are?)
 * lhs, rhs, rule length features
 * all other features depend on syntax annotation. 
 * word alignment
 
-FIXME, todo
+Todo
 -----------
 * merge dtrain part-X files, for better blocks (how to do this with 4.5tb ep)
 * mapred count shard sents
@@ -113,7 +106,6 @@ FIXME, todo
 * mira: 5/10/15, pro: (5)/10/20/30 (on devtest!)
 * sample pairs like in pro
 * mira forest sampling
-
 
 Data
 ----
@@ -274,3 +266,72 @@ loo vs non-loo? => generalization
  train on dev, test on devtest
  train on devtest, test on dev
  as above ^^^
+
+
+ ---
+
+as PRO
+ - UPDATES:       perceptron
+ - LEARNING RATE: 0.0005
+ - GAMMA:         -
+ - #ITERATIONS:   30
+ - SCORER:        stupid_bleu@4
+ - K:             100, 1500?(top X pairs)
+ - SAMPLE:        kbest uniq, kbest no
+ - PAIR SAMPLING: all, PRO?TODO
+ - SELECT:        best
+ - FEATURES:      baseline, RuleShape+SpanFeatures
+ ---
+ - Note: no weight interpolation
+         no early stopping based on kbest lists (epsilon?TODO)
+
+dtrain tune reg 
+ - updates: SVM
+ - pair sampling important!
+ - learning_rate= 100 50 10 5 1 0.5 0.1 0.05 0.01 0.005 0.001 0.0005 0.0001 0.00005 0.00001 0.000005 0.000001 0.0000005 0.0000001 0.0000000001
+   
+ - gamma=
+   
+ - scorer: stupid_bleu 3
+ - test weights: last
+ -
+ -
+ - test: devtest
+
+
+---
+weights visualization (blocks, color coded)
+zig zag!?
+repeat all basic exps with training set
+merge?
+
+
+
+
+--sample_from
+--k
+--filter
+--pair_sampling
+--N
+--epochs
+--scorer
+--learning_rate
+--gamma
+--select_weights
+[--unit_weight_vector]
+[--l1_reg]
+[--l1_reg_strength]
+
+---------
+corr best = really best?
+108010gaps
+
+coltrane:  9
+gillespie: 9
+staley:    2
+io:        6
+ioh:       4
+         slots
+
+
+when does overfitting begin?

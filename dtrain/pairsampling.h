@@ -6,7 +6,7 @@ namespace dtrain
 
 
 inline void
-sample_all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training)
+all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training)
 {
   for (unsigned i = 0; i < s->size()-1; i++) {
     for (unsigned j = i+1; j < s->size(); j++) {
@@ -19,7 +19,7 @@ sample_all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& train
 }
 
 inline void
-sample_rand_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training,
+rand_pairs_5050(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training,
                   MT19937* prng)
 {
   for (unsigned i = 0; i < s->size()-1; i++) {
@@ -35,15 +35,14 @@ sample_rand_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& trai
 }
 
 bool
-sort_samples_by_score(ScoredHyp a, ScoredHyp b)
+_multpart_cmp_hyp_by_score(ScoredHyp a, ScoredHyp b)
 {
   return a.score < b.score;
 }
-
 inline void
-sample108010(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training)
+multpart108010(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training)
 {
-  sort(s->begin(), s->end(), sort_samples_by_score);
+  sort(s->begin(), s->end(), _multpart_cmp_hyp_by_score);
   pair<ScoredHyp,ScoredHyp>  p;
   unsigned sz = s->size();
   unsigned slice = 10;
@@ -63,6 +62,50 @@ sample108010(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training)
       if(p.first.rank < p.second.rank) training.push_back(p);
     }
   }
+}
+
+
+inline bool
+_PRO_accept_pair(pair<ScoredHyp,ScoredHyp> &p)
+{
+  if (fabs(p.first.score - p.second.score) < 0.05) return false;
+  return true;
+}
+bool
+_PRO_cmp_pair_by_diff(pair<ScoredHyp,ScoredHyp> a, pair<ScoredHyp,ScoredHyp> b)
+{
+  // descending order
+  return (fabs(a.first.score - a.second.score)) > (fabs(b.first.score - b.second.score));
+}
+inline void
+PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training) // ugly
+{
+  unsigned max_count = 5000, count = 0;
+  bool b = false;
+  //unsigned max_pairs = (s->size()*(s->size()-1))/2;
+  vector<pair<unsigned,unsigned> > taken;
+  for (unsigned i = 0; i < s->size()-1; i++) {
+    for (unsigned j = i+1; j < s->size(); j++) {
+      pair<ScoredHyp,ScoredHyp> p;
+      p.first = (*s)[i];
+      p.second = (*s)[j];
+      vector<pair<unsigned,unsigned> >::iterator it = find(taken.begin(), taken.end(), make_pair(i, j));
+      if (_PRO_accept_pair(p) && it == taken.end()) {
+        training.push_back(p);
+        count++;
+        taken.push_back(make_pair(i, j));
+        if (count == max_count) {
+          b = true;
+          break;
+        }
+      }
+    }
+    if (b) break;
+  }
+  sort(training.begin(), training.end(), _PRO_cmp_pair_by_diff);
+  if (training.size() > 50)
+    training.erase(training.begin()+50, training.end()); 
+  return;
 }
 
 
