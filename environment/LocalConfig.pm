@@ -75,6 +75,7 @@ for my $config_key (keys %$CCONFIG) {
   die "Can't find HOST_REGEXP for $config_key" unless $re;
   if ($host =~ /$re/) {
     $senvironment_name = $config_key;
+    last;
   }
 }
 
