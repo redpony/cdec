@@ -3,7 +3,7 @@
 
 #include "ff.h"
 
-#include <boost/unordered/unordered_set.hpp>
+#include <tr1/unordered_set>
 #include <boost/algorithm/string.hpp>
 
 #include <vector>
@@ -43,7 +43,7 @@ class WordSet : public FeatureFunction {
                                      void* context) const;
  private:
 
-  static void loadVocab(const std::string& vocabFile, boost::unordered_set<WordID>* vocab) {
+  static void loadVocab(const std::string& vocabFile, std::tr1::unordered_set<WordID>* vocab) {
 
       std::ifstream file;
       std::string line;
@@ -105,7 +105,7 @@ class WordSet : public FeatureFunction {
 
   int fid_;
   bool oovMode_;
-  boost::unordered_set<WordID> vocab_;
+  std::tr1::unordered_set<WordID> vocab_;
 };
 
 #endif
