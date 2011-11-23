@@ -69,10 +69,9 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     cerr << "Wrong 'filter' param: '" << (*cfg)["filter"].as<string>() << "', use 'uniq' or 'no'." << endl;
     return false;
   }
-  if ((*cfg)["pair_sampling"].as<string>() != "all"
-       && (*cfg)["pair_sampling"].as<string>() != "5050" && (*cfg)["pair_sampling"].as<string>() != "108010"
-       && (*cfg)["pair_sampling"].as<string>() != "PRO") {
-    cerr << "Wrong 'pair_sampling' param: '" << (*cfg)["pair_sampling"].as<string>() << "', use 'all' or 'rand'." << endl;
+  string s = (*cfg)["pair_sampling"].as<string>();
+  if (s != "all" && s != "5050" && s != "108010" && s != "PRO" && s != "alld") {
+    cerr << "Wrong 'pair_sampling' param: '" << (*cfg)["pair_sampling"].as<string>() << "'." << endl;
     return false;
   }
   if ((*cfg)["select_weights"].as<string>() != "last"
@@ -390,6 +389,8 @@ main(int argc, char** argv)
         multpart108010(samples, pairs);
       if (pair_sampling == "PRO")
         PROsampling(samples, pairs);
+      if (pair_sampling == "alld")
+        all_pairs_discard(samples, pairs);
       npairs += pairs.size();
 
       for (vector<pair<ScoredHyp,ScoredHyp> >::iterator it = pairs.begin();
