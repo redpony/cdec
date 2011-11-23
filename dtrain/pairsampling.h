@@ -82,18 +82,14 @@ PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training) 
 {
   unsigned max_count = 5000, count = 0;
   bool b = false;
-  //unsigned max_pairs = (s->size()*(s->size()-1))/2;
-  vector<pair<unsigned,unsigned> > taken;
   for (unsigned i = 0; i < s->size()-1; i++) {
     for (unsigned j = i+1; j < s->size(); j++) {
       pair<ScoredHyp,ScoredHyp> p;
       p.first = (*s)[i];
       p.second = (*s)[j];
-      vector<pair<unsigned,unsigned> >::iterator it = find(taken.begin(), taken.end(), make_pair(i, j));
-      if (_PRO_accept_pair(p) && it == taken.end()) {
+      if (_PRO_accept_pair(p)) {
         training.push_back(p);
         count++;
-        taken.push_back(make_pair(i, j));
         if (count == max_count) {
           b = true;
           break;
@@ -106,6 +102,20 @@ PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training) 
   if (training.size() > 50)
     training.erase(training.begin()+50, training.end()); 
   return;
+}
+
+inline void
+all_pairs_discard(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training)
+{
+  for (unsigned i = 0; i < s->size()-1; i++) {
+    for (unsigned j = i+1; j < s->size(); j++) {
+      pair<ScoredHyp,ScoredHyp> p;
+      p.first = (*s)[i];
+      p.second = (*s)[j];
+      if(_PRO_accept_pair(p))
+        training.push_back(p);
+    }
+  }
 }
 
 
