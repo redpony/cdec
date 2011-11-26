@@ -49,17 +49,17 @@ multpart108010(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& trainin
   unsigned sep = sz%slice;
   if (sep == 0) sep = sz/slice;
   for (unsigned i = 0; i < sep; i++) {
-    for(unsigned j = sep; j < sz; j++) {
+    for (unsigned j = sep; j < sz; j++) {
       p.first = (*s)[i];
       p.second = (*s)[j];
-      if(p.first.rank < p.second.rank) training.push_back(p);
+      if (p.first.rank < p.second.rank) training.push_back(p);
     }
   }
   for (unsigned i = sep; i < sz-sep; i++) {
     for (unsigned j = sz-sep; j < sz; j++) {
       p.first = (*s)[i];
       p.second = (*s)[j];
-      if(p.first.rank < p.second.rank) training.push_back(p);
+      if (p.first.rank < p.second.rank) training.push_back(p);
     }
   }
 }
@@ -116,6 +116,70 @@ all_pairs_discard(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& trai
         training.push_back(p);
     }
   }
+}
+
+inline void
+multpart108010_discard(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training)
+{
+  sort(s->begin(), s->end(), _multpart_cmp_hyp_by_score);
+  pair<ScoredHyp,ScoredHyp>  p;
+  unsigned sz = s->size();
+  unsigned slice = 10;
+  unsigned sep = sz%slice;
+  if (sep == 0) sep = sz/slice;
+  for (unsigned i = 0; i < sep; i++) {
+    for (unsigned j = sep; j < sz; j++) {
+      p.first = (*s)[i];
+      p.second = (*s)[j];
+      if (p.first.rank < p.second.rank) {
+        if (_PRO_accept_pair(p)) training.push_back(p);
+      }
+    }
+  }
+  for (unsigned i = sep; i < sz-sep; i++) {
+    for (unsigned j = sz-sep; j < sz; j++) {
+      p.first = (*s)[i];
+      p.second = (*s)[j];
+      if (p.first.rank < p.second.rank) {
+        if (_PRO_accept_pair(p)) training.push_back(p);
+      }
+    }
+  }
+  sort(training.begin(), training.end(), _PRO_cmp_pair_by_diff);
+  if (training.size() > 50)
+    training.erase(training.begin()+50, training.end());
+}
+
+inline void
+multpart108010_discard1(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training)
+{
+  sort(s->begin(), s->end(), _multpart_cmp_hyp_by_score);
+  pair<ScoredHyp,ScoredHyp>  p;
+  unsigned sz = s->size();
+  unsigned slice = 10;
+  unsigned sep = sz%slice;
+  if (sep == 0) sep = sz/slice;
+  for (unsigned i = 0; i < sep; i++) {
+    for (unsigned j = sep; j < sz; j++) {
+      p.first = (*s)[i];
+      p.second = (*s)[j];
+      if (p.first.rank < p.second.rank) {
+        if (_PRO_accept_pair(p)) training.push_back(p);
+      }
+    }
+  }
+  for (unsigned i = sep; i < sz-sep; i++) {
+    for (unsigned j = sz-sep; j < sz; j++) {
+      p.first = (*s)[i];
+      p.second = (*s)[j];
+      if (p.first.rank < p.second.rank) {
+        if (_PRO_accept_pair(p)) training.push_back(p);
+      }
+    }
+  }
+  sort(training.begin(), training.end(), _PRO_cmp_pair_by_diff);
+  if (training.size() > 50)
+    training.erase(training.begin()+50, training.end());
 }
 
 

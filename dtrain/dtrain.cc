@@ -70,7 +70,7 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     return false;
   }
   string s = (*cfg)["pair_sampling"].as<string>();
-  if (s != "all" && s != "5050" && s != "108010" && s != "PRO" && s != "alld") {
+  if (s != "all" && s != "5050" && s != "108010" && s != "PRO" && s != "alld" && s != "108010d") {
     cerr << "Wrong 'pair_sampling' param: '" << (*cfg)["pair_sampling"].as<string>() << "'." << endl;
     return false;
   }
@@ -391,6 +391,8 @@ main(int argc, char** argv)
         PROsampling(samples, pairs);
       if (pair_sampling == "alld")
         all_pairs_discard(samples, pairs);
+      if (pair_sampling == "108010d")
+        multpart108010_discard(samples, pairs);
       npairs += pairs.size();
 
       for (vector<pair<ScoredHyp,ScoredHyp> >::iterator it = pairs.begin();
