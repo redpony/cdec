@@ -88,7 +88,7 @@ struct KBestGetter : public HypSampler
   {
     if (filter_type_ == "uniq") {
       KBestUnique(forest);
-    } else if (filter_type_ == "no") {
+    } else if (filter_type_ == "not") {
       KBestNoFilter(forest);
     }
   }
