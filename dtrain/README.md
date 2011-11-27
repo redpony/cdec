@@ -106,6 +106,7 @@ Todo
 * mira: 5/10/15, pro: (5)/10/20/30 (on devtest!)
 * sample pairs like in pro
 * mira forest sampling
+* platform specific (108010!)
 
 Data
 ----
