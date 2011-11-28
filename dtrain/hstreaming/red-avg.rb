@@ -7,7 +7,7 @@ STDOUT.set_encoding 'utf-8'
 
 w = {}
 c = {}
-w.default = 0.
+w.default = 0
 c.default = 0
 while line = STDIN.gets
   key, val = line.split /\t/
