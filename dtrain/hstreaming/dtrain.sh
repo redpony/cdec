@@ -1,8 +1,8 @@
 #!/bin/bash
 
-pushd .
+pushd . &>/dev/null
 cd ..
 ID=$(basename $(pwd)) # attempt_...
-popd
+popd &>/dev/null
 ./dtrain -c dtrain.ini --hstreaming $ID 
 
