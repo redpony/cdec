@@ -336,3 +336,65 @@ ioh:       4
 
 
 when does overfitting begin?
+---
+Variables
+ k 100..1500 higher better
+ N 3/4
+ learning rate
+ reg/gamma
+ epochs -> best on devtest (10..30) (select_weights)
+ scorer -> approx_bleu correlates ok (stupid bleu, bleu, smooth bleu)
+ sample from -> kbest | forest
+ filter -> no uniq (kbest)
+ pair sampling -> all 5050 108010 PRO alld
+ update_ok -> update towards correctly ranked
+ features
+  6x tm
+  2x lm
+  wp
+  Glue
+  rule ids
+  rule ngrams
+  rule shape
+  span features
+
+
+PRO
+ k = 1500
+ N = 4
+ learning rate = 0.0005
+ gamma = 0
+ epochs = 30
+ scorer = stupid bleu (Bleu+1)
+ sample from = kbest
+ filter = no
+ pair sampling = PRO
+ update_ok
+ features = base
+
+cur:
+ shard_sz 500 1k 3k
+ PRO with forest sampling
+ PRO w/o update_ok
+ tune learning rate
+ all with discard (not only top 50)
+ filter kbest uniq?
+
+ -> repeat most on Tset, lXlX stuff
+ -> PRO approx bleu
+ -> tune gamma
+ -> best pair sampling method
+ -> reduce k?
+ => scorer => approx_bleu (test w PRO)
+ -> PRO on training set
+ -> PRO more features 
+ -> discard + 108010
+
+
+
+--
+forest vs kbest count vocab?
+108010 select discard
+approx bleu
+
+
