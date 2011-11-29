@@ -31,7 +31,7 @@ my $CCONFIG = {
     'JobControl'  => 'qsub',
     'QSubMemFlag' => '-l pmem=',
     'QSubQueue' => '-q batch',
-    'QSubExtraFlags' => '-l walltime=144:00:00',
+    'QSubExtraFlags' => '-V -l walltime=144:00:00',
     'DefaultJobs' => 15,
   },
   'CLSP' => {
@@ -75,6 +75,7 @@ for my $config_key (keys %$CCONFIG) {
   die "Can't find HOST_REGEXP for $config_key" unless $re;
   if ($host =~ /$re/) {
     $senvironment_name = $config_key;
+    last;
   }
 }
 
