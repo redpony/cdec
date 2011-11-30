@@ -37,7 +37,7 @@ end
 
 def cut(weights, norm_fun, n, epsilon=0.0001)
   weights.each { |k,v|
-    if norm_fun.call(v, n).abs > epsilon
+    if norm_fun.call(v, n).abs >= epsilon
       puts "#{k}\t#{mean(v, n)}"
     end
   }
@@ -87,6 +87,10 @@ _test()
 # actually do something
 def usage()
   puts "lplp.rb <l0,l1,l2,linfty,mean,median> <cut|select_k> <k|threshold> [n] < <input>"
+  puts "   l0...: norms for selection"
+  puts "select_k: only output top k (according to the norm of their column vector) features"
+  puts "     cut: output features with weight >= threshold"
+  puts "       n: if we do not have a shard count use this number for averaging"
   exit
 end
 
