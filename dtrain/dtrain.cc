@@ -202,7 +202,6 @@ main(int argc, char** argv)
   vector<vector<WordID> > ref_ids_buf; // references as WordID vecs
   // where temp files go
   string tmp_path = cfg["tmp"].as<string>();
-  vector<string> w_tmp_files; // used for keep
 #ifdef DTRAIN_LOCAL
   string refs_fn = cfg["refs"].as<string>();
   ReadFile refs(refs_fn);
@@ -628,13 +627,6 @@ if (false) {
     cerr << _p5 << _np << endl << "---" << endl << "Best iteration: ";
     cerr << best_it+1 << " [SCORE '" << scorer_str << "'=" << max_score << "]." << endl;
     cerr << _p2 << "This took " << overall_time/60. << " min." << endl;
-  }
-
-  if (keep) {
-    cout << endl << "Weight files per iteration:" << endl;
-    for (unsigned i = 0; i < w_tmp_files.size(); i++) {
-      cout << w_tmp_files[i] << endl;
-    }
   }
 
   return 0;
