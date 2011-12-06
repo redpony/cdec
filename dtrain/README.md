@@ -398,3 +398,12 @@ forest vs kbest count vocab?
 approx bleu
 
 
+
+
+---
+re-iterate ruleids
+r_
+10s
+p30
+stopwords
+gillespie wtf
