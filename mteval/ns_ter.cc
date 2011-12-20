@@ -1,5 +1,6 @@
 #include "ns_ter.h"
 
+#include <cstdio>
 #include <cassert>
 #include <iostream>
 #include <limits>
