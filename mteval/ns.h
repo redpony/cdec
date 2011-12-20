@@ -7,18 +7,15 @@
 #include <boost/shared_ptr.hpp>
 #include "wordid.h"
 
-class EvaluationMetric;
-
 class SufficientStats {
  public:
-  SufficientStats() : evaluation_metric() {}
+  SufficientStats() : id_() {}
   explicit SufficientStats(const std::string& encoded);
-  explicit SufficientStats(const EvaluationMetric* s) : evaluation_metric(s) {}
-  SufficientStats(const EvaluationMetric* s, const std::vector<float>& f) :
-    evaluation_metric(s), fields(f) {}
+  SufficientStats(const std::string& mid, const std::vector<float>& f) :
+    id_(mid), fields(f) {}
 
   SufficientStats& operator+=(const SufficientStats& delta) {
-    if (delta.evaluation_metric) evaluation_metric = delta.evaluation_metric;
+    if (id_.empty() && delta.id_.size()) id_ = delta.id_;
     if (fields.size() != delta.fields.size())
       fields.resize(std::max(fields.size(), delta.fields.size()));
     for (unsigned i = 0; i < delta.fields.size(); ++i)
@@ -26,7 +23,7 @@ class SufficientStats {
     return *this;
   }
   SufficientStats& operator-=(const SufficientStats& delta) {
-    if (delta.evaluation_metric) evaluation_metric = delta.evaluation_metric;
+    if (id_.empty() && delta.id_.size()) id_ = delta.id_;
     if (fields.size() != delta.fields.size())
       fields.resize(std::max(fields.size(), delta.fields.size()));
     for (unsigned i = 0; i < delta.fields.size(); ++i)
@@ -53,7 +50,7 @@ class SufficientStats {
   }
   void Encode(std::string* out) const;
 
-  const EvaluationMetric* evaluation_metric;
+  std::string id_;
   std::vector<float> fields;
 };
 
@@ -73,13 +70,13 @@ struct SegmentEvaluator {
 };
 
 // Instructions for implementing a new metric
-//   Override MetricId() and give the metric a unique string name (no spaces)
 //   To Instance(), add something that creates the metric
+//   Implement ComputeScore(const SufficientStats& stats) const;
 //   Implement ONE of the following:
 //      1) void ComputeSufficientStatistics(const std::vector<std::vector<WordID> >& refs, SufficientStats* out) const;
 //      2) a new SegmentEvaluator class AND CreateSegmentEvaluator(const std::vector<std::vector<WordID> >& refs) const;
-//   The later (#2) is only used when it is necessary to precompute per-segment data from a set of refs
-//   Implement ComputeScore(const SufficientStats& stats) const;
+//    [The later (#2) is only used when it is necessary to precompute per-segment data from a set of refs]
+//   OPTIONAL: Override SufficientStatisticsVectorSize() if it is easy to do so
 class EvaluationMetric {
  public:
   static EvaluationMetric* Instance(const std::string& metric_id = "IBM_BLEU");
@@ -91,7 +88,9 @@ class EvaluationMetric {
  public:
   const std::string& MetricId() const { return name_; }
 
+  virtual unsigned SufficientStatisticsVectorSize() const;
   virtual float ComputeScore(const SufficientStats& stats) const = 0;
+  virtual std::string DetailedScore(const SufficientStats& stats) const;
   virtual boost::shared_ptr<SegmentEvaluator> CreateSegmentEvaluator(const std::vector<std::vector<WordID> >& refs) const;
   virtual void ComputeSufficientStatistics(const std::vector<WordID>& hyp,
                                            const std::vector<std::vector<WordID> >& refs,

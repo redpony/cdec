@@ -205,20 +205,22 @@ TEST_F(ScorerTest, Kernel) {
 }
 
 TEST_F(ScorerTest, NewScoreAPI) {
-  EvaluationMetric* metric = EvaluationMetric::Instance("IBM_BLEU");
+  //EvaluationMetric* metric = EvaluationMetric::Instance("IBM_BLEU");
+  //EvaluationMetric* metric = EvaluationMetric::Instance("METEOR");
+  EvaluationMetric* metric = EvaluationMetric::Instance("COMB:IBM_BLEU=0.5;TER=-0.5");
   boost::shared_ptr<SegmentEvaluator> e1 = metric->CreateSegmentEvaluator(refs0);
   boost::shared_ptr<SegmentEvaluator> e2 = metric->CreateSegmentEvaluator(refs1);
   SufficientStats stats1;
-  e1->Evaluate(hyp2, &stats1);
+  e1->Evaluate(hyp1, &stats1);
   SufficientStats stats2;
-  e2->Evaluate(hyp1, &stats2);
+  e2->Evaluate(hyp2, &stats2);
   stats1 += stats2;
   string ss;
   stats1.Encode(&ss);
   cerr << "SS: " << ss << endl;
   cerr << metric->ComputeScore(stats1) << endl;
-  SufficientStats statse("IBM_BLEU 53 32 18 11 65 63 61 59 65 72");
-  cerr << metric->ComputeScore(statse) << endl;
+  //SufficientStats statse("IBM_BLEU 53 32 18 11 65 63 61 59 65 72");
+  //cerr << metric->ComputeScore(statse) << endl;
 }
 
 int main(int argc, char **argv) {
