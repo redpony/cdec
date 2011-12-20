@@ -3,6 +3,7 @@
 #include "ns_ext.h"
 #include "ns_comb.h"
 
+#include <cstdio>
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
