@@ -10,6 +10,7 @@ class TERMetric : public EvaluationMetric {
 
  public:
   virtual unsigned SufficientStatisticsVectorSize() const;
+  virtual std::string DetailedScore(const SufficientStats& stats) const;
   virtual void ComputeSufficientStatistics(const std::vector<WordID>& hyp,
                                            const std::vector<std::vector<WordID> >& refs,
                                            SufficientStats* out) const;

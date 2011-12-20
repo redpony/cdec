@@ -473,3 +473,15 @@ float TERMetric::ComputeScore(const SufficientStats& stats) const {
   return edits / static_cast<float>(stats[kREF_WORDCOUNT]);
 }
 
+string TERMetric::DetailedScore(const SufficientStats& stats) const {
+  char buf[200];
+  sprintf(buf, "TER = %.2f, %3.f|%3.f|%3.f|%3.f (len=%3.f)",
+     ComputeScore(stats) * 100.0f,
+     stats[kINSERTIONS],
+     stats[kDELETIONS],
+     stats[kSUBSTITUTIONS],
+     stats[kSHIFTS],
+     stats[kREF_WORDCOUNT]);
+  return buf;
+}
+

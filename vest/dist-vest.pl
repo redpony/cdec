@@ -308,7 +308,7 @@ while (1){
 	    $retries++;
 	}
 	die "Dev set contains $devSize sentences, but we don't have topbest and hypergraphs for all these! Decoder failure? Check $decoderLog\n" if ($devSize != $num_hgs || $devSize != $num_topbest);
-	my $dec_score = check_output("cat $runFile | $SCORER $refs_comma_sep -l $metric");
+	my $dec_score = check_output("cat $runFile | $SCORER $refs_comma_sep -m $metric");
 	chomp $dec_score;
 	print STDERR "DECODER SCORE: $dec_score\n";
 
