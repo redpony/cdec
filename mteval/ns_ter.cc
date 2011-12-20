@@ -1,15 +1,11 @@
 #include "ns_ter.h"
 
-#include <cstdio>
 #include <cassert>
 #include <iostream>
 #include <limits>
-#include <sstream>
 #include <tr1/unordered_map>
 #include <set>
-#include <valarray>
 #include <boost/functional/hash.hpp>
-#include <stdexcept>
 #include "tdict.h"
 
 static const bool ter_use_average_ref_len = true;
@@ -25,7 +21,7 @@ static const unsigned kDUMMY_LAST_ENTRY = 5;
 using namespace std;
 using namespace std::tr1;
 
-#if 0
+namespace NewScorer {
 
 struct COSTS {
   static const float substitution;
@@ -82,7 +78,7 @@ class TERScorerImpl {
   enum TransType { MATCH, SUBSTITUTION, INSERTION, DELETION };
 
   explicit TERScorerImpl(const vector<WordID>& ref) : ref_(ref) {
-    for (int i = 0; i < ref.size(); ++i)
+    for (unsigned i = 0; i < ref.size(); ++i)
       rwexists_.insert(ref[i]);
   }
 
@@ -95,7 +91,7 @@ class TERScorerImpl {
   }
 
  private:
-  vector<WordID> ref_;
+  const vector<WordID>& ref_;
   set<WordID> rwexists_;
 
   typedef unordered_map<vector<WordID>, set<int>, boost::hash<vector<WordID> > > NgramToIntsMap;
@@ -421,68 +417,7 @@ class TERScorerImpl {
   }
 };
 
-class TERScore : public ScoreBase<TERScore> {
-  friend class TERScorer;
-
- public:
-
- TERScore() : stats(0,kDUMMY_LAST_ENTRY) {}
-  float ComputePartialScore() const { return 0.0;}
-  float ComputeScore() const {
-    float edits = static_cast<float>(stats[kINSERTIONS] + stats[kDELETIONS] + stats[kSUBSTITUTIONS] + stats[kSHIFTS]);
-    return edits / static_cast<float>(stats[kREF_WORDCOUNT]);
-  }
-  void ScoreDetails(string* details) const;
-  void PlusPartialEquals(const Score& rhs, int oracle_e_cover, int oracle_f_cover, int src_len){}
-  void PlusEquals(const Score& delta, const float scale) {
-    if (scale==1)
-      stats += static_cast<const TERScore&>(delta).stats;
-    if (scale==-1)
-      stats -= static_cast<const TERScore&>(delta).stats;
-    throw std::runtime_error("TERScore::PlusEquals with scale != +-1");
- }
-  void PlusEquals(const Score& delta) {
-    stats += static_cast<const TERScore&>(delta).stats;
-  }
-
-  ScoreP GetZero() const {
-    return ScoreP(new TERScore);
-  }
-  ScoreP GetOne() const {
-    return ScoreP(new TERScore);
-  }
-  void Subtract(const Score& rhs, Score* res) const {
-    static_cast<TERScore*>(res)->stats = stats - static_cast<const TERScore&>(rhs).stats;
-  }
-  void Encode(std::string* out) const {
-    ostringstream os;
-    os << stats[kINSERTIONS] << ' '
-       << stats[kDELETIONS] << ' '
-       << stats[kSUBSTITUTIONS] << ' '
-       << stats[kSHIFTS] << ' '
-       << stats[kREF_WORDCOUNT];
-    *out = os.str();
-  }
-  bool IsAdditiveIdentity() const {
-    for (int i = 0; i < kDUMMY_LAST_ENTRY; ++i)
-      if (stats[i] != 0) return false;
-    return true;
-  }
- private:
-  valarray<int> stats;
-};
-
-ScoreP TERScorer::ScoreFromString(const std::string& data) {
-  istringstream is(data);
-  TERScore* r = new TERScore;
-  is >> r->stats[TERScore::kINSERTIONS]
-     >> r->stats[TERScore::kDELETIONS]
-     >> r->stats[TERScore::kSUBSTITUTIONS]
-     >> r->stats[TERScore::kSHIFTS]
-     >> r->stats[TERScore::kREF_WORDCOUNT];
-  return ScoreP(r);
-}
-
+#if 0
 void TERScore::ScoreDetails(std::string* details) const {
   char buf[200];
   sprintf(buf, "TER = %.2f, %3d|%3d|%3d|%3d (len=%d)",
@@ -494,54 +429,43 @@ void TERScore::ScoreDetails(std::string* details) const {
      stats[kREF_WORDCOUNT]);
   *details = buf;
 }
-
-TERScorer::~TERScorer() {
-  for (vector<TERScorerImpl*>::iterator i = impl_.begin(); i != impl_.end(); ++i)
-    delete *i;
-}
-
-TERScorer::TERScorer(const vector<vector<WordID> >& refs) : impl_(refs.size()) {
-  for (int i = 0; i < refs.size(); ++i)
-    impl_[i] = new TERScorerImpl(refs[i]);
-}
-
-ScoreP TERScorer::ScoreCCandidate(const vector<WordID>& hyp) const {
-  return ScoreP();
-}
-
-ScoreP TERScorer::ScoreCandidate(const std::vector<WordID>& hyp) const {
-  float best_score = numeric_limits<float>::max();
-  TERScore* res = new TERScore;
-  int avg_len = 0;
-  for (int i = 0; i < impl_.size(); ++i)
-    avg_len += impl_[i]->GetRefLength();
-  avg_len /= impl_.size();
-  for (int i = 0; i < impl_.size(); ++i) {
-    int subs, ins, dels, shifts;
-    float score = impl_[i]->Calculate(hyp, &subs, &ins, &dels, &shifts);
-    // cerr << "Component TER cost: " << score << endl;
-    if (score < best_score) {
-      res->stats[TERScore::kINSERTIONS] = ins;
-      res->stats[TERScore::kDELETIONS] = dels;
-      res->stats[TERScore::kSUBSTITUTIONS] = subs;
-      res->stats[TERScore::kSHIFTS] = shifts;
-      if (ter_use_average_ref_len) {
-        res->stats[TERScore::kREF_WORDCOUNT] = avg_len;
-      } else {
-        res->stats[TERScore::kREF_WORDCOUNT] = impl_[i]->GetRefLength();
-      }
-
-      best_score = score;
-    }
-  }
-  return ScoreP(res);
-}
 #endif
+
+} // namespace NewScorer
 
 void TERMetric::ComputeSufficientStatistics(const vector<WordID>& hyp,
                                             const vector<vector<WordID> >& refs,
                                             SufficientStats* out) const {
   out->fields.resize(kDUMMY_LAST_ENTRY);
+  float best_score = numeric_limits<float>::max();
+  unsigned avg_len = 0;
+  for (int i = 0; i < refs.size(); ++i)
+    avg_len += refs[i].size();
+  avg_len /= refs.size();
+
+  for (int i = 0; i < refs.size(); ++i) {
+    int subs, ins, dels, shifts;
+    NewScorer::TERScorerImpl ter(refs[i]);
+    float score = ter.Calculate(hyp, &subs, &ins, &dels, &shifts);
+    // cerr << "Component TER cost: " << score << endl;
+    if (score < best_score) {
+      out->fields[kINSERTIONS] = ins;
+      out->fields[kDELETIONS] = dels;
+      out->fields[kSUBSTITUTIONS] = subs;
+      out->fields[kSHIFTS] = shifts;
+      if (ter_use_average_ref_len) {
+        out->fields[kREF_WORDCOUNT] = avg_len;
+      } else {
+        out->fields[kREF_WORDCOUNT] = refs[i].size();
+      }
+
+      best_score = score;
+    }
+  }
+}
+
+unsigned TERMetric::SufficientStatisticsVectorSize() const {
+  return kDUMMY_LAST_ENTRY;
 }
 
 float TERMetric::ComputeScore(const SufficientStats& stats) const {
