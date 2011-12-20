@@ -173,7 +173,7 @@ struct BleuSegmentEvaluator : public SegmentEvaluator {
 
 template <unsigned int N = 4u, BleuType BrevityType = IBM>
 struct BleuMetric : public EvaluationMetric {
-  BleuMetric() : EvaluationMetric("IBM_BLEU") {}
+  BleuMetric() : EvaluationMetric(BrevityType == IBM ? "IBM_BLEU" : (BrevityType == Koehn ? "KOEHN_BLEU" : "NIST_BLEU")) {}
   unsigned SufficientStatisticsVectorSize() const { return N*2 + 2; }
   shared_ptr<SegmentEvaluator> CreateSegmentEvaluator(const vector<vector<WordID> >& refs) const {
     return shared_ptr<SegmentEvaluator>(new BleuSegmentEvaluator<N,BrevityType>(refs, this));
@@ -208,7 +208,8 @@ struct BleuMetric : public EvaluationMetric {
     vector<float> precs(N);
     float bp;
     float bleu = ComputeBreakdown(stats, &bp, &precs);
-    sprintf(buf, "BLEU = %.2f, %.1f|%.1f|%.1f|%.1f (brev=%.3f)",
+    sprintf(buf, "%s = %.2f, %.1f|%.1f|%.1f|%.1f (brev=%.3f)",
+       MetricId().c_str(),
        bleu*100.0,
        precs[0]*100.0,
        precs[1]*100.0,
