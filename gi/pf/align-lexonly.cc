@@ -66,41 +66,9 @@ struct AlignedSentencePair {
   Array2D<short> posterior;
 };
 
-struct HierarchicalUnigramBase {
-  explicit HierarchicalUnigramBase(const unsigned vocab_e_size) : r(5,5), u0(1.0 / vocab_e_size) {}
-
-  // return p0 of rule.e_
-  prob_t operator()(const TRule& rule) const {
-    prob_t p = prob_t::One();
-    prob_t q;
-    for (unsigned i = 0; i < rule.e_.size(); ++i) {
-      q.logeq(r.logprob(rule.e_[i], log(u0)));
-      p *= q;
-    }
-    q.logeq(r.logprob(TD::Convert("</s>"), log(u0)));
-    p *= q;
-    return p;
-  }
-
-  void Increment(const TRule& rule) {
-    for (unsigned i = 0; i < rule.e_.size(); ++i)
-      r.increment(rule.e_[i]);
-    r.increment(TD::Convert("</s>"));
-  }
-
-  void Decrement(const TRule& rule) {
-    for (unsigned i = 0; i < rule.e_.size(); ++i)
-      r.decrement(rule.e_[i]);
-    r.decrement(TD::Convert("</s>"));
-  }
-
-  CCRP_NoTable<WordID> r;
-  prob_t u0;
-};
-
 struct HierarchicalWordBase {
   explicit HierarchicalWordBase(const unsigned vocab_e_size) :
-      base(prob_t::One()), r(15,15), u0(-log(vocab_e_size)) {}
+      base(prob_t::One()), r(25,25,10), u0(-log(vocab_e_size)) {}
 
   void ResampleHyperparameters(MT19937* rng) {
     r.resample_hyperparameters(rng);
@@ -137,7 +105,7 @@ struct HierarchicalWordBase {
   }
 
   void Summary() const {
-    cerr << "NUMBER OF CUSTOMERS: " << r.num_customers() << endl;
+    cerr << "NUMBER OF CUSTOMERS: " << r.num_customers() << "  (\\alpha=" << r.concentration() << ')' << endl;
     for (CCRP_NoTable<vector<WordID> >::const_iterator it = r.begin(); it != r.end(); ++it)
       cerr << "   " << it->second << '\t' << TD::GetString(it->first) << endl;
   }
