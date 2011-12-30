@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iostream>
 
+#include "unigrams.h"
 #include "trule.h"
 #include "prob.h"
 #include "tdict.h"
@@ -49,6 +50,51 @@ struct Model1 {
   std::vector<std::map<WordID, prob_t> > ttable;
 };
 
+struct CompletelyUniformBase {
+  explicit CompletelyUniformBase(const unsigned ves) : kUNIFORM(1.0 / ves) {}
+  prob_t operator()(const TRule&) const {
+    return kUNIFORM;
+  }
+  const prob_t kUNIFORM;
+};
+
+struct UnigramWordBase {
+  explicit UnigramWordBase(const std::string& fname) : un(fname) {}
+  prob_t operator()(const TRule& r) const {
+    return un(r.e_);
+  }
+  const UnigramWordModel un;
+};
+
+struct PhraseConditionalUninformativeBase {
+  explicit PhraseConditionalUninformativeBase(const unsigned vocab_e_size) :
+      kUNIFORM_TARGET(1.0 / vocab_e_size) {
+    assert(vocab_e_size > 0);
+  }
+
+  // return p0 of rule.e_ | rule.f_
+  prob_t operator()(const TRule& rule) const {
+    return p0(rule.f_, rule.e_, 0, 0);
+  }
+
+  prob_t p0(const std::vector<WordID>& vsrc, const std::vector<WordID>& vtrg, int start_src, int start_trg) const;
+
+  const prob_t kUNIFORM_TARGET;
+};
+
+struct PhraseConditionalUninformativeUnigramBase {
+  explicit PhraseConditionalUninformativeUnigramBase(const std::string& file, const unsigned vocab_e_size) : u(file, vocab_e_size) {}
+
+  // return p0 of rule.e_ | rule.f_
+  prob_t operator()(const TRule& rule) const {
+    return p0(rule.f_, rule.e_, 0, 0);
+  }
+
+  prob_t p0(const std::vector<WordID>& vsrc, const std::vector<WordID>& vtrg, int start_src, int start_trg) const;
+
+  const UnigramModel u;
+};
+
 struct PhraseConditionalBase {
   explicit PhraseConditionalBase(const Model1& m1, const double m1mixture, const unsigned vocab_e_size) :
       model1(m1),
@@ -83,7 +129,7 @@ struct PhraseJointBase {
     assert(vocab_e_size > 0);
   }
 
-  // return p0 of rule.e_ | rule.f_
+  // return p0 of rule.e_ , rule.f_
   prob_t operator()(const TRule& rule) const {
     return p0(rule.f_, rule.e_, 0, 0);
   }
@@ -113,7 +159,7 @@ struct PhraseJointBase_BiDir {
     assert(vocab_e_size > 0);
   }
 
-  // return p0 of rule.e_ | rule.f_
+  // return p0 of rule.e_ , rule.f_
   prob_t operator()(const TRule& rule) const {
     return p0(rule.f_, rule.e_, 0, 0);
   }

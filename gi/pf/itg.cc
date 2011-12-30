@@ -27,10 +27,67 @@ ostream& operator<<(ostream& os, const vector<WordID>& p) {
   return os << ']';
 }
 
-double log_poisson(unsigned x, const double& lambda) {
-  assert(lambda > 0.0);
-  return log(lambda) * x - lgamma(x + 1) - lambda;
-}
+struct UnigramModel {
+  explicit UnigramModel(const string& fname, unsigned vocab_size, double p0null = 0.05) :
+      use_uniform_(fname.size() == 0),
+      p0null_(p0null),
+      uniform_((1.0 - p0null) / vocab_size),
+      probs_(TD::NumWords() + 1) {
+    if (fname.size() > 0) LoadUnigrams(fname);
+    probs_[0] = p0null_;
+  }
+
+// 
+// \data\
+// ngram 1=9295
+// 
+// \1-grams:
+// -3.191193	"
+
+  void LoadUnigrams(const string& fname) {
+    cerr << "Loading unigram probabilities from " << fname << " ..." << endl;
+    ReadFile rf(fname);
+    string line;
+    istream& in = *rf.stream();
+    assert(in);
+    getline(in, line);
+    assert(line.empty());
+    getline(in, line);
+    assert(line == "\\data\\");
+    getline(in, line);
+    size_t pos = line.find("ngram 1=");
+    assert(pos == 0);
+    assert(line.size() > 8);
+    const size_t num_unigrams = atoi(&line[8]);
+    getline(in, line);
+    assert(line.empty());
+    getline(in, line);
+    assert(line == "\\1-grams:");
+    for (size_t i = 0; i < num_unigrams; ++i) {
+      getline(in, line);
+      assert(line.size() > 0);
+      pos = line.find('\t');
+      assert(pos > 0);
+      assert(pos + 1 < line.size());
+      const WordID w = TD::Convert(line.substr(pos + 1));
+      line[pos] = 0;
+      float p = atof(&line[0]);
+      const prob_t pnon_null(1.0 - p0null_.as_float());
+      if (w < probs_.size()) probs_[w].logeq(p * log(10) + log(pnon_null)); else abort();
+    }
+  }
+
+  const prob_t& operator()(const WordID& w) const {
+    if (!w) return p0null_;
+    if (use_uniform_) return uniform_;
+    return probs_[w];
+  }
+
+  const bool use_uniform_;
+  const prob_t p0null_;
+  const prob_t uniform_;
+  vector<prob_t> probs_;
+};
 
 struct Model1 {
   explicit Model1(const string& fname) :
@@ -89,11 +146,11 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("samples,s",po::value<unsigned>()->default_value(1000),"Number of samples")
         ("particles,p",po::value<unsigned>()->default_value(25),"Number of particles")
         ("input,i",po::value<string>(),"Read parallel data from")
-        ("max_src_phrase",po::value<unsigned>()->default_value(7),"Maximum length of source language phrases")
-        ("max_trg_phrase",po::value<unsigned>()->default_value(7),"Maximum length of target language phrases")
         ("model1,m",po::value<string>(),"Model 1 parameters (used in base distribution)")
         ("inverse_model1,M",po::value<string>(),"Inverse Model 1 parameters (used in backward estimate)")
         ("model1_interpolation_weight",po::value<double>()->default_value(0.95),"Mixing proportion of model 1 with uniform target distribution")
+        ("src_unigram,u",po::value<string>()->default_value(""),"Source unigram distribution; empty for uniform")
+        ("trg_unigram,U",po::value<string>()->default_value(""),"Target unigram distribution; empty for uniform")
         ("random_seed,S",po::value<uint32_t>(), "Random seed");
   po::options_description clo("Command line options");
   clo.add_options()
@@ -165,11 +222,11 @@ void ReadParallelCorpus(const string& filename,
 int main(int argc, char** argv) {
   po::variables_map conf;
   InitCommandLine(argc, argv, &conf);
-  const size_t kMAX_TRG_PHRASE = conf["max_trg_phrase"].as<unsigned>();
-  const size_t kMAX_SRC_PHRASE = conf["max_src_phrase"].as<unsigned>();
   const unsigned particles = conf["particles"].as<unsigned>();
   const unsigned samples = conf["samples"].as<unsigned>();
-
+  TD::Convert("<s>");
+  TD::Convert("</s>");
+  TD::Convert("<unk>");
   if (!conf.count("model1")) {
     cerr << argv[0] << "Please use --model1 to specify model 1 parameters\n";
     return 1;
@@ -188,23 +245,28 @@ int main(int argc, char** argv) {
   cerr << "F-corpus size: " << corpusf.size() << " sentences\t (" << vocabf.size() << " word types)\n";
   cerr << "E-corpus size: " << corpuse.size() << " sentences\t (" << vocabe.size() << " word types)\n";
   assert(corpusf.size() == corpuse.size());
+  UnigramModel src_unigram(conf["src_unigram"].as<string>(), vocabf.size());
+  UnigramModel trg_unigram(conf["trg_unigram"].as<string>(), vocabe.size());
+  const prob_t kHALF(0.5);
 
+  const string kEMPTY = "NULL";
   const int kLHS = -TD::Convert("X");
   Model1 m1(conf["model1"].as<string>());
   Model1 invm1(conf["inverse_model1"].as<string>());
   for (int si = 0; si < conf["samples"].as<unsigned>(); ++si) {
     cerr << '.' << flush;
     for (int ci = 0; ci < corpusf.size(); ++ci) {
-      const vector<WordID>& src = corpusf[ci];
       const vector<WordID>& trg = corpuse[ci];
-      for (int i = 0; i < src.size(); ++i) {
-        for (int j = 0; j < trg.size(); ++j) {
-          const int eff_max_src = min(src.size() - i, kMAX_SRC_PHRASE);
-          for (int k = 0; k < eff_max_src; ++k) {
-            const int eff_max_trg = (k == 0 ? 1 : min(trg.size() - j, kMAX_TRG_PHRASE));
-            for (int l = 0; l < eff_max_trg; ++l) {
-            }
-          }
+      const vector<WordID>& src = corpusf[ci];
+      for (int i = 0; i <= trg.size(); ++i) {
+        const WordID e_i = i > 0 ? trg[i-1] : 0;
+        for (int j = 0; j <= src.size(); ++j) {
+          const WordID f_j = j > 0 ? src[j-1] : 0;
+          if (e_i == 0 && f_j == 0) continue;
+          prob_t je = kHALF * src_unigram(f_j) * m1(f_j,e_i) + kHALF * trg_unigram(e_i) * invm1(e_i,f_j);
+          cerr << "p( " << (e_i ? TD::Convert(e_i) : kEMPTY) << " , " << (f_j ? TD::Convert(f_j) : kEMPTY) << " ) = " << log(je) << endl;
+          if (e_i && f_j)
+            cout << "[X] ||| " << TD::Convert(f_j) << " ||| " << TD::Convert(e_i) << " ||| LogProb=" << log(je) << endl;
         }
       }
     }

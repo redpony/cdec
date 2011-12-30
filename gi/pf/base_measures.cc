@@ -6,6 +6,32 @@
 
 using namespace std;
 
+prob_t PhraseConditionalUninformativeUnigramBase::p0(const vector<WordID>& vsrc,
+                                                     const vector<WordID>& vtrg,
+                                                     int start_src, int start_trg) const {
+  const int flen = vsrc.size() - start_src;
+  const int elen = vtrg.size() - start_trg;
+  prob_t p;
+  p.logeq(log_poisson(elen, flen + 0.01));       // elen | flen          ~Pois(flen + 0.01)
+  //p.logeq(log_poisson(elen, 1));       // elen | flen          ~Pois(flen + 0.01)
+  for (int i = 0; i < elen; ++i)
+    p *= u(vtrg[i + start_trg]);                        // draw e_i             ~Uniform
+  return p;
+}
+
+prob_t PhraseConditionalUninformativeBase::p0(const vector<WordID>& vsrc,
+                                              const vector<WordID>& vtrg,
+                                              int start_src, int start_trg) const {
+  const int flen = vsrc.size() - start_src;
+  const int elen = vtrg.size() - start_trg;
+  prob_t p;
+  //p.logeq(log_poisson(elen, flen + 0.01));       // elen | flen          ~Pois(flen + 0.01)
+  p.logeq(log_poisson(elen, 1));       // elen | flen          ~Pois(flen + 0.01)
+  for (int i = 0; i < elen; ++i)
+    p *= kUNIFORM_TARGET;                        // draw e_i             ~Uniform
+  return p;
+}
+
 void Model1::LoadModel1(const string& fname) {
   cerr << "Loading Model 1 parameters from " << fname << " ..." << endl;
   ReadFile rf(fname);
