@@ -117,10 +117,12 @@ struct HierarchicalWordBase {
 
 struct BasicLexicalAlignment {
   explicit BasicLexicalAlignment(const vector<vector<WordID> >& lets,
+                                 const unsigned words_e,
                                  const unsigned letters_e,
                                  vector<AlignedSentencePair>* corp) :
       letters(lets),
       corpus(*corp),
+      //up0(words_e),
       //up0("en.chars.1gram", letters_e),
       //up0("en.words.1gram"),
       up0(letters_e),
@@ -302,11 +304,11 @@ int main(int argc, char** argv) {
   ExtractLetters(vocabf, &letters, NULL);
   letters[TD::Convert("NULL")].clear();
 
-  BasicLexicalAlignment x(letters, letset.size(), &corpus);
+  BasicLexicalAlignment x(letters, vocabe.size(), letset.size(), &corpus);
   x.InitializeRandom();
   const unsigned samples = conf["samples"].as<unsigned>();
   for (int i = 0; i < samples; ++i) {
-    for (int j = 431; j < 433; ++j) Debug(corpus[j]);
+    for (int j = 4995; j < 4997; ++j) Debug(corpus[j]);
     cerr << i << "\t" << x.tmodel.r.size() << "\t";
     if (i % 10 == 0) x.ResampleHyperparemeters();
     x.ResampleCorpus();

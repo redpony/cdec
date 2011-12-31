@@ -11,6 +11,7 @@
 #include "trule.h"
 #include "prob.h"
 #include "tdict.h"
+#include "sampler.h"
 
 inline double log_poisson(unsigned x, const double& lambda) {
   assert(lambda > 0.0);
@@ -55,6 +56,11 @@ struct CompletelyUniformBase {
   prob_t operator()(const TRule&) const {
     return kUNIFORM;
   }
+  void Summary() const {}
+  void ResampleHyperparameters(MT19937*) {}
+  void Increment(const TRule&) {}
+  void Decrement(const TRule&) {}
+  prob_t Likelihood() const { return prob_t::One(); }
   const prob_t kUNIFORM;
 };
 
@@ -79,6 +85,11 @@ struct PhraseConditionalUninformativeBase {
 
   prob_t p0(const std::vector<WordID>& vsrc, const std::vector<WordID>& vtrg, int start_src, int start_trg) const;
 
+  void Summary() const {}
+  void ResampleHyperparameters(MT19937*) {}
+  void Increment(const TRule&) {}
+  void Decrement(const TRule&) {}
+  prob_t Likelihood() const { return prob_t::One(); }
   const prob_t kUNIFORM_TARGET;
 };
 
