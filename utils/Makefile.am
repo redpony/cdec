@@ -1,8 +1,8 @@
 
 bin_PROGRAMS = reconstruct_weights
 
-noinst_PROGRAMS = ts phmt
-TESTS = ts phmt
+noinst_PROGRAMS = ts phmt mfcr_test
+TESTS = ts phmt mfcr_test
 
 if HAVE_GTEST
 noinst_PROGRAMS += \
@@ -40,6 +40,8 @@ phmt_SOURCES = phmt.cc
 ts_SOURCES = ts.cc
 dict_test_SOURCES = dict_test.cc
 dict_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
+mfcr_test_SOURCES = mfcr_test.cc
+mfcr_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
 weights_test_SOURCES = weights_test.cc
 weights_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
 logval_test_SOURCES = logval_test.cc
