@@ -72,6 +72,24 @@ struct UnigramWordBase {
   const UnigramWordModel un;
 };
 
+struct RuleHasher {
+  size_t operator()(const TRule& r) const {
+    return hash_value(r);
+  }
+};
+
+struct TableLookupBase {
+  TableLookupBase(const std::string& fname);
+
+  prob_t operator()(const TRule& rule) const {
+    const std::tr1::unordered_map<TRule,prob_t>::const_iterator it = table.find(rule);
+    assert(it != table.end());
+    return it->second;
+  }
+
+  std::tr1::unordered_map<TRule,prob_t,RuleHasher> table;
+};
+
 struct PhraseConditionalUninformativeBase {
   explicit PhraseConditionalUninformativeBase(const unsigned vocab_e_size) :
       kUNIFORM_TARGET(1.0 / vocab_e_size) {
