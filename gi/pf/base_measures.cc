@@ -6,6 +6,53 @@
 
 using namespace std;
 
+TableLookupBase::TableLookupBase(const string& fname) {
+  cerr << "TableLookupBase reading from " << fname << " ..." << endl;
+  ReadFile rf(fname);
+  istream& in = *rf.stream();
+  string line;
+  unsigned lc = 0;
+  const WordID kDIV = TD::Convert("|||");
+  vector<WordID> tmp;
+  vector<int> le, lf;
+  TRule x;
+  x.lhs_ = -TD::Convert("X");
+  bool flag = false;
+  while(getline(in, line)) {
+    ++lc;
+    if (lc % 1000000 == 0) { cerr << " [" << lc << ']' << endl; flag = false; }
+    else if (lc % 25000 == 0) { cerr << '.' << flush; flag = true; }
+    tmp.clear();
+    TD::ConvertSentence(line, &tmp);
+    x.f_.clear();
+    x.e_.clear();
+    size_t pos = 0;
+    int cc = 0;
+    while(pos < tmp.size()) {
+      const WordID cur = tmp[pos++];
+      if (cur == kDIV) {
+        ++cc;
+      } else if (cc == 0) {
+        x.f_.push_back(cur);    
+      } else if (cc == 1) {
+        x.e_.push_back(cur);
+      } else if (cc == 2) {
+        table[x] = atof(TD::Convert(cur));
+        ++cc;
+      } else {
+        if (flag) cerr << endl;
+        cerr << "Bad format in " << lc << ": " << line << endl; abort();
+      }
+    }
+    if (cc != 3) {
+      if (flag) cerr << endl;
+      cerr << "Bad format in " << lc << ": " << line << endl; abort();
+    }
+  }
+  if (flag) cerr << endl;
+  cerr << " read " << lc << " entries\n";
+}
+
 prob_t PhraseConditionalUninformativeUnigramBase::p0(const vector<WordID>& vsrc,
                                                      const vector<WordID>& vtrg,
                                                      int start_src, int start_trg) const {
