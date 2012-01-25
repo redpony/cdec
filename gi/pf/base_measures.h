@@ -51,6 +51,22 @@ struct Model1 {
   std::vector<std::map<WordID, prob_t> > ttable;
 };
 
+struct PoissonUniformUninformativeBase {
+  explicit PoissonUniformUninformativeBase(const unsigned ves) : kUNIFORM(1.0 / ves) {}
+  prob_t operator()(const TRule& r) const {
+    prob_t p; p.logeq(log_poisson(r.e_.size(), 1.0));
+    prob_t q = kUNIFORM; q.poweq(r.e_.size());
+    p *= q;
+    return p;
+  }
+  void Summary() const {}
+  void ResampleHyperparameters(MT19937*) {}
+  void Increment(const TRule&) {}
+  void Decrement(const TRule&) {}
+  prob_t Likelihood() const { return prob_t::One(); }
+  const prob_t kUNIFORM;
+};
+
 struct CompletelyUniformBase {
   explicit CompletelyUniformBase(const unsigned ves) : kUNIFORM(1.0 / ves) {}
   prob_t operator()(const TRule&) const {
@@ -83,9 +99,18 @@ struct TableLookupBase {
 
   prob_t operator()(const TRule& rule) const {
     const std::tr1::unordered_map<TRule,prob_t>::const_iterator it = table.find(rule);
-    assert(it != table.end());
+    if (it == table.end()) {
+      std::cerr << rule << " not found\n";
+      abort();
+    }
     return it->second;
   }
+
+  void ResampleHyperparameters(MT19937*) {}
+  void Increment(const TRule&) {}
+  void Decrement(const TRule&) {}
+  prob_t Likelihood() const { return prob_t::One(); }
+  void Summary() const {}
 
   std::tr1::unordered_map<TRule,prob_t,RuleHasher> table;
 };

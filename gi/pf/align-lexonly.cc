@@ -122,10 +122,11 @@ struct BasicLexicalAlignment {
                                  vector<AlignedSentencePair>* corp) :
       letters(lets),
       corpus(*corp),
+      up0("fr-en.10k.translit-base.txt.gz"),
       //up0(words_e),
       //up0("en.chars.1gram", letters_e),
       //up0("en.words.1gram"),
-      up0(letters_e),
+      //up0(letters_e),
       //up0("en.chars.2gram"),
       tmodel(up0) {
   }
@@ -180,14 +181,18 @@ struct BasicLexicalAlignment {
   //PhraseConditionalUninformativeUnigramBase up0;
   //UnigramWordBase up0;
   //HierarchicalUnigramBase up0;
-  HierarchicalWordBase up0;
+  TableLookupBase up0;
+  //HierarchicalWordBase up0;
+  //PoissonUniformUninformativeBase up0;
   //CompletelyUniformBase up0;
   //FixedNgramBase up0;
   //ConditionalTranslationModel<PhraseConditionalUninformativeBase> tmodel;
   //ConditionalTranslationModel<PhraseConditionalUninformativeUnigramBase> tmodel;
   //ConditionalTranslationModel<UnigramWordBase> tmodel;
   //ConditionalTranslationModel<HierarchicalUnigramBase> tmodel;
-  ConditionalTranslationModel<HierarchicalWordBase> tmodel;
+  //ConditionalTranslationModel<HierarchicalWordBase> tmodel;
+  //ConditionalTranslationModel<PoissonUniformUninformativeBase> tmodel;
+  ConditionalTranslationModel<TableLookupBase> tmodel;
   //ConditionalTranslationModel<FixedNgramBase> tmodel;
   //ConditionalTranslationModel<CompletelyUniformBase> tmodel;
 };
@@ -222,6 +227,7 @@ void BasicLexicalAlignment::ResampleCorpus() {
 
 void ExtractLetters(const set<WordID>& v, vector<vector<WordID> >* l, set<WordID>* letset = NULL) {
   for (set<WordID>::const_iterator it = v.begin(); it != v.end(); ++it) {
+    if (*it >= l->size()) { l->resize(*it + 1); }
     vector<WordID>& letters = (*l)[*it];
     if (letters.size()) continue;   // if e and f have the same word
 
@@ -308,7 +314,7 @@ int main(int argc, char** argv) {
   x.InitializeRandom();
   const unsigned samples = conf["samples"].as<unsigned>();
   for (int i = 0; i < samples; ++i) {
-    for (int j = 4995; j < 4997; ++j) Debug(corpus[j]);
+    for (int j = 395; j < 397; ++j) Debug(corpus[j]);
     cerr << i << "\t" << x.tmodel.r.size() << "\t";
     if (i % 10 == 0) x.ResampleHyperparemeters();
     x.ResampleCorpus();
