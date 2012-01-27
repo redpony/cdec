@@ -6,11 +6,12 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "ns.h"
+#include "ns_docscorer.h"
 #include "ces.h"
 #include "filelib.h"
 #include "stringlib.h"
 #include "sparse_vector.h"
-#include "scorer.h"
 #include "viterbi_envelope.h"
 #include "inside_outside.h"
 #include "error_surface.h"
@@ -25,7 +26,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("reference,r",po::value<vector<string> >(), "[REQD] Reference translation (tokenized text)")
         ("source,s",po::value<string>(), "Source file (ignored, except for AER)")
-        ("loss_function,l",po::value<string>()->default_value("ibm_bleu"), "Loss function being optimized")
+        ("evaluation_metric,m",po::value<string>()->default_value("ibm_bleu"), "Evaluation metric being optimized")
         ("input,i",po::value<string>()->default_value("-"), "Input file to map (- is STDIN)")
         ("help,h", "Help");
   po::options_description dcmdline_options;
@@ -67,10 +68,10 @@ bool ReadSparseVectorString(const string& s, SparseVector<double>* v) {
 int main(int argc, char** argv) {
   po::variables_map conf;
   InitCommandLine(argc, argv, &conf);
-  const string loss_function = conf["loss_function"].as<string>();
-  ScoreType type = ScoreTypeFromString(loss_function);
-  DocScorer ds(type, conf["reference"].as<vector<string> >(), conf["source"].as<string>());
-  cerr << "Loaded " << ds.size() << " references for scoring with " << loss_function << endl;
+  const string evaluation_metric = conf["evaluation_metric"].as<string>();
+  EvaluationMetric* metric = EvaluationMetric::Instance(evaluation_metric);
+  DocumentScorer ds(metric, conf["reference"].as<vector<string> >());
+  cerr << "Loaded " << ds.size() << " references for scoring with " << evaluation_metric << endl;
   Hypergraph hg;
   string last_file;
   ReadFile in_read(conf["input"].as<string>());
@@ -97,7 +98,8 @@ int main(int argc, char** argv) {
     ViterbiEnvelopeWeightFunction wf(origin, axis);
     ViterbiEnvelope ve = Inside<ViterbiEnvelope, ViterbiEnvelopeWeightFunction>(hg, NULL, wf);
     ErrorSurface es;
-    ComputeErrorSurface(*ds[sent_id], ve, &es, type, hg);
+
+    ComputeErrorSurface(*ds[sent_id], ve, &es, metric, hg);
     //cerr << "Viterbi envelope has " << ve.size() << " segments\n";
     // cerr << "Error surface has " << es.size() << " segments\n";
     string val;

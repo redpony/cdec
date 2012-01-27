@@ -7,6 +7,7 @@
 #include "error_surface.h"
 #include "sampler.h"
 
+class EvaluationMetric;
 class Weights;
 
 struct LineOptimizer {
@@ -18,6 +19,7 @@ struct LineOptimizer {
   // merge all the error surfaces together into a global
   // error surface and find (the middle of) the best segment
   static double LineOptimize(
+     const EvaluationMetric* metric,
      const std::vector<ErrorSurface>& envs,
      const LineOptimizer::ScoreType type,
      float* best_score,

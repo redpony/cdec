@@ -6,6 +6,7 @@
 #include <string>
 #include <cmath>
 #include <iostream>
+#include <cassert>
 
 #include "unigrams.h"
 #include "trule.h"
@@ -16,6 +17,19 @@
 inline double log_poisson(unsigned x, const double& lambda) {
   assert(lambda > 0.0);
   return log(lambda) * x - lgamma(x + 1) - lambda;
+}
+
+inline double log_binom_coeff(unsigned n, unsigned k) {
+  assert(n >= k);
+  if (n == k) return 0.0;
+  return lgamma(n + 1) - lgamma(k + 1) - lgamma(n - k + 1);
+}
+
+// http://en.wikipedia.org/wiki/Negative_binomial_distribution
+inline double log_negative_binom(unsigned x, unsigned r, double p) {
+  assert(p > 0.0);
+  assert(p < 1.0);
+  return log_binom_coeff(x + r - 1, x) + r * log(1 - p) + x * log(p);
 }
 
 inline std::ostream& operator<<(std::ostream& os, const std::vector<WordID>& p) {

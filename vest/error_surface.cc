@@ -5,8 +5,7 @@
 
 using namespace std;
 
-ErrorSurface::~ErrorSurface() {
-}
+ErrorSurface::~ErrorSurface() {}
 
 void ErrorSurface::Serialize(std::string* out) const {
   const int segments = this->size();
@@ -15,8 +14,8 @@ void ErrorSurface::Serialize(std::string* out) const {
   for (int i = 0; i < segments; ++i) {
     const ErrorSegment& cur = (*this)[i];
     string senc;
-    cur.delta->Encode(&senc);
-    assert(senc.size() < 256);
+    cur.delta.Encode(&senc);
+    assert(senc.size() < 1024);
     unsigned char len = senc.size();
     os.write((const char*)&cur.x, sizeof(cur.x));
     os.write((const char*)&len, sizeof(len));
@@ -25,7 +24,7 @@ void ErrorSurface::Serialize(std::string* out) const {
   *out = os.str();
 }
 
-void ErrorSurface::Deserialize(ScoreType type, const std::string& in) {
+void ErrorSurface::Deserialize(const std::string& in) {
   istringstream is(in, ios::binary);
   int segments;
   is.read((char*)&segments, sizeof(segments));
@@ -37,7 +36,7 @@ void ErrorSurface::Deserialize(ScoreType type, const std::string& in) {
     is.read((char*)&len, sizeof(len));
     string senc(len, '\0'); assert(senc.size() == len);
     is.read((char*)&senc[0], len);
-    cur.delta = SentenceScorer::CreateScoreFromString(type, senc);
+    cur.delta = SufficientStats(senc);
   }
 }
 

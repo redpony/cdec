@@ -6,6 +6,7 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include "wordid.h"
+#include <iostream>
 
 class SufficientStats {
  public:
@@ -43,6 +44,11 @@ class SufficientStats {
   bool operator==(const SufficientStats& other) const {
     return other.fields == fields;
   }
+  bool IsAdditiveIdentity() const {
+    for (unsigned i = 0; i < fields.size(); ++i)
+      if (fields[i]) return false;
+    return true;
+  }
   size_t size() const { return fields.size(); }
   float operator[](size_t i) const {
     if (i < fields.size()) return fields[i];
@@ -54,12 +60,12 @@ class SufficientStats {
   std::vector<float> fields;
 };
 
-inline const SufficientStats& operator+(const SufficientStats& a, const SufficientStats& b) {
+inline const SufficientStats operator+(const SufficientStats& a, const SufficientStats& b) {
   SufficientStats res(a);
   return res += b;
 }
 
-inline const SufficientStats& operator-(const SufficientStats& a, const SufficientStats& b) {
+inline const SufficientStats operator-(const SufficientStats& a, const SufficientStats& b) {
   SufficientStats res(a);
   return res -= b;
 }
