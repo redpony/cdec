@@ -65,8 +65,6 @@ my $oraclen=0;
 my $oracleb=20;
 my $bleu_weight=1;
 my $use_make = 1;  # use make to parallelize line search
-my $dirargs='';
-my $density_prune;
 my $useqsub;
 my $pass_suffix = '';
 my $cpbin=1;
@@ -75,7 +73,6 @@ Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
 	"decoder=s" => \$decoderOpt,
 	"jobs=i" => \$jobs,
-	"density-prune=f" => \$density_prune,
 	"dont-clean" => \$disable_clean,
 	"pass-suffix=s" => \$pass_suffix,
 	"dry-run" => \$dryrun,
@@ -87,15 +84,7 @@ if (GetOptions(
 	"normalize=s" => \$normalize,
 	"pmem=s" => \$pmem,
         "cpbin!" => \$cpbin,
-	"rand-directions=i" => \$rand_directions,
-	"random_directions=i" => \$rand_directions,
-        "bleu_weight=s" => \$bleu_weight,
-        "no-primary!" => \$noprimary,
-        "max-similarity=s" => \$maxsim,
-        "oracle-directions=i" => \$oraclen,
-        "n-oracle=i" => \$oraclen,
-        "oracle-batch=i" => \$oracleb,
-        "directions-args=s" => \$dirargs,
+	"random-directions=i" => \$rand_directions,
 	"ref-files=s" => \$refFiles,
 	"metric=s" => \$metric,
 	"source-file=s" => \$srcFile,
@@ -105,10 +94,6 @@ if (GetOptions(
 ) == 0 || @ARGV!=1 || $help) {
 	print_help();
 	exit;
-}
-
-if (defined $density_prune) {
-  die "--density_prune n: n must be greater than 1.0\n" unless $density_prune > 1.0;
 }
 
 if ($useqsub) {
@@ -328,10 +313,7 @@ while (1){
 		print STDERR "\nGENERATE OPTIMIZATION STRATEGY (OPT-ITERATION $opt_iter/$optimization_iters)\n";
 		print STDERR unchecked_output("date");
 		$icc++;
-		my $nop=$noprimary?"--no_primary":"";
-		my $targs=$oraclen ? "--decoder_translations='$runFile.gz' ".get_comma_sep_refs('-references',$refFiles):"";
-		my $bwargs=$bleu_weight!=1 ? "--bleu_weight=$bleu_weight":"";
-		$cmd="$MAPINPUT -w $inweights -r $dir/hgs $bwargs -s $devSize -d $rand_directions --max_similarity=$maxsim --oracle_directions=$oraclen --oracle_batch=$oracleb $targs $dirargs > $dir/agenda.$im1-$opt_iter";
+		$cmd="$MAPINPUT -w $inweights -r $dir/hgs -s $devSize -d $rand_directions > $dir/agenda.$im1-$opt_iter";
 		print STDERR "COMMAND:\n$cmd\n";
 		check_call($cmd);
 		check_call("mkdir -p $dir/splag.$im1");
