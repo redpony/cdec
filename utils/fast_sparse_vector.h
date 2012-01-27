@@ -178,6 +178,12 @@ class FastSparseVector {
   T l2norm() const {
     return sqrt(l2norm_sq());
   }
+  T pnorm(const double p) const {
+    T sum = T();
+    for (const_iterator it = begin(), e = end(); it != e; ++it)
+      sum += pow(fabs(it->second), p);
+    return pow(sum, 1.0 / p);
+  }
   // if values are binary, gives |A intersect B|/|A union B|
   template<typename S>
   S tanimoto_coef(const FastSparseVector<S> &vec) const {

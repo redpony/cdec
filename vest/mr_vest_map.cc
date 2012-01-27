@@ -82,20 +82,20 @@ int main(int argc, char** argv) {
     if (line.empty()) continue;
     istringstream is(line);
     int sent_id;
-    string file, s_origin, s_axis;
+    string file, s_origin, s_direction;
     // path-to-file (JSON) sent_ed starting-point search-direction
-    is >> file >> sent_id >> s_origin >> s_axis;
+    is >> file >> sent_id >> s_origin >> s_direction;
     SparseVector<double> origin;
-    assert(ReadSparseVectorString(s_origin, &origin));
-    SparseVector<double> axis;
-    assert(ReadSparseVectorString(s_axis, &axis));
-    // cerr << "File: " << file << "\nAxis: " << axis << "\n   X: " << origin << endl;
+    ReadSparseVectorString(s_origin, &origin);
+    SparseVector<double> direction;
+    ReadSparseVectorString(s_direction, &direction);
+    // cerr << "File: " << file << "\nDir: " << direction << "\n   X: " << origin << endl;
     if (last_file != file) {
       last_file = file;
       ReadFile rf(file);
       HypergraphIO::ReadFromJSON(rf.stream(), &hg);
     }
-    ViterbiEnvelopeWeightFunction wf(origin, axis);
+    ViterbiEnvelopeWeightFunction wf(origin, direction);
     ViterbiEnvelope ve = Inside<ViterbiEnvelope, ViterbiEnvelopeWeightFunction>(hg, NULL, wf);
     ErrorSurface es;
 
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
     // cerr << "Error surface has " << es.size() << " segments\n";
     string val;
     es.Serialize(&val);
-    cout << 'M' << ' ' << s_origin << ' ' << s_axis << '\t';
+    cout << 'M' << ' ' << s_origin << ' ' << s_direction << '\t';
     B64::b64encode(val.c_str(), val.size(), &cout);
     cout << endl << flush;
   }
