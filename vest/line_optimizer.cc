@@ -4,7 +4,7 @@
 #include <algorithm>
 
 #include "sparse_vector.h"
-#include "scorer.h"
+#include "ns.h"
 
 using namespace std;
 
@@ -18,6 +18,7 @@ struct IntervalComp {
 };
 
 double LineOptimizer::LineOptimize(
+    const EvaluationMetric* metric,
     const vector<ErrorSurface>& surfaces,
     const LineOptimizer::ScoreType type,
     float* best_score,
@@ -32,8 +33,7 @@ double LineOptimizer::LineOptimize(
   }
   sort(all_ints.begin(), all_ints.end(), IntervalComp());
   double last_boundary = all_ints.front()->x;
-  ScoreP accp = all_ints.front()->delta->GetZero();
-  Score *acc=accp.get();
+  SufficientStats acc;
   float& cur_best_score = *best_score;
   cur_best_score = (type == MAXIMIZE_SCORE ?
     -numeric_limits<float>::max() : numeric_limits<float>::max());
@@ -42,9 +42,8 @@ double LineOptimizer::LineOptimize(
   for (vector<ErrorIter>::iterator i = all_ints.begin();
        i != all_ints.end(); ++i) {
     const ErrorSegment& seg = **i;
-    assert(seg.delta);
     if (seg.x - last_boundary > epsilon) {
-      float sco = acc->ComputeScore();
+      float sco = metric->ComputeScore(acc);
       if ((type == MAXIMIZE_SCORE && sco > cur_best_score) ||
           (type == MINIMIZE_SCORE && sco < cur_best_score) ) {
         cur_best_score = sco;
@@ -54,16 +53,18 @@ double LineOptimizer::LineOptimize(
 	} else {
 	  pos = last_boundary + (seg.x - last_boundary) / 2;
 	}
-	// cerr << "NEW BEST: " << pos << "  (score=" << cur_best_score << ")\n";
+	//cerr << "NEW BEST: " << pos << "  (score=" << cur_best_score << ")\n";
       }
-      // string xx; acc->ScoreDetails(&xx); cerr << "---- " << xx;
+      // string xx = metric->DetailedScore(acc); cerr << "---- " << xx;
       // cerr << "---- s=" << sco << "\n";
       last_boundary = seg.x;
     }
     // cerr << "x-boundary=" << seg.x << "\n";
-    acc->PlusEquals(*seg.delta);
+    //string x2; acc.Encode(&x2); cerr << "   ACC: " << x2 << endl;
+    //string x1; seg.delta.Encode(&x1); cerr << " DELTA: " << x1 << endl;
+    acc += seg.delta;
   }
-  float sco = acc->ComputeScore();
+  float sco = metric->ComputeScore(acc);
   if ((type == MAXIMIZE_SCORE && sco > cur_best_score) ||
       (type == MINIMIZE_SCORE && sco < cur_best_score) ) {
     cur_best_score = sco;
@@ -107,3 +108,4 @@ void LineOptimizer::CreateOptimizationDirections(
      RandomUnitVector(features_to_optimize, &out[i], rng);
   cerr << "Generated " << out.size() << " total axes to optimize along.\n";
 }
+

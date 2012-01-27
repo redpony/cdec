@@ -4,25 +4,32 @@
 #include <sstream>
 #include <boost/shared_ptr.hpp>
 
-#include "aligner.h"
+// TODO, if AER is to be optimized again, we will need this
+// #include "aligner.h"
 #include "lattice.h"
 #include "viterbi_envelope.h"
 #include "error_surface.h"
+#include "ns.h"
 
 using boost::shared_ptr;
 using namespace std;
 
 const bool minimize_segments = true;    // if adjacent segments have equal scores, merge them
 
-void ComputeErrorSurface(const SentenceScorer& ss, const ViterbiEnvelope& ve, ErrorSurface* env, const ScoreType type, const Hypergraph& hg) {
+void ComputeErrorSurface(const SegmentEvaluator& ss,
+                         const ViterbiEnvelope& ve,
+                         ErrorSurface* env,
+                         const EvaluationMetric* metric,
+                         const Hypergraph& hg) {
   vector<WordID> prev_trans;
   const vector<shared_ptr<Segment> >& ienv = ve.GetSortedSegs();
   env->resize(ienv.size());
-  ScoreP prev_score;
+  SufficientStats prev_score; // defaults to 0
   int j = 0;
   for (int i = 0; i < ienv.size(); ++i) {
     const Segment& seg = *ienv[i];
     vector<WordID> trans;
+#if 0
     if (type == AER) {
       vector<bool> edges(hg.edges_.size(), false);
       seg.CollectEdgesUsed(&edges);  // get the set of edges in the viterbi
@@ -46,34 +53,31 @@ void ComputeErrorSurface(const SentenceScorer& ss, const ViterbiEnvelope& ve, Er
       string tstr = os.str();
       TD::ConvertSentence(tstr.substr(tstr.rfind(" ||| ") + 5), &trans);
     } else {
+#endif
       seg.ConstructTranslation(&trans);
-    }
-    // cerr << "Scoring: " << TD::GetString(trans) << endl;
+    //}
+    //cerr << "Scoring: " << TD::GetString(trans) << endl;
     if (trans == prev_trans) {
       if (!minimize_segments) {
-        assert(prev_score); // if this fails, it means
-	                    // the decoder can generate null translations
         ErrorSegment& out = (*env)[j];
-        out.delta = prev_score->GetZero();
+        out.delta.fields.clear();
         out.x = seg.x;
 	++j;
       }
-      // cerr << "Identical translation, skipping scoring\n";
+      //cerr << "Identical translation, skipping scoring\n";
     } else {
-      ScoreP score = ss.ScoreCandidate(trans);
+      SufficientStats score;
+      ss.Evaluate(trans, &score);
       // cerr << "score= " << score->ComputeScore() << "\n";
-      ScoreP cur_delta_p = score->GetZero();
-      Score* cur_delta = cur_delta_p.get();
-      // just record the score diffs
-      if (!prev_score)
-        prev_score = score->GetZero();
-
-      score->Subtract(*prev_score, cur_delta);
+      //string x1; score.Encode(&x1); cerr << "STATS: " << x1 << endl;
+      const SufficientStats delta = score - prev_score;
+      //string x2; delta.Encode(&x2); cerr << "DELTA: " << x2 << endl;
+      //string xx; delta.Encode(&xx); cerr << xx << endl;
       prev_trans.swap(trans);
       prev_score = score;
-      if ((!minimize_segments) || (!cur_delta->IsAdditiveIdentity())) {
+      if ((!minimize_segments) || (!delta.IsAdditiveIdentity())) {
         ErrorSegment& out = (*env)[j];
-        out.delta = cur_delta_p;
+        out.delta = delta;
         out.x = seg.x;
         ++j;
       }

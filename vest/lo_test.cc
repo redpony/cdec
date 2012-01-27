@@ -5,6 +5,8 @@
 #include <boost/shared_ptr.hpp>
 #include <gtest/gtest.h>
 
+#include "ns.h"
+#include "ns_docscorer.h"
 #include "ces.h"
 #include "fdict.h"
 #include "hg.h"
@@ -15,7 +17,6 @@
 #include "viterbi.h"
 #include "viterbi_envelope.h"
 #include "line_optimizer.h"
-#include "scorer.h"
 
 using namespace std;
 using boost::shared_ptr;
@@ -141,9 +142,6 @@ TEST_F(OptTest, TestS1) {
   TD::ConvertSentence(ref22, &refs2[1]);
   TD::ConvertSentence(ref32, &refs2[2]);
   TD::ConvertSentence(ref42, &refs2[3]);
-  ScoreType type = ScoreTypeFromString("ibm_bleu");
-  ScorerP scorer1 = SentenceScorer::CreateSentenceScorer(type, refs1);
-  ScorerP scorer2 = SentenceScorer::CreateSentenceScorer(type, refs2);
   vector<ViterbiEnvelope> envs(2);
 
   RandomNumberGenerator<boost::mt19937> rng;
@@ -167,14 +165,17 @@ TEST_F(OptTest, TestS1) {
   envs[1] = Inside<ViterbiEnvelope, ViterbiEnvelopeWeightFunction>(hg2, NULL, wf);
 
   vector<ErrorSurface> es(2);
-  ComputeErrorSurface(*scorer1, envs[0], &es[0], IBM_BLEU, hg);
-  ComputeErrorSurface(*scorer2, envs[1], &es[1], IBM_BLEU, hg2);
+  EvaluationMetric* metric = EvaluationMetric::Instance("IBM_BLEU");
+  boost::shared_ptr<SegmentEvaluator> scorer1 = metric->CreateSegmentEvaluator(refs1);
+  boost::shared_ptr<SegmentEvaluator> scorer2 = metric->CreateSegmentEvaluator(refs2);
+  ComputeErrorSurface(*scorer1, envs[0], &es[0], metric, hg);
+  ComputeErrorSurface(*scorer2, envs[1], &es[1], metric, hg2);
   cerr << envs[0].size() << " " << envs[1].size() << endl;
   cerr << es[0].size() << " " << es[1].size() << endl;
   envs.clear();
   clock_t t_env=clock();
   float score;
-  double m = LineOptimizer::LineOptimize(es, LineOptimizer::MAXIMIZE_SCORE, &score);
+  double m = LineOptimizer::LineOptimize(metric,es, LineOptimizer::MAXIMIZE_SCORE, &score);
   clock_t t_opt=clock();
   cerr << "line optimizer returned: " << m << " (SCORE=" << score << ")\n";
   EXPECT_FLOAT_EQ(0.48719698, score);
@@ -217,15 +218,15 @@ TEST_F(OptTest,TestZeroOrigin) {
   vector<ViterbiEnvelope> envs(1);
   envs[0] = Inside<ViterbiEnvelope, ViterbiEnvelopeWeightFunction>(hg, NULL, wf);
 
-  ScoreType type = ScoreTypeFromString("ibm_bleu");
   vector<vector<WordID> > mr(4);
   TD::ConvertSentence("untitled", &mr[0]);
   TD::ConvertSentence("with no title", &mr[1]);
   TD::ConvertSentence("without a title", &mr[2]);
   TD::ConvertSentence("without title", &mr[3]);
-  ScorerP scorer1 = SentenceScorer::CreateSentenceScorer(type, mr);
+  EvaluationMetric* metric = EvaluationMetric::Instance("IBM_BLEU");
+  boost::shared_ptr<SegmentEvaluator> scorer1 = metric->CreateSegmentEvaluator(mr);
   vector<ErrorSurface> es(1);
-  ComputeErrorSurface(*scorer1, envs[0], &es[0], IBM_BLEU, hg);
+  ComputeErrorSurface(*scorer1, envs[0], &es[0], metric, hg);
 }
 
 int main(int argc, char **argv) {

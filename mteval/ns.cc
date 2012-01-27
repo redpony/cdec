@@ -136,6 +136,10 @@ struct BleuSegmentEvaluator : public SegmentEvaluator {
                          float* correct,  // N elements reserved
                          float* hyp,      // N elements reserved
                          bool clip_counts = true) const {
+    // clear clipping stats
+    for (typename NGramCountMap::iterator it = ngrams_.begin(); it != ngrams_.end(); ++it)
+      it->second.second = 0;
+
     vector<WordID> ngram(N);
     *correct *= 0;
     *hyp *= 0;
