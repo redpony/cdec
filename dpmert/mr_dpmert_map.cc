@@ -12,7 +12,7 @@
 #include "filelib.h"
 #include "stringlib.h"
 #include "sparse_vector.h"
-#include "viterbi_envelope.h"
+#include "mert_geometry.h"
 #include "inside_outside.h"
 #include "error_surface.h"
 #include "b64tools.h"
@@ -95,11 +95,11 @@ int main(int argc, char** argv) {
       ReadFile rf(file);
       HypergraphIO::ReadFromJSON(rf.stream(), &hg);
     }
-    ViterbiEnvelopeWeightFunction wf(origin, direction);
-    ViterbiEnvelope ve = Inside<ViterbiEnvelope, ViterbiEnvelopeWeightFunction>(hg, NULL, wf);
-    ErrorSurface es;
+    const ConvexHullWeightFunction wf(origin, direction);
+    const ConvexHull hull = Inside<ConvexHull, ConvexHullWeightFunction>(hg, NULL, wf);
 
-    ComputeErrorSurface(*ds[sent_id], ve, &es, metric, hg);
+    ErrorSurface es;
+    ComputeErrorSurface(*ds[sent_id], hull, &es, metric, hg);
     //cerr << "Viterbi envelope has " << ve.size() << " segments\n";
     // cerr << "Error surface has " << es.size() << " segments\n";
     string val;

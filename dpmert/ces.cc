@@ -7,7 +7,7 @@
 // TODO, if AER is to be optimized again, we will need this
 // #include "aligner.h"
 #include "lattice.h"
-#include "viterbi_envelope.h"
+#include "mert_geometry.h"
 #include "error_surface.h"
 #include "ns.h"
 
@@ -17,17 +17,17 @@ using namespace std;
 const bool minimize_segments = true;    // if adjacent segments have equal scores, merge them
 
 void ComputeErrorSurface(const SegmentEvaluator& ss,
-                         const ViterbiEnvelope& ve,
+                         const ConvexHull& ve,
                          ErrorSurface* env,
                          const EvaluationMetric* metric,
                          const Hypergraph& hg) {
   vector<WordID> prev_trans;
-  const vector<shared_ptr<Segment> >& ienv = ve.GetSortedSegs();
+  const vector<shared_ptr<MERTPoint> >& ienv = ve.GetSortedSegs();
   env->resize(ienv.size());
   SufficientStats prev_score; // defaults to 0
   int j = 0;
   for (int i = 0; i < ienv.size(); ++i) {
-    const Segment& seg = *ienv[i];
+    const MERTPoint& seg = *ienv[i];
     vector<WordID> trans;
 #if 0
     if (type == AER) {

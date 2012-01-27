@@ -15,7 +15,7 @@
 #include "filelib.h"
 #include "inside_outside.h"
 #include "viterbi.h"
-#include "viterbi_envelope.h"
+#include "mert_geometry.h"
 #include "line_optimizer.h"
 
 using namespace std;
@@ -43,23 +43,23 @@ TEST_F(OptTest, TestCheckNaN) {
   EXPECT_EQ(true, isnan(z));
 }
 
-TEST_F(OptTest,TestViterbiEnvelope) {
-  shared_ptr<Segment> a1(new Segment(-1, 0));
-  shared_ptr<Segment> b1(new Segment(1, 0));
-  shared_ptr<Segment> a2(new Segment(-1, 1));
-  shared_ptr<Segment> b2(new Segment(1, -1));
-  vector<shared_ptr<Segment> > sa; sa.push_back(a1); sa.push_back(b1);
-  vector<shared_ptr<Segment> > sb; sb.push_back(a2); sb.push_back(b2);
-  ViterbiEnvelope a(sa);
+TEST_F(OptTest,TestConvexHull) {
+  shared_ptr<MERTPoint> a1(new MERTPoint(-1, 0));
+  shared_ptr<MERTPoint> b1(new MERTPoint(1, 0));
+  shared_ptr<MERTPoint> a2(new MERTPoint(-1, 1));
+  shared_ptr<MERTPoint> b2(new MERTPoint(1, -1));
+  vector<shared_ptr<MERTPoint> > sa; sa.push_back(a1); sa.push_back(b1);
+  vector<shared_ptr<MERTPoint> > sb; sb.push_back(a2); sb.push_back(b2);
+  ConvexHull a(sa);
   cerr << a << endl;
-  ViterbiEnvelope b(sb);
-  ViterbiEnvelope c = a;
+  ConvexHull b(sb);
+  ConvexHull c = a;
   c *= b;
   cerr << a << " (*) " << b << " = " << c << endl;
   EXPECT_EQ(3, c.size());
 }
 
-TEST_F(OptTest,TestViterbiEnvelopeInside) {
+TEST_F(OptTest,TestConvexHullInside) {
   const string json = "{\"rules\":[1,\"[X] ||| a\",2,\"[X] ||| A [1]\",3,\"[X] ||| c\",4,\"[X] ||| C [1]\",5,\"[X] ||| [1] B [2]\",6,\"[X] ||| [1] b [2]\",7,\"[X] ||| X [1]\",8,\"[X] ||| Z [1]\"],\"features\":[\"f1\",\"f2\",\"Feature_1\",\"Feature_0\",\"Model_0\",\"Model_1\",\"Model_2\",\"Model_3\",\"Model_4\",\"Model_5\",\"Model_6\",\"Model_7\"],\"edges\":[{\"tail\":[],\"feats\":[],\"rule\":1}],\"node\":{\"in_edges\":[0]},\"edges\":[{\"tail\":[0],\"feats\":[0,-0.8,1,-0.1],\"rule\":2}],\"node\":{\"in_edges\":[1]},\"edges\":[{\"tail\":[],\"feats\":[1,-1],\"rule\":3}],\"node\":{\"in_edges\":[2]},\"edges\":[{\"tail\":[2],\"feats\":[0,-0.2,1,-0.1],\"rule\":4}],\"node\":{\"in_edges\":[3]},\"edges\":[{\"tail\":[1,3],\"feats\":[0,-1.2,1,-0.2],\"rule\":5},{\"tail\":[1,3],\"feats\":[0,-0.5,1,-1.3],\"rule\":6}],\"node\":{\"in_edges\":[4,5]},\"edges\":[{\"tail\":[4],\"feats\":[0,-0.5,1,-0.8],\"rule\":7},{\"tail\":[4],\"feats\":[0,-0.7,1,-0.9],\"rule\":8}],\"node\":{\"in_edges\":[6,7]}}";
   Hypergraph hg;
   istringstream instr(json);
@@ -78,10 +78,10 @@ TEST_F(OptTest,TestViterbiEnvelopeInside) {
     cerr << log(d->score) << " ||| " << TD::GetString(d->yield) << " ||| " << d->feature_values << endl;
   }
   SparseVector<double> dir; dir.set_value(FD::Convert("f1"), 1.0);
-  ViterbiEnvelopeWeightFunction wf(wts, dir);
-  ViterbiEnvelope env = Inside<ViterbiEnvelope, ViterbiEnvelopeWeightFunction>(hg, NULL, wf);
+  ConvexHullWeightFunction wf(wts, dir);
+  ConvexHull env = Inside<ConvexHull, ConvexHullWeightFunction>(hg, NULL, wf);
   cerr << env << endl;
-  const vector<boost::shared_ptr<Segment> >& segs = env.GetSortedSegs();
+  const vector<boost::shared_ptr<MERTPoint> >& segs = env.GetSortedSegs();
   dir *= segs[1]->x;
   wts += dir;
   hg.Reweight(wts);
@@ -142,7 +142,7 @@ TEST_F(OptTest, TestS1) {
   TD::ConvertSentence(ref22, &refs2[1]);
   TD::ConvertSentence(ref32, &refs2[2]);
   TD::ConvertSentence(ref42, &refs2[3]);
-  vector<ViterbiEnvelope> envs(2);
+  vector<ConvexHull> envs(2);
 
   RandomNumberGenerator<boost::mt19937> rng;
 
@@ -160,9 +160,9 @@ TEST_F(OptTest, TestS1) {
   cerr << "Computing Viterbi envelope using inside algorithm...\n";
   cerr << "axis: " << axis << endl;
   clock_t t_start=clock();
-  ViterbiEnvelopeWeightFunction wf(wts, axis);  // wts = starting point, axis = search direction
-  envs[0] = Inside<ViterbiEnvelope, ViterbiEnvelopeWeightFunction>(hg, NULL, wf);
-  envs[1] = Inside<ViterbiEnvelope, ViterbiEnvelopeWeightFunction>(hg2, NULL, wf);
+  ConvexHullWeightFunction wf(wts, axis);  // wts = starting point, axis = search direction
+  envs[0] = Inside<ConvexHull, ConvexHullWeightFunction>(hg, NULL, wf);
+  envs[1] = Inside<ConvexHull, ConvexHullWeightFunction>(hg2, NULL, wf);
 
   vector<ErrorSurface> es(2);
   EvaluationMetric* metric = EvaluationMetric::Instance("IBM_BLEU");
@@ -214,9 +214,9 @@ TEST_F(OptTest,TestZeroOrigin) {
   }
  
   SparseVector<double> axis; axis.set_value(FD::Convert("Glue"),1.0);
-  ViterbiEnvelopeWeightFunction wf(wts, axis);  // wts = starting point, axis = search direction
-  vector<ViterbiEnvelope> envs(1);
-  envs[0] = Inside<ViterbiEnvelope, ViterbiEnvelopeWeightFunction>(hg, NULL, wf);
+  ConvexHullWeightFunction wf(wts, axis);  // wts = starting point, axis = search direction
+  vector<ConvexHull> envs(1);
+  envs[0] = Inside<ConvexHull, ConvexHullWeightFunction>(hg, NULL, wf);
 
   vector<vector<WordID> > mr(4);
   TD::ConvertSentence("untitled", &mr[0]);

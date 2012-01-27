@@ -21,9 +21,9 @@ my $bin_dir = $SCRIPT_DIR;
 die "Bin directory $bin_dir missing/inaccessible" unless -d $bin_dir;
 my $FAST_SCORE="$bin_dir/../mteval/fast_score";
 die "Can't execute $FAST_SCORE" unless -x $FAST_SCORE;
-my $MAPINPUT = "$bin_dir/mr_vest_generate_mapper_input";
-my $MAPPER = "$bin_dir/mr_vest_map";
-my $REDUCER = "$bin_dir/mr_vest_reduce";
+my $MAPINPUT = "$bin_dir/mr_dpmert_generate_mapper_input";
+my $MAPPER = "$bin_dir/mr_dpmert_map";
+my $REDUCER = "$bin_dir/mr_dpmert_reduce";
 my $parallelize = "$bin_dir/parallelize.pl";
 my $libcall = "$bin_dir/libcall.pl";
 my $sentserver = "$bin_dir/sentserver";
@@ -136,7 +136,7 @@ if ($metric =~ /^ter$|^aer$/i) {
 my $refs_comma_sep = get_comma_sep_refs('r',$refFiles);
 
 unless ($dir){
-	$dir = "vest";
+	$dir = "dpmert";
 }
 unless ($dir =~ /^\//){  # convert relative path to absolute path
 	my $basedir = check_output("pwd");
@@ -197,14 +197,14 @@ if ($dryrun){
 	write_config(*STDERR);
 	exit 0;
 } else {
-	if (-e $dir && dirsize($dir)>1 && -e "$dir/hgs" ){ # allow preexisting logfile, binaries, but not dist-vest.pl outputs
+	if (-e $dir && dirsize($dir)>1 && -e "$dir/hgs" ){ # allow preexisting logfile, binaries, but not dist-dpmert.pl outputs
 	  die "ERROR: working dir $dir already exists\n\n";
 	} else {
 		-e $dir || mkdir $dir;
 		mkdir "$dir/hgs";
         modbin("$dir/bin",\$LocalConfig,\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize,\$sentserver,\$sentclient,\$libcall) if $cpbin;
     mkdir "$dir/scripts";
-        my $cmdfile="$dir/rerun-vest.sh";
+        my $cmdfile="$dir/rerun-dpmert.sh";
         open CMD,'>',$cmdfile;
         print CMD "cd ",&getcwd,"\n";
 #        print CMD &escaped_cmdline,"\n"; #buggy - last arg is quoted.
@@ -342,7 +342,7 @@ while (1){
 			my $mapoutput = $shard;
 			my $client_name = $shard;
 			$client_name =~ s/mapinput.//;
-			$client_name = "vest.$client_name";
+			$client_name = "dpmert.$client_name";
 			$mapoutput =~ s/mapinput/mapoutput/;
 			push @mapoutputs, "$dir/splag.$im1/$mapoutput";
 			$o2i{"$dir/splag.$im1/$mapoutput"} = "$dir/splag.$im1/$shard";
