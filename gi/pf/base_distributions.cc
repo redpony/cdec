@@ -1,4 +1,4 @@
-#include "base_measures.h"
+#include "base_distributions.h"
 
 #include <iostream>
 
