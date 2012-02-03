@@ -22,6 +22,10 @@ static const unsigned kDUMMY_LAST_ENTRY = 5;
 using namespace std;
 using namespace std::tr1;
 
+bool TERMetric::IsErrorMetric() const {
+  return true;
+}
+
 namespace NewScorer {
 
 struct COSTS {

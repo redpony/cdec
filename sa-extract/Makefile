@@ -1,7 +1,7 @@
 PYVER=python2.7
-PYDIR=/usr
+PYDIR=/usr/local/Cellar/python/2.7.2
 PYINCLUDE=$(PYDIR)/include/$(PYVER)
-CYTHON=/usr/bin/cython
+CYTHON=/usr/local/share/python/cython
 PYTHON=$(PYDIR)/bin/python
 
 %.c: %.pyx

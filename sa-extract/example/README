@@ -4,5 +4,5 @@ Commands to compile a corpus and extract some grammars
 # compile
 ../sa-compile.pl -b nc=corpus.de.gz,corpus.en.gz -a gdfa=corpus.align.gz > extract.ini
 # extract
-cat test.de | ../extractor.py -c extract.ini
+cat test.de | ../escape-testset.pl | ../extractor.py -c extract.ini
 
