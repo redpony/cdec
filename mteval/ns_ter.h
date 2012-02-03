@@ -9,6 +9,7 @@ class TERMetric : public EvaluationMetric {
   TERMetric() : EvaluationMetric("TER") {}
 
  public:
+  virtual bool IsErrorMetric() const;
   virtual unsigned SufficientStatisticsVectorSize() const;
   virtual std::string DetailedScore(const SufficientStats& stats) const;
   virtual void ComputeSufficientStatistics(const std::vector<WordID>& hyp,
