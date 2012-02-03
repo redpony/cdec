@@ -28,10 +28,22 @@ COMPILING A PARALLEL CORPUS AND WORD ALIGNMENT
                 -a alignment_name=alignment.txt > extract.ini
 
 
+  The training data should be in two parallel text files (source.fr,source.en)
+  and the alignments are expected in "0-0 1-2 2-1 ..." format produced by
+  most alignment toolkits. The text files should NOT be escaped for non-XML
+  characters.
+
+
 EXTRACTION OF PER-SENTENCE GRAMMARS
 ==============================================================================
+The most common use-case we support is extraction of "per-sentence" grammars
+for each segment in a testset. You may run the extractor on test set, but it
+will try to interpret tags as SGML markup, so we provide a script that does
+escaping: ./escape-testset.pl.
+
 - Example:
-  cat test.fr | extractor.py -c extract.ini
+
+  cat test.fr | ./escape-testset.pl | ./extractor.py -c extract.ini
 
 
 EXTRACTION OF COMPLETE TEST-SET GRAMMARS
