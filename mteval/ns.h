@@ -94,6 +94,10 @@ class EvaluationMetric {
  public:
   const std::string& MetricId() const { return name_; }
 
+  // returns true for metrics like WER and TER where lower scores are better
+  // false for metrics like BLEU and METEOR where higher scores are better
+  virtual bool IsErrorMetric() const;
+
   virtual unsigned SufficientStatisticsVectorSize() const;
   virtual float ComputeScore(const SufficientStats& stats) const = 0;
   virtual std::string DetailedScore(const SufficientStats& stats) const;

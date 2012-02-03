@@ -21,6 +21,10 @@ map<string, EvaluationMetric*> EvaluationMetric::instances_;
 SegmentEvaluator::~SegmentEvaluator() {}
 EvaluationMetric::~EvaluationMetric() {}
 
+bool EvaluationMetric::IsErrorMetric() const {
+  return false;
+}
+
 struct DefaultSegmentEvaluator : public SegmentEvaluator {
   DefaultSegmentEvaluator(const vector<vector<WordID> >& refs, const EvaluationMetric* em) : refs_(refs), em_(em) {}
   void Evaluate(const vector<WordID>& hyp, SufficientStats* out) const {

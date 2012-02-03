@@ -12,7 +12,7 @@ use POSIX ":sys_wait_h";
 my $QSUB_CMD = qsub_args(mert_memory());
 my $default_jobs = env_default_jobs();
 
-my $VEST_DIR="$SCRIPT_DIR/../vest";
+my $VEST_DIR="$SCRIPT_DIR/../dpmert";
 require "$VEST_DIR/libcall.pl";
 
 # Default settings
@@ -338,7 +338,7 @@ while (1){
 		$mapoutput =~ s/mapinput/mapoutput/;
 		push @mapoutputs, "$dir/splag.$im1/$mapoutput";
 		$o2i{"$dir/splag.$im1/$mapoutput"} = "$dir/splag.$im1/$shard";
-		my $script = "$MAPPER -s $srcFile -l $metric $refs_comma_sep -w $inweights -K $dir/kbest < $dir/splag.$im1/$shard > $dir/splag.$im1/$mapoutput";
+		my $script = "$MAPPER -s $srcFile -m $metric $refs_comma_sep -w $inweights -K $dir/kbest < $dir/splag.$im1/$shard > $dir/splag.$im1/$mapoutput";
 		if ($use_make) {
 			my $script_file = "$dir/scripts/map.$shard";
 			open F, ">$script_file" or die "Can't write $script_file: $!";
