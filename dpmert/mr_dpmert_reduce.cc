@@ -34,10 +34,10 @@ int main(int argc, char** argv) {
   po::variables_map conf;
   InitCommandLine(argc, argv, &conf);
   const string evaluation_metric = conf["evaluation_metric"].as<string>();
-  LineOptimizer::ScoreType opt_type = LineOptimizer::MAXIMIZE_SCORE;
-  if (UppercaseString(evaluation_metric) == "TER")
-    opt_type = LineOptimizer::MINIMIZE_SCORE;
   EvaluationMetric* metric = EvaluationMetric::Instance(evaluation_metric);
+  LineOptimizer::ScoreType opt_type = LineOptimizer::MAXIMIZE_SCORE;
+  if (metric->IsErrorMetric())
+    opt_type = LineOptimizer::MINIMIZE_SCORE;
 
   vector<ErrorSurface> esv;
   string last_key, line, key, val;
