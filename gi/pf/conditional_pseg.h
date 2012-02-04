@@ -10,7 +10,7 @@
 #include "ccrp_nt.h"
 #include "mfcr.h"
 #include "trule.h"
-#include "base_measures.h"
+#include "base_distributions.h"
 #include "tdict.h"
 
 template <typename ConditionalBaseMeasure>

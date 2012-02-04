@@ -7,7 +7,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #include "array2d.h"
-#include "base_measures.h"
+#include "base_distributions.h"
 #include "monotonic_pseg.h"
 #include "conditional_pseg.h"
 #include "trule.h"

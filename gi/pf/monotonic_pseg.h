@@ -6,7 +6,7 @@
 #include "prob.h"
 #include "ccrp_nt.h"
 #include "trule.h"
-#include "base_measures.h"
+#include "base_distributions.h"
 
 template <typename BaseMeasure>
 struct MonotonicParallelSegementationModel {
