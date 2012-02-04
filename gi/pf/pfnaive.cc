@@ -7,7 +7,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #include "pf.h"
-#include "base_measures.h"
+#include "base_distributions.h"
 #include "monotonic_pseg.h"
 #include "reachability.h"
 #include "viterbi.h"
