@@ -7,11 +7,12 @@ TESTS = ts phmt mfcr_test
 if HAVE_GTEST
 noinst_PROGRAMS += \
   dict_test \
+  m_test \
   weights_test \
   logval_test \
   small_vector_test
 
-TESTS += small_vector_test logval_test weights_test dict_test
+TESTS += small_vector_test logval_test weights_test dict_test m_test
 endif
 
 reconstruct_weights_SOURCES = reconstruct_weights.cc
@@ -38,6 +39,8 @@ endif
 
 phmt_SOURCES = phmt.cc
 ts_SOURCES = ts.cc
+m_test_SOURCES = m_test.cc
+m_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
 dict_test_SOURCES = dict_test.cc
 dict_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
 mfcr_test_SOURCES = mfcr_test.cc

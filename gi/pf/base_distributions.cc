@@ -59,7 +59,7 @@ prob_t PhraseConditionalUninformativeUnigramBase::p0(const vector<WordID>& vsrc,
   const int flen = vsrc.size() - start_src;
   const int elen = vtrg.size() - start_trg;
   prob_t p;
-  p.logeq(log_poisson(elen, flen + 0.01));       // elen | flen          ~Pois(flen + 0.01)
+  p.logeq(Md::log_poisson(elen, flen + 0.01));       // elen | flen          ~Pois(flen + 0.01)
   //p.logeq(log_poisson(elen, 1));       // elen | flen          ~Pois(flen + 0.01)
   for (int i = 0; i < elen; ++i)
     p *= u(vtrg[i + start_trg]);                        // draw e_i             ~Uniform
@@ -73,7 +73,7 @@ prob_t PhraseConditionalUninformativeBase::p0(const vector<WordID>& vsrc,
   const int elen = vtrg.size() - start_trg;
   prob_t p;
   //p.logeq(log_poisson(elen, flen + 0.01));       // elen | flen          ~Pois(flen + 0.01)
-  p.logeq(log_poisson(elen, 1));       // elen | flen          ~Pois(flen + 0.01)
+  p.logeq(Md::log_poisson(elen, 1));       // elen | flen          ~Pois(flen + 0.01)
   for (int i = 0; i < elen; ++i)
     p *= kUNIFORM_TARGET;                        // draw e_i             ~Uniform
   return p;
@@ -113,7 +113,7 @@ prob_t PhraseConditionalBase::p0(const vector<WordID>& vsrc,
   const int elen = vtrg.size() - start_trg;
   prob_t uniform_src_alignment; uniform_src_alignment.logeq(-log(flen + 1));
   prob_t p;
-  p.logeq(log_poisson(elen, flen + 0.01));       // elen | flen          ~Pois(flen + 0.01)
+  p.logeq(Md::log_poisson(elen, flen + 0.01));       // elen | flen          ~Pois(flen + 0.01)
   for (int i = 0; i < elen; ++i) {               // for each position i in e-RHS
     const WordID trg = vtrg[i + start_trg];
     prob_t tp = prob_t::Zero();
@@ -139,9 +139,9 @@ prob_t PhraseJointBase::p0(const vector<WordID>& vsrc,
   const int elen = vtrg.size() - start_trg;
   prob_t uniform_src_alignment; uniform_src_alignment.logeq(-log(flen + 1));
   prob_t p;
-  p.logeq(log_poisson(flen, 1.0));               // flen                 ~Pois(1)
+  p.logeq(Md::log_poisson(flen, 1.0));               // flen                 ~Pois(1)
                                                  // elen | flen          ~Pois(flen + 0.01)
-  prob_t ptrglen; ptrglen.logeq(log_poisson(elen, flen + 0.01));
+  prob_t ptrglen; ptrglen.logeq(Md::log_poisson(elen, flen + 0.01));
   p *= ptrglen;
   p *= kUNIFORM_SOURCE.pow(flen);                // each f in F ~Uniform
   for (int i = 0; i < elen; ++i) {               // for each position i in E
@@ -171,9 +171,9 @@ prob_t PhraseJointBase_BiDir::p0(const vector<WordID>& vsrc,
   prob_t uniform_trg_alignment; uniform_trg_alignment.logeq(-log(elen + 1));
 
   prob_t p1;
-  p1.logeq(log_poisson(flen, 1.0));               // flen                 ~Pois(1)
+  p1.logeq(Md::log_poisson(flen, 1.0));               // flen                 ~Pois(1)
                                                  // elen | flen          ~Pois(flen + 0.01)
-  prob_t ptrglen; ptrglen.logeq(log_poisson(elen, flen + 0.01));
+  prob_t ptrglen; ptrglen.logeq(Md::log_poisson(elen, flen + 0.01));
   p1 *= ptrglen;
   p1 *= kUNIFORM_SOURCE.pow(flen);                // each f in F ~Uniform
   for (int i = 0; i < elen; ++i) {               // for each position i in E
@@ -193,9 +193,9 @@ prob_t PhraseJointBase_BiDir::p0(const vector<WordID>& vsrc,
   }
 
   prob_t p2;
-  p2.logeq(log_poisson(elen, 1.0));               // elen                 ~Pois(1)
+  p2.logeq(Md::log_poisson(elen, 1.0));               // elen                 ~Pois(1)
                                                  // flen | elen          ~Pois(flen + 0.01)
-  prob_t psrclen; psrclen.logeq(log_poisson(flen, elen + 0.01));
+  prob_t psrclen; psrclen.logeq(Md::log_poisson(flen, elen + 0.01));
   p2 *= psrclen;
   p2 *= kUNIFORM_TARGET.pow(elen);                // each f in F ~Uniform
   for (int i = 0; i < flen; ++i) {               // for each position i in E
@@ -227,9 +227,9 @@ JumpBase::JumpBase() : p(200) {
     for (int j = min_jump; j <= max_jump; ++j) {
       prob_t& cp = cpd[j];
       if (j < 0)
-        cp.logeq(log_poisson(1.5-j, 1));
+        cp.logeq(Md::log_poisson(1.5-j, 1));
       else if (j > 0)
-        cp.logeq(log_poisson(j, 1));
+        cp.logeq(Md::log_poisson(j, 1));
       cp.poweq(0.2);
       z += cp;
     }

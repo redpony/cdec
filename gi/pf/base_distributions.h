@@ -13,24 +13,7 @@
 #include "prob.h"
 #include "tdict.h"
 #include "sampler.h"
-
-inline double log_poisson(unsigned x, const double& lambda) {
-  assert(lambda > 0.0);
-  return log(lambda) * x - lgamma(x + 1) - lambda;
-}
-
-inline double log_binom_coeff(unsigned n, unsigned k) {
-  assert(n >= k);
-  if (n == k) return 0.0;
-  return lgamma(n + 1) - lgamma(k + 1) - lgamma(n - k + 1);
-}
-
-// http://en.wikipedia.org/wiki/Negative_binomial_distribution
-inline double log_negative_binom(unsigned x, unsigned r, double p) {
-  assert(p > 0.0);
-  assert(p < 1.0);
-  return log_binom_coeff(x + r - 1, x) + r * log(1 - p) + x * log(p);
-}
+#include "m.h"
 
 inline std::ostream& operator<<(std::ostream& os, const std::vector<WordID>& p) {
   os << '[';
@@ -68,7 +51,7 @@ struct Model1 {
 struct PoissonUniformUninformativeBase {
   explicit PoissonUniformUninformativeBase(const unsigned ves) : kUNIFORM(1.0 / ves) {}
   prob_t operator()(const TRule& r) const {
-    prob_t p; p.logeq(log_poisson(r.e_.size(), 1.0));
+    prob_t p; p.logeq(Md::log_poisson(r.e_.size(), 1.0));
     prob_t q = kUNIFORM; q.poweq(r.e_.size());
     p *= q;
     return p;
