@@ -1,4 +1,5 @@
 mira/kbest_mira
+utils/m_test
 sa-extract/calignment.c
 sa-extract/calignment.so
 sa-extract/cdat.c

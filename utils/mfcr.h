@@ -12,6 +12,7 @@
 #include <boost/functional/hash.hpp>
 #include "sampler.h"
 #include "slice_sampler.h"
+#include "m.h"
 
 struct TableCount {
   TableCount() : count(), floor() {}
@@ -218,31 +219,14 @@ class MFCR {
     return log_crp_prob(d_, alpha_);
   }
 
-  static double log_beta_density(const double& x, const double& alpha, const double& beta) {
-    assert(x > 0.0);
-    assert(x < 1.0);
-    assert(alpha > 0.0);
-    assert(beta > 0.0);
-    const double lp = (alpha-1)*log(x)+(beta-1)*log(1-x)+lgamma(alpha+beta)-lgamma(alpha)-lgamma(beta);
-    return lp;
-  }
-
-  static double log_gamma_density(const double& x, const double& shape, const double& rate) {
-    assert(x >= 0.0);
-    assert(shape > 0.0);
-    assert(rate > 0.0);
-    const double lp = (shape-1)*log(x) - shape*log(rate) - x/rate - lgamma(shape);
-    return lp;
-  }
-
   // taken from http://en.wikipedia.org/wiki/Chinese_restaurant_process
   // does not include draws from G_w's
   double log_crp_prob(const double& d, const double& alpha) const {
     double lp = 0.0;
     if (has_d_prior())
-      lp = log_beta_density(d, d_prior_alpha_, d_prior_beta_);
+      lp = Md::log_beta_density(d, d_prior_alpha_, d_prior_beta_);
     if (has_alpha_prior())
-      lp += log_gamma_density(alpha, alpha_prior_shape_, alpha_prior_rate_);
+      lp += Md::log_gamma_density(alpha, alpha_prior_shape_, alpha_prior_rate_);
     assert(lp <= 0.0);
     if (num_customers_) {
       if (d > 0.0) {

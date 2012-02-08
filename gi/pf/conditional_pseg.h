@@ -6,6 +6,7 @@
 #include <boost/functional/hash.hpp>
 #include <iostream>
 
+#include "m.h"
 #include "prob.h"
 #include "ccrp_nt.h"
 #include "mfcr.h"
@@ -210,7 +211,7 @@ struct ConditionalParallelSegementationModel {
 
   prob_t AlignProbability(unsigned span) const {
     prob_t p;
-    p.logeq(aligns.logprob(span, log_poisson(span, 1.0)));
+    p.logeq(aligns.logprob(span, Md::log_poisson(span, 1.0)));
     return p;
   }
 
