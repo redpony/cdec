@@ -8,7 +8,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "filelib.h"
-#include "aligner.h"
 #include "alignment_pharaoh.h"
 
 namespace po = boost::program_options;
@@ -79,7 +78,7 @@ struct FMeasureCommand : public Command {
 struct DisplayCommand : public Command {
   string Name() const { return "display"; }
   bool RequiresTwoOperands() const { return false; }
-  void Apply(const Array2D<bool>& in, const Array2D<bool>&not_used, Array2D<bool>* x) {
+  void Apply(const Array2D<bool>& in, const Array2D<bool>&, Array2D<bool>* x) {
     *x = in;
     cout << *x << endl;
   }
@@ -88,7 +87,7 @@ struct DisplayCommand : public Command {
 struct ConvertCommand : public Command {
   string Name() const { return "convert"; }
   bool RequiresTwoOperands() const { return false; }
-  void Apply(const Array2D<bool>& in, const Array2D<bool>&not_used, Array2D<bool>* x) {
+  void Apply(const Array2D<bool>& in, const Array2D<bool>&, Array2D<bool>* x) {
     *x = in;
   }
 };
@@ -96,7 +95,7 @@ struct ConvertCommand : public Command {
 struct InvertCommand : public Command {
   string Name() const { return "invert"; }
   bool RequiresTwoOperands() const { return false; }
-  void Apply(const Array2D<bool>& in, const Array2D<bool>&not_used, Array2D<bool>* x) {
+  void Apply(const Array2D<bool>& in, const Array2D<bool>&, Array2D<bool>* x) {
     Array2D<bool>& res = *x;
     res.resize(in.height(), in.width());
     for (int i = 0; i < in.height(); ++i)
@@ -268,15 +267,15 @@ map<string, boost::shared_ptr<Command> > commands;
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   ostringstream os;
-  os << "[REQ] Operation to perform:";
+  os << "Operation to perform:";
   for (map<string, boost::shared_ptr<Command> >::iterator it = commands.begin();
        it != commands.end(); ++it) {
     os << ' ' << it->first;
   }
   string cstr = os.str();
   opts.add_options()
-        ("input_1,i", po::value<string>(), "[REQ] Alignment 1 file, - for STDIN")
-        ("input_2,j", po::value<string>(), "[OPT] Alignment 2 file, - for STDIN")
+        ("input_1,i", po::value<string>(), "[REQUIRED] Alignment 1 file, - for STDIN")
+        ("input_2,j", po::value<string>(), "Alignment 2 file, - for STDIN")
 	("command,c", po::value<string>()->default_value("convert"), cstr.c_str())
         ("help,h", "Print this help message and exit");
   po::options_description clo("Command line options");
