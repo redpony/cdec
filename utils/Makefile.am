@@ -1,5 +1,5 @@
 
-bin_PROGRAMS = reconstruct_weights
+bin_PROGRAMS = reconstruct_weights atools
 
 noinst_PROGRAMS = ts phmt mfcr_test
 TESTS = ts phmt mfcr_test
@@ -16,6 +16,8 @@ TESTS += small_vector_test logval_test weights_test dict_test m_test
 endif
 
 reconstruct_weights_SOURCES = reconstruct_weights.cc
+
+atools_SOURCES = atools.cc
 
 noinst_LIBRARIES = libutils.a
 
