@@ -28,6 +28,7 @@ while(<STDIN>) {
   my %b2a;
   for my $ap (@as) {
     my ($a,$b) = split /-/, $ap;
+    die "BAD INPUT: $_\n" unless defined $a && defined $b;
     $a2b{$a}->{$b} = 1;
     $b2a{$b}->{$a} = 1;
   }
