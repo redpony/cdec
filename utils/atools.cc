@@ -267,7 +267,7 @@ map<string, boost::shared_ptr<Command> > commands;
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   ostringstream os;
-  os << "[REQ] Operation to perform:";
+  os << "Operation to perform:";
   for (map<string, boost::shared_ptr<Command> >::iterator it = commands.begin();
        it != commands.end(); ++it) {
     os << ' ' << it->first;
