@@ -632,7 +632,7 @@ void HypergraphIO::WriteAsCFG(const Hypergraph& hg) {
  *     RHS with [vertex_index] for NTs ||| scores
  */
 void HypergraphIO::WriteTarget(const Hypergraph& hg) {
-  cout << hg.nodes_.size() << '\n';
+  cout << hg.nodes_.size() << ' ' << hg.edges_.size() << '\n';
   for (unsigned int i = 0; i < hg.nodes_.size(); ++i) {
     const Hypergraph::EdgesVector &edges = hg.nodes_[i].in_edges_;
     cout << edges.size() << '\n';
