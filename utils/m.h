@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <boost/math/special_functions/digamma.hpp>
 
 template <typename F>
 struct M {
@@ -79,6 +80,11 @@ struct M {
     } else {  // y == 0.0
       return n * std::log(x);
     }
+  }
+
+  // digamma is the first derivative of the log-gamma function
+  static inline F digamma(const F& x) {
+    return boost::math::digamma(x);
   }
 
 };

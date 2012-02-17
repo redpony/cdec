@@ -9,7 +9,7 @@ esac
 AC_PROG_CC
 AC_PROG_CXX
 AC_LANG_CPLUSPLUS
-BOOST_REQUIRE
+BOOST_REQUIRE([1.44])
 BOOST_PROGRAM_OPTIONS
 AC_ARG_ENABLE(mpi,
  [ --enable-mpi  Build MPI binaries, assumes mpi.h is present ],
@@ -38,12 +38,24 @@ then
   CPPFLAGS="$CPPFLAGS -I${with_cmph}/include"
 
   AC_CHECK_HEADER(cmph.h,
-                 [AC_DEFINE([HAVE_CMPH], [], [flag for cmph perfect hashing library])],
+                 [AC_DEFINE([HAVE_CMPH], [1], [flag for cmph perfect hashing library])],
                  [AC_MSG_ERROR([Cannot find cmph library!])])
 
   LDFLAGS="$LDFLAGS -L${with_cmph}/lib"
   AC_CHECK_LIB(cmph, cmph_search)
   AM_CONDITIONAL([HAVE_CMPH], true)
+fi
+
+if test "x$with_eigen" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_eigen}"
+
+  AC_CHECK_HEADER(Eigen,
+                 [AC_DEFINE([HAVE_EIGEN], [1], [flag for Eigen linear algebra library])],
+                 [AC_MSG_ERROR([Cannot find Eigen!])])
+
+  AM_CONDITIONAL([HAVE_EIGEN], true)
 fi
 
 #BOOST_THREADS
@@ -53,11 +65,8 @@ LDFLAGS="$LDFLAGS $BOOST_PROGRAM_OPTIONS_LDFLAGS"
 LIBS="$LIBS $BOOST_PROGRAM_OPTIONS_LIBS"
 # $BOOST_THREAD_LIBS"
 
-AC_CHECK_HEADER(boost/math/special_functions/digamma.hpp,
-               [AC_DEFINE([HAVE_BOOST_DIGAMMA], [], [flag for boost::math::digamma])])
-
 AC_CHECK_HEADER(google/dense_hash_map,
-               [AC_DEFINE([HAVE_SPARSEHASH], [], [flag for google::dense_hash_map])])
+               [AC_DEFINE([HAVE_SPARSEHASH], [1], [flag for google::dense_hash_map])])
 
 AC_PROG_INSTALL
 GTEST_LIB_CHECK(1.0)
