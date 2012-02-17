@@ -10,7 +10,7 @@
 #include "fdict.h"
 #include "weights.h"
 #include "sparse_vector.h"
-#include "em_utils.h"
+#include "m.h"
 
 using namespace std;
 namespace po = boost::program_options;
@@ -63,11 +63,11 @@ void Maximize(const bool use_vb,
   assert(tot > 0.0);
   double ltot = log(tot);
   if (use_vb)
-    ltot = digamma(tot + total_event_types * alpha);
+    ltot = Md::digamma(tot + total_event_types * alpha);
   for (SparseVector<double>::const_iterator it = counts.begin();
        it != counts.end(); ++it) {
     if (use_vb) {
-      pc->set_value(it->first, NoZero(digamma(it->second + alpha) - ltot));
+      pc->set_value(it->first, NoZero(Md::digamma(it->second + alpha) - ltot));
     } else {
       pc->set_value(it->first, NoZero(log(it->second) - ltot));
     }

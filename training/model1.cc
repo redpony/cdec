@@ -9,7 +9,6 @@
 #include "filelib.h"
 #include "ttables.h"
 #include "tdict.h"
-#include "em_utils.h"
 
 namespace po = boost::program_options;
 using namespace std;

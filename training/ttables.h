@@ -4,9 +4,9 @@
 #include <iostream>
 #include <tr1/unordered_map>
 
+#include "m.h"
 #include "wordid.h"
 #include "tdict.h"
-#include "em_utils.h"
 
 class TTable {
  public:
@@ -39,7 +39,7 @@ class TTable {
       for (Word2Double::iterator it = cpd.begin(); it != cpd.end(); ++it)
         tot += it->second + alpha;
       for (Word2Double::iterator it = cpd.begin(); it != cpd.end(); ++it)
-        it->second = exp(digamma(it->second + alpha) - digamma(tot));
+        it->second = exp(Md::digamma(it->second + alpha) - Md::digamma(tot));
     }
     counts.clear();
   }
