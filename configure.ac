@@ -51,7 +51,7 @@ then
   SAVE_CPPFLAGS="$CPPFLAGS"
   CPPFLAGS="$CPPFLAGS -I${with_eigen}"
 
-  AC_CHECK_HEADER(Eigen,
+  AC_CHECK_HEADER(Eigen/Dense,
                  [AC_DEFINE([HAVE_EIGEN], [1], [flag for Eigen linear algebra library])],
                  [AC_MSG_ERROR([Cannot find Eigen!])])
 
