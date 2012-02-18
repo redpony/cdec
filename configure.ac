@@ -46,6 +46,13 @@ then
   AM_CONDITIONAL([HAVE_CMPH], true)
 fi
 
+AM_CONDITIONAL([HAVE_EIGEN], false)
+AC_ARG_WITH(eigen,
+            [AC_HELP_STRING([--with-eigen=PATH], [(optional) path to Eigen linear algebra library])],
+            [with_eigen=$withval],
+            [with_eigen=no]
+           )
+
 if test "x$with_eigen" != 'xno'
 then
   SAVE_CPPFLAGS="$CPPFLAGS"
