@@ -33,6 +33,7 @@ sa-extract/rulefactory.so
 sa-extract/sgml.pyc
 sa-extract/sym.c
 sa-extract/sym.so
+training/lbl_model
 training/mpi_flex_optimize
 training/test_ngram
 utils/dict_test
