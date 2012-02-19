@@ -1,5 +1,6 @@
 bin_PROGRAMS = \
   model1 \
+  lbl_model \
   test_ngram \
   mr_em_map_adapter \
   mr_em_adapted_reduce \
@@ -48,6 +49,9 @@ test_ngram_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteva
 
 model1_SOURCES = model1.cc ttables.cc
 model1_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
+
+lbl_model_SOURCES = lbl_model.cc ttables.cc
+lbl_model_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
 grammar_convert_SOURCES = grammar_convert.cc
 grammar_convert_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
