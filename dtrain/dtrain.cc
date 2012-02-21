@@ -216,6 +216,7 @@ main(int argc, char** argv)
   score_t max_score = 0.;
   unsigned best_it = 0;
   float overall_time = 0.;
+  unsigned pair_count = 0, feature_count = 0;
 
   // output cfg
   if (!quiet) {
@@ -400,10 +401,12 @@ main(int argc, char** argv)
       if (pair_sampling == "PRO")
         PROsampling(samples, pairs);
       npairs += pairs.size();
+      pair_count += 2*pairs.size();
 
       for (vector<pair<ScoredHyp,ScoredHyp> >::iterator it = pairs.begin();
            it != pairs.end(); it++) {
         score_t rank_error = it->second.score - it->first.score;
+        feature_count += it->first.f.size() + it->second.f.size();
         if (!gamma) {
           // perceptron
           if (rank_error > 0) {
@@ -534,9 +537,11 @@ if (false) {
     cerr << "        avg #rank err: ";
     cerr << rank_errors/(float)in_sz << endl;
     cerr << "     avg #margin viol: ";
-    cerr << margin_violations/float(in_sz) << endl;
-    cerr << "   non0 feature count: ";
+    cerr << margin_violations/(float)in_sz << endl;
+    cerr << "   non0 feature count: " << endl;
     cerr << nonz << endl;
+    cerr << "          avg f count: ";
+    cerr << feature_count/(float)pair_count;
   }
 
   if (hstreaming) {
