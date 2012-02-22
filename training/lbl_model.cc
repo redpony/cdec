@@ -12,6 +12,7 @@
 #include <cstring> // memset
 #include <ctime>
 
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <Eigen/Dense>
@@ -27,7 +28,7 @@
 namespace po = boost::program_options;
 using namespace std;
 
-#define kDIMENSIONS 8
+#define kDIMENSIONS 110
 typedef Eigen::Matrix<float, kDIMENSIONS, 1> RVector;
 typedef Eigen::Matrix<float, 1, kDIMENSIONS> RTVector;
 typedef Eigen::Matrix<float, kDIMENSIONS, kDIMENSIONS> TMatrix;
@@ -38,8 +39,9 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("input,i",po::value<string>(),"Input file")
         ("iterations,I",po::value<unsigned>()->default_value(1000),"Number of iterations of training")
+        ("regularization_strength,C",po::value<float>()->default_value(0.1),"L2 regularization strength (0 for no regularization)")
         ("eta,e", po::value<float>()->default_value(0.1f), "Eta for SGD")
-        ("random_seed", po::value<unsigned>(), "Random seed")
+        ("random_seed,s", po::value<unsigned>(), "Random seed")
         ("diagonal_tension,T", po::value<double>()->default_value(4.0), "How sharp or flat around the diagonal is the alignment distribution (0 = uniform, >0 sharpens)")
         ("testset,x", po::value<string>(), "After training completes, compute the log likelihood of this set of sentence pairs under the learned model");
   po::options_description clo("Command line options");
@@ -67,6 +69,7 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
 
 void Normalize(RVector* v) {
   float norm = v->norm();
+  assert(norm > 0.0f);
   *v /= norm;
 }
 
@@ -74,21 +77,42 @@ void Flatten(const TMatrix& m, vector<double>* v) {
   unsigned c = 0;
   v->resize(kDIMENSIONS * kDIMENSIONS);
   for (unsigned i = 0; i < kDIMENSIONS; ++i)
-    for (unsigned j = 0; j < kDIMENSIONS; ++j)
+    for (unsigned j = 0; j < kDIMENSIONS; ++j) {
+      assert(boost::math::isnormal(m(i, j)));
       (*v)[c++] = m(i,j);
+    }
 }
 
 void Unflatten(const vector<double>& v, TMatrix* m) {
   unsigned c = 0;
   for (unsigned i = 0; i < kDIMENSIONS; ++i)
-    for (unsigned j = 0; j < kDIMENSIONS; ++j)
+    for (unsigned j = 0; j < kDIMENSIONS; ++j) {
+      assert(boost::math::isnormal(v[c]));
       (*m)(i, j) = v[c++];
+    }
+}
+
+double ApplyRegularization(const double C,
+                           const vector<double>& weights,
+                           vector<double>* g) {
+  assert(weights.size() == g->size());
+  double reg = 0;
+  for (size_t i = 0; i < weights.size(); ++i) {
+    const double& w_i = weights[i];
+    double& g_i = (*g)[i];
+    reg += C * w_i * w_i;
+    g_i += 2 * C * w_i;
+  }
+  return reg;
 }
 
 int main(int argc, char** argv) {
   po::variables_map conf;
   if (!InitCommandLine(argc, argv, &conf)) return 1;
   const string fname = conf["input"].as<string>();
+  const float reg_strength = conf["regularization_strength"].as<float>();
+  const bool has_l2 = reg_strength;
+  assert(reg_strength >= 0.0f);
   const int ITERATIONS = conf["iterations"].as<unsigned>();
   const float eta = conf["eta"].as<float>();
   const double diagonal_tension = conf["diagonal_tension"].as<double>();
@@ -147,7 +171,7 @@ int main(int argc, char** argv) {
     cerr << "Random seed: " << seed << endl;
     srand(seed);
   }
-  TMatrix t = TMatrix::Random() / 1024.0;
+  TMatrix t = TMatrix::Random() / 50.0;
   for (unsigned i = 1; i < r_trg.size(); ++i) {
     r_trg[i] = RVector::Random();
     r_src[i] = RVector::Random();
@@ -159,7 +183,7 @@ int main(int argc, char** argv) {
   vector<set<unsigned> > trg_pos(TD::NumWords() + 1);
 
   // do optimization
-  TMatrix g;
+  TMatrix g = TMatrix::Zero();
   vector<TMatrix> exp_src;
   vector<double> z_src;
   vector<double> flat_g, flat_t;
@@ -265,11 +289,19 @@ int main(int argc, char** argv) {
     const double base2_likelihood = likelihood / log(2);
     cerr << "  log_e likelihood: " << likelihood << endl;
     cerr << "  log_2 likelihood: " << base2_likelihood << endl;
-    cerr << "   cross entropy: " << (-base2_likelihood / denom) << endl;
-    cerr << "      perplexity: " << pow(2.0, -base2_likelihood / denom) << endl;
+    cerr << "     cross entropy: " << (-base2_likelihood / denom) << endl;
+    cerr << "        perplexity: " << pow(2.0, -base2_likelihood / denom) << endl;
     if (!SGD) {
       Flatten(g, &flat_g);
-      lbfgs.Optimize(-likelihood, flat_g, &flat_t);
+      double obj = -likelihood;
+      if (has_l2) {
+        const double r = ApplyRegularization(reg_strength,
+                                             flat_t,
+                                             &flat_g);
+        obj += r;
+        cerr << "    regularization: " << r << endl;
+      }
+      lbfgs.Optimize(obj, flat_g, &flat_t);
       Unflatten(flat_t, &t);
       if (lbfgs.HasConverged()) break;
     }
