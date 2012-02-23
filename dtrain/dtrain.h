@@ -15,7 +15,7 @@
 
 #define DTRAIN_LOCAL
 
-#define DTRAIN_DOTS 100 // when to display a '.'
+#define DTRAIN_DOTS 10 // when to display a '.'
 #define DTRAIN_GRAMMAR_DELIM "########EOS########"
 #define DTRAIN_SCALE 100000
 

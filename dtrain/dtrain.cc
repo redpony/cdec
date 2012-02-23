@@ -538,10 +538,9 @@ if (false) {
     cerr << rank_errors/(float)in_sz << endl;
     cerr << "     avg #margin viol: ";
     cerr << margin_violations/(float)in_sz << endl;
-    cerr << "   non0 feature count: " << endl;
-    cerr << nonz << endl;
+    cerr << "   non0 feature count: " <<  nonz << endl;
     cerr << "          avg f count: ";
-    cerr << feature_count/(float)pair_count;
+    cerr << feature_count/(float)pair_count << endl;
   }
 
   if (hstreaming) {
