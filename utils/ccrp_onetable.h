@@ -117,6 +117,18 @@ class CCRP_OneTable {
     }
   }
 
+  template <typename T>
+  T probT(const Dish& dish, const T& p0) const {
+    const typename DishMapType::const_iterator it = dish_counts_.find(dish);
+    const T r(num_tables_ * discount_ + concentration_);
+    if (it == dish_counts_.end()) {
+      return r * p0 / T(num_customers_ + concentration_);
+    } else {
+      return (T(it->second - discount_) + r * p0) /
+               T(num_customers_ + concentration_);
+    }
+  }
+
   double log_crp_prob() const {
     return log_crp_prob(discount_, concentration_);
   }

@@ -27,7 +27,7 @@ class CCRP {
     concentration_prior_shape_(std::numeric_limits<double>::quiet_NaN()),
     concentration_prior_rate_(std::numeric_limits<double>::quiet_NaN()) {}
 
-  CCRP(double d_alpha, double d_beta, double c_shape, double c_rate, double d = 0.1, double c = 10.0) :
+  CCRP(double d_alpha, double d_beta, double c_shape, double c_rate, double d = 0.9, double c = 1.0) :
     num_tables_(),
     num_customers_(),
     discount_(d),
@@ -107,6 +107,40 @@ class CCRP {
     return (share_table ? 0 : 1);
   }
 
+  // returns +1 or 0 indicating whether a new table was opened
+  template <typename T>
+  int incrementT(const Dish& dish, const T& p0, MT19937* rng) {
+    DishLocations& loc = dish_locs_[dish];
+    bool share_table = false;
+    if (loc.total_dish_count_) {
+      const T p_empty = T(concentration_ + num_tables_ * discount_) * p0;
+      const T p_share = T(loc.total_dish_count_ - loc.table_counts_.size() * discount_);
+      share_table = rng->SelectSample(p_empty, p_share);
+    }
+    if (share_table) {
+      double r = rng->next() * (loc.total_dish_count_ - loc.table_counts_.size() * discount_);
+      for (typename std::list<unsigned>::iterator ti = loc.table_counts_.begin();
+           ti != loc.table_counts_.end(); ++ti) {
+        r -= (*ti - discount_);
+        if (r <= 0.0) {
+          ++(*ti);
+          break;
+        }
+      }
+      if (r > 0.0) {
+        std::cerr << "Serious error: r=" << r << std::endl;
+        Print(&std::cerr);
+        assert(r <= 0.0);
+      }
+    } else {
+      loc.table_counts_.push_back(1u);
+      ++num_tables_;
+    }
+    ++loc.total_dish_count_;
+    ++num_customers_;
+    return (share_table ? 0 : 1);
+  }
+
   // returns -1 or 0, indicating whether a table was closed
   int decrement(const Dish& dish, MT19937* rng) {
     DishLocations& loc = dish_locs_[dish];
@@ -152,6 +186,18 @@ class CCRP {
     } else {
       return (it->second.total_dish_count_ - discount_ * it->second.table_counts_.size() + r * p0) /
                (num_customers_ + concentration_);
+    }
+  }
+
+  template <typename T>
+  T probT(const Dish& dish, const T& p0) const {
+    const typename std::tr1::unordered_map<Dish, DishLocations, DishHash>::const_iterator it = dish_locs_.find(dish);
+    const T r = T(num_tables_ * discount_ + concentration_);
+    if (it == dish_locs_.end()) {
+      return r * p0 / T(num_customers_ + concentration_);
+    } else {
+      return (T(it->second.total_dish_count_ - discount_ * it->second.table_counts_.size()) + r * p0) /
+               T(num_customers_ + concentration_);
     }
   }
 
