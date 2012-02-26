@@ -1,4 +1,4 @@
-bin_PROGRAMS = cbgi brat dpnaive pfbrat pfdist itg pfnaive condnaive align-lexonly align-lexonly-pyp
+bin_PROGRAMS = cbgi brat dpnaive pfbrat pfdist itg pfnaive condnaive align-lexonly align-lexonly-pyp hierolm
 
 noinst_LIBRARIES = libpf.a
 libpf_a_SOURCES = base_distributions.cc reachability.cc cfg_wfst_composer.cc corpus.cc unigrams.cc ngram_base.cc
@@ -8,6 +8,8 @@ align_lexonly_SOURCES = align-lexonly.cc
 align_lexonly_pyp_SOURCES = align-lexonly-pyp.cc
 
 itg_SOURCES = itg.cc
+
+hierolm_SOURCES = hierolm.cc
 
 condnaive_SOURCES = condnaive.cc
 
