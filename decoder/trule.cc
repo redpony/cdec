@@ -232,16 +232,6 @@ void TRule::ComputeArity() {
   arity_ = 1 - min;
 }
 
-static string AnonymousStrVar(int i) {
-  string res("[v]");
-  if(!(i <= 0 && i >= -8)) {
-    cerr << "Can't handle more than 9 non-terminals: index=" << (-i) << endl;
-    abort();
-  }
-  res[1] = '1' - i;
-  return res;
-}
-
 string TRule::AsString(bool verbose) const {
   ostringstream os;
   int idx = 0;
@@ -259,15 +249,11 @@ string TRule::AsString(bool verbose) const {
     }
   }
   os << " ||| ";
-  if (idx > 9) {
-    cerr << "Too many non-terminals!\n partial: " << os.str() << endl;
-    exit(1);
-  }
   for (int i =0; i<e_.size(); ++i) {
     if (i) os << ' ';
     const WordID& w = e_[i];
     if (w < 1)
-      os << AnonymousStrVar(w);
+      os << '[' << (1-w) << ']';
     else
       os << TD::Convert(w);
   }
