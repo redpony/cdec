@@ -106,10 +106,10 @@ struct BaseRuleModel {
     const prob_t nonterm_prob(1.0 - term_prob.as_float());
     for (unsigned i = 0; i < r.f_.size(); ++i) {
       if (r.f_[i] <= 0) {     // nonterminal
-        p *= nonterm_prob;
+        if (kALLOW_MIXED) p *= nonterm_prob;
         p *= unif_nonterm;
       } else {                // terminal
-        p *= term_prob;
+        if (kALLOW_MIXED) p *= term_prob;
         p *= unif_term;
       }
     }
