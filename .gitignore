@@ -57,6 +57,7 @@ training/mpi_extract_reachable
 klm/lm/build_binary
 extools/extractor_monolingual
 gi/pf/.deps
+gi/pf/learn_cfg
 gi/pf/brat
 gi/pf/cbgi
 gi/pf/dpnaive
