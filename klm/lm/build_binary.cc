@@ -8,18 +8,24 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <unistd.h>
+
+#ifdef WIN32
+#include "util/getopt.hh"
+#endif
 
 namespace lm {
 namespace ngram {
 namespace {
 
 void Usage(const char *name) {
-  std::cerr << "Usage: " << name << " [-u log10_unknown_probability] [-s] [-i] [-p probing_multiplier] [-t trie_temporary] [-m trie_building_megabytes] [-q bits] [-b bits] [-a bits] [type] input.arpa [output.mmap]\n\n"
+  std::cerr << "Usage: " << name << " [-u log10_unknown_probability] [-s] [-i] [-w mmap|after] [-p probing_multiplier] [-t trie_temporary] [-m trie_building_megabytes] [-q bits] [-b bits] [-a bits] [type] input.arpa [output.mmap]\n\n"
 "-u sets the log10 probability for <unk> if the ARPA file does not have one.\n"
 "   Default is -100.  The ARPA file will always take precedence.\n"
 "-s allows models to be built even if they do not have <s> and </s>.\n"
-"-i allows buggy models from IRSTLM by mapping positive log probability to 0.\n\n"
+"-i allows buggy models from IRSTLM by mapping positive log probability to 0.\n"
+"-w mmap|after determines how writing is done.\n"
+"   mmap maps the binary file and writes to it.  Default for trie.\n"
+"   after allocates anonymous memory, builds, and writes.  Default for probing.\n\n"
 "type is either probing or trie.  Default is probing.\n\n"
 "probing uses a probing hash table.  It is the fastest but uses the most memory.\n"
 "-p sets the space multiplier and must be >1.0.  The default is 1.5.\n\n"
@@ -55,7 +61,7 @@ uint8_t ParseBitCount(const char *from) {
   unsigned long val = ParseUInt(from);
   if (val > 25) {
     util::ParseNumberException e(from);
-    e << " bit counts are limited to 256.";
+    e << " bit counts are limited to 25.";
   }
   return val;
 }
@@ -87,7 +93,7 @@ void ShowSizes(const char *file, const lm::ngram::Config &config) {
     prefix = 'G';
     divide = 1 << 30;
   }
-  long int length = std::max<long int>(2, lrint(ceil(log10(max_length / divide))));
+  long int length = std::max<long int>(2, static_cast<long int>(ceil(log10((double) max_length / divide))));
   std::cout << "Memory estimate:\ntype    ";
   // right align bytes.  
   for (long int i = 0; i < length - 2; ++i) std::cout << ' ';
@@ -112,10 +118,10 @@ int main(int argc, char *argv[]) {
   using namespace lm::ngram;
 
   try {
-    bool quantize = false, set_backoff_bits = false, bhiksha = false;
+    bool quantize = false, set_backoff_bits = false, bhiksha = false, set_write_method = false;
     lm::ngram::Config config;
     int opt;
-    while ((opt = getopt(argc, argv, "siu:p:t:m:q:b:a:")) != -1) {
+    while ((opt = getopt(argc, argv, "q:b:a:u:p:t:m:w:si")) != -1) {
       switch(opt) {
         case 'q':
           config.prob_bits = ParseBitCount(optarg);
@@ -129,6 +135,7 @@ int main(int argc, char *argv[]) {
         case 'a':
           config.pointer_bhiksha_bits = ParseBitCount(optarg);
           bhiksha = true;
+          break;
         case 'u':
           config.unknown_missing_logprob = ParseFloat(optarg);
           break;
@@ -140,6 +147,16 @@ int main(int argc, char *argv[]) {
           break;
         case 'm':
           config.building_memory = ParseUInt(optarg) * 1048576;
+          break;
+        case 'w':
+          set_write_method = true;
+          if (!strcmp(optarg, "mmap")) {
+            config.write_method = Config::WRITE_MMAP;
+          } else if (!strcmp(optarg, "after")) {
+            config.write_method = Config::WRITE_AFTER;
+          } else {
+            Usage(argv[0]);
+          }
           break;
         case 's':
           config.sentence_marker_missing = lm::SILENT;
@@ -166,9 +183,11 @@ int main(int argc, char *argv[]) {
       const char *from_file = argv[optind + 1];
       config.write_mmap = argv[optind + 2];
       if (!strcmp(model_type, "probing")) {
+        if (!set_write_method) config.write_method = Config::WRITE_AFTER;
         if (quantize || set_backoff_bits) ProbingQuantizationUnsupported();
         ProbingModel(from_file, config);
       } else if (!strcmp(model_type, "trie")) {
+        if (!set_write_method) config.write_method = Config::WRITE_MMAP;
         if (quantize) {
           if (bhiksha) {
             QuantArrayTrieModel(from_file, config);
@@ -191,7 +210,9 @@ int main(int argc, char *argv[]) {
   }
   catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
+    std::cerr << "ERROR" << std::endl;
     return 1;
   }
+  std::cerr << "SUCCESS" << std::endl;
   return 0;
 }
