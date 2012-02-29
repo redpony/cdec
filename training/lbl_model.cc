@@ -12,11 +12,17 @@
 #include <cstring> // memset
 #include <ctime>
 
+#ifdef HAVE_MPI
+#include <boost/mpi/timer.hpp>
+#include <boost/mpi.hpp>
+namespace mpi = boost::mpi;
+#endif
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <Eigen/Dense>
 
+#include "corpus_tools.h"
 #include "optimize.h"
 #include "array2d.h"
 #include "m.h"
@@ -29,9 +35,9 @@ namespace po = boost::program_options;
 using namespace std;
 
 #define kDIMENSIONS 100
-typedef Eigen::Matrix<float, kDIMENSIONS, 1> RVector;
-typedef Eigen::Matrix<float, 1, kDIMENSIONS> RTVector;
-typedef Eigen::Matrix<float, kDIMENSIONS, kDIMENSIONS> TMatrix;
+typedef Eigen::Matrix<double, kDIMENSIONS, 1> RVector;
+typedef Eigen::Matrix<double, 1, kDIMENSIONS> RTVector;
+typedef Eigen::Matrix<double, kDIMENSIONS, kDIMENSIONS> TMatrix;
 vector<RVector> r_src, r_trg;
 
 bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
@@ -39,8 +45,8 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("input,i",po::value<string>(),"Input file")
         ("iterations,I",po::value<unsigned>()->default_value(1000),"Number of iterations of training")
-        ("regularization_strength,C",po::value<float>()->default_value(0.1),"L2 regularization strength (0 for no regularization)")
-        ("eta", po::value<float>()->default_value(0.1f), "Eta for SGD")
+        ("regularization_strength,C",po::value<double>()->default_value(0.1),"L2 regularization strength (0 for no regularization)")
+        ("eta", po::value<double>()->default_value(0.1f), "Eta for SGD")
         ("source_embeddings,f", po::value<string>(), "File containing source embeddings (if unset, random vectors will be used)")
         ("target_embeddings,e", po::value<string>(), "File containing target embeddings (if unset, random vectors will be used)")
         ("random_seed,s", po::value<unsigned>(), "Random seed")
@@ -70,7 +76,7 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
 }
 
 void Normalize(RVector* v) {
-  float norm = v->norm();
+  double norm = v->norm();
   assert(norm > 0.0f);
   *v /= norm;
 }
@@ -80,7 +86,7 @@ void Flatten(const TMatrix& m, vector<double>* v) {
   v->resize(kDIMENSIONS * kDIMENSIONS);
   for (unsigned i = 0; i < kDIMENSIONS; ++i)
     for (unsigned j = 0; j < kDIMENSIONS; ++j) {
-      assert(boost::math::isnormal(m(i, j)));
+      assert(boost::math::isfinite(m(i, j)));
       (*v)[c++] = m(i,j);
     }
 }
@@ -89,7 +95,7 @@ void Unflatten(const vector<double>& v, TMatrix* m) {
   unsigned c = 0;
   for (unsigned i = 0; i < kDIMENSIONS; ++i)
     for (unsigned j = 0; j < kDIMENSIONS; ++j) {
-      assert(boost::math::isnormal(v[c]));
+      assert(boost::math::isfinite(v[c]));
       (*m)(i, j) = v[c++];
     }
 }
@@ -162,14 +168,25 @@ void LoadEmbeddings(const string& filename, vector<RVector>* pv) {
 }
 
 int main(int argc, char** argv) {
+#ifdef HAVE_MPI
+  std::cerr << "**MPI enabled.\n";
+  mpi::environment env(argc, argv);
+  mpi::communicator world;
+  const int size = world.size(); 
+  const int rank = world.rank();
+#else
+  std::cerr << "**MPI disabled.\n";
+  const int rank = 0;
+  const int size = 1;
+#endif
   po::variables_map conf;
   if (!InitCommandLine(argc, argv, &conf)) return 1;
   const string fname = conf["input"].as<string>();
-  const float reg_strength = conf["regularization_strength"].as<float>();
+  const double reg_strength = conf["regularization_strength"].as<double>();
   const bool has_l2 = reg_strength;
   assert(reg_strength >= 0.0f);
   const int ITERATIONS = conf["iterations"].as<unsigned>();
-  const float eta = conf["eta"].as<float>();
+  const double eta = conf["eta"].as<double>();
   const double diagonal_tension = conf["diagonal_tension"].as<double>();
   bool SGD = false;
   if (diagonal_tension < 0.0) {
@@ -181,61 +198,44 @@ int main(int argc, char** argv) {
 
   unsigned lc = 0;
   vector<double> unnormed_a_i;
-  string line;
-  string ssrc, strg;
   bool flag = false;
-  Lattice src, trg;
+  vector<vector<WordID> > srcs, trgs;
   vector<WordID> vocab_e;
-  { // read through corpus, initialize int map, check lines are good
-    set<WordID> svocab_e;
-    cerr << "INITIAL READ OF " << fname << endl;
-    ReadFile rf(fname);
-    istream& in = *rf.stream();
-    while(getline(in, line)) {
-      ++lc;
-      if (lc % 1000 == 0) { cerr << '.'; flag = true; }
-      if (lc %50000 == 0) { cerr << " [" << lc << "]\n" << flush; flag = false; }
-      ParseTranslatorInput(line, &ssrc, &strg);
-      LatticeTools::ConvertTextToLattice(ssrc, &src);
-      LatticeTools::ConvertTextToLattice(strg, &trg);
-      if (src.size() == 0 || trg.size() == 0) {
-        cerr << "Error: " << lc << "\n" << line << endl;
-        assert(src.size() > 0);
-        assert(trg.size() > 0);
-      }
-      if (src.size() > unnormed_a_i.size())
-        unnormed_a_i.resize(src.size());
-      for (unsigned i = 0; i < trg.size(); ++i) {
-        assert(trg[i].size() == 1);
-        svocab_e.insert(trg[i][0].label);
-      }
-    }
+  {
+    set<WordID> svocab_e, svocab_f;
+    CorpusTools::ReadFromFile(fname, &srcs, NULL, &trgs, &svocab_e, rank, size);
     copy(svocab_e.begin(), svocab_e.end(), back_inserter(vocab_e));
   }
-  if (flag) cerr << endl;
   cerr << "Number of target word types: " << vocab_e.size() << endl;
-  const float num_examples = lc;
+  const double num_examples = lc;
 
-  LBFGSOptimizer lbfgs(kDIMENSIONS * kDIMENSIONS, 100);
+  boost::shared_ptr<LBFGSOptimizer> lbfgs;
+  if (rank == 0)
+    lbfgs.reset(new LBFGSOptimizer(kDIMENSIONS * kDIMENSIONS, 100));
   r_trg.resize(TD::NumWords() + 1);
   r_src.resize(TD::NumWords() + 1);
+  vector<set<unsigned> > trg_pos(TD::NumWords() + 1);
+
   if (conf.count("random_seed")) {
     srand(conf["random_seed"].as<unsigned>());
   } else {
-    unsigned seed = time(NULL);
+    unsigned seed = time(NULL) + rank * 100;
     cerr << "Random seed: " << seed << endl;
     srand(seed);
   }
-  TMatrix t = TMatrix::Random() / 50.0;
-  for (unsigned i = 1; i < r_trg.size(); ++i) {
-    r_trg[i] = RVector::Random();
-    r_src[i] = RVector::Random();
+  
+  TMatrix t;
+  if (rank == 0) {
+    t = TMatrix::Random() / 50.0;
+    for (unsigned i = 1; i < r_trg.size(); ++i) {
+      r_trg[i] = RVector::Random();
+      r_src[i] = RVector::Random();
+    }
+    if (conf.count("source_embeddings"))
+      LoadEmbeddings(conf["source_embeddings"].as<string>(), &r_src);
+    if (conf.count("target_embeddings"))
+      LoadEmbeddings(conf["target_embeddings"].as<string>(), &r_trg);
   }
-  if (conf.count("source_embeddings"))
-    LoadEmbeddings(conf["source_embeddings"].as<string>(), &r_src);
-  if (conf.count("target_embeddings"))
-    LoadEmbeddings(conf["target_embeddings"].as<string>(), &r_trg);
-  vector<set<unsigned> > trg_pos(TD::NumWords() + 1);
 
   // do optimization
   TMatrix g = TMatrix::Zero();
@@ -243,22 +243,25 @@ int main(int argc, char** argv) {
   vector<double> z_src;
   vector<double> flat_g, flat_t;
   Flatten(t, &flat_t);
-  for (int iter = 0; iter < ITERATIONS; ++iter) {
+  bool converged = false;
+  // TODO broadcast embeddings
+  for (int iter = 0; !converged && iter < ITERATIONS; ++iter) {
+#ifdef HAVE_MPI
+    mpi::broadcast(world, &flat_t[0], flat_t.size(), 0);
+#endif
+    Unflatten(flat_t, &t);
     cerr << "ITERATION " << (iter + 1) << endl;
-    ReadFile rf(fname);
-    istream& in = *rf.stream();
     double likelihood = 0;
     double denom = 0.0;
     lc = 0;
     flag = false;
     g *= 0;
-    while(getline(in, line)) {
+    for (unsigned i = 0; i < srcs.size(); ++i) {
+      const vector<WordID>& src = srcs[i];
+      const vector<WordID>& trg = trgs[i];
       ++lc;
-      if (lc % 1000 == 0) { cerr << '.'; flag = true; }
-      if (lc %50000 == 0) { cerr << " [" << lc << "]\n" << flush; flag = false; }
-      ParseTranslatorInput(line, &ssrc, &strg);
-      LatticeTools::ConvertTextToLattice(ssrc, &src);
-      LatticeTools::ConvertTextToLattice(strg, &trg);
+      if (rank == 0 && lc % 1000 == 0) { cerr << '.'; flag = true; }
+      if (rank == 0 && lc %50000 == 0) { cerr << " [" << lc << "]\n" << flush; flag = false; }
       denom += trg.size();
 
       exp_src.clear(); exp_src.resize(src.size(), TMatrix::Zero());
@@ -266,10 +269,10 @@ int main(int argc, char** argv) {
       Array2D<TMatrix> exp_refs(src.size(), trg.size(), TMatrix::Zero());
       Array2D<double> z_refs(src.size(), trg.size(), 0.0);
       for (unsigned j = 0; j < trg.size(); ++j)
-        trg_pos[trg[j][0].label].insert(j);
+        trg_pos[trg[j]].insert(j);
 
       for (unsigned i = 0; i < src.size(); ++i) {
-        const RVector& r_s = r_src[src[i][0].label];
+        const RVector& r_s = r_src[src[i]];
         const RTVector pred = r_s.transpose() * t;
         TMatrix& exp_m = exp_src[i];
         double& z = z_src[i];
@@ -293,7 +296,7 @@ int main(int argc, char** argv) {
         }
       }
       for (unsigned j = 0; j < trg.size(); ++j)
-        trg_pos[trg[j][0].label].clear();
+        trg_pos[trg[j]].clear();
 
       // model expectations for a single target generation with
       // uniform alignment prior
@@ -323,8 +326,8 @@ int main(int argc, char** argv) {
           // TODO handle alignment prob
         }
         if (ref_z <= 0) { 
-          cerr << "TRG=" << TD::Convert(trg[j][0].label) << endl;
-          cerr << " LINE=" << line << endl;
+          cerr << "TRG=" << TD::Convert(trg[j]) << endl;
+          cerr << " LINE=" << lc << " (RANK=" << rank << "/" << size << ")" << endl;
           cerr << " REF_EXP=\n" << ref_exp << endl;
           cerr << " M_EXP=\n" << m_exp << endl;
           abort();
@@ -339,30 +342,42 @@ int main(int argc, char** argv) {
         }
       }
       
-      if (iter == (ITERATIONS - 1) || lc == 28) { cerr << al << endl; }
+      if (rank == 0 && (iter == (ITERATIONS - 1) || lc < 12)) { cerr << al << endl; }
     }
-    if (flag) { cerr << endl; }
+    if (flag && rank == 0) { cerr << endl; }
 
-    const double base2_likelihood = likelihood / log(2);
-    cerr << "  log_e likelihood: " << likelihood << endl;
-    cerr << "  log_2 likelihood: " << base2_likelihood << endl;
-    cerr << "     cross entropy: " << (-base2_likelihood / denom) << endl;
-    cerr << "        perplexity: " << pow(2.0, -base2_likelihood / denom) << endl;
+    double obj = 0;
     if (!SGD) {
       Flatten(g, &flat_g);
-      double obj = -likelihood;
-      if (has_l2) {
-        const double r = ApplyRegularization(reg_strength,
-                                             flat_t,
-                                             &flat_g);
-        obj += r;
-        cerr << "    regularization: " << r << endl;
-      }
-      lbfgs.Optimize(obj, flat_g, &flat_t);
-      Unflatten(flat_t, &t);
-      if (lbfgs.HasConverged()) break;
+      obj = -likelihood;
+      // TODO - reduce gradient
     }
-    cerr << t << endl;
+
+    if (rank == 0) {
+      double gn = 0;
+      for (unsigned i = 0; i < flat_g.size(); ++i)
+        gn += flat_g[i]*flat_g[i];
+      const double base2_likelihood = likelihood / log(2);
+      cerr << "  log_e likelihood: " << likelihood << endl;
+      cerr << "  log_2 likelihood: " << base2_likelihood << endl;
+      cerr << "     cross entropy: " << (-base2_likelihood / denom) << endl;
+      cerr << "        perplexity: " << pow(2.0, -base2_likelihood / denom) << endl;
+      cerr << "     gradient norm: " << sqrt(gn) << endl;
+      if (!SGD) {
+        if (has_l2) {
+          const double r = ApplyRegularization(reg_strength,
+                                               flat_t,
+                                               &flat_g);
+          obj += r;
+          cerr << "    regularization: " << r << endl;
+        }
+        lbfgs->Optimize(obj, flat_g, &flat_t);
+        converged = (lbfgs->HasConverged());
+      }
+    }
+#ifdef HAVE_MPI
+    mpi::broadcast(world, converged, 0);
+#endif
   }
   cerr << "TRANSLATION MATRIX:" << endl << t << endl;
   return 0;
