@@ -15,6 +15,7 @@
 #ifdef HAVE_MPI
 #include <boost/mpi/timer.hpp>
 #include <boost/mpi.hpp>
+#include <boost/archive/text_oarchive.hpp>
 namespace mpi = boost::mpi;
 #endif
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -34,11 +35,25 @@ namespace mpi = boost::mpi;
 namespace po = boost::program_options;
 using namespace std;
 
-#define kDIMENSIONS 100
+#define kDIMENSIONS 10
 typedef Eigen::Matrix<double, kDIMENSIONS, 1> RVector;
 typedef Eigen::Matrix<double, 1, kDIMENSIONS> RTVector;
 typedef Eigen::Matrix<double, kDIMENSIONS, kDIMENSIONS> TMatrix;
 vector<RVector> r_src, r_trg;
+
+#if HAVE_MPI
+namespace boost {
+namespace serialization {
+
+template<class Archive>
+void serialize(Archive & ar, RVector & v, const unsigned int version) {
+  for (unsigned i = 0; i < kDIMENSIONS; ++i)
+    ar & v[i];
+}
+
+} // namespace serialization
+} // namespace boost
+#endif
 
 bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
@@ -224,7 +239,7 @@ int main(int argc, char** argv) {
     srand(seed);
   }
   
-  TMatrix t;
+  TMatrix t = TMatrix::Zero();
   if (rank == 0) {
     t = TMatrix::Random() / 50.0;
     for (unsigned i = 1; i < r_trg.size(); ++i) {
@@ -241,16 +256,18 @@ int main(int argc, char** argv) {
   TMatrix g = TMatrix::Zero();
   vector<TMatrix> exp_src;
   vector<double> z_src;
-  vector<double> flat_g, flat_t;
+  vector<double> flat_g, flat_t, rcv_grad;
   Flatten(t, &flat_t);
   bool converged = false;
-  // TODO broadcast embeddings
-  for (int iter = 0; !converged && iter < ITERATIONS; ++iter) {
-#ifdef HAVE_MPI
-    mpi::broadcast(world, &flat_t[0], flat_t.size(), 0);
+#if HAVE_MPI
+  mpi::broadcast(world, &flat_t[0], flat_t.size(), 0);
+  mpi::broadcast(world, r_trg, 0);
+  mpi::broadcast(world, r_src, 0);
 #endif
+  cerr << "rank=" << rank << ": " << r_trg[0][4] << endl;
+  for (int iter = 0; !converged && iter < ITERATIONS; ++iter) {
+    if (rank == 0) cerr << "ITERATION " << (iter + 1) << endl;
     Unflatten(flat_t, &t);
-    cerr << "ITERATION " << (iter + 1) << endl;
     double likelihood = 0;
     double denom = 0.0;
     lc = 0;
@@ -350,7 +367,22 @@ int main(int argc, char** argv) {
     if (!SGD) {
       Flatten(g, &flat_g);
       obj = -likelihood;
-      // TODO - reduce gradient
+#if HAVE_MPI
+      rcv_grad.resize(flat_g.size(), 0.0);
+      mpi::reduce(world, &flat_g[0], flat_g.size(), &rcv_grad[0], plus<double>(), 0);
+      swap(flat_g, rcv_grad);
+      rcv_grad.clear();
+
+      double to = 0;
+      mpi::reduce(world, obj, to, plus<double>(), 0);
+      obj = to;
+      double tlh = 0;
+      mpi::reduce(world, likelihood, tlh, plus<double>(), 0);
+      likelihood = tlh;
+      double td = 0;
+      mpi::reduce(world, denom, td, plus<double>(), 0);
+      denom = td;
+#endif
     }
 
     if (rank == 0) {
@@ -376,10 +408,12 @@ int main(int argc, char** argv) {
       }
     }
 #ifdef HAVE_MPI
+    mpi::broadcast(world, &flat_t[0], flat_t.size(), 0);
     mpi::broadcast(world, converged, 0);
 #endif
   }
-  cerr << "TRANSLATION MATRIX:" << endl << t << endl;
+  if (rank == 0)
+    cerr << "TRANSLATION MATRIX:" << endl << t << endl;
   return 0;
 }
 
