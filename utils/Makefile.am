@@ -24,6 +24,7 @@ noinst_LIBRARIES = libutils.a
 libutils_a_SOURCES = \
   alignment_pharaoh.cc \
   b64tools.cc \
+  corpus_tools.cc \
   dict.cc \
   tdict.cc \
   fdict.cc \
