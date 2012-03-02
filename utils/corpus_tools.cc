@@ -33,10 +33,12 @@ void CorpusTools::ReadFromFile(const string& filename,
   while(getline(in, line)) {
     const bool skip = (lc % size != rank);
     ++lc;
-    if (skip) continue;
     TD::ConvertSentence(line, &tmp);
-    src->push_back(vector<WordID>());
-    vector<WordID>* d = &src->back();
+    vector<WordID>* d = NULL;
+    if (!skip) {
+      src->push_back(vector<WordID>());
+      d = &src->back();
+    }
     set<WordID>* v = src_vocab;
     int s = 0;
     for (unsigned i = 0; i < tmp.size(); ++i) {
@@ -44,11 +46,13 @@ void CorpusTools::ReadFromFile(const string& filename,
         ++s;
         if (s > 1) { cerr << "Unexpected format in line " << lc << ": " << line << endl; abort(); }
         assert(trg);
-        trg->push_back(vector<WordID>());
-        d = &trg->back();
+        if (!skip) {
+          trg->push_back(vector<WordID>());
+          d = &trg->back();
+        }
         v = trg_vocab;
       } else {
-        d->push_back(tmp[i]);
+        if (d) d->push_back(tmp[i]);
         if (v) v->insert(tmp[i]);
       }
     }

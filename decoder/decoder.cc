@@ -812,6 +812,9 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     abort();
   }
 
+  if (conf.count("show_target_graph"))
+    HypergraphIO::WriteTarget(forest);
+
   for (int pass = 0; pass < rescoring_passes.size(); ++pass) {
     const RescoringPass& rp = rescoring_passes[pass];
     const vector<weight_t>& cur_weights = *rp.weight_vector;
@@ -1018,8 +1021,6 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   }
   if (conf.count("show_cfg_search_space"))
     HypergraphIO::WriteAsCFG(forest);
-  if (conf.count("show_target_graph"))
-    HypergraphIO::WriteTarget(forest);
   if (has_ref) {
     if (HG::Intersect(ref, &forest)) {
 //      if (crf_uniform_empirical) {
