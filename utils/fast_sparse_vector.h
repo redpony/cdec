@@ -363,7 +363,7 @@ class FastSparseVector {
     }
     ar & eff_size;
     while (it != this->end()) {
-      const std::pair<const std::string&, const T&> wire_pair(FD::Convert(it->first), it->second);
+      const std::pair<std::string, T> wire_pair(FD::Convert(it->first), it->second);
       ar & wire_pair;
       ++it;
     }
