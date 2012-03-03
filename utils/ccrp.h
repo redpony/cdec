@@ -17,35 +17,37 @@
 template <typename Dish, typename DishHash = boost::hash<Dish> >
 class CCRP {
  public:
-  CCRP(double disc, double conc) :
+  CCRP(double disc, double alpha) :
     num_tables_(),
     num_customers_(),
     discount_(disc),
-    concentration_(conc),
+    alpha_(alpha),
     discount_prior_alpha_(std::numeric_limits<double>::quiet_NaN()),
     discount_prior_beta_(std::numeric_limits<double>::quiet_NaN()),
-    concentration_prior_shape_(std::numeric_limits<double>::quiet_NaN()),
-    concentration_prior_rate_(std::numeric_limits<double>::quiet_NaN()) {}
+    alpha_prior_shape_(std::numeric_limits<double>::quiet_NaN()),
+    alpha_prior_rate_(std::numeric_limits<double>::quiet_NaN()) {}
 
   CCRP(double d_alpha, double d_beta, double c_shape, double c_rate, double d = 0.9, double c = 1.0) :
     num_tables_(),
     num_customers_(),
     discount_(d),
-    concentration_(c),
+    alpha_(c),
     discount_prior_alpha_(d_alpha),
     discount_prior_beta_(d_beta),
-    concentration_prior_shape_(c_shape),
-    concentration_prior_rate_(c_rate) {}
+    alpha_prior_shape_(c_shape),
+    alpha_prior_rate_(c_rate) {}
 
   double discount() const { return discount_; }
-  double concentration() const { return concentration_; }
+  double alpha() const { return alpha_; }
+  void set_discount(double d) { discount_ = d; }
+  void set_alpha(double a) { alpha_ = a; }
 
   bool has_discount_prior() const {
     return !std::isnan(discount_prior_alpha_);
   }
 
-  bool has_concentration_prior() const {
-    return !std::isnan(concentration_prior_shape_);
+  bool has_alpha_prior() const {
+    return !std::isnan(alpha_prior_shape_);
   }
 
   void clear() {
@@ -79,7 +81,7 @@ class CCRP {
     DishLocations& loc = dish_locs_[dish];
     bool share_table = false;
     if (loc.total_dish_count_) {
-      const double p_empty = (concentration_ + num_tables_ * discount_) * p0;
+      const double p_empty = (alpha_ + num_tables_ * discount_) * p0;
       const double p_share = (loc.total_dish_count_ - loc.table_counts_.size() * discount_);
       share_table = rng->SelectSample(p_empty, p_share);
     }
@@ -113,7 +115,7 @@ class CCRP {
     DishLocations& loc = dish_locs_[dish];
     bool share_table = false;
     if (loc.total_dish_count_) {
-      const T p_empty = T(concentration_ + num_tables_ * discount_) * p0;
+      const T p_empty = T(alpha_ + num_tables_ * discount_) * p0;
       const T p_share = T(loc.total_dish_count_ - loc.table_counts_.size() * discount_);
       share_table = rng->SelectSample(p_empty, p_share);
     }
@@ -180,63 +182,46 @@ class CCRP {
 
   double prob(const Dish& dish, const double& p0) const {
     const typename std::tr1::unordered_map<Dish, DishLocations, DishHash>::const_iterator it = dish_locs_.find(dish);
-    const double r = num_tables_ * discount_ + concentration_;
+    const double r = num_tables_ * discount_ + alpha_;
     if (it == dish_locs_.end()) {
-      return r * p0 / (num_customers_ + concentration_);
+      return r * p0 / (num_customers_ + alpha_);
     } else {
       return (it->second.total_dish_count_ - discount_ * it->second.table_counts_.size() + r * p0) /
-               (num_customers_ + concentration_);
+               (num_customers_ + alpha_);
     }
   }
 
   template <typename T>
   T probT(const Dish& dish, const T& p0) const {
     const typename std::tr1::unordered_map<Dish, DishLocations, DishHash>::const_iterator it = dish_locs_.find(dish);
-    const T r = T(num_tables_ * discount_ + concentration_);
+    const T r = T(num_tables_ * discount_ + alpha_);
     if (it == dish_locs_.end()) {
-      return r * p0 / T(num_customers_ + concentration_);
+      return r * p0 / T(num_customers_ + alpha_);
     } else {
       return (T(it->second.total_dish_count_ - discount_ * it->second.table_counts_.size()) + r * p0) /
-               T(num_customers_ + concentration_);
+               T(num_customers_ + alpha_);
     }
   }
 
   double log_crp_prob() const {
-    return log_crp_prob(discount_, concentration_);
-  }
-
-  static double log_beta_density(const double& x, const double& alpha, const double& beta) {
-    assert(x > 0.0);
-    assert(x < 1.0);
-    assert(alpha > 0.0);
-    assert(beta > 0.0);
-    const double lp = (alpha-1)*log(x)+(beta-1)*log(1-x)+lgamma(alpha+beta)-lgamma(alpha)-lgamma(beta);
-    return lp;
-  }
-
-  static double log_gamma_density(const double& x, const double& shape, const double& rate) {
-    assert(x >= 0.0);
-    assert(shape > 0.0);
-    assert(rate > 0.0);
-    const double lp = (shape-1)*log(x) - shape*log(rate) - x/rate - lgamma(shape);
-    return lp;
+    return log_crp_prob(discount_, alpha_);
   }
 
   // taken from http://en.wikipedia.org/wiki/Chinese_restaurant_process
   // does not include P_0's
-  double log_crp_prob(const double& discount, const double& concentration) const {
+  double log_crp_prob(const double& discount, const double& alpha) const {
     double lp = 0.0;
     if (has_discount_prior())
-      lp = log_beta_density(discount, discount_prior_alpha_, discount_prior_beta_);
-    if (has_concentration_prior())
-      lp += log_gamma_density(concentration, concentration_prior_shape_, concentration_prior_rate_);
+      lp = Md::log_beta_density(discount, discount_prior_alpha_, discount_prior_beta_);
+    if (has_alpha_prior())
+      lp += Md::log_gamma_density(alpha, alpha_prior_shape_, alpha_prior_rate_);
     assert(lp <= 0.0);
     if (num_customers_) {
       if (discount > 0.0) {
         const double r = lgamma(1.0 - discount);
-        lp += lgamma(concentration) - lgamma(concentration + num_customers_)
-             + num_tables_ * log(discount) + lgamma(concentration / discount + num_tables_)
-             - lgamma(concentration / discount);
+        lp += lgamma(alpha) - lgamma(alpha + num_customers_)
+             + num_tables_ * log(discount) + lgamma(alpha / discount + num_tables_)
+             - lgamma(alpha / discount);
         assert(std::isfinite(lp));
         for (typename std::tr1::unordered_map<Dish, DishLocations, DishHash>::const_iterator it = dish_locs_.begin();
              it != dish_locs_.end(); ++it) {
@@ -254,12 +239,12 @@ class CCRP {
   }
 
   void resample_hyperparameters(MT19937* rng, const unsigned nloop = 5, const unsigned niterations = 10) {
-    assert(has_discount_prior() || has_concentration_prior());
+    assert(has_discount_prior() || has_alpha_prior());
     DiscountResampler dr(*this);
     ConcentrationResampler cr(*this);
     for (int iter = 0; iter < nloop; ++iter) {
-      if (has_concentration_prior()) {
-        concentration_ = slice_sampler1d(cr, concentration_, *rng, 0.0,
+      if (has_alpha_prior()) {
+        alpha_ = slice_sampler1d(cr, alpha_, *rng, 0.0,
                                std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
       }
       if (has_discount_prior()) {
@@ -267,7 +252,7 @@ class CCRP {
                                1.0, 0.0, niterations, 100*niterations);
       }
     }
-    concentration_ = slice_sampler1d(cr, concentration_, *rng, 0.0,
+    alpha_ = slice_sampler1d(cr, alpha_, *rng, 0.0,
                              std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
   }
 
@@ -275,15 +260,15 @@ class CCRP {
     DiscountResampler(const CCRP& crp) : crp_(crp) {}
     const CCRP& crp_;
     double operator()(const double& proposed_discount) const {
-      return crp_.log_crp_prob(proposed_discount, crp_.concentration_);
+      return crp_.log_crp_prob(proposed_discount, crp_.alpha_);
     }
   };
 
   struct ConcentrationResampler {
     ConcentrationResampler(const CCRP& crp) : crp_(crp) {}
     const CCRP& crp_;
-    double operator()(const double& proposed_concentration) const {
-      return crp_.log_crp_prob(crp_.discount_, proposed_concentration);
+    double operator()(const double& proposed_alpha) const {
+      return crp_.log_crp_prob(crp_.discount_, proposed_alpha);
     }
   };
 
@@ -295,7 +280,7 @@ class CCRP {
   };
 
   void Print(std::ostream* out) const {
-    std::cerr << "PYP(d=" << discount_ << ",c=" << concentration_ << ") customers=" << num_customers_ << std::endl;
+    std::cerr << "PYP(d=" << discount_ << ",c=" << alpha_ << ") customers=" << num_customers_ << std::endl;
     for (typename std::tr1::unordered_map<Dish, DishLocations, DishHash>::const_iterator it = dish_locs_.begin();
          it != dish_locs_.end(); ++it) {
       (*out) << it->first << " (" << it->second.total_dish_count_ << " on " << it->second.table_counts_.size() << " tables): ";
@@ -320,15 +305,15 @@ class CCRP {
   std::tr1::unordered_map<Dish, DishLocations, DishHash> dish_locs_;
 
   double discount_;
-  double concentration_;
+  double alpha_;
 
   // optional beta prior on discount_ (NaN if no prior)
   double discount_prior_alpha_;
   double discount_prior_beta_;
 
-  // optional gamma prior on concentration_ (NaN if no prior)
-  double concentration_prior_shape_;
-  double concentration_prior_rate_;
+  // optional gamma prior on alpha_ (NaN if no prior)
+  double alpha_prior_shape_;
+  double alpha_prior_rate_;
 };
 
 template <typename T,typename H>

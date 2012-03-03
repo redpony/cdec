@@ -105,7 +105,7 @@ struct HierarchicalWordBase {
   }
 
   void Summary() const {
-    cerr << "NUMBER OF CUSTOMERS: " << r.num_customers() << "  (\\alpha=" << r.concentration() << ')' << endl;
+    cerr << "NUMBER OF CUSTOMERS: " << r.num_customers() << "  (\\alpha=" << r.alpha() << ')' << endl;
     for (CCRP_NoTable<vector<WordID> >::const_iterator it = r.begin(); it != r.end(); ++it)
       cerr << "   " << it->second << '\t' << TD::GetString(it->first) << endl;
   }

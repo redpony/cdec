@@ -252,7 +252,7 @@ struct UniphraseLM {
   void ResampleHyperparameters(MT19937* rng) {
     phrases_.resample_hyperparameters(rng);
     gen_.resample_hyperparameters(rng);
-    cerr << " d=" << phrases_.discount() << ",c=" << phrases_.concentration();
+    cerr << " d=" << phrases_.discount() << ",a=" << phrases_.alpha();
   }
 
   CCRP<vector<int> > phrases_;
