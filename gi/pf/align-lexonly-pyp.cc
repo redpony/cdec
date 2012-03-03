@@ -104,7 +104,7 @@ struct HierarchicalWordBase {
   }
 
   void Summary() const {
-    cerr << "NUMBER OF CUSTOMERS: " << r.num_customers() << "  (d=" << r.d() << ",\\alpha=" << r.alpha() << ')' << endl;
+    cerr << "NUMBER OF CUSTOMERS: " << r.num_customers() << "  (d=" << r.discount() << ",\\alpha=" << r.alpha() << ')' << endl;
     for (MFCR<vector<WordID> >::const_iterator it = r.begin(); it != r.end(); ++it)
       cerr << "   " << it->second.total_dish_count_ << " (on " << it->second.table_counts_.size() << " tables)" << TD::GetString(it->first) << endl;
   }

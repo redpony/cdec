@@ -183,9 +183,9 @@ struct HieroLMModel {
       nts[i].resample_hyperparameters(rng);
     if (kHIERARCHICAL_PRIOR) {
       q0.resample_hyperparameters(rng);
-      cerr << "[base d=" << q0.discount() << ", alpha=" << q0.discount() << "]";
+      cerr << "[base d=" << q0.discount() << ", alpha=" << q0.alpha() << "]";
     }
-    cerr << " d=" << nts[0].discount() << ", alpha=" << nts[0].concentration() << endl;
+    cerr << " d=" << nts[0].discount() << ", alpha=" << nts[0].alpha() << endl;
   }
 
   const BaseRuleModel base;
