@@ -270,7 +270,8 @@ public:
       const Hypergraph::Edge& edge = in.edges_[in_edges[i]];
       const JVector j(edge.tail_nodes_.size(), 0);
       cand.push_back(new Candidate(edge, j, out, D, node_states_, smeta, models, is_goal));
-      assert(unique_cands.insert(cand.back()).second);  // these should all be unique!
+      bool is_new = unique_cands.insert(cand.back()).second;
+      assert(is_new);  // these should all be unique!
     }
 //    cerr << "  making heap of " << cand.size() << " candidates\n";
     make_heap(cand.begin(), cand.end(), HeapCandCompare());
@@ -378,7 +379,8 @@ public:
 		  pop_heap(cand.begin(), cand.end(), HeapCandCompare());
 		  Candidate* item = cand.back();
 		  cand.pop_back();
-		  assert(unique_accepted.insert(item).second); // these should all be unique!
+                  bool is_new = unique_accepted.insert(item).second;
+		  assert(is_new); // these should all be unique!
 		  // cerr << "POPPED: " << *item << endl;
 
 		  PushSuccFast2(*item, is_goal, &cand, &unique_accepted);
@@ -419,7 +421,8 @@ public:
           Candidate* new_cand = new Candidate(*item.in_edge_, j, out, D, node_states_, smeta, models, is_goal);
           cand.push_back(new_cand);
           push_heap(cand.begin(), cand.end(), HeapCandCompare());
-          assert(cs->insert(new_cand).second);  // insert into uniqueness set, sanity check
+          bool is_new = cs->insert(new_cand).second;
+          assert(is_new);  // insert into uniqueness set, sanity check
         }
       }
     }
