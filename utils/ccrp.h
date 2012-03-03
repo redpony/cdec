@@ -11,6 +11,7 @@
 #include <boost/functional/hash.hpp>
 #include "sampler.h"
 #include "slice_sampler.h"
+#include "m.h"
 
 // Chinese restaurant process (Pitman-Yor parameters) with table tracking.
 
