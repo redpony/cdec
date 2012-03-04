@@ -29,7 +29,7 @@ shared_ptr<MT19937> prng;
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()
-        ("samples,s",po::value<unsigned>()->default_value(300),"Number of samples")
+        ("samples,n",po::value<unsigned>()->default_value(300),"Number of samples")
         ("train,i",po::value<string>(),"Training data file")
         ("test,T",po::value<string>(),"Test data file")
         ("discount_prior_a,a",po::value<double>()->default_value(1.0), "discount ~ Beta(a,b): a=this")
