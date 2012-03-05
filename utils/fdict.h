@@ -10,7 +10,7 @@
 
 #ifdef HAVE_CMPH
 #include "perfect_hash.h"
-#include "string_to.h"
+#include <sstream>
 #endif
 
 struct FD {
@@ -49,7 +49,9 @@ struct FD {
 #ifdef HAVE_CMPH
     if (hash_) {
       static std::string tls;
-      tls = to_string(w);
+      std::ostringstream os;
+      os << w;
+      tls = os.str();
       return tls;
     }
 #endif
