@@ -78,14 +78,14 @@ template <unsigned N> struct PYPLM {
       backoff(vs, da, db, ss, sr),
       discount_a(da), discount_b(db),
       strength_s(ss), strength_r(sr),
-      d(0.8), alpha(1.0), lookup(N-1) {}
+      d(0.8), strength(1.0), lookup(N-1) {}
   void increment(WordID w, const vector<WordID>& context, MT19937* rng) {
     const double bo = backoff.prob(w, context);
     for (unsigned i = 0; i < N-1; ++i)
       lookup[i] = context[context.size() - 1 - i];
     typename unordered_map<vector<WordID>, CCRP<WordID>, boost::hash<vector<WordID> > >::iterator it = p.find(lookup);
     if (it == p.end())
-      it = p.insert(make_pair(lookup, CCRP<WordID>(d,alpha))).first;
+      it = p.insert(make_pair(lookup, CCRP<WordID>(d,strength))).first;
     if (it->second.increment(w, bo, rng))
       backoff.increment(w, context, rng);
   }
@@ -107,7 +107,7 @@ template <unsigned N> struct PYPLM {
   }
 
   double log_likelihood() const {
-    return log_likelihood(d, alpha) + backoff.log_likelihood();
+    return log_likelihood(d, strength) + backoff.log_likelihood();
   }
 
   double log_likelihood(const double& dd, const double& aa) const {
@@ -125,15 +125,15 @@ template <unsigned N> struct PYPLM {
     DiscountResampler(const PYPLM& m) : m_(m) {}
     const PYPLM& m_;
     double operator()(const double& proposed_discount) const {
-      return m_.log_likelihood(proposed_discount, m_.alpha);
+      return m_.log_likelihood(proposed_discount, m_.strength);
     }
   };
 
   struct AlphaResampler {
     AlphaResampler(const PYPLM& m) : m_(m) {}
     const PYPLM& m_;
-    double operator()(const double& proposed_alpha) const {
-      return m_.log_likelihood(m_.d, proposed_alpha);
+    double operator()(const double& proposed_strength) const {
+      return m_.log_likelihood(m_.d, proposed_strength);
     }
   };
 
@@ -141,25 +141,25 @@ template <unsigned N> struct PYPLM {
     DiscountResampler dr(*this);
     AlphaResampler ar(*this);
     for (int iter = 0; iter < nloop; ++iter) {
-      alpha = slice_sampler1d(ar, alpha, *rng, 0.0,
+      strength = slice_sampler1d(ar, strength, *rng, 0.0,
                               std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
       d = slice_sampler1d(dr, d, *rng, std::numeric_limits<double>::min(),
                           1.0, 0.0, niterations, 100*niterations);
     }
-    alpha = slice_sampler1d(ar, alpha, *rng, 0.0,
+    strength = slice_sampler1d(ar, strength, *rng, 0.0,
                             std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
     typename unordered_map<vector<WordID>, CCRP<WordID>, boost::hash<vector<WordID> > >::iterator it;
-    cerr << "PYPLM<" << N << ">(d=" << d << ",a=" << alpha << ") = " << log_likelihood(d, alpha) << endl;
+    cerr << "PYPLM<" << N << ">(d=" << d << ",a=" << strength << ") = " << log_likelihood(d, strength) << endl;
     for (it = p.begin(); it != p.end(); ++it) {
       it->second.set_discount(d);
-      it->second.set_alpha(alpha);
+      it->second.set_strength(strength);
     }
     backoff.resample_hyperparameters(rng, nloop, niterations);
   }
 
   PYPLM<N-1> backoff;
   double discount_a, discount_b, strength_s, strength_r;
-  double d, alpha;
+  double d, strength;
   mutable vector<WordID> lookup;  // thread-local
   unordered_map<vector<WordID>, CCRP<WordID>, boost::hash<vector<WordID> > > p;
 };

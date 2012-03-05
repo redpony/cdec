@@ -39,37 +39,37 @@ template <typename Dish, typename DishHash = boost::hash<Dish> >
 class MFCR {
  public:
 
-  MFCR(unsigned num_floors, double d, double alpha) :
+  MFCR(unsigned num_floors, double d, double strength) :
     num_floors_(num_floors),
     num_tables_(),
     num_customers_(),
     discount_(d),
-    alpha_(alpha),
-    discount_prior_alpha_(std::numeric_limits<double>::quiet_NaN()),
+    strength_(strength),
+    discount_prior_strength_(std::numeric_limits<double>::quiet_NaN()),
     discount_prior_beta_(std::numeric_limits<double>::quiet_NaN()),
-    alpha_prior_shape_(std::numeric_limits<double>::quiet_NaN()),
-    alpha_prior_rate_(std::numeric_limits<double>::quiet_NaN()) {}
+    strength_prior_shape_(std::numeric_limits<double>::quiet_NaN()),
+    strength_prior_rate_(std::numeric_limits<double>::quiet_NaN()) {}
 
-  MFCR(unsigned num_floors, double discount_alpha, double discount_beta, double alpha_shape, double alpha_rate, double d = 0.9, double alpha = 10.0) :
+  MFCR(unsigned num_floors, double discount_strength, double discount_beta, double strength_shape, double strength_rate, double d = 0.9, double strength = 10.0) :
     num_floors_(num_floors),
     num_tables_(),
     num_customers_(),
     discount_(d),
-    alpha_(alpha),
-    discount_prior_alpha_(discount_alpha),
+    strength_(strength),
+    discount_prior_strength_(discount_strength),
     discount_prior_beta_(discount_beta),
-    alpha_prior_shape_(alpha_shape),
-    alpha_prior_rate_(alpha_rate) {}
+    strength_prior_shape_(strength_shape),
+    strength_prior_rate_(strength_rate) {}
 
   double discount() const { return discount_; }
-  double alpha() const { return alpha_; }
+  double strength() const { return strength_; }
 
   bool has_discount_prior() const {
-    return !std::isnan(discount_prior_alpha_);
+    return !std::isnan(discount_prior_strength_);
   }
 
-  bool has_alpha_prior() const {
-    return !std::isnan(alpha_prior_shape_);
+  bool has_strength_prior() const {
+    return !std::isnan(strength_prior_shape_);
   }
 
   void clear() {
@@ -122,7 +122,7 @@ class MFCR {
     int floor = -1;
     bool share_table = false;
     if (loc.total_dish_count_) {
-      const double p_empty = (alpha_ + num_tables_ * discount_) * marg_p0;
+      const double p_empty = (strength_ + num_tables_ * discount_) * marg_p0;
       const double p_share = (loc.total_dish_count_ - loc.table_counts_.size() * discount_);
       share_table = rng->SelectSample(p_empty, p_share);
     }
@@ -206,44 +206,53 @@ class MFCR {
     const double marg_p0 = std::inner_product(p0s.begin(), p0s.end(), lambdas.begin(), 0.0);
     assert(marg_p0 <= 1.0);
     const typename std::tr1::unordered_map<Dish, DishLocations, DishHash>::const_iterator it = dish_locs_.find(dish);
-    const double r = num_tables_ * discount_ + alpha_;
+    const double r = num_tables_ * discount_ + strength_;
     if (it == dish_locs_.end()) {
-      return r * marg_p0 / (num_customers_ + alpha_);
+      return r * marg_p0 / (num_customers_ + strength_);
     } else {
       return (it->second.total_dish_count_ - discount_ * it->second.table_counts_.size() + r * marg_p0) /
-               (num_customers_ + alpha_);
+               (num_customers_ + strength_);
     }
   }
 
   double log_crp_prob() const {
-    return log_crp_prob(discount_, alpha_);
+    return log_crp_prob(discount_, strength_);
   }
 
   // taken from http://en.wikipedia.org/wiki/Chinese_restaurant_process
   // does not include draws from G_w's
-  double log_crp_prob(const double& d, const double& alpha) const {
+  double log_crp_prob(const double& discount, const double& strength) const {
     double lp = 0.0;
     if (has_discount_prior())
-      lp = Md::log_beta_density(d, discount_prior_alpha_, discount_prior_beta_);
-    if (has_alpha_prior())
-      lp += Md::log_gamma_density(alpha, alpha_prior_shape_, alpha_prior_rate_);
+      lp = Md::log_beta_density(discount, discount_prior_strength_, discount_prior_beta_);
+    if (has_strength_prior())
+      lp += Md::log_gamma_density(strength + discount, strength_prior_shape_, strength_prior_rate_);
     assert(lp <= 0.0);
     if (num_customers_) {
-      if (d > 0.0) {
-        const double r = lgamma(1.0 - d);
-        lp += lgamma(alpha) - lgamma(alpha + num_customers_)
-             + num_tables_ * log(d) + lgamma(alpha / d + num_tables_)
-             - lgamma(alpha / d);
+      if (discount > 0.0) {
+        const double r = lgamma(1.0 - discount);
+        if (strength)
+          lp += lgamma(strength) - lgamma(strength / discount);
+        lp += - lgamma(strength + num_customers_)
+             + num_tables_ * log(discount) + lgamma(strength / discount + num_tables_);
         assert(std::isfinite(lp));
         for (typename std::tr1::unordered_map<Dish, DishLocations, DishHash>::const_iterator it = dish_locs_.begin();
              it != dish_locs_.end(); ++it) {
           const DishLocations& cur = it->second;
           for (std::list<TableCount>::const_iterator ti = cur.table_counts_.begin(); ti != cur.table_counts_.end(); ++ti) {
-            lp += lgamma(ti->count - d) - r;
+            lp += lgamma(ti->count - discount) - r;
           }
         }
+      } else if (!discount) { // discount == 0.0
+        lp += lgamma(strength) + num_tables_ * log(strength) - lgamma(strength + num_tables_);
+        assert(std::isfinite(lp));
+        for (typename std::tr1::unordered_map<Dish, DishLocations, DishHash>::const_iterator it = dish_locs_.begin();
+             it != dish_locs_.end(); ++it) {
+          const DishLocations& cur = it->second;
+          lp += lgamma(cur.table_counts_.size());
+        }
       } else {
-        assert(!"not implemented yet");
+        assert(!"discount less than 0 detected!");
       }
     }
     assert(std::isfinite(lp));
@@ -251,20 +260,22 @@ class MFCR {
   }
 
   void resample_hyperparameters(MT19937* rng, const unsigned nloop = 5, const unsigned niterations = 10) {
-    assert(has_discount_prior() || has_alpha_prior());
+    assert(has_discount_prior() || has_strength_prior());
     DiscountResampler dr(*this);
-    ConcentrationResampler cr(*this);
+    StrengthResampler sr(*this);
     for (int iter = 0; iter < nloop; ++iter) {
-      if (has_alpha_prior()) {
-        alpha_ = slice_sampler1d(cr, alpha_, *rng, 0.0,
+      if (has_strength_prior()) {
+        strength_ = slice_sampler1d(sr, strength_, *rng, -discount_,
                                std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
       }
       if (has_discount_prior()) {
-        discount_ = slice_sampler1d(dr, discount_, *rng, std::numeric_limits<double>::min(),
+        double min_discount = std::numeric_limits<double>::min();
+        if (strength_ < 0.0) min_discount = -strength_;
+        discount_ = slice_sampler1d(dr, discount_, *rng, min_discount,
                                1.0, 0.0, niterations, 100*niterations);
       }
     }
-    alpha_ = slice_sampler1d(cr, alpha_, *rng, 0.0,
+    strength_ = slice_sampler1d(sr, strength_, *rng, -discount_,
                              std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
   }
 
@@ -272,15 +283,15 @@ class MFCR {
     DiscountResampler(const MFCR& crp) : crp_(crp) {}
     const MFCR& crp_;
     double operator()(const double& proposed_d) const {
-      return crp_.log_crp_prob(proposed_d, crp_.alpha_);
+      return crp_.log_crp_prob(proposed_d, crp_.strength_);
     }
   };
 
-  struct ConcentrationResampler {
-    ConcentrationResampler(const MFCR& crp) : crp_(crp) {}
+  struct StrengthResampler {
+    StrengthResampler(const MFCR& crp) : crp_(crp) {}
     const MFCR& crp_;
-    double operator()(const double& proposediscount_alpha) const {
-      return crp_.log_crp_prob(crp_.discount_, proposediscount_alpha);
+    double operator()(const double& proposediscount_strength) const {
+      return crp_.log_crp_prob(crp_.discount_, proposediscount_strength);
     }
   };
 
@@ -292,7 +303,7 @@ class MFCR {
   };
 
   void Print(std::ostream* out) const {
-    (*out) << "MFCR(d=" << discount_ << ",alpha=" << alpha_ << ") customers=" << num_customers_ << std::endl;
+    (*out) << "MFCR(d=" << discount_ << ",strength=" << strength_ << ") customers=" << num_customers_ << std::endl;
     for (typename std::tr1::unordered_map<Dish, DishLocations, DishHash>::const_iterator it = dish_locs_.begin();
          it != dish_locs_.end(); ++it) {
       (*out) << it->first << " (" << it->second.total_dish_count_ << " on " << it->second.table_counts_.size() << " tables): ";
@@ -318,15 +329,15 @@ class MFCR {
   std::tr1::unordered_map<Dish, DishLocations, DishHash> dish_locs_;
 
   double discount_;
-  double alpha_;
+  double strength_;
 
   // optional beta prior on discount_ (NaN if no prior)
-  double discount_prior_alpha_;
+  double discount_prior_strength_;
   double discount_prior_beta_;
 
-  // optional gamma prior on alpha_ (NaN if no prior)
-  double alpha_prior_shape_;
-  double alpha_prior_rate_;
+  // optional gamma prior on strength_ (NaN if no prior)
+  double strength_prior_shape_;
+  double strength_prior_rate_;
 };
 
 template <typename T,typename H>
