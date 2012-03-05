@@ -242,10 +242,10 @@ class CCRP {
   void resample_hyperparameters(MT19937* rng, const unsigned nloop = 5, const unsigned niterations = 10) {
     assert(has_discount_prior() || has_alpha_prior());
     DiscountResampler dr(*this);
-    ConcentrationResampler cr(*this);
+    StrengthResampler sr(*this);
     for (int iter = 0; iter < nloop; ++iter) {
       if (has_alpha_prior()) {
-        alpha_ = slice_sampler1d(cr, alpha_, *rng, 0.0,
+        alpha_ = slice_sampler1d(sr, alpha_, *rng, 0.0,
                                std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
       }
       if (has_discount_prior()) {
@@ -253,7 +253,7 @@ class CCRP {
                                1.0, 0.0, niterations, 100*niterations);
       }
     }
-    alpha_ = slice_sampler1d(cr, alpha_, *rng, 0.0,
+    alpha_ = slice_sampler1d(sr, alpha_, *rng, 0.0,
                              std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
   }
 
@@ -265,8 +265,8 @@ class CCRP {
     }
   };
 
-  struct ConcentrationResampler {
-    ConcentrationResampler(const CCRP& crp) : crp_(crp) {}
+  struct StrengthResampler {
+    StrengthResampler(const CCRP& crp) : crp_(crp) {}
     const CCRP& crp_;
     double operator()(const double& proposed_alpha) const {
       return crp_.log_crp_prob(crp_.discount_, proposed_alpha);
