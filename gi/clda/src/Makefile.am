@@ -1,14 +1,3 @@
-if HAVE_GTEST
-noinst_PROGRAMS = \
-  crp_test
-
-TESTS = crp_test
-
-crp_test_SOURCES = crp_test.cc
-crp_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS)
-
-endif
-
 bin_PROGRAMS = clda
 
 clda_SOURCES = clda.cc
