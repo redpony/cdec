@@ -22,7 +22,7 @@ struct MConditionalTranslationModel {
   void Summary() const {
     std::cerr << "Number of conditioning contexts: " << r.size() << std::endl;
     for (RuleModelHash::const_iterator it = r.begin(); it != r.end(); ++it) {
-      std::cerr << TD::GetString(it->first) << "   \t(d=" << it->second.discount() << ",\\alpha = " << it->second.alpha() << ") --------------------------" << std::endl;
+      std::cerr << TD::GetString(it->first) << "   \t(d=" << it->second.discount() << ",s=" << it->second.strength() << ") --------------------------" << std::endl;
       for (MFCR<TRule>::const_iterator i2 = it->second.begin(); i2 != it->second.end(); ++i2)
         std::cerr << "   " << -1 << '\t' << i2->first << std::endl;
     }
