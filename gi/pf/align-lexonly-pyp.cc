@@ -68,7 +68,7 @@ struct AlignedSentencePair {
 
 struct HierarchicalWordBase {
   explicit HierarchicalWordBase(const unsigned vocab_e_size) :
-      base(prob_t::One()), r(1,1,1,25,25), u0(-log(vocab_e_size)), l(1,1.0), v(1, 0.0) {}
+      base(prob_t::One()), r(1,1,1,1), u0(-log(vocab_e_size)), l(1,prob_t::One()), v(1, prob_t::Zero()) {}
 
   void ResampleHyperparameters(MT19937* rng) {
     r.resample_hyperparameters(rng);
@@ -80,14 +80,14 @@ struct HierarchicalWordBase {
 
   // return p0 of rule.e_
   prob_t operator()(const TRule& rule) const {
-    v[0] = exp(logp0(rule.e_));
-    return prob_t(r.prob(rule.e_, v, l));
+    v[0].logeq(logp0(rule.e_));
+    return r.prob(rule.e_, v.begin(), l.begin());
   }
 
   void Increment(const TRule& rule) {
-    v[0] = exp(logp0(rule.e_));
-    if (r.increment(rule.e_, v, l, &*prng).count) {
-      base *= prob_t(v[0] * l[0]);
+    v[0].logeq(logp0(rule.e_));
+    if (r.increment(rule.e_, v.begin(), l.begin(), &*prng).count) {
+      base *= v[0] * l[0];
     }
   }
 
@@ -105,15 +105,15 @@ struct HierarchicalWordBase {
 
   void Summary() const {
     cerr << "NUMBER OF CUSTOMERS: " << r.num_customers() << "  (d=" << r.discount() << ",s=" << r.strength() << ')' << endl;
-    for (MFCR<vector<WordID> >::const_iterator it = r.begin(); it != r.end(); ++it)
+    for (MFCR<1,vector<WordID> >::const_iterator it = r.begin(); it != r.end(); ++it)
       cerr << "   " << it->second.total_dish_count_ << " (on " << it->second.table_counts_.size() << " tables)" << TD::GetString(it->first) << endl;
   }
 
   prob_t base;
-  MFCR<vector<WordID> > r;
+  MFCR<1,vector<WordID> > r;
   const double u0;
-  const vector<double> l;
-  mutable vector<double> v;
+  const vector<prob_t> l;
+  mutable vector<prob_t> v;
 };
 
 struct BasicLexicalAlignment {

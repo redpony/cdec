@@ -9,7 +9,7 @@
 using namespace std;
 
 void test_exch(MT19937* rng) {
-  MFCR<int> crp(2, 0.5, 3.0);
+  MFCR<2, int> crp(0.5, 3.0);
   vector<double> lambdas(2);
   vector<double> p0s(2);
   lambdas[0] = 0.2;
@@ -22,23 +22,23 @@ void test_exch(MT19937* rng) {
   double xt = 0;
   int cust = 10;
   vector<int> hist(cust + 1, 0), hist2(cust + 1, 0);
-  for (int i = 0; i < cust; ++i) { crp.increment(1, p0s, lambdas, rng); }
+  for (int i = 0; i < cust; ++i) { crp.increment(1, p0s.begin(), lambdas.begin(), rng); }
   const int samples = 100000;
   const bool simulate = true;
   for (int k = 0; k < samples; ++k) {
     if (!simulate) {
       crp.clear();
-      for (int i = 0; i < cust; ++i) { crp.increment(1, p0s, lambdas, rng); }
+      for (int i = 0; i < cust; ++i) { crp.increment(1, p0s.begin(), lambdas.begin(), rng); }
     } else {
       int da = rng->next() * cust;
       bool a = rng->next() < 0.45;
       if (a) {
-        for (int i = 0; i < da; ++i) { crp.increment(1, p0s, lambdas, rng); }
+        for (int i = 0; i < da; ++i) { crp.increment(1, p0s.begin(), lambdas.begin(), rng); }
         for (int i = 0; i < da; ++i) { crp.decrement(1, rng); }
         xt += 1.0;
       } else {
         for (int i = 0; i < da; ++i) { crp.decrement(1, rng); }
-        for (int i = 0; i < da; ++i) { crp.increment(1, p0s, lambdas, rng); }
+        for (int i = 0; i < da; ++i) { crp.increment(1, p0s.begin(), lambdas.begin(), rng); }
       }
     }
     int c = crp.num_tables(1);
