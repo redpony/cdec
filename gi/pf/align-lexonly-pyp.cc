@@ -68,14 +68,14 @@ struct AlignedSentencePair {
 
 struct HierarchicalWordBase {
   explicit HierarchicalWordBase(const unsigned vocab_e_size) :
-      base(prob_t::One()), r(1,1,1,1), u0(-log(vocab_e_size)), l(1,prob_t::One()), v(1, prob_t::Zero()) {}
+      base(prob_t::One()), r(1,1,1,1,0.66,50.0), u0(-log(vocab_e_size)), l(1,prob_t::One()), v(1, prob_t::Zero()) {}
 
   void ResampleHyperparameters(MT19937* rng) {
     r.resample_hyperparameters(rng);
   }
 
   inline double logp0(const vector<WordID>& s) const {
-    return s.size() * u0;
+    return Md::log_poisson(s.size(), 7.5) + s.size() * u0;
   }
 
   // return p0 of rule.e_
@@ -106,7 +106,7 @@ struct HierarchicalWordBase {
   void Summary() const {
     cerr << "NUMBER OF CUSTOMERS: " << r.num_customers() << "  (d=" << r.discount() << ",s=" << r.strength() << ')' << endl;
     for (MFCR<1,vector<WordID> >::const_iterator it = r.begin(); it != r.end(); ++it)
-      cerr << "   " << it->second.total_dish_count_ << " (on " << it->second.table_counts_.size() << " tables)" << TD::GetString(it->first) << endl;
+      cerr << "   " << it->second.total_dish_count_ << " (on " << it->second.table_counts_.size() << " tables) " << TD::GetString(it->first) << endl;
   }
 
   prob_t base;
@@ -167,10 +167,9 @@ struct BasicLexicalAlignment {
   }
 
   void ResampleHyperparemeters() {
-    cerr << "  LLH_prev = " << Likelihood() << flush;
     tmodel.ResampleHyperparameters(&*prng);
     up0.ResampleHyperparameters(&*prng);
-    cerr << "\tLLH_post = " << Likelihood() << endl;
+    cerr << "  (base d=" << up0.r.discount() << ",s=" << up0.r.strength() << ")\n";
   }
 
   void ResampleCorpus();
@@ -218,7 +217,7 @@ void BasicLexicalAlignment::ResampleCorpus() {
         up0.Increment(r);
     }
   }
-  cerr << "  LLH = " << tmodel.Likelihood() << endl;
+  cerr << "  LLH = " << Likelihood() << endl;
 }
 
 void ExtractLetters(const set<WordID>& v, vector<vector<WordID> >* l, set<WordID>* letset = NULL) {
@@ -311,7 +310,7 @@ int main(int argc, char** argv) {
   for (int i = 0; i < samples; ++i) {
     for (int j = 65; j < 67; ++j) Debug(corpus[j]);
     cerr << i << "\t" << x.tmodel.r.size() << "\t";
-    if (i % 10 == 0) x.ResampleHyperparemeters();
+    if (i % 7 == 6) x.ResampleHyperparemeters();
     x.ResampleCorpus();
     if (i > (samples / 5) && (i % 10 == 9)) for (int j = 0; j < corpus.size(); ++j) AddSample(&corpus[j]);
   }

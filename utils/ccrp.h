@@ -225,12 +225,12 @@ class CCRP {
     StrengthResampler sr(*this);
     for (int iter = 0; iter < nloop; ++iter) {
       if (has_strength_prior()) {
-        strength_ = slice_sampler1d(sr, strength_, *rng, -discount_,
+        strength_ = slice_sampler1d(sr, strength_, *rng, -discount_ + std::numeric_limits<double>::min(),
                                std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
       }
       if (has_discount_prior()) {
         double min_discount = std::numeric_limits<double>::min();
-        if (strength_ < 0.0) min_discount = -strength_;
+        if (strength_ < 0.0) min_discount -= strength_;
         discount_ = slice_sampler1d(dr, discount_, *rng, min_discount,
                                1.0, 0.0, niterations, 100*niterations);
       }
