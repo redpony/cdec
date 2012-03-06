@@ -18,7 +18,7 @@
 
 // I use templates to handle the recursive formalation of the prior, so
 // the order of the model has to be specified here, at compile time:
-#define kORDER 3
+#define kORDER 4
 
 using namespace std;
 using namespace tr1;
@@ -114,7 +114,7 @@ template <unsigned N> struct PYPLM {
     if (aa <= -dd) return -std::numeric_limits<double>::infinity();
     //double llh = Md::log_beta_density(dd, 10, 3) + Md::log_gamma_density(aa, 1, 1);
     double llh = Md::log_beta_density(dd, discount_a, discount_b) +
-                 Md::log_gamma_density(aa, strength_s, strength_r);
+                 Md::log_gamma_density(aa + dd, strength_s, strength_r);
     typename unordered_map<vector<WordID>, CCRP<WordID>, boost::hash<vector<WordID> > >::const_iterator it;
     for (it = p.begin(); it != p.end(); ++it)
       llh += it->second.log_crp_prob(dd, aa);
@@ -141,12 +141,14 @@ template <unsigned N> struct PYPLM {
     DiscountResampler dr(*this);
     AlphaResampler ar(*this);
     for (int iter = 0; iter < nloop; ++iter) {
-      strength = slice_sampler1d(ar, strength, *rng, 0.0,
+      strength = slice_sampler1d(ar, strength, *rng, -d + std::numeric_limits<double>::min(),
                               std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
-      d = slice_sampler1d(dr, d, *rng, std::numeric_limits<double>::min(),
+      double min_discount = std::numeric_limits<double>::min();
+      if (strength < 0.0) min_discount -= strength;
+      d = slice_sampler1d(dr, d, *rng, min_discount,
                           1.0, 0.0, niterations, 100*niterations);
     }
-    strength = slice_sampler1d(ar, strength, *rng, 0.0,
+    strength = slice_sampler1d(ar, strength, *rng, -d + std::numeric_limits<double>::min(),
                             std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
     typename unordered_map<vector<WordID>, CCRP<WordID>, boost::hash<vector<WordID> > >::iterator it;
     cerr << "PYPLM<" << N << ">(d=" << d << ",a=" << strength << ") = " << log_likelihood(d, strength) << endl;

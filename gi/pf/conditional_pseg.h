@@ -17,21 +17,66 @@
 template <typename ConditionalBaseMeasure>
 struct MConditionalTranslationModel {
   explicit MConditionalTranslationModel(ConditionalBaseMeasure& rcp0) :
-    rp0(rcp0), lambdas(1, prob_t::One()), p0s(1) {}
+    rp0(rcp0), d(0.5), strength(1.0), lambdas(1, prob_t::One()), p0s(1) {}
 
   void Summary() const {
     std::cerr << "Number of conditioning contexts: " << r.size() << std::endl;
     for (RuleModelHash::const_iterator it = r.begin(); it != r.end(); ++it) {
       std::cerr << TD::GetString(it->first) << "   \t(d=" << it->second.discount() << ",s=" << it->second.strength() << ") --------------------------" << std::endl;
       for (MFCR<1,TRule>::const_iterator i2 = it->second.begin(); i2 != it->second.end(); ++i2)
-        std::cerr << "   " << -1 << '\t' << i2->first << std::endl;
+        std::cerr << "   " << i2->second.total_dish_count_ << '\t' << i2->first << std::endl;
     }
   }
 
+  double log_likelihood(const double& dd, const double& aa) const {
+    if (aa <= -dd) return -std::numeric_limits<double>::infinity();
+    //double llh = Md::log_beta_density(dd, 10, 3) + Md::log_gamma_density(aa, 1, 1);
+    double llh = Md::log_beta_density(dd, 1, 1) +
+                 Md::log_gamma_density(dd + aa, 1, 1);
+    typename std::tr1::unordered_map<std::vector<WordID>, MFCR<1,TRule>, boost::hash<std::vector<WordID> > >::const_iterator it;
+    for (it = r.begin(); it != r.end(); ++it)
+      llh += it->second.log_crp_prob(dd, aa);
+    return llh;
+  }
+
+  struct DiscountResampler {
+    DiscountResampler(const MConditionalTranslationModel& m) : m_(m) {}
+    const MConditionalTranslationModel& m_;
+    double operator()(const double& proposed_discount) const {
+      return m_.log_likelihood(proposed_discount, m_.strength);
+    }
+  };
+
+  struct AlphaResampler {
+    AlphaResampler(const MConditionalTranslationModel& m) : m_(m) {}
+    const MConditionalTranslationModel& m_;
+    double operator()(const double& proposed_strength) const {
+      return m_.log_likelihood(m_.d, proposed_strength);
+    }
+  };
+
   void ResampleHyperparameters(MT19937* rng) {
-    for (RuleModelHash::iterator it = r.begin(); it != r.end(); ++it)
-      it->second.resample_hyperparameters(rng);
-  } 
+    const unsigned nloop = 5;
+    const unsigned niterations = 10;
+    DiscountResampler dr(*this);
+    AlphaResampler ar(*this);
+    for (int iter = 0; iter < nloop; ++iter) {
+      strength = slice_sampler1d(ar, strength, *rng, -d + std::numeric_limits<double>::min(),
+                              std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
+      double min_discount = std::numeric_limits<double>::min();
+      if (strength < 0.0) min_discount -= strength;
+      d = slice_sampler1d(dr, d, *rng, min_discount,
+                          1.0, 0.0, niterations, 100*niterations);
+    }
+    strength = slice_sampler1d(ar, strength, *rng, -d,
+                            std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
+    typename std::tr1::unordered_map<std::vector<WordID>, MFCR<1,TRule>, boost::hash<std::vector<WordID> > >::iterator it;
+    std::cerr << "MConditionalTranslationModel(d=" << d << ",s=" << strength << ") = " << log_likelihood(d, strength) << std::endl;
+    for (it = r.begin(); it != r.end(); ++it) {
+      it->second.set_discount(d);
+      it->second.set_strength(strength);
+    }
+  }
 
   int DecrementRule(const TRule& rule, MT19937* rng) {
     RuleModelHash::iterator it = r.find(rule.f_);
@@ -46,7 +91,7 @@ struct MConditionalTranslationModel {
   int IncrementRule(const TRule& rule, MT19937* rng) {
     RuleModelHash::iterator it = r.find(rule.f_);
     if (it == r.end()) {
-      it = r.insert(make_pair(rule.f_, MFCR<1,TRule>(1.0, 1.0, 1.0, 1.0, 1e-9, 4.0))).first;
+      it = r.insert(make_pair(rule.f_, MFCR<1,TRule>(d, strength))).first;
     }
     p0s[0] = rp0(rule); 
     TableCount delta = it->second.increment(rule, p0s.begin(), lambdas.begin(), rng);
@@ -66,15 +111,7 @@ struct MConditionalTranslationModel {
   }
 
   prob_t Likelihood() const {
-    prob_t p = prob_t::One();
-#if 0
-    for (RuleModelHash::const_iterator it = r.begin(); it != r.end(); ++it) {
-      prob_t q; q.logeq(it->second.log_crp_prob());
-      p *= q;
-      for (CCRP_NoTable<TRule>::const_iterator i2 = it->second.begin(); i2 != it->second.end(); ++i2)
-        p *= rp0(i2->first);
-    }
-#endif
+    prob_t p; p.logeq(log_likelihood(d, strength));
     return p;
   }
 
@@ -83,6 +120,7 @@ struct MConditionalTranslationModel {
                                   MFCR<1, TRule>,
                                   boost::hash<std::vector<WordID> > > RuleModelHash;
   RuleModelHash r;
+  double d, strength;
   std::vector<prob_t> lambdas;
   mutable std::vector<prob_t> p0s;
 };
