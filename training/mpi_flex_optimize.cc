@@ -205,7 +205,7 @@ int main(int argc, char** argv) {
   const int size = 1;
   const int rank = 0;
 #endif
-  if (size > 0) SetSilent(true);  // turn off verbose decoder output
+  if (size > 1) SetSilent(true);  // turn off verbose decoder output
   register_feature_functions();
   MT19937* rng = NULL;
 
@@ -343,7 +343,7 @@ int main(int argc, char** argv) {
 
         double obj = 0;
 #ifdef HAVE_MPI
-        // TODO obj
+        reduce(world, local_obj, obj, std::plus<double>(), 0);
         reduce(world, local_grad, g, std::plus<SparseVector<double> >(), 0);
 #else
         obj = local_obj;
