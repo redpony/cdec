@@ -14,6 +14,22 @@ class MTest : public testing::Test {
   virtual void TearDown() { }
 };
 
+TEST_F(MTest, Densities) {
+  double px1 = Md::log_gaussian_density(1.0, 0.0, 1.0);
+  double px2 = Md::log_gaussian_density(-1.0, 0.0, 1.0);
+  double py1 = Md::log_laplace_density(1.0, 0.0, 1.0);
+  double py2 = Md::log_laplace_density(1.0, 0.0, 1.0);
+  double pz1 = Md::log_triangle_density(1.0, -2.0, 2.0, 0.0);
+  double pz2 = Md::log_triangle_density(1.0, -2.0, 2.0, 0.0);
+  cerr << px1 << " " << py1 << " " << pz2 << endl;
+  EXPECT_FLOAT_EQ(px1, px2);
+  EXPECT_FLOAT_EQ(py1, py2);
+  EXPECT_FLOAT_EQ(pz1, pz2);
+  double b1 = Md::log_bivariate_gaussian_density(1.0, -1.0, 0.0, 0.0, 1.0, 1.0, -0.8);
+  double b2 = Md::log_bivariate_gaussian_density(-1.0, 1.0, 0.0, 0.0, 1.0, 1.0, -0.8);
+  cerr << b1 << " " << b2 << endl;
+}
+
 TEST_F(MTest, Poisson) {
   double prev = 1.0;
   double tot = 0;
