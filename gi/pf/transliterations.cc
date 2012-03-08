@@ -48,10 +48,11 @@ struct BackwardEstimates {
 };
 
 struct TransliterationsImpl {
-  TransliterationsImpl(int max_src, int max_trg) :
+  TransliterationsImpl(int max_src, int max_trg, double fr) :
       kMAX_SRC_CHUNK(max_src),
       kMAX_TRG_CHUNK(max_trg),
-      tot_pairs() {
+      kFILTER_RATIO(fr),
+      tot_pairs(), tot_mem() {
   }
 
   void Initialize(WordID src, const vector<WordID>& src_lets, WordID trg, const vector<WordID>& trg_lets) {
@@ -63,7 +64,7 @@ struct TransliterationsImpl {
     if (trg_len >= graphs[src_len].size()) graphs[src_len].resize(trg_len + 1);
     GraphStructure& gs = graphs[src_len][trg_len];
     if (!gs.r)
-      gs.r = new Reachability(src_len, trg_len, kMAX_SRC_CHUNK, kMAX_TRG_CHUNK);
+      gs.r = new Reachability(src_len, trg_len, kMAX_SRC_CHUNK, kMAX_TRG_CHUNK, kFILTER_RATIO);
     const Reachability& r = *gs.r;
 
     // init backward estimates
@@ -77,6 +78,7 @@ struct TransliterationsImpl {
 
     // TODO
     tot_pairs++;
+    tot_mem += sizeof(float) * gs.r->nodes;
   }
 
   void Forbid(WordID src, const vector<WordID>& src_lets, WordID trg, const vector<WordID>& trg_lets) {
@@ -119,16 +121,20 @@ struct TransliterationsImpl {
     cerr << "Average out-degree = " << (to / tn) << endl;
     cerr << " Unique structures = " << tt << endl;
     cerr << "      Unique pairs = " << tot_pairs << endl;
+    cerr << "          BEs size = " << (tot_mem / (1024.0*1024.0)) << " MB" << endl;
   }
 
   const int kMAX_SRC_CHUNK;
   const int kMAX_TRG_CHUNK;
+  const double kFILTER_RATIO;
   unsigned tot_pairs;
+  size_t tot_mem;
   vector<vector<GraphStructure> > graphs; // graphs[src_len][trg_len]
   vector<unordered_map<WordID, BackwardEstimates> > bes; // bes[src][trg]
 };
 
-Transliterations::Transliterations(int max_src, int max_trg) : pimpl_(new TransliterationsImpl(max_src, max_trg)) {}
+Transliterations::Transliterations(int max_src, int max_trg, double fr) :
+    pimpl_(new TransliterationsImpl(max_src, max_trg, fr)) {}
 Transliterations::~Transliterations() { delete pimpl_; }
 
 void Transliterations::Initialize(WordID src, const vector<WordID>& src_lets, WordID trg, const vector<WordID>& trg_lets) {

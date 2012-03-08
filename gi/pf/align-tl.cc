@@ -30,6 +30,10 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("samples,s",po::value<unsigned>()->default_value(1000),"Number of samples")
         ("input,i",po::value<string>(),"Read parallel data from")
+        ("max_src_chunk", po::value<unsigned>()->default_value(4), "Maximum size of translitered chunk in source")
+        ("max_trg_chunk", po::value<unsigned>()->default_value(4), "Maximum size of translitered chunk in target")
+        ("min_transliterated_src_length", po::value<unsigned>()->default_value(3), "Minimum length of source words considered for transliteration")
+        ("filter_ratio", po::value<double>()->default_value(0.66), "Filter ratio: basically, if the lengths differ by less than this ratio, mark the pair as non-transliteratable")
         ("random_seed,S",po::value<uint32_t>(), "Random seed");
   po::options_description clo("Command line options");
   clo.add_options()
@@ -306,12 +310,11 @@ int main(int argc, char** argv) {
   letters[TD::Convert("NULL")].clear();
 
   // TODO configure this
-  int max_src_chunk = 4;
-  int max_trg_chunk = 4;
-  Transliterations tl(max_src_chunk, max_trg_chunk);
-
-  // TODO CONFIGURE THIS
-  int min_trans_src = 4;
+  const int max_src_chunk = conf["max_src_chunk"].as<unsigned>();
+  const int max_trg_chunk = conf["max_trg_chunk"].as<unsigned>();
+  const double filter_rat = conf["filter_ratio"].as<double>();
+  const int min_trans_src = conf["min_transliterated_src_length"].as<unsigned>();
+  Transliterations tl(max_src_chunk, max_trg_chunk, filter_rat);
 
   cerr << "Initializing transliteration graph structures ...\n";
   for (int i = 0; i < corpus.size(); ++i) {

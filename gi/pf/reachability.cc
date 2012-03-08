@@ -12,7 +12,7 @@ struct SState {
   int prev_trg_covered;
 };
 
-void Reachability::ComputeReachability(int srclen, int trglen, int src_max_phrase_len, int trg_max_phrase_len) {
+void Reachability::ComputeReachability(int srclen, int trglen, int src_max_phrase_len, int trg_max_phrase_len, double filter_ratio) {
     typedef boost::multi_array<vector<SState>, 2> array_type;
     array_type a(boost::extents[srclen + 1][trglen + 1]);
     a[0][0].push_back(SState());
@@ -30,9 +30,10 @@ void Reachability::ComputeReachability(int srclen, int trglen, int src_max_phras
       }
     }
     a[0][0].clear();
-    //cerr << "Final cell contains " << a[srclen][trglen].size() << " back pointers\n";
-    if (a[srclen][trglen].size() == 0) {
-      cerr << "Sentence with length (" << srclen << ',' << trglen << ") violates reachability constraints\n";
+    //cerr << srclen << "," << trglen << ": Final cell contains " << a[srclen][trglen].size() << " back pointers\n";
+    size_t min_allowed = (src_max_phrase_len + 1) * (trg_max_phrase_len + 1) * (filter_ratio * filter_ratio);
+    if (a[srclen][trglen].size() < min_allowed) {
+      cerr << "Sequence pair with lengths (" << srclen << ',' << trglen << ") violates reachability constraint of min indegree " << min_allowed << " with " << a[srclen][trglen].size() << " in edges\n";
       return;
     }
 
