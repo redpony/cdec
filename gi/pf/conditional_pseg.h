@@ -56,6 +56,12 @@ struct MConditionalTranslationModel {
   };
 
   void ResampleHyperparameters(MT19937* rng) {
+    typename std::tr1::unordered_map<std::vector<WordID>, MFCR<1,TRule>, boost::hash<std::vector<WordID> > >::iterator it;
+#if 1
+    for (it = r.begin(); it != r.end(); ++it) {
+      it->second.resample_hyperparameters(rng);
+    }
+#else
     const unsigned nloop = 5;
     const unsigned niterations = 10;
     DiscountResampler dr(*this);
@@ -70,12 +76,12 @@ struct MConditionalTranslationModel {
     }
     strength = slice_sampler1d(ar, strength, *rng, -d,
                             std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
-    typename std::tr1::unordered_map<std::vector<WordID>, MFCR<1,TRule>, boost::hash<std::vector<WordID> > >::iterator it;
     std::cerr << "MConditionalTranslationModel(d=" << d << ",s=" << strength << ") = " << log_likelihood(d, strength) << std::endl;
     for (it = r.begin(); it != r.end(); ++it) {
       it->second.set_discount(d);
       it->second.set_strength(strength);
     }
+#endif
   }
 
   int DecrementRule(const TRule& rule, MT19937* rng) {
@@ -91,7 +97,8 @@ struct MConditionalTranslationModel {
   int IncrementRule(const TRule& rule, MT19937* rng) {
     RuleModelHash::iterator it = r.find(rule.f_);
     if (it == r.end()) {
-      it = r.insert(make_pair(rule.f_, MFCR<1,TRule>(d, strength))).first;
+      //it = r.insert(make_pair(rule.f_, MFCR<1,TRule>(d, strength))).first;
+      it = r.insert(make_pair(rule.f_, MFCR<1,TRule>(1,1,1,1,0.6, -0.12))).first;
     }
     p0s[0] = rp0(rule); 
     TableCount delta = it->second.increment(rule, p0s.begin(), lambdas.begin(), rng);
