@@ -63,6 +63,7 @@ libcdec_a_SOURCES = \
   ff.cc \
   ff_rules.cc \
   ff_wordset.cc \
+  ff_context.cc \
   ff_charset.cc \
   ff_lm.cc \
   ff_klm.cc \
