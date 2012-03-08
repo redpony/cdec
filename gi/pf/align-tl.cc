@@ -305,7 +305,10 @@ int main(int argc, char** argv) {
   ExtractLetters(vocabf, &letters, NULL);
   letters[TD::Convert("NULL")].clear();
 
-  Transliterations tl;
+  // TODO configure this
+  int max_src_chunk = 4;
+  int max_trg_chunk = 4;
+  Transliterations tl(max_src_chunk, max_trg_chunk);
 
   // TODO CONFIGURE THIS
   int min_trans_src = 4;
@@ -318,10 +321,9 @@ int main(int argc, char** argv) {
       const vector<int>& src_let = letters[src[j]];
       for (int k = 0; k < trg.size(); ++k) {
         const vector<int>& trg_let = letters[trg[k]];
+        tl.Initialize(src[j], src_let, trg[k], trg_let);
         if (src_let.size() < min_trans_src)
           tl.Forbid(src[j], src_let, trg[k], trg_let);
-        else
-          tl.Initialize(src[j], src_let, trg[k], trg_let);
       }
     }
   }

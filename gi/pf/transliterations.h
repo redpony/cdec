@@ -7,7 +7,8 @@
 
 struct TransliterationsImpl;
 struct Transliterations {
-  explicit Transliterations();
+  // max_src and max_trg indicate how big the transliteration phrases can be
+  explicit Transliterations(int max_src, int max_trg);
   ~Transliterations();
   void Initialize(WordID src, const std::vector<WordID>& src_lets, WordID trg, const std::vector<WordID>& trg_lets);
   void Forbid(WordID src, const std::vector<WordID>& src_lets, WordID trg, const std::vector<WordID>& trg_lets);
