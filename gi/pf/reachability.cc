@@ -47,6 +47,7 @@ void Reachability::ComputeReachability(int srclen, int trglen, int src_max_phras
           r[prevs[k].prev_src_covered][prevs[k].prev_trg_covered] = true;
           int src_delta = i - prevs[k].prev_src_covered;
           edges[prevs[k].prev_src_covered][prevs[k].prev_trg_covered][src_delta][j - prevs[k].prev_trg_covered] = true;
+          valid_deltas[prevs[k].prev_src_covered][prevs[k].prev_trg_covered].push_back(make_pair<short,short>(src_delta,j - prevs[k].prev_trg_covered));
           short &msd = max_src_delta[prevs[k].prev_src_covered][prevs[k].prev_trg_covered];
           if (src_delta > msd) msd = src_delta;
         }
@@ -56,6 +57,7 @@ void Reachability::ComputeReachability(int srclen, int trglen, int src_max_phras
     assert(!edges[0][0][0][1]);
     assert(!edges[0][0][0][0]);
     assert(max_src_delta[0][0] > 0);
+    cerr << "Sentence with length (" << srclen << ',' << trglen << ") has " << valid_deltas[0][0].size() << " out edges in its root node\n";
     //cerr << "First cell contains " << b[0][0].size() << " forward pointers\n";
     //for (int i = 0; i < b[0][0].size(); ++i) {
     //  cerr << "  -> (" << b[0][0][i].next_src_covered << "," << b[0][0][i].next_trg_covered << ")\n";

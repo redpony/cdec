@@ -310,18 +310,16 @@ int main(int argc, char** argv) {
   // TODO CONFIGURE THIS
   int min_trans_src = 4;
 
-  cerr << "Initializing transliteration DPs ...\n";
+  cerr << "Initializing transliteration graph structures ...\n";
   for (int i = 0; i < corpus.size(); ++i) {
     const vector<int>& src = corpus[i].src;
     const vector<int>& trg = corpus[i].trg;
-    cerr << '.' << flush;
-    if (i % 80 == 79) cerr << endl;
     for (int j = 0; j < src.size(); ++j) {
       const vector<int>& src_let = letters[src[j]];
       for (int k = 0; k < trg.size(); ++k) {
         const vector<int>& trg_let = letters[trg[k]];
         if (src_let.size() < min_trans_src)
-          tl.Forbid(src[j], trg[k]);
+          tl.Forbid(src[j], src_let, trg[k], trg_let);
         else
           tl.Initialize(src[j], src_let, trg[k], trg_let);
       }
