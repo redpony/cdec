@@ -2,15 +2,17 @@ bin_PROGRAMS = cbgi brat dpnaive pfbrat pfdist itg pfnaive condnaive align-lexon
 
 noinst_LIBRARIES = libpf.a
 
-libpf_a_SOURCES = base_distributions.cc reachability.cc cfg_wfst_composer.cc corpus.cc unigrams.cc ngram_base.cc
+libpf_a_SOURCES = base_distributions.cc reachability.cc cfg_wfst_composer.cc corpus.cc unigrams.cc ngram_base.cc transliterations.cc
 
-nuisance_test_SOURCES = nuisance_test.cc transliterations.cc
+nuisance_test_SOURCES = nuisance_test.cc
+nuisance_test_LDADD = libpf.a
 
 align_lexonly_SOURCES = align-lexonly.cc
 
 align_lexonly_pyp_SOURCES = align-lexonly-pyp.cc
 
-align_tl_SOURCES = align-tl.cc transliterations.cc
+align_tl_SOURCES = align-tl.cc
+align_tl_LDADD = libpf.a
 
 itg_SOURCES = itg.cc
 

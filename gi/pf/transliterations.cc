@@ -14,42 +14,75 @@ using namespace std;
 using namespace std::tr1;
 
 struct GraphStructure {
-  GraphStructure() : initialized(false) {}
-  boost::shared_ptr<Reachability> r;
-  bool initialized;
+  GraphStructure() : r() {}
+  // leak memory - these are basically static
+  const Reachability* r;
+  bool IsReachable() const { return r->nodes > 0; }
+};
+
+struct BackwardEstimates {
+  BackwardEstimates() : gs(), backward() {}
+  explicit BackwardEstimates(const GraphStructure& g) :
+      gs(&g), backward() {
+    if (g.r->nodes > 0)
+      backward = new float[g.r->nodes];
+  }
+  // leak memory, these are static
+
+  // returns an estimate of the marginal probability
+  double MarginalEstimate() const {
+    if (!backward) return 0;
+    return backward[0];
+  }
+
+  // returns an backward estimate
+  double operator()(int src_covered, int trg_covered) const {
+    if (!backward) return 0;
+    int ind = gs->r->node_addresses[src_covered][trg_covered];
+    if (ind < 0) return 0;
+    return backward[ind];
+  }
+ private:
+  const GraphStructure* gs;
+  float* backward;
 };
 
 struct TransliterationsImpl {
-  TransliterationsImpl() {
+  TransliterationsImpl(int max_src, int max_trg) :
+      kMAX_SRC_CHUNK(max_src),
+      kMAX_TRG_CHUNK(max_trg),
+      tot_pairs() {
   }
 
   void Initialize(WordID src, const vector<WordID>& src_lets, WordID trg, const vector<WordID>& trg_lets) {
     const size_t src_len = src_lets.size();
     const size_t trg_len = trg_lets.size();
+
+    // init graph structure
     if (src_len >= graphs.size()) graphs.resize(src_len + 1);
     if (trg_len >= graphs[src_len].size()) graphs[src_len].resize(trg_len + 1);
-    if (graphs[src_len][trg_len].initialized) return;
-    graphs[src_len][trg_len].r.reset(new Reachability(src_len, trg_len, 4, 4));
+    GraphStructure& gs = graphs[src_len][trg_len];
+    if (!gs.r)
+      gs.r = new Reachability(src_len, trg_len, kMAX_SRC_CHUNK, kMAX_TRG_CHUNK);
+    const Reachability& r = *gs.r;
 
-#if 0
-    if (HG::Intersect(tlat, &hg)) {
-      // TODO
-    } else {
-      cerr << "No transliteration lattice possible for src_len=" << src_len << " trg_len=" << trg_len << endl;
-      hg.clear();
-    }
-    //cerr << "Number of paths: " << graphs[src][trg].lattice.NumberOfPaths() << endl;
-#endif
-    graphs[src_len][trg_len].initialized = true;
+    // init backward estimates
+    if (src >= bes.size()) bes.resize(src + 1);
+    unordered_map<WordID, BackwardEstimates>::iterator it = bes[src].find(trg);
+    if (it != bes[src].end()) return; // already initialized
+
+    it = bes[src].insert(make_pair(trg, BackwardEstimates(gs))).first;
+    BackwardEstimates& b = it->second;
+    if (!gs.r->nodes) return;  // not derivable subject to length constraints
+
+    // TODO
+    tot_pairs++;
   }
 
   void Forbid(WordID src, const vector<WordID>& src_lets, WordID trg, const vector<WordID>& trg_lets) {
     const size_t src_len = src_lets.size();
     const size_t trg_len = trg_lets.size();
-    if (src_len >= graphs.size()) graphs.resize(src_len + 1);
-    if (trg_len >= graphs[src_len].size()) graphs[src_len].resize(trg_len + 1);
-    graphs[src_len][trg_len].r.reset();
-    graphs[src_len][trg_len].initialized = true;
+    // TODO
   }
 
   prob_t EstimateProbability(WordID s, const vector<WordID>& src, WordID t, const vector<WordID>& trg) const {
@@ -85,12 +118,17 @@ struct TransliterationsImpl {
     cerr << "     Average nodes = " << (tn / tt) << endl;
     cerr << "Average out-degree = " << (to / tn) << endl;
     cerr << " Unique structures = " << tt << endl;
+    cerr << "      Unique pairs = " << tot_pairs << endl;
   }
 
+  const int kMAX_SRC_CHUNK;
+  const int kMAX_TRG_CHUNK;
+  unsigned tot_pairs;
   vector<vector<GraphStructure> > graphs; // graphs[src_len][trg_len]
+  vector<unordered_map<WordID, BackwardEstimates> > bes; // bes[src][trg]
 };
 
-Transliterations::Transliterations() : pimpl_(new TransliterationsImpl) {}
+Transliterations::Transliterations(int max_src, int max_trg) : pimpl_(new TransliterationsImpl(max_src, max_trg)) {}
 Transliterations::~Transliterations() { delete pimpl_; }
 
 void Transliterations::Initialize(WordID src, const vector<WordID>& src_lets, WordID trg, const vector<WordID>& trg_lets) {

@@ -39,6 +39,7 @@ void Reachability::ComputeReachability(int srclen, int trglen, int src_max_phras
     typedef boost::multi_array<bool, 2> rarray_type;
     rarray_type r(boost::extents[srclen + 1][trglen + 1]);
     r[srclen][trglen] = true;
+    nodes = 0;
     for (int i = srclen; i >= 0; --i) {
       for (int j = trglen; j >= 0; --j) {
         vector<SState>& prevs = a[i][j];
@@ -57,10 +58,16 @@ void Reachability::ComputeReachability(int srclen, int trglen, int src_max_phras
     assert(!edges[0][0][0][1]);
     assert(!edges[0][0][0][0]);
     assert(max_src_delta[0][0] > 0);
-    cerr << "Sentence with length (" << srclen << ',' << trglen << ") has " << valid_deltas[0][0].size() << " out edges in its root node\n";
-    //cerr << "First cell contains " << b[0][0].size() << " forward pointers\n";
-    //for (int i = 0; i < b[0][0].size(); ++i) {
-    //  cerr << "  -> (" << b[0][0][i].next_src_covered << "," << b[0][0][i].next_trg_covered << ")\n";
-    //}
+    nodes = 0;
+    for (int i = 0; i < srclen; ++i) {
+      for (int j = 0; j < trglen; ++j) {
+        if (valid_deltas[i][j].size() > 0) {
+          node_addresses[i][j] = nodes++;
+        } else {
+          node_addresses[i][j] = -1;
+        }
+      }
+    }
+    cerr << "Sequence pair with lengths (" << srclen << ',' << trglen << ") has " << valid_deltas[0][0].size() << " out edges in its root node, " << nodes << " nodes in total, and outside estimate matrix will require " << sizeof(float)*nodes << " bytes\n";
   }
 
