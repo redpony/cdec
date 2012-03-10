@@ -1,27 +1,18 @@
 #include <iostream>
-#include <tr1/memory>
 #include <queue>
 
-#include <boost/multi_array.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
-#include "array2d.h"
-#include "base_distributions.h"
-#include "monotonic_pseg.h"
-#include "conditional_pseg.h"
-#include "trule.h"
 #include "tdict.h"
 #include "stringlib.h"
 #include "filelib.h"
-#include "dict.h"
+#include "array2d.h"
 #include "sampler.h"
-#include "mfcr.h"
 #include "corpus.h"
-#include "ngram_base.h"
+#include "pyp_tm.h"
 
 using namespace std;
-using namespace tr1;
 namespace po = boost::program_options;
 
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
@@ -51,7 +42,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
 }
 
-shared_ptr<MT19937> prng;
+MT19937* prng;
 
 struct LexicalAlignment {
   unsigned char src_index;
@@ -66,159 +57,59 @@ struct AlignedSentencePair {
   Array2D<short> posterior;
 };
 
-struct HierarchicalWordBase {
-  explicit HierarchicalWordBase(const unsigned vocab_e_size) :
-      base(prob_t::One()), r(1,1,1,1,0.66,50.0), u0(-log(vocab_e_size)), l(1,prob_t::One()), v(1, prob_t::Zero()) {}
-
-  void ResampleHyperparameters(MT19937* rng) {
-    r.resample_hyperparameters(rng);
+struct Aligner {
+  Aligner(const vector<vector<WordID> >& lets, int num_letters, vector<AlignedSentencePair>* c) :
+      corpus(*c),
+      model(lets, num_letters),
+      kNULL(TD::Convert("NULL")) {
+    assert(lets[kNULL].size() == 0);
   }
 
-  inline double logp0(const vector<WordID>& s) const {
-    return Md::log_poisson(s.size(), 7.5) + s.size() * u0;
-  }
+  vector<AlignedSentencePair>& corpus;
+  PYPLexicalTranslation model;
+  const WordID kNULL;
 
-  // return p0 of rule.e_
-  prob_t operator()(const TRule& rule) const {
-    v[0].logeq(logp0(rule.e_));
-    return r.prob(rule.e_, v.begin(), l.begin());
-  }
-
-  void Increment(const TRule& rule) {
-    v[0].logeq(logp0(rule.e_));
-    if (r.increment(rule.e_, v.begin(), l.begin(), &*prng).count) {
-      base *= v[0] * l[0];
-    }
-  }
-
-  void Decrement(const TRule& rule) {
-    if (r.decrement(rule.e_, &*prng).count) {
-      base /= prob_t(exp(logp0(rule.e_)));
-    }
-  }
-
-  prob_t Likelihood() const {
-    prob_t p; p.logeq(r.log_crp_prob());
-    p *= base;
-    return p;
-  }
-
-  void Summary() const {
-    cerr << "NUMBER OF CUSTOMERS: " << r.num_customers() << "  (d=" << r.discount() << ",s=" << r.strength() << ')' << endl;
-    for (MFCR<1,vector<WordID> >::const_iterator it = r.begin(); it != r.end(); ++it)
-      cerr << "   " << it->second.total_dish_count_ << " (on " << it->second.table_counts_.size() << " tables) " << TD::GetString(it->first) << endl;
-  }
-
-  prob_t base;
-  MFCR<1,vector<WordID> > r;
-  const double u0;
-  const vector<prob_t> l;
-  mutable vector<prob_t> v;
-};
-
-struct BasicLexicalAlignment {
-  explicit BasicLexicalAlignment(const vector<vector<WordID> >& lets,
-                                 const unsigned words_e,
-                                 const unsigned letters_e,
-                                 vector<AlignedSentencePair>* corp) :
-      letters(lets),
-      corpus(*corp),
-      //up0(words_e),
-      //up0("en.chars.1gram", letters_e),
-      //up0("en.words.1gram"),
-      up0(letters_e),
-      //up0("en.chars.2gram"),
-      tmodel(up0) {
-  }
-
-  void InstantiateRule(const WordID src,
-                       const WordID trg,
-                       TRule* rule) const {
-    static const WordID kX = TD::Convert("X") * -1;
-    rule->lhs_ = kX;
-    rule->e_ = letters[trg];
-    rule->f_ = letters[src];
+  void ResampleHyperparameters() {
+    model.ResampleHyperparameters(prng);
   }
 
   void InitializeRandom() {
-    const WordID kNULL = TD::Convert("NULL");
     cerr << "Initializing with random alignments ...\n";
     for (unsigned i = 0; i < corpus.size(); ++i) {
       AlignedSentencePair& asp = corpus[i];
       asp.a.resize(asp.trg.size());
       for (unsigned j = 0; j < asp.trg.size(); ++j) {
-        const unsigned char a_j = prng->next() * (1 + asp.src.size());
+        unsigned char& a_j = asp.a[j].src_index;
+        a_j = prng->next() * (1 + asp.src.size());
         const WordID f_a_j = (a_j ? asp.src[a_j - 1] : kNULL);
-        TRule r;
-        InstantiateRule(f_a_j, asp.trg[j], &r);
-        asp.a[j].is_transliteration = false;
-        asp.a[j].src_index = a_j;
-        if (tmodel.IncrementRule(r, &*prng))
-          up0.Increment(r);
+        model.Increment(f_a_j, asp.trg[j], &*prng);
       }
     }
-    cerr << "  LLH = " << Likelihood() << endl;
+    cerr << "Corpus intialized randomly. LLH = " << model.Likelihood() << endl;
   }
 
-  prob_t Likelihood() const {
-    prob_t p = tmodel.Likelihood();
-    p *= up0.Likelihood();
-    return p;
+  void ResampleCorpus() {
+    for (unsigned i = 0; i < corpus.size(); ++i) {
+      AlignedSentencePair& asp = corpus[i];
+      SampleSet<prob_t> ss; ss.resize(asp.src.size() + 1);
+      for (unsigned j = 0; j < asp.trg.size(); ++j) {
+        unsigned char& a_j = asp.a[j].src_index;
+        const WordID e_j = asp.trg[j];
+        WordID f_a_j = (a_j ? asp.src[a_j - 1] : kNULL);
+        model.Decrement(f_a_j, e_j, prng);
+
+        for (unsigned prop_a_j = 0; prop_a_j <= asp.src.size(); ++prop_a_j) {
+          const WordID prop_f = (prop_a_j ? asp.src[prop_a_j - 1] : kNULL);
+          ss[prop_a_j] = model.Prob(prop_f, e_j);
+        }
+        a_j = prng->SelectSample(ss);
+        f_a_j = (a_j ? asp.src[a_j - 1] : kNULL);
+        model.Increment(f_a_j, e_j, prng);
+      }
+    }
+    cerr << "LLH = " << model.Likelihood() << " " << model.UniqueConditioningContexts() << endl;
   }
-
-  void ResampleHyperparemeters() {
-    tmodel.ResampleHyperparameters(&*prng);
-    up0.ResampleHyperparameters(&*prng);
-    cerr << "  (base d=" << up0.r.discount() << ",s=" << up0.r.strength() << ")\n";
-  }
-
-  void ResampleCorpus();
-
-  const vector<vector<WordID> >& letters; // spelling dictionary
-  vector<AlignedSentencePair>& corpus;
-  //PhraseConditionalUninformativeBase up0;
-  //PhraseConditionalUninformativeUnigramBase up0;
-  //UnigramWordBase up0;
-  //HierarchicalUnigramBase up0;
-  HierarchicalWordBase up0;
-  //CompletelyUniformBase up0;
-  //FixedNgramBase up0;
-  //ConditionalTranslationModel<PhraseConditionalUninformativeBase> tmodel;
-  //ConditionalTranslationModel<PhraseConditionalUninformativeUnigramBase> tmodel;
-  //ConditionalTranslationModel<UnigramWordBase> tmodel;
-  //ConditionalTranslationModel<HierarchicalUnigramBase> tmodel;
-  MConditionalTranslationModel<HierarchicalWordBase> tmodel;
-  //ConditionalTranslationModel<FixedNgramBase> tmodel;
-  //ConditionalTranslationModel<CompletelyUniformBase> tmodel;
 };
-
-void BasicLexicalAlignment::ResampleCorpus() {
-  static const WordID kNULL = TD::Convert("NULL");
-  for (unsigned i = 0; i < corpus.size(); ++i) {
-    AlignedSentencePair& asp = corpus[i];
-    SampleSet<prob_t> ss; ss.resize(asp.src.size() + 1);
-    for (unsigned j = 0; j < asp.trg.size(); ++j) {
-      TRule r;
-      unsigned char& a_j = asp.a[j].src_index;
-      WordID f_a_j = (a_j ? asp.src[a_j - 1] : kNULL);
-      InstantiateRule(f_a_j, asp.trg[j], &r);
-      if (tmodel.DecrementRule(r, &*prng))
-        up0.Decrement(r);
-
-      for (unsigned prop_a_j = 0; prop_a_j <= asp.src.size(); ++prop_a_j) {
-        const WordID prop_f = (prop_a_j ? asp.src[prop_a_j - 1] : kNULL);
-        InstantiateRule(prop_f, asp.trg[j], &r);
-        ss[prop_a_j] = tmodel.RuleProbability(r);
-      }
-      a_j = prng->SelectSample(ss);
-      f_a_j = (a_j ? asp.src[a_j - 1] : kNULL);
-      InstantiateRule(f_a_j, asp.trg[j], &r);
-      if (tmodel.IncrementRule(r, &*prng))
-        up0.Increment(r);
-    }
-  }
-  cerr << "  LLH = " << Likelihood() << endl;
-}
 
 void ExtractLetters(const set<WordID>& v, vector<vector<WordID> >* l, set<WordID>* letset = NULL) {
   for (set<WordID>::const_iterator it = v.begin(); it != v.end(); ++it) {
@@ -240,8 +131,10 @@ void ExtractLetters(const set<WordID>& v, vector<vector<WordID> >* l, set<WordID
 void Debug(const AlignedSentencePair& asp) {
   cerr << TD::GetString(asp.src) << endl << TD::GetString(asp.trg) << endl;
   Array2D<bool> a(asp.src.size(), asp.trg.size());
-  for (unsigned j = 0; j < asp.trg.size(); ++j)
+  for (unsigned j = 0; j < asp.trg.size(); ++j) {
+    assert(asp.a[j].src_index <= asp.src.size());
     if (asp.a[j].src_index) a(asp.a[j].src_index - 1, j) = true;
+  }
   cerr << a << endl;
 }
 
@@ -275,10 +168,9 @@ int main(int argc, char** argv) {
   InitCommandLine(argc, argv, &conf);
 
   if (conf.count("random_seed"))
-    prng.reset(new MT19937(conf["random_seed"].as<uint32_t>()));
+    prng = new MT19937(conf["random_seed"].as<uint32_t>());
   else
-    prng.reset(new MT19937);
-//  MT19937& rng = *prng;
+    prng = new MT19937;
 
   vector<vector<int> > corpuse, corpusf;
   set<int> vocabe, vocabf;
@@ -304,23 +196,18 @@ int main(int argc, char** argv) {
   ExtractLetters(vocabf, &letters, NULL);
   letters[TD::Convert("NULL")].clear();
 
-  BasicLexicalAlignment x(letters, vocabe.size(), letset.size(), &corpus);
-  x.InitializeRandom();
+  Aligner aligner(letters, letset.size(), &corpus);
+  aligner.InitializeRandom();
+
   const unsigned samples = conf["samples"].as<unsigned>();
   for (int i = 0; i < samples; ++i) {
     for (int j = 65; j < 67; ++j) Debug(corpus[j]);
-    cerr << i << "\t" << x.tmodel.r.size() << "\t";
-    if (i % 7 == 6) x.ResampleHyperparemeters();
-    x.ResampleCorpus();
+    if (i % 7 == 6) aligner.ResampleHyperparameters();
+    aligner.ResampleCorpus();
     if (i > (samples / 5) && (i % 10 == 9)) for (int j = 0; j < corpus.size(); ++j) AddSample(&corpus[j]);
   }
   for (unsigned i = 0; i < corpus.size(); ++i)
     WriteAlignments(corpus[i]);
-  //ModelAndData posterior(x, &corpus, vocabe, vocabf);
-  x.tmodel.Summary();
-  x.up0.Summary();
-
-  //posterior.Sample();
 
   return 0;
 }

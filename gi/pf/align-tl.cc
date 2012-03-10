@@ -6,6 +6,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "backward.h"
 #include "array2d.h"
 #include "base_distributions.h"
 #include "monotonic_pseg.h"
@@ -30,10 +31,11 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("samples,s",po::value<unsigned>()->default_value(1000),"Number of samples")
         ("input,i",po::value<string>(),"Read parallel data from")
+        ("s2t", po::value<string>(), "character level source-to-target prior transliteration probabilities")
+        ("t2s", po::value<string>(), "character level target-to-source prior transliteration probabilities")
         ("max_src_chunk", po::value<unsigned>()->default_value(4), "Maximum size of translitered chunk in source")
         ("max_trg_chunk", po::value<unsigned>()->default_value(4), "Maximum size of translitered chunk in target")
-        ("min_transliterated_src_length", po::value<unsigned>()->default_value(3), "Minimum length of source words considered for transliteration")
-        ("filter_ratio", po::value<double>()->default_value(0.66), "Filter ratio: basically, if the lengths differ by less than this ratio, mark the pair as non-transliteratable")
+        ("expected_src_to_trg_ratio", po::value<double>()->default_value(1.0), "If a word is transliterated, what is the expected length ratio from source to target?")
         ("random_seed,S",po::value<uint32_t>(), "Random seed");
   po::options_description clo("Command line options");
   clo.add_options()
@@ -303,7 +305,7 @@ int main(int argc, char** argv) {
   corpusf.clear(); corpuse.clear();
 
   vocabf.insert(TD::Convert("NULL"));
-  vector<vector<WordID> > letters(TD::NumWords());
+  vector<vector<WordID> > letters(TD::NumWords() + 1);
   set<WordID> letset;
   ExtractLetters(vocabe, &letters, &letset);
   ExtractLetters(vocabf, &letters, NULL);
@@ -312,9 +314,9 @@ int main(int argc, char** argv) {
   // TODO configure this
   const int max_src_chunk = conf["max_src_chunk"].as<unsigned>();
   const int max_trg_chunk = conf["max_trg_chunk"].as<unsigned>();
-  const double filter_rat = conf["filter_ratio"].as<double>();
-  const int min_trans_src = conf["min_transliterated_src_length"].as<unsigned>();
-  Transliterations tl(max_src_chunk, max_trg_chunk, filter_rat);
+  const double s2t_rat = conf["expected_src_to_trg_ratio"].as<double>();
+  const BackwardEstimator be(conf["s2t"].as<string>(), conf["t2s"].as<string>());
+  Transliterations tl(max_src_chunk, max_trg_chunk, s2t_rat, be); 
 
   cerr << "Initializing transliteration graph structures ...\n";
   for (int i = 0; i < corpus.size(); ++i) {
@@ -325,8 +327,8 @@ int main(int argc, char** argv) {
       for (int k = 0; k < trg.size(); ++k) {
         const vector<int>& trg_let = letters[trg[k]];
         tl.Initialize(src[j], src_let, trg[k], trg_let);
-        if (src_let.size() < min_trans_src)
-          tl.Forbid(src[j], src_let, trg[k], trg_let);
+        //if (src_let.size() < min_trans_src)
+        //  tl.Forbid(src[j], src_let, trg[k], trg_let);
       }
     }
   }
