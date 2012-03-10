@@ -11,6 +11,7 @@
 #include "sampler.h"
 #include "corpus.h"
 #include "pyp_tm.h"
+#include "quasi_model2.h"
 
 using namespace std;
 namespace po = boost::program_options;
@@ -61,12 +62,14 @@ struct Aligner {
   Aligner(const vector<vector<WordID> >& lets, int num_letters, vector<AlignedSentencePair>* c) :
       corpus(*c),
       model(lets, num_letters),
+      paj(4, 0.08),
       kNULL(TD::Convert("NULL")) {
     assert(lets[kNULL].size() == 0);
   }
 
   vector<AlignedSentencePair>& corpus;
   PYPLexicalTranslation model;
+  const QuasiModel2 paj;
   const WordID kNULL;
 
   void ResampleHyperparameters() {
@@ -83,6 +86,7 @@ struct Aligner {
         a_j = prng->next() * (1 + asp.src.size());
         const WordID f_a_j = (a_j ? asp.src[a_j - 1] : kNULL);
         model.Increment(f_a_j, asp.trg[j], &*prng);
+        // TODO factor in alignment prob
       }
     }
     cerr << "Corpus intialized randomly. LLH = " << model.Likelihood() << endl;
@@ -101,6 +105,8 @@ struct Aligner {
         for (unsigned prop_a_j = 0; prop_a_j <= asp.src.size(); ++prop_a_j) {
           const WordID prop_f = (prop_a_j ? asp.src[prop_a_j - 1] : kNULL);
           ss[prop_a_j] = model.Prob(prop_f, e_j);
+          // TODO configurable
+          ss[prop_a_j] *= paj.Pa_j(prop_a_j, j, asp.src.size(), asp.trg.size());
         }
         a_j = prng->SelectSample(ss);
         f_a_j = (a_j ? asp.src[a_j - 1] : kNULL);
