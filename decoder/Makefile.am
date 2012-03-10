@@ -76,7 +76,6 @@ libcdec_a_SOURCES = \
   ff_source_syntax.cc \
   ff_bleu.cc \
   ff_factory.cc \
-  freqdict.cc \
   lexalign.cc \
   lextrans.cc \
   tagger.cc \
