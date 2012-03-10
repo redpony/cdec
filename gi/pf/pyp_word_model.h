@@ -12,7 +12,7 @@
 
 // PYP(d,s,poisson-uniform) represented as a CRP
 struct PYPWordModel {
-  explicit PYPWordModel(const unsigned vocab_e_size, const double mean_len = 7.5) :
+  explicit PYPWordModel(const unsigned vocab_e_size, const double mean_len = 5) :
       base(prob_t::One()), r(1,1,1,1,0.66,50.0), u0(-std::log(vocab_e_size)), mean_length(mean_len) {}
 
   void ResampleHyperparameters(MT19937* rng);

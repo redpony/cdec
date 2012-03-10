@@ -221,6 +221,7 @@ class CCRP {
 
   void resample_hyperparameters(MT19937* rng, const unsigned nloop = 5, const unsigned niterations = 10) {
     assert(has_discount_prior() || has_strength_prior());
+    if (num_customers() == 0) return;
     DiscountResampler dr(*this);
     StrengthResampler sr(*this);
     for (int iter = 0; iter < nloop; ++iter) {

@@ -208,6 +208,7 @@ int main(int argc, char** argv) {
   }
   for (unsigned i = 0; i < corpus.size(); ++i)
     WriteAlignments(corpus[i]);
+  aligner.model.Summary();
 
   return 0;
 }

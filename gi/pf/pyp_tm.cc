@@ -54,8 +54,6 @@ struct ConditionalPYPWordModel {
     assert(it != r.end());
     if (it->second.decrement(trglets, rng)) {
       base.Decrement(trglets, rng);
-      if (it->second.num_customers() == 0)
-        r.erase(it);
     }
   }
 
@@ -83,6 +81,11 @@ PYPLexicalTranslation::PYPLexicalTranslation(const vector<vector<WordID> >& lets
     up0(new PYPWordModel(num_letters)),
     tmodel(new ConditionalPYPWordModel<PYPWordModel>(up0)),
     kX(-TD::Convert("X")) {}
+
+void PYPLexicalTranslation::Summary() const {
+  tmodel->Summary();
+  up0->Summary();
+}
 
 prob_t PYPLexicalTranslation::Likelihood() const {
   prob_t p = up0->Likelihood();
