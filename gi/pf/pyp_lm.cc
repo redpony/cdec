@@ -18,7 +18,7 @@
 
 // I use templates to handle the recursive formalation of the prior, so
 // the order of the model has to be specified here, at compile time:
-#define kORDER 4
+#define kORDER 3
 
 using namespace std;
 using namespace tr1;

@@ -14,13 +14,7 @@
 #include "tdict.h"
 #include "sampler.h"
 #include "m.h"
-
-inline std::ostream& operator<<(std::ostream& os, const std::vector<WordID>& p) {
-  os << '[';
-  for (int i = 0; i < p.size(); ++i)
-    os << (i==0 ? "" : " ") << TD::Convert(p[i]);
-  return os << ']';
-}
+#include "os_phrase.h"
 
 struct Model1 {
   explicit Model1(const std::string& fname) :

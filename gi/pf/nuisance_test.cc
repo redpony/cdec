@@ -124,9 +124,9 @@ int main(int argc, char** argv) {
   WordID y = TD::Convert("remember");
   vector<WordID> src; TD::ConvertSentence("s o u v e n o n s", &src);
   vector<WordID> trg; TD::ConvertSentence("r e m e m b e r", &trg);
-  Transliterations xx;
-  xx.Initialize(x, src, y, trg);
-  return 1;
+//  Transliterations xx;
+//  xx.Initialize(x, src, y, trg);
+//  return 1;
 
  for (int j = 0; j < ITERS; ++j) {
   Base b;

@@ -69,4 +69,4 @@ for my $f (keys %fs) {
   }
 }
 print STDERR "Extracted $num pairs.\n";
-print STDERR "Recommend running:\n   ../../training/model1 -t -99999 output.txt\n";
+print STDERR "Recommend running:\n   ../../training/model1 -v -d -t -99999 output.txt\n";
