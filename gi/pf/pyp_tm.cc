@@ -10,7 +10,6 @@
 #include "tdict.h"
 #include "ccrp.h"
 #include "pyp_word_model.h"
-
 #include "tied_resampler.h"
 
 using namespace std;
@@ -18,7 +17,7 @@ using namespace std::tr1;
 
 template <typename Base>
 struct ConditionalPYPWordModel {
-  ConditionalPYPWordModel(Base* b) : base(*b) {}
+  ConditionalPYPWordModel(Base* b) : base(*b), btr(3) {}
 
   void Summary() const {
     cerr << "Number of conditioning contexts: " << r.size() << endl;
@@ -32,6 +31,7 @@ struct ConditionalPYPWordModel {
   void ResampleHyperparameters(MT19937* rng) {
     for (RuleModelHash::iterator it = r.begin(); it != r.end(); ++it)
       it->second.resample_hyperparameters(rng);
+    btr.ResampleHyperparameters(rng);
   } 
 
   prob_t Prob(const WordID src, const vector<WordID>& trglets) const {
@@ -72,7 +72,9 @@ struct ConditionalPYPWordModel {
     return r.size();
   }
 
+  // TODO tie PYP hyperparameters based on source word frequency bins
   Base& base;
+  BinTiedResampler<CCRP<vector<WordID> > > btr;
   typedef unordered_map<WordID, CCRP<vector<WordID> > > RuleModelHash;
   RuleModelHash r;
 };
