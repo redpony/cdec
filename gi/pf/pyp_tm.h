@@ -5,10 +5,11 @@
 #include "wordid.h"
 #include "prob.h"
 #include "sampler.h"
+#include "freqdict.h"
 
-struct TRule;
+struct FreqBinner;
 struct PYPWordModel;
-template <typename T> struct ConditionalPYPWordModel;
+template <typename T, class B> struct ConditionalPYPWordModel;
 
 struct PYPLexicalTranslation {
   explicit PYPLexicalTranslation(const std::vector<std::vector<WordID> >& lets,
@@ -26,7 +27,7 @@ struct PYPLexicalTranslation {
  private:
   const std::vector<std::vector<WordID> >& letters;   // spelling dictionary
   PYPWordModel* up0;  // base distribuction (model English word)
-  ConditionalPYPWordModel<PYPWordModel>* tmodel;  // translation distributions
+  ConditionalPYPWordModel<PYPWordModel, FreqBinner>* tmodel;  // translation distributions
                       // (model English word | French word)
   const WordID kX;
 };

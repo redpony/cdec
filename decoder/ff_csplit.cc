@@ -72,7 +72,7 @@ struct BasicCSplitFeaturesImpl {
   const int fl1_;
   const int fl2_;
   const int bad_;
-  FreqDict freq_dict_;
+  FreqDict<float> freq_dict_;
   set<WordID> bad_words_;
 };
 

@@ -4,9 +4,6 @@
 #include <iostream>
 #include <queue>
 
-#include "base_distributions.h"
-#include "monotonic_pseg.h"
-#include "conditional_pseg.h"
 #include "tdict.h"
 #include "ccrp.h"
 #include "pyp_word_model.h"
@@ -15,9 +12,19 @@
 using namespace std;
 using namespace std::tr1;
 
-template <typename Base>
+struct FreqBinner {
+  FreqBinner(const std::string& fname) { fd_.Load(fname); }
+  unsigned NumberOfBins() const { return fd_.Max() + 1; }
+  unsigned Bin(const WordID& w) const { return fd_.LookUp(w); }
+  FreqDict<unsigned> fd_;
+};
+
+template <typename Base, class Binner = FreqBinner>
 struct ConditionalPYPWordModel {
-  ConditionalPYPWordModel(Base* b) : base(*b), btr(2) {}
+  ConditionalPYPWordModel(Base* b, const Binner* bnr = NULL) :
+      base(*b),
+      binner(bnr),
+      btr(binner ? binner->NumberOfBins() + 1u : 2u) {}
 
   void Summary() const {
     cerr << "Number of conditioning contexts: " << r.size() << endl;
@@ -46,7 +53,9 @@ struct ConditionalPYPWordModel {
     if (it == r.end()) {
       it = r.insert(make_pair(src, CCRP<vector<WordID> >(0.5,1.0))).first;
       static const WordID kNULL = TD::Convert("NULL");
-      btr.Add(src == kNULL ? 0 : 1, &it->second);
+      unsigned bin = (src == kNULL ? 0 : 1);
+      if (binner && bin) { bin = binner->Bin(src) + 1; }
+      btr.Add(bin, &it->second);
     }
     if (it->second.increment(trglets, base(trglets), rng))
       base.Increment(trglets, rng);
@@ -75,6 +84,7 @@ struct ConditionalPYPWordModel {
 
   // TODO tie PYP hyperparameters based on source word frequency bins
   Base& base;
+  const Binner* binner;
   BinTiedResampler<CCRP<vector<WordID> > > btr;
   typedef unordered_map<WordID, CCRP<vector<WordID> > > RuleModelHash;
   RuleModelHash r;
@@ -84,7 +94,7 @@ PYPLexicalTranslation::PYPLexicalTranslation(const vector<vector<WordID> >& lets
                                              const unsigned num_letters) :
     letters(lets),
     up0(new PYPWordModel(num_letters)),
-    tmodel(new ConditionalPYPWordModel<PYPWordModel>(up0)),
+    tmodel(new ConditionalPYPWordModel<PYPWordModel>(up0, new FreqBinner("10k.freq"))),
     kX(-TD::Convert("X")) {}
 
 void PYPLexicalTranslation::Summary() const {

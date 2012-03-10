@@ -20,6 +20,9 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()
         ("samples,s",po::value<unsigned>()->default_value(1000),"Number of samples")
+        ("infer_alignment_hyperparameters,I", "Infer alpha and p_null, otherwise fixed values will be assumed")
+        ("p_null,0", po::value<double>()->default_value(0.08), "probability of aligning to null")
+        ("align_alpha,a", po::value<double>()->default_value(4.0), "how 'tight' is the bias toward be along the diagonal?")
         ("input,i",po::value<string>(),"Read parallel data from")
         ("random_seed,S",po::value<uint32_t>(), "Random seed");
   po::options_description clo("Command line options");
@@ -59,9 +62,13 @@ struct AlignedSentencePair {
 };
 
 struct Aligner {
-  Aligner(const vector<vector<WordID> >& lets, int num_letters, vector<AlignedSentencePair>* c) :
+  Aligner(const vector<vector<WordID> >& lets,
+          int num_letters,
+          const po::variables_map& conf,
+          vector<AlignedSentencePair>* c) :
       corpus(*c),
-      paj_model(4, 0.08),
+      paj_model(conf["align_alpha"].as<double>(), conf["p_null"].as<double>()),
+      infer_paj(conf.count("infer_alignment_hyperparameters") > 0),
       model(lets, num_letters),
       kNULL(TD::Convert("NULL")) {
     assert(lets[kNULL].size() == 0);
@@ -69,12 +76,13 @@ struct Aligner {
 
   vector<AlignedSentencePair>& corpus;
   QuasiModel2 paj_model;
+  const bool infer_paj;
   PYPLexicalTranslation model;
   const WordID kNULL;
 
   void ResampleHyperparameters() {
     model.ResampleHyperparameters(prng);
-    paj_model.ResampleHyperparameters(prng);
+    if (infer_paj) paj_model.ResampleHyperparameters(prng);
   }
 
   void InitializeRandom() {
@@ -117,8 +125,6 @@ struct Aligner {
         paj_model.Increment(a_j, j, asp.src.size(), asp.trg.size());
       }
     }
-    cerr << "LLH = " << Likelihood() << "    \t(Amodel=" << paj_model.Likelihood()
-         << " TModel=" << model.Likelihood() << ") contexts=" << model.UniqueConditioningContexts() << endl;
   }
 
   prob_t Likelihood() const {
@@ -211,13 +217,17 @@ int main(int argc, char** argv) {
   ExtractLetters(vocabf, &letters, NULL);
   letters[TD::Convert("NULL")].clear();
 
-  Aligner aligner(letters, letset.size(), &corpus);
+  Aligner aligner(letters, letset.size(), conf, &corpus);
   aligner.InitializeRandom();
 
   const unsigned samples = conf["samples"].as<unsigned>();
   for (int i = 0; i < samples; ++i) {
     for (int j = 65; j < 67; ++j) Debug(corpus[j]);
-    if (i % 10 == 9) aligner.ResampleHyperparameters();
+    if (i % 10 == 9) {
+      aligner.ResampleHyperparameters();
+      cerr << "LLH = " << aligner.Likelihood() << "    \t(Amodel=" << aligner.paj_model.Likelihood()
+           << " TModel=" << aligner.model.Likelihood() << ") contexts=" << aligner.model.UniqueConditioningContexts() << endl;
+    }
     aligner.ResampleCorpus();
     if (i > (samples / 5) && (i % 6 == 5)) for (int j = 0; j < corpus.size(); ++j) AddSample(&corpus[j]);
   }
