@@ -42,6 +42,10 @@ struct TiedResampler {
     return llh;
   }
 
+  double LogLikelihood() const {
+    return LogLikelihood(discount, strength);
+  }
+
   struct DiscountResampler {
     DiscountResampler(const TiedResampler& m) : m_(m) {}
     const TiedResampler& m_;
@@ -104,6 +108,13 @@ struct BinTiedResampler {
       std::cerr << "BIN " << i << " (" << resamplers[i].size() << " CRPs): " << std::flush;
       resamplers[i].ResampleHyperparameters(rng);
     }
+  }
+
+  double LogLikelihood() const {
+    double llh = 0;
+    for (unsigned i = 0; i < resamplers.size(); ++i)
+      llh += resamplers[i].LogLikelihood();
+    return llh;
   }
 
  private:

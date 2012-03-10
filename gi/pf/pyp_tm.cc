@@ -17,7 +17,7 @@ using namespace std::tr1;
 
 template <typename Base>
 struct ConditionalPYPWordModel {
-  ConditionalPYPWordModel(Base* b) : base(*b), btr(3) {}
+  ConditionalPYPWordModel(Base* b) : base(*b), btr(2) {}
 
   void Summary() const {
     cerr << "Number of conditioning contexts: " << r.size() << endl;
@@ -29,8 +29,6 @@ struct ConditionalPYPWordModel {
   }
 
   void ResampleHyperparameters(MT19937* rng) {
-    for (RuleModelHash::iterator it = r.begin(); it != r.end(); ++it)
-      it->second.resample_hyperparameters(rng);
     btr.ResampleHyperparameters(rng);
   } 
 
@@ -45,8 +43,11 @@ struct ConditionalPYPWordModel {
 
   void Increment(const WordID src, const vector<WordID>& trglets, MT19937* rng) {
     RuleModelHash::iterator it = r.find(src);
-    if (it == r.end())
-      it = r.insert(make_pair(src, CCRP<vector<WordID> >(1,1,1,1,0.5,1.0))).first;
+    if (it == r.end()) {
+      it = r.insert(make_pair(src, CCRP<vector<WordID> >(0.5,1.0))).first;
+      static const WordID kNULL = TD::Convert("NULL");
+      btr.Add(src == kNULL ? 0 : 1, &it->second);
+    }
     if (it->second.increment(trglets, base(trglets), rng))
       base.Increment(trglets, rng);
   }

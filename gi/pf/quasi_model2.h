@@ -7,6 +7,8 @@
 #include "boost/functional.hpp"
 #include "prob.h"
 #include "array2d.h"
+#include "slice_sampler.h"
+#include "m.h"
 
 struct AlignmentObservation {
   AlignmentObservation() : src_len(), trg_len(), j(), a_j() {}
@@ -53,6 +55,37 @@ struct QuasiModel2 {
     if (!cc) obs_.erase(ao);
   }
 
+  struct PNullResampler {
+    PNullResampler(const QuasiModel2& m) : m_(m) {}
+    const QuasiModel2& m_;
+    double operator()(const double& proposed_pnull) const {
+      return log(m_.Likelihood(m_.alpha_, proposed_pnull));
+    }
+  };
+
+  struct AlphaResampler {
+    AlphaResampler(const QuasiModel2& m) : m_(m) {}
+    const QuasiModel2& m_;
+    double operator()(const double& proposed_alpha) const {
+      return log(m_.Likelihood(proposed_alpha, m_.pnull_.as_float()));
+    }
+  };
+
+  void ResampleHyperparameters(MT19937* rng, const unsigned nloop = 5, const unsigned niterations = 10) {
+    const PNullResampler dr(*this);
+    const AlphaResampler ar(*this);
+    for (unsigned i = 0; i < nloop; ++i) {
+      double pnull = slice_sampler1d(dr, pnull_.as_float(), *rng, 0.00000001,
+                            1.0, 0.0, niterations, 100*niterations);
+      pnull_ = prob_t(pnull);
+      alpha_ = slice_sampler1d(ar, alpha_, *rng, 0.00000001,
+                              std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
+    }
+    std::cerr << "QuasiModel2(alpha=" << alpha_ << ",p_null="
+              << pnull_.as_float() << ") = " << Likelihood() << std::endl;
+    zcache_.clear();
+  }
+
   prob_t Likelihood() const {
     return Likelihood(alpha_, pnull_.as_float());
   }
@@ -61,12 +94,17 @@ struct QuasiModel2 {
     const prob_t pnull(ppnull);
     const prob_t pnotnull(1 - ppnull);
 
-    prob_t p = prob_t::One();
+    prob_t p;
+    p.logeq(Md::log_gamma_density(alpha, 0.1, 25));  // TODO configure
+    assert(!p.is_0());
+    prob_t prob_of_ppnull; prob_of_ppnull.logeq(Md::log_beta_density(ppnull, 2, 10));
+    assert(!prob_of_ppnull.is_0());
+    p *= prob_of_ppnull;
     for (ObsCount::const_iterator it = obs_.begin(); it != obs_.end(); ++it) {
       const AlignmentObservation& ao = it->first;
       if (ao.a_j) {
-        double u = UnnormalizedProb(ao.a_j, ao.j, ao.src_len, ao.trg_len, alpha);
-        double z = ComputeZ(ao.j, ao.src_len, ao.trg_len, alpha);
+        prob_t u = XUnnormalizedProb(ao.a_j, ao.j, ao.src_len, ao.trg_len, alpha);
+        prob_t z = XComputeZ(ao.j, ao.src_len, ao.trg_len, alpha);
         prob_t pa(u / z);
         pa *= pnotnull;
         pa.poweq(it->second);
@@ -79,6 +117,19 @@ struct QuasiModel2 {
   }
 
  private:
+  static prob_t XUnnormalizedProb(unsigned a_j, unsigned j, unsigned src_len, unsigned trg_len, double alpha) {
+    prob_t p;
+    p.logeq(-fabs(double(a_j - 1) / src_len - double(j) / trg_len) * alpha);
+    return p;
+  }
+
+  static prob_t XComputeZ(unsigned j, unsigned src_len, unsigned trg_len, double alpha) {
+    prob_t z = prob_t::Zero();
+    for (int a_j = 1; a_j <= src_len; ++a_j)
+      z += XUnnormalizedProb(a_j, j, src_len, trg_len, alpha);
+    return z;
+  }
+
   static double UnnormalizedProb(unsigned a_j, unsigned j, unsigned src_len, unsigned trg_len, double alpha) {
     return exp(-fabs(double(a_j - 1) / src_len - double(j) / trg_len) * alpha);
   }
