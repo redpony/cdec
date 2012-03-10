@@ -11,6 +11,8 @@
 #include "ccrp.h"
 #include "pyp_word_model.h"
 
+#include "tied_resampler.h"
+
 using namespace std;
 using namespace std::tr1;
 

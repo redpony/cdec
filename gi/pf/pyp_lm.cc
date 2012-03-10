@@ -11,6 +11,7 @@
 #include "tdict.h"
 #include "sampler.h"
 #include "ccrp.h"
+#include "tied_resampler.h"
 
 // A not very memory-efficient implementation of an N-gram LM based on PYPs
 // as described in Y.-W. Teh. (2006) A Hierarchical Bayesian Language Model
@@ -66,7 +67,7 @@ template<> struct PYPLM<0> {
   void increment(WordID, const vector<WordID>&, MT19937*) { ++draws; }
   void decrement(WordID, const vector<WordID>&, MT19937*) { --draws; assert(draws >= 0); }
   double prob(WordID, const vector<WordID>&) const { return p0; }
-  void resample_hyperparameters(MT19937*, const unsigned, const unsigned) {}
+  void resample_hyperparameters(MT19937*) {}
   double log_likelihood() const { return draws * log(p0); }
   const double p0;
   int draws;
@@ -76,16 +77,17 @@ template<> struct PYPLM<0> {
 template <unsigned N> struct PYPLM {
   PYPLM(unsigned vs, double da, double db, double ss, double sr) :
       backoff(vs, da, db, ss, sr),
-      discount_a(da), discount_b(db),
-      strength_s(ss), strength_r(sr),
-      d(0.8), strength(1.0), lookup(N-1) {}
+      tr(da, db, ss, sr, 0.8, 1.0),
+      lookup(N-1) {}
   void increment(WordID w, const vector<WordID>& context, MT19937* rng) {
     const double bo = backoff.prob(w, context);
     for (unsigned i = 0; i < N-1; ++i)
       lookup[i] = context[context.size() - 1 - i];
     typename unordered_map<vector<WordID>, CCRP<WordID>, boost::hash<vector<WordID> > >::iterator it = p.find(lookup);
-    if (it == p.end())
-      it = p.insert(make_pair(lookup, CCRP<WordID>(d,strength))).first;
+    if (it == p.end()) {
+      it = p.insert(make_pair(lookup, CCRP<WordID>(0.5,1))).first;
+      tr.Add(&it->second);  // add to resampler
+    }
     if (it->second.increment(w, bo, rng))
       backoff.increment(w, context, rng);
   }
@@ -107,59 +109,21 @@ template <unsigned N> struct PYPLM {
   }
 
   double log_likelihood() const {
-    return log_likelihood(d, strength) + backoff.log_likelihood();
-  }
-
-  double log_likelihood(const double& dd, const double& aa) const {
-    if (aa <= -dd) return -std::numeric_limits<double>::infinity();
-    //double llh = Md::log_beta_density(dd, 10, 3) + Md::log_gamma_density(aa, 1, 1);
-    double llh = Md::log_beta_density(dd, discount_a, discount_b) +
-                 Md::log_gamma_density(aa + dd, strength_s, strength_r);
+    double llh = backoff.log_likelihood();
     typename unordered_map<vector<WordID>, CCRP<WordID>, boost::hash<vector<WordID> > >::const_iterator it;
     for (it = p.begin(); it != p.end(); ++it)
-      llh += it->second.log_crp_prob(dd, aa);
+      llh += it->second.log_crp_prob();
+    // TODO parametric likelihood from TiedResampler
     return llh;
   }
 
-  struct DiscountResampler {
-    DiscountResampler(const PYPLM& m) : m_(m) {}
-    const PYPLM& m_;
-    double operator()(const double& proposed_discount) const {
-      return m_.log_likelihood(proposed_discount, m_.strength);
-    }
-  };
-
-  struct AlphaResampler {
-    AlphaResampler(const PYPLM& m) : m_(m) {}
-    const PYPLM& m_;
-    double operator()(const double& proposed_strength) const {
-      return m_.log_likelihood(m_.d, proposed_strength);
-    }
-  };
-
-  void resample_hyperparameters(MT19937* rng, const unsigned nloop = 5, const unsigned niterations = 10) {
-    DiscountResampler dr(*this);
-    AlphaResampler ar(*this);
-    for (int iter = 0; iter < nloop; ++iter) {
-      strength = slice_sampler1d(ar, strength, *rng, -d + std::numeric_limits<double>::min(),
-                              std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
-      double min_discount = std::numeric_limits<double>::min();
-      if (strength < 0.0) min_discount -= strength;
-      d = slice_sampler1d(dr, d, *rng, min_discount,
-                          1.0, 0.0, niterations, 100*niterations);
-    }
-    strength = slice_sampler1d(ar, strength, *rng, -d + std::numeric_limits<double>::min(),
-                            std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
-    typename unordered_map<vector<WordID>, CCRP<WordID>, boost::hash<vector<WordID> > >::iterator it;
-    cerr << "PYPLM<" << N << ">(d=" << d << ",a=" << strength << ") = " << log_likelihood(d, strength) << endl;
-    for (it = p.begin(); it != p.end(); ++it) {
-      it->second.set_discount(d);
-      it->second.set_strength(strength);
-    }
-    backoff.resample_hyperparameters(rng, nloop, niterations);
+  void resample_hyperparameters(MT19937* rng) {
+    tr.ResampleHyperparameters(rng);
+    backoff.resample_hyperparameters(rng);
   }
 
   PYPLM<N-1> backoff;
+  TiedResampler<CCRP<WordID> > tr;
   double discount_a, discount_b, strength_s, strength_r;
   double d, strength;
   mutable vector<WordID> lookup;  // thread-local
