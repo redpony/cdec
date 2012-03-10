@@ -113,7 +113,7 @@ template <unsigned N> struct PYPLM {
     typename unordered_map<vector<WordID>, CCRP<WordID>, boost::hash<vector<WordID> > >::const_iterator it;
     for (it = p.begin(); it != p.end(); ++it)
       llh += it->second.log_crp_prob();
-    // TODO parametric likelihood from TiedResampler
+    llh += tr.LogLikelihood();
     return llh;
   }
 

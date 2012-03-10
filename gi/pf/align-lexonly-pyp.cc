@@ -74,6 +74,7 @@ struct Aligner {
 
   void ResampleHyperparameters() {
     model.ResampleHyperparameters(prng);
+    paj_model.ResampleHyperparameters(prng);
   }
 
   void InitializeRandom() {
@@ -216,9 +217,9 @@ int main(int argc, char** argv) {
   const unsigned samples = conf["samples"].as<unsigned>();
   for (int i = 0; i < samples; ++i) {
     for (int j = 65; j < 67; ++j) Debug(corpus[j]);
-    if (i % 7 == 6) aligner.ResampleHyperparameters();
+    if (i % 10 == 9) aligner.ResampleHyperparameters();
     aligner.ResampleCorpus();
-    if (i > (samples / 5) && (i % 10 == 9)) for (int j = 0; j < corpus.size(); ++j) AddSample(&corpus[j]);
+    if (i > (samples / 5) && (i % 6 == 5)) for (int j = 0; j < corpus.size(); ++j) AddSample(&corpus[j]);
   }
   for (unsigned i = 0; i < corpus.size(); ++i)
     WriteAlignments(corpus[i]);
