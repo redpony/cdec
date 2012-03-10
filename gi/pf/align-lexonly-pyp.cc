@@ -61,15 +61,15 @@ struct AlignedSentencePair {
 struct Aligner {
   Aligner(const vector<vector<WordID> >& lets, int num_letters, vector<AlignedSentencePair>* c) :
       corpus(*c),
+      paj_model(4, 0.08),
       model(lets, num_letters),
-      paj(4, 0.08),
       kNULL(TD::Convert("NULL")) {
     assert(lets[kNULL].size() == 0);
   }
 
   vector<AlignedSentencePair>& corpus;
+  QuasiModel2 paj_model;
   PYPLexicalTranslation model;
-  const QuasiModel2 paj;
   const WordID kNULL;
 
   void ResampleHyperparameters() {
@@ -86,10 +86,12 @@ struct Aligner {
         a_j = prng->next() * (1 + asp.src.size());
         const WordID f_a_j = (a_j ? asp.src[a_j - 1] : kNULL);
         model.Increment(f_a_j, asp.trg[j], &*prng);
-        // TODO factor in alignment prob
+        paj_model.Increment(a_j, j, asp.src.size(), asp.trg.size());
       }
     }
-    cerr << "Corpus intialized randomly. LLH = " << model.Likelihood() << endl;
+    cerr << "Corpus intialized randomly." << endl;
+    cerr << "LLH = " << Likelihood() << "    \t(Amodel=" << paj_model.Likelihood()
+         << " TModel=" << model.Likelihood() << ") contexts=" << model.UniqueConditioningContexts() << endl;
   }
 
   void ResampleCorpus() {
@@ -101,19 +103,25 @@ struct Aligner {
         const WordID e_j = asp.trg[j];
         WordID f_a_j = (a_j ? asp.src[a_j - 1] : kNULL);
         model.Decrement(f_a_j, e_j, prng);
+        paj_model.Decrement(a_j, j, asp.src.size(), asp.trg.size());
 
         for (unsigned prop_a_j = 0; prop_a_j <= asp.src.size(); ++prop_a_j) {
           const WordID prop_f = (prop_a_j ? asp.src[prop_a_j - 1] : kNULL);
           ss[prop_a_j] = model.Prob(prop_f, e_j);
-          // TODO configurable
-          ss[prop_a_j] *= paj.Pa_j(prop_a_j, j, asp.src.size(), asp.trg.size());
+          ss[prop_a_j] *= paj_model.Prob(prop_a_j, j, asp.src.size(), asp.trg.size());
         }
         a_j = prng->SelectSample(ss);
         f_a_j = (a_j ? asp.src[a_j - 1] : kNULL);
         model.Increment(f_a_j, e_j, prng);
+        paj_model.Increment(a_j, j, asp.src.size(), asp.trg.size());
       }
     }
-    cerr << "LLH = " << model.Likelihood() << " " << model.UniqueConditioningContexts() << endl;
+    cerr << "LLH = " << Likelihood() << "    \t(Amodel=" << paj_model.Likelihood()
+         << " TModel=" << model.Likelihood() << ") contexts=" << model.UniqueConditioningContexts() << endl;
+  }
+
+  prob_t Likelihood() const {
+    return model.Likelihood() * paj_model.Likelihood();
   }
 };
 
