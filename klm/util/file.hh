@@ -1,8 +1,11 @@
 #ifndef UTIL_FILE__
 #define UTIL_FILE__
 
+#include <cstddef>
 #include <cstdio>
-#include <unistd.h>
+#include <string>
+
+#include <stdint.h>
 
 namespace util {
 
@@ -52,22 +55,52 @@ class scoped_FILE {
       file_ = to;
     }
 
+    std::FILE *release() {
+      std::FILE *ret = file_;
+      file_ = NULL;
+      return ret;
+    }
+
   private:
     std::FILE *file_;
 };
 
+// Open for read only.  
 int OpenReadOrThrow(const char *name);
-
+// Create file if it doesn't exist, truncate if it does.  Opened for write.   
 int CreateOrThrow(const char *name);
 
 // Return value for SizeFile when it can't size properly.  
-const off_t kBadSize = -1;
-off_t SizeFile(int fd);
+const uint64_t kBadSize = (uint64_t)-1;
+uint64_t SizeFile(int fd);
+
+void ResizeOrThrow(int fd, uint64_t to);
 
 void ReadOrThrow(int fd, void *to, std::size_t size);
+std::size_t ReadOrEOF(int fd, void *to_void, std::size_t amount);
+
 void WriteOrThrow(int fd, const void *data_void, std::size_t size);
 
-void RemoveOrThrow(const char *name);
+void FSyncOrThrow(int fd);
+
+// Seeking
+void SeekOrThrow(int fd, uint64_t off);
+void AdvanceOrThrow(int fd, int64_t off);
+void SeekEnd(int fd);
+
+std::FILE *FDOpenOrThrow(scoped_fd &file);
+
+class TempMaker {
+  public:
+    explicit TempMaker(const std::string &prefix);
+
+    int Make() const;
+
+    std::FILE *MakeFile() const;
+
+  private:
+    std::string base_;
+};
 
 } // namespace util
 

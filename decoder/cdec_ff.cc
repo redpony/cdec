@@ -1,6 +1,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ff.h"
+#include "ff_context.h"
 #include "ff_spans.h"
 #include "ff_lm.h"
 #include "ff_klm.h"
@@ -42,6 +43,7 @@ void register_feature_functions() {
 #endif
   ff_registry.Register("SpanFeatures", new FFFactory<SpanFeatures>());
   ff_registry.Register("NgramFeatures", new FFFactory<NgramDetector>());
+  ff_registry.Register("RuleContextFeatures", new FFFactory<RuleContextFeatures>());
   ff_registry.Register("RuleIdentityFeatures", new FFFactory<RuleIdentityFeatures>());
   ff_registry.Register("SourceSyntaxFeatures", new FFFactory<SourceSyntaxFeatures>);
   ff_registry.Register("SourceSpanSizeFeatures", new FFFactory<SourceSpanSizeFeatures>);

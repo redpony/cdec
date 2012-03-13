@@ -24,11 +24,11 @@ void ReadParallelCorpus(const string& filename,
   istream* in = rf.stream();
   assert(*in);
   string line;
+  unsigned lc = 0;
   const WordID kDIV = TD::Convert("|||");
   vector<WordID> tmp;
-  while(*in) {
-    getline(*in, line);
-    if (line.empty() && !*in) break;
+  while(getline(*in, line)) {
+    ++lc;
     e->push_back(vector<int>());
     f->push_back(vector<int>());
     vector<int>& le = e->back();
@@ -39,12 +39,17 @@ void ReadParallelCorpus(const string& filename,
     for (unsigned i = 0; i < tmp.size(); ++i) {
       const int cur = tmp[i];
       if (isf) {
-        if (kDIV == cur) { isf = false; } else {
+        if (kDIV == cur) {
+          isf = false;
+        } else {
           lf.push_back(cur);
           vocab_f->insert(cur);
         }
       } else {
-        assert(cur != kDIV);
+        if (cur == kDIV) {
+          cerr << "ERROR in " << lc << ": " << line << endl << endl;
+          abort();
+        }
         le.push_back(cur);
         vocab_e->insert(cur);
       }

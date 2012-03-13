@@ -8,6 +8,7 @@
 #include "dict.h"
 #include "sampler.h"
 #include "ccrp.h"
+#include "m.h"
 
 using namespace std;
 using namespace std::tr1;
@@ -95,11 +96,6 @@ void ReadCorpus(const string& filename, vector<vector<int> >* c, set<int>* vocab
   if (in != &cin) delete in;
 }
 
-double log_poisson(unsigned x, const double& lambda) {
-  assert(lambda > 0.0);
-  return log(lambda) * x - lgamma(x + 1) - lambda;
-}
-
 struct UniphraseLM {
   UniphraseLM(const vector<vector<int> >& corpus,
               const set<int>& vocab,
@@ -128,7 +124,7 @@ struct UniphraseLM {
   double log_p0(const vector<int>& phrase) const {
     double len_logprob;
     if (use_poisson_)
-      len_logprob = log_poisson(phrase.size(), 1.0);
+      len_logprob = Md::log_poisson(phrase.size(), 1.0);
     else
       len_logprob = log(1 - p_end_) * (phrase.size() -1) + log(p_end_);
     return log(uniform_word_) * phrase.size() + len_logprob;
@@ -256,7 +252,7 @@ struct UniphraseLM {
   void ResampleHyperparameters(MT19937* rng) {
     phrases_.resample_hyperparameters(rng);
     gen_.resample_hyperparameters(rng);
-    cerr << " d=" << phrases_.discount() << ",c=" << phrases_.concentration();
+    cerr << " d=" << phrases_.discount() << ",s=" << phrases_.strength();
   }
 
   CCRP<vector<int> > phrases_;

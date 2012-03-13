@@ -13,11 +13,12 @@
 #include "filelib.h"
 #include "stringlib.h"
 #include "weights.h"
-#include "scorer.h"
 #include "inside_outside.h"
 #include "hg_io.h"
 #include "kbest.h"
 #include "viterbi.h"
+#include "ns.h"
+#include "ns_docscorer.h"
 
 // This is Figure 4 (Algorithm Sampler) from Hopkins&May (2011)
 
@@ -80,7 +81,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("kbest_repository,K",po::value<string>()->default_value("./kbest"),"K-best list repository (directory)")
         ("input,i",po::value<string>()->default_value("-"), "Input file to map (- is STDIN)")
         ("source,s",po::value<string>()->default_value(""), "Source file (ignored, except for AER)")
-        ("loss_function,l",po::value<string>()->default_value("ibm_bleu"), "Loss function being optimized")
+        ("evaluation_metric,m",po::value<string>()->default_value("IBM_BLEU"), "Evaluation metric (ibm_bleu, koehn_bleu, nist_bleu, ter, meteor, etc.)")
         ("kbest_size,k",po::value<unsigned>()->default_value(1500u), "Top k-hypotheses to extract")
         ("candidate_pairs,G", po::value<unsigned>()->default_value(5000u), "Number of pairs to sample per hypothesis (Gamma)")
         ("best_pairs,X", po::value<unsigned>()->default_value(50u), "Number of pairs, ranked by magnitude of objective delta, to retain (Xi)")
@@ -109,9 +110,12 @@ struct HypInfo {
   HypInfo(const vector<WordID>& h, const SparseVector<weight_t>& feats) : hyp(h), g_(-100.0f), x(feats) {}
 
   // lazy evaluation
-  double g(const SentenceScorer& scorer) const {
-    if (g_ == -100.0f)
-      g_ = scorer.ScoreCandidate(hyp)->ComputeScore();
+  double g(const SegmentEvaluator& scorer, const EvaluationMetric* metric) const {
+    if (g_ == -100.0f) {
+      SufficientStats ss;
+      scorer.Evaluate(hyp, &ss);
+      g_ = metric->ComputeScore(ss);
+    }
     return g_;
   }
   vector<WordID> hyp;
@@ -233,15 +237,21 @@ struct DiffOrder {
   }
 };
 
-void Sample(const unsigned gamma, const unsigned xi, const vector<HypInfo>& J_i, const SentenceScorer& scorer, const bool invert_score, vector<TrainingInstance>* pv) {
+void Sample(const unsigned gamma,
+            const unsigned xi,
+            const vector<HypInfo>& J_i,
+            const SegmentEvaluator& scorer,
+            const EvaluationMetric* metric,
+            vector<TrainingInstance>* pv) {
+  const bool invert_score = metric->IsErrorMetric();
   vector<TrainingInstance> v1, v2;
   float avg_diff = 0;
   for (unsigned i = 0; i < gamma; ++i) {
     const size_t a = rng->inclusive(0, J_i.size() - 1)();
     const size_t b = rng->inclusive(0, J_i.size() - 1)();
     if (a == b) continue;
-    float ga = J_i[a].g(scorer);
-    float gb = J_i[b].g(scorer);
+    float ga = J_i[a].g(scorer, metric);
+    float gb = J_i[b].g(scorer, metric);
     bool positive = gb < ga;
     if (invert_score) positive = !positive;
     const float gdiff = fabs(ga - gb);
@@ -288,11 +298,12 @@ int main(int argc, char** argv) {
     rng.reset(new MT19937(conf["random_seed"].as<uint32_t>()));
   else
     rng.reset(new MT19937);
-  const string loss_function = conf["loss_function"].as<string>();
+  const string evaluation_metric = conf["evaluation_metric"].as<string>();
 
-  ScoreType type = ScoreTypeFromString(loss_function);
-  DocScorer ds(type, conf["reference"].as<vector<string> >(), conf["source"].as<string>());
-  cerr << "Loaded " << ds.size() << " references for scoring with " << loss_function << endl;
+  EvaluationMetric* metric = EvaluationMetric::Instance(evaluation_metric);
+  DocumentScorer ds(metric, conf["reference"].as<vector<string> >());
+  cerr << "Loaded " << ds.size() << " references for scoring with " << evaluation_metric << endl;
+
   Hypergraph hg;
   string last_file;
   ReadFile in_read(conf["input"].as<string>());
@@ -335,7 +346,7 @@ int main(int argc, char** argv) {
     Dedup(&J_i);
     WriteKBest(kbest_file, J_i);
 
-    Sample(gamma, xi, J_i, *ds[sent_id], (type == TER), &v);
+    Sample(gamma, xi, J_i, *ds[sent_id], metric, &v);
     for (unsigned i = 0; i < v.size(); ++i) {
       const TrainingInstance& vi = v[i];
       cout << vi.y << "\t" << vi.x << endl;

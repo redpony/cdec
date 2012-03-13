@@ -10,7 +10,7 @@ endif
 
 noinst_LIBRARIES = libmteval.a
 
-libmteval_a_SOURCES = ter.cc comb_scorer.cc aer_scorer.cc scorer.cc external_scorer.cc
+libmteval_a_SOURCES = ter.cc comb_scorer.cc aer_scorer.cc scorer.cc external_scorer.cc ns.cc ns_ter.cc ns_ext.cc ns_comb.cc ns_docscorer.cc
 
 fast_score_SOURCES = fast_score.cc
 fast_score_LDADD = libmteval.a $(top_srcdir)/utils/libutils.a -lz

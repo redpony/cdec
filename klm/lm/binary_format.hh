@@ -12,7 +12,7 @@
 #include <cstddef>
 #include <vector>
 
-#include <inttypes.h>
+#include <stdint.h>
 
 namespace lm {
 namespace ngram {
@@ -33,10 +33,8 @@ struct FixedWidthParameters {
   unsigned int search_version;
 };
 
-inline std::size_t Align8(std::size_t in) {
-  std::size_t off = in % 8;
-  return off ? (in + 8 - off) : in;
-}
+// This is a macro instead of an inline function so constants can be assigned using it.
+#define ALIGN8(a) ((std::ptrdiff_t(((a)-1)/8)+1)*8)
 
 // Parameters stored in the header of a binary file.  
 struct Parameters {
@@ -53,10 +51,6 @@ struct Backing {
   util::scoped_memory search;
 };
 
-void SeekOrThrow(int fd, off_t off);
-// Seek forward
-void AdvanceOrThrow(int fd, off_t off);
-
 // Create just enough of a binary file to write vocabulary to it.  
 uint8_t *SetupJustVocab(const Config &config, uint8_t order, std::size_t memory_size, Backing &backing);
 // Grow the binary file for the search data structure and set backing.search, returning the memory address where the search data structure should begin.  
@@ -64,7 +58,7 @@ uint8_t *GrowForSearch(const Config &config, std::size_t vocab_pad, std::size_t 
 
 // Write header to binary file.  This is done last to prevent incomplete files
 // from loading.   
-void FinishFile(const Config &config, ModelType model_type, unsigned int search_version, const std::vector<uint64_t> &counts, Backing &backing);
+void FinishFile(const Config &config, ModelType model_type, unsigned int search_version, const std::vector<uint64_t> &counts,  std::size_t vocab_pad, Backing &backing);
 
 namespace detail {
 

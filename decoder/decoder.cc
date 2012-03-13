@@ -408,6 +408,7 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
         ("show_partition,z", "Compute and show the partition (inside score)")
         ("show_conditional_prob", "Output the conditional log prob to STDOUT instead of a translation")
         ("show_cfg_search_space", "Show the search space as a CFG")
+        ("show_target_graph", "Output the target hypergraph")
         ("coarse_to_fine_beam_prune", po::value<double>(), "Prune paths from coarse parse forest before fine parse, keeping paths within exp(alpha>=0)")
         ("ctf_beam_widen", po::value<double>()->default_value(2.0), "Expand coarse pass beam by this factor if no fine parse is found")
         ("ctf_num_widenings", po::value<int>()->default_value(2), "Widen coarse beam this many times before backing off to full parse")
@@ -814,6 +815,9 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     cerr << "Bad summary_feature_type: " << conf["summary_feature_type"].as<string>() << endl;
     abort();
   }
+
+  if (conf.count("show_target_graph"))
+    HypergraphIO::WriteTarget(forest);
 
   for (int pass = 0; pass < rescoring_passes.size(); ++pass) {
     const RescoringPass& rp = rescoring_passes[pass];

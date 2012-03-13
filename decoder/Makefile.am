@@ -63,6 +63,7 @@ libcdec_a_SOURCES = \
   ff.cc \
   ff_rules.cc \
   ff_wordset.cc \
+  ff_context.cc \
   ff_charset.cc \
   ff_lm.cc \
   ff_klm.cc \
@@ -75,7 +76,6 @@ libcdec_a_SOURCES = \
   ff_source_syntax.cc \
   ff_bleu.cc \
   ff_factory.cc \
-  freqdict.cc \
   lexalign.cc \
   lextrans.cc \
   tagger.cc \

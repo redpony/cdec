@@ -1,4 +1,0 @@
-Rescoring example:
-
-  ../rescore_with_cdec_model.pl -c cdec.ini -s source.txt  -h hyp.txt  -w weights -f RescoringModel
-

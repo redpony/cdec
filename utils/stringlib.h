@@ -125,6 +125,13 @@ inline std::string LowercaseString(const std::string& in) {
   return res;
 }
 
+inline std::string UppercaseString(const std::string& in) {
+  std::string res(in.size(),' ');
+  for (int i = 0; i < in.size(); ++i)
+    res[i] = toupper(in[i]);
+  return res;
+}
+
 inline int CountSubstrings(const std::string& str, const std::string& sub) {
   size_t p = 0;
   int res = 0;
