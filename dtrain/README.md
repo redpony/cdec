@@ -11,8 +11,10 @@ builds when building cdec, see ../BUILDING
 
 Running
 -------
-To run this on a dev set locally (default):
+To run this on a dev set locally:
+```
     #define DTRAIN_LOCAL
+```
 otherwise remove that line or undef. You need a single grammar file
 or per-sentence-grammars (psg) as you would use with cdec.
 Additionally you need to give dtrain a file with
