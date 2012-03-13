@@ -3,9 +3,11 @@
 #include <valarray>
 #include <gtest/gtest.h>
 
+#include "ns.h"
 #include "tdict.h"
 #include "scorer.h"
 #include "aer_scorer.h"
+#include "kernel_string_subseq.h"
 
 using namespace std;
 
@@ -173,6 +175,52 @@ TEST_F(ScorerTest, AERTest) {
   y->ScoreDetails(&d2);
   cerr << d2 << endl;
   EXPECT_EQ(d2, details);
+}
+
+TEST_F(ScorerTest, Kernel) {
+  for (int i = 1; i < 10; ++i) {
+    const float l = (i / 10.0);
+    float f = ssk<4>(refs0[0], hyp1, l) +
+              ssk<4>(refs0[1], hyp1, l) +
+              ssk<4>(refs0[2], hyp1, l) +
+              ssk<4>(refs0[3], hyp1, l);
+    float f2= ssk<4>(refs1[0], hyp2, l) +
+              ssk<4>(refs1[1], hyp2, l) +
+              ssk<4>(refs1[2], hyp2, l) +
+              ssk<4>(refs1[3], hyp2, l);
+    f /= 4;
+    f2 /= 4;
+    float f3= ssk<4>(refs0[0], hyp2, l) +
+              ssk<4>(refs0[1], hyp2, l) +
+              ssk<4>(refs0[2], hyp2, l) +
+              ssk<4>(refs0[3], hyp2, l);
+    float f4= ssk<4>(refs1[0], hyp1, l) +
+              ssk<4>(refs1[1], hyp1, l) +
+              ssk<4>(refs1[2], hyp1, l) +
+              ssk<4>(refs1[3], hyp1, l);
+    f3 += f4;
+    f3 /= 8;
+    cerr << "LAMBDA=" << l << "\t" << f << " " << f2 << "\tf=" << ((f + f2)/2 - f3) << " (bad=" << f3 << ")" << endl;
+  }
+}
+
+TEST_F(ScorerTest, NewScoreAPI) {
+  //EvaluationMetric* metric = EvaluationMetric::Instance("IBM_BLEU");
+  //EvaluationMetric* metric = EvaluationMetric::Instance("METEOR");
+  EvaluationMetric* metric = EvaluationMetric::Instance("COMB:IBM_BLEU=0.5;TER=-0.5");
+  boost::shared_ptr<SegmentEvaluator> e1 = metric->CreateSegmentEvaluator(refs0);
+  boost::shared_ptr<SegmentEvaluator> e2 = metric->CreateSegmentEvaluator(refs1);
+  SufficientStats stats1;
+  e1->Evaluate(hyp1, &stats1);
+  SufficientStats stats2;
+  e2->Evaluate(hyp2, &stats2);
+  stats1 += stats2;
+  string ss;
+  stats1.Encode(&ss);
+  cerr << "SS: " << ss << endl;
+  cerr << metric->ComputeScore(stats1) << endl;
+  //SufficientStats statse("IBM_BLEU 53 32 18 11 65 63 61 59 65 72");
+  //cerr << metric->ComputeScore(statse) << endl;
 }
 
 int main(int argc, char **argv) {

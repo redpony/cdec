@@ -1,0 +1,62 @@
+SUFFIX-ARRAY-EXTRACT README
+  Feb 1, 2012
+
+Written by Adam Lopez, repackaged by Chris Dyer.
+
+Originally based on parts of Hiero, by David Chiang, but these dependencies
+have been removed or rewritten.
+
+
+BUILD INSTRUCTIONS
+==============================================================================
+
+Requirements:
+  Python 2.7 or later (http://www.python.org)
+  Cython 0.14.1 or later (http://cython.org/)
+
+- Edit Makefile to set the location of Python/Cython then do:
+
+  make
+
+
+COMPILING A PARALLEL CORPUS AND WORD ALIGNMENT
+==============================================================================
+- Run sa-compile.pl to compile the training data and generate an extract.ini
+  file (which is written to STDOUT):
+
+  sa-compile.pl -b bitext_name=source.fr,target.en \
+                -a alignment_name=alignment.txt > extract.ini
+
+
+  The training data should be in two parallel text files (source.fr,source.en)
+  and the alignments are expected in "0-0 1-2 2-1 ..." format produced by
+  most alignment toolkits. The text files should NOT be escaped for non-XML
+  characters.
+
+
+EXTRACTION OF PER-SENTENCE GRAMMARS
+==============================================================================
+The most common use-case we support is extraction of "per-sentence" grammars
+for each segment in a testset. You may run the extractor on test set, but it
+will try to interpret tags as SGML markup, so we provide a script that does
+escaping: ./escape-testset.pl.
+
+- Example:
+
+  cat test.fr | ./escape-testset.pl | ./extractor.py -c extract.ini
+
+
+EXTRACTION OF COMPLETE TEST-SET GRAMMARS
+==============================================================================
+Edit the generated extract.ini file a change per_sentence_grammar
+to False. Then, run extraction as normal.
+
+Note: extracting a single grammar for an entire test set will consume more
+memory during extraction and (probably) during decoding.
+
+
+EXAMPLE
+==============================================================================
+- See example/ and the README therein.
+
+

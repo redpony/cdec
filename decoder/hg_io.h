@@ -23,6 +23,9 @@ struct HypergraphIO {
 
   static void WriteAsCFG(const Hypergraph& hg);
 
+  // Write only the target size information in bottom-up order.  
+  static void WriteTarget(const Hypergraph& hg);
+
   // serialization utils
   static void ReadFromPLF(const std::string& in, Hypergraph* out, int line = 0);
   // return PLF string representation (undefined behavior on non-lattices)

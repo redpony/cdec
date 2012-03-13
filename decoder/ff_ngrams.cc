@@ -57,6 +57,39 @@ namespace {
   }
 }
 
+static bool ParseArgs(string const& in, bool* explicit_markers, unsigned* order) {
+  vector<string> const& argv=SplitOnWhitespace(in);
+  *explicit_markers = false;
+  *order = 3;
+#define LMSPEC_NEXTARG if (i==argv.end()) {            \
+    cerr << "Missing argument for "<<*last<<". "; goto usage; \
+    } else { ++i; }
+
+  for (vector<string>::const_iterator last,i=argv.begin(),e=argv.end();i!=e;++i) {
+    string const& s=*i;
+    if (s[0]=='-') {
+      if (s.size()>2) goto fail;
+      switch (s[1]) {
+      case 'x':
+        *explicit_markers = true;
+        break;
+      case 'o':
+        LMSPEC_NEXTARG; *order=atoi((*i).c_str());
+        break;
+#undef LMSPEC_NEXTARG
+      default:
+      fail:
+        cerr<<"Unknown option on NgramFeatures "<<s<<" ; ";
+        goto usage;
+      }
+    }
+  }
+  return true;
+usage:
+  cerr << "NgramFeatures is incorrect!\n";
+  return false;
+}
+
 class NgramDetectorImpl {
 
   // returns the number of unscored words at the left edge of a span
@@ -264,10 +297,10 @@ class NgramDetectorImpl {
   }
 
  public:
-  explicit NgramDetectorImpl(bool explicit_markers) :
+  explicit NgramDetectorImpl(bool explicit_markers, unsigned order) :
       kCDEC_UNK(TD::Convert("<unk>")) ,
       add_sos_eos_(!explicit_markers) {
-    order_ = 3;
+    order_ = order;
     state_size_ = (order_ - 1) * sizeof(WordID) + 2 + (order_ - 1) * sizeof(WordID);
     unscored_size_offset_ = (order_ - 1) * sizeof(WordID);
     is_complete_offset_ = unscored_size_offset_ + 1;
@@ -316,8 +349,10 @@ class NgramDetectorImpl {
 
 NgramDetector::NgramDetector(const string& param) {
   string filename, mapfile, featname;
-  bool explicit_markers = (param == "-x");
-  pimpl_ = new NgramDetectorImpl(explicit_markers);
+  bool explicit_markers = false;
+  unsigned order = 3;
+  ParseArgs(param, &explicit_markers, &order);
+  pimpl_ = new NgramDetectorImpl(explicit_markers, order);
   SetStateSize(pimpl_->ReserveStateSize());
 }
 

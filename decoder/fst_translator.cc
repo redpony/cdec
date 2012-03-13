@@ -30,7 +30,10 @@ struct FSTTranslatorImpl {
     if (input.find("{\"rules\"") == 0) {
       istringstream is(input);
       Hypergraph src_cfg_hg;
-      assert(HypergraphIO::ReadFromJSON(&is, &src_cfg_hg));
+      if (!HypergraphIO::ReadFromJSON(&is, &src_cfg_hg)) {
+        cerr << "Failed to read HG from JSON.\n";
+        abort();
+      }
       if (add_pass_through_rules) {
         SparseVector<double> feats;
         feats.set_value(FD::Convert("PassThrough"), 1);

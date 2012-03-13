@@ -1,12 +1,12 @@
 bin_PROGRAMS = \
   model1 \
+  lbl_model \
   test_ngram \
   mr_em_map_adapter \
   mr_em_adapted_reduce \
   mr_reduce_to_weights \
   mr_optimize_reduce \
   grammar_convert \
-  atools \
   plftools \
   collapse_weights \
   mpi_extract_reachable \
@@ -47,11 +47,11 @@ augment_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/lib
 test_ngram_SOURCES = test_ngram.cc
 test_ngram_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
-atools_SOURCES = atools.cc
-atools_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
-
 model1_SOURCES = model1.cc ttables.cc
 model1_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
+
+lbl_model_SOURCES = lbl_model.cc optimize.cc
+lbl_model_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
 grammar_convert_SOURCES = grammar_convert.cc
 grammar_convert_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz

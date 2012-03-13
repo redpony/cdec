@@ -329,7 +329,10 @@ class EarleyComposerImpl {
     forest->ReserveNodes(kMAX_NODES);
     assert(sit != g.end());
     Edge* init = new Edge(start_cat_, &sit->second, q_0_);
-    assert(IncorporateNewEdge(init));
+    if (!IncorporateNewEdge(init)) {
+      cerr << "Failed to create initial edge!\n";
+      abort();
+    }
     while (exp_agenda.HasWork() || agenda.HasWork()) {
       while(exp_agenda.HasWork()) {
         const Edge* edge = exp_agenda.Next();

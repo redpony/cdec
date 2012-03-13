@@ -7,7 +7,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #include "pf.h"
-#include "base_measures.h"
+#include "base_distributions.h"
 #include "monotonic_pseg.h"
 #include "reachability.h"
 #include "viterbi.h"
@@ -77,7 +77,7 @@ struct BackwardEstimateSym {
         r.push_back(src_[i]);
       r.push_back(0);  // NULL word
       const prob_t uniform_alignment(1.0 / r.size());
-      e.logeq(log_poisson(trg_.size() - trg_cov, r.size() - 1)); // p(trg len remaining | src len remaining)
+      e.logeq(Md::log_poisson(trg_.size() - trg_cov, r.size() - 1)); // p(trg len remaining | src len remaining)
       for (unsigned j = trg_cov; j < trg_.size(); ++j) {
         prob_t p;
         for (unsigned i = 0; i < r.size(); ++i)
@@ -92,7 +92,7 @@ struct BackwardEstimateSym {
       r.pop_back();
       const prob_t inv_uniform(1.0 / (trg_.size() - trg_cov + 1.0));
       prob_t inv;
-      inv.logeq(log_poisson(r.size(), trg_.size() - trg_cov));
+      inv.logeq(Md::log_poisson(r.size(), trg_.size() - trg_cov));
       for (unsigned i = 0; i < r.size(); ++i) {
         prob_t p;
         for (unsigned j = trg_cov - 1; j < trg_.size(); ++j)

@@ -624,3 +624,30 @@ void HypergraphIO::WriteAsCFG(const Hypergraph& hg) {
   }
 }
 
+/* Output format:
+ * #vertices
+ * for each vertex in bottom-up topological order:
+ *   #downward_edges
+ *   for each downward edge:
+ *     RHS with [vertex_index] for NTs ||| scores
+ */
+void HypergraphIO::WriteTarget(const Hypergraph& hg) {
+  cout << hg.nodes_.size() << ' ' << hg.edges_.size() << '\n';
+  for (unsigned int i = 0; i < hg.nodes_.size(); ++i) {
+    const Hypergraph::EdgesVector &edges = hg.nodes_[i].in_edges_;
+    cout << edges.size() << '\n';
+    for (unsigned int j = 0; j < edges.size(); ++j) {
+      const Hypergraph::Edge &edge = hg.edges_[edges[j]];
+      const std::vector<WordID> &e = edge.rule_->e();
+      for (std::vector<WordID>::const_iterator word = e.begin(); word != e.end(); ++word) {
+        if (*word <= 0) {
+          cout << '[' << edge.tail_nodes_[-*word] << "] ";
+        } else {
+          cout << TD::Convert(*word) << ' ';
+        }
+      }
+      cout << "||| " << edge.rule_->scores_ << '\n';
+    }
+  }
+}
+

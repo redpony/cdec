@@ -46,6 +46,7 @@ void LatticeTools::ConvertTextToLattice(const string& text, Lattice* pl) {
   Lattice& l = *pl;
   vector<WordID> ids;
   TD::ConvertSentence(text, &ids);
+  l.clear();
   l.resize(ids.size());
   for (int i = 0; i < l.size(); ++i)
     l[i].push_back(LatticeArc(ids[i], 0.0, 1));
