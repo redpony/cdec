@@ -376,15 +376,16 @@ main(int argc, char** argv)
     vector<ScoredHyp>* samples = observer->GetSamples();
 
     if (verbose) {
-      cerr << "--- ref for " << ii << " ";
+      cerr << "--- ref for " << ii << ": ";
       if (t > 0) printWordIDVec(ref_ids_buf[ii]);
       else printWordIDVec(ref_ids);
+      cerr << endl;
       for (unsigned u = 0; u < samples->size(); u++) {
         cerr << _p5 << _np << "[" << u << ". '";
         printWordIDVec((*samples)[u].w);
         cerr << "'" << endl;
-        cerr << "SCORE=" << (*samples)[0].score << ",model="<< (*samples)[0].model << endl;
-        cerr << "F{" << (*samples)[0].f << "} ]" << endl << endl;
+        cerr << "SCORE=" << (*samples)[u].score << ",model="<< (*samples)[u].model << endl;
+        cerr << "F{" << (*samples)[u].f << "} ]" << endl << endl;
       }
     }
 
@@ -434,11 +435,7 @@ main(int argc, char** argv)
         }
       }
 
-      ////////
-      // TEST THIS
-      // reset cumulative_penalties after 1 iter? 
-      // do this only once per INPUT (not per pair)
-if (false) {
+      // l1 regularization
       if (l1naive) {
         for (unsigned d = 0; d < lambdas.size(); d++) {
           weight_t v = lambdas.get(d);
@@ -471,9 +468,8 @@ if (false) {
           }
         }
       }
+
     }
-}
-    ////////
 
     if (rescale) lambdas /= lambdas.l2norm();
     
@@ -523,7 +519,7 @@ if (false) {
   if (!quiet || hstreaming) nonz = (unsigned)lambdas.size_nonzero();
 
   if (!quiet) {
-    cerr << _p5 << _p << "WEIGHTS" << endl;
+    cerr << _p9 << _p << "WEIGHTS" << endl;
     for (vector<string>::iterator it = print_weights.begin(); it != print_weights.end(); it++) {
       cerr << setw(18) << *it << " = " << lambdas.get(FD::Convert(*it)) << endl;
     }

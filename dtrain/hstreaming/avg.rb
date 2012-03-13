@@ -1,4 +1,4 @@
-# avg.rb
+#!/usr/bin/env ruby
 
 shard_count_key = "__SHARD_COUNT__"
 

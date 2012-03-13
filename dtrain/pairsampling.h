@@ -32,7 +32,7 @@ all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, sc
  * multipartite ranking
  *  sort by bleu
  *  compare top 10% to middle 80% and low 10%
- *   80% to low 10%
+ *  cmp middle 80% to low 10%
  */
 bool
 _108010_cmp_hyp_by_score(ScoredHyp a, ScoredHyp b)

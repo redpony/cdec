@@ -11,7 +11,7 @@ namespace dtrain
  *        of Machine Translation"
  * (Papineni et al. '02)
  *
- * NOTE: 0 if one n in {1..N} has 0 count
+ * NOTE: 0 if for one n \in {1..N} count is 0
  */
 score_t
 BleuScorer::Bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len)
@@ -96,6 +96,8 @@ SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  * as in "Online Large-Margin Training of Syntactic
  *        and Structural Translation Features"
  * (Chiang et al. '08)
+ *
+ * NOTE: needs some code in dtrain.cc
  */
 score_t
 ApproxBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
