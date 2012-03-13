@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 STDIN.set_encoding 'utf-8'
 STDOUT.set_encoding 'utf-8'
 
