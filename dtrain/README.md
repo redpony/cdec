@@ -21,7 +21,9 @@ Additionally you need to give dtrain a file with
 references (--refs).
 
 The input for use with hadoop streaming looks like this:
+```
     <sid>\t<source>\t<ref>\t<grammar rules separated by \t>
+```
 To convert a psg to this format you need to replace all "\n"
 by "\t". Make sure there are no tabs in your data.
 
