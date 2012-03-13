@@ -12,24 +12,20 @@ builds when building cdec, see ../BUILDING
 Running
 -------
 To run this on a dev set locally (default):
-<code>
-#define DTRAIN_LOCAL
-</code>
+    #define DTRAIN_LOCAL
 otherwise remove that line or undef. You need a single grammar file
 or per-sentence-grammars (psg) as you would use with cdec.
 Additionally you need to give dtrain a file with
 references (--refs).
 
 The input for use with hadoop streaming looks like this:
-<code>
-<id>\t<source>\t<ref>\t<grammar rules separated by tab>
-</code>
+    <sid>\t<source>\t<ref>\t<grammar rules separated by \t>
 To convert a psg to this format you need to replace all "\n"
 by "\t". Make sure there are no tabs in your data.
 
 For an example of local usage (with 'distributed' format)
 the see test/example/ . This expects dtrain to be built without
-DTRAIN_LOCAL param.
+DTRAIN_LOCAL.
 
 Legal stuff
 -----------
