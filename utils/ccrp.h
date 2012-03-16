@@ -55,6 +55,10 @@ class CCRP {
 
   double discount() const { return discount_; }
   double strength() const { return strength_; }
+  void set_hyperparameters(double d, double s) {
+    discount_ = d; strength_ = s;
+    check_hyperparameters();
+  }
   void set_discount(double d) { discount_ = d; check_hyperparameters(); }
   void set_strength(double a) { strength_ = a; check_hyperparameters(); }
 

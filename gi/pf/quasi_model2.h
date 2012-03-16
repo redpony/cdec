@@ -9,6 +9,7 @@
 #include "array2d.h"
 #include "slice_sampler.h"
 #include "m.h"
+#include "have_64_bits.h"
 
 struct AlignmentObservation {
   AlignmentObservation() : src_len(), trg_len(), j(), a_j() {}
@@ -20,13 +21,23 @@ struct AlignmentObservation {
   unsigned short a_j;
 };
 
+#ifdef HAVE_64_BITS
 inline size_t hash_value(const AlignmentObservation& o) {
   return reinterpret_cast<const size_t&>(o);
 }
-
 inline bool operator==(const AlignmentObservation& a, const AlignmentObservation& b) {
   return hash_value(a) == hash_value(b);
 }
+#else
+inline size_t hash_value(const AlignmentObservation& o) {
+  size_t h = 1;
+  boost::hash_combine(h, o.src_len);
+  boost::hash_combine(h, o.trg_len);
+  boost::hash_combine(h, o.j);
+  boost::hash_combine(h, o.a_j);
+  return h;
+}
+#endif
 
 struct QuasiModel2 {
   explicit QuasiModel2(double alpha, double pnull = 0.1) :
