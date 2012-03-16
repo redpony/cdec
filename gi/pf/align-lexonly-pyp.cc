@@ -11,6 +11,7 @@
 #include "sampler.h"
 #include "corpus.h"
 #include "pyp_tm.h"
+#include "hpyp_tm.h"
 #include "quasi_model2.h"
 
 using namespace std;
@@ -61,15 +62,17 @@ struct AlignedSentencePair {
   Array2D<short> posterior;
 };
 
+template <class LexicalTranslationModel>
 struct Aligner {
   Aligner(const vector<vector<WordID> >& lets,
+          int vocab_size,
           int num_letters,
           const po::variables_map& conf,
           vector<AlignedSentencePair>* c) :
       corpus(*c),
       paj_model(conf["align_alpha"].as<double>(), conf["p_null"].as<double>()),
       infer_paj(conf.count("infer_alignment_hyperparameters") > 0),
-      model(lets, num_letters),
+      model(lets, vocab_size, num_letters),
       kNULL(TD::Convert("NULL")) {
     assert(lets[kNULL].size() == 0);
   }
@@ -77,7 +80,7 @@ struct Aligner {
   vector<AlignedSentencePair>& corpus;
   QuasiModel2 paj_model;
   const bool infer_paj;
-  PYPLexicalTranslation model;
+  LexicalTranslationModel model;
   const WordID kNULL;
 
   void ResampleHyperparameters() {
@@ -217,7 +220,8 @@ int main(int argc, char** argv) {
   ExtractLetters(vocabf, &letters, NULL);
   letters[TD::Convert("NULL")].clear();
 
-  Aligner aligner(letters, letset.size(), conf, &corpus);
+  //Aligner<PYPLexicalTranslation> aligner(letters, vocabe.size(), letset.size(), conf, &corpus);
+  Aligner<HPYPLexicalTranslation> aligner(letters, vocabe.size(), letset.size(), conf, &corpus);
   aligner.InitializeRandom();
 
   const unsigned samples = conf["samples"].as<unsigned>();

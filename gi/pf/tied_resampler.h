@@ -78,10 +78,8 @@ struct TiedResampler {
                             std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
     std::cerr << "TiedCRPs(d=" << discount << ",s="
               << strength << ") = " << LogLikelihood(discount, strength) << std::endl;
-    for (typename std::set<CRP*>::iterator it = crps.begin(); it != crps.end(); ++it) {
-      (*it)->set_discount(discount);
-      (*it)->set_strength(strength);
-    }
+    for (typename std::set<CRP*>::iterator it = crps.begin(); it != crps.end(); ++it)
+      (*it)->set_hyperparameters(discount, strength);
   }
  private:
   std::set<CRP*> crps;

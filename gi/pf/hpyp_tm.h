@@ -1,5 +1,5 @@
-#ifndef PYP_LEX_TRANS
-#define PYP_LEX_TRANS
+#ifndef HPYP_LEX_TRANS
+#define HPYP_LEX_TRANS
 
 #include <vector>
 #include "wordid.h"
@@ -9,10 +9,11 @@
 #include "poisson_uniform_word_model.h"
 
 struct FreqBinner;
+template <class B> struct PYPWordModel;
 template <typename T, class B> struct ConditionalPYPWordModel;
 
-struct PYPLexicalTranslation {
-  explicit PYPLexicalTranslation(const std::vector<std::vector<WordID> >& lets,
+struct HPYPLexicalTranslation {
+  explicit HPYPLexicalTranslation(const std::vector<std::vector<WordID> >& lets,
                                  const unsigned vocab_size,
                                  const unsigned num_letters);
 
@@ -28,7 +29,8 @@ struct PYPLexicalTranslation {
  private:
   const std::vector<std::vector<WordID> >& letters;   // spelling dictionary
   PoissonUniformWordModel base;  // "generator" of English types
-  ConditionalPYPWordModel<PoissonUniformWordModel, FreqBinner>* tmodel;  // translation distributions
+  PYPWordModel<PoissonUniformWordModel>* up0;  // model English lexicon
+  ConditionalPYPWordModel<PYPWordModel<PoissonUniformWordModel>, FreqBinner>* tmodel;  // translation distributions
                       // (model English word | French word)
   const WordID kX;
 };
