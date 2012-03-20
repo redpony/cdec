@@ -55,7 +55,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
 }
 
-shared_ptr<MT19937> prng;
+boost::shared_ptr<MT19937> prng;
 
 struct ModelAndData {
   explicit ModelAndData(ConditionalParallelSegementationModel<PhraseConditionalBase>& m, const vector<vector<int> >& ce, const vector<vector<int> >& cf, const set<int>& ve, const set<int>& vf) :

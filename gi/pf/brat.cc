@@ -489,7 +489,7 @@ int main(int argc, char** argv) {
     cerr << argv[0] << "Please use --model1 to specify model 1 parameters\n";
     return 1;
   }
-  shared_ptr<MT19937> prng;
+  boost::shared_ptr<MT19937> prng;
   if (conf.count("random_seed"))
     prng.reset(new MT19937(conf["random_seed"].as<uint32_t>()));
   else
