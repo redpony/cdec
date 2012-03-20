@@ -71,8 +71,7 @@ int AnnotatedParallelSentence::ReadAlignmentPoint(const char* buf,
     exit(1);
   }
   (*b) = 0;
-  //TODO: is this what is intended?  parses as A && B || C && D.
-  while(ch < end && (c == 0 && (!permit_col || (permit_col && buf[ch] != ':')) || c != 0 && buf[ch] != '-')) {
+  while((ch < end) && (c == 0 && (!permit_col || (permit_col && buf[ch] != ':')) || c != 0 && buf[ch] != '-')) {
     if ((buf[ch] < '0') || (buf[ch] > '9')) {
       cerr << "Alignment point badly formed 4: " << string(buf, start, end-start) << endl << buf << endl << buf[ch] << endl;
       exit(1);
@@ -151,7 +150,7 @@ void AnnotatedParallelSentence::ParseSpanLabel(const char* buf, int start, int e
     exit(1);
   }
   // cerr << a << " " << b << " " << string(buf,c,end-c) << endl;
-  span_types[make_tuple(a,b,c,d)].push_back(-TD::Convert(string(buf, ch, end-ch)));
+  span_types[boost::make_tuple(a,b,c,d)].push_back(-TD::Convert(string(buf, ch, end-ch)));
 }
 
 // INPUT FORMAT

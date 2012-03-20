@@ -9,7 +9,6 @@
 #include "filelib.h"
 #include "tdict.h"
 
-using boost::shared_ptr;
 using namespace std;
 
 TargetPhraseSet::~TargetPhraseSet() {}
@@ -46,7 +45,7 @@ class TextFSTNode : public FSTNode {
   void ClearPassThroughTranslations();
  private:
   vector<WordID> passthroughs;
-  shared_ptr<TargetPhraseSet> data;
+  boost::shared_ptr<TargetPhraseSet> data;
   map<WordID, TextFSTNode> ptr;
 };
 

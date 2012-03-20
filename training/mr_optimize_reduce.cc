@@ -15,7 +15,6 @@
 #include "sparse_vector.h"
 
 using namespace std;
-using boost::shared_ptr;
 namespace po = boost::program_options;
 
 void SanityCheck(const vector<double>& w) {
@@ -102,7 +101,7 @@ int main(int argc, char** argv) {
     }
     Weights::InitFromFile(conf["means"].as<string>(), &means);
   }
-  shared_ptr<BatchOptimizer> o;
+  boost::shared_ptr<BatchOptimizer> o;
   const string omethod = conf["optimization_method"].as<string>();
   if (omethod == "rprop")
     o.reset(new RPropOptimizer(num_feats));  // TODO add configuration

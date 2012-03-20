@@ -55,7 +55,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
 }
 
-shared_ptr<MT19937> prng;
+boost::shared_ptr<MT19937> prng;
 
 template <typename Base>
 struct ModelAndData {

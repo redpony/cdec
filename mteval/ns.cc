@@ -14,7 +14,6 @@
 #include "stringlib.h"
 
 using namespace std;
-using boost::shared_ptr;
 
 map<string, EvaluationMetric*> EvaluationMetric::instances_;
 
@@ -35,8 +34,8 @@ struct DefaultSegmentEvaluator : public SegmentEvaluator {
   const EvaluationMetric* em_;
 };
 
-shared_ptr<SegmentEvaluator> EvaluationMetric::CreateSegmentEvaluator(const vector<vector<WordID> >& refs) const {
-  return shared_ptr<SegmentEvaluator>(new DefaultSegmentEvaluator(refs, this));
+boost::shared_ptr<SegmentEvaluator> EvaluationMetric::CreateSegmentEvaluator(const vector<vector<WordID> >& refs) const {
+  return boost::shared_ptr<SegmentEvaluator>(new DefaultSegmentEvaluator(refs, this));
 }
 
 #define MAX_SS_VECTOR_SIZE 50
@@ -184,8 +183,8 @@ template <unsigned int N = 4u, BleuType BrevityType = IBM>
 struct BleuMetric : public EvaluationMetric {
   BleuMetric() : EvaluationMetric(BrevityType == IBM ? "IBM_BLEU" : (BrevityType == Koehn ? "KOEHN_BLEU" : "NIST_BLEU")) {}
   unsigned SufficientStatisticsVectorSize() const { return N*2 + 2; }
-  shared_ptr<SegmentEvaluator> CreateSegmentEvaluator(const vector<vector<WordID> >& refs) const {
-    return shared_ptr<SegmentEvaluator>(new BleuSegmentEvaluator<N,BrevityType>(refs, this));
+  boost::shared_ptr<SegmentEvaluator> CreateSegmentEvaluator(const vector<vector<WordID> >& refs) const {
+    return boost::shared_ptr<SegmentEvaluator>(new BleuSegmentEvaluator<N,BrevityType>(refs, this));
   }
   float ComputeBreakdown(const SufficientStats& stats, float* bp, vector<float>* out) const {
     if (out) { out->clear(); }

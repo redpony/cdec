@@ -4,13 +4,12 @@
 #include <limits>
 
 using namespace std;
-using boost::shared_ptr;
 
 ConvexHull::ConvexHull(int i) {
   if (i == 0) {
     // do nothing - <>
   } else if (i == 1) {
-    points.push_back(shared_ptr<MERTPoint>(new MERTPoint(0, 0, 0, shared_ptr<MERTPoint>(), shared_ptr<MERTPoint>())));
+    points.push_back(boost::shared_ptr<MERTPoint>(new MERTPoint(0, 0, 0, boost::shared_ptr<MERTPoint>(), boost::shared_ptr<MERTPoint>())));
     assert(this->IsMultiplicativeIdentity());
   } else {
     cerr << "Only can create ConvexHull semiring 0 and 1 with this constructor!\n";
@@ -27,7 +26,7 @@ const ConvexHull ConvexHullWeightFunction::operator()(const Hypergraph::Edge& e)
 
 ostream& operator<<(ostream& os, const ConvexHull& env) {
   os << '<';
-  const vector<shared_ptr<MERTPoint> >& points = env.GetSortedSegs();
+  const vector<boost::shared_ptr<MERTPoint> >& points = env.GetSortedSegs();
   for (int i = 0; i < points.size(); ++i)
     os << (i==0 ? "" : "|") << "x=" << points[i]->x << ",b=" << points[i]->b << ",m=" << points[i]->m << ",p1=" << points[i]->p1 << ",p2=" << points[i]->p2;
   return os << '>';
@@ -37,7 +36,7 @@ ostream& operator<<(ostream& os, const ConvexHull& env) {
 #ifdef ORIGINAL_MERT_IMPLEMENTATION
 
 struct SlopeCompare {
-  bool operator() (const shared_ptr<MERTPoint>& a, const shared_ptr<MERTPoint>& b) const {
+  bool operator() (const boost::shared_ptr<MERTPoint>& a, const boost::shared_ptr<MERTPoint>& b) const {
     return a->m < b->m;
   }
 };
@@ -93,7 +92,7 @@ const ConvexHull& ConvexHull::operator*=(const ConvexHull& other) {
   if (this->IsEdgeEnvelope()) {
 //    if (other.size() > 1)
 //      cerr << *this << " (TIMES) " << other << endl;
-    shared_ptr<MERTPoint> edge_parent = points[0];
+    boost::shared_ptr<MERTPoint> edge_parent = points[0];
     const double& edge_b = edge_parent->b;
     const double& edge_m = edge_parent->m;
     points.clear();
@@ -102,13 +101,13 @@ const ConvexHull& ConvexHull::operator*=(const ConvexHull& other) {
       const double m = p.m + edge_m;
       const double b = p.b + edge_b;
       const double& x = p.x;       // x's don't change with *
-      points.push_back(shared_ptr<MERTPoint>(new MERTPoint(x, m, b, edge_parent, other.points[i])));
+      points.push_back(boost::shared_ptr<MERTPoint>(new MERTPoint(x, m, b, edge_parent, other.points[i])));
       assert(points.back()->p1->edge);
     }
 //    if (other.size() > 1)
 //      cerr << " = " << *this << endl;
   } else {
-    vector<shared_ptr<MERTPoint> > new_points;
+    vector<boost::shared_ptr<MERTPoint> > new_points;
     int this_i = 0;
     int other_i = 0;
     const int this_size  = points.size();
@@ -124,7 +123,7 @@ const ConvexHull& ConvexHull::operator*=(const ConvexHull& other) {
       const double m = this_point.m + other_point.m;
       const double b = this_point.b + other_point.b;
  
-      new_points.push_back(shared_ptr<MERTPoint>(new MERTPoint(cur_x, m, b, points[this_i], other.points[other_i])));
+      new_points.push_back(boost::shared_ptr<MERTPoint>(new MERTPoint(cur_x, m, b, points[this_i], other.points[other_i])));
       int comp = 0;
       if (this_next_val < other_next_val) comp = -1; else
         if (this_next_val > other_next_val) comp = 1;

@@ -58,7 +58,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
 }
 
-shared_ptr<MT19937> prng;
+boost::shared_ptr<MT19937> prng;
 
 struct LexicalAlignment {
   unsigned char src_index;

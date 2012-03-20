@@ -136,8 +136,8 @@ class FERegistry {
  public:
   FERegistry() {}
   boost::shared_ptr<FeatureExtractor> Create(const std::string& ffname) const {
-    map<string, shared_ptr<FEFactoryBase> >::const_iterator it = reg_.find(ffname);
-    shared_ptr<FeatureExtractor> res;
+    map<string, boost::shared_ptr<FEFactoryBase> >::const_iterator it = reg_.find(ffname);
+    boost::shared_ptr<FeatureExtractor> res;
     if (it == reg_.end()) {
       cerr << "I don't know how to create feature " << ffname << endl;
     } else {
@@ -147,7 +147,7 @@ class FERegistry {
   }
   void DisplayList(ostream* out) const {
     bool first = true;
-    for (map<string, shared_ptr<FEFactoryBase> >::const_iterator it = reg_.begin();
+    for (map<string, boost::shared_ptr<FEFactoryBase> >::const_iterator it = reg_.begin();
         it != reg_.end(); ++it) {
       if (first) {first=false;} else {*out << ' ';}
       *out << it->first;
