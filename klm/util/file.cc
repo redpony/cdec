@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdint.h>
+#include <unistd.h>
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
