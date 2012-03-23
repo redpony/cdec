@@ -97,8 +97,10 @@ class CCRP {
   }
 
   // returns +1 or 0 indicating whether a new table was opened
+  //   p = probability with which the particular table was selected
+  //       excluding p0
   template <typename T>
-  int increment(const Dish& dish, const T& p0, MT19937* rng) {
+  int increment(const Dish& dish, const T& p0, MT19937* rng, T* p = NULL) {
     DishLocations& loc = dish_locs_[dish];
     bool share_table = false;
     if (loc.total_dish_count_) {
@@ -112,6 +114,7 @@ class CCRP {
            ti != loc.table_counts_.end(); ++ti) {
         r -= (*ti - discount_);
         if (r <= 0.0) {
+          if (p) { *p = T(*ti - discount_) / T(strength_ + num_customers_); }
           ++(*ti);
           break;
         }
@@ -123,6 +126,7 @@ class CCRP {
       }
     } else {
       loc.table_counts_.push_back(1u);
+      if (p) { *p = T(strength_ + discount_ * num_tables_) / T(strength_ + num_customers_); }
       ++num_tables_;
     }
     ++loc.total_dish_count_;
