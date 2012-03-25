@@ -11,7 +11,7 @@
 #include "sentence_metadata.h"
 #include "inside_outside.h"
 #include "viterbi.h"
-#include "alignment_pharaoh.h"
+#include "alignment_io.h"
 
 using namespace std;
 
@@ -300,7 +300,7 @@ void AlignerTools::WriteAlignment(const Lattice& src_lattice,
       cerr << grid << endl;
     }
     (*out) << TD::GetString(src_sent) << " ||| " << TD::GetString(trg_sent) << " ||| ";
-    AlignmentPharaoh::SerializePharaohFormat(grid, out);
+    AlignmentIO::SerializePharaohFormat(grid, out);
   }
 };
 
