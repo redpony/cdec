@@ -401,6 +401,26 @@ string HypergraphIO::AsPLF(const Hypergraph& hg, bool include_global_parentheses
   return os.str();
 }
 
+string HypergraphIO::AsPLF(const Lattice& lat, bool include_global_parentheses) {
+  static bool first = true;
+  if (first) { InitEscapes(); first = false; }
+  if (lat.empty()) return "()";
+  ostringstream os;
+  if (include_global_parentheses) os << '(';
+  static const string EPS="*EPS*";
+  for (int i = 0; i < lat.size(); ++i) {
+    const vector<LatticeArc> arcs = lat[i];
+    os << '(';
+    for (int j = 0; j < arcs.size(); ++j) {
+      os << "('" << Escape(TD::Convert(arcs[j].label)) << "',"
+                 << arcs[j].cost << ',' << arcs[j].dist2next << "),";
+    }
+    os << "),";
+  }
+  if (include_global_parentheses) os << ')';
+  return os.str();
+}
+
 namespace PLF {
 
 const string chars = "'\\";
