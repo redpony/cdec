@@ -23,7 +23,7 @@ atools_SOURCES = atools.cc
 noinst_LIBRARIES = libutils.a
 
 libutils_a_SOURCES = \
-  alignment_pharaoh.cc \
+  alignment_io.cc \
   b64tools.cc \
   corpus_tools.cc \
   dict.cc \

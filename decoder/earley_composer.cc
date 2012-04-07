@@ -16,8 +16,6 @@
 #include "tdict.h"
 #include "hg.h"
 
-using boost::shared_ptr;
-namespace po = boost::program_options;
 using namespace std;
 using namespace std::tr1;
 
@@ -111,7 +109,7 @@ struct Edge {
   const Edge* const active_parent;    // back pointer, NULL for PREDICT items
   const Edge* const passive_parent;   // back pointer, NULL for SCAN and PREDICT items
   const TargetPhraseSet* const tps;   // translations
-  shared_ptr<SparseVector<double> > features; // features from CFG rule
+  boost::shared_ptr<SparseVector<double> > features; // features from CFG rule
 
   bool IsPassive() const {
     // when a rule is completed, this value will be set

@@ -91,8 +91,6 @@ struct GlueGrammar : public TextGrammar {
 struct PassThroughGrammar : public TextGrammar {
   PassThroughGrammar(const Lattice& input, const std::string& cat, const unsigned int ctf_level=0);
   virtual bool HasRuleForSpan(int i, int j, int distance) const;
- private:
-  std::vector<std::set<int> > has_rule_;  // index by [i][j]
 };
 
 void RefineRule(TRulePtr pt, const unsigned int ctf_level);

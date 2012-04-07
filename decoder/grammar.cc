@@ -3,12 +3,14 @@
 #include <algorithm>
 #include <utility>
 #include <map>
+#include <tr1/unordered_map>
 
 #include "rule_lexer.h"
 #include "filelib.h"
 #include "tdict.h"
 
 using namespace std;
+using namespace std::tr1;
 
 const vector<TRulePtr> Grammar::NO_RULES;
 
@@ -148,24 +150,24 @@ bool GlueGrammar::HasRuleForSpan(int i, int /* j */, int /* distance */) const {
   return (i == 0);
 }
 
-PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat, const unsigned int ctf_level) :
-    has_rule_(input.size() + 1) {
+PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat, const unsigned int ctf_level) {
+  unordered_set<WordID> ss;
   for (int i = 0; i < input.size(); ++i) {
     const vector<LatticeArc>& alts = input[i];
     for (int k = 0; k < alts.size(); ++k) {
       const int j = alts[k].dist2next + i;
-      has_rule_[i].insert(j);
       const string& src = TD::Convert(alts[k].label);
-      TRulePtr pt(new TRule("[" + cat + "] ||| " + src + " ||| " + src + " ||| PassThrough=1"));
-      pt->a_.push_back(AlignmentPoint(0,0));
-      AddRule(pt);
-      RefineRule(pt, ctf_level);
+      if (ss.count(alts[k].label) == 0) {
+        TRulePtr pt(new TRule("[" + cat + "] ||| " + src + " ||| " + src + " ||| PassThrough=1"));
+        pt->a_.push_back(AlignmentPoint(0,0));
+        AddRule(pt);
+        RefineRule(pt, ctf_level);
+        ss.insert(alts[k].label);
+      }
     }
   }
 }
 
-bool PassThroughGrammar::HasRuleForSpan(int i, int j, int /* distance */) const {
-  const set<int>& hr = has_rule_[i];
-  if (i == j) { return !hr.empty(); }
-  return (hr.find(j) != hr.end());
+bool PassThroughGrammar::HasRuleForSpan(int, int, int distance) const {
+  return (distance < 2);
 }

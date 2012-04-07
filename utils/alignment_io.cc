@@ -1,12 +1,10 @@
-#include "utils/alignment_pharaoh.h"
-
-#include <set>
+#include "utils/alignment_io.h"
 
 using namespace std;
 
 static bool is_digit(char x) { return x >= '0' && x <= '9'; }
 
-boost::shared_ptr<Array2D<bool> > AlignmentPharaoh::ReadPharaohAlignmentGrid(const string& al) {
+boost::shared_ptr<Array2D<bool> > AlignmentIO::ReadPharaohAlignmentGrid(const string& al) {
   int max_x = 0;
   int max_y = 0;
   int i = 0;
@@ -64,14 +62,36 @@ boost::shared_ptr<Array2D<bool> > AlignmentPharaoh::ReadPharaohAlignmentGrid(con
   return grid;
 }
 
-void AlignmentPharaoh::SerializePharaohFormat(const Array2D<bool>& alignment, ostream* out) {
+void AlignmentIO::SerializePharaohFormat(const Array2D<bool>& alignment, ostream* o) {
+  ostream& out = *o;
   bool need_space = false;
   for (int i = 0; i < alignment.width(); ++i)
     for (int j = 0; j < alignment.height(); ++j)
       if (alignment(i,j)) {
-        if (need_space) (*out) << ' '; else need_space = true;
-        (*out) << i << '-' << j;
+        if (need_space) out << ' '; else need_space = true;
+        out << i << '-' << j;
       }
-  (*out) << endl;
+  out << endl;
+}
+
+void AlignmentIO::SerializeTypedAlignment(const Array2D<AlignmentType>& alignment, ostream* o) {
+  ostream& out = *o;
+  bool need_space = false;
+  for (int i = 0; i < alignment.width(); ++i)
+    for (int j = 0; j < alignment.height(); ++j) {
+      const AlignmentType& aij = alignment(i,j);
+      if (aij != kNONE) {
+        if (need_space) out << ' '; else need_space = true;
+        if (aij == kTRANSLATION) {}
+        else if (aij == kTRANSLITERATION) {
+          out << 'T' << ':';
+        } else {
+          cerr << "\nUnexpected alignment point type: " << static_cast<int>(aij) << endl;
+          abort();
+        }
+        out << i << '-' << j;
+      }
+    }
+  out << endl;
 }
 

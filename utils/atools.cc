@@ -8,11 +8,10 @@
 #include <boost/shared_ptr.hpp>
 
 #include "filelib.h"
-#include "alignment_pharaoh.h"
+#include "alignment_io.h"
 
 namespace po = boost::program_options;
 using namespace std;
-using boost::shared_ptr;
 
 struct Command {
   virtual ~Command() {}
@@ -348,10 +347,10 @@ int main(int argc, char **argv) {
       }
     }
     if (line1.empty() && !*in1) break;
-    shared_ptr<Array2D<bool> > out(new Array2D<bool>);
-    shared_ptr<Array2D<bool> > a1 = AlignmentPharaoh::ReadPharaohAlignmentGrid(line1);
+    boost::shared_ptr<Array2D<bool> > out(new Array2D<bool>);
+    boost::shared_ptr<Array2D<bool> > a1 = AlignmentIO::ReadPharaohAlignmentGrid(line1);
     if (in2) {
-      shared_ptr<Array2D<bool> > a2 = AlignmentPharaoh::ReadPharaohAlignmentGrid(line2);
+      boost::shared_ptr<Array2D<bool> > a2 = AlignmentIO::ReadPharaohAlignmentGrid(line2);
       cmd.Apply(*a1, *a2, out.get());
     } else {
       Array2D<bool> dummy;
@@ -359,7 +358,7 @@ int main(int argc, char **argv) {
     }
     
     if (cmd.Result() == 1) {
-      AlignmentPharaoh::SerializePharaohFormat(*out, &cout);
+      AlignmentIO::SerializePharaohFormat(*out, &cout);
     }
   }
   if (cmd.Result() == 2)
