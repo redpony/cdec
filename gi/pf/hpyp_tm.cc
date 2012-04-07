@@ -1,4 +1,4 @@
-#include "pyp_tm.h"
+#include "hpyp_tm.h"
 
 #include <tr1/unordered_map>
 #include <iostream>
@@ -90,39 +90,44 @@ struct ConditionalPYPWordModel {
   RuleModelHash r;
 };
 
-PYPLexicalTranslation::PYPLexicalTranslation(const vector<vector<WordID> >& lets,
-                                             const unsigned vocab_size,
-                                             const unsigned num_letters) :
+HPYPLexicalTranslation::HPYPLexicalTranslation(const vector<vector<WordID> >& lets,
+                                               const unsigned vocab_size,
+                                               const unsigned num_letters) :
     letters(lets),
     base(vocab_size, num_letters, 5),
-    tmodel(new ConditionalPYPWordModel<PoissonUniformWordModel>(&base, new FreqBinner("10k.freq"))),
+    up0(new PYPWordModel<PoissonUniformWordModel>(&base)),
+    tmodel(new ConditionalPYPWordModel<PYPWordModel<PoissonUniformWordModel> >(up0, new FreqBinner("10k.freq"))),
     kX(-TD::Convert("X")) {}
 
-void PYPLexicalTranslation::Summary() const {
+void HPYPLexicalTranslation::Summary() const {
   tmodel->Summary();
+  up0->Summary();
 }
 
-prob_t PYPLexicalTranslation::Likelihood() const {
-  return tmodel->Likelihood() * base.Likelihood();
+prob_t HPYPLexicalTranslation::Likelihood() const {
+  prob_t p = up0->Likelihood();
+  p *= tmodel->Likelihood();
+  return p;
 }
 
-void PYPLexicalTranslation::ResampleHyperparameters(MT19937* rng) {
+void HPYPLexicalTranslation::ResampleHyperparameters(MT19937* rng) {
   tmodel->ResampleHyperparameters(rng);
+  up0->ResampleHyperparameters(rng);
 }
 
-unsigned PYPLexicalTranslation::UniqueConditioningContexts() const {
+unsigned HPYPLexicalTranslation::UniqueConditioningContexts() const {
   return tmodel->UniqueConditioningContexts();
 }
 
-prob_t PYPLexicalTranslation::Prob(WordID src, WordID trg) const {
+prob_t HPYPLexicalTranslation::Prob(WordID src, WordID trg) const {
   return tmodel->Prob(src, letters[trg]);
 }
 
-void PYPLexicalTranslation::Increment(WordID src, WordID trg, MT19937* rng) {
+void HPYPLexicalTranslation::Increment(WordID src, WordID trg, MT19937* rng) {
   tmodel->Increment(src, letters[trg], rng);
 }
 
-void PYPLexicalTranslation::Decrement(WordID src, WordID trg, MT19937* rng) {
+void HPYPLexicalTranslation::Decrement(WordID src, WordID trg, MT19937* rng) {
   tmodel->Decrement(src, letters[trg], rng);
 }
 

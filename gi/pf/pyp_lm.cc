@@ -25,7 +25,7 @@ using namespace std;
 using namespace tr1;
 namespace po = boost::program_options;
 
-shared_ptr<MT19937> prng;
+boost::shared_ptr<MT19937> prng;
 
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");

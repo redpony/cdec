@@ -131,16 +131,16 @@ lookup_and_append(const map<K, V> &dict, const K &key, V &output)
 // phrases if there is more than one annotation.
 // TODO: support source annotation
 void Extract::AnnotatePhrasesWithCategoryTypes(const WordID default_cat,
-                                      const map< tuple<short,short,short,short>, vector<WordID> > &types,
+                                      const map< boost::tuple<short,short,short,short>, vector<WordID> > &types,
                                       vector<ParallelSpan>* phrases) {
   const int num_unannotated_phrases = phrases->size();
   // have to use num_unannotated_phrases since we may grow the vector
   for (int i = 0; i < num_unannotated_phrases; ++i) {
     ParallelSpan& phrase = (*phrases)[i];
     vector<WordID> cats;
-    lookup_and_append(types, make_tuple(phrase.i1, phrase.i2, phrase.j1, phrase.j2), cats);
-    lookup_and_append(types, make_tuple((short)-1, (short)-1, phrase.j1, phrase.j2), cats);
-    lookup_and_append(types, make_tuple(phrase.i1, phrase.i2, (short)-1, (short)-1), cats);
+    lookup_and_append(types, boost::make_tuple(phrase.i1, phrase.i2, phrase.j1, phrase.j2), cats);
+    lookup_and_append(types, boost::make_tuple((short)-1, (short)-1, phrase.j1, phrase.j2), cats);
+    lookup_and_append(types, boost::make_tuple(phrase.i1, phrase.i2, (short)-1, (short)-1), cats);
     if (cats.empty() && default_cat != 0) {
       cats = vector<WordID>(1, default_cat);
     }

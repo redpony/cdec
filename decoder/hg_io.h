@@ -30,6 +30,7 @@ struct HypergraphIO {
   static void ReadFromPLF(const std::string& in, Hypergraph* out, int line = 0);
   // return PLF string representation (undefined behavior on non-lattices)
   static std::string AsPLF(const Hypergraph& hg, bool include_global_parentheses = true);
+  static std::string AsPLF(const Lattice& lat, bool include_global_parentheses = true);
   static void PLFtoLattice(const std::string& plf, Lattice* pl);
   static std::string Escape(const std::string& s);  // PLF helper
 };

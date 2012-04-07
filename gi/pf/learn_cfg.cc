@@ -24,7 +24,7 @@ using namespace std;
 using namespace tr1;
 namespace po = boost::program_options;
 
-shared_ptr<MT19937> prng;
+boost::shared_ptr<MT19937> prng;
 vector<int> nt_vocab;
 vector<int> nt_id_to_index;
 static unsigned kMAX_RULE_SIZE = 0;

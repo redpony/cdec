@@ -15,7 +15,6 @@
 
 #include "factored_lexicon_helper.h"
 #include "verbose.h"
-#include "alignment_pharaoh.h"
 #include "stringlib.h"
 #include "sentence_metadata.h"
 #include "hg.h"
