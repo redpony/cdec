@@ -8,7 +8,7 @@ TESTS = rst_test
 
 noinst_LIBRARIES = librst.a
 
-librst_a_SOURCES = arc_factored.cc rst.cc
+librst_a_SOURCES = arc_factored.cc arc_factored_marginals.cc rst.cc
 
 mst_train_SOURCES = mst_train.cc
 mst_train_LDADD = librst.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz

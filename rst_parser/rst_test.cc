@@ -26,8 +26,13 @@ int main(int argc, char** argv) {
   af(0,2).edge_prob.logeq(10);
   af(0,1).edge_prob.logeq(9);
   af(0,3).edge_prob.logeq(9);
-  SpanningTree tree;
-  af.MaximumSpanningTree(&tree);
+  EdgeSubset tree;
+//  af.MaximumEdgeSubset(&tree);
+  double lz;
+  af.EdgeMarginals(&lz);
+  cerr << "Z = " << lz << endl;
+  af.PickBestParentForEachWord(&tree);
+  cerr << tree << endl;
   return 0;
 }
 
