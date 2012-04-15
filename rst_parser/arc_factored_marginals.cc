@@ -31,14 +31,18 @@ void ArcFactoredForest::EdgeMarginals(double *plog_z) {
   ArcMatrix Linv = L.inverse();
   if (plog_z) *plog_z = log(Linv.determinant());
   RootVector rootMarginals = r.cwiseProduct(Linv.col(0));
+//  ArcMatrix T = Linv;
   for (int h = 0; h < num_words_; ++h) {
     for (int m = 0; m < num_words_; ++m) {
-      edges_(h,m).edge_prob = prob_t((m == 0 ? 0.0 : 1.0) * A(h,m) * Linv(m,m) -
-                                     (h == 0 ? 0.0 : 1.0) * A(h,m) * Linv(m,h));
+      const double marginal = (m == 0 ? 0.0 : 1.0) * A(h,m) * Linv(m,m) -
+                              (h == 0 ? 0.0 : 1.0) * A(h,m) * Linv(m,h);
+      edges_(h,m).edge_prob = prob_t(marginal);
+//      T(h,m) = marginal;
     }
     root_edges_[h].edge_prob = prob_t(rootMarginals(h));
   }
-  // cerr << "ROOT MARGINALS: " << rootMarginals.transpose() << endl;
+//   cerr << "ROOT MARGINALS: " << rootMarginals.transpose() << endl;
+//  cerr << "M:\n" << T << endl;
 }
 
 #else

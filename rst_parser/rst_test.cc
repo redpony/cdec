@@ -17,15 +17,15 @@ int main(int argc, char** argv) {
   //   (0, 1) 9
   //   (0, 3) 9
   ArcFactoredForest af(3);
-  af(1,2).edge_prob.logeq(20);
-  af(1,3).edge_prob.logeq(3);
-  af(2,1).edge_prob.logeq(20);
-  af(2,3).edge_prob.logeq(30);
-  af(3,2).edge_prob.logeq(0);
-  af(3,1).edge_prob.logeq(11);
-  af(0,2).edge_prob.logeq(10);
-  af(0,1).edge_prob.logeq(9);
-  af(0,3).edge_prob.logeq(9);
+  af(0,1).edge_prob.logeq(20);
+  af(0,2).edge_prob.logeq(3);
+  af(1,0).edge_prob.logeq(20);
+  af(1,2).edge_prob.logeq(30);
+  af(2,1).edge_prob.logeq(0);
+  af(2,0).edge_prob.logeq(11);
+  af(-1,1).edge_prob.logeq(10);
+  af(-1,0).edge_prob.logeq(9);
+  af(-1,2).edge_prob.logeq(9);
   EdgeSubset tree;
 //  af.MaximumEdgeSubset(&tree);
   double lz;
