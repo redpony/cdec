@@ -6,6 +6,7 @@ AC_PROG_LEX
 case $LEX in 
 :) AC_MSG_ERROR([No lex (Flex, lex, etc.) program found]);; 
 esac 
+# CPPFLAGS="$CPPFLAGS -std=c++0x"
 AC_PROG_CC
 AC_PROG_CXX
 AC_LANG_CPLUSPLUS
@@ -129,4 +130,4 @@ then
   AM_CONDITIONAL([GLC], true)
 fi
 
-AC_OUTPUT(Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile phrasinator/Makefile training/Makefile dpmert/Makefile pro-train/Makefile klm/util/Makefile klm/lm/Makefile mira/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile gi/pf/Makefile gi/markov_al/Makefile)
+AC_OUTPUT(Makefile rst_parser/Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile phrasinator/Makefile training/Makefile dpmert/Makefile pro-train/Makefile klm/util/Makefile klm/lm/Makefile mira/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile gi/pf/Makefile gi/markov_al/Makefile)
