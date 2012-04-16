@@ -14,10 +14,13 @@
 // constructor computes the F's and L's given an arbitrary multionimial p in
 // O(n) time and Draw returns samples in O(1) time.
 struct AliasSampler {
-  explicit AliasSampler(const std::vector<double>& p) :
-      cutoffs_(p.size()),
-      aliases_(p.size(), std::numeric_limits<unsigned>::max()) {
+  AliasSampler() {}
+  explicit AliasSampler(const std::vector<double>& p) { Init(p); }
+  void Init(const std::vector<double>& p) {
     const unsigned N = p.size();
+    cutoffs_.resize(p.size());
+    aliases_.clear();
+    aliases_.resize(p.size(), std::numeric_limits<unsigned>::max());
     std::vector<unsigned> s,g;
     for (unsigned i = 0; i < N; ++i) {
       const double cutoff = cutoffs_[i] = N * p[i];
