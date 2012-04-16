@@ -12,6 +12,27 @@ using namespace std;
 using namespace std::tr1;
 using namespace boost;
 
+void EdgeSubset::ExtractFeatures(const TaggedSentence& sentence,
+                                 const std::vector<boost::shared_ptr<ArcFeatureFunction> >& ffs,
+                                 SparseVector<double>* features) const {
+  SparseVector<weight_t> efmap;
+  for (int i = 0; i < ffs.size(); ++i) {
+    const ArcFeatureFunction& ff= *ffs[i];
+    for (int j = 0; j < h_m_pairs.size(); ++j) {
+      efmap.clear();
+      ff.EgdeFeatures(sentence, h_m_pairs[j].first,
+                      h_m_pairs[j].second,
+                      &efmap);
+      (*features) += efmap;
+    }
+    for (int j = 0; j < roots.size(); ++j) {
+      efmap.clear();
+      ff.EgdeFeatures(sentence, -1, roots[j], &efmap);
+      (*features) += efmap;
+    }
+  }
+}
+
 void ArcFactoredForest::ExtractFeatures(const TaggedSentence& sentence,
                                         const std::vector<boost::shared_ptr<ArcFeatureFunction> >& ffs) {
   for (int i = 0; i < ffs.size(); ++i) {
