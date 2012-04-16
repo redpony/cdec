@@ -56,7 +56,7 @@ class ArcFactoredForest {
 
   // Reweight edges so that edge_prob is the edge's marginals
   // optionally returns log partition
-  void EdgeMarginals(double* p_log_z = NULL);
+  void EdgeMarginals(prob_t* p_log_z = NULL);
 
   // This may not return a tree
   void PickBestParentForEachWord(EdgeSubset* st) const;

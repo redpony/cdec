@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <Eigen/Dense>
+
 using namespace std;
 
 int main(int argc, char** argv) {
@@ -28,11 +30,19 @@ int main(int argc, char** argv) {
   af(-1,2).edge_prob.logeq(9);
   EdgeSubset tree;
 //  af.MaximumEdgeSubset(&tree);
-  double lz;
-  af.EdgeMarginals(&lz);
-  cerr << "Z = " << lz << endl;
+  prob_t z;
+  af.EdgeMarginals(&z);
+  cerr << "Z = " << abs(z) << endl;
   af.PickBestParentForEachWord(&tree);
   cerr << tree << endl;
+  typedef Eigen::Matrix<prob_t, 2, 2> M3;
+  M3 A = M3::Zero();
+  A(0,0) = prob_t(1);
+  A(1,0) = prob_t(3);
+  A(0,1) = prob_t(2);
+  A(1,1) = prob_t(4);
+  prob_t det = A.determinant();
+  cerr << det.as_float() << endl;
   return 0;
 }
 
