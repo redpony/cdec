@@ -28,9 +28,11 @@ struct ArcFeatureFunction;
 class ArcFactoredForest {
  public:
   ArcFactoredForest() : num_words_() {}
-  explicit ArcFactoredForest(short num_words) {
+  explicit ArcFactoredForest(short num_words) : num_words_(num_words) {
     resize(num_words);
   }
+
+  unsigned size() const { return num_words_; }
 
   void resize(unsigned num_words) {
     num_words_ = num_words;
