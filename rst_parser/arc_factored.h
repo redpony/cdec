@@ -17,14 +17,17 @@ struct TaggedSentence {
   std::vector<WordID> pos;
 };
 
+struct ArcFeatureFunction;
 struct EdgeSubset {
   EdgeSubset() {}
   std::vector<short> roots; // unless multiroot trees are supported, this
                             // will have a single member
   std::vector<std::pair<short, short> > h_m_pairs; // h,m start at 0
+  void ExtractFeatures(const TaggedSentence& sentence,
+                       const std::vector<boost::shared_ptr<ArcFeatureFunction> >& ffs,
+                       SparseVector<double>* features) const;
 };
 
-struct ArcFeatureFunction;
 class ArcFactoredForest {
  public:
   ArcFactoredForest() : num_words_() {}
