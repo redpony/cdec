@@ -144,8 +144,10 @@ void Weights::ShowLargestFeatures(const vector<weight_t>& w) {
   vector<int> fnums(w.size());
   for (int i = 0; i < w.size(); ++i)
     fnums[i] = i;
+  int nf = FD::NumFeats();
+  if (nf > 10) nf = 10;
   vector<int>::iterator mid = fnums.begin();
-  mid += (w.size() > 10 ? 10 : w.size());
+  mid += nf;
   partial_sort(fnums.begin(), mid, fnums.end(), FComp(w));
   cerr << "TOP FEATURES:";
   for (vector<int>::iterator i = fnums.begin(); i != mid; ++i) {
