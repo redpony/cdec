@@ -7,37 +7,22 @@
 #include "arc_factored.h"
 
 struct TaggedSentence;
-class ArcFeatureFunction {
+struct ArcFFImpl;
+class ArcFeatureFunctions {
  public:
-  virtual ~ArcFeatureFunction();
+  ArcFeatureFunctions();
+  ~ArcFeatureFunctions();
 
   // called once, per input, before any calls to EdgeFeatures
   // used to initialize sentence-specific data structures
-  virtual void PrepareForInput(const TaggedSentence& sentence);
+  void PrepareForInput(const TaggedSentence& sentence);
 
-  inline void EgdeFeatures(const TaggedSentence& sentence,
-                           short h,
-                           short m,
-                           SparseVector<weight_t>* features) const {
-    EdgeFeaturesImpl(sentence, h, m, features);
-  }
- protected:
-  virtual void EdgeFeaturesImpl(const TaggedSentence& sentence,
-                                short h,
-                                short m,
-                                SparseVector<weight_t>* features) const = 0;
-};
-
-class DistancePenalty : public ArcFeatureFunction {
- public:
-  DistancePenalty(const std::string& param);
- protected:
-  virtual void EdgeFeaturesImpl(const TaggedSentence& sentence,
-                                short h,
-                                short m,
-                                SparseVector<weight_t>* features) const;
+  void EdgeFeatures(const TaggedSentence& sentence,
+                    short h,
+                    short m,
+                    SparseVector<weight_t>* features) const;
  private:
-  const int fidw_, fidr_;
+  ArcFFImpl* pimpl;
 };
 
 #endif
