@@ -17,14 +17,15 @@ struct TaggedSentence {
   std::vector<WordID> pos;
 };
 
-struct ArcFeatureFunction;
+struct ArcFeatureFunctions;
 struct EdgeSubset {
   EdgeSubset() {}
   std::vector<short> roots; // unless multiroot trees are supported, this
                             // will have a single member
   std::vector<std::pair<short, short> > h_m_pairs; // h,m start at 0
+  // assumes ArcFeatureFunction::PrepareForInput has already been called
   void ExtractFeatures(const TaggedSentence& sentence,
-                       const std::vector<boost::shared_ptr<ArcFeatureFunction> >& ffs,
+                       const ArcFeatureFunctions& ffs,
                        SparseVector<double>* features) const;
 };
 
@@ -74,7 +75,7 @@ class ArcFactoredForest {
 
   // set eges_[*].features
   void ExtractFeatures(const TaggedSentence& sentence,
-                       const std::vector<boost::shared_ptr<ArcFeatureFunction> >& ffs);
+                       const ArcFeatureFunctions& ffs);
 
   const Edge& operator()(short h, short m) const {
     return h >= 0 ? edges_(h, m) : root_edges_[m];

@@ -13,36 +13,30 @@ using namespace std::tr1;
 using namespace boost;
 
 void EdgeSubset::ExtractFeatures(const TaggedSentence& sentence,
-                                 const std::vector<boost::shared_ptr<ArcFeatureFunction> >& ffs,
+                                 const ArcFeatureFunctions& ffs,
                                  SparseVector<double>* features) const {
   SparseVector<weight_t> efmap;
-  for (int i = 0; i < ffs.size(); ++i) {
-    const ArcFeatureFunction& ff= *ffs[i];
-    for (int j = 0; j < h_m_pairs.size(); ++j) {
-      efmap.clear();
-      ff.EgdeFeatures(sentence, h_m_pairs[j].first,
-                      h_m_pairs[j].second,
-                      &efmap);
-      (*features) += efmap;
-    }
-    for (int j = 0; j < roots.size(); ++j) {
-      efmap.clear();
-      ff.EgdeFeatures(sentence, -1, roots[j], &efmap);
-      (*features) += efmap;
-    }
+  for (int j = 0; j < h_m_pairs.size(); ++j) {
+    efmap.clear();
+    ffs.EdgeFeatures(sentence, h_m_pairs[j].first,
+                     h_m_pairs[j].second,
+                     &efmap);
+    (*features) += efmap;
+  }
+  for (int j = 0; j < roots.size(); ++j) {
+    efmap.clear();
+    ffs.EdgeFeatures(sentence, -1, roots[j], &efmap);
+    (*features) += efmap;
   }
 }
 
 void ArcFactoredForest::ExtractFeatures(const TaggedSentence& sentence,
-                                        const std::vector<boost::shared_ptr<ArcFeatureFunction> >& ffs) {
-  for (int i = 0; i < ffs.size(); ++i) {
-    const ArcFeatureFunction& ff = *ffs[i];
-    for (int m = 0; m < num_words_; ++m) {
-      for (int h = 0; h < num_words_; ++h) {
-        ff.EgdeFeatures(sentence, h, m, &edges_(h,m).features);
-      }
-      ff.EgdeFeatures(sentence, -1, m, &root_edges_[m].features);
+                                        const ArcFeatureFunctions& ffs) {
+  for (int m = 0; m < num_words_; ++m) {
+    for (int h = 0; h < num_words_; ++h) {
+      ffs.EdgeFeatures(sentence, h, m, &edges_(h,m).features);
     }
+    ffs.EdgeFeatures(sentence, -1, m, &root_edges_[m].features);
   }
 }
 
