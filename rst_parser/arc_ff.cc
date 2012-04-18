@@ -38,28 +38,28 @@ struct ArcFFImpl {
   template <typename A, typename B>
   static void Fire(SparseVector<weight_t>* v, const A& a, const B& b) {
     ostringstream os;
-    os << a << '_' << b;
+    os << a << ':' << b;
     v->set_value(FD::Convert(os.str()), 1);
   }
 
   template <typename A, typename B, typename C>
   static void Fire(SparseVector<weight_t>* v, const A& a, const B& b, const C& c) {
     ostringstream os;
-    os << a << '_' << b << '_' << c;
+    os << a << ':' << b << '_' << c;
     v->set_value(FD::Convert(os.str()), 1);
   }
 
   template <typename A, typename B, typename C, typename D>
   static void Fire(SparseVector<weight_t>* v, const A& a, const B& b, const C& c, const D& d) {
     ostringstream os;
-    os << a << '_' << b << '_' << c << '_' << d;
+    os << a << ':' << b << '_' << c << '_' << d;
     v->set_value(FD::Convert(os.str()), 1);
   }
 
   template <typename A, typename B, typename C, typename D, typename E>
   static void Fire(SparseVector<weight_t>* v, const A& a, const B& b, const C& c, const D& d, const E& e) {
     ostringstream os;
-    os << a << '_' << b << '_' << c << '_' << d << '_' << e;
+    os << a << ':' << b << '_' << c << '_' << d << '_' << e;
     v->set_value(FD::Convert(os.str()), 1);
   }
 
@@ -75,7 +75,7 @@ struct ArcFFImpl {
     const string& mod_pos = TD::Convert(sent.pos[m]);
     const string& mod_pos_L = (m > 0 ? TD::Convert(sent.pos[m-1]) : kLEFT_POS);
     const string& mod_pos_R = (m < sent.pos.size() - 1 ? TD::Convert(sent.pos[m]) : kRIGHT_POS);
-    const bool dir = m < h;
+    const string dir = (m < h ? "MLeft" : "MRight");
     int v = m - h;
     if (v < 0) {
       v= -1 - int(log(-v) / log(2));
@@ -118,11 +118,13 @@ struct ArcFFImpl {
       // between features
       int left = min(h,m);
       int right = max(h,m);
-      if (right - left > 2) {
-        ++left;
+      if (right - left >= 2) {
+        --right;
         for (map<WordID, vector<int> >::const_iterator it = pcs.begin(); it != pcs.end(); ++it) {
-          if (it->second[left] != it->second[right])
+          if (it->second[left] != it->second[right]) {
             Fire(features, "BT", head_pos, TD::Convert(it->first), mod_pos);
+            Fire(features, "BT", head_pos, TD::Convert(it->first), mod_pos, dir);
+          }
         }
       }
     }
