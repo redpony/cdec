@@ -11,9 +11,21 @@ struct ArcFFImpl {
   const string kROOT;
   const string kLEFT_POS;
   const string kRIGHT_POS;
+  map<WordID, vector<int> > pcs;
 
   void PrepareForInput(const TaggedSentence& sent) {
-    (void) sent;
+    pcs.clear();
+    for (int i = 0; i < sent.pos.size(); ++i)
+      pcs[sent.pos[i]].resize(1, 0);
+    pcs[sent.pos[0]][0] = 1;
+    for (int i = 1; i < sent.pos.size(); ++i) {
+      const WordID posi = sent.pos[i];
+      for (map<WordID, vector<int> >::iterator j = pcs.begin(); j != pcs.end(); ++j) {
+        const WordID posj = j->first;
+        vector<int>& cs = j->second;
+        cs.push_back(cs.back() + (posj == posi ? 1 : 0));
+      }
+    }
   }
 
   template <typename A>
@@ -102,6 +114,17 @@ struct ArcFFImpl {
       Fire(features, "posLR", head_pos, mod_pos, head_pos_L, mod_pos_R);
       Fire(features, "posRL", head_pos, mod_pos, head_pos_R, mod_pos_L);
       Fire(features, "lexRL", head_word, head_pos_L, mod_pos_L);
+
+      // between features
+      int left = min(h,m);
+      int right = max(h,m);
+      if (right - left > 2) {
+        ++left;
+        for (map<WordID, vector<int> >::const_iterator it = pcs.begin(); it != pcs.end(); ++it) {
+          if (it->second[left] != it->second[right])
+            Fire(features, "BT", head_pos, TD::Convert(it->first), mod_pos);
+        }
+      }
     }
   }
 };
