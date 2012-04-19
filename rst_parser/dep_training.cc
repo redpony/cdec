@@ -18,6 +18,10 @@ static void ParseInstance(const string& line, int start, TrainingInstance* out, 
   TrainingInstance& cur = *out;
   TaggedSentence& ts = cur.ts;
   EdgeSubset& tree = cur.tree;
+  ts.pos.clear();
+  ts.words.clear();
+  tree.roots.clear();
+  tree.h_m_pairs.clear();
   assert(obj.is<picojson::object>());
   const picojson::object& d = obj.get<picojson::object>();
   const picojson::array& ta = d.find("tokens")->second.get<picojson::array>();
