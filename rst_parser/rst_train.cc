@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
   vector<TrainingInstance> corpus;
   ArcFeatureFunctions ffs;
   GlobalFeatureFunctions gff;
-  TrainingInstance::ReadTraining(conf["training_data"].as<string>(), &corpus);
+  TrainingInstance::ReadTrainingCorpus(conf["training_data"].as<string>(), &corpus);
   vector<ArcFactoredForest> forests(corpus.size());
   vector<prob_t> zs(corpus.size());
   SparseVector<double> empirical;

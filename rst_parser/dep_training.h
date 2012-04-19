@@ -1,6 +1,7 @@
 #ifndef _DEP_TRAINING_H_
 #define _DEP_TRAINING_H_
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include "arc_factored.h"
@@ -11,7 +12,8 @@ struct TrainingInstance {
   EdgeSubset tree;
   SparseVector<weight_t> features;
   // reads a "Jsent" formatted dependency file
-  static void ReadTraining(const std::string& fname, std::vector<TrainingInstance>* corpus, int rank = 0, int size = 1);
+  static bool ReadInstance(std::istream* in, TrainingInstance* instance); // returns false at EOF
+  static void ReadTrainingCorpus(const std::string& fname, std::vector<TrainingInstance>* corpus, int rank = 0, int size = 1);
 };
 
 #endif
