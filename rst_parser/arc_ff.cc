@@ -1,5 +1,8 @@
 #include "arc_ff.h"
 
+#include <iostream>
+#include <sstream>
+
 #include "tdict.h"
 #include "fdict.h"
 #include "sentence_metadata.h"
