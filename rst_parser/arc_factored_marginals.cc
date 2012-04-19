@@ -49,7 +49,7 @@ void ArcFactoredForest::EdgeMarginals(prob_t *plog_z) {
 
 #else
 
-void ArcFactoredForest::EdgeMarginals(double*) {
+void ArcFactoredForest::EdgeMarginals(prob_t *) {
   cerr << "EdgeMarginals() requires --with-eigen!\n";
   abort();
 }
