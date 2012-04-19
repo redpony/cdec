@@ -1,6 +1,7 @@
 #include "global_ff.h"
 
 #include <iostream>
+#include <sstream>
 
 #include "tdict.h"
 
