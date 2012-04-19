@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
   InitCommandLine(argc, argv, &conf);
   ArcFeatureFunctions ffs;
   vector<TrainingInstance> corpus;
-  TrainingInstance::ReadTraining(conf["training_data"].as<string>(), &corpus, rank, size);
+  TrainingInstance::ReadTrainingCorpus(conf["training_data"].as<string>(), &corpus, rank, size);
   vector<ArcFactoredForest> forests(corpus.size());
   SparseVector<double> empirical;
   bool flag = false;
