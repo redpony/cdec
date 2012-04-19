@@ -75,7 +75,8 @@ struct ArcFFImpl {
     const string& mod_pos = TD::Convert(sent.pos[m]);
     const string& mod_pos_L = (m > 0 ? TD::Convert(sent.pos[m-1]) : kLEFT_POS);
     const string& mod_pos_R = (m < sent.pos.size() - 1 ? TD::Convert(sent.pos[m]) : kRIGHT_POS);
-    const string dir = (m < h ? "MLeft" : "MRight");
+    const bool bdir = m < h;
+    const string dir = (bdir ? "MLeft" : "MRight");
     int v = m - h;
     if (v < 0) {
       v= -1 - int(log(-v) / log(2));
@@ -119,7 +120,7 @@ struct ArcFFImpl {
       int left = min(h,m);
       int right = max(h,m);
       if (right - left >= 2) {
-        --right;
+        if (bdir) --right; else ++left;
         for (map<WordID, vector<int> >::const_iterator it = pcs.begin(); it != pcs.end(); ++it) {
           if (it->second[left] != it->second[right]) {
             Fire(features, "BT", head_pos, TD::Convert(it->first), mod_pos);
