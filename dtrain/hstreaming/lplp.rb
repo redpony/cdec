@@ -82,7 +82,7 @@ def _test()
   cut(w, method(:mean), 1, 2.05)
  exit
 end
-_test()
+#_test()
 
 # actually do something
 def usage()
@@ -107,7 +107,7 @@ STDOUT.set_encoding 'utf-8'
 w = {}
 shard_count = 0
 while line = STDIN.gets
-  key, val = line.split /\t/
+  key, val = line.split /\s+/
   if key == shard_count_key
     shard_count += 1
     next

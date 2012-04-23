@@ -1,4 +1,4 @@
-This is a really fast (parallelizable) tuning method for cdec as used here:
+This is a simple (but parallelizable) tuning method for cdec, as used here:
   "Joint Feature Selection in Distributed Stochastic
    Learning for Large-Scale Discriminative Training in
    SMT" Simianer, Riezler, Dyer

@@ -13,7 +13,7 @@
 
 #include "filelib.h"
 
-//#define DTRAIN_LOCAL
+#define DTRAIN_LOCAL
 
 #define DTRAIN_DOTS 10 // when to display a '.'
 #define DTRAIN_GRAMMAR_DELIM "########EOS########"

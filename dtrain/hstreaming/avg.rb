@@ -22,10 +22,11 @@ else
 end
 w.each_key { |k|
   if k == shard_count_key
-    puts "# shard count: #{shard_count.to_i}"
+    #puts "# shard count: #{shard_count.to_i}"
+    next
   else
     puts "#{k}\t#{w[k]/shard_count}"
-    puts "# #{c[k]}"
+    #puts "# #{c[k]}"
   end
 }
 
