@@ -30,8 +30,6 @@ class LogVal {
   LogVal(init_minus_1) : s_(true),v_(0) {  }
   LogVal(init_1) : s_(),v_(0) {  }
   LogVal(init_0) : s_(),v_(LOGVAL_LOG0) {  }
-  explicit LogVal(int x) : s_(x<0), v_(s_ ? std::log(-x) : std::log(x)) {}
-  explicit LogVal(unsigned x) : s_(0), v_(std::log(x)) { }
   LogVal(double lnx,bool sign) : s_(sign),v_(lnx) {}
   LogVal(double lnx,init_lnx) : s_(),v_(lnx) {}
   static Self exp(T lnx) { return Self(lnx,false); }
@@ -126,7 +124,7 @@ class LogVal {
   }
 
   Self operator-() const {
-    return Self(v_,-s_);
+    return Self(v_,!s_);
   }
   void negate() { s_ = !s_; }
 
@@ -191,6 +189,15 @@ T log(const LogVal<T>& o) {
   if (o.s_) return log(-1.0);
 #endif
   return o.v_;
+}
+
+template<class T>
+LogVal<T> abs(const LogVal<T>& o) {
+  if (o.s_) {
+    LogVal<T> res = o;
+    res.s_ = false;
+    return res;
+  } else { return o; }
 }
 
 template <class T>

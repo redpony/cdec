@@ -89,7 +89,7 @@ struct TableLookupBase {
   TableLookupBase(const std::string& fname);
 
   prob_t operator()(const TRule& rule) const {
-    const std::tr1::unordered_map<TRule,prob_t>::const_iterator it = table.find(rule);
+    const std::tr1::unordered_map<TRule,prob_t,RuleHasher>::const_iterator it = table.find(rule);
     if (it == table.end()) {
       std::cerr << rule << " not found\n";
       abort();
