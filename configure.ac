@@ -130,8 +130,4 @@ then
   AM_CONDITIONAL([GLC], true)
 fi
 
-<<<<<<< HEAD
-AC_OUTPUT(Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile phrasinator/Makefile training/Makefile dpmert/Makefile pro-train/Makefile klm/util/Makefile klm/lm/Makefile mira/Makefile dtrain/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile gi/pf/Makefile gi/markov_al/Makefile)
-=======
-AC_OUTPUT(Makefile rst_parser/Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile phrasinator/Makefile training/Makefile dpmert/Makefile pro-train/Makefile klm/util/Makefile klm/lm/Makefile mira/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile gi/pf/Makefile gi/markov_al/Makefile)
->>>>>>> upstream/master
+AC_OUTPUT(Makefile rst_parser/Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile phrasinator/Makefile training/Makefile dpmert/Makefile pro-train/Makefile klm/util/Makefile klm/lm/Makefile mira/Makefile dtrain/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile gi/pf/Makefile gi/markov_al/Makefile)
