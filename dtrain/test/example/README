@@ -1,0 +1,6 @@
+Small example of input format for distributed training.
+Call dtrain from cdec/dtrain/ with ./dtrain -c test/example/dtrain.ini .
+
+For this to work, disable '#define DTRAIN_LOCAL' from dtrain.h
+and recompile.
+

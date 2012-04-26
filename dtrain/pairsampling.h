@@ -13,7 +13,7 @@ accept_pair(score_t a, score_t b, score_t threshold)
 }
 
 inline void
-all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold)
+all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float _unused = 1)
 {
   for (unsigned i = 0; i < s->size()-1; i++) {
     for (unsigned j = i+1; j < s->size(); j++) {
@@ -35,19 +35,16 @@ all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, sc
  *  cmp middle 80% to low 10%
  */
 bool
-_108010_cmp_hyp_by_score(ScoredHyp a, ScoredHyp b)
+_XYX_cmp_hyp_by_score(ScoredHyp a, ScoredHyp b)
 {
   return a.score < b.score;
 }
 inline void
-part108010(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold)
+partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float hi_lo)
 {
-  sort(s->begin(), s->end(), _108010_cmp_hyp_by_score);
+  sort(s->begin(), s->end(), _XYX_cmp_hyp_by_score);
   unsigned sz = s->size();
-  unsigned slice = 10;
-  unsigned sep = sz%slice;
-  cout << "sep " << sep <<endl;
-  if (sep == 0) sep = sz/slice;
+  unsigned sep = sz * hi_lo;
   for (unsigned i = 0; i < sep; i++) {
     for (unsigned j = sep; j < sz; j++) {
       if ((*s)[i].rank < (*s)[j].rank) {
@@ -80,7 +77,7 @@ part108010(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, s
  * pair sampling as in
  * 'Tuning as Ranking' (Hopkins & May, 2011)
  *     count = 5000
- * threshold = 5% BLEU
+ * threshold = 5% BLEU (0.05 for param 3)
  *       cut = top 50
  */
 bool
@@ -90,7 +87,7 @@ _PRO_cmp_pair_by_diff(pair<ScoredHyp,ScoredHyp> a, pair<ScoredHyp,ScoredHyp> b)
   return (fabs(a.first.score - a.second.score)) > (fabs(b.first.score - b.second.score));
 }
 inline void
-PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold=0.05)
+PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float _unused = 1)
 {
   unsigned max_count = 5000, count = 0;
   bool b = false;
