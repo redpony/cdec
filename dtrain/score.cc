@@ -24,12 +24,12 @@ BleuScorer::Bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref
     if (counts.clipped[i] == 0 || counts.sum[i] == 0) return 0;
     sum += w_[i] * log((score_t)counts.clipped[i]/counts.sum[i]);
   }
-  return brevity_penaly(hyp_len, ref_len) * exp(sum);
+  return brevity_penalty(hyp_len, ref_len) * exp(sum);
 }
 
 score_t
 BleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
-                  const unsigned rank)
+                  const unsigned /*rank*/)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
   if (hyp_len == 0 || ref_len == 0) return 0;
@@ -49,7 +49,7 @@ BleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  */
 score_t
 StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
-                        const unsigned rank)
+                        const unsigned /*rank*/)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
   if (hyp_len == 0 || ref_len == 0) return 0;
@@ -58,10 +58,11 @@ StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
   if (ref_len < N_) M = ref_len;
   score_t sum = 0, add = 0;
   for (unsigned i = 0; i < M; i++) {
+    if (i == 0 && (counts.clipped[i] == 0 || counts.sum[i] == 0)) return 0;
     if (i == 1) add = 1;
     sum += w_[i] * log(((score_t)counts.clipped[i] + add)/((counts.sum[i] + add)));
   }
-  return  brevity_penaly(hyp_len, ref_len) * exp(sum);
+  return  brevity_penalty(hyp_len, ref_len) * exp(sum);
 }
 
 /*
@@ -75,19 +76,28 @@ StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  */
 score_t
 SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
-                        const unsigned rank)
+                        const unsigned /*rank*/)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
   if (hyp_len == 0 || ref_len == 0) return 0;
   NgramCounts counts = make_ngram_counts(hyp, ref, N_);
-  score_t sum = 0;
-  unsigned j = 1;
-  for (unsigned i = 0; i < N_; i++) {
-    if (counts.clipped[i] == 0 || counts.sum[i] == 0) continue;
-    sum += exp((w_[i] * log((score_t)counts.clipped[i]/counts.sum[i])))/pow(2, N_-j+1);
-    j++;
+  unsigned M = N_;
+  if (ref_len < N_) M = ref_len;
+  score_t sum = 0.;
+  vector<score_t> i_bleu;
+  for (unsigned i = 0; i < M; i++) i_bleu.push_back(0.);
+  for (unsigned i = 0; i < M; i++) {
+    if (counts.clipped[i] == 0 || counts.sum[i] == 0) {
+      break;
+    } else {
+      score_t i_ng = log((score_t)counts.clipped[i]/counts.sum[i]);
+      for (unsigned j = i; j < M; j++) {
+        i_bleu[j] += (1/((score_t)j+1)) * i_ng;
+      }
+    }
+    sum += exp(i_bleu[i])/(pow(2, N_-i));
   }
-  return brevity_penaly(hyp_len, ref_len) * sum;
+  return brevity_penalty(hyp_len, ref_len) * sum;
 }
 
 /*
