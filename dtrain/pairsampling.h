@@ -46,6 +46,7 @@ part108010(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, s
   unsigned sz = s->size();
   unsigned slice = 10;
   unsigned sep = sz%slice;
+  cout << "sep " << sep <<endl;
   if (sep == 0) sep = sz/slice;
   for (unsigned i = 0; i < sep; i++) {
     for (unsigned j = sep; j < sz; j++) {
@@ -107,7 +108,7 @@ PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, 
   }
   if (training.size() > 50) {
     sort(training.begin(), training.end(), _PRO_cmp_pair_by_diff);
-    training.erase(training.begin()+50, training.end()); 
+    training.erase(training.begin()+50, training.end());
   }
   return;
 }

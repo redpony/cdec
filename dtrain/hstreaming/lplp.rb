@@ -29,7 +29,7 @@ end
 # selection
 def select_k(weights, norm_fun, n, k=10000)
   weights.sort{|a,b| norm_fun.call(b[1], n) <=> norm_fun.call(a[1], n)}.each { |p|
-    puts "#{p[0]}\t#{mean(p[1], n)}" 
+    puts "#{p[0]}\t#{mean(p[1], n)}"
     k -= 1
     if k == 0 then break end
   }

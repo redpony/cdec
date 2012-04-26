@@ -15,7 +15,7 @@ struct NgramCounts
   map<unsigned, unsigned> clipped;
   map<unsigned, unsigned> sum;
 
-  NgramCounts(const unsigned N) : N_(N) { Zero(); } 
+  NgramCounts(const unsigned N) : N_(N) { Zero(); }
 
   inline void
   operator+=(const NgramCounts& rhs)

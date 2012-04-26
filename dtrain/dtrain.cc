@@ -15,7 +15,7 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     ("tmp",             po::value<string>()->default_value("/tmp"),                                        "temp dir to use")
     ("keep",            po::value<bool>()->zero_tokens(),                            "keep weights files for each iteration")
     ("hstreaming",      po::value<string>(),                                "run in hadoop streaming mode, arg is a task id")
-    ("epochs",          po::value<unsigned>()->default_value(10),                            "# of iterations T (per shard)") 
+    ("epochs",          po::value<unsigned>()->default_value(10),                            "# of iterations T (per shard)")
     ("k",               po::value<unsigned>()->default_value(100),                         "how many translations to sample")
     ("sample_from",     po::value<string>()->default_value("kbest"),  "where to sample translations from: 'kbest', 'forest'")
     ("filter",          po::value<string>()->default_value("uniq"),                       "filter kbest list: 'not', 'uniq'")
@@ -47,7 +47,7 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     po::store(po::parse_config_file(ini_f, ini), *cfg);
   }
   po::notify(*cfg);
-  if (!cfg->count("decoder_config")) { 
+  if (!cfg->count("decoder_config")) {
     cerr << cl << endl;
     return false;
   }
@@ -93,10 +93,10 @@ main(int argc, char** argv)
 {
   // handle most parameters
   po::variables_map cfg;
-  if (!dtrain_init(argc, argv, &cfg)) exit(1); // something is wrong 
+  if (!dtrain_init(argc, argv, &cfg)) exit(1); // something is wrong
   bool quiet = false;
   if (cfg.count("quiet")) quiet = true;
-  bool verbose = false;  
+  bool verbose = false;
   if (cfg.count("verbose")) verbose = true;
   bool noup = false;
   if (cfg.count("noup")) noup = true;
@@ -118,7 +118,7 @@ main(int argc, char** argv)
     inc_correct = true;
 
   const unsigned k = cfg["k"].as<unsigned>();
-  const unsigned N = cfg["N"].as<unsigned>(); 
+  const unsigned N = cfg["N"].as<unsigned>();
   const unsigned T = cfg["epochs"].as<unsigned>();
   const unsigned stop_after = cfg["stop_after"].as<unsigned>();
   const string filter_type = cfg["filter"].as<string>();
@@ -241,7 +241,7 @@ main(int argc, char** argv)
       cerr << setw(25) << "rescale " << rescale << endl;
     cerr << setw(25) << "cdec cfg " << "'" << cfg["decoder_config"].as<string>() << "'" << endl;
     cerr << setw(25) << "input " << "'" << input_fn << "'" << endl;
-#ifdef DTRAIN_LOCAL 
+#ifdef DTRAIN_LOCAL
     cerr << setw(25) << "refs " << "'" << refs_fn << "'" << endl;
 #endif
     cerr << setw(25) << "output " << "'" << output_fn << "'" << endl;
@@ -258,7 +258,7 @@ main(int argc, char** argv)
 
   if (hstreaming) cerr << "reporter:status:Iteration #" << t+1 << " of " << T << endl;
 
-  time_t start, end;  
+  time_t start, end;
   time(&start);
 #ifndef DTRAIN_LOCAL
   igzstream grammar_buf_in;
@@ -281,7 +281,7 @@ main(int argc, char** argv)
     }
     // stop after X sentences (but still go on for those)
     if (stop_after > 0 && stop_after == ii && !next) stop = true;
-    
+
     // produce some pretty output
     if (!quiet && !verbose) {
       if (ii == 0) cerr << " ";
@@ -302,7 +302,7 @@ main(int argc, char** argv)
         }
       }
     }
-   
+
     // next iteration
     if (next || stop) break;
 
@@ -315,7 +315,7 @@ main(int argc, char** argv)
     vector<string> in_split; // input: sid\tsrc\tref\tpsg
     if (t == 0) {
       // handling input
-      split_in(in, in_split); 
+      split_in(in, in_split);
       if (hstreaming && ii == 0) cerr << "reporter:counter:" << task_id << ",First ID," << in_split[0] << endl;
       // getting reference
       vector<string> ref_tok;
@@ -369,13 +369,13 @@ main(int argc, char** argv)
       ref_ids = ref_ids_buf[ii];
     }
     observer->SetRef(ref_ids);
-    if (t == 0) 
+    if (t == 0)
       decoder.Decode(in, observer);
     else
       decoder.Decode(src_str_buf[ii], observer);
 #endif
 
-    // get (scored) samples 
+    // get (scored) samples
     vector<ScoredHyp>* samples = observer->GetSamples();
 
     if (verbose) {
@@ -475,7 +475,7 @@ main(int argc, char** argv)
     }
 
     if (rescale) lambdas /= lambdas.l2norm();
-    
+
     ++ii;
 
     if (hstreaming) {
@@ -485,7 +485,7 @@ main(int argc, char** argv)
 
   } // input loop
 
-  if (average) w_average += lambdas; 
+  if (average) w_average += lambdas;
 
   if (scorer_str == "approx_bleu") scorer->Reset();
 
@@ -517,7 +517,7 @@ main(int argc, char** argv)
     score_diff = score_avg;
     model_diff = model_avg;
   }
-  
+
   unsigned nonz = 0;
   if (!quiet || hstreaming) nonz = (unsigned)lambdas.size_nonzero();
 
@@ -543,12 +543,12 @@ main(int argc, char** argv)
   }
 
   if (hstreaming) {
-    rep.update_counter("Score 1best avg #"+boost::lexical_cast<string>(t+1), (unsigned)(score_avg*DTRAIN_SCALE)); 
-    rep.update_counter("Model 1best avg #"+boost::lexical_cast<string>(t+1), (unsigned)(model_avg*DTRAIN_SCALE)); 
-    rep.update_counter("Pairs avg #"+boost::lexical_cast<string>(t+1), (unsigned)((npairs/(weight_t)in_sz)*DTRAIN_SCALE)); 
-    rep.update_counter("Rank errors avg #"+boost::lexical_cast<string>(t+1), (unsigned)((rank_errors/(weight_t)in_sz)*DTRAIN_SCALE)); 
-    rep.update_counter("Margin violations avg #"+boost::lexical_cast<string>(t+1), (unsigned)((margin_violations/(weight_t)in_sz)*DTRAIN_SCALE)); 
-    rep.update_counter("Non zero feature count #"+boost::lexical_cast<string>(t+1), nonz); 
+    rep.update_counter("Score 1best avg #"+boost::lexical_cast<string>(t+1), (unsigned)(score_avg*DTRAIN_SCALE));
+    rep.update_counter("Model 1best avg #"+boost::lexical_cast<string>(t+1), (unsigned)(model_avg*DTRAIN_SCALE));
+    rep.update_counter("Pairs avg #"+boost::lexical_cast<string>(t+1), (unsigned)((npairs/(weight_t)in_sz)*DTRAIN_SCALE));
+    rep.update_counter("Rank errors avg #"+boost::lexical_cast<string>(t+1), (unsigned)((rank_errors/(weight_t)in_sz)*DTRAIN_SCALE));
+    rep.update_counter("Margin violations avg #"+boost::lexical_cast<string>(t+1), (unsigned)((margin_violations/(weight_t)in_sz)*DTRAIN_SCALE));
+    rep.update_counter("Non zero feature count #"+boost::lexical_cast<string>(t+1), nonz);
     rep.update_gcounter("Non zero feature count #"+boost::lexical_cast<string>(t+1), nonz);
   }
 
@@ -575,7 +575,7 @@ main(int argc, char** argv)
   if (select_weights == "best" || keep) {
     lambdas.init_vector(&dense_weights);
     string w_fn = "weights." + boost::lexical_cast<string>(t) + ".gz";
-    Weights::WriteToFile(w_fn, dense_weights, true); 
+    Weights::WriteToFile(w_fn, dense_weights, true);
   }
 
   } // outer loop
@@ -625,7 +625,7 @@ main(int argc, char** argv)
     if (output_fn == "-" && hstreaming) cout << "__SHARD_COUNT__\t1" << endl;
     if (!quiet) cerr << "done" << endl;
   }
-  
+
   if (!quiet) {
     cerr << _p5 << _np << endl << "---" << endl << "Best iteration: ";
     cerr << best_it+1 << " [SCORE '" << scorer_str << "'=" << max_score << "]." << endl;

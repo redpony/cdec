@@ -13,7 +13,7 @@
 
 #include "filelib.h"
 
-//#define DTRAIN_LOCAL
+#define DTRAIN_LOCAL
 
 #define DTRAIN_DOTS 10 // after how many inputs to display a '.'
 #define DTRAIN_GRAMMAR_DELIM "########EOS########"
@@ -49,7 +49,7 @@ inline void split_in(string& s, vector<string>& parts)
     unsigned e = f;
     f = s.find("\t", f+1);
     if (e != 0) parts.push_back(s.substr(e+1, f-e-1));
-    else parts.push_back(s.substr(0, f)); 
+    else parts.push_back(s.substr(0, f));
   }
   s.erase(0, f+1);
 }
