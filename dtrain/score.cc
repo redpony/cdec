@@ -129,7 +129,7 @@ ApproxBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
     ref_len = ref.size();
     tmp = glob_onebest_counts + counts;
   }
-  return 0.9 * Bleu(tmp, hyp_len, ref_len);
+  return 0.9 * Bleu(tmp, hyp_len, ref_len); // TODO param
 }
 
 

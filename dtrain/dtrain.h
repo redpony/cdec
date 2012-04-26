@@ -13,7 +13,7 @@
 
 #include "filelib.h"
 
-#define DTRAIN_LOCAL
+//#define DTRAIN_LOCAL
 
 #define DTRAIN_DOTS 10 // after how many inputs to display a '.'
 #define DTRAIN_GRAMMAR_DELIM "########EOS########"
@@ -23,13 +23,15 @@ using namespace std;
 using namespace dtrain;
 namespace po = boost::program_options;
 
-inline void register_and_convert(const vector<string>& strs, vector<WordID>& ids) {
+inline void register_and_convert(const vector<string>& strs, vector<WordID>& ids)
+{
   vector<string>::const_iterator it;
   for (it = strs.begin(); it < strs.end(); it++)
     ids.push_back(TD::Convert(*it));
 }
 
-inline string gettmpf(const string path, const string infix) {
+inline string gettmpf(const string path, const string infix)
+{
   char fn[1024];
   strcpy(fn, path.c_str());
   strcat(fn, "/");
