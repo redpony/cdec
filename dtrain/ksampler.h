@@ -20,7 +20,7 @@ struct KSampler : public HypSampler
     k_(k), prng_(prng) {}
 
   virtual void
-  NotifyTranslationForest(const SentenceMetadata& smeta, Hypergraph* hg)
+  NotifyTranslationForest(const SentenceMetadata& /*smeta*/, Hypergraph* hg)
   {
     ScoredSamples(*hg);
   }

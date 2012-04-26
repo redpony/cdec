@@ -1,5 +1,5 @@
-#ifndef _DTRAIN_COMMON_H_
-#define _DTRAIN_COMMON_H_
+#ifndef _DTRAIN_H_
+#define _DTRAIN_H_
 
 #include <iomanip>
 #include <climits>
@@ -13,9 +13,9 @@
 
 #include "filelib.h"
 
-#define DTRAIN_LOCAL
+//#define DTRAIN_LOCAL
 
-#define DTRAIN_DOTS 10 // when to display a '.'
+#define DTRAIN_DOTS 10 // after how many inputs to display a '.'
 #define DTRAIN_GRAMMAR_DELIM "########EOS########"
 #define DTRAIN_SCALE 100000
 
@@ -35,7 +35,10 @@ inline string gettmpf(const string path, const string infix) {
   strcat(fn, "/");
   strcat(fn, infix.c_str());
   strcat(fn, "-XXXXXX");
-  mkstemp(fn);
+  if (!mkstemp(fn)) {
+    cerr << "Cannot make temp file in" << path << " , exiting." << endl;
+    exit(1);
+  }
   return string(fn);
 }
 

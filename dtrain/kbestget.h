@@ -46,7 +46,7 @@ struct LocalScorer
   }
 
   inline score_t
-  brevity_penaly(const unsigned hyp_len, const unsigned ref_len)
+  brevity_penalty(const unsigned hyp_len, const unsigned ref_len)
   {
     if (hyp_len > ref_len) return 1;
     return exp(1 - (score_t)ref_len/hyp_len);
@@ -61,7 +61,7 @@ struct HypSampler : public DecoderObserver
   inline void SetScorer(LocalScorer* scorer) { scorer_ = scorer; }
   inline void SetRef(vector<WordID>& ref) { ref_ = &ref; } 
 };
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -76,7 +76,7 @@ struct KBestGetter : public HypSampler
     k_(k), filter_type_(filter_type) {}
 
   virtual void
-  NotifyTranslationForest(const SentenceMetadata& smeta, Hypergraph* hg)
+  NotifyTranslationForest(const SentenceMetadata& /*smeta*/, Hypergraph* hg)
   {
     KBestScored(*hg);
   }
