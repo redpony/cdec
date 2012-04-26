@@ -59,7 +59,7 @@ struct HypSampler : public DecoderObserver
   vector<WordID>* ref_;
   virtual vector<ScoredHyp>* GetSamples()=0;
   inline void SetScorer(LocalScorer* scorer) { scorer_ = scorer; }
-  inline void SetRef(vector<WordID>& ref) { ref_ = &ref; } 
+  inline void SetRef(vector<WordID>& ref) { ref_ = &ref; }
 };
 ////////////////////////////////////////////////////////////////////////////////
 
