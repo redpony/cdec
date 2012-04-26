@@ -3,7 +3,8 @@ which is able to train the weights of very many (sparse) features.
 It was used here:
   "Joint Feature Selection in Distributed Stochastic
    Learning for Large-Scale Discriminative Training in
-   SMT" Simianer, Riezler, Dyer; ACL 2012
+   SMT"
+(Simianer, Riezler, Dyer; ACL 2012)
 
 
 Building

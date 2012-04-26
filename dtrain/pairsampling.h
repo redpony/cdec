@@ -44,7 +44,7 @@ partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, scor
 {
   sort(s->begin(), s->end(), _XYX_cmp_hyp_by_score);
   unsigned sz = s->size();
-  unsigned sep = sz * hi_lo;
+  unsigned sep = round(sz*hi_lo);
   for (unsigned i = 0; i < sep; i++) {
     for (unsigned j = sep; j < sz; j++) {
       if ((*s)[i].rank < (*s)[j].rank) {
