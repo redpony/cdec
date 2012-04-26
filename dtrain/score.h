@@ -12,8 +12,8 @@ namespace dtrain
 struct NgramCounts
 {
   unsigned N_;
-  map<unsigned, unsigned> clipped;
-  map<unsigned, unsigned> sum;
+  map<unsigned, score_t> clipped_;
+  map<unsigned, score_t> sum_;
 
   NgramCounts(const unsigned N) : N_(N) { Zero(); }
 
@@ -22,8 +22,8 @@ struct NgramCounts
   {
     assert(N_ == rhs.N_);
     for (unsigned i = 0; i < N_; i++) {
-      this->clipped[i] += rhs.clipped.find(i)->second;
-      this->sum[i] += rhs.sum.find(i)->second;
+      this->clipped_[i] += rhs.clipped_.find(i)->second;
+      this->sum_[i] += rhs.sum_.find(i)->second;
     }
   }
 
@@ -36,15 +36,24 @@ struct NgramCounts
   }
 
   inline void
+  operator*=(const score_t rhs)
+  {
+    for (unsigned i = 0; i < N_; i++) {
+      this->clipped_[i] *= rhs;
+      this->sum_[i] *= rhs;
+    }
+  }
+
+  inline void
   Add(const unsigned count, const unsigned ref_count, const unsigned i)
   {
     assert(i < N_);
     if (count > ref_count) {
-      clipped[i] += ref_count;
+      clipped_[i] += ref_count;
     } else {
-      clipped[i] += count;
+      clipped_[i] += count;
     }
-    sum[i] += count;
+    sum_[i] += count;
   }
 
   inline void
@@ -52,8 +61,8 @@ struct NgramCounts
   {
     unsigned i;
     for (i = 0; i < N_; i++) {
-      clipped[i] = 0;
-      sum[i] = 0;
+      clipped_[i] = 0;
+      sum_[i] = 0;
     }
   }
 
@@ -61,8 +70,8 @@ struct NgramCounts
   Print()
   {
     for (unsigned i = 0; i < N_; i++) {
-      cout << i+1 << "grams (clipped):\t" << clipped[i] << endl;
-      cout << i+1 << "grams:\t\t\t" << sum[i] << endl;
+      cout << i+1 << "grams (clipped):\t" << clipped_[i] << endl;
+      cout << i+1 << "grams:\t\t\t" << sum_[i] << endl;
     }
   }
 };
@@ -106,35 +115,36 @@ make_ngram_counts(const vector<WordID>& hyp, const vector<WordID>& ref, const un
 struct BleuScorer : public LocalScorer
 {
   score_t Bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len);
-  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank);
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
 };
 
 struct StupidBleuScorer : public LocalScorer
 {
-  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank);
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
 };
 
 struct SmoothBleuScorer : public LocalScorer
 {
-  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank);
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
 };
 
 struct ApproxBleuScorer : public BleuScorer
 {
-  NgramCounts glob_onebest_counts;
-  unsigned glob_hyp_len, glob_ref_len;
+  NgramCounts glob_onebest_counts_;
+  unsigned glob_hyp_len_, glob_ref_len_, glob_src_len_;
+  score_t discount_;
 
-  ApproxBleuScorer(unsigned N) : glob_onebest_counts(NgramCounts(N))
+  ApproxBleuScorer(unsigned N, score_t d) : glob_onebest_counts_(NgramCounts(N)), discount_(d)
   {
-    glob_hyp_len = glob_ref_len = 0;
+    glob_hyp_len_ = glob_ref_len_ = glob_src_len_ = 0;
   }
 
   inline void Reset() {
-    glob_onebest_counts.Zero();
-    glob_hyp_len = glob_ref_len = 0;
+    glob_onebest_counts_.Zero();
+    glob_hyp_len_ = glob_ref_len_ = glob_src_len_ = 0.;
   }
 
-  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank);
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank, const unsigned src_len);
 };
 
 

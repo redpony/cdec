@@ -15,13 +15,15 @@ struct KSampler : public HypSampler
   vector<ScoredHyp> s_;
   MT19937* prng_;
   score_t (*scorer)(NgramCounts&, const unsigned, const unsigned, unsigned, vector<score_t>);
+  unsigned src_len_;
 
   explicit KSampler(const unsigned k, MT19937* prng) :
     k_(k), prng_(prng) {}
 
   virtual void
-  NotifyTranslationForest(const SentenceMetadata& /*smeta*/, Hypergraph* hg)
+  NotifyTranslationForest(const SentenceMetadata& smeta, Hypergraph* hg)
   {
+    src_len_ = smeta.GetSourceLength();
     ScoredSamples(*hg);
   }
 
@@ -37,7 +39,7 @@ struct KSampler : public HypSampler
       h.f = samples[i].fmap;
       h.model = log(samples[i].model_score);
       h.rank = i;
-      h.score = scorer_->Score(h.w, *ref_, i);
+      h.score = scorer_->Score(h.w, *ref_, i, src_len_);
       s_.push_back(h);
     }
   }
