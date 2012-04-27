@@ -61,8 +61,8 @@ struct NgramCounts
   {
     unsigned i;
     for (i = 0; i < N_; i++) {
-      clipped_[i] = 0;
-      sum_[i] = 0;
+      clipped_[i] = 0.;
+      sum_[i] = 0.;
     }
   }
 
