@@ -58,7 +58,7 @@ struct HypInfo {
     SufficientStats ss;
     scorer.Evaluate(hyp, &ss);
     g = metric->ComputeScore(ss);
-    if (metric->IsErrorMetric()) g = 1 - g;
+    if (!metric->IsErrorMetric()) g = 1 - g;
   }
 
   vector<WordID> hyp;
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
   EvaluationMetric* metric = EvaluationMetric::Instance(evaluation_metric);
   DocumentScorer ds(metric, conf["reference"].as<vector<string> >());
   cerr << "Loaded " << ds.size() << " references for scoring with " << evaluation_metric << endl;
-  double goodsign = 1;
+  double goodsign = -1;
   double badsign = -goodsign;
 
   Hypergraph hg;

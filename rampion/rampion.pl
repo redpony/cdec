@@ -309,6 +309,7 @@ while (1){
 	check_call($cmd);
 	$lastWeightsFile = $outweights;
 	$iteration++;
+	`rm hgs/*.gz`;
 	print STDERR "\n==========\n";
 }
 
