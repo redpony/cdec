@@ -13,7 +13,7 @@
 
 #include "filelib.h"
 
-//#define DTRAIN_LOCAL
+#define DTRAIN_LOCAL
 
 #define DTRAIN_DOTS 10 // after how many inputs to display a '.'
 #define DTRAIN_GRAMMAR_DELIM "########EOS########"
@@ -85,7 +85,8 @@ inline void printWordIDVec(vector<WordID>& v)
 }
 
 template<typename T>
-inline T sign(T z) {
+inline T sign(T z)
+{
   if (z == 0) return 0;
   return z < 0 ? -1 : +1;
 }
