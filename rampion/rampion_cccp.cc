@@ -58,6 +58,7 @@ struct HypInfo {
     SufficientStats ss;
     scorer.Evaluate(hyp, &ss);
     g = metric->ComputeScore(ss);
+    if (metric->IsErrorMetric()) g = 1 - g;
   }
 
   vector<WordID> hyp;
@@ -91,7 +92,6 @@ int main(int argc, char** argv) {
   DocumentScorer ds(metric, conf["reference"].as<vector<string> >());
   cerr << "Loaded " << ds.size() << " references for scoring with " << evaluation_metric << endl;
   double goodsign = 1;
-  if (metric->IsErrorMetric()) goodsign = -goodsign;
   double badsign = -goodsign;
 
   Hypergraph hg;
@@ -121,6 +121,8 @@ int main(int argc, char** argv) {
     vector<HypInfo>& curkbest = kis.back();
     is >> file >> sent_id;
     ReadFile rf(file);
+    if (kis.size() % 5 == 0) { cerr << '.'; }
+    if (kis.size() % 200 == 0) { cerr << " [" << kis.size() << "]\n"; }
     HypergraphIO::ReadFromJSON(rf.stream(), &hg);
     hg.Reweight(weights);
     KBest::KBestDerivations<vector<WordID>, ESentenceTraversal> kbest(hg, kbest_size);
@@ -132,8 +134,8 @@ int main(int argc, char** argv) {
       curkbest.push_back(HypInfo(d->yield, d->feature_values, *ds[sent_id], metric));
     }
   }
+  cerr << "\nHypergraphs loaded.\n";
 
-  cerr << "Hypergraphs loaded.\n";
   vector<SparseVector<weight_t> > goals(kis.size());  // f(x_i,y+,h+)
   SparseVector<weight_t> fear;  // f(x,y-,h-)
   for (unsigned iterp = 1; iterp <= tp; ++iterp) {

@@ -301,10 +301,13 @@ while (1){
 	my $score = 0;
 	my $icc = 0;
 	my $inweights="$dir/weights.$im1";
+	my $outweights="$dir/weights.$iteration";
 	$cmd="$MAPINPUT $dir/hgs > $dir/agenda.$im1";
 	print STDERR "COMMAND:\n$cmd\n";
 	check_call($cmd);
-	die "PLEASE IMPL";
+	$cmd="$MAPPER $refs_comma_sep -m $metric -i $dir/agenda.$im1 -w $inweights > $outweights";
+	check_call($cmd);
+	$lastWeightsFile = $outweights;
 	$iteration++;
 	print STDERR "\n==========\n";
 }
