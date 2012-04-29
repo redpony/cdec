@@ -1,8 +1,10 @@
 #ifndef DICT_H_
 #define DICT_H_
 
+
 #include <cassert>
 #include <cstring>
+
 #include <string>
 #include <vector>
 #include "hash.h"
