@@ -218,7 +218,7 @@ int main(int argc, char** argv) {
   Weights::InitSparseVector(dense_weights, &lambdas);
 
   const double max_step_size = conf["max_step_size"].as<double>();
-  const double mt_metric_scale = 1.0;//conf["mt_metric_scale"].as<double>();
+  const double mt_metric_scale = conf["mt_metric_scale"].as<double>();
 
   assert(corpus.size() > 0);
   vector<GoodBadOracle> oracles(corpus.size());
