@@ -12,9 +12,16 @@ accept_pair(score_t a, score_t b, score_t threshold)
   return true;
 }
 
-inline void
-all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float _unused = 1)
+bool
+cmp_hyp_by_score_d(ScoredHyp a, ScoredHyp b)
 {
+  return a.score > b.score;
+}
+
+inline void
+all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float _unused=1)
+{
+  sort(s->begin(), s->end(), cmp_hyp_by_score_d);
   unsigned sz = s->size();
   for (unsigned i = 0; i < sz-1; i++) {
     for (unsigned j = i+1; j < sz; j++) {
@@ -22,7 +29,8 @@ all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, sc
         if (accept_pair((*s)[i].score, (*s)[j].score, threshold))
           training.push_back(make_pair((*s)[i], (*s)[j]));
       } else {
-        training.push_back(make_pair((*s)[i], (*s)[j]));
+        if ((*s)[i].score != (*s)[j].score)
+          training.push_back(make_pair((*s)[i], (*s)[j]));
       }
     }
   }
@@ -34,15 +42,11 @@ all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, sc
  *  compare top X to middle Y and low X
  *  cmp middle Y to low X
  */
-bool
-_XYX_cmp_hyp_by_score(ScoredHyp a, ScoredHyp b)
-{
-  return a.score > b.score;
-}
+
 inline void
 partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float hi_lo)
 {
-  sort(s->begin(), s->end(), _XYX_cmp_hyp_by_score);
+  sort(s->begin(), s->end(), cmp_hyp_by_score_d);
   unsigned sz = s->size();
   unsigned sep = round(sz*hi_lo);
   for (unsigned i = 0; i < sep; i++) {
@@ -51,7 +55,7 @@ partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, scor
         if (accept_pair((*s)[i].score, (*s)[j].score, threshold))
           training.push_back(make_pair((*s)[i], (*s)[j]));
       } else {
-        if((*s)[i].score != (*s)[j].score)
+        if ((*s)[i].score != (*s)[j].score)
           training.push_back(make_pair((*s)[i], (*s)[j]));
       }
     }
@@ -62,7 +66,7 @@ partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, scor
         if (accept_pair((*s)[i].score, (*s)[j].score, threshold))
           training.push_back(make_pair((*s)[i], (*s)[j]));
       } else {
-        if((*s)[i].score != (*s)[j].score)
+        if ((*s)[i].score != (*s)[j].score)
           training.push_back(make_pair((*s)[i], (*s)[j]));
       }
     }
@@ -77,17 +81,17 @@ partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, scor
  *       cut = top 50
  */
 bool
-_PRO_cmp_pair_by_diff(pair<ScoredHyp,ScoredHyp> a, pair<ScoredHyp,ScoredHyp> b)
+_PRO_cmp_pair_by_diff_d(pair<ScoredHyp,ScoredHyp> a, pair<ScoredHyp,ScoredHyp> b)
 {
   return (fabs(a.first.score - a.second.score)) > (fabs(b.first.score - b.second.score));
 }
 inline void
-PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float _unused = 1)
+PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float _unused=1)
 {
-  unsigned max_count = 5000, count = 0;
+  unsigned max_count = 5000, count = 0, sz = s->size();
   bool b = false;
-  for (unsigned i = 0; i < s->size()-1; i++) {
-    for (unsigned j = i+1; j < s->size(); j++) {
+  for (unsigned i = 0; i < sz-1; i++) {
+    for (unsigned j = i+1; j < sz; j++) {
       if (accept_pair((*s)[i].score, (*s)[j].score, threshold)) {
         training.push_back(make_pair((*s)[i], (*s)[j]));
         if (++count == max_count) {
@@ -99,7 +103,7 @@ PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, 
     if (b) break;
   }
   if (training.size() > 50) {
-    sort(training.begin(), training.end(), _PRO_cmp_pair_by_diff);
+    sort(training.begin(), training.end(), _PRO_cmp_pair_by_diff_d);
     training.erase(training.begin()+50, training.end());
   }
   return;

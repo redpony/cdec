@@ -21,7 +21,7 @@ BleuScorer::Bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref
   vector<score_t> v = w_;
   if (ref_len < N_) {
     M = ref_len;
-    for (unsigned i = 0; i < M; i++) v[i] = 1./((score_t)M);
+    for (unsigned i = 0; i < M; i++) v[i] = 1/((score_t)M);
   }
   score_t sum = 0;
   for (unsigned i = 0; i < M; i++) {
@@ -62,7 +62,7 @@ StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
   vector<score_t> v = w_;
   if (ref_len < N_) {
     M = ref_len;
-    for (unsigned i = 0; i < M; i++) v[i] = 1./((score_t)M);
+    for (unsigned i = 0; i < M; i++) v[i] = 1/((score_t)M);
   }
   score_t sum = 0, add = 0;
   for (unsigned i = 0; i < M; i++) {
