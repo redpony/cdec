@@ -13,7 +13,7 @@ Builds when building cdec, see ../BUILDING .
 To build only parts needed for dtrain do
 ```
   autoreconf -ifv
-  ./configure [--disable-test]
+  ./configure [--disable-gtest]
   cd dtrain/; make
 ```
 
