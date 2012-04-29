@@ -3,7 +3,6 @@
 
 #include <cassert>
 #include <cstring>
-
 #include <string>
 #include <vector>
 #include "hash.h"
@@ -73,7 +72,6 @@ class Dict {
   inline const std::string& Convert(const WordID& id) const {
     if (id == 0) return b0_;
     assert(id <= (int)words_.size());
-    if (id < 0 || id > (int)words_.size()) return b0_;
     return words_[id-1];
   }
 
