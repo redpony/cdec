@@ -3,6 +3,8 @@
 #If your code uses ICU, edit util/string_piece.hh and uncomment #define USE_ICU
 #I use zlib by default.  If you don't want to depend on zlib, remove #define USE_ZLIB from util/file_piece.hh
 
+#don't need to use if compiling with moses Makefiles already
+
 set -e
 
 for i in util/{bit_packing,ersatz_progress,exception,file_piece,murmur_hash,file,mmap} lm/{bhiksha,binary_format,config,lm_exception,model,quantize,read_arpa,search_hashed,search_trie,trie,trie_sort,virtual_interface,vocab}; do

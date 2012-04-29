@@ -66,7 +66,7 @@ my $CCONFIG = {
     'QSubMemFlag' => ' ',
     'JobControl'  => 'fork',
     'DefaultJobs' => 2,
-  }
+  },
 };
 
 our $senvironment_name = 'LOCAL';
