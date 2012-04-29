@@ -30,7 +30,7 @@ struct KSampler : public HypSampler
   vector<ScoredHyp>* GetSamples() { return &s_; }
 
   void ScoredSamples(const Hypergraph& forest) {
-    s_.clear();
+    s_.clear(); sz_ = f_count_ = 0;
     std::vector<HypergraphSampler::Hypothesis> samples;
     HypergraphSampler::sample_hypotheses(forest, k_, prng_, &samples);
     for (unsigned i = 0; i < k_; ++i) {
@@ -41,6 +41,8 @@ struct KSampler : public HypSampler
       h.rank = i;
       h.score = scorer_->Score(h.w, *ref_, i, src_len_);
       s_.push_back(h);
+      sz_++;
+      f_count_ += h.f.size();
     }
   }
 };

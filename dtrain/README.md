@@ -41,13 +41,13 @@ DTRAIN_LOCAL.
 
 Next
 ----
-+ (dtrain|decoder) meta-parameters testing
-+ target side rule ngrams
++ (dtrain|decoder) more meta-parameters testing
++ feature selection directly in dtrain
++ feature template: target side rule ngrams
 + sa-extract -> leave-one-out for grammar of training set?
 + make svm doable; no subgradient?
 + reranking while sgd?
 + try PRO, mira emulations
-+ avg feature count
 
 Legal
 -----
