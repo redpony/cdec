@@ -151,6 +151,8 @@ dpmert/Makefile.in
 dpmert/mr_dpmert_generate_mapper_input
 dpmert/*.o
 decoder/logval_test
+dtrain/dtrain
+dtrain/*.o
 extools/build_lexical_translation
 extools/filter_grammar
 extools/score_grammar

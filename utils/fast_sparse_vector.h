@@ -196,6 +196,14 @@ class FastSparseVector {
     else
       return local_size_;
   }
+  size_t num_nonzero() const {
+    size_t sz = 0;
+    const_iterator it = this->begin();
+    for (; it != this->end(); ++it) {
+      if (nonzero(it->first)) sz++; 
+    }
+    return sz;
+  }
   inline void clear() {
     if (is_remote_) delete data_.rbmap;
     is_remote_ = false;
@@ -219,6 +227,13 @@ class FastSparseVector {
       get_or_create_bin(it->first) += it->second;
     }
     return *this;
+  }
+  template <typename O>
+  inline void plus_eq_v_times_s(const FastSparseVector<O>& other, const O scalar) {
+    const typename FastSparseVector<O>::const_iterator end = other.end();
+    for (typename FastSparseVector<O>::const_iterator it = other.begin(); it != end; ++it) {
+      get_or_create_bin(it->first) += it->second * scalar;
+    }
   }
   inline FastSparseVector& operator-=(const FastSparseVector& other) {
     const typename FastSparseVector::const_iterator end = other.end();

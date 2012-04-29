@@ -7,6 +7,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "grammar.h"
+
 class Hypergraph;
 class SentenceMetadata;
 
@@ -57,6 +59,7 @@ class SCFGTranslator : public Translator {
  public:
   SCFGTranslator(const boost::program_options::variables_map& conf);
   void SetSupplementalGrammar(const std::string& grammar);
+  void SetSentenceGrammarFromString(const std::string& grammar);
   virtual std::string GetDecoderType() const;
  protected:
   bool TranslateImpl(const std::string& src,
