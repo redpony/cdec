@@ -518,7 +518,7 @@ main(int argc, char** argv)
   }
 
   unsigned nonz = 0;
-  if (!quiet || hstreaming) nonz = (unsigned)lambdas.size_nonzero();
+  if (!quiet || hstreaming) nonz = (unsigned)lambdas.num_nonzero();
 
   if (!quiet) {
     cerr << _p5 << _p << "WEIGHTS" << endl;

@@ -52,7 +52,7 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("reference,r",po::value<vector<string> >(), "[REQD] Reference translation(s) (tokenized text file)")
         ("mt_metric,m",po::value<string>()->default_value("ibm_bleu"), "Scoring metric (ibm_bleu, nist_bleu, koehn_bleu, ter, combi)")
         ("max_step_size,C", po::value<double>()->default_value(0.01), "regularization strength (C)")
-        //("mt_metric_scale,s", po::value<double>()->default_value(1.0), "Amount to scale MT loss function by")
+        ("mt_metric_scale,s", po::value<double>()->default_value(1.0), "Amount to scale MT loss function by")
         ("k_best_size,k", po::value<int>()->default_value(250), "Size of hypothesis list to search for oracles")
         ("sample_forest,f", "Instead of a k-best list, sample k hypotheses from the decoder's forest")
         ("sample_forest_unit_weight_vector,x", "Before sampling (must use -f option), rescale the weight vector used so it has unit length; this may improve the quality of the samples")
