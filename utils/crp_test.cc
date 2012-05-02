@@ -2,25 +2,18 @@
 #include <vector>
 #include <string>
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE CrpTest
+#include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 
 #include "ccrp.h"
 #include "sampler.h"
 
-const size_t MAX_DOC_LEN_CHARS = 10000000;
-
 using namespace std;
 
-class CRPTest : public testing::Test {
- public:
-  CRPTest() {}
- protected:
-  virtual void SetUp() { }
-  virtual void TearDown() { }
-  MT19937 rng;
-};
+MT19937 rng;
 
-TEST_F(CRPTest, Dist) {
+BOOST_AUTO_TEST_CASE(Dist) {
   CCRP<string> crp(0.1, 5);
   double un = 0.25;
   int tt = 0;
@@ -41,7 +34,7 @@ TEST_F(CRPTest, Dist) {
   cout << "  P(foo)=" << crp.prob("foo", un) << endl;
   double x = crp.prob("bar", un) + crp.prob("hi", un) + crp.prob("baz", un) + crp.prob("foo", un);
   cout << "    tot=" << x << endl;
-  EXPECT_FLOAT_EQ(1.0, x);
+  BOOST_CHECK_CLOSE(1.0, x, 1e-6);
   tt += crp.decrement("hi", &rng);
   tt += crp.decrement("bar", &rng);
   cout << crp << endl;
@@ -50,7 +43,7 @@ TEST_F(CRPTest, Dist) {
   cout << "tt=" << tt << endl;
 }
 
-TEST_F(CRPTest, Exchangability) {
+BOOST_AUTO_TEST_CASE(Exchangability) {
     double tot = 0;
     double xt = 0;
     CCRP<int> crp(0.5, 1.0);
@@ -79,24 +72,20 @@ TEST_F(CRPTest, Exchangability) {
       ++hist[c];
       tot += c;
     }
-    EXPECT_EQ(cust, crp.num_customers());
+    BOOST_CHECK_EQUAL(cust, crp.num_customers());
     cerr << "P(a) = " << (xt / samples) << endl;
     cerr << "E[num tables] = " << (tot / samples) << endl;
     double error = fabs((tot / samples) - 5.4);
     cerr << "  error = " << error << endl;
-    EXPECT_LT(error, 0.1);  // it's possible for this to fail, but
+    BOOST_CHECK_MESSAGE(error < 0.1, "error is too big = " << error);  // it's possible for this to fail, but
                             // very, very unlikely
     for (int i = 1; i <= cust; ++i)
       cerr << i << ' ' << (hist[i]) << endl;
 }
 
-TEST_F(CRPTest, LP) {
+BOOST_AUTO_TEST_CASE(LP) {
   CCRP<string> crp(1,1,1,1,0.1,50.0);
   crp.increment("foo", 1.0, &rng);
   cerr << crp.log_crp_prob() << endl;
 }
 
-int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

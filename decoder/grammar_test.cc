@@ -1,8 +1,11 @@
+#define BOOST_TEST_MODULE g_test
+#include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+
 #include <cassert>
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <gtest/gtest.h>
 #include "trule.h"
 #include "tdict.h"
 #include "grammar.h"
@@ -12,18 +15,16 @@
 
 using namespace std;
 
-class GrammarTest : public testing::Test {
- public:
+struct GrammarTest {
   GrammarTest() {
     Weights::InitFromFile("test_data/weights.gt", &wts);
   }
- protected:
-  virtual void SetUp() { }
-  virtual void TearDown() { }
   vector<weight_t> wts;
 };
-       
-TEST_F(GrammarTest,TestTextGrammar) {
+
+BOOST_FIXTURE_TEST_SUITE( s, GrammarTest );
+
+BOOST_AUTO_TEST_CASE(TestTextGrammar) {
   vector<double> w;
   vector<const FeatureFunction*> ms;
   ModelSet models(w, ms);
@@ -38,7 +39,7 @@ TEST_F(GrammarTest,TestTextGrammar) {
   g.AddRule(r3);
 }
 
-TEST_F(GrammarTest,TestTextGrammarFile) {
+BOOST_AUTO_TEST_CASE(TestTextGrammarFile) {
   GrammarPtr g(new TextGrammar("./test_data/grammar.prune"));
   vector<GrammarPtr> grammars(1, g);
 
@@ -52,8 +53,5 @@ TEST_F(GrammarTest,TestTextGrammarFile) {
   parser.Parse(lattice, &forest);
   forest.PrintGraphviz();
 }
+BOOST_AUTO_TEST_SUITE_END()
 
-int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

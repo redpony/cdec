@@ -3,45 +3,34 @@
 #include "fdict.h"
 
 #include <iostream>
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE CrpTest
+#include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 #include <cassert>
 
 using namespace std;
 
-class DTest : public testing::Test {
- public:
-  DTest() {}
- protected:
-  virtual void SetUp() { }
-  virtual void TearDown() { }
-};
-
-TEST_F(DTest, Convert) {
+BOOST_AUTO_TEST_CASE(Convert) {
   Dict d;
   WordID a = d.Convert("foo");
   WordID b = d.Convert("bar");
   std::string x = "foo";
   WordID c = d.Convert(x);
-  EXPECT_NE(a, b);
-  EXPECT_EQ(a, c);
-  EXPECT_EQ(d.Convert(a), "foo");
-  EXPECT_EQ(d.Convert(b), "bar");
+  assert(a != b);
+  BOOST_CHECK_EQUAL(a, c);
+  BOOST_CHECK_EQUAL(d.Convert(a), "foo");
+  BOOST_CHECK_EQUAL(d.Convert(b), "bar");
 }
 
-TEST_F(DTest, FDictTest) {
+BOOST_AUTO_TEST_CASE(FDictTest) {
   int fid = FD::Convert("First");
-  EXPECT_GT(fid, 0);
-  EXPECT_EQ(FD::Convert(fid), "First");
+  assert(fid > 0);
+  BOOST_CHECK_EQUAL(FD::Convert(fid), "First");
   string x = FD::Escape("=");
   cerr << x << endl;
-  EXPECT_NE(x, "=");
+  assert(x != "=");
   x = FD::Escape(";");
   cerr << x << endl;
-  EXPECT_NE(x, ";");
-}
-
-int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  assert(x != ";");
 }
 

@@ -1,26 +1,12 @@
-#include <cassert>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE WeightsTest
+#include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 #include "weights.h"
-#include "tdict.h"
 
 using namespace std;
 
-class WeightsTest : public testing::Test {
- protected:
-  virtual void SetUp() { }
-  virtual void TearDown() { }
-};
-       
-TEST_F(WeightsTest,Load) {
+BOOST_AUTO_TEST_CASE(Load) {
   vector<weight_t> v;
   Weights::InitFromFile("test_data/weights", &v);
   Weights::WriteToFile("-", v);
-}
-
-int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }
