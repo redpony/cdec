@@ -5,10 +5,7 @@
 #include "hg.h"
 #include "hg_io.h"
 #include <sstream>
-#include <gtest/gtest.h>
 
-using namespace std;
-using namespace testing;
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 namespace {
@@ -25,7 +22,7 @@ Name perro_wts="SameFirstLetter 1 LongerThanPrev 1 ShorterThanPrev 1 GlueTop 0.0
 }
 
 // you can inherit from this or just use the static methods
-struct HGSetup : public Test {
+struct HGSetup {
   enum {
     HG,
     HG_int,
@@ -43,11 +40,11 @@ struct HGSetup : public Test {
 
   static void Json(Hypergraph *hg,std::string const& json) {
     std::istringstream i(json);
-    ASSERT_TRUE(HypergraphIO::ReadFromJSON(&i, hg));
+    HypergraphIO::ReadFromJSON(&i, hg);
   }
   static void JsonFile(Hypergraph *hg,std::string f) {
     ReadFile rf(f);
-    ASSERT_TRUE(HypergraphIO::ReadFromJSON(rf.stream(), hg)) << "read from HG file "<<f;
+    HypergraphIO::ReadFromJSON(rf.stream(), hg);
   }
   static void JsonTestFile(Hypergraph *hg,std::string n) {
     JsonFile(hg,"test_data/"+n);

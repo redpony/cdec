@@ -4,6 +4,7 @@
 #include <fstream>
 #include <map>
 #include <queue>
+#include <tr1/unordered_map>
 #include <tr1/unordered_set>
 
 #include <boost/shared_ptr.hpp>
