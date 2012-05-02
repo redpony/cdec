@@ -424,12 +424,18 @@ main(int argc, char** argv)
 
       for (vector<pair<ScoredHyp,ScoredHyp> >::iterator it = pairs.begin();
            it != pairs.end(); it++) {
+#ifdef DTRAIN_FASTER_PERCEPTRON
+        bool rank_error = true; // pair filtering already did this for us
+        rank_errors++;
+        score_t margin = 2.; // compiler, could you get rid of the margin?
+#else
         bool rank_error = it->first.model <= it->second.model;
         if (rank_error) rank_errors++;
         score_t margin = fabs(it->first.model - it->second.model);
-        if (!rank_error && margin < 1) margin_violations++;
+        if (!rank_error && margin < 1.) margin_violations++;
+#endif
         if (scale_bleu_diff) eta = it->first.score - it->second.score;
-        if (rank_error || (gamma && margin<1)) {
+        if (rank_error || (gamma && margin<1.)) {
           SparseVector<weight_t> diff_vec = it->first.f - it->second.f;
           lambdas.plus_eq_v_times_s(diff_vec, eta);
           if (gamma)
@@ -534,8 +540,10 @@ main(int argc, char** argv)
     cerr << _np << npairs/(float)in_sz << endl;
     cerr << "        avg # rank err: ";
     cerr << rank_errors/(float)in_sz << endl;
+#ifndef DTRAIN_FASTER_PERCEPTRON
     cerr << "     avg # margin viol: ";
     cerr << margin_violations/(float)in_sz << endl;
+#endif
     cerr << "    non0 feature count: " <<  nonz << endl;
     cerr << "           avg list sz: " << list_sz/(float)in_sz << endl;
     cerr << "           avg f count: " << f_count/(float)list_sz << endl;

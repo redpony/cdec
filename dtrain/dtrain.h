@@ -32,7 +32,7 @@ inline void register_and_convert(const vector<string>& strs, vector<WordID>& ids
 
 inline string gettmpf(const string path, const string infix)
 {
-  char fn[1024];
+  char fn[path.size() + infix.size() + 8];
   strcpy(fn, path.c_str());
   strcat(fn, "/");
   strcat(fn, infix.c_str());
