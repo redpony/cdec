@@ -5,17 +5,15 @@ bin_PROGRAMS = \
   sentserver \
   sentclient
 
-if HAVE_GTEST
 noinst_PROGRAMS = \
   lo_test
 TESTS = lo_test
-endif
 
 sentserver_SOURCES = sentserver.c
-sentserver_LDFLAGS = -all-static -pthread
+sentserver_LDFLAGS = -pthread
 
 sentclient_SOURCES = sentclient.c
-sentclient_LDFLAGS = -all-static -pthread
+sentclient_LDFLAGS = -pthread
 
 mr_dpmert_generate_mapper_input_SOURCES = mr_dpmert_generate_mapper_input.cc line_optimizer.cc
 mr_dpmert_generate_mapper_input_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
@@ -30,6 +28,6 @@ mr_dpmert_reduce_SOURCES = error_surface.cc ces.cc mr_dpmert_reduce.cc line_opti
 mr_dpmert_reduce_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
 
 lo_test_SOURCES = lo_test.cc ces.cc mert_geometry.cc error_surface.cc line_optimizer.cc
-lo_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
+lo_test_LDADD = $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I$(top_srcdir)/utils -I$(top_srcdir)/decoder -I$(top_srcdir)/mteval
+AM_CPPFLAGS = -DBOOST_TEST_DYN_LINK -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I$(top_srcdir)/utils -I$(top_srcdir)/decoder -I$(top_srcdir)/mteval
