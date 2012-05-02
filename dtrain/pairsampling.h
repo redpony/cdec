@@ -1,6 +1,9 @@
 #ifndef _DTRAIN_PAIRSAMPLING_H_
 #define _DTRAIN_PAIRSAMPLING_H_
 
+#define DTRAIN_FASTER_PERCEPTRON // only look at misranked pairs
+                                 // DO NOT USE WITH SVM!
+
 namespace dtrain
 {
 
@@ -51,6 +54,9 @@ partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, scor
   unsigned sep = round(sz*hi_lo);
   for (unsigned i = 0; i < sep; i++) {
     for (unsigned j = sep; j < sz; j++) {
+#ifdef DTRAIN_FASTER_PERCEPTRON
+      if ((*s)[i].model <= (*s)[j].model) {
+#endif
       if (threshold > 0) {
         if (accept_pair((*s)[i].score, (*s)[j].score, threshold))
           training.push_back(make_pair((*s)[i], (*s)[j]));
@@ -58,10 +64,16 @@ partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, scor
         if ((*s)[i].score != (*s)[j].score)
           training.push_back(make_pair((*s)[i], (*s)[j]));
       }
+#ifdef DTRAIN_FASTER_PERCEPTRON
+      }
+#endif
     }
   }
   for (unsigned i = sep; i < sz-sep; i++) {
     for (unsigned j = sz-sep; j < sz; j++) {
+#ifdef DTRAIN_FASTER_PERCEPTRON
+      if ((*s)[i].model <= (*s)[j].model) {
+#endif
       if (threshold > 0) {
         if (accept_pair((*s)[i].score, (*s)[j].score, threshold))
           training.push_back(make_pair((*s)[i], (*s)[j]));
@@ -69,6 +81,9 @@ partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, scor
         if ((*s)[i].score != (*s)[j].score)
           training.push_back(make_pair((*s)[i], (*s)[j]));
       }
+#ifdef DTRAIN_FASTER_PERCEPTRON
+      }
+#endif
     }
   }
 }
