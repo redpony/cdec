@@ -12,6 +12,7 @@ AC_PROG_CXX
 AC_LANG_CPLUSPLUS
 BOOST_REQUIRE([1.44])
 BOOST_PROGRAM_OPTIONS
+BOOST_TEST
 AC_ARG_ENABLE(mpi,
  [ --enable-mpi  Build MPI binaries, assumes mpi.h is present ],
  [ mpi=yes
@@ -77,7 +78,6 @@ AC_CHECK_HEADER(google/dense_hash_map,
                [AC_DEFINE([HAVE_SPARSEHASH], [1], [flag for google::dense_hash_map])])
 
 AC_PROG_INSTALL
-GTEST_LIB_CHECK(1.0)
 
 AM_CONDITIONAL([RAND_LM], false)
 AC_ARG_WITH(randlm,

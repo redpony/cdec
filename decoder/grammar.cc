@@ -4,6 +4,7 @@
 #include <utility>
 #include <map>
 #include <tr1/unordered_map>
+#include <tr1/unordered_set>
 
 #include "rule_lexer.h"
 #include "filelib.h"

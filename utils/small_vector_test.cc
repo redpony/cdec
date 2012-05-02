@@ -1,129 +1,118 @@
 #include "small_vector.h"
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE svTest
+#include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 #include <iostream>
-#include <cassert>
 #include <vector>
 
 using namespace std;
 
-class SVTest : public testing::Test {
- protected:
-  virtual void SetUp() { }
-  virtual void TearDown() { }
-};
-
-TEST_F(SVTest, LargerThan2) {
+BOOST_AUTO_TEST_CASE(LargerThan2) {
   SmallVectorInt v;
   SmallVectorInt v2;
   v.push_back(0);
   v.push_back(1);
   v.push_back(2);
-  assert(v.size() == 3);
-  assert(v[2] == 2);
-  assert(v[1] == 1);
-  assert(v[0] == 0);
+  BOOST_CHECK(v.size() == 3);
+  BOOST_CHECK(v[2] == 2);
+  BOOST_CHECK(v[1] == 1);
+  BOOST_CHECK(v[0] == 0);
   v2 = v;
   SmallVectorInt copy(v);
-  assert(copy.size() == 3);
-  assert(copy[0] == 0);
-  assert(copy[1] == 1);
-  assert(copy[2] == 2);
-  assert(copy == v2);
+  BOOST_CHECK(copy.size() == 3);
+  BOOST_CHECK(copy[0] == 0);
+  BOOST_CHECK(copy[1] == 1);
+  BOOST_CHECK(copy[2] == 2);
+  BOOST_CHECK(copy == v2);
   copy[1] = 99;
-  assert(copy != v2);
-  assert(v2.size() == 3);
-  assert(v2[2] == 2);
-  assert(v2[1] == 1);
-  assert(v2[0] == 0);
+  BOOST_CHECK(copy != v2);
+  BOOST_CHECK(v2.size() == 3);
+  BOOST_CHECK(v2[2] == 2);
+  BOOST_CHECK(v2[1] == 1);
+  BOOST_CHECK(v2[0] == 0);
   v2[0] = -2;
   v2[1] = -1;
   v2[2] = 0;
-  assert(v2[2] == 0);
-  assert(v2[1] == -1);
-  assert(v2[0] == -2);
+  BOOST_CHECK(v2[2] == 0);
+  BOOST_CHECK(v2[1] == -1);
+  BOOST_CHECK(v2[0] == -2);
   SmallVectorInt v3(1,1);
-  assert(v3[0] == 1);
+  BOOST_CHECK(v3[0] == 1);
   v2 = v3;
-  assert(v2.size() == 1);
-  assert(v2[0] == 1);
+  BOOST_CHECK(v2.size() == 1);
+  BOOST_CHECK(v2[0] == 1);
   SmallVectorInt v4(10, 1);
-  assert(v4.size() == 10);
-  assert(v4[5] == 1);
-  assert(v4[9] == 1);
+  BOOST_CHECK(v4.size() == 10);
+  BOOST_CHECK(v4[5] == 1);
+  BOOST_CHECK(v4[9] == 1);
   v4 = v;
-  assert(v4.size() == 3);
-  assert(v4[2] == 2);
-  assert(v4[1] == 1);
-  assert(v4[0] == 0);
+  BOOST_CHECK(v4.size() == 3);
+  BOOST_CHECK(v4[2] == 2);
+  BOOST_CHECK(v4[1] == 1);
+  BOOST_CHECK(v4[0] == 0);
   SmallVectorInt v5(10, 2);
-  assert(v5.size() == 10);
-  assert(v5[7] == 2);
-  assert(v5[0] == 2);
-  assert(v.size() == 3);
+  BOOST_CHECK(v5.size() == 10);
+  BOOST_CHECK(v5[7] == 2);
+  BOOST_CHECK(v5[0] == 2);
+  BOOST_CHECK(v.size() == 3);
   v = v5;
-  assert(v.size() == 10);
-  assert(v[2] == 2);
-  assert(v[9] == 2);
+  BOOST_CHECK(v.size() == 10);
+  BOOST_CHECK(v[2] == 2);
+  BOOST_CHECK(v[9] == 2);
   SmallVectorInt cc;
   for (int i = 0; i < 33; ++i)
     cc.push_back(i);
   for (int i = 0; i < 33; ++i)
-    assert(cc[i] == i);
+    BOOST_CHECK(cc[i] == i);
   cc.resize(20);
-  assert(cc.size() == 20);
+  BOOST_CHECK(cc.size() == 20);
   for (int i = 0; i < 20; ++i)
-    assert(cc[i] == i);
+    BOOST_CHECK(cc[i] == i);
   cc[0]=-1;
   cc.resize(1, 999);
-  assert(cc.size() == 1);
-  assert(cc[0] == -1);
+  BOOST_CHECK(cc.size() == 1);
+  BOOST_CHECK(cc[0] == -1);
   cc.resize(99, 99);
   for (int i = 1; i < 99; ++i) {
     cerr << i << " " << cc[i] << endl;
-    assert(cc[i] == 99);
+    BOOST_CHECK(cc[i] == 99);
   }
   cc.clear();
-  assert(cc.size() == 0);
+  BOOST_CHECK(cc.size() == 0);
 }
 
-TEST_F(SVTest, Small) {
+BOOST_AUTO_TEST_CASE(Small) {
   SmallVectorInt v;
   SmallVectorInt v1(1,0);
   SmallVectorInt v2(2,10);
   SmallVectorInt v1a(2,0);
-  EXPECT_TRUE(v1 != v1a);
-  EXPECT_TRUE(v1 == v1);
-  EXPECT_EQ(v1[0], 0);
-  EXPECT_EQ(v2[1], 10);
-  EXPECT_EQ(v2[0], 10);
+  BOOST_CHECK(v1 != v1a);
+  BOOST_CHECK(v1 == v1);
+  BOOST_CHECK_EQUAL(v1[0], 0);
+  BOOST_CHECK_EQUAL(v2[1], 10);
+  BOOST_CHECK_EQUAL(v2[0], 10);
   ++v2[1];
   --v2[0];
-  EXPECT_EQ(v2[0], 9);
-  EXPECT_EQ(v2[1], 11);
+  BOOST_CHECK_EQUAL(v2[0], 9);
+  BOOST_CHECK_EQUAL(v2[1], 11);
   SmallVectorInt v3(v2);
-  assert(v3[0] == 9);
-  assert(v3[1] == 11);
-  assert(!v3.empty());
-  assert(v3.size() == 2);
+  BOOST_CHECK(v3[0] == 9);
+  BOOST_CHECK(v3[1] == 11);
+  BOOST_CHECK(!v3.empty());
+  BOOST_CHECK(v3.size() == 2);
   v3.clear();
-  assert(v3.empty());
-  assert(v3.size() == 0);
-  assert(v3 != v2);
-  assert(v2 != v3);
+  BOOST_CHECK(v3.empty());
+  BOOST_CHECK(v3.size() == 0);
+  BOOST_CHECK(v3 != v2);
+  BOOST_CHECK(v2 != v3);
   v3 = v2;
-  assert(v3 == v2);
-  assert(v2 == v3);
-  assert(v3[0] == 9);
-  assert(v3[1] == 11);
-  assert(!v3.empty());
-  assert(v3.size() == 2);
+  BOOST_CHECK(v3 == v2);
+  BOOST_CHECK(v2 == v3);
+  BOOST_CHECK(v3[0] == 9);
+  BOOST_CHECK(v3[1] == 11);
+  BOOST_CHECK(!v3.empty());
+  BOOST_CHECK(v3.size() == 2);
   cerr << sizeof(SmallVectorInt) << endl;
   cerr << sizeof(vector<int>) << endl;
 }
-
-int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
-

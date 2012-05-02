@@ -1,6 +1,7 @@
+#define BOOST_TEST_MODULE hg_test
+#include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 #include <iostream>
-#include <fstream>
-#include <vector>
 #include "tdict.h"
 
 #include "json_parse.h"
@@ -11,12 +12,11 @@
 
 #include "hg_test.h"
 
-
 using namespace std;
 
-typedef HGSetup HGTest;
+BOOST_FIXTURE_TEST_SUITE( s, HGSetup );
 
-TEST_F(HGTest,Controlled) {
+BOOST_AUTO_TEST_CASE(Controlled) {
   Hypergraph hg;
   CreateHG_tiny(&hg);
   SparseVector<double> wts;
@@ -27,15 +27,15 @@ TEST_F(HGTest,Controlled) {
   prob_t prob = ViterbiESentence(hg, &trans);
   cerr << TD::GetString(trans) << "\n";
   cerr << "prob: " << prob << "\n";
-  EXPECT_FLOAT_EQ(-80.839996, log(prob));
-  EXPECT_EQ("X <s>", TD::GetString(trans));
+  BOOST_CHECK_CLOSE(-80.839996, log(prob), 1e-4);
+  BOOST_CHECK_EQUAL("X <s>", TD::GetString(trans));
   vector<prob_t> post;
   hg.PrintGraphviz();
   prob_t c2 = Inside<prob_t, ScaledEdgeProb>(hg, NULL, ScaledEdgeProb(0.6));
-  EXPECT_FLOAT_EQ(-47.8577, log(c2));
+  BOOST_CHECK_CLOSE(-47.8577, log(c2), 1e-4);
 }
 
-TEST_F(HGTest,Union) {
+BOOST_AUTO_TEST_CASE(Union) {
   Hypergraph hg1;
   Hypergraph hg2;
   CreateHG_tiny(&hg1);
@@ -57,16 +57,16 @@ TEST_F(HGTest,Union) {
   c3 = ViterbiESentence(hg1, &t3);
   int l3 = ViterbiPathLength(hg1);
   cerr << c3 << "\t" << TD::GetString(t3) << endl;
-  EXPECT_FLOAT_EQ(c2.as_float(), c3.as_float());
-  EXPECT_EQ(TD::GetString(t2), TD::GetString(t3));
-  EXPECT_EQ(l2, l3);
+  BOOST_CHECK_CLOSE(c2.as_float(), c3.as_float(), 1e-4);
+  BOOST_CHECK_EQUAL(TD::GetString(t2), TD::GetString(t3));
+  BOOST_CHECK_EQUAL(l2, l3);
 
   wts.set_value(FD::Convert("f2"), -1);
   hg1.Reweight(wts);
   c4 = ViterbiESentence(hg1, &t4);
   cerr << c4 << "\t" << TD::GetString(t4) << endl;
-  EXPECT_EQ("Z <s>", TD::GetString(t4));
-  EXPECT_FLOAT_EQ(98.82, log(c4));
+  BOOST_CHECK_EQUAL("Z <s>", TD::GetString(t4));
+  BOOST_CHECK_CLOSE(98.82, log(c4), 1e-4);
 
   vector<pair<vector<WordID>, prob_t> > list;
   KBest::KBestDerivations<vector<WordID>, ESentenceTraversal> kbest(hg1, 10);
@@ -76,13 +76,13 @@ TEST_F(HGTest,Union) {
     if (!d) break;
     list.push_back(make_pair(d->yield, d->score));
   }
-  EXPECT_TRUE(list[0].first == t4);
-  EXPECT_FLOAT_EQ(log(list[0].second), log(c4));
-  EXPECT_EQ(list.size(), 6);
-  EXPECT_FLOAT_EQ(log(list.back().second / list.front().second), -97.7);
+  BOOST_CHECK(list[0].first == t4);
+  BOOST_CHECK_CLOSE(log(list[0].second), log(c4), 1e-4);
+  BOOST_CHECK_EQUAL(list.size(), 6);
+  BOOST_CHECK_CLOSE(log(list.back().second / list.front().second), -97.7, 1e-4);
 }
 
-TEST_F(HGTest,ControlledKBest) {
+BOOST_AUTO_TEST_CASE(ControlledKBest) {
   Hypergraph hg;
   CreateHG(&hg);
   vector<double> w(2); w[0]=0.4; w[1]=0.8;
@@ -101,11 +101,11 @@ TEST_F(HGTest,ControlledKBest) {
     cerr << TD::GetString(d->yield) << endl;
     ++best;
   }
-  EXPECT_EQ(4, best);
+  BOOST_CHECK_EQUAL(4, best);
 }
 
 
-TEST_F(HGTest,InsideScore) {
+BOOST_AUTO_TEST_CASE(InsideScore) {
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 1.0);
   Hypergraph hg;
@@ -117,18 +117,18 @@ TEST_F(HGTest,InsideScore) {
   cerr << "cost: " << cost << "\n";
   hg.PrintGraphviz();
   prob_t inside = Inside<prob_t, EdgeProb>(hg);
-  EXPECT_FLOAT_EQ(1.7934048, inside.as_float());  // computed by hand
+  BOOST_CHECK_CLOSE(1.7934048, inside.as_float(), 1e-4);  // computed by hand
   vector<prob_t> post;
   inside = hg.ComputeBestPathThroughEdges(&post);
-  EXPECT_FLOAT_EQ(-0.3, log(inside));  // computed by hand
-  EXPECT_EQ(post.size(), 4);
+  BOOST_CHECK_CLOSE(-0.3, log(inside), 1e-4);  // computed by hand
+  BOOST_CHECK_EQUAL(post.size(), 4);
   for (int i = 0; i < 4; ++i) {
     cerr << "edge post: " << log(post[i]) << '\t' << hg.edges_[i].rule_->AsString() << endl;
   }
 }
 
 
-TEST_F(HGTest,PruneInsideOutside) {
+BOOST_AUTO_TEST_CASE(PruneInsideOutside) {
   SparseVector<double> wts;
   wts.set_value(FD::Convert("Feature_1"), 1.0);
   Hypergraph hg;
@@ -147,7 +147,7 @@ TEST_F(HGTest,PruneInsideOutside) {
   hg.PrintGraphviz();
 }
 
-TEST_F(HGTest,TestPruneEdges) {
+BOOST_AUTO_TEST_CASE(TestPruneEdges) {
   Hypergraph hg;
   CreateLatticeHG(&hg);
   SparseVector<double> wts;
@@ -161,7 +161,7 @@ TEST_F(HGTest,TestPruneEdges) {
   hg.PrintGraphviz();
 }
 
-TEST_F(HGTest,TestIntersect) {
+BOOST_AUTO_TEST_CASE(TestIntersect) {
   Hypergraph hg;
   CreateHG_int(&hg);
   SparseVector<double> wts;
@@ -178,7 +178,7 @@ TEST_F(HGTest,TestIntersect) {
     cerr << TD::GetString(d->yield) << endl;
     ++best;
   }
-  EXPECT_EQ(4, best);
+  BOOST_CHECK_EQUAL(4, best);
 
   Lattice target(2);
   target[0].push_back(LatticeArc(TD::Convert("a"), 0.0, 1));
@@ -187,7 +187,7 @@ TEST_F(HGTest,TestIntersect) {
   hg.PrintGraphviz();
 }
 
-TEST_F(HGTest,TestPrune2) {
+BOOST_AUTO_TEST_CASE(TestPrune2) {
   Hypergraph hg;
   CreateHG_int(&hg);
   SparseVector<double> wts;
@@ -202,7 +202,7 @@ TEST_F(HGTest,TestPrune2) {
   cerr << "TODO: fix this pruning behavior-- the resulting HG should be empty!\n";
 }
 
-TEST_F(HGTest,Sample) {
+BOOST_AUTO_TEST_CASE(Sample) {
   Hypergraph hg;
   CreateLatticeHG(&hg);
   SparseVector<double> wts;
@@ -215,7 +215,7 @@ TEST_F(HGTest,Sample) {
   hg.PrintGraphviz();
 }
 
-TEST_F(HGTest,PLF) {
+BOOST_AUTO_TEST_CASE(PLF) {
   Hypergraph hg;
   string inplf = "((('haupt',-2.06655,1),('hauptgrund',-5.71033,2),),(('grund',-1.78709,1),),(('für\\'',0.1,1),),)";
   HypergraphIO::ReadFromPLF(inplf, &hg);
@@ -226,10 +226,10 @@ TEST_F(HGTest,PLF) {
   string outplf = HypergraphIO::AsPLF(hg);
   cerr << " IN: " << inplf << endl;
   cerr << "OUT: " << outplf << endl;
-  EXPECT_EQ(inplf,outplf);
+  BOOST_CHECK_EQUAL(inplf,outplf);
 }
 
-TEST_F(HGTest,PushWeightsToGoal) {
+BOOST_AUTO_TEST_CASE(PushWeightsToGoal) {
   Hypergraph hg;
   CreateHG(&hg);
   vector<double> w(2); w[0]=0.4; w[1]=0.8;
@@ -243,7 +243,7 @@ TEST_F(HGTest,PushWeightsToGoal) {
   hg.PrintGraphviz();
 }
 
-TEST_F(HGTest,TestSpecialKBest) {
+BOOST_AUTO_TEST_CASE(TestSpecialKBest) {
   Hypergraph hg;
   CreateHGBalanced(&hg);
   vector<double> w(1); w[0]=0;
@@ -259,7 +259,7 @@ TEST_F(HGTest,TestSpecialKBest) {
   hg.PrintGraphviz();
 }
 
-TEST_F(HGTest, TestGenericViterbi) {
+BOOST_AUTO_TEST_CASE(TestGenericViterbi) {
   Hypergraph hg;
   CreateHG_tiny(&hg);
   SparseVector<double> wts;
@@ -270,11 +270,11 @@ TEST_F(HGTest, TestGenericViterbi) {
   const prob_t prob = ViterbiESentence(hg, &trans);
   cerr << TD::GetString(trans) << "\n";
   cerr << "prob: " << prob << "\n";
-  EXPECT_FLOAT_EQ(-80.839996, log(prob));
-  EXPECT_EQ("X <s>", TD::GetString(trans));
+  BOOST_CHECK_CLOSE(-80.839996, log(prob), 1e-4);
+  BOOST_CHECK_EQUAL("X <s>", TD::GetString(trans));
 }
 
-TEST_F(HGTest, TestGenericInside) {
+BOOST_AUTO_TEST_CASE(TestGenericInside) {
   Hypergraph hg;
   CreateTinyLatticeHG(&hg);
   SparseVector<double> wts;
@@ -282,16 +282,16 @@ TEST_F(HGTest, TestGenericInside) {
   hg.Reweight(wts);
   vector<prob_t> inside;
   prob_t ins = Inside<prob_t, EdgeProb>(hg, &inside);
-  EXPECT_FLOAT_EQ(1.7934048, ins.as_float());  // computed by hand
+  BOOST_CHECK_CLOSE(1.7934048, ins.as_float(), 1e-4);  // computed by hand
   vector<prob_t> outside;
   Outside<prob_t, EdgeProb>(hg, inside, &outside);
-  EXPECT_EQ(3, outside.size());
-  EXPECT_FLOAT_EQ(1.7934048, outside[0].as_float());
-  EXPECT_FLOAT_EQ(1.3114071, outside[1].as_float());
-  EXPECT_FLOAT_EQ(1.0, outside[2].as_float());
+  BOOST_CHECK_EQUAL(3, outside.size());
+  BOOST_CHECK_CLOSE(1.7934048, outside[0].as_float(), 1e-4);
+  BOOST_CHECK_CLOSE(1.3114071, outside[1].as_float(), 1e-4);
+  BOOST_CHECK_CLOSE(1.0, outside[2].as_float(), 1e-4);
 }
 
-TEST_F(HGTest,TestGenericInside2) {
+BOOST_AUTO_TEST_CASE(TestGenericInside2) {
   Hypergraph hg;
   CreateHG(&hg);
   SparseVector<double> wts;
@@ -303,21 +303,21 @@ TEST_F(HGTest,TestGenericInside2) {
   Outside<prob_t, EdgeProb>(hg, inside, &outside);
   for (int i = 0; i < hg.nodes_.size(); ++i)
     cerr << i << "\t" << log(inside[i]) << "\t" << log(outside[i]) << endl;
-  EXPECT_FLOAT_EQ(0, log(inside[0]));
-  EXPECT_FLOAT_EQ(-1.7861683, log(outside[0]));
-  EXPECT_FLOAT_EQ(-0.4, log(inside[1]));
-  EXPECT_FLOAT_EQ(-1.3861683, log(outside[1]));
-  EXPECT_FLOAT_EQ(-0.8, log(inside[2]));
-  EXPECT_FLOAT_EQ(-0.986168, log(outside[2]));
-  EXPECT_FLOAT_EQ(-0.96, log(inside[3]));
-  EXPECT_FLOAT_EQ(-0.8261683, log(outside[3]));
-  EXPECT_FLOAT_EQ(-1.562512, log(inside[4]));
-  EXPECT_FLOAT_EQ(-0.22365622, log(outside[4]));
-  EXPECT_FLOAT_EQ(-1.7861683, log(inside[5]));
-  EXPECT_FLOAT_EQ(0, log(outside[5]));
+  BOOST_CHECK_CLOSE(0, log(inside[0]), 1e-4);
+  BOOST_CHECK_CLOSE(-1.7861683, log(outside[0]), 1e-4);
+  BOOST_CHECK_CLOSE(-0.4, log(inside[1]), 1e-4);
+  BOOST_CHECK_CLOSE(-1.3861683, log(outside[1]), 1e-4);
+  BOOST_CHECK_CLOSE(-0.8, log(inside[2]), 1e-4);
+  BOOST_CHECK_CLOSE(-0.986168, log(outside[2]), 1e-4);
+  BOOST_CHECK_CLOSE(-0.96, log(inside[3]), 1e-4);
+  BOOST_CHECK_CLOSE(-0.8261683, log(outside[3]), 1e-4);
+  BOOST_CHECK_CLOSE(-1.562512, log(inside[4]), 1e-4);
+  BOOST_CHECK_CLOSE(-0.22365622, log(outside[4]), 1e-4);
+  BOOST_CHECK_CLOSE(-1.7861683, log(inside[5]), 1e-4);
+  BOOST_CHECK_CLOSE(0, log(outside[5]), 1e-4);
 }
 
-TEST_F(HGTest,TestAddExpectations) {
+BOOST_AUTO_TEST_CASE(TestAddExpectations) {
   Hypergraph hg;
   CreateHG(&hg);
   SparseVector<double> wts;
@@ -327,13 +327,13 @@ TEST_F(HGTest,TestAddExpectations) {
   SparseVector<prob_t> feat_exps;
   prob_t z = InsideOutside<prob_t, EdgeProb,
                   SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>(hg, &feat_exps);
-  EXPECT_FLOAT_EQ(-2.5439765, (feat_exps.value(FD::Convert("f1")) / z).as_float());
-  EXPECT_FLOAT_EQ(-2.6357865, (feat_exps.value(FD::Convert("f2")) / z).as_float());
+  BOOST_CHECK_CLOSE(-2.5439765, (feat_exps.value(FD::Convert("f1")) / z).as_float(), 1e-4);
+  BOOST_CHECK_CLOSE(-2.6357865, (feat_exps.value(FD::Convert("f2")) / z).as_float(), 1e-4);
   cerr << feat_exps << endl;
   cerr << "Z=" << z << endl;
 }
 
-TEST_F(HGTest, Small) {
+BOOST_AUTO_TEST_CASE(Small) {
   Hypergraph hg;
   CreateSmallHG(&hg);
   SparseVector<double> wts;
@@ -352,19 +352,19 @@ TEST_F(HGTest, Small) {
   cerr << "cost: " << cost << "\n";
   vector<prob_t> post;
   prob_t c2 = Inside<prob_t, ScaledEdgeProb>(hg, NULL, ScaledEdgeProb(0.6));
-  EXPECT_FLOAT_EQ(2.1431036, log(c2));
+  BOOST_CHECK_CLOSE(2.1431036, log(c2), 1e-4);
 }
 
-TEST_F(HGTest, JSONTest) {
+BOOST_AUTO_TEST_CASE(JSONTest) {
   ostringstream os;
   JSONParser::WriteEscapedString("\"I don't know\", she said.", &os);
-  EXPECT_EQ("\"\\\"I don't know\\\", she said.\"", os.str());
+  BOOST_CHECK_EQUAL("\"\\\"I don't know\\\", she said.\"", os.str());
   ostringstream os2;
   JSONParser::WriteEscapedString("yes", &os2);
-  EXPECT_EQ("\"yes\"", os2.str());
+  BOOST_CHECK_EQUAL("\"yes\"", os2.str());
 }
 
-TEST_F(HGTest, TestGenericKBest) {
+BOOST_AUTO_TEST_CASE(TestGenericKBest) {
   Hypergraph hg;
   CreateHG(&hg);
   //CreateHGBalanced(&hg);
@@ -386,7 +386,7 @@ TEST_F(HGTest, TestGenericKBest) {
   }
 }
 
-TEST_F(HGTest, TestReadWriteHG) {
+BOOST_AUTO_TEST_CASE(TestReadWriteHG) {
   Hypergraph hg,hg2;
   CreateHG(&hg);
   hg.edges_.front().j_ = 23;
@@ -395,12 +395,9 @@ TEST_F(HGTest, TestReadWriteHG) {
   HypergraphIO::WriteToJSON(hg, false, &os);
   istringstream is(os.str());
   HypergraphIO::ReadFromJSON(&is, &hg2);
-  EXPECT_EQ(hg2.NumberOfPaths(), hg.NumberOfPaths());
-  EXPECT_EQ(hg2.edges_.front().j_, 23);
-  EXPECT_EQ(hg2.edges_.back().prev_i_, 99);
+  BOOST_CHECK_EQUAL(hg2.NumberOfPaths(), hg.NumberOfPaths());
+  BOOST_CHECK_EQUAL(hg2.edges_.front().j_, 23);
+  BOOST_CHECK_EQUAL(hg2.edges_.back().prev_i_, 99);
 }
 
-int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

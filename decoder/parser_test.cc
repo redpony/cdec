@@ -1,8 +1,7 @@
-#include <cassert>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE ParseTest
+#include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+#include "lattice.h"
 #include "hg.h"
 #include "trule.h"
 #include "bottom_up_parser.h"
@@ -10,13 +9,7 @@
 
 using namespace std;
 
-class ChartTest : public testing::Test {
- protected:
-  virtual void SetUp() { }
-  virtual void TearDown() { }
-};
-       
-TEST_F(ChartTest,LanguageModel) {
+BOOST_AUTO_TEST_CASE(Parse) {
   LatticeArc a(TD::Convert("ein"), 0.0, 1);
   LatticeArc b(TD::Convert("haus"), 0.0, 1);
   Lattice lattice(2);
@@ -29,7 +22,3 @@ TEST_F(ChartTest,LanguageModel) {
   parser.Parse(lattice, &forest);
 }
 
-int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

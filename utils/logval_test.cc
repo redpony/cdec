@@ -1,56 +1,51 @@
 #include "logval.h"
-
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE LogValTest
+#include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 #include <iostream>
-
-class LogValTest : public testing::Test {
- protected:
-  virtual void SetUp() { }
-  virtual void TearDown() { }
-};
 
 using namespace std;
 
-TEST_F(LogValTest,Order) {
+BOOST_AUTO_TEST_CASE(Order) {
   LogVal<double> a(-0.3);
   LogVal<double> b(0.3);
   LogVal<double> c(2.4);
-  EXPECT_LT(a,b);
-  EXPECT_LT(b,c);
-  EXPECT_LT(a,c);
-  EXPECT_FALSE(b < a);
-  EXPECT_FALSE(c < a);
-  EXPECT_FALSE(c < b);
-  EXPECT_FALSE(c < c);
-  EXPECT_FALSE(b < b);
-  EXPECT_FALSE(a < a);
+  BOOST_CHECK_LT(a,b);
+  BOOST_CHECK_LT(b,c);
+  BOOST_CHECK_LT(a,c);
+  BOOST_CHECK(b >= a);
+  BOOST_CHECK(c >= a);
+  BOOST_CHECK(c >= b);
+  BOOST_CHECK(c >= c);
+  BOOST_CHECK(b >= b);
+  BOOST_CHECK(a >= a);
 }
 
-TEST_F(LogValTest,Negate) {
+BOOST_AUTO_TEST_CASE(Negate) {
   LogVal<double> x(-2.4);
   LogVal<double> y(2.4);
   y.negate();
-  EXPECT_FLOAT_EQ(x.as_float(),y.as_float());
+  BOOST_CHECK_CLOSE(x.as_float(),y.as_float(), 1e-6);
 }
 
-TEST_F(LogValTest,Inverse) {
+BOOST_AUTO_TEST_CASE(Inverse) {
   LogVal<double> x(1/2.4);
   LogVal<double> y(2.4);
-  EXPECT_FLOAT_EQ(x.as_float(),y.inverse().as_float());
+  BOOST_CHECK_CLOSE(x.as_float(),y.inverse().as_float(), 1e-6);
 }
 
-TEST_F(LogValTest,Minus) {
+BOOST_AUTO_TEST_CASE(Minus) {
   LogVal<double> x(12);
   LogVal<double> y(2);
   LogVal<double> z1 = x - y;
   LogVal<double> z2 = x;
   z2 -= y;
-  EXPECT_FLOAT_EQ(z1.as_float(), z2.as_float());
-  EXPECT_FLOAT_EQ(z1.as_float(), 10.0);
-  EXPECT_FLOAT_EQ((y - x).as_float(), -10.0);
+  BOOST_CHECK_CLOSE(z1.as_float(), z2.as_float(), 1e-6);
+  BOOST_CHECK_CLOSE(z1.as_float(), 10.0, 1e-6);
+  BOOST_CHECK_CLOSE((y - x).as_float(), -10.0, 1e-6);
 }
 
-TEST_F(LogValTest,TestOps) {
+BOOST_AUTO_TEST_CASE(TestOps) {
   LogVal<double> x(-12.12);
   LogVal<double> y(x);
   cerr << x << endl;
@@ -62,18 +57,13 @@ TEST_F(LogValTest,TestOps) {
   LogVal<double> bb(-0.3);
   cerr << (aa + bb) << endl;
   cerr << (bb + aa) << endl;
-  EXPECT_FLOAT_EQ((aa + bb).as_float(), (bb + aa).as_float());
-  EXPECT_FLOAT_EQ((aa + bb).as_float(), -0.1);
+  BOOST_CHECK_CLOSE((aa + bb).as_float(), (bb + aa).as_float(), 1e-6);
+  BOOST_CHECK_CLOSE((aa + bb).as_float(), -0.1, 1e-6);
 }
 
-TEST_F(LogValTest,TestSizes) {
+BOOST_AUTO_TEST_CASE(TestSizes) {
   cerr << sizeof(LogVal<double>) << endl;
   cerr << sizeof(LogVal<float>) << endl;
   cerr << sizeof(void*) << endl;
-}
-
-int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }
 
