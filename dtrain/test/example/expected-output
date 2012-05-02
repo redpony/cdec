@@ -1,0 +1,124 @@
+                cdec cfg 'test/example/cdec.ini'
+feature: WordPenalty (no config parameters)
+State is 0 bytes for feature WordPenalty
+feature: KLanguageModel (with config parameters 'test/example/nc-wmt11.en.srilm.gz')
+Loading the LM will be faster if you build a binary file.
+Reading test/example/nc-wmt11.en.srilm.gz
+----5---10---15---20---25---30---35---40---45---50---55---60---65---70---75---80---85---90---95--100
+****************************************************************************************************
+Loaded 5-gram KLM from test/example/nc-wmt11.en.srilm.gz (MapSize=49581)
+State is 98 bytes for feature KLanguageModel test/example/nc-wmt11.en.srilm.gz
+feature: RuleIdentityFeatures (no config parameters)
+State is 0 bytes for feature RuleIdentityFeatures
+feature: RuleNgramFeatures (no config parameters)
+State is 0 bytes for feature RuleNgramFeatures
+feature: RuleShape (no config parameters)
+  Example feature: Shape_S00000_T00000
+State is 0 bytes for feature RuleShape
+Seeding random number sequence to 380245307
+
+dtrain
+Parameters:
+                       k 100
+                       N 4
+                       T 3
+                 scorer 'stupid_bleu'
+             sample from 'kbest'
+                  filter 'uniq'
+           learning rate 0.0001
+                   gamma 0
+                   pairs 'XYX'
+                   hi lo 0.1
+          pair threshold 0
+          select weights 'VOID'
+                  l1 reg 0 'none'
+                cdec cfg 'test/example/cdec.ini'
+                   input 'test/example/nc-wmt11.1k.gz'
+                  output '-'
+              stop_after 20
+(a dot represents 10 inputs)
+Iteration #1 of 3.
+ .. 20
+Stopping after 20 input sentences.
+WEIGHTS
+              Glue = -0.1015
+       WordPenalty = -0.0152
+     LanguageModel = +0.21493
+ LanguageModel_OOV = -0.3257
+     PhraseModel_0 = -0.050844
+     PhraseModel_1 = +0.25074
+     PhraseModel_2 = +0.27944
+     PhraseModel_3 = -0.038384
+     PhraseModel_4 = -0.12041
+     PhraseModel_5 = +0.1047
+     PhraseModel_6 = -0.1289
+       PassThrough = -0.3094
+        ---
+       1best avg score: 0.17508 (+0.17508)
+ 1best avg model score: -1.2392 (-1.2392)
+           avg # pairs: 1329.8
+        avg # rank err: 649.1
+     avg # margin viol: 677.5
+    non0 feature count: 874
+           avg list sz: 88.6
+           avg f count: 85.643
+(time 0.25 min, 0.75 s/S)
+
+Iteration #2 of 3.
+ .. 20
+WEIGHTS
+              Glue = -0.0792
+       WordPenalty = -0.056198
+     LanguageModel = +0.31038
+ LanguageModel_OOV = -0.4011
+     PhraseModel_0 = +0.072188
+     PhraseModel_1 = +0.11473
+     PhraseModel_2 = +0.049774
+     PhraseModel_3 = -0.18448
+     PhraseModel_4 = -0.12092
+     PhraseModel_5 = +0.1599
+     PhraseModel_6 = -0.0606
+       PassThrough = -0.3848
+        ---
+       1best avg score: 0.24015 (+0.065075)
+ 1best avg model score: -10.131 (-8.8914)
+           avg # pairs: 1324.7
+        avg # rank err: 558.65
+     avg # margin viol: 752.85
+    non0 feature count: 1236
+           avg list sz: 84.9
+           avg f count: 88.306
+(time 0.22 min, 0.65 s/S)
+
+Iteration #3 of 3.
+ .. 20
+WEIGHTS
+              Glue = -0.051
+       WordPenalty = -0.077956
+     LanguageModel = +0.33699
+ LanguageModel_OOV = -0.4726
+     PhraseModel_0 = +0.040228
+     PhraseModel_1 = +0.18
+     PhraseModel_2 = +0.15618
+     PhraseModel_3 = -0.098908
+     PhraseModel_4 = -0.036555
+     PhraseModel_5 = +0.1619
+     PhraseModel_6 = +0.0078
+       PassThrough = -0.4563
+        ---
+       1best avg score: 0.25527 (+0.015113)
+ 1best avg model score: -13.906 (-3.7756)
+           avg # pairs: 1356.3
+        avg # rank err: 562.1
+     avg # margin viol: 757.35
+    non0 feature count: 1482
+           avg list sz: 86.65
+           avg f count: 87.475
+(time 0.23 min, 0.7 s/S)
+
+Writing weights file to '-' ...
+done
+
+---
+Best iteration: 3 [SCORE 'stupid_bleu'=0.25527].
+This took 0.7 min.

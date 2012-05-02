@@ -1,9 +1,6 @@
 #ifndef _DTRAIN_PAIRSAMPLING_H_
 #define _DTRAIN_PAIRSAMPLING_H_
 
-#define DTRAIN_FASTER_PERCEPTRON // only look at misranked pairs
-                                 // DO NOT USE WITH SVM!
-
 namespace dtrain
 {
 
