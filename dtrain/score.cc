@@ -103,7 +103,7 @@ SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
         i_bleu[j] += (1/((score_t)j+1)) * i_ng;
       }
     }
-    sum += exp(i_bleu[i])/(pow(2, N_-i));
+    sum += exp(i_bleu[i])/(pow(2.0, static_cast<double>(N_-i)));
   }
   return brevity_penalty(hyp_len, ref_len) * sum;
 }

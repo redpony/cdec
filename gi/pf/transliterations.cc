@@ -118,7 +118,7 @@ struct TransliterationChunkConditionalModel {
     //double llh = Md::log_beta_density(dd, 10, 3) + Md::log_gamma_density(aa, 1, 1);
     double llh = //Md::log_beta_density(dd, 1, 1) +
                  Md::log_gamma_density(dd + aa, 1, 1);
-    typename std::tr1::unordered_map<std::vector<WordID>, CCRP_NoTable<TRule>, boost::hash<std::vector<WordID> > >::const_iterator it;
+    std::tr1::unordered_map<std::vector<WordID>, CCRP_NoTable<TRule>, boost::hash<std::vector<WordID> > >::const_iterator it;
     for (it = r.begin(); it != r.end(); ++it)
       llh += it->second.log_crp_prob(aa);
     return llh;
@@ -133,7 +133,7 @@ struct TransliterationChunkConditionalModel {
   };
 
   void ResampleHyperparameters(MT19937* rng) {
-    typename std::tr1::unordered_map<std::vector<WordID>, CCRP_NoTable<TRule>, boost::hash<std::vector<WordID> > >::iterator it;
+    std::tr1::unordered_map<std::vector<WordID>, CCRP_NoTable<TRule>, boost::hash<std::vector<WordID> > >::iterator it;
     //const unsigned nloop = 5;
     const unsigned niterations = 10;
     //DiscountResampler dr(*this);
