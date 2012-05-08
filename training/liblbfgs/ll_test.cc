@@ -4,12 +4,11 @@
 using namespace std;
 
 // Function must be lbfgsfloatval_t f(x.begin, x.end, g.begin)
-lbfgsfloatval_t func(const lbfgsfloatval_t* x, lbfgsfloatval_t* g) {
+lbfgsfloatval_t func(const vector<lbfgsfloatval_t>& x, lbfgsfloatval_t* g) {
     int i;
     lbfgsfloatval_t fx = 0.0;
-    int n = 4;
 
-    for (i = 0;i < n;i += 2) {
+    for (i = 0;i < x.size();i += 2) {
         lbfgsfloatval_t t1 = 1.0 - x[i];
         lbfgsfloatval_t t2 = 10.0 * (x[i+1] - x[i] * x[i]);
         g[i+1] = 20.0 * t2;
@@ -21,8 +20,8 @@ lbfgsfloatval_t func(const lbfgsfloatval_t* x, lbfgsfloatval_t* g) {
 
 template<typename F>
 void Opt(F& f) {
-  LBFGS<F> lbfgs(4, f, 1.0);
-  lbfgs.Optimize();
+  LBFGS<F> lbfgs(4, f);
+  lbfgs.MinimizeFunction();
 }
 
 int main(int argc, char** argv) {

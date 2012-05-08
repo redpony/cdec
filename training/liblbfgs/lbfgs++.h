@@ -9,9 +9,10 @@
 #define __LBFGSPP_H__
 
 #include <vector>
+#include <cassert>
 #include "liblbfgs/lbfgs.h"
 
-// Function must be lbfgsfloatval_t f(const double* x_start, double* g_start)
+// Function must be double f(const vector<double>& x_start, double* g_start)
 template <typename Function>
 class LBFGS {
  public:
@@ -46,11 +47,14 @@ class LBFGS {
   lbfgsfloatval_t& operator[](size_t i) { return m_x[i]; }
   size_t size() const { return m_x.size(); }
 
-  int Optimize() {
+  int MinimizeFunction(bool s = false) {
+    silence = s;
     lbfgsfloatval_t fx;
     int ret = lbfgs(m_x.size(), &m_x[0], &fx, _evaluate, _progress, this, &param);
-    std::cerr << "L-BFGS optimization terminated with status code = " << ret << std::endl;
-    std::cerr << "  fx = " << fx << std::endl;
+    if (!silence) {
+      std::cerr << "L-BFGS optimization terminated with status code = " << ret << std::endl;
+      std::cerr << "  fx = " << fx << std::endl;
+    }
     return ret;
   }
 
@@ -62,6 +66,7 @@ class LBFGS {
       param.linesearch = LBFGS_LINESEARCH_BACKTRACKING;
       param.orthantwise_c = 1.0;
     }
+    silence = false;
   }
 
   static lbfgsfloatval_t _evaluate(
@@ -79,7 +84,8 @@ class LBFGS {
                              const lbfgsfloatval_t step) {
       (void) n;
       (void) step;
-      return func(x, g);
+      assert(x == &m_x[0]);  // sanity check, ensures pass m_x is okay
+      return func(m_x, g);
     }
 
     static int _progress(
@@ -109,21 +115,23 @@ class LBFGS {
         int n,
         int k,
         int ls
-        )
-    {
-        (void) n;
-        (void) k;
-        std::cerr << "Iteration " << k << ':' << std::endl;
-        std::cerr << "  fx = " << fx << ", x[0] = " << x[0] << ", x[1] = " << x[1] << std::endl;
-        std::cerr << "  xnorm = " << xnorm << ", gnorm = " << gnorm << ", step = " << step << std::endl << std::endl;
-        return 0;
+        ) {
+    (void) x;
+    (void) g;
+    (void) n;
+    (void) ls;
+    if (!silence) {
+      std::cerr << "Iteration " << k << ':' << "\tfx = " << fx << "\t"
+                << "  xnorm = " << xnorm << ", gnorm = " << gnorm << ", step = " << step << std::endl;
     }
+    return 0;
+  }
   std::vector<lbfgsfloatval_t>* p_x;
   const bool owned;
   std::vector<lbfgsfloatval_t>& m_x;
   const Function& func;
   lbfgs_parameter_t param;
-
+  bool silence;
 };
 
 #endif
