@@ -2,6 +2,7 @@
 #define _HG_IO_H_
 
 #include <iostream>
+#include <string>
 #include "lattice.h"
 
 class Hypergraph;
@@ -24,7 +25,7 @@ struct HypergraphIO {
   static void WriteAsCFG(const Hypergraph& hg);
 
   // Write only the target size information in bottom-up order.  
-  static void WriteTarget(const Hypergraph& hg);
+  static void WriteTarget(const std::string &base, unsigned int sent_id, const Hypergraph& hg);
 
   // serialization utils
   static void ReadFromPLF(const std::string& in, Hypergraph* out, int line = 0);
