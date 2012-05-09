@@ -49,6 +49,7 @@ class LBFGS {
 
   int MinimizeFunction(bool s = false) {
     silence = s;
+    ec = 0;
     lbfgsfloatval_t fx;
     int ret = lbfgs(m_x.size(), &m_x[0], &fx, _evaluate, _progress, this, &param);
     if (!silence) {
@@ -84,6 +85,7 @@ class LBFGS {
                              const lbfgsfloatval_t step) {
       (void) n;
       (void) step;
+      if (!silence) { ec++; std::cerr << '.'; }
       assert(x == &m_x[0]);  // sanity check, ensures pass m_x is okay
       return func(m_x, g);
     }
@@ -121,6 +123,9 @@ class LBFGS {
     (void) n;
     (void) ls;
     if (!silence) {
+      if (ec < 8) std::cerr << '\t';
+      if (ec < 16) std::cerr << '\t';
+      ec = 0;
       std::cerr << "Iteration " << k << ':' << "\tfx = " << fx << "\t"
                 << "  xnorm = " << xnorm << ", gnorm = " << gnorm << ", step = " << step << std::endl;
     }
@@ -132,6 +137,7 @@ class LBFGS {
   const Function& func;
   lbfgs_parameter_t param;
   bool silence;
+  int ec;
 };
 
 #endif
