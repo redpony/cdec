@@ -1,0 +1,34 @@
+import testing ;
+import option ;
+
+additional = ;
+if [ option.get with-cmph ] {
+  additional += perfect_hash.cc ;
+}
+
+lib utils :
+  alignment_io.cc 
+  b64tools.cc 
+  corpus_tools.cc 
+  dict.cc 
+  tdict.cc 
+  fdict.cc 
+  gzstream.cc 
+  filelib.cc 
+  stringlib.cc 
+  sparse_vector.cc 
+  timing_stats.cc 
+  verbose.cc 
+  weights.cc
+  $(additional)
+  ..//z
+  : <include>.. <include>. : : <include>.. <include>. ;
+
+exe ts : ts.cc utils ;
+exe atools : atools.cc utils ..//boost_program_options ;
+exe phmt : phmt.cc utils ;
+exe reconstruct_weights : reconstruct_weights.cc utils ..//boost_program_options ;
+
+alias programs : reconstruct_weights atools ;
+
+all_tests : utils ;
