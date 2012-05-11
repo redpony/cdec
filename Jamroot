@@ -1,0 +1,29 @@
+path-constant TOP : . ;
+include $(TOP)/sanity.jam ;
+boost 104400 ;
+external-lib z ;
+
+if [ test_header google/dense_hash_map ] {
+  requirements += <define>HAVE_SPARSEHASH ;
+}
+
+if [ test_header boost/serialization/map.hpp ] && [ test_library boost_serialization ] {
+  requirements += <define>HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP ;
+}
+
+project : requirements $(requirements) ;
+project : default-build <threading>single <warnings>on <variant>release ;
+
+install-bin-libs utils//programs mteval//programs klm/lm//programs decoder//cdec ;
+
+build-project mteval ;
+build-project decoder ;
+
+#Compile everything ending with _test.cc into a test and run it.
+rule all_tests ( targets * : dependencies ) {
+  targets ?= [ glob *_test.cc ] ;
+  for t in $(targets) {
+    local base = [ MATCH "^(.*).cc$" : $(t) ] ;
+    unit-test $(base) : $(t) $(dependencies) ..//boost_unit_test_framework ;
+  }
+}
