@@ -21,7 +21,7 @@ cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a ../klm/lm/libkl
 
 AM_CPPFLAGS = -DBOOST_TEST_DYN_LINK -W -Wno-sign-compare $(GTEST_CPPFLAGS) -I.. -I../mteval -I../utils -I../klm
 
-rule_lexer.cc: rule_lexer.l
+rule_lexer.cc: rule_lexer.ll
 	$(LEX) -s -CF -8 -o$@ $<
 
 noinst_LIBRARIES = libcdec.a
