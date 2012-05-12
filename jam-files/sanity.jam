@@ -13,9 +13,15 @@ rule _shell ( cmd : extras * ) {
   return [ trim-nl [ SHELL $(cmd) : $(extras) ] ] ;
 }
 
+cxxflags = [ os.environ "CXXFLAGS" ] ;
+cflags = [ os.environ "CFLAGS" ] ;
+ldflags = [ os.environ "LDFLAGS" ] ;
+
 #Run g++ with empty main and these arguments to see if it passes.  
 rule test_flags ( flags * ) {
-  local cmd = "bash -c \"g++ "$(flags:J=" ")" -x c++ - <<<'int main() {}' -o /dev/null >/dev/null 2>/dev/null\"" ;
+  local add = $(CXXFLAGS) $(LDFLAGS) ;
+  add ?= "" ;
+  local cmd = "bash -c \"g++ $(add) "$(flags:J=" ")" -x c++ - <<<'int main() {}' -o /dev/null >/dev/null 2>/dev/null\"" ;
   local ret = [ SHELL $(cmd) : exit-status ] ;
   if --debug-configuration in [ modules.peek : ARGV ] {
     echo $(cmd) ;
@@ -144,10 +150,6 @@ rule external-lib ( name : search-path * ) {
 
 requirements = ;
 {
-  local cxxflags = [ os.environ "CXXFLAGS" ] ;
-  local cflags = [ os.environ "CFLAGS" ] ;
-  local ldflags = [ os.environ "LDFLAGS" ] ;
-
   #Boost jam's static clang is buggy.  
   requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <toolset>clang:<link>shared ;
 
