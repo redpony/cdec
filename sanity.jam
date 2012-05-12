@@ -21,11 +21,7 @@ rule test_flags ( flags * ) {
     echo $(cmd) ;
     echo $(ret) ;
   }
-  if $(ret[2]) = 0 {
-    return true ;
-  } else {
-    return ;
-  }
+  return $(ret[2]) == 0 ;
 }
 
 rule test_header ( name ) {
@@ -181,4 +177,10 @@ rule install-headers ( name : list * : source-root ? ) {
   local includedir = [ option.get "includedir" : $(prefix)/include ] ;
   source-root ?= "." ;
   install $(name) : $(list) : <location>$(includedir) <install-source-root>$(source-root) ;
+}
+
+rule build-projects ( projects * ) {
+  for p in $(projects) {
+    build-project $(p) ;
+  }
 }
