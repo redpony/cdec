@@ -14,16 +14,15 @@ if [ test_header boost/serialization/map.hpp ] && [ test_library boost_serializa
 project : requirements $(requirements) ;
 project : default-build <threading>single <warnings>on <variant>release ;
 
-install-bin-libs utils//programs mteval//programs klm/lm//programs decoder//cdec ;
+install-bin-libs utils//programs mteval//programs klm/lm//programs decoder//cdec phrasinator//programs ;
 
-build-project mteval ;
-build-project decoder ;
+build-projects mteval decoder klm/lm ;
 
 #Compile everything ending with _test.cc into a test and run it.
-rule all_tests ( targets * : dependencies ) {
+rule all_tests ( targets * : dependencies : properties * ) {
   targets ?= [ glob *_test.cc ] ;
   for t in $(targets) {
     local base = [ MATCH "^(.*).cc$" : $(t) ] ;
-    unit-test $(base) : $(t) $(dependencies) ..//boost_unit_test_framework ;
+    unit-test $(base) : $(t) $(dependencies) ..//boost_unit_test_framework : $(properties) ;
   }
 }

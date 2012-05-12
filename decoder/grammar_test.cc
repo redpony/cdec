@@ -17,7 +17,8 @@ using namespace std;
 
 struct GrammarTest {
   GrammarTest() {
-    Weights::InitFromFile("test_data/weights.gt", &wts);
+    std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : "test_data");
+    Weights::InitFromFile(path + "/weights.gt", &wts);
   }
   vector<weight_t> wts;
 };
@@ -40,7 +41,8 @@ BOOST_AUTO_TEST_CASE(TestTextGrammar) {
 }
 
 BOOST_AUTO_TEST_CASE(TestTextGrammarFile) {
-  GrammarPtr g(new TextGrammar("./test_data/grammar.prune"));
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : "test_data");
+  GrammarPtr g(new TextGrammar(path + "/grammar.prune"));
   vector<GrammarPtr> grammars(1, g);
 
   LatticeArc a(TD::Convert("ein"), 0.0, 1);

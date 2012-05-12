@@ -65,7 +65,7 @@ lib cdec_lib :
 
 exe cdec : cdec.cc cdec_lib ;
 
-all_tests [ glob *_test.cc : cfg_test.cc ] : cdec_lib ;
+all_tests [ glob *_test.cc : cfg_test.cc ] : cdec_lib : <testing.arg>$(TOP)/decoder/test_data ;
 
 install legacy : cdec
   : <location>$(TOP)/cdec <install-type>EXE <install-dependencies>on <link>shared:<dll-path>$(TOP)/cdec <link>shared:<install-type>LIB ;

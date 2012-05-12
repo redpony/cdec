@@ -5,4 +5,4 @@ exe fast_score : fast_score.cc mteval ..//utils ..//boost_program_options ;
 exe mbr_kbest : mbr_kbest.cc mteval ..//utils ..//boost_program_options ;
 alias programs : fast_score mbr_kbest ;
 
-unit-test scorer_test : scorer_test.cc mteval ..//utils ..//z ..//boost_unit_test_framework ;
+unit-test scorer_test : scorer_test.cc mteval ..//utils ..//z ..//boost_unit_test_framework : <testing.arg>$(TOP)/mteval/test_data ;
