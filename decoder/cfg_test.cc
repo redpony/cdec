@@ -33,7 +33,8 @@ struct CFGTest : public TestWithParam<HgW> {
     istringstream ws(wts);
     EXPECT_TRUE(ws>>featw);
     CSHOW(featw)
-    HGSetup::JsonTestFile(&hg,file);
+    std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : "test_data");
+    HGSetup::JsonTestFile(&hg,path,file);
     hg.Reweight(featw);
     cfg.Init(hg,true,true,false);
   }

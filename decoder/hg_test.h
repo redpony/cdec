@@ -46,10 +46,10 @@ struct HGSetup {
     ReadFile rf(f);
     HypergraphIO::ReadFromJSON(rf.stream(), hg);
   }
-  static void JsonTestFile(Hypergraph *hg,std::string n) {
-    JsonFile(hg,"test_data/"+n);
+  static void JsonTestFile(Hypergraph *hg,std::string path,std::string n) {
+    JsonFile(hg,path + "/"+n);
   }
-  static void CreateSmallHG(Hypergraph *hg) { JsonTestFile(hg,small_json); }
+  static void CreateSmallHG(Hypergraph *hg, std::string path) { JsonTestFile(hg,path,small_json); }
 };
 
 namespace {
