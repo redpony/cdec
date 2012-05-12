@@ -21,7 +21,11 @@ rule test_flags ( flags * ) {
     echo $(cmd) ;
     echo $(ret) ;
   }
-  return $(ret[2]) == 0 ;
+  if $(ret[2]) = 0 {
+    return true ;
+  } else {
+    return ;
+  }
 }
 
 rule test_header ( name ) {
