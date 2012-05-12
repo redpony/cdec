@@ -1,5 +1,5 @@
 path-constant TOP : . ;
-include $(TOP)/sanity.jam ;
+include $(TOP)/jam-files/sanity.jam ;
 boost 104400 ;
 external-lib z ;
 
