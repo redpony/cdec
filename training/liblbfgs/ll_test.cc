@@ -5,7 +5,7 @@ using namespace std;
 
 // Function must be lbfgsfloatval_t f(x.begin, x.end, g.begin)
 lbfgsfloatval_t func(const vector<lbfgsfloatval_t>& x, lbfgsfloatval_t* g) {
-    int i;
+    unsigned i;
     lbfgsfloatval_t fx = 0.0;
 
     for (i = 0;i < x.size();i += 2) {
@@ -24,7 +24,7 @@ void Opt(F& f) {
   lbfgs.MinimizeFunction();
 }
 
-int main(int argc, char** argv) {
+int main() {
   Opt(func);
   return 0;
 }

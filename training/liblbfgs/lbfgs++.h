@@ -16,28 +16,33 @@
 template <typename Function>
 class LBFGS {
  public:
-  LBFGS(size_t n,            // number of variables
-        const Function& f,   // function to optimize
-        double l1_c = 0.0,   // l1 penalty strength
-        size_t m = 10        // number of memory buffers
-                             // TODO should use custom allocator here:
+  LBFGS(size_t n,              // number of variables
+        const Function& f,     // function to optimize
+        size_t m = 10,         // number of memory buffers
+        double l1_c = 0.0,     // l1 penalty strength
+        unsigned l1_start = 0, // l1 penalty starting index
+        double eps = 1e-5      // convergence epsilon
+                               // TODO should use custom allocator here:
         ) : p_x(new std::vector<lbfgsfloatval_t>(n, 0.0)),
                              owned(true),
                              m_x(*p_x),
                              func(f) {
-    Init(m, l1_c);
+    Init(m, l1_c, l1_start, eps);
   }
 
   // constructor where external vector storage for variables is used
   LBFGS(std::vector<lbfgsfloatval_t>* px,
         const Function& f,
-        double l1_c = 0.0,   // l1 penalty strength
-        size_t m = 10
+        size_t m = 10,         // number of memory buffers
+        double l1_c = 0.0,     // l1 penalty strength
+        unsigned l1_start = 0, // l1 penalty starting index
+        double eps = 1e-5      // convergence epsilon
+                               // TODO should use custom allocator here:
         ) : p_x(px),
                              owned(false),
                              m_x(*p_x),
                              func(f) {
-    Init(m, l1_c);
+    Init(m, l1_c, l1_start, eps);
   }
 
   ~LBFGS() {
@@ -60,12 +65,14 @@ class LBFGS {
   }
 
  private:
-  void Init(size_t m, double l1_c) {
+  void Init(size_t m, double l1_c, unsigned l1_start, double eps) {
     lbfgs_parameter_init(&param);
     param.m = m;
+    param.epsilon = eps;
     if (l1_c > 0.0) {
       param.linesearch = LBFGS_LINESEARCH_BACKTRACKING;
-      param.orthantwise_c = 1.0;
+      param.orthantwise_c = l1_c;
+      param.orthantwise_start = l1_start;
     }
     silence = false;
   }
