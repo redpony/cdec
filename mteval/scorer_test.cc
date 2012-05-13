@@ -36,11 +36,12 @@ struct Stuff {
 BOOST_FIXTURE_TEST_SUITE( s, Stuff );
 
 BOOST_AUTO_TEST_CASE(TestCreateFromFiles) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : "test_data");
   vector<string> files;
-  files.push_back("test_data/re.txt.0");
-  files.push_back("test_data/re.txt.1");
-  files.push_back("test_data/re.txt.2");
-  files.push_back("test_data/re.txt.3");
+  files.push_back(path + "/re.txt.0");
+  files.push_back(path + "/re.txt.1");
+  files.push_back(path + "/re.txt.2");
+  files.push_back(path + "/re.txt.3");
   DocScorer ds(IBM_BLEU, files);
 }
 
