@@ -33,11 +33,15 @@ libutils_a_SOURCES = \
   sparse_vector.cc \
   timing_stats.cc \
   verbose.cc \
+  json_feature_map_lexer.cc \
   weights.cc
 
 if HAVE_CMPH
   libutils_a_SOURCES += perfect_hash.cc
 endif
+
+json_feature_map_lexer.cc: json_feature_map_lexer.ll
+	$(LEX) -s -8 -CF -o$@ $<
 
 phmt_SOURCES = phmt.cc
 ts_SOURCES = ts.cc

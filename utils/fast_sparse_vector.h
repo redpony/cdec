@@ -7,8 +7,6 @@
 // important: indexes are integers
 // important: iterators may return elements in any order
 
-#include "config.h"
-
 #include <cmath>
 #include <cstring>
 #include <climits>
@@ -16,8 +14,9 @@
 #include <cassert>
 #include <vector>
 
-#include <boost/static_assert.hpp>
+#include "config.h"
 
+#include <boost/static_assert.hpp>
 #if HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP
 #include <boost/serialization/map.hpp>
 #endif
@@ -118,6 +117,17 @@ class FastSparseVector {
   FastSparseVector(const FastSparseVector& other) {
     std::memcpy(this, &other, sizeof(FastSparseVector));
     if (is_remote_) data_.rbmap = new std::map<int, T>(*data_.rbmap);
+  }
+  FastSparseVector(std::pair<int, T>* first, std::pair<int, T>* last) {
+    const ptrdiff_t n = last - first;
+    if (n <= LOCAL_MAX) {
+      is_remote_ = false;
+      local_size_ = n;
+      std::memcpy(data_.local, first, sizeof(std::pair<int, T>) * n);
+    } else {
+      is_remote_ = true;
+      data_.rbmap = new std::map<int, T>(first, last);
+    }
   }
   void erase(int k) {
     if (is_remote_) {
