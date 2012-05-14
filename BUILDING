@@ -1,6 +1,5 @@
 To build cdec, you'll need:
 
- * Google c++ testing framework (http://code.google.com/p/googletest/)
  * boost headers & boost program_options (you may need to install a package
     like boost-devel)
 
@@ -8,20 +7,14 @@ To build cdec, you'll need:
 Instructions for building
 -----------------------------------
 
- 1) Optional: Download and build SRILM
-
- 2) Download, build, and install Google Test (optional, this is necessary
-    to build unit tests that may be useful in development; system tests
-    work without it)
-
- 3) Use automake / autoconf to generate the configure script.
+ 1) Use automake / autoconf to generate the configure script.
     I'm not an expert at using these tools, but this should be sufficient:
 
         autoreconf -ifv
 
- 4) Configure and build.  Your command will look something like this.
+ 2) Configure and build.  Your command will look something like this.
 
-        ./configure --disable-gtest
+        ./configure
         make
 
     If you get errors during configure about missing BOOST macros, then step 3
@@ -36,12 +29,12 @@ Instructions for building
         make LIBS+="-lz -lboost_program_options" \
              CFLAGS+="-Wno-sign-compare"
 
- 5) Test
+ 3) Test
 
         ./tests/run-system-tests.pl
 
     Everything should pass.
 
 
- 6) Enjoy!
+ 4) Enjoy!
 
