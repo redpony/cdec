@@ -2,6 +2,8 @@
 #include <iostream>
 #include <vector>
 #include <tr1/unordered_map>
+#include <limits>
+#include <cmath>
 
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -25,6 +27,8 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("linear,n", "Linear (rather than logistic) regression")
         ("l1",po::value<double>()->default_value(0.0), "l_1 regularization strength")
         ("l2",po::value<double>()->default_value(0.0), "l_2 regularization strength")
+        ("test_features,t", po::value<string>(), "File containing training instance features (ARKRegression format)")
+        ("test_responses,s", po::value<string>(), "File containing training response features (ARKRegression format)")
         ("weights,w", po::value<string>(), "Initial weights")
         ("epsilon,e", po::value<double>()->default_value(1e-4), "Epsilon for convergence test. Terminates when ||g|| < epsilon * max(1, ||w||)")
         ("memory_buffers,m",po::value<unsigned>()->default_value(40), "Number of memory buffers for LBFGS")
@@ -77,7 +81,7 @@ void ReadLabeledInstances(const string& ffeats,
   int lc = 0;
   ReaderHelper rh(xy_pairs);
   unordered_map<string, unsigned> label2id;
-  cerr << "Reading training responses from " << fresp << " ..." << endl;
+  cerr << "Reading responses from " << fresp << " ..." << endl;
   ReadFile fr(fresp);
   for (unsigned i = 0; i < labels->size(); ++i)
     label2id[(*labels)[i]] = i;
@@ -116,7 +120,7 @@ void ReadLabeledInstances(const string& ffeats,
       cerr << " " << (*labels)[j];
     cerr << endl;
   }
-  cerr << "Reading training features from " << ffeats << " ..." << endl;
+  cerr << "Reading features from " << ffeats << " ..." << endl;
   ReadFile ff(ffeats);
   JSONFeatureMapLexer::ReadRules(ff.stream(), ReaderCB, &rh);
   if (rh.flag) cerr << endl;
@@ -204,6 +208,23 @@ struct UnivariateSquaredLoss : public BaseLoss {
     double reg = ApplyRegularizationTerms(x, g);
     return cll + reg;
   }
+
+  // return root mse
+  double Evaluate(const vector<TrainingInstance>& test,
+                  const vector<double>& w) const {
+    vector<double> dotprods(1);  // K-1 degrees of freedom
+    double mse = 0;
+    for (unsigned i = 0; i < test.size(); ++i) {
+      const SparseVector<float>& fmapx = test[i].x;
+      const float refy = test[i].y.value;
+      ComputeDotProducts(fmapx, w, &dotprods);
+      double diff = dotprods[0] - refy;
+      cerr << "line=" << (i+1) << " true=" << refy << " pred=" << dotprods[0] << endl;
+      mse += diff * diff;
+    }
+    mse /= test.size();
+    return sqrt(mse);
+  }
 };
 
 struct MulticlassLogLoss : public BaseLoss {
@@ -243,6 +264,23 @@ struct MulticlassLogLoss : public BaseLoss {
     double reg = ApplyRegularizationTerms(x, g);
     return cll + reg;
   }
+
+  double Evaluate(const vector<TrainingInstance>& test,
+                  const vector<double>& w) const {
+    vector<double> dotprods(K - 1);  // K-1 degrees of freedom
+    double correct = 0;
+    for (unsigned i = 0; i < test.size(); ++i) {
+      const SparseVector<float>& fmapx = test[i].x;
+      const unsigned refy = test[i].y.label;
+      ComputeDotProducts(fmapx, w, &dotprods);
+      double best = 0;
+      unsigned besty = dotprods.size();
+      for (unsigned y = 0; y < dotprods.size(); ++y)
+        if (dotprods[y] > best) { best = dotprods[y]; besty = y; }
+      if (refy == besty) { ++correct; }
+    }
+    return correct / test.size();
+  }
 };
 
 template <class LossFunction>
@@ -261,9 +299,6 @@ int main(int argc, char** argv) {
   po::variables_map conf;
   InitCommandLine(argc, argv, &conf);
   string line;
-  vector<TrainingInstance> training;
-  const string xfile = conf["training_features"].as<string>();
-  const string yfile = conf["training_responses"].as<string>();
   double l1 = conf["l1"].as<double>();
   double l2 = conf["l2"].as<double>();
   const unsigned memory_buffers = conf["memory_buffers"].as<unsigned>();
@@ -278,8 +313,16 @@ int main(int argc, char** argv) {
   }
 
   const bool is_continuous = conf.count("linear");
+  const string xfile = conf["training_features"].as<string>();
+  const string yfile = conf["training_responses"].as<string>();
   vector<string> labels; // only populated for non-continuous models
+  vector<TrainingInstance> training, test;
   ReadLabeledInstances(xfile, yfile, is_continuous, &training, &labels);
+  if (conf.count("test_features")) {
+    const string txfile = conf["test_features"].as<string>();
+    const string tyfile = conf["test_responses"].as<string>();
+    ReadLabeledInstances(txfile, tyfile, is_continuous, &test, &labels);
+  }
 
   if (conf.count("weights")) {
     cerr << "Initial weights are not implemented, please implement." << endl;
@@ -298,6 +341,10 @@ int main(int argc, char** argv) {
     cerr << "       Number of parameters: " << weights.size() << endl;
     UnivariateSquaredLoss loss(training, p, l2);
     LearnParameters(loss, l1, 1, memory_buffers, epsilon, &weights);
+
+    if (test.size())
+      cerr << "Held-out root MSE: " << loss.Evaluate(test, weights) << endl;
+
     cout << p << "\t***CONTINUOUS***" << endl;
     cout << "***BIAS***\t" << weights[0] << endl;
     for (unsigned f = 0; f < p; ++f) {
@@ -313,6 +360,9 @@ int main(int argc, char** argv) {
     const unsigned km1 = K - 1;
     MulticlassLogLoss loss(training, K, p, l2);
     LearnParameters(loss, l1, km1, memory_buffers, epsilon, &weights);
+
+    if (test.size())
+      cerr << "Held-out accuracy: " << loss.Evaluate(test, weights) << endl;
 
     cout << p << "\t***CATEGORICAL***";
     for (unsigned y = 0; y < K; ++y)

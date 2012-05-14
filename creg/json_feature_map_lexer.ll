@@ -61,7 +61,7 @@ inline unsigned unicode_escape_to_utf8(uint16_t w1, uint16_t w2, char* putf8) {
 
 %}
 
-ID [A-Za-z_0-9]+
+ID [^ \t\n\r]+
 HEX_D [a-fA-F0-9]
 INT [-]?[0-9]+
 DOUBLE {INT}((\.[0-9]+)?([eE][-+]?[0-9]+)?)
