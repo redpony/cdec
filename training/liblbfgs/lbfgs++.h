@@ -90,6 +90,7 @@ class LBFGS {
                              lbfgsfloatval_t *g,
                              const int n,
                              const lbfgsfloatval_t step) {
+      (void) x;
       (void) n;
       (void) step;
       if (!silence) { ec++; std::cerr << '.'; }
