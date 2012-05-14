@@ -1,10 +1,21 @@
+#cdec compilation with bjam
+#
+#--with-boost=/usr/include
+#--with-google-hash=/usr/include so that $with-google-hash/google/dense_hash_map exists
+#
+#-a forces the build to run from scratch
+#-jN parallelizes just like make
+#
+#Respects CXXFLAGS, CFLAGS, and LDFLAGS environment variables.  
+
 path-constant TOP : . ;
 include $(TOP)/jam-files/sanity.jam ;
 boost 104400 ;
 external-lib z ;
 
-if [ test_header google/dense_hash_map ] {
-  requirements += <define>HAVE_SPARSEHASH ;
+with-google-hash = [ option.get "with-google-hash" ] ;
+if [ test_header google/dense_hash_map ] || $(with-google-hash) {
+  requirements += <define>HAVE_SPARSEHASH <include>$(with-google-hash) ;
 }
 
 if [ test_header boost/serialization/map.hpp ] && [ test_library boost_serialization ] {
