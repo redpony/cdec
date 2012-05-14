@@ -26,7 +26,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("l1",po::value<double>()->default_value(0.0), "l_1 regularization strength")
         ("l2",po::value<double>()->default_value(0.0), "l_2 regularization strength")
         ("weights,w", po::value<string>(), "Initial weights")
-        ("epsilon,e", po::value<double>()->default_value(1e-4), "Epsilon for convergence test. Terminates when ||g|| < epsilon * max(1, ||x||)")
+        ("epsilon,e", po::value<double>()->default_value(1e-4), "Epsilon for convergence test. Terminates when ||g|| < epsilon * max(1, ||w||)")
         ("memory_buffers,m",po::value<unsigned>()->default_value(40), "Number of memory buffers for LBFGS")
         ("help,h", "Help");
   po::options_description dcmdline_options;
@@ -191,7 +191,7 @@ struct UnivariateSquaredLoss : public BaseLoss {
     fill(g, g + x.size(), 0.0);
     double cll = 0;
     vector<double> dotprods(1);  // univariate prediction
-    for (int i = 0; i < training.size(); ++i) {
+    for (unsigned i = 0; i < training.size(); ++i) {
       const SparseVector<float>& fmapx = training[i].x;
       const double refy = training[i].y.value;
       ComputeDotProducts(fmapx, x, &dotprods);
@@ -219,7 +219,7 @@ struct MulticlassLogLoss : public BaseLoss {
     vector<double> dotprods(K - 1);  // K-1 degrees of freedom
     vector<prob_t> probs(K);
     double cll = 0;
-    for (int i = 0; i < training.size(); ++i) {
+    for (unsigned i = 0; i < training.size(); ++i) {
       const SparseVector<float>& fmapx = training[i].x;
       const unsigned refy = training[i].y.label;
       //cerr << "FMAP: " << fmapx << endl;

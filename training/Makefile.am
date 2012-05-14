@@ -1,6 +1,5 @@
 bin_PROGRAMS = \
   model1 \
-  creg \
   lbl_model \
   test_ngram \
   mr_em_map_adapter \
@@ -23,9 +22,6 @@ noinst_PROGRAMS = \
   optimize_test
 
 TESTS = lbfgs_test optimize_test
-
-creg_SOURCES = creg.cc
-creg_LDADD = ./liblbfgs/liblbfgs.a $(top_srcdir)/utils/libutils.a -lz
 
 mpi_online_optimize_SOURCES = mpi_online_optimize.cc online_optimizer.cc
 mpi_online_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz

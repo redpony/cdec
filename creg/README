@@ -1,0 +1,7 @@
+creg is a fast tool for training linear and logistic regression models with
+l_1 and l_2 regularization. Its data (feature and response) format is compatible
+with ARKRegression.
+
+Example invokation:
+$ ./creg -x test_data/iris.trainfeat -y test_data/iris.trainresp --l2 100
+
