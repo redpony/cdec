@@ -103,7 +103,27 @@ SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
         i_bleu[j] += (1/((score_t)j+1)) * i_ng;
       }
     }
-    sum += exp(i_bleu[i])/(pow(2.0, static_cast<double>(N_-i)));
+    sum += exp(i_bleu[i])/(pow(2.0, N_-i));
+  }
+  return brevity_penalty(hyp_len, ref_len) * sum;
+}
+
+// variant of smooth_bleu; i-Bleu scores only single 'i'
+score_t
+SmoothSingleBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                        const unsigned /*rank*/, const unsigned /*src_len*/)
+{
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
+  if (hyp_len == 0 || ref_len == 0) return 0.;
+  NgramCounts counts = make_ngram_counts(hyp, ref, N_);
+  unsigned M = N_;
+  if (ref_len < N_) M = ref_len;
+  score_t sum = 0.;
+  unsigned j = 1;
+  for (unsigned i = 0; i < M; i++) {
+    if (counts.sum_[i] == 0 || counts.clipped_[i] == 0) break;
+    sum += ((score_t)counts.clipped_[i]/counts.sum_[i])/pow(2.0, N_-j+1);
+    j++;
   }
   return brevity_penalty(hyp_len, ref_len) * sum;
 }

@@ -8,6 +8,11 @@
 namespace dtrain
 {
 
+bool
+cmp_hyp_by_model_d(ScoredHyp a, ScoredHyp b)
+{
+  return a.model > b.model;
+}
 
 struct KSampler : public HypSampler
 {
@@ -44,6 +49,8 @@ struct KSampler : public HypSampler
       sz_++;
       f_count_ += h.f.size();
     }
+    sort(s_.begin(), s_.end(), cmp_hyp_by_model_d);
+    for (unsigned i = 0; i < s_.size(); i++) s_[i].rank = i;
   }
 };
 

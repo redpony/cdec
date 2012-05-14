@@ -128,6 +128,11 @@ struct SmoothBleuScorer : public LocalScorer
   score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
 };
 
+struct SmoothSingleBleuScorer : public LocalScorer
+{
+   score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
+};
+
 struct ApproxBleuScorer : public BleuScorer
 {
   NgramCounts glob_onebest_counts_;
