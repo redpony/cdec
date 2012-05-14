@@ -46,11 +46,15 @@ all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, sc
 inline void
 partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float hi_lo)
 {
-  sort(s->begin(), s->end(), cmp_hyp_by_score_d);
   unsigned sz = s->size();
+  if (sz < 2) return;
+  sort(s->begin(), s->end(), cmp_hyp_by_score_d);
   unsigned sep = round(sz*hi_lo);
-  for (unsigned i = 0; i < sep; i++) {
-    for (unsigned j = sep; j < sz; j++) {
+  unsigned sep_hi = sep;
+  if (sz > 4) while (sep_hi < sz && (*s)[sep_hi-1].score == (*s)[sep_hi].score) ++sep_hi;
+  else sep_hi = 1;
+  for (unsigned i = 0; i < sep_hi; i++) {
+    for (unsigned j = sep_hi; j < sz; j++) {
 #ifdef DTRAIN_FASTER_PERCEPTRON
       if ((*s)[i].model <= (*s)[j].model) {
 #endif
@@ -66,8 +70,10 @@ partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, scor
 #endif
     }
   }
-  for (unsigned i = sep; i < sz-sep; i++) {
-    for (unsigned j = sz-sep; j < sz; j++) {
+  unsigned sep_lo = sz-sep;
+  while (sep_lo > 0 && (*s)[sep_lo-1].score == (*s)[sep_lo].score) --sep_lo;
+  for (unsigned i = sep_hi; i < sz-sep_lo; i++) {
+    for (unsigned j = sz-sep_lo; j < sz; j++) {
 #ifdef DTRAIN_FASTER_PERCEPTRON
       if ((*s)[i].model <= (*s)[j].model) {
 #endif

@@ -33,6 +33,7 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     ("fselect",           po::value<weight_t>()->default_value(-1), "TODO select top x percent (or by threshold) of features after each epoch")
     ("approx_bleu_d",     po::value<score_t>()->default_value(0.9),                                "discount for approx. BLEU")
     ("scale_bleu_diff",   po::value<bool>()->zero_tokens(),                   "learning rate <- bleu diff of a misranked pair")
+    ("loss_margin",       po::value<weight_t>()->default_value(0.), "update if no error in pref pair but model scores this near")
 #ifdef DTRAIN_LOCAL
     ("refs,r",            po::value<string>(),                                                      "references in local mode")
 #endif
@@ -134,6 +135,8 @@ main(int argc, char** argv)
   const string select_weights = cfg["select_weights"].as<string>();
   const float hi_lo = cfg["hi_lo"].as<float>();
   const score_t approx_bleu_d = cfg["approx_bleu_d"].as<score_t>();
+  weight_t loss_margin = cfg["loss_margin"].as<weight_t>();
+  if (loss_margin > 9998.) loss_margin = std::numeric_limits<float>::max();
   bool scale_bleu_diff = false;
   if (cfg.count("scale_bleu_diff")) scale_bleu_diff = true;
   bool average = false;
@@ -160,6 +163,8 @@ main(int argc, char** argv)
     scorer = dynamic_cast<StupidBleuScorer*>(new StupidBleuScorer);
   } else if (scorer_str == "smooth_bleu") {
     scorer = dynamic_cast<SmoothBleuScorer*>(new SmoothBleuScorer);
+  } else if (scorer_str == "smooth_single_bleu") {
+    scorer = dynamic_cast<SmoothSingleBleuScorer*>(new SmoothSingleBleuScorer);
   } else if (scorer_str == "approx_bleu") {
     scorer = dynamic_cast<ApproxBleuScorer*>(new ApproxBleuScorer(N, approx_bleu_d));
   } else {
@@ -220,7 +225,7 @@ main(int argc, char** argv)
   grammar_buf_out.open(grammar_buf_fn.c_str());
 #endif
 
-  unsigned in_sz = UINT_MAX; // input index, input size
+  unsigned in_sz = std::numeric_limits<unsigned>::max(); // input index, input size
   vector<pair<score_t, score_t> > all_scores;
   score_t max_score = 0.;
   unsigned best_it = 0;
@@ -242,6 +247,7 @@ main(int argc, char** argv)
     if (!scale_bleu_diff) cerr << setw(25) << "learning rate " << eta << endl;
     else cerr << setw(25) << "learning rate " << "bleu diff" << endl;
     cerr << setw(25) << "gamma " << gamma << endl;
+    cerr << setw(25) << "loss margin " << loss_margin << endl;
     cerr << setw(25) << "pairs " << "'" << pair_sampling << "'" << endl;
     if (pair_sampling == "XYX")
       cerr << setw(25) << "hi lo " << hi_lo << endl;
@@ -427,15 +433,15 @@ main(int argc, char** argv)
 #ifdef DTRAIN_FASTER_PERCEPTRON
         bool rank_error = true; // pair filtering already did this for us
         rank_errors++;
-        score_t margin = 2.; // compiler, could you get rid of the margin?
+        score_t margin = std::numeric_limits<float>::max();
 #else
         bool rank_error = it->first.model <= it->second.model;
         if (rank_error) rank_errors++;
-        score_t margin = fabs(it->first.model - it->second.model);
-        if (!rank_error && margin < 1.) margin_violations++;
+        score_t margin = fabs(fabs(it->first.model) - fabs(it->second.model));
+        if (!rank_error && margin < loss_margin) margin_violations++;
 #endif
         if (scale_bleu_diff) eta = it->first.score - it->second.score;
-        if (rank_error || (gamma && margin<1.)) {
+        if (rank_error || margin < loss_margin) {
           SparseVector<weight_t> diff_vec = it->first.f - it->second.f;
           lambdas.plus_eq_v_times_s(diff_vec, eta);
           if (gamma)
