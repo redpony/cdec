@@ -18,31 +18,35 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#ifdef HAVE_ZLIB
+#include <zlib.h>
+#endif
+
 namespace util {
 
 ParseNumberException::ParseNumberException(StringPiece value) throw() {
   *this << "Could not parse \"" << value << "\" into a number";
 }
 
+GZException::GZException(void *file) {
 #ifdef HAVE_ZLIB
-GZException::GZException(gzFile file) {
   int num;
-  *this << gzerror( file, &num) << " from zlib";
-}
+  *this << gzerror(file, &num) << " from zlib";
 #endif // HAVE_ZLIB
+}
 
 // Sigh this is the only way I could come up with to do a _const_ bool.  It has ' ', '\f', '\n', '\r', '\t', and '\v' (same as isspace on C locale). 
 const bool kSpaces[256] = {0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 FilePiece::FilePiece(const char *name, std::ostream *show_progress, std::size_t min_buffer) : 
   file_(OpenReadOrThrow(name)), total_size_(SizeFile(file_.get())), page_(SizePage()),
-  progress_(total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + name, total_size_) {
+  progress_(total_size_, total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + name) {
   Initialize(name, show_progress, min_buffer);
 }
 
 FilePiece::FilePiece(int fd, const char *name, std::ostream *show_progress, std::size_t min_buffer)  : 
   file_(fd), total_size_(SizeFile(file_.get())), page_(SizePage()),
-  progress_(total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + name, total_size_) {
+  progress_(total_size_, total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + name) {
   Initialize(name, show_progress, min_buffer);
 }
 
@@ -149,8 +153,9 @@ template <class T> T FilePiece::ReadNumber() {
   SkipSpaces();
   while (last_space_ < position_) {
     if (at_end_) {
+      if (position_ >= position_end_) throw EndOfFileException();
       // Hallucinate a null off the end of the file.
-      std::string buffer(position_, position_end_);
+      std::string buffer(position_, position_end_ - position_);
       char *end;
       T ret;
       ParseNumber(buffer.c_str(), end, ret);

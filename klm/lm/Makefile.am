@@ -24,6 +24,7 @@ libklm_a_SOURCES = \
   search_trie.cc \
   trie.cc \
 	trie_sort.cc \
+	value_build.cc \
   virtual_interface.cc \
   vocab.cc
 
