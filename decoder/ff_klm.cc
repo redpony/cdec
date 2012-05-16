@@ -373,15 +373,17 @@ boost::shared_ptr<FeatureFunction> KLanguageModelFactory::Create(std::string par
   if (!RecognizeBinary(filename.c_str(), m)) m = HASH_PROBING;
 
   switch (m) {
-    case HASH_PROBING:
+    case PROBING:
       return CreateModel<ProbingModel>(param);
-    case TRIE_SORTED:
+    case REST_PROBING:
+      return CreateModel<RestProbingModel>(param);
+    case TRIE:
       return CreateModel<TrieModel>(param);
-    case ARRAY_TRIE_SORTED:
+    case ARRAY_TRIE:
       return CreateModel<ArrayTrieModel>(param);
-    case QUANT_TRIE_SORTED:
+    case QUANT_TRIE:
       return CreateModel<QuantTrieModel>(param);
-    case QUANT_ARRAY_TRIE_SORTED:
+    case QUANT_ARRAY_TRIE:
       return CreateModel<QuantArrayTrieModel>(param);
     default:
       UTIL_THROW(util::Exception, "Unrecognized kenlm binary file type " << (unsigned)m);
