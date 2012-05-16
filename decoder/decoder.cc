@@ -965,14 +965,14 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       {
         ReadFile rf(writer.fname_);
         bool succeeded = HypergraphIO::ReadFromJSON(rf.stream(), &new_hg);
-        assert(succeeded);
+        if (!succeeded) abort();
       }
       new_hg.Union(forest);
       bool succeeded = writer.Write(new_hg, false);
-      assert(succeeded);
+      if (!succeeded) abort();
     } else {
       bool succeeded = writer.Write(forest, false);
-      assert(succeeded);
+      if (!succeeded) abort();
     }
   }
 
@@ -1052,14 +1052,14 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
           {
             ReadFile rf(writer.fname_);
             bool succeeded = HypergraphIO::ReadFromJSON(rf.stream(), &new_hg);
-            assert(succeeded);
+            if (!succeeded) abort();
           }
           new_hg.Union(forest);
           bool succeeded = writer.Write(new_hg, false);
-          assert(succeeded);
+          if (!succeeded) abort();
         } else {
           bool succeeded = writer.Write(forest, false);
-          assert(succeeded);
+          if (!succeeded) abort();
         }
       }
       if (aligner_mode && !output_training_vector)

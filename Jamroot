@@ -18,6 +18,10 @@ if [ test_header google/dense_hash_map ] || $(with-google-hash) {
   requirements += <define>HAVE_SPARSEHASH <include>$(with-google-hash) ;
 }
 
+if [ test_header cmph.h ] || $(with-cmph) {
+  requirements += <define>HAVE_CMPH <include>$(with-cmph) ;
+}
+
 if [ test_header boost/serialization/map.hpp ] && [ test_library boost_serialization ] {
   requirements += <define>HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP ;
 }
