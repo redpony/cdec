@@ -14,7 +14,9 @@
 #include <cassert>
 #include <vector>
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include <boost/static_assert.hpp>
 #if HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP
@@ -323,7 +325,7 @@ class FastSparseVector {
     std::memcpy(&data_, t, sizeof(data_));
   }
  private:
-  static inline T& extend_vector(std::vector<T> &v,int i) {
+  static inline T& extend_vector(std::vector<T> &v,size_t i) {
     if (i>=v.size())
       v.resize(i+1);
     return v[i];
