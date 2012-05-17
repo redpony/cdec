@@ -130,4 +130,6 @@ then
   AM_CONDITIONAL([GLC], true)
 fi
 
+CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
+
 AC_OUTPUT(Makefile rst_parser/Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile phrasinator/Makefile training/Makefile training/liblbfgs/Makefile creg/Makefile dpmert/Makefile pro-train/Makefile rampion/Makefile klm/util/Makefile klm/lm/Makefile mira/Makefile dtrain/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile gi/pf/Makefile gi/markov_al/Makefile)
