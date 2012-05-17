@@ -189,7 +189,7 @@ public:
       o<<'(';
       show(o,show_mask);
       if (indent) o<<'\n';
-      for (int i=0;i<tail_nodes_.size();++i) {
+      for (unsigned i=0;i<tail_nodes_.size();++i) {
         TEdgeHandle c=re(tail_nodes_[i],i,eh);
         Edge const* cp=c;
         if (cp) {
@@ -314,7 +314,7 @@ public:
 
 private:
   void index_tails(Edge const& edge) {
-    for (int i = 0; i < edge.tail_nodes_.size(); ++i)
+    for (unsigned i = 0; i < edge.tail_nodes_.size(); ++i)
       nodes_[edge.tail_nodes_[i]].out_edges_.push_back(edge.id_);
   }
 public:
@@ -348,7 +348,7 @@ public:
     edge->rule_ = rule;
     edge->tail_nodes_ = tail;
     edge->id_ = eid;
-    for (int i = 0; i < edge->tail_nodes_.size(); ++i)
+    for (unsigned i = 0; i < edge->tail_nodes_.size(); ++i)
       nodes_[edge->tail_nodes_[i]].out_edges_.push_back(edge->id_);
     return edge;
   }

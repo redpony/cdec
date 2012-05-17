@@ -5,7 +5,10 @@
 
 #include "murmur_hash.h"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #ifdef HAVE_SPARSEHASH
 # include <google/dense_hash_map>
 # include <google/dense_hash_set>
@@ -130,8 +133,7 @@ bool maybe_add(H &ht,K const& k,typename H::mapped_type const& v) {
 // ht[k] must not exist (yet)
 template <class H,class K>
 void add(H &ht,K const& k,typename H::mapped_type const& v) {
-  bool fresh=maybe_add(ht,k,v);
-  assert(fresh);
+  maybe_add(ht,k,v);
 }
 
 
