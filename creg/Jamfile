@@ -1,0 +1,6 @@
+import lex ;
+
+exe creg : creg.cc json_feature_map_lexer.ll ..//utils ../training//liblbfgs ..//boost_program_options : <include>../training <include>. : <library>..//z ;
+
+alias programs : creg ;
+
