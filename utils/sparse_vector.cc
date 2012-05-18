@@ -23,7 +23,7 @@ void Encode(double objective, const SparseVector<double>& v, ostream* out) {
   for (const_iterator it = v.begin(); it != v.end(); ++it)
     tot_size += FD::Convert(it->first).size();   // feature names;
   tot_size += sizeof(double) * num_feats;        // gradient
-  const size_t off_magic = tot_size;
+  const size_t off_magic = tot_size; (void) off_magic;
   tot_size += 4;                                 // magic
 
   // size_t b64_size = tot_size * 4 / 3;

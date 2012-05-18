@@ -50,16 +50,16 @@ class SmallVector {
   explicit SmallVector(size_t s) {
     Alloc(s);
     if (s <= SV_MAX) {
-      for (int i = 0; i < s; ++i) new(&data_.vals[i]) T();
+      for (unsigned i = 0; i < s; ++i) new(&data_.vals[i]) T();
     } //TODO: if alloc were raw space, construct here.
   }
 
   SmallVector(size_t s, T const& v) {
     Alloc(s);
     if (s <= SV_MAX) {
-      for (int i = 0; i < s; ++i) data_.vals[i] = v;
+      for (unsigned i = 0; i < s; ++i) data_.vals[i] = v;
     } else {
-      for (int i = 0; i < size_; ++i) data_.ptr[i] = v;
+      for (unsigned i = 0; i < size_; ++i) data_.ptr[i] = v;
     }
   }
 
@@ -69,9 +69,9 @@ class SmallVector {
     int s=end-begin;
     Alloc(s);
     if (s <= SV_MAX) {
-      for (int i = 0; i < s; ++i,++begin) data_.vals[i] = *begin;
+      for (unsigned i = 0; i < s; ++i,++begin) data_.vals[i] = *begin;
     } else
-      for (int i = 0; i < s; ++i,++begin) data_.ptr[i] = *begin;
+      for (unsigned i = 0; i < s; ++i,++begin) data_.ptr[i] = *begin;
   }
 
   SmallVector(const Self& o) : size_(o.size_) {
@@ -106,7 +106,7 @@ class SmallVector {
     if (size_ <= SV_MAX) {
       if (o.size_ <= SV_MAX) {
         size_ = o.size_;
-        for (int i = 0; i < SV_MAX; ++i) data_.vals[i] = o.data_.vals[i];
+        for (unsigned i = 0; i < SV_MAX; ++i) data_.vals[i] = o.data_.vals[i];
       } else {
         capacity_ = size_ = o.size_;
         data_.ptr = new T[capacity_];
@@ -116,7 +116,7 @@ class SmallVector {
       if (o.size_ <= SV_MAX) {
         delete[] data_.ptr;
         size_ = o.size_;
-        for (int i = 0; i < size_; ++i) data_.vals[i] = o.data_.vals[i];
+        for (unsigned i = 0; i < size_; ++i) data_.vals[i] = o.data_.vals[i];
       } else {
         if (capacity_ < o.size_) {
           delete[] data_.ptr;
@@ -124,7 +124,7 @@ class SmallVector {
           data_.ptr = new T[capacity_];
         }
         size_ = o.size_;
-        for (int i = 0; i < size_; ++i)
+        for (unsigned i = 0; i < size_; ++i)
           data_.ptr[i] = o.data_.ptr[i];
       }
     }
@@ -135,7 +135,7 @@ class SmallVector {
     if (size_ <= SV_MAX) {
       // skip if pod?  yes, we required pod anyway.  no need to destruct
 #if !SMALL_VECTOR_POD
-      for (int i=0;i<size_;++i) data_.vals[i].~T();
+      for (unsigned i=0;i<size_;++i) data_.vals[i].~T();
 #endif
     } else
       delete[] data_.ptr;
@@ -166,13 +166,13 @@ private:
   inline void copy_vals_to_ptr() {
     capacity_ = SV_MAX * 2;
     T* tmp = new T[capacity_];
-    for (int i = 0; i < SV_MAX; ++i) tmp[i] = data_.vals[i];
+    for (unsigned i = 0; i < SV_MAX; ++i) tmp[i] = data_.vals[i];
     data_.ptr = tmp;
   }
   inline void ptr_to_small() {
     assert(size_<=SV_MAX);
     int *tmp=data_.ptr;
-    for (int i=0;i<size_;++i)
+    for (unsigned i=0;i<size_;++i)
       data_.vals[i]=tmp[i];
     delete[] tmp;
   }
@@ -224,7 +224,7 @@ public:
     if (s <= SV_MAX) {
       if (size_ > SV_MAX) {
         T *tmp=data_.ptr;
-        for (int i = 0; i < s; ++i) data_.vals[i] = tmp[i];
+        for (unsigned i = 0; i < s; ++i) data_.vals[i] = tmp[i];
         delete[] tmp;
         size_ = s;
         return;
@@ -233,7 +233,7 @@ public:
         size_ = s;
         return;
       } else {
-        for (int i = size_; i < s; ++i)
+        for (unsigned i = size_; i < s; ++i)
           data_.vals[i] = v;
         size_ = s;
         return;
@@ -244,7 +244,7 @@ public:
       if (s > capacity_)
         ensure_capacity(s);
       if (s > size_) {
-        for (int i = size_; i < s; ++i)
+        for (unsigned i = size_; i < s; ++i)
           data_.ptr[i] = v;
       }
       size_ = s;

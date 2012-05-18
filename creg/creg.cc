@@ -65,7 +65,7 @@ void ReaderCB(const string& id, const SparseVector<float>& fmap, void* extra) {
   if (rh.lc % 40000 == 0) { cerr << " [" << rh.lc << "]\n"; rh.flag = false; }
   const unordered_map<string, unsigned>::iterator it = rh.id2ind.find(id);
   if (it == rh.id2ind.end()) {
-    cerr << "Unlabeled example in line " << rh.lc << endl;
+    cerr << "Unlabeled example in line " << rh.lc << " (key=" << id << ')' << endl;
     abort();
   }
   (*rh.xy_pairs)[it->second - 1].x = fmap;

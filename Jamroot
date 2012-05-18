@@ -18,16 +18,21 @@ if [ test_header google/dense_hash_map ] || $(with-google-hash) {
   requirements += <define>HAVE_SPARSEHASH <include>$(with-google-hash) ;
 }
 
+if [ test_header cmph.h ] || $(with-cmph) {
+  requirements += <define>HAVE_CMPH <include>$(with-cmph) ;
+}
+
 if [ test_header boost/serialization/map.hpp ] && [ test_library boost_serialization ] {
   requirements += <define>HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP ;
 }
 
-project : requirements $(requirements) ;
+# project : requirements $(requirements) ;
+project : requirements $(requirements) <toolset>darwin:<link>static ;
 project : default-build <threading>single <warnings>on <variant>release ;
 
-install-bin-libs utils//programs mteval//programs klm/lm//programs decoder//cdec phrasinator//programs ;
+install-bin-libs utils//programs mteval//programs klm/lm//programs training//liblbfgs decoder//cdec creg//creg phrasinator//programs ;
 
-build-projects mteval decoder klm/lm ;
+build-projects mteval decoder klm/lm training/liblbfgs creg ;
 
 #Compile everything ending with _test.cc into a test and run it.
 rule all_tests ( targets * : dependencies : properties * ) {
