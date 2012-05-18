@@ -29,9 +29,9 @@ if [ test_header boost/serialization/map.hpp ] && [ test_library boost_serializa
 project : requirements $(requirements) ;
 project : default-build <threading>single <warnings>on <variant>release ;
 
-install-bin-libs utils//programs mteval//programs klm/lm//programs decoder//cdec phrasinator//programs ;
+install-bin-libs utils//programs mteval//programs klm/lm//programs training//liblbfgs decoder//cdec creg//creg phrasinator//programs ;
 
-build-projects mteval decoder klm/lm ;
+build-projects mteval decoder klm/lm training/liblbfgs creg ;
 
 #Compile everything ending with _test.cc into a test and run it.
 rule all_tests ( targets * : dependencies : properties * ) {
