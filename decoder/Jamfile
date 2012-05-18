@@ -61,9 +61,14 @@ lib cdec_lib :
   ../klm/lm//kenlm
   ..//boost_program_options
   : <include>.
+  : :
+  <library>..//utils
+  <library>..//mteval
+  <library>../klm/lm//kenlm
+  <library>..//boost_program_options
   ;
 
-exe cdec : cdec.cc cdec_lib ;
+exe cdec : cdec.cc cdec_lib ..//utils ..//mteval ../klm/lm//kenlm ..//boost_program_options ;
 
 all_tests [ glob *_test.cc : cfg_test.cc ] : cdec_lib : <testing.arg>$(TOP)/decoder/test_data ;
 

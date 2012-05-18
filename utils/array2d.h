@@ -155,7 +155,7 @@ inline std::ostream& operator<<(std::ostream& os, const Array2D<std::vector<bool
     os << (i%10);
     for (int j=0; j<m.height(); ++j) {
       const std::vector<bool>& ar = m(i,j);
-      for (int k=0; k<ar.size(); ++k)
+      for (unsigned k=0; k<ar.size(); ++k)
         os << (ar[k] ? '*' : '.');
     }
     os << "\t";

@@ -77,6 +77,11 @@ UNESCAPED_CH [^\"\\\b\n\r\f\t]
 
 <JSON>{WS}*{LCB}{WS}*                    { BEGIN(PREVAL); }
 
+<JSON>{WS}*{LCB}{WS}*{RCB}\n*            {const SparseVector<float> x;
+                                         json_fmap_callback(instid, x, json_fmap_callback_extra);
+                                         curfeat = 0;
+                                         BEGIN(INITIAL);}
+
 <PREVAL>\"                               { BEGIN(STRING); spos=0; }
 
 <STRING>\"                               { featname[spos] = 0;
@@ -92,7 +97,8 @@ UNESCAPED_CH [^\"\\\b\n\r\f\t]
 <STRING>\\n                              { }
 <STRING>\\r                              { }
 <STRING>\\t                              { }
-<STRING>\\u{HEX_D}{HEX_D}{HEX_D}{HEX_D}  { abort();
+<STRING>\\u{HEX_D}{HEX_D}{HEX_D}{HEX_D}  { uint16_t hex = strtol(&yytext[2], NULL, 16);
+                                           spos += unicode_escape_to_utf8(hex, 0, &featname[spos++])-1;
                                          }
 
 <JSONVAL>{WS}*:{WS}*                     { BEGIN(DOUBLE); }
@@ -129,4 +135,3 @@ int main() {
   JSONFeatureMapLexer::ReadRules(&std::cin, cb, NULL);
 }
 #endif
-
