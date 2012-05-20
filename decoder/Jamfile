@@ -6,7 +6,7 @@ if [ option.get "with-glc" ] {
   glc = ff_glc.cc string_util.cc feature-factory.cc ;
 }
 
-lib cdec_lib : 
+lib decoder : 
   forest_writer.cc
   maxtrans_blunsom.cc
   cdec_ff.cc
@@ -66,11 +66,12 @@ lib cdec_lib :
   <library>..//mteval
   <library>../klm/lm//kenlm
   <library>..//boost_program_options
+  <include>.
   ;
 
-exe cdec : cdec.cc cdec_lib ..//utils ..//mteval ../klm/lm//kenlm ..//boost_program_options ;
+exe cdec : cdec.cc decoder ..//utils ..//mteval ../klm/lm//kenlm ..//boost_program_options ;
 
-all_tests [ glob *_test.cc : cfg_test.cc ] : cdec_lib : <testing.arg>$(TOP)/decoder/test_data ;
+all_tests [ glob *_test.cc : cfg_test.cc ] : decoder : <testing.arg>$(TOP)/decoder/test_data ;
 
 install legacy : cdec
   : <location>$(TOP)/cdec <install-type>EXE <install-dependencies>on <link>shared:<dll-path>$(TOP)/cdec <link>shared:<install-type>LIB ;
