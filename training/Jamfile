@@ -19,7 +19,7 @@ lib training :
 
 exe model1 : model1.cc : <include>../decoder ;
 
-# // all_tests [ glob *_test.cc ] : cdec_lib : <testing.arg>$(TOP)/decoder/test_data ;
+# // all_tests [ glob *_test.cc ] : ..//decoder : <testing.arg>$(TOP)/decoder/test_data ;
 
 alias programs : model1 ;
 
