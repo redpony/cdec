@@ -48,6 +48,13 @@ Next
 + make svm doable; no subgradient?
 + reranking while sgd?
 + try PRO, mira emulations
++ sampling (MBR)
++ forest (on train)?
++ best BLEU transl (Sokolov)?
++ entire reg. path
++ resharding [nfold cross val.]
++ bigger LM, feats (target side Ng., word alignments etc.)
++ merge kbest lists
 
 Legal
 -----
