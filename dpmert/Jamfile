@@ -28,3 +28,5 @@ exe sentclient : sentclient.c ;
 exe mr_dpmert_generate_mapper_input : mr_dpmert_generate_mapper_input.cc dpmert ..//boost_program_options ;
 exe mr_dpmert_map : mr_dpmert_map.cc dpmert ..//boost_program_options ;
 exe mr_dpmert_reduce : mr_dpmert_reduce.cc dpmert ..//boost_program_options ;
+
+alias programs : sentserver sentclient mr_dpmert_generate_mapper_input mr_dpmert_map mr_dpmert_reduce ;
