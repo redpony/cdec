@@ -229,13 +229,13 @@ template <>
 struct null_for<RHS> {
   static RHS null;
 };
+
+template <>
+BinRhs null_traits<BinRhs>::xnull(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
+
+template <>
+RHS null_traits<RHS>::xnull(1,std::numeric_limits<int>::min());
 */
-
-template <>
-BinRhs null_traits<BinRhs>::null(std::numeric_limits<int>::min(),std::numeric_limits<int>::min());
-
-template <>
-RHS null_traits<RHS>::null(1,std::numeric_limits<int>::min());
 
 template <class Rhs>
 struct add_virtual_rules {
@@ -250,7 +250,7 @@ struct add_virtual_rules {
   R2L rhs2lhs; // an rhs maps to this -virtntid, or original id if length 1
   bool name_nts;
   add_virtual_rules(CFG &cfg,bool name_nts=false) : nts(cfg.nts),rules(cfg.rules),newnt(-nts.size()),newruleid(rules.size()),name_nts(name_nts) {
-    HASH_MAP_EMPTY(rhs2lhs,null_traits<Rhs>::null);
+    HASH_MAP_EMPTY(rhs2lhs,null_traits<Rhs>::xnull);
   }
   NTHandle get_virt(Rhs const& r) {
     NTHandle nt=get_default(rhs2lhs,r,newnt);
