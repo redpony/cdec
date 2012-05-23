@@ -25,6 +25,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("weights,w", po::value<string>(), "Weights from previous iteration (used as initialization and interpolation")
         ("regularization_strength,C",po::value<double>()->default_value(500.0), "l2 regularization strength")
+        ("l1",po::value<double>()->default_value(0.0), "l1 regularization strength")
         ("regularize_to_weights,y",po::value<double>()->default_value(5000.0), "Differences in learned weights to previous weights are penalized with an l2 penalty with this strength; 0.0 = no effect")
         ("memory_buffers,m",po::value<unsigned>()->default_value(100), "Number of memory buffers (LBFGS)")
         ("min_reg,r",po::value<double>()->default_value(0.01), "When tuning (-T) regularization strength, minimum regularization strenght")
@@ -180,12 +181,13 @@ struct ProLoss {
 double LearnParameters(const vector<pair<bool, SparseVector<weight_t> > >& training,
                        const vector<pair<bool, SparseVector<weight_t> > >& testing,
                        const double C,
+                       const double C1,
                        const double T,
                        const unsigned memory_buffers,
                        const vector<weight_t>& prev_x,
                        vector<weight_t>* px) {
   ProLoss loss(training, testing, C, T, prev_x);
-  LBFGS<ProLoss> lbfgs(px, loss, 0.0, memory_buffers);
+  LBFGS<ProLoss> lbfgs(px, loss, C1, memory_buffers);
   lbfgs.MinimizeFunction();
   return loss.tppl;
 }
@@ -203,6 +205,7 @@ int main(int argc, char** argv) {
   const double min_reg = conf["min_reg"].as<double>();
   const double max_reg = conf["max_reg"].as<double>();
   double C = conf["regularization_strength"].as<double>(); // will be overridden if parameter is tuned
+  double C1 = conf["l1"].as<double>(); // will be overridden if parameter is tuned
   const double T = conf["regularize_to_weights"].as<double>();
   assert(C >= 0.0);
   assert(min_reg >= 0.0);
@@ -239,7 +242,7 @@ int main(int argc, char** argv) {
     cerr << "SWEEP FACTOR: " << sweep_factor << endl;
     while(C < max_reg) {
       cerr << "C=" << C << "\tT=" <<T << endl;
-      tppl = LearnParameters(training, testing, C, T, conf["memory_buffers"].as<unsigned>(), prev_x, &x);
+      tppl = LearnParameters(training, testing, C, C1, T, conf["memory_buffers"].as<unsigned>(), prev_x, &x);
       sp.push_back(make_pair(C, tppl));
       C *= sweep_factor;
     }
@@ -262,7 +265,7 @@ int main(int argc, char** argv) {
     }
     C = sp[best_i].first;
   }  // tune regularizer
-  tppl = LearnParameters(training, testing, C, T, conf["memory_buffers"].as<unsigned>(), prev_x, &x);
+  tppl = LearnParameters(training, testing, C, C1, T, conf["memory_buffers"].as<unsigned>(), prev_x, &x);
   if (conf.count("weights")) {
     for (int i = 1; i < x.size(); ++i) {
       x[i] = (x[i] * psi) + prev_x[i] * (1.0 - psi);

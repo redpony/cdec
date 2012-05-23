@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(TestConvexHullInside) {
     if (!d) break;
     cerr << log(d->score) << " ||| " << TD::GetString(d->yield) << " ||| " << d->feature_values << endl;
   }
-  for (int i = 0; i < segs.size(); ++i) {
+  for (unsigned i = 0; i < segs.size(); ++i) {
     cerr << "seg=" << i << endl;
     vector<WordID> trans;
     segs[i]->ConstructTranslation(&trans);
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE( TestS1) {
      &rng,
      &axes);
   assert(axes.size() == 10 + to_optimize.size());
-  for (int i = 0; i < axes.size(); ++i)
+  for (unsigned i = 0; i < axes.size(); ++i)
     cerr << axes[i] << endl;
   const SparseVector<double>& axis = axes[0];
 

@@ -488,13 +488,13 @@ int getInt(const std::string& in, int &c)
 #define MAX_NODES 100000000
 // parse ('foo', 0.23)
 void ReadPLFEdge(const std::string& in, int &c, int cur_node, Hypergraph* hg) {
-  if (get(in,c++) != '(') { assert(!"PCN/PLF parse error: expected ( at start of cn alt block\n"); }
+  if (get(in,c++) != '(') { cerr << "PCN/PLF parse error: expected (\n"; abort(); }
   vector<WordID> ewords(2, 0);
   ewords[1] = TD::Convert(getEscapedString(in,c));
   TRulePtr r(new TRule(ewords));
   r->ComputeArity();
   // cerr << "RULE: " << r->AsString() << endl;
-  if (get(in,c++) != ',') { cerr << in << endl; assert(!"PCN/PLF parse error: expected , after string\n"); }
+  if (get(in,c++) != ',') { cerr << in << endl; cerr << "PCN/PLF parse error: expected , after string\n"; abort(); }
   size_t cnNext = 1;
   std::vector<float> probs;
   probs.push_back(getFloat(in,c));
@@ -508,10 +508,9 @@ void ReadPLFEdge(const std::string& in, int &c, int cur_node, Hypergraph* hg) {
   if (probs.size()>1) {
     cnNext = static_cast<size_t>(probs.back());
     probs.pop_back();
-    if (cnNext < 1) { cerr << cnNext << endl;
-             assert(!"PCN/PLF parse error: bad link length at last element of cn alt block\n"); }
+    if (cnNext < 1) { cerr << cnNext << endl << "PCN/PLF parse error: bad link length at last element of cn alt block\n"; abort(); }
   }
-  if (get(in,c++) != ')') { assert(!"PCN/PLF parse error: expected ) at end of cn alt block\n"); }
+  if (get(in,c++) != ')') { cerr << "PCN/PLF parse error: expected ) at end of cn alt block\n"; abort(); }
   eatws(in,c);
   Hypergraph::TailNodeVector tail(1, cur_node);
   Hypergraph::Edge* edge = hg->AddEdge(r, tail);

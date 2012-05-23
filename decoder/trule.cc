@@ -18,7 +18,7 @@ bool TRule::IsGoal() const {
 }
 
 static WordID ConvertTrgString(const string& w) {
-  int len = w.size();
+  const unsigned len = w.size();
   WordID id = 0;
   // [X,0] or [0]
   // for target rules, we ignore the category, just keep the index
@@ -33,7 +33,7 @@ static WordID ConvertTrgString(const string& w) {
 }
 
 static WordID ConvertSrcString(const string& w, bool mono = false) {
-  int len = w.size();
+  const unsigned len = w.size();
   // [X,0]
   // for source rules, we keep the category and ignore the index (source rules are
   // always numbered 1, 2, 3...
@@ -60,7 +60,7 @@ static WordID ConvertSrcString(const string& w, bool mono = false) {
 
 static WordID ConvertLHS(const string& w) {
   if (w[0] == '[') {
-    int len = w.size();
+    const unsigned len = w.size();
     if (len < 3) { cerr << "Format error: " << w << endl; exit(1); }
     return TD::Convert(w.substr(1, len-2)) * -1;
   } else {
@@ -143,15 +143,15 @@ bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
       string ss;
       getline(is, ss);
       //cerr << "L: " << ss << endl;
-      int start = 0;
-      int len = ss.size();
+      unsigned start = 0;
+      unsigned len = ss.size();
       const size_t ppos = ss.find(" |||");
       if (ppos != string::npos) { len = ppos; }
       while (start < len) {
         while(start < len && (ss[start] == ' ' || ss[start] == ';'))
           ++start;
         if (start == len) break;
-        int end = start + 1;
+        unsigned end = start + 1;
         while(end < len && (ss[end] != '=' && ss[end] != ' ' && ss[end] != ';'))
           ++end;
         if (end == len || ss[end] == ' ' || ss[end] == ';') {
@@ -188,7 +188,7 @@ bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
     while(is>>w && w!="|||") { e_.push_back(ConvertTrgString(w)); }
     f_ = e_;
     int x = ConvertLHS("[X]");
-    for (int i = 0; i < f_.size(); ++i)
+    for (unsigned i = 0; i < f_.size(); ++i)
       if (f_[i] <= 0) { f_[i] = x; }
   } else {
     cerr << "F: " << format << endl;
@@ -197,7 +197,7 @@ bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
   if (mono) {
     e_ = f_;
     int ci = 0;
-    for (int i = 0; i < e_.size(); ++i)
+    for (unsigned i = 0; i < e_.size(); ++i)
       if (e_[i] < 0)
         e_[i] = ci--;
   }
@@ -208,7 +208,7 @@ bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
 bool TRule::SanityCheck() const {
   vector<int> used(f_.size(), 0);
   int ac = 0;
-  for (int i = 0; i < e_.size(); ++i) {
+  for (unsigned i = 0; i < e_.size(); ++i) {
     int ind = e_[i];
     if (ind > 0) continue;
     ind = -ind;
@@ -238,7 +238,7 @@ string TRule::AsString(bool verbose) const {
   if (lhs_ && verbose) {
     os << '[' << TD::Convert(lhs_ * -1) << "] |||";
   }
-  for (int i = 0; i < f_.size(); ++i) {
+  for (unsigned i = 0; i < f_.size(); ++i) {
     const WordID& w = f_[i];
     if (w < 0) {
       int wi = w * -1;
@@ -249,7 +249,7 @@ string TRule::AsString(bool verbose) const {
     }
   }
   os << " ||| ";
-  for (int i =0; i<e_.size(); ++i) {
+  for (unsigned i =0; i<e_.size(); ++i) {
     if (i) os << ' ';
     const WordID& w = e_[i];
     if (w < 1)
@@ -261,7 +261,7 @@ string TRule::AsString(bool verbose) const {
     os << " ||| " << scores_;
     if (!a_.empty()) {
       os << " |||";
-      for (int i = 0; i < a_.size(); ++i)
+      for (unsigned i = 0; i < a_.size(); ++i)
         os << ' ' << a_[i];
     }
   }

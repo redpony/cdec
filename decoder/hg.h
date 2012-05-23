@@ -396,7 +396,7 @@ public:
   // (inner product) to set the edge probabilities
   template <class V>
   void Reweight(const V& weights) {
-    for (int i = 0; i < edges_.size(); ++i) {
+    for (unsigned i = 0; i < edges_.size(); ++i) {
       Edge& e = edges_[i];
       e.edge_prob_.logeq(e.feature_values_.dot(weights));
     }
