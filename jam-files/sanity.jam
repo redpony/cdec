@@ -74,6 +74,7 @@ if $(with-macports) {
 }
 else {
   with-boost = [ option.get "with-boost" ] ;
+  with-boost ?= [ os.environ "BOOST_ROOT" ] ;
   if $(with-boost) {
     L-boost-search = -L$(with-boost)/lib" "-L$(with-boost)/lib64 ;
     boost-search = <search>$(with-boost)/lib <search>$(with-boost)/lib64 ;
