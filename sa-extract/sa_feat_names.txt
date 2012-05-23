@@ -1,0 +1,7 @@
+EGivenFCoherent
+SampleCountF
+CountEF
+MaxLexFGivenE
+MaxLexEGivenF
+IsSingletonF
+IsSingletonFE
