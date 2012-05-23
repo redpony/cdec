@@ -41,6 +41,8 @@ DTRAIN_LOCAL.
 
 Next
 ----
++ approx. Bleu?
++ turn off inclusion
 + (dtrain|decoder) more meta-parameters testing
 + feature selection directly in dtrain
 + feature template: target side rule ngrams
