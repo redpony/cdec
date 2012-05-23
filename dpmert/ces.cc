@@ -25,7 +25,7 @@ void ComputeErrorSurface(const SegmentEvaluator& ss,
   env->resize(ienv.size());
   SufficientStats prev_score; // defaults to 0
   int j = 0;
-  for (int i = 0; i < ienv.size(); ++i) {
+  for (unsigned i = 0; i < ienv.size(); ++i) {
     const MERTPoint& seg = *ienv[i];
     vector<WordID> trans;
 #if 0

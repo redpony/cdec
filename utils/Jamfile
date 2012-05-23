@@ -24,11 +24,9 @@ lib utils :
   ..//z
   : <include>.. <include>. : : <include>.. <include>. ;
 
-exe ts : ts.cc utils ;
 exe atools : atools.cc utils ..//boost_program_options ;
-exe phmt : phmt.cc utils ;
 exe reconstruct_weights : reconstruct_weights.cc utils ..//boost_program_options ;
 
 alias programs : reconstruct_weights atools ;
 
-all_tests : utils ;
+all_tests [ glob *_test.cc phmt.cc ts.cc ] : utils : <testing.arg>$(TOP)/utils/test_data ;

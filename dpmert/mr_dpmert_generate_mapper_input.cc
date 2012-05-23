@@ -52,12 +52,15 @@ int main(int argc, char** argv) {
   Weights::InitFromFile(conf["weights"].as<string>(), &w, &features);
   Weights::InitSparseVector(w, &origin);
   const string forest_repository = conf["forest_repository"].as<string>();
-  assert(DirectoryExists(forest_repository));
+  if (!DirectoryExists(forest_repository)) {
+    cerr << "Forest repository directory " << forest_repository << " not found!\n";
+    return 1;
+  }
   if (conf.count("optimize_feature") > 0)
     features=conf["optimize_feature"].as<vector<string> >();
   vector<SparseVector<weight_t> > directions;
   vector<int> fids(features.size());
-  for (int i = 0; i < features.size(); ++i)
+  for (unsigned i = 0; i < features.size(); ++i)
     fids[i] = FD::Convert(features[i]);
   LineOptimizer::CreateOptimizationDirections(
      fids,
