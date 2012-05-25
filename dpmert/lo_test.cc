@@ -118,13 +118,15 @@ BOOST_AUTO_TEST_CASE( TestS1) {
   to_optimize.push_back(fPhraseModel_1);
   to_optimize.push_back(fPhraseModel_2);
 
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : "test_data");
+
   Hypergraph hg;
-  ReadFile rf("./test_data/0.json.gz");
+  ReadFile rf(path + "/0.json.gz");
   HypergraphIO::ReadFromJSON(rf.stream(), &hg);
   hg.Reweight(wts);
 
   Hypergraph hg2;
-  ReadFile rf2("./test_data/1.json.gz");
+  ReadFile rf2(path + "/1.json.gz");
   HypergraphIO::ReadFromJSON(rf2.stream(), &hg2);
   hg2.Reweight(wts);
 
