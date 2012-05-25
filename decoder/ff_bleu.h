@@ -6,7 +6,6 @@
 
 #include "hg.h"
 #include "ff.h"
-#include "config.h"
 
 class BLEUModelImpl;
 
