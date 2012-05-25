@@ -87,6 +87,8 @@ else {
     boost-include = ;
   }
 }
+
+requirements = ;
  
 #Are we linking static binaries against shared boost?
 boost-auto-shared = [ auto-shared "boost_program_options" : $(L-boost-search) ] ;
@@ -96,8 +98,15 @@ rule boost-lib ( name macro ) {
   #versions of boost do not have -mt tagged versions of all libraries.   Sadly,
   #boost.jam does not handle this correctly.  
   if [ test_flags $(L-boost-search)" -lboost_"$(name)"-mt" ] {
-    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name) ;
-    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt ;
+#    if [ test_flags $(L-boost-search)" -lboost_"$(name) ] {
+#      lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name) ;
+#      lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt ;
+#    } else {
+      if ! <threading>multi in $(requirements) {
+        requirements += <threading>multi ;
+      }
+      lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt ;
+#    }
   } else {
     lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name) ;
   }
@@ -149,7 +158,6 @@ rule external-lib ( name : search-path * ) {
   local ignored = @($(build-log):E=$(script)) ;
 }
 
-requirements = ;
 {
   #Boost jam's static clang is buggy.  
   requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <toolset>clang:<link>shared ;
