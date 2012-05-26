@@ -31,7 +31,7 @@ project : default-build <warnings>on <variant>release ;
 
 install-bin-libs dpmert//programs utils//programs mteval//programs klm/lm//programs training//liblbfgs decoder//cdec creg//creg phrasinator//programs mira//kbest_mira ;
 
-build-projects mteval decoder dpmert klm/lm training/liblbfgs creg ;
+build-projects mteval decoder dpmert klm/lm training/liblbfgs ;
 
 #Compile everything ending with _test.cc into a test and run it.
 rule all_tests ( targets * : dependencies : properties * ) {

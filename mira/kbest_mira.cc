@@ -5,8 +5,6 @@
 #include <cmath>
 #include <tr1/memory>
 
-#include "config.h"
-
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
