@@ -1,0 +1,6 @@
+Glue -0.1
+WordPenalty -1.0
+EGivenFCoherent -0.25
+PassThrough -0.35
+LanguageModel 0.30
+LanguageModel_OOV -1.25
