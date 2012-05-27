@@ -10,11 +10,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdint.h>
-#include <unistd.h>
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 #include <io.h>
+#else
+#include <unistd.h>
 #endif
 
 namespace util {
