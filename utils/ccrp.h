@@ -232,7 +232,7 @@ class CCRP {
     if (num_customers() == 0) return;
     DiscountResampler dr(*this);
     StrengthResampler sr(*this);
-    for (int iter = 0; iter < nloop; ++iter) {
+    for (unsigned iter = 0; iter < nloop; ++iter) {
       if (has_strength_prior()) {
         strength_ = slice_sampler1d(sr, strength_, *rng, -discount_ + std::numeric_limits<double>::min(),
                                std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);

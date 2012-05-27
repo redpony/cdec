@@ -45,11 +45,11 @@ void Weights::InitFromFile(const string& filename,
       }
       for (int i = buf.size() - 1; i > 0; --i)
         if (buf[i] == '=' || buf[i] == '\t') { buf[i] = ' '; break; }
-      int start = 0;
+      unsigned start = 0;
       while(start < buf.size() && buf[start] == ' ') ++start;
-      int end = 0;
+      unsigned end = 0;
       while(end < buf.size() && buf[end] != ' ') ++end;
-      const int fid = FD::Convert(buf.substr(start, end - start));
+      const unsigned fid = FD::Convert(buf.substr(start, end - start));
       if (feature_list) { feature_list->push_back(buf.substr(start, end - start)); }
       while(end < buf.size() && buf[end] == ' ') ++end;
       val = strtod(&buf.c_str()[end], NULL);
@@ -73,7 +73,7 @@ void Weights::InitFromFile(const string& filename,
   } else {   // !read_text
     char buf[6];
     in.read(buf, 5);
-    size_t num_keys;
+    int num_keys;
     in.read(reinterpret_cast<char*>(&num_keys), sizeof(size_t));
     if (num_keys != FD::NumFeats()) {
       cerr << "Hash function reports " << FD::NumFeats() << " keys but weights file contains " << num_keys << endl;
@@ -102,8 +102,8 @@ void Weights::WriteToFile(const string& fname,
   if (write_text) {
     if (extra) { o << "# " << *extra << endl; }
     o.precision(17);
-    const int num_feats = FD::NumFeats();
-    for (int i = 1; i < num_feats; ++i) {
+    const unsigned num_feats = FD::NumFeats();
+    for (unsigned i = 1; i < num_feats; ++i) {
       const weight_t val = (i < weights.size() ? weights[i] : 0.0);
       if (hide_zero_value_features && val == 0.0) continue;
       o << FD::Convert(i) << ' ' << val << endl;
@@ -126,7 +126,7 @@ void Weights::InitSparseVector(const vector<weight_t>& dv,
 }
 
 void Weights::SanityCheck(const vector<weight_t>& w) {
-  for (int i = 0; i < w.size(); ++i) {
+  for (unsigned i = 0; i < w.size(); ++i) {
     assert(!isnan(w[i]));
     assert(!isinf(w[i]));
   }
@@ -142,7 +142,7 @@ struct FComp {
 
 void Weights::ShowLargestFeatures(const vector<weight_t>& w) {
   vector<int> fnums(w.size());
-  for (int i = 0; i < w.size(); ++i)
+  for (unsigned i = 0; i < w.size(); ++i)
     fnums[i] = i;
   int nf = FD::NumFeats();
   if (nf > 10) nf = 10;

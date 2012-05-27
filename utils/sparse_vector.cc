@@ -32,7 +32,7 @@ void Encode(double objective, const SparseVector<double>& v, ostream* out) {
   *reinterpret_cast<double*>(&data[off_objective]) = objective;
   *reinterpret_cast<int*>(&data[off_num_feats]) = num_feats;
   char* cur = &data[off_data];
-  assert(cur - data == off_data);
+  assert(static_cast<size_t>(cur - data) == off_data);
   for (const_iterator it = v.begin(); it != v.end(); ++it) {
     const string& fname = FD::Convert(it->first);
     *cur++ = static_cast<char>(fname.size());   // name len
@@ -41,10 +41,10 @@ void Encode(double objective, const SparseVector<double>& v, ostream* out) {
     *reinterpret_cast<double*>(cur) = it->second;
     cur += sizeof(double);
   }
-  assert(cur - data == off_magic);
+  assert(static_cast<size_t>(cur - data) == off_magic);
   *reinterpret_cast<unsigned int*>(cur) = 0xBAABABBAu;
   cur += sizeof(unsigned int);
-  assert(cur - data == tot_size);
+  assert(static_cast<size_t>(cur - data) == tot_size);
   b64encode(data, tot_size, out);
   delete[] data;
 }

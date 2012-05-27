@@ -316,6 +316,7 @@ inline void swap(SmallVector<T,M> &a,SmallVector<T,M> &b) {
 }
 
 typedef SmallVector<int,2> SmallVectorInt;
+typedef SmallVector<unsigned,2> SmallVectorUnsigned;
 
 template <class T,int M>
 void memcpy(void *out,SmallVector<T,M> const& v) {

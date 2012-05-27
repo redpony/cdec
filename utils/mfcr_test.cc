@@ -4,11 +4,17 @@
 #include <cassert>
 #include <cmath>
 
+#define BOOST_TEST_MODULE MFCRTest
+#include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+
 #include "sampler.h"
 
 using namespace std;
 
-void test_exch(MT19937* rng) {
+BOOST_AUTO_TEST_CASE(Exchangability) {
+  MT19937 r;
+  MT19937* rng = &r;
   MFCR<2, int> crp(0.5, 3.0);
   vector<double> lambdas(2);
   vector<double> p0s(2);
@@ -63,10 +69,4 @@ void test_exch(MT19937* rng) {
   assert(error < 0.05);   // these can fail with very low probability
   assert(error2 < 0.05);
 };
-
-int main(int argc, char** argv) {
-  MT19937 rng;
-  test_exch(&rng);
-  return 0;
-}
 

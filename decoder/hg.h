@@ -43,7 +43,7 @@ public:
   Hypergraph() : is_linear_chain_(false) {}
 
   // SmallVector is a fast, small vector<int> implementation for sizes <= 2
-  typedef SmallVectorInt TailNodeVector; // indices in nodes_
+  typedef SmallVectorUnsigned TailNodeVector; // indices in nodes_
   typedef std::vector<int> EdgesVector; // indices in edges_
 
   // TODO get rid of cat_?
@@ -457,8 +457,6 @@ public:
 
   void PruneUnreachable(int goal_node_id); // DEPRECATED
 
-  void RemoveNoncoaccessibleStates(int goal_node_id = -1);
-
   // remove edges from the hypergraph if prune_edge[edge_id] is true
   // note: if run_inside_algorithm is false, then consumers may be unhappy if you pruned nodes that are built on by nodes that are kept.
   void PruneEdges(const EdgeMask& prune_edge, bool run_inside_algorithm = false);
@@ -524,7 +522,7 @@ public:
 
   template <class V>
   void visit_edges(V &v) {
-    for (int i=0;i<edges_.size();++i)
+    for (unsigned i=0;i<edges_.size();++i)
       v(edges_[i].head_node_,i,edges_[i]);
   }
 
