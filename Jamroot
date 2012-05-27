@@ -31,6 +31,8 @@ project : default-build <warnings>on <variant>release ;
 
 install-bin-libs dpmert//programs utils//programs mteval//programs klm/lm//programs training//liblbfgs decoder//cdec phrasinator//programs mira//kbest_mira ;
 
+install perl-scripts : dpmert//dpmert.pl : <location>$(bindir) ;
+
 build-projects mteval decoder dpmert klm/lm training/liblbfgs ;
 
 #Compile everything ending with _test.cc into a test and run it.
