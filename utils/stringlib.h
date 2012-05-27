@@ -231,7 +231,7 @@ template <class F>
 void VisitTokens(std::string const& s,F f) {
   if (0) {
   std::vector<std::string> ss=SplitOnWhitespace(s);
-  for (int i=0;i<ss.size();++i)
+  for (unsigned i=0;i<ss.size();++i)
     f(ss[i]);
   return;
   }

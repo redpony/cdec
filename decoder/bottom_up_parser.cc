@@ -84,7 +84,7 @@ class ActiveChart {
       const GrammarIter* ni = gptr_->Extend(symbol);
       if (!ni) return;
       Hypergraph::TailNodeVector na(ant_nodes_.size() + 1);
-      for (int i = 0; i < ant_nodes_.size(); ++i)
+      for (unsigned i = 0; i < ant_nodes_.size(); ++i)
         na[i] = ant_nodes_[i];
       na[ant_nodes_.size()] = node_index;
       out_cell->push_back(ActiveItem(ni, na, lattice_cost));

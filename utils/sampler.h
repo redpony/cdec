@@ -49,9 +49,10 @@ struct RandomNumberGenerator {
   size_t SelectSample(const F& a, const F& b, double T = 1.0) {
     if (T == 1.0) {
       if (F(this->next()) > (a / (a + b))) return 1; else return 0;
-    } else {
-      assert(!"not implemented");
     }
+    std::cerr << "SelectSample with annealing not implemented\n";
+    abort();
+    return 0;
   }
 
   // T is the annealing temperature, if desired

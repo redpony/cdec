@@ -76,7 +76,7 @@ class TRule {
 
   void ESubstitute(const std::vector<const std::vector<WordID>* >& var_values,
                    std::vector<WordID>* result) const {
-    int vc = 0;
+    unsigned vc = 0;
     result->clear();
     for (std::vector<WordID>::const_iterator i = e_.begin(); i != e_.end(); ++i) {
       const WordID& c = *i;
@@ -95,7 +95,7 @@ class TRule {
 
   void FSubstitute(const std::vector<const std::vector<WordID>* >& var_values,
                    std::vector<WordID>* result) const {
-    int vc = 0;
+    unsigned vc = 0;
     result->clear();
     for (std::vector<WordID>::const_iterator i = f_.begin(); i != f_.end(); ++i) {
       const WordID& c = *i;

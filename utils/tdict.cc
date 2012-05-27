@@ -37,7 +37,7 @@ void TD::GetWordIDs(const std::vector<std::string>& strings, std::vector<WordID>
 
 std::string TD::GetString(const std::vector<WordID>& str) {
   ostringstream o;
-  for (int i=0;i<str.size();++i) {
+  for (unsigned i=0;i<str.size();++i) {
     if (i) o << ' ';
     o << TD::Convert(str[i]);
   }

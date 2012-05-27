@@ -67,7 +67,7 @@ void Outside(const Hypergraph& hg,
   ) {
   assert(result);
   const int num_nodes = hg.nodes_.size();
-  assert(inside_score.size() == num_nodes);
+  assert(static_cast<int>(inside_score.size()) == num_nodes);
   std::vector<WeightType>& outside_score = *result;
   outside_score.clear();
   outside_score.resize(num_nodes);
