@@ -29,7 +29,7 @@ if [ test_header boost/serialization/map.hpp ] && [ test_library boost_serializa
 project : requirements $(requirements) <toolset>darwin:<link>static ;
 project : default-build <warnings>on <variant>release ;
 
-install-bin-libs dpmert//programs utils//programs mteval//programs klm/lm//programs training//liblbfgs decoder//cdec creg//creg phrasinator//programs mira//kbest_mira ;
+install-bin-libs dpmert//programs utils//programs mteval//programs klm/lm//programs training//liblbfgs decoder//cdec phrasinator//programs mira//kbest_mira ;
 
 build-projects mteval decoder dpmert klm/lm training/liblbfgs ;
 
