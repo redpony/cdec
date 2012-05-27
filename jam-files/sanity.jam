@@ -182,9 +182,10 @@ if $(prefix) {
 } else {
   prefix = $(TOP)/dist$(GITTAG) ;
 }
+
+bindir = [ option.get "bindir" : $(prefix)/bin ] ;
+libdir = [ option.get "libdir" : $(prefix)/lib ] ;
 rule install-bin-libs ( deps * ) {
-  local bindir = [ option.get "bindir" : $(prefix)/bin ] ;
-  local libdir = [ option.get "libdir" : $(prefix)/lib ] ;
   install prefix-bin : $(deps) : <location>$(bindir) <install-dependencies>on <install-type>EXE <link>shared:<dll-path>$(libdir) ;
   install prefix-lib : $(deps) : <location>$(libdir) <install-dependencies>on <install-type>LIB <link>shared:<dll-path>$(libdir) ;
 }
