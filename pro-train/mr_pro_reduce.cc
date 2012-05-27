@@ -186,8 +186,9 @@ double LearnParameters(const vector<pair<bool, SparseVector<weight_t> > >& train
                        const unsigned memory_buffers,
                        const vector<weight_t>& prev_x,
                        vector<weight_t>* px) {
+  assert(px->size() == prev_x.size());
   ProLoss loss(training, testing, C, T, prev_x);
-  LBFGS<ProLoss> lbfgs(px, loss, C1, memory_buffers);
+  LBFGS<ProLoss> lbfgs(px, loss, memory_buffers, C1);
   lbfgs.MinimizeFunction();
   return loss.tppl;
 }
