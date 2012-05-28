@@ -56,6 +56,11 @@ class SufficientStats {
   }
   void Encode(std::string* out) const;
 
+  void swap(SufficientStats& other) {
+    id_.swap(other.id_);
+    fields.swap(other.fields);
+  }
+
   std::string id_;
   std::vector<float> fields;
 };
