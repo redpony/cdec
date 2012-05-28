@@ -92,7 +92,6 @@ struct DiffOrder {
 void Sample(const unsigned gamma,
             const unsigned xi,
             const training::CandidateSet& J_i,
-            const SegmentEvaluator& scorer,
             const EvaluationMetric* metric,
             vector<TrainingInstance>* pv) {
   const bool invert_score = metric->IsErrorMetric();
@@ -102,8 +101,8 @@ void Sample(const unsigned gamma,
     const size_t a = rng->inclusive(0, J_i.size() - 1)();
     const size_t b = rng->inclusive(0, J_i.size() - 1)();
     if (a == b) continue;
-    float ga = J_i[a].g(scorer, metric);
-    float gb = J_i[b].g(scorer, metric);
+    float ga = metric->ComputeScore(J_i[a].score_stats);
+    float gb = metric->ComputeScore(J_i[b].score_stats);
     bool positive = gb < ga;
     if (invert_score) positive = !positive;
     const float gdiff = fabs(ga - gb);
@@ -187,10 +186,10 @@ int main(int argc, char** argv) {
       J_i.ReadFromFile(kbest_file);
     HypergraphIO::ReadFromJSON(rf.stream(), &hg);
     hg.Reweight(weights);
-    J_i.AddKBestCandidates(hg, kbest_size);
+    J_i.AddKBestCandidates(hg, kbest_size, ds[sent_id]);
     J_i.WriteToFile(kbest_file);
 
-    Sample(gamma, xi, J_i, *ds[sent_id], metric, &v);
+    Sample(gamma, xi, J_i, metric, &v);
     for (unsigned i = 0; i < v.size(); ++i) {
       const TrainingInstance& vi = v[i];
       cout << vi.y << "\t" << vi.x << endl;
