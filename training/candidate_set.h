@@ -4,29 +4,27 @@
 #include <vector>
 #include <algorithm>
 
+#include "ns.h"
 #include "wordid.h"
 #include "sparse_vector.h"
 
 class Hypergraph;
-struct SegmentEvaluator;
-struct EvaluationMetric;
 
 namespace training {
 
 struct Candidate {
-  Candidate() : g_(-100.0f) {}
-  Candidate(const std::vector<WordID>& e, const SparseVector<double>& fm) : ewords(e), fmap(fm), g_(-100.0f) {}
+  Candidate() {}
+  Candidate(const std::vector<WordID>& e, const SparseVector<double>& fm) :
+    ewords(e),
+    fmap(fm) {}
   std::vector<WordID> ewords;
   SparseVector<double> fmap;
-  double g(const SegmentEvaluator& scorer, const EvaluationMetric* metric) const;
+  SufficientStats score_stats;
   void swap(Candidate& other) {
-    std::swap(g_, other.g_);
+    score_stats.swap(other.score_stats);
     ewords.swap(other.ewords);
     fmap.swap(other.fmap);
   }
- private:
-  mutable float g_;
-  //SufficientStats score_stats;
 };
 
 // represents some kind of collection of translation candidates, e.g.
@@ -39,7 +37,7 @@ class CandidateSet {
 
   void ReadFromFile(const std::string& file);
   void WriteToFile(const std::string& file) const;
-  void AddKBestCandidates(const Hypergraph& hg, size_t kbest_size);
+  void AddKBestCandidates(const Hypergraph& hg, size_t kbest_size, const SegmentEvaluator* scorer = NULL);
   // TODO add code to do unique k-best
   // TODO add code to draw k samples
 
