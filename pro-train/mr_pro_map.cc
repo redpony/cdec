@@ -101,8 +101,8 @@ void Sample(const unsigned gamma,
     const size_t a = rng->inclusive(0, J_i.size() - 1)();
     const size_t b = rng->inclusive(0, J_i.size() - 1)();
     if (a == b) continue;
-    float ga = metric->ComputeScore(J_i[a].score_stats);
-    float gb = metric->ComputeScore(J_i[b].score_stats);
+    float ga = metric->ComputeScore(J_i[a].eval_feats);
+    float gb = metric->ComputeScore(J_i[b].eval_feats);
     bool positive = gb < ga;
     if (invert_score) positive = !positive;
     const float gdiff = fabs(ga - gb);

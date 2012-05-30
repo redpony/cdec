@@ -15,16 +15,25 @@ namespace training {
 struct Candidate {
   Candidate() {}
   Candidate(const std::vector<WordID>& e, const SparseVector<double>& fm) :
-    ewords(e),
-    fmap(fm) {}
-  std::vector<WordID> ewords;
-  SparseVector<double> fmap;
-  SufficientStats score_stats;
+      ewords(e),
+      fmap(fm) {}
+  Candidate(const std::vector<WordID>& e,
+            const SparseVector<double>& fm,
+            const SegmentEvaluator& se) :
+      ewords(e),
+      fmap(fm) {
+    se.Evaluate(ewords, &eval_feats);
+  }
+
   void swap(Candidate& other) {
-    score_stats.swap(other.score_stats);
+    eval_feats.swap(other.eval_feats);
     ewords.swap(other.ewords);
     fmap.swap(other.fmap);
   }
+
+  std::vector<WordID> ewords;
+  SparseVector<double> fmap;
+  SufficientStats eval_feats;
 };
 
 // represents some kind of collection of translation candidates, e.g.

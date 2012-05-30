@@ -112,7 +112,7 @@ void CandidateSet::WriteToFile(const string& file) const {
   for (unsigned i = 0; i < cs.size(); ++i) {
     out << TD::GetString(cs[i].ewords) << endl;
     out << cs[i].fmap << endl;
-    cs[i].score_stats.Encode(&ss);
+    cs[i].eval_feats.Encode(&ss);
     out << ss << endl;
   }
 }
@@ -131,7 +131,7 @@ void CandidateSet::ReadFromFile(const string& file) {
     cs.push_back(Candidate());
     TD::ConvertSentence(cand, &cs.back().ewords);
     ParseSparseVector(feats, 0, &cs.back().fmap);
-    cs.back().score_stats = SufficientStats(ss);
+    cs.back().eval_feats = SufficientStats(ss);
   }
   cerr << "  read " << cs.size() << " candidates\n";
 }
@@ -160,7 +160,7 @@ void CandidateSet::AddKBestCandidates(const Hypergraph& hg, size_t kbest_size, c
     if (!d) break;
     cs.push_back(Candidate(d->yield, d->feature_values));
     if (scorer)
-      scorer->Evaluate(d->yield, &cs.back().score_stats);
+      scorer->Evaluate(d->yield, &cs.back().eval_feats);
   }
   Dedup();
 }
