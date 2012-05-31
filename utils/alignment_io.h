@@ -16,12 +16,12 @@ struct AlignmentIO {
 
 inline std::ostream& operator<<(std::ostream& os, const Array2D<AlignmentIO::AlignmentType>& m) {
   os << ' ';
-  for (int j=0; j<m.height(); ++j)
+  for (unsigned j=0; j<m.height(); ++j)
     os << (j%10);
   os << "\n";
-  for (int i=0; i<m.width(); ++i) {
+  for (unsigned i=0; i<m.width(); ++i) {
     os << (i%10);
-    for (int j=0; j<m.height(); ++j) {
+    for (unsigned j=0; j<m.height(); ++j) {
       switch (m(i,j)) {
         case AlignmentIO::kNONE:            os << '.'; break;
         case AlignmentIO::kTRANSLATION:     os << '*'; break;
@@ -32,7 +32,7 @@ inline std::ostream& operator<<(std::ostream& os, const Array2D<AlignmentIO::Ali
     os << (i%10) << "\n";
   }
   os << ' ';
-  for (int j=0; j<m.height(); ++j)
+  for (unsigned j=0; j<m.height(); ++j)
     os << (j%10);
   os << "\n";
   return os;

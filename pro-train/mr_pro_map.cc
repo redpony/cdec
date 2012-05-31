@@ -9,14 +9,13 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "candidate_set.h"
 #include "sampler.h"
 #include "filelib.h"
 #include "stringlib.h"
 #include "weights.h"
 #include "inside_outside.h"
 #include "hg_io.h"
-#include "kbest.h"
-#include "viterbi.h"
 #include "ns.h"
 #include "ns_docscorer.h"
 
@@ -24,52 +23,6 @@
 
 using namespace std;
 namespace po = boost::program_options;
-
-struct ApproxVectorHasher {
-  static const size_t MASK = 0xFFFFFFFFull;
-  union UType {
-    double f;   // leave as double
-    size_t i;
-  };
-  static inline double round(const double x) {
-    UType t;
-    t.f = x;
-    size_t r = t.i & MASK;
-    if ((r << 1) > MASK)
-      t.i += MASK - r + 1;
-    else
-      t.i &= (1ull - MASK);
-    return t.f;
-  }
-  size_t operator()(const SparseVector<weight_t>& x) const {
-    size_t h = 0x573915839;
-    for (SparseVector<weight_t>::const_iterator it = x.begin(); it != x.end(); ++it) {
-      UType t;
-      t.f = it->second;
-      if (t.f) {
-        size_t z = (t.i >> 32);
-        boost::hash_combine(h, it->first);
-        boost::hash_combine(h, z);
-      }
-    }
-    return h;
-  }
-};
-
-struct ApproxVectorEquals {
-  bool operator()(const SparseVector<weight_t>& a, const SparseVector<weight_t>& b) const {
-    SparseVector<weight_t>::const_iterator bit = b.begin();
-    for (SparseVector<weight_t>::const_iterator ait = a.begin(); ait != a.end(); ++ait) {
-      if (bit == b.end() ||
-          ait->first != bit->first ||
-          ApproxVectorHasher::round(ait->second) != ApproxVectorHasher::round(bit->second))
-        return false;
-      ++bit;
-    }
-    if (bit != b.end()) return false;
-    return true;
-  }
-};
 
 boost::shared_ptr<MT19937> rng;
 
@@ -105,107 +58,6 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
 }
 
-struct HypInfo {
-  HypInfo() : g_(-100.0f) {}
-  HypInfo(const vector<WordID>& h, const SparseVector<weight_t>& feats) : hyp(h), g_(-100.0f), x(feats) {}
-
-  // lazy evaluation
-  double g(const SegmentEvaluator& scorer, const EvaluationMetric* metric) const {
-    if (g_ == -100.0f) {
-      SufficientStats ss;
-      scorer.Evaluate(hyp, &ss);
-      g_ = metric->ComputeScore(ss);
-    }
-    return g_;
-  }
-  vector<WordID> hyp;
-  mutable float g_;
-  SparseVector<weight_t> x;
-};
-
-struct HypInfoCompare {
-  bool operator()(const HypInfo& a, const HypInfo& b) const {
-    ApproxVectorEquals comp;
-    return (a.hyp == b.hyp && comp(a.x,b.x));
-  }
-};
-
-struct HypInfoHasher {
-  size_t operator()(const HypInfo& x) const {
-    boost::hash<vector<WordID> > hhasher;
-    ApproxVectorHasher vhasher;
-    size_t ha = hhasher(x.hyp);
-    boost::hash_combine(ha, vhasher(x.x));
-    return ha;
-  }
-};
-
-void WriteKBest(const string& file, const vector<HypInfo>& kbest) {
-  WriteFile wf(file);
-  ostream& out = *wf.stream();
-  out.precision(10);
-  for (int i = 0; i < kbest.size(); ++i) {
-    out << TD::GetString(kbest[i].hyp) << endl;
-    out << kbest[i].x << endl;
-  }
-}
-
-void ParseSparseVector(string& line, size_t cur, SparseVector<weight_t>* out) {
-  SparseVector<weight_t>& x = *out;
-  size_t last_start = cur;
-  size_t last_comma = string::npos;
-  while(cur <= line.size()) {
-    if (line[cur] == ' ' || cur == line.size()) {
-      if (!(cur > last_start && last_comma != string::npos && cur > last_comma)) {
-        cerr << "[ERROR] " << line << endl << "  position = " << cur << endl;
-        exit(1);
-      }
-      const int fid = FD::Convert(line.substr(last_start, last_comma - last_start));
-      if (cur < line.size()) line[cur] = 0;
-      const double val = strtod(&line[last_comma + 1], NULL);
-      x.set_value(fid, val);
-
-      last_comma = string::npos;
-      last_start = cur+1;
-    } else {
-      if (line[cur] == '=')
-        last_comma = cur;
-    }
-    ++cur;
-  }
-}
-
-void ReadKBest(const string& file, vector<HypInfo>* kbest) {
-  cerr << "Reading from " << file << endl;
-  ReadFile rf(file);
-  istream& in = *rf.stream();
-  string cand;
-  string feats;
-  while(getline(in, cand)) {
-    getline(in, feats);
-    assert(in);
-    kbest->push_back(HypInfo());
-    TD::ConvertSentence(cand, &kbest->back().hyp);
-    ParseSparseVector(feats, 0, &kbest->back().x);
-  }
-  cerr << "  read " << kbest->size() << " hypotheses\n";
-}
-
-void Dedup(vector<HypInfo>* h) {
-  cerr << "Dedup in=" << h->size();
-  tr1::unordered_set<HypInfo, HypInfoHasher, HypInfoCompare> u;
-  while(h->size() > 0) {
-    u.insert(h->back());
-    h->pop_back();
-  }
-  tr1::unordered_set<HypInfo, HypInfoHasher, HypInfoCompare>::iterator it = u.begin();
-  while (it != u.end()) {
-    h->push_back(*it);
-    it = u.erase(it);
-  }
-  cerr << "  out=" << h->size() << endl;
-}
-
 struct ThresholdAlpha {
   explicit ThresholdAlpha(double t = 0.05) : threshold(t) {}
   double operator()(double mag) const {
@@ -239,8 +91,7 @@ struct DiffOrder {
 
 void Sample(const unsigned gamma,
             const unsigned xi,
-            const vector<HypInfo>& J_i,
-            const SegmentEvaluator& scorer,
+            const training::CandidateSet& J_i,
             const EvaluationMetric* metric,
             vector<TrainingInstance>* pv) {
   const bool invert_score = metric->IsErrorMetric();
@@ -250,17 +101,17 @@ void Sample(const unsigned gamma,
     const size_t a = rng->inclusive(0, J_i.size() - 1)();
     const size_t b = rng->inclusive(0, J_i.size() - 1)();
     if (a == b) continue;
-    float ga = J_i[a].g(scorer, metric);
-    float gb = J_i[b].g(scorer, metric);
+    float ga = metric->ComputeScore(J_i[a].eval_feats);
+    float gb = metric->ComputeScore(J_i[b].eval_feats);
     bool positive = gb < ga;
     if (invert_score) positive = !positive;
     const float gdiff = fabs(ga - gb);
     if (!gdiff) continue;
     avg_diff += gdiff;
-    SparseVector<weight_t> xdiff = (J_i[a].x - J_i[b].x).erase_zeros();
+    SparseVector<weight_t> xdiff = (J_i[a].fmap - J_i[b].fmap).erase_zeros();
     if (xdiff.empty()) {
-      cerr << "Empty diff:\n  " << TD::GetString(J_i[a].hyp) << endl << "x=" << J_i[a].x << endl;
-      cerr << "  " << TD::GetString(J_i[b].hyp) << endl << "x=" << J_i[b].x << endl;
+      cerr << "Empty diff:\n  " << TD::GetString(J_i[a].ewords) << endl << "x=" << J_i[a].fmap << endl;
+      cerr << "  " << TD::GetString(J_i[b].ewords) << endl << "x=" << J_i[b].fmap << endl;
       continue;
     }
     v1.push_back(TrainingInstance(xdiff, positive, gdiff));
@@ -328,25 +179,17 @@ int main(int argc, char** argv) {
     is >> file >> sent_id;
     ReadFile rf(file);
     ostringstream os;
-    vector<HypInfo> J_i;
+    training::CandidateSet J_i;
     os << kbest_repo << "/kbest." << sent_id << ".txt.gz";
     const string kbest_file = os.str();
     if (FileExists(kbest_file))
-      ReadKBest(kbest_file, &J_i);
+      J_i.ReadFromFile(kbest_file);
     HypergraphIO::ReadFromJSON(rf.stream(), &hg);
     hg.Reweight(weights);
-    KBest::KBestDerivations<vector<WordID>, ESentenceTraversal> kbest(hg, kbest_size);
+    J_i.AddKBestCandidates(hg, kbest_size, ds[sent_id]);
+    J_i.WriteToFile(kbest_file);
 
-    for (int i = 0; i < kbest_size; ++i) {
-      const KBest::KBestDerivations<vector<WordID>, ESentenceTraversal>::Derivation* d =
-        kbest.LazyKthBest(hg.nodes_.size() - 1, i);
-      if (!d) break;
-      J_i.push_back(HypInfo(d->yield, d->feature_values));
-    }
-    Dedup(&J_i);
-    WriteKBest(kbest_file, J_i);
-
-    Sample(gamma, xi, J_i, *ds[sent_id], metric, &v);
+    Sample(gamma, xi, J_i, metric, &v);
     for (unsigned i = 0; i < v.size(); ++i) {
       const TrainingInstance& vi = v[i];
       cout << vi.y << "\t" << vi.x << endl;

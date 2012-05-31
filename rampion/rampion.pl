@@ -65,12 +65,14 @@ my $cpbin=1;
 my $tune_regularizer = 0;
 my $reg = 500;
 my $reg_previous = 5000;
+my $dont_accum = 0;
 
 # Process command-line options
 Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
 	"jobs=i" => \$jobs,
 	"dont-clean" => \$disable_clean,
+	"dont-accumulate" => \$dont_accum,
 	"pass-suffix=s" => \$pass_suffix,
         "qsub" => \$useqsub,
 	"dry-run" => \$dryrun,
@@ -163,8 +165,6 @@ my $decoderBase = check_output("basename $decoder"); chomp $decoderBase;
 my $newIniFile = "$dir/$decoderBase.ini";
 my $inputFileName = "$dir/input";
 my $user = $ENV{"USER"};
-
-
 # process ini file
 -e $iniFile || die "Error: could not open $iniFile for reading\n";
 open(INI, $iniFile);
@@ -229,6 +229,13 @@ close F;
 unless($best_weights){ $best_weights = $weights; }
 unless($projected_score){ $projected_score = 0.0; }
 $seen_weights{$weights} = 1;
+my $kbest = "$dir/kbest";
+if ($dont_accum) {
+  $kbest = '';
+} else {
+  check_call("mkdir -p $kbest");
+  $kbest = "--kbest_repository $kbest";
+}
 
 my $random_seed = int(time / 1000);
 my $lastWeightsFile;
@@ -305,7 +312,7 @@ while (1){
 	$cmd="$MAPINPUT $dir/hgs > $dir/agenda.$im1";
 	print STDERR "COMMAND:\n$cmd\n";
 	check_call($cmd);
-	$cmd="$MAPPER $refs_comma_sep -m $metric -i $dir/agenda.$im1 -w $inweights > $outweights";
+	$cmd="$MAPPER $refs_comma_sep -m $metric -i $dir/agenda.$im1 $kbest -w $inweights > $outweights";
 	check_call($cmd);
 	$lastWeightsFile = $outweights;
 	$iteration++;
@@ -444,6 +451,9 @@ General options:
 
 	--help
 		Print this message and exit.
+
+	--dont-accumulate
+		Don't accumulate k-best lists from multiple iterations.
 
 	--max-iterations <M>
 		Maximum number of iterations to run.  If not specified, defaults

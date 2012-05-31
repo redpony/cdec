@@ -73,7 +73,7 @@ struct Candidate {
     prob_t p = prob_t::One();
     // cerr << "\nEstimating application of " << in_edge.rule_->AsString() << endl;
     vector<const vector<WordID>* > ants(tail.size());
-    for (int i = 0; i < tail.size(); ++i) {
+    for (unsigned i = 0; i < tail.size(); ++i) {
       const Candidate& ant = *D[in_edge.tail_nodes_[i]][j_[i]];
       ants[i] = &ant.state_;
       assert(ant.IsIncorporatedIntoHypergraph());
@@ -99,7 +99,7 @@ ostream& operator<<(ostream& os, const Candidate& cand) {
   else { os << "+LM_node=" << cand.node_index_; }
   os << " edge=" << cand.in_edge_->id_;
   os << " j=<";
-  for (int i = 0; i < cand.j_.size(); ++i)
+  for (unsigned i = 0; i < cand.j_.size(); ++i)
     os << (i==0 ? "" : " ") << cand.j_[i];
   os << "> vit=" << log(cand.inside_prob_);
   os << " est=" << log(cand.est_prob_);
@@ -127,7 +127,7 @@ struct CandidateUniquenessHash {
   size_t operator()(const Candidate* c) const {
     size_t x = 5381;
     x = ((x << 5) + x) ^ c->in_edge_->id_;
-    for (int i = 0; i < c->j_.size(); ++i)
+    for (unsigned i = 0; i < c->j_.size(); ++i)
       x = ((x << 5) + x) ^ c->j_[i];
     return x;
   }
@@ -154,12 +154,12 @@ public:
   }
 
   void Apply() {
-    int num_nodes = in.nodes_.size();
-    int goal_id = num_nodes - 1;
-    int pregoal = goal_id - 1;
+    const unsigned num_nodes = in.nodes_.size();
+    const unsigned goal_id = num_nodes - 1;
+    const unsigned pregoal = goal_id - 1;
     assert(in.nodes_[pregoal].out_edges_.size() == 1);
     cerr << "    ";
-    for (int i = 0; i < in.nodes_.size(); ++i) {
+    for (unsigned i = 0; i < in.nodes_.size(); ++i) {
       cerr << '.';
       KBest(i, i == goal_id);
     }
@@ -174,9 +174,9 @@ public:
 
  private:
   void FreeAll() {
-    for (int i = 0; i < D.size(); ++i) {
+    for (unsigned i = 0; i < D.size(); ++i) {
       CandidateList& D_i = D[i];
-      for (int j = 0; j < D_i.size(); ++j)
+      for (unsigned j = 0; j < D_i.size(); ++j)
         delete D_i[j];
     }
     D.clear();
@@ -216,7 +216,7 @@ public:
     CandidateList freelist;
     cand.reserve(in_edges.size());
     UniqueCandidateSet unique_cands;
-    for (int i = 0; i < in_edges.size(); ++i) {
+    for (unsigned i = 0; i < in_edges.size(); ++i) {
       const Hypergraph::Edge& edge = in.edges_[in_edges[i]];
       const JVector j(edge.tail_nodes_.size(), 0);
       cand.push_back(new Candidate(edge, j, D, is_goal));
@@ -242,20 +242,20 @@ public:
     sort(D_v.begin(), D_v.end(), EstProbSorter());
     // cerr << "  expanded to " << D_v.size() << " nodes\n";
 
-    for (int i = 0; i < cand.size(); ++i)
+    for (unsigned i = 0; i < cand.size(); ++i)
       delete cand[i];
     // freelist is necessary since even after an item merged, it still stays in
     // the unique set so it can't be deleted til now
-    for (int i = 0; i < freelist.size(); ++i)
+    for (unsigned i = 0; i < freelist.size(); ++i)
       delete freelist[i];
   }
 
   void PushSucc(const Candidate& item, const bool is_goal, CandidateHeap* pcand, UniqueCandidateSet* cs) {
     CandidateHeap& cand = *pcand;
-    for (int i = 0; i < item.j_.size(); ++i) {
+    for (unsigned i = 0; i < item.j_.size(); ++i) {
       JVector j = item.j_;
       ++j[i];
-      if (j[i] < D[item.in_edge_->tail_nodes_[i]].size()) {
+      if (static_cast<unsigned>(j[i]) < D[item.in_edge_->tail_nodes_[i]].size()) {
         Candidate query_unique(*item.in_edge_, j);
         if (cs->count(&query_unique) == 0) {
           Candidate* new_cand = new Candidate(*item.in_edge_, j, D, is_goal);

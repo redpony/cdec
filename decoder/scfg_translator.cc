@@ -33,7 +33,7 @@ struct SCFGTranslatorImpl {
   {
     if(conf.count("grammar")){
       vector<string> gfiles = conf["grammar"].as<vector<string> >();
-      for (int i = 0; i < gfiles.size(); ++i) {
+      for (unsigned i = 0; i < gfiles.size(); ++i) {
         if (!SILENT) cerr << "Reading SCFG grammar from " << gfiles[i] << endl;
         TextGrammar* g = new TextGrammar(gfiles[i]);
         g->SetMaxSpan(max_span_limit);
@@ -132,7 +132,7 @@ struct SCFGTranslatorImpl {
       g->SetGrammarName("PassThrough");
       glist.push_back(GrammarPtr(g));
     }
-    for (int gi = 0; gi < glist.size(); ++gi) {
+    for (unsigned gi = 0; gi < glist.size(); ++gi) {
       if(printGrammarsUsed)
         cerr << "Using grammar::" << glist[gi]->GetGrammarName() << endl;
     }
@@ -147,7 +147,7 @@ struct SCFGTranslatorImpl {
     forest->Reweight(weights);
     if (use_ctf_) {
       Hypergraph::Node& goal_node = *(forest->nodes_.end()-1);
-      foreach(int edge_id, goal_node.in_edges_)
+      foreach(unsigned edge_id, goal_node.in_edges_)
         RefineRule(forest->edges_[edge_id].rule_, ctf_iterations_);
       double alpha = ctf_alpha_;
       bool found_parse=false;
@@ -155,7 +155,7 @@ struct SCFGTranslatorImpl {
         cerr << "Coarse-to-fine source parse, alpha=" << alpha << endl;
         found_parse = true;
         Hypergraph refined_forest = *forest;
-        for (int j=0; j < ctf_iterations_; ++j) {
+        for (unsigned j=0; j < ctf_iterations_; ++j) {
           cerr << viterbi_stats(refined_forest,"  Coarse forest",true,show_tree_structure_);
           cerr << "  Iteration " << (j+1) << ": Pruning forest... ";
           refined_forest.BeamPruneInsideOutside(1.0, false, alpha, NULL);
@@ -178,7 +178,7 @@ struct SCFGTranslatorImpl {
       if (!found_parse){
         if (ctf_exhaustive_){
           cerr << "Last resort: refining coarse forest without pruning...";
-          for (int j=0; j < ctf_iterations_; ++j) {
+          for (unsigned j=0; j < ctf_iterations_; ++j) {
             if (RefineForest(forest)){
               cerr << "  Refinement succeeded." << endl;
               forest->Reweight(weights);
@@ -213,7 +213,7 @@ struct SCFGTranslatorImpl {
         Hypergraph::Edge& edge = forest->edges_[edge_id];
         std::vector<int> nt_positions;
         TRulePtr& coarse_rule_ptr = edge.rule_;
-        for(int i=0; i< coarse_rule_ptr->f_.size(); ++i){
+        for(unsigned i=0; i< coarse_rule_ptr->f_.size(); ++i){
           if (coarse_rule_ptr->f_[i] < 0)
             nt_positions.push_back(i);
         }
@@ -225,7 +225,7 @@ struct SCFGTranslatorImpl {
         // fine rules apply only if state splits on tail nodes match fine rule nonterminals
         foreach(TRulePtr& fine_rule_ptr, *(coarse_rule_ptr->fine_rules_)) {
           Hypergraph::TailNodeVector tail;
-          for (int pos_i=0; pos_i<nt_positions.size(); ++pos_i){
+          for (unsigned pos_i=0; pos_i<nt_positions.size(); ++pos_i){
             WordID fine_cat = fine_rule_ptr->f_[nt_positions[pos_i]];
             Split2Node::iterator it =
               s2n.find(StateSplit(edge.tail_nodes_[pos_i], fine_cat));

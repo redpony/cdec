@@ -31,24 +31,24 @@ template<class WeightType, class WeightFunction>
 WeightType Inside(const Hypergraph& hg,
                   std::vector<WeightType>* result = NULL,
                   const WeightFunction& weight = WeightFunction()) {
-  const int num_nodes = hg.nodes_.size();
+  const unsigned num_nodes = hg.nodes_.size();
   std::vector<WeightType> dummy;
   std::vector<WeightType>& inside_score = result ? *result : dummy;
   inside_score.clear();
   inside_score.resize(num_nodes);
 //  std::fill(inside_score.begin(), inside_score.end(), WeightType()); // clear handles
-  for (int i = 0; i < num_nodes; ++i) {
+  for (unsigned i = 0; i < num_nodes; ++i) {
     WeightType* const cur_node_inside_score = &inside_score[i];
     Hypergraph::EdgesVector const& in=hg.nodes_[i].in_edges_;
-    const int num_in_edges = in.size();
+    const unsigned num_in_edges = in.size();
     if (num_in_edges == 0) {
       *cur_node_inside_score = WeightType(1); //FIXME: why not call weight(edge) instead?
       continue;
     }
-    for (int j = 0; j < num_in_edges; ++j) {
+    for (unsigned j = 0; j < num_in_edges; ++j) {
       const Hypergraph::Edge& edge = hg.edges_[in[j]];
       WeightType score = weight(edge);
-      for (int k = 0; k < edge.tail_nodes_.size(); ++k) {
+      for (unsigned k = 0; k < edge.tail_nodes_.size(); ++k) {
         const int tail_node_index = edge.tail_nodes_[k];
         score *= inside_score[tail_node_index];
       }
@@ -67,7 +67,7 @@ void Outside(const Hypergraph& hg,
   ) {
   assert(result);
   const int num_nodes = hg.nodes_.size();
-  assert(inside_score.size() == num_nodes);
+  assert(static_cast<int>(inside_score.size()) == num_nodes);
   std::vector<WeightType>& outside_score = *result;
   outside_score.clear();
   outside_score.resize(num_nodes);

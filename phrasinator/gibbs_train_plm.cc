@@ -18,7 +18,7 @@ Dict d; // global dictionary
 
 string Join(char joiner, const vector<int>& phrase) {
   ostringstream os;
-  for (int i = 0; i < phrase.size(); ++i) {
+  for (unsigned i = 0; i < phrase.size(); ++i) {
     if (i > 0) os << joiner;
     os << d.Convert(phrase[i]);
   }
@@ -26,7 +26,7 @@ string Join(char joiner, const vector<int>& phrase) {
 }
 
 ostream& operator<<(ostream& os, const vector<int>& phrase) {
-  for (int i = 0; i < phrase.size(); ++i)
+  for (unsigned i = 0; i < phrase.size(); ++i)
     os << (i == 0 ? "" : " ") << d.Convert(phrase[i]);
   return os;
 }
@@ -37,7 +37,7 @@ struct UnigramLM {
     assert(in);
   }
 
-  double logprob(int word) const {
+  double logprob(unsigned word) const {
     assert(word < freqs_.size());
     return freqs_[word];
   }
@@ -91,7 +91,7 @@ void ReadCorpus(const string& filename, vector<vector<int> >* c, set<int>* vocab
     c->push_back(vector<int>());
     vector<int>& v = c->back();
     d.ConvertWhitespaceDelimitedLine(line, &v);
-    for (int i = 0; i < v.size(); ++i) vocab->insert(v[i]);
+    for (unsigned i = 0; i < v.size(); ++i) vocab->insert(v[i]);
   }
   if (in != &cin) delete in;
 }
@@ -151,7 +151,7 @@ struct UniphraseLM {
     cerr << "Initializing...\n";
     z_.resize(corpus_.size());
     int tc = 0;
-    for (int i = 0; i < corpus_.size(); ++i) {
+    for (unsigned i = 0; i < corpus_.size(); ++i) {
       const vector<int>& line = corpus_[i];
       const int ls = line.size();
       const int last_pos = ls - 1;
@@ -177,7 +177,7 @@ struct UniphraseLM {
     cerr << "Initial LLH: " << llh() << endl;
     cerr << "Sampling...\n";
     cerr << gen_ << endl;
-    for (int s = 1; s < samples; ++s) {
+    for (unsigned s = 1; s < samples; ++s) {
       cerr << '.';
       if (s % 10 == 0) {
         cerr << " [" << s;
@@ -187,7 +187,7 @@ struct UniphraseLM {
         //for (int j = 0; j < z.size(); ++j) z[j] = z_[0][j];
         //SegCorpus::Write(corpus_[0], z, d);
       }
-      for (int i = 0; i < corpus_.size(); ++i) {
+      for (unsigned i = 0; i < corpus_.size(); ++i) {
         const vector<int>& line = corpus_[i];
         const int ls = line.size();
         const int last_pos = ls - 1;
@@ -286,7 +286,7 @@ int main(int argc, char** argv) {
   ulm.Sample(conf["samples"].as<unsigned>(), conf.count("no_hyperparameter_inference") == 0, &rng);
   cerr << "OOV unigram prob: " << ulm.OOVUnigramLogProb() << endl;
 
-  for (int i = 0; i < corpus.size(); ++i)
+  for (unsigned i = 0; i < corpus.size(); ++i)
 //    SegCorpus::Write(corpus[i], shmmlm.z_[i], d);
  ;
   if (conf.count("write_cdec_grammar")) {
@@ -303,8 +303,6 @@ int main(int argc, char** argv) {
     ostream& os = *wf.stream();
     os << "# make C smaller to use more phrases\nP 1\nPassThrough " << ulm.OOVUnigramLogProb() << "\nC -3\n";
   }
-
-  
 
   return 0;
 }

@@ -30,7 +30,7 @@
 // to just set it
 #define L2_CACHE_LINE 128
 
-// this should just be a typedef to pair<int,T> on the new c++
+// this should just be a typedef to pair<unsigned,T> on the new c++
 // I have to avoid this since I want to use unions and c++-98
 // does not let unions have types with constructors in them
 // this type bypasses default constructors. use with caution!
@@ -38,32 +38,32 @@
 // does anything
 template <typename T>
 struct PairIntT {
-  const PairIntT& operator=(const std::pair<const int, T>& v) {
+  const PairIntT& operator=(const std::pair<const unsigned, T>& v) {
     std::memcpy(this, &v, sizeof(PairIntT));
     return *this;
   }
-  operator const std::pair<const int, T>&() const {
-    return *reinterpret_cast<const std::pair<const int, T>*>(this);
+  operator const std::pair<const unsigned, T>&() const {
+    return *reinterpret_cast<const std::pair<const unsigned, T>*>(this);
   }
-  int& first() {
-    return reinterpret_cast<std::pair<int, T>*>(this)->first;
+  unsigned& first() {
+    return reinterpret_cast<std::pair<unsigned, T>*>(this)->first;
   }
   T& second() {
-    return reinterpret_cast<std::pair<int, T>*>(this)->second;
+    return reinterpret_cast<std::pair<unsigned, T>*>(this)->second;
   }
-  const int& first() const {
-    return reinterpret_cast<const std::pair<int, T>*>(this)->first;
+  const unsigned& first() const {
+    return reinterpret_cast<const std::pair<unsigned, T>*>(this)->first;
   }
   const T& second() const {
-    return reinterpret_cast<const std::pair<int, T>*>(this)->second;
+    return reinterpret_cast<const std::pair<unsigned, T>*>(this)->second;
   }
  private:
   // very bad way of bypassing the default constructor on T
-  char data_[sizeof(std::pair<int, T>)];
+  char data_[sizeof(std::pair<unsigned, T>)];
 };
-BOOST_STATIC_ASSERT(sizeof(PairIntT<float>) == sizeof(std::pair<int,float>));
+BOOST_STATIC_ASSERT(sizeof(PairIntT<float>) == sizeof(std::pair<unsigned,float>));
 
-template <typename T, int LOCAL_MAX = (sizeof(T) == sizeof(float) ? 15 : 7)>
+template <typename T, unsigned LOCAL_MAX = (sizeof(T) == sizeof(float) ? 15u : 7u)>
 class FastSparseVector {
  public:
   struct const_iterator {
@@ -79,17 +79,17 @@ class FastSparseVector {
     }
     const bool local_;
     const PairIntT<T>* local_it_;
-    typename std::map<int, T>::const_iterator remote_it_;
-    const std::pair<const int, T>& operator*() const {
+    typename std::map<unsigned, T>::const_iterator remote_it_;
+    const std::pair<const unsigned, T>& operator*() const {
       if (local_)
-        return *reinterpret_cast<const std::pair<const int, float>*>(local_it_);
+        return *reinterpret_cast<const std::pair<const unsigned, float>*>(local_it_);
       else
         return *remote_it_;
     }
 
-    const std::pair<const int, T>* operator->() const {
+    const std::pair<const unsigned, T>* operator->() const {
       if (local_)
-        return reinterpret_cast<const std::pair<const int, T>*>(local_it_);
+        return reinterpret_cast<const std::pair<const unsigned, T>*>(local_it_);
       else
         return &*remote_it_;
     }
@@ -118,17 +118,17 @@ class FastSparseVector {
   }
   FastSparseVector(const FastSparseVector& other) {
     std::memcpy(this, &other, sizeof(FastSparseVector));
-    if (is_remote_) data_.rbmap = new std::map<int, T>(*data_.rbmap);
+    if (is_remote_) data_.rbmap = new std::map<unsigned, T>(*data_.rbmap);
   }
-  FastSparseVector(std::pair<int, T>* first, std::pair<int, T>* last) {
+  FastSparseVector(std::pair<unsigned, T>* first, std::pair<unsigned, T>* last) {
     const ptrdiff_t n = last - first;
     if (n <= LOCAL_MAX) {
       is_remote_ = false;
       local_size_ = n;
-      std::memcpy(data_.local, first, sizeof(std::pair<int, T>) * n);
+      std::memcpy(data_.local, first, sizeof(std::pair<unsigned, T>) * n);
     } else {
       is_remote_ = true;
-      data_.rbmap = new std::map<int, T>(first, last);
+      data_.rbmap = new std::map<unsigned, T>(first, last);
     }
   }
   void erase(int k) {
@@ -150,31 +150,31 @@ class FastSparseVector {
     clear();
     std::memcpy(this, &other, sizeof(FastSparseVector));
     if (is_remote_)
-      data_.rbmap = new std::map<int, T>(*data_.rbmap);
+      data_.rbmap = new std::map<unsigned, T>(*data_.rbmap);
     return *this;
   }
   T const& get_singleton() const {
     assert(size()==1);
     return begin()->second;
   }
-  bool nonzero(int k) const {
+  bool nonzero(unsigned k) const {
     return static_cast<bool>(value(k));
   }
-  inline void set_value(int k, const T& v) {
+  inline void set_value(unsigned k, const T& v) {
     get_or_create_bin(k) = v;
   }
-  inline T& add_value(int k, const T& v) {
+  inline T& add_value(unsigned k, const T& v) {
     return get_or_create_bin(k) += v;
   }
-  inline T get(int k) const {
+  inline T get(unsigned k) const {
     return value(k);
   }
-  inline T value(int k) const {
+  inline T value(unsigned k) const {
     if (is_remote_) {
-      typename std::map<int, T>::const_iterator it = data_.rbmap->find(k);
+      typename std::map<unsigned, T>::const_iterator it = data_.rbmap->find(k);
       if (it != data_.rbmap->end()) return it->second;
     } else {
-      for (int i = 0; i < local_size_; ++i) {
+      for (unsigned i = 0; i < local_size_; ++i) {
         const PairIntT<T>& p = data_.local[i];
         if (p.first() == k) return p.second();
       }
@@ -256,8 +256,8 @@ class FastSparseVector {
   }
   inline FastSparseVector& operator*=(const T& scalar) {
     if (is_remote_) {
-      const typename std::map<int, T>::iterator end = data_.rbmap->end();
-      for (typename std::map<int, T>::iterator it = data_.rbmap->begin(); it != end; ++it)
+      const typename std::map<unsigned, T>::iterator end = data_.rbmap->end();
+      for (typename std::map<unsigned, T>::iterator it = data_.rbmap->begin(); it != end; ++it)
         it->second *= scalar;
     } else {
       for (int i = 0; i < local_size_; ++i)
@@ -267,8 +267,8 @@ class FastSparseVector {
   }
   inline FastSparseVector& operator/=(const T& scalar) {
     if (is_remote_) {
-      const typename std::map<int, T>::iterator end = data_.rbmap->end();
-      for (typename std::map<int, T>::iterator it = data_.rbmap->begin(); it != end; ++it)
+      const typename std::map<unsigned, T>::iterator end = data_.rbmap->end();
+      for (typename std::map<unsigned, T>::iterator it = data_.rbmap->begin(); it != end; ++it)
         it->second /= scalar;
     } else {
       for (int i = 0; i < local_size_; ++i)
@@ -300,7 +300,7 @@ class FastSparseVector {
   T dot(const std::vector<T>& v) const {
     T res = T();
     for (const_iterator it = begin(), e = end(); it != e; ++it)
-      if (it->first < v.size()) res += it->second * v[it->first];
+      if (static_cast<unsigned>(it->first) < v.size()) res += it->second * v[it->first];
     return res;
   }
   T dot(const FastSparseVector<T>& other) const {
@@ -330,11 +330,11 @@ class FastSparseVector {
       v.resize(i+1);
     return v[i];
   }
-  inline T& get_or_create_bin(int k) {
+  inline T& get_or_create_bin(unsigned k) {
     if (is_remote_) {
       return (*data_.rbmap)[k];
     } else {
-      for (int i = 0; i < local_size_; ++i)
+      for (unsigned i = 0; i < local_size_; ++i)
         if (data_.local[i].first() == k) return data_.local[i].second();
     }
     assert(!is_remote_);
@@ -353,17 +353,17 @@ class FastSparseVector {
   void swap_local_rbmap() {
     if (is_remote_) { // data is in rbmap, move to local
       assert(data_.rbmap->size() < LOCAL_MAX);
-      const std::map<int, T>* m = data_.rbmap;
+      const std::map<unsigned, T>* m = data_.rbmap;
       local_size_ = m->size();
       int i = 0;
-      for (typename std::map<int, T>::const_iterator it = m->begin();
+      for (typename std::map<unsigned, T>::const_iterator it = m->begin();
            it != m->end(); ++it) {
         data_.local[i] = *it;
         ++i;
       }
       is_remote_ = false;
     } else { // data is local, move to rbmap
-      std::map<int, T>* m = new std::map<int, T>(&data_.local[0], &data_.local[local_size_]);
+      std::map<unsigned, T>* m = new std::map<unsigned, T>(&data_.local[0], &data_.local[local_size_]);
       data_.rbmap = m;
       is_remote_ = true;
     }
@@ -371,7 +371,7 @@ class FastSparseVector {
 
   union {
     PairIntT<T> local[LOCAL_MAX];
-    std::map<int, T>* rbmap;
+    std::map<unsigned, T>* rbmap;
   } data_;
   unsigned char local_size_;
   bool is_remote_;
@@ -399,8 +399,8 @@ class FastSparseVector {
   void load(Archive & ar, const unsigned int version) {
     (void) version;
     this->clear();
-    int sz; ar & sz;
-    for (int i = 0; i < sz; ++i) {
+    unsigned sz; ar & sz;
+    for (unsigned i = 0; i < sz; ++i) {
       std::pair<std::string, T> wire_pair;
       ar & wire_pair;
       this->set_value(FD::Convert(wire_pair.first), wire_pair.second);

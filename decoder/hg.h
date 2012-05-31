@@ -43,7 +43,7 @@ public:
   Hypergraph() : is_linear_chain_(false) {}
 
   // SmallVector is a fast, small vector<int> implementation for sizes <= 2
-  typedef SmallVectorInt TailNodeVector; // indices in nodes_
+  typedef SmallVectorUnsigned TailNodeVector; // indices in nodes_
   typedef std::vector<int> EdgesVector; // indices in edges_
 
   // TODO get rid of cat_?
@@ -396,7 +396,7 @@ public:
   // (inner product) to set the edge probabilities
   template <class V>
   void Reweight(const V& weights) {
-    for (int i = 0; i < edges_.size(); ++i) {
+    for (unsigned i = 0; i < edges_.size(); ++i) {
       Edge& e = edges_[i];
       e.edge_prob_.logeq(e.feature_values_.dot(weights));
     }
@@ -456,8 +456,6 @@ public:
 //  void SortInEdgesByEdgeWeights(); // local sort only - pretty useless
 
   void PruneUnreachable(int goal_node_id); // DEPRECATED
-
-  void RemoveNoncoaccessibleStates(int goal_node_id = -1);
 
   // remove edges from the hypergraph if prune_edge[edge_id] is true
   // note: if run_inside_algorithm is false, then consumers may be unhappy if you pruned nodes that are built on by nodes that are kept.
@@ -524,7 +522,7 @@ public:
 
   template <class V>
   void visit_edges(V &v) {
-    for (int i=0;i<edges_.size();++i)
+    for (unsigned i=0;i<edges_.size();++i)
       v(edges_[i].head_node_,i,edges_[i]);
   }
 

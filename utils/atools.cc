@@ -27,7 +27,7 @@ struct Command {
     x->resize(max(a.width(), b.width()), max(a.height(), b.height()));
   }
   static bool Safe(const Array2D<bool>& a, int i, int j) {
-    if (i >= 0 && j >= 0 && i < a.width() && j < a.height())
+    if (i >= 0 && j >= 0 && i < static_cast<int>(a.width()) && j < static_cast<int>(a.height()))
       return a(i,j);
     else
       return false;
@@ -43,18 +43,18 @@ struct FMeasureCommand : public Command {
   bool RequiresTwoOperands() const { return true; }
   void Apply(const Array2D<bool>& hyp, const Array2D<bool>& ref, Array2D<bool>* x) {
     (void) x;   // AER just computes statistics, not an alignment
-    int i_len = ref.width();
-    int j_len = ref.height();
-    for (int i = 0; i < i_len; ++i) {
-      for (int j = 0; j < j_len; ++j) {
+    unsigned i_len = ref.width();
+    unsigned j_len = ref.height();
+    for (unsigned i = 0; i < i_len; ++i) {
+      for (unsigned j = 0; j < j_len; ++j) {
         if (ref(i,j)) {
           ++num_in_ref;
           if (Safe(hyp, i, j)) ++matches;
         } 
       }
     }
-    for (int i = 0; i < hyp.width(); ++i)
-      for (int j = 0; j < hyp.height(); ++j)
+    for (unsigned i = 0; i < hyp.width(); ++i)
+      for (unsigned j = 0; j < hyp.height(); ++j)
         if (hyp(i,j)) ++num_predicted;
   }
   void Summary() {
@@ -97,8 +97,8 @@ struct InvertCommand : public Command {
   void Apply(const Array2D<bool>& in, const Array2D<bool>&, Array2D<bool>* x) {
     Array2D<bool>& res = *x;
     res.resize(in.height(), in.width());
-    for (int i = 0; i < in.height(); ++i)
-      for (int j = 0; j < in.width(); ++j)
+    for (unsigned i = 0; i < in.height(); ++i)
+      for (unsigned j = 0; j < in.width(); ++j)
         res(i, j) = in(j, i);
   }
 };
@@ -109,8 +109,8 @@ struct IntersectCommand : public Command {
   void Apply(const Array2D<bool>& a, const Array2D<bool>& b, Array2D<bool>* x) {
     EnsureSize(a, b, x);
     Array2D<bool>& res = *x;
-    for (int i = 0; i < a.width(); ++i)
-      for (int j = 0; j < a.height(); ++j)
+    for (unsigned i = 0; i < a.width(); ++i)
+      for (unsigned j = 0; j < a.height(); ++j)
         res(i, j) = Safe(a, i, j) && Safe(b, i, j);
   }
 };
@@ -121,8 +121,8 @@ struct UnionCommand : public Command {
   void Apply(const Array2D<bool>& a, const Array2D<bool>& b, Array2D<bool>* x) {
     EnsureSize(a, b, x);
     Array2D<bool>& res = *x;
-    for (int i = 0; i < res.width(); ++i)
-      for (int j = 0; j < res.height(); ++j)
+    for (unsigned i = 0; i < res.width(); ++i)
+      for (unsigned j = 0; j < res.height(); ++j)
         res(i, j) = Safe(a, i, j) || Safe(b, i, j);
   }
 };
@@ -136,14 +136,14 @@ struct RefineCommand : public Command {
   }
   bool RequiresTwoOperands() const { return true; }
 
-  void Align(int i, int j) {
+  void Align(unsigned i, unsigned j) {
     res_(i, j) = true;
     is_i_aligned_[i] = true;
     is_j_aligned_[j] = true;
   }
 
   bool IsNeighborAligned(int i, int j) const {
-    for (int k = 0; k < neighbors_.size(); ++k) {
+    for (unsigned k = 0; k < neighbors_.size(); ++k) {
       const int di = neighbors_[k].first;
       const int dj = neighbors_[k].second;
       if (Safe(res_, i + di, j + dj))
@@ -177,8 +177,8 @@ struct RefineCommand : public Command {
     EnsureSize(a, b, &un_);
     is_i_aligned_.resize(res_.width(), false);
     is_j_aligned_.resize(res_.height(), false);
-    for (int i = 0; i < in_.width(); ++i)
-      for (int j = 0; j < in_.height(); ++j) {
+    for (unsigned i = 0; i < in_.width(); ++i)
+      for (unsigned j = 0; j < in_.height(); ++j) {
         un_(i, j) = Safe(a, i, j) || Safe(b, i, j);
         in_(i, j) = Safe(a, i, j) && Safe(b, i, j);
         if (in_(i, j)) Align(i, j);
@@ -188,16 +188,16 @@ struct RefineCommand : public Command {
   // if they match the constraints determined by pred
   void Grow(Predicate pred, bool idempotent, const Array2D<bool>& adds) {
     if (idempotent) {
-      for (int i = 0; i < adds.width(); ++i)
-        for (int j = 0; j < adds.height(); ++j) {
+      for (unsigned i = 0; i < adds.width(); ++i)
+        for (unsigned j = 0; j < adds.height(); ++j) {
           if (adds(i, j) && !res_(i, j) &&
               (this->*pred)(i, j)) Align(i, j);
         }
       return;
     }
     set<pair<int, int> > p;
-    for (int i = 0; i < adds.width(); ++i)
-      for (int j = 0; j < adds.height(); ++j)
+    for (unsigned i = 0; i < adds.width(); ++i)
+      for (unsigned j = 0; j < adds.height(); ++j)
         if (adds(i, j) && !res_(i, j))
           p.insert(make_pair(i, j));
     bool keep_going = !p.empty();
@@ -263,7 +263,7 @@ struct GDFACommand : public DiagCommand {
 
 map<string, boost::shared_ptr<Command> > commands;
 
-void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
+void InitCommandLine(unsigned argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   ostringstream os;
   os << "Operation to perform:";

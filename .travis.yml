@@ -1,0 +1,10 @@
+before_script:
+ - sudo apt-get install libboost-program-options-dev
+ - sudo apt-get install libboost-regex-dev
+ - sudo apt-get install libboost-test-dev
+ - sudo apt-get install flex
+ - autoreconf -ifv
+ - ./configure
+script: make
+after_script:
+ - ./tests/run-system-tests.pl
