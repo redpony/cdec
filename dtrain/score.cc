@@ -122,11 +122,12 @@ SmoothSingleBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
   unsigned j = 1;
   for (unsigned i = 0; i < M; i++) {
     if (counts.sum_[i] == 0 || counts.clipped_[i] == 0) break;
-    sum += ((score_t)counts.clipped_[i]/counts.sum_[i])/pow(2.0, N_-j+1);
+    sum += ((score_t)counts.clipped_[i]/counts.sum_[i])/pow(2., N_-j+1);
     j++;
   }
   return brevity_penalty(hyp_len, ref_len) * sum;
 }
+
 
 /*
  * approx. bleu
@@ -158,6 +159,38 @@ ApproxBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
     glob_src_len_ = discount_ * (glob_src_len_ + src_len);
   }
   return (score_t)glob_src_len_ * score;
+}
+
+/*
+ * Linear (Corpus) Bleu
+ *
+ * as in "Lattice Minimum Bayes-Risk Decoding
+ *        for Statistical Machine Translation"
+ * (Tromble et al. '08)
+ *
+ */
+score_t
+LinearBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                        const unsigned rank, const unsigned /*src_len*/)
+{
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
+  if (ref_len == 0) return 0.;
+  unsigned M = N_;
+  if (ref_len < N_) M = ref_len;
+  NgramCounts counts(M);
+  if (hyp_len > 0)
+    counts = make_ngram_counts(hyp, ref, M);
+  score_t ret = 0.;
+  for (unsigned i = 0; i < M; i++) {
+    if (counts.sum_[i] == 0 || onebest_counts_.sum_[i] == 0) break;
+    ret += counts.sum_[i]/onebest_counts_.sum_[i];
+  }
+  ret = -(hyp_len/(score_t)onebest_len_) + (1./M) * ret;
+  if (rank == 0) {
+    onebest_len_ += hyp_len;
+    onebest_counts_ += counts;
+  }
+  return ret;
 }
 
 

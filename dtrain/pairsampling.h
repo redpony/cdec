@@ -19,7 +19,7 @@ cmp_hyp_by_score_d(ScoredHyp a, ScoredHyp b)
 }
 
 inline void
-all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float _unused=1)
+all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, unsigned max, float _unused=1)
 {
   sort(s->begin(), s->end(), cmp_hyp_by_score_d);
   unsigned sz = s->size();
@@ -44,7 +44,7 @@ all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, sc
  */
 
 inline void
-partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float hi_lo)
+partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, unsigned max, float hi_lo)
 {
   unsigned sz = s->size();
   if (sz < 2) return;
@@ -104,7 +104,7 @@ _PRO_cmp_pair_by_diff_d(pair<ScoredHyp,ScoredHyp> a, pair<ScoredHyp,ScoredHyp> b
   return (fabs(a.first.score - a.second.score)) > (fabs(b.first.score - b.second.score));
 }
 inline void
-PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float _unused=1)
+PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, unsigned max, float _unused=1)
 {
   unsigned max_count = 5000, count = 0, sz = s->size();
   bool b = false;
