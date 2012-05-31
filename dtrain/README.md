@@ -41,7 +41,7 @@ DTRAIN_LOCAL.
 
 Next
 ----
-+ approx. Bleu?
++ approx. Bleu? proper lc_bleu (init with X)
 + turn off inclusion
 + (dtrain|decoder) more meta-parameters testing
 + feature selection directly in dtrain
@@ -57,6 +57,7 @@ Next
 + resharding [nfold cross val.]
 + bigger LM, feats (target side Ng., word alignments etc.)
 + merge kbest lists
++ proper eval, pairwise ranking, forced transl
 
 Legal
 -----
