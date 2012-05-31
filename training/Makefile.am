@@ -23,11 +23,17 @@ noinst_PROGRAMS = \
 
 TESTS = lbfgs_test optimize_test
 
-mpi_online_optimize_SOURCES = mpi_online_optimize.cc online_optimizer.cc
-mpi_online_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+noinst_LIBRARIES = libtraining.a
+libtraining_a_SOURCES = \
+  candidate_set.cc \
+  optimize.cc \
+  online_optimizer.cc
 
-mpi_flex_optimize_SOURCES = mpi_flex_optimize.cc online_optimizer.cc optimize.cc
-mpi_flex_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+mpi_online_optimize_SOURCES = mpi_online_optimize.cc
+mpi_online_optimize_LDADD = libtraining.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+
+mpi_flex_optimize_SOURCES = mpi_flex_optimize.cc
+mpi_flex_optimize_LDADD = libtraining.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 mpi_extract_reachable_SOURCES = mpi_extract_reachable.cc
 mpi_extract_reachable_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
@@ -35,8 +41,8 @@ mpi_extract_reachable_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mtev
 mpi_extract_features_SOURCES = mpi_extract_features.cc
 mpi_extract_features_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
-mpi_batch_optimize_SOURCES = mpi_batch_optimize.cc optimize.cc
-mpi_batch_optimize_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+mpi_batch_optimize_SOURCES = mpi_batch_optimize.cc
+mpi_batch_optimize_LDADD = libtraining.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 mpi_compute_cllh_SOURCES = mpi_compute_cllh.cc
 mpi_compute_cllh_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
@@ -50,14 +56,14 @@ test_ngram_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteva
 model1_SOURCES = model1.cc ttables.cc
 model1_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
-lbl_model_SOURCES = lbl_model.cc optimize.cc
-lbl_model_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
+lbl_model_SOURCES = lbl_model.cc
+lbl_model_LDADD = libtraining.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
 grammar_convert_SOURCES = grammar_convert.cc
 grammar_convert_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
-optimize_test_SOURCES = optimize_test.cc optimize.cc online_optimizer.cc
-optimize_test_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
+optimize_test_SOURCES = optimize_test.cc
+optimize_test_LDADD = libtraining.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
 collapse_weights_SOURCES = collapse_weights.cc
 collapse_weights_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
@@ -65,8 +71,8 @@ collapse_weights_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/lib
 lbfgs_test_SOURCES = lbfgs_test.cc
 lbfgs_test_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
-mr_optimize_reduce_SOURCES = mr_optimize_reduce.cc optimize.cc
-mr_optimize_reduce_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
+mr_optimize_reduce_SOURCES = mr_optimize_reduce.cc
+mr_optimize_reduce_LDADD = libtraining.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
 mr_em_map_adapter_SOURCES = mr_em_map_adapter.cc
 mr_em_map_adapter_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz

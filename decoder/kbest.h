@@ -43,7 +43,7 @@ namespace KBest {
       traverse(tf), w(wf), g(hg), nds(g.nodes_.size()), k_prime(k) {}
 
     ~KBestDerivations() {
-      for (int i = 0; i < freelist.size(); ++i)
+      for (unsigned i = 0; i < freelist.size(); ++i)
         delete freelist[i];
     }
 
@@ -86,7 +86,7 @@ namespace KBest {
 //      Hypergraph::Edge const * operator ->() const { return d->edge; }
     };
 
-    EdgeHandle operator()(int t,int taili,EdgeHandle const& parent) const {
+    EdgeHandle operator()(unsigned t,unsigned taili,EdgeHandle const& parent) const {
       return EdgeHandle(nds[t].D[parent.d->j[taili]]);
     }
 
@@ -98,7 +98,7 @@ namespace KBest {
       size_t operator()(const Derivation* d) const {
         size_t x = 5381;
         x = ((x << 5) + x) ^ d->edge->id_;
-        for (int i = 0; i < d->j.size(); ++i)
+        for (unsigned i = 0; i < d->j.size(); ++i)
           x = ((x << 5) + x) ^ d->j[i];
         return x;
       }
@@ -121,7 +121,7 @@ namespace KBest {
       explicit NodeDerivationState(const DerivationFilter& f = DerivationFilter()) : filter(f) {}
     };
 
-    Derivation* LazyKthBest(int v, int k) {
+    Derivation* LazyKthBest(unsigned v, unsigned k) {
       NodeDerivationState& s = GetCandidates(v);
       CandidateHeap& cand = s.cand;
       DerivationList& D = s.D;
@@ -139,7 +139,7 @@ namespace KBest {
           Derivation* d = cand.back();
           cand.pop_back();
           std::vector<const T*> ants(d->edge->Arity());
-          for (int j = 0; j < ants.size(); ++j)
+          for (unsigned j = 0; j < ants.size(); ++j)
             ants[j] = &LazyKthBest(d->edge->tail_nodes_[j], d->j[j])->yield;
           traverse(*d->edge, ants, &d->yield);
           if (!filter(d->yield)) {
@@ -171,12 +171,12 @@ namespace KBest {
       return freelist.back();
     }
 
-    NodeDerivationState& GetCandidates(int v) {
+    NodeDerivationState& GetCandidates(unsigned v) {
       NodeDerivationState& s = nds[v];
       if (!s.D.empty() || !s.cand.empty()) return s;
 
       const Hypergraph::Node& node = g.nodes_[v];
-      for (int i = 0; i < node.in_edges_.size(); ++i) {
+      for (unsigned i = 0; i < node.in_edges_.size(); ++i) {
         const Hypergraph::Edge& edge = g.edges_[node.in_edges_[i]];
         SmallVectorInt jv(edge.Arity(), 0);
         Derivation* d = CreateDerivation(edge, jv);
@@ -184,7 +184,7 @@ namespace KBest {
         s.cand.push_back(d);
       }
 
-      const int effective_k = std::min(k_prime, s.cand.size());
+      const unsigned effective_k = std::min(k_prime, s.cand.size());
       const typename CandidateHeap::iterator kth = s.cand.begin() + effective_k;
       std::nth_element(s.cand.begin(), kth, s.cand.end(), DerivationCompare());
       s.cand.resize(effective_k);
@@ -194,7 +194,7 @@ namespace KBest {
     }
 
     void LazyNext(const Derivation* d, CandidateHeap* cand, UniqueDerivationSet* ds) {
-      for (int i = 0; i < d->j.size(); ++i) {
+      for (unsigned i = 0; i < d->j.size(); ++i) {
         SmallVectorInt j = d->j;
         ++j[i];
         const Derivation* ant = LazyKthBest(d->edge->tail_nodes_[i], j[i]);
@@ -205,8 +205,12 @@ namespace KBest {
             if (new_d) {
               cand->push_back(new_d);
               std::push_heap(cand->begin(), cand->end(), HeapCompare());
+#ifdef NDEBUG
+              ds->insert(new_d).second;  // insert into uniqueness set
+#else
               bool inserted = ds->insert(new_d).second;  // insert into uniqueness set
               assert(inserted);
+#endif
             }
           }
         }

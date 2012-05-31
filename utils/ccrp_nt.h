@@ -111,7 +111,7 @@ class CCRP_NoTable {
   void resample_hyperparameters(MT19937* rng, const unsigned nloop = 5, const unsigned niterations = 10) {
     assert(has_alpha_prior());
     ConcentrationResampler cr(*this);
-    for (int iter = 0; iter < nloop; ++iter) {
+    for (unsigned iter = 0; iter < nloop; ++iter) {
         alpha_ = slice_sampler1d(cr, alpha_, *rng, 0.0,
                                std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);
     }

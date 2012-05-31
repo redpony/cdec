@@ -97,9 +97,9 @@ inline std::string Trim(const std::string& str, const std::string& dropChars = "
 
 inline void Tokenize(const std::string& str, char delimiter, std::vector<std::string>* res) {
   std::string s = str;
-  int last = 0;
+  unsigned last = 0;
   res->clear();
-  for (int i=0; i < s.size(); ++i)
+  for (unsigned i=0; i < s.size(); ++i)
     if (s[i] == delimiter) {
       s[i]=0;
       if (last != i) {
@@ -120,14 +120,14 @@ inline unsigned NTokens(const std::string& str, char delimiter)
 
 inline std::string LowercaseString(const std::string& in) {
   std::string res(in.size(),' ');
-  for (int i = 0; i < in.size(); ++i)
+  for (unsigned i = 0; i < in.size(); ++i)
     res[i] = tolower(in[i]);
   return res;
 }
 
 inline std::string UppercaseString(const std::string& in) {
   std::string res(in.size(),' ');
-  for (int i = 0; i < in.size(); ++i)
+  for (unsigned i = 0; i < in.size(); ++i)
     res[i] = toupper(in[i]);
   return res;
 }
@@ -146,8 +146,8 @@ inline int CountSubstrings(const std::string& str, const std::string& sub) {
 
 inline int SplitOnWhitespace(const std::string& in, std::vector<std::string>* out) {
   out->clear();
-  int i = 0;
-  int start = 0;
+  unsigned i = 0;
+  unsigned start = 0;
   std::string cur;
   while(i < in.size()) {
     if (in[i] == ' ' || in[i] == '\t') {
@@ -231,7 +231,7 @@ template <class F>
 void VisitTokens(std::string const& s,F f) {
   if (0) {
   std::vector<std::string> ss=SplitOnWhitespace(s);
-  for (int i=0;i<ss.size();++i)
+  for (unsigned i=0;i<ss.size();++i)
     f(ss[i]);
   return;
   }
@@ -249,7 +249,7 @@ inline void SplitCommandAndParam(const std::string& in, std::string* cmd, std::s
   SplitOnWhitespace(in, &x);
   if (x.size() == 0) return;
   *cmd = x[0];
-  for (int i = 1; i < x.size(); ++i) {
+  for (unsigned i = 1; i < x.size(); ++i) {
     if (i > 1) { *param += " "; }
     *param += x[i];
   }

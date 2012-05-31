@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(TestConvexHullInside) {
     if (!d) break;
     cerr << log(d->score) << " ||| " << TD::GetString(d->yield) << " ||| " << d->feature_values << endl;
   }
-  for (int i = 0; i < segs.size(); ++i) {
+  for (unsigned i = 0; i < segs.size(); ++i) {
     cerr << "seg=" << i << endl;
     vector<WordID> trans;
     segs[i]->ConstructTranslation(&trans);
@@ -118,13 +118,15 @@ BOOST_AUTO_TEST_CASE( TestS1) {
   to_optimize.push_back(fPhraseModel_1);
   to_optimize.push_back(fPhraseModel_2);
 
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : "test_data");
+
   Hypergraph hg;
-  ReadFile rf("./test_data/0.json.gz");
+  ReadFile rf(path + "/0.json.gz");
   HypergraphIO::ReadFromJSON(rf.stream(), &hg);
   hg.Reweight(wts);
 
   Hypergraph hg2;
-  ReadFile rf2("./test_data/1.json.gz");
+  ReadFile rf2(path + "/1.json.gz");
   HypergraphIO::ReadFromJSON(rf2.stream(), &hg2);
   hg2.Reweight(wts);
 
@@ -149,7 +151,7 @@ BOOST_AUTO_TEST_CASE( TestS1) {
      &rng,
      &axes);
   assert(axes.size() == 10 + to_optimize.size());
-  for (int i = 0; i < axes.size(); ++i)
+  for (unsigned i = 0; i < axes.size(); ++i)
     cerr << axes[i] << endl;
   const SparseVector<double>& axis = axes[0];
 

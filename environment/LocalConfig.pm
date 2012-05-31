@@ -15,8 +15,14 @@ my $CCONFIG = {
   'StarCluster' => {
     'HOST_REGEXP' => qr/compute-\d+\.internal$/,
     'JobControl'  => 'qsub',
-    'QSubMemFlag' => '-l mem',
+    'QSubMemFlag' => '-l mem=',
     'DefaultJobs' => 20,
+  },
+  'Cab' => {
+    'HOST_REGEXP' => qr/cab\.ark\.cs\.cmu\.edu$|cab\.local$/,
+    'JobControl' => 'qsub',
+    'QSubMemFlag' => '-l mem=',
+    'DefaultJobs' => 8
   },
   'LTICluster' => {
     'HOST_REGEXP' => qr/^cluster\d+\.lti\.cs\.cmu\.edu$/,

@@ -84,7 +84,7 @@ class ActiveChart {
       const GrammarIter* ni = gptr_->Extend(symbol);
       if (!ni) return;
       Hypergraph::TailNodeVector na(ant_nodes_.size() + 1);
-      for (int i = 0; i < ant_nodes_.size(); ++i)
+      for (unsigned i = 0; i < ant_nodes_.size(); ++i)
         na[i] = ant_nodes_[i];
       na[ant_nodes_.size()] = node_index;
       out_cell->push_back(ActiveItem(ni, na, lattice_cost));
@@ -154,7 +154,7 @@ PassiveChart::PassiveChart(const string& goal,
     goal_idx_(-1),
     lc_fid_(FD::Convert("LatticeCost")) {
   act_chart_.resize(grammars_.size());
-  for (int i = 0; i < grammars_.size(); ++i)
+  for (unsigned i = 0; i < grammars_.size(); ++i)
     act_chart_[i] = new ActiveChart(forest, *this);
   if (!kGOAL) kGOAL = TD::Convert("Goal") * -1;
   if (!SILENT) cerr << "  Goal category: [" << goal << ']' << endl;
@@ -204,12 +204,12 @@ void PassiveChart::ApplyRules(const int i,
 
 void PassiveChart::ApplyUnaryRules(const int i, const int j) {
   const vector<int>& nodes = chart_(i,j);  // reference is important!
-  for (int gi = 0; gi < grammars_.size(); ++gi) {
+  for (unsigned gi = 0; gi < grammars_.size(); ++gi) {
     if (!grammars_[gi]->HasRuleForSpan(i,j,input_.Distance(i,j))) continue;
-    for (int di = 0; di < nodes.size(); ++di) {
+    for (unsigned di = 0; di < nodes.size(); ++di) {
       const WordID& cat = forest_->nodes_[nodes[di]].cat_;
       const vector<TRulePtr>& unaries = grammars_[gi]->GetUnaryRulesForRHS(cat);
-      for (int ri = 0; ri < unaries.size(); ++ri) {
+      for (unsigned ri = 0; ri < unaries.size(); ++ri) {
         // cerr << "At (" << i << "," << j << "): applying " << unaries[ri]->AsString() << endl;
         const Hypergraph::TailNodeVector ant(1, nodes[di]);
         ApplyRule(i, j, unaries[ri], ant, 0);  // may update nodes
@@ -224,15 +224,15 @@ bool PassiveChart::Parse() {
   size_t res = min(static_cast<size_t>(2000000), static_cast<size_t>(in_size_2 * 1000));
   forest_->edges_.reserve(res);
   goal_idx_ = -1;
-  for (int gi = 0; gi < grammars_.size(); ++gi)
+  for (unsigned gi = 0; gi < grammars_.size(); ++gi)
     act_chart_[gi]->SeedActiveChart(*grammars_[gi]);
 
   if (!SILENT) cerr << "    ";
-  for (int l=1; l<input_.size()+1; ++l) {
+  for (unsigned l=1; l<input_.size()+1; ++l) {
     if (!SILENT) cerr << '.';
-    for (int i=0; i<input_.size() + 1 - l; ++i) {
-      int j = i + l;
-      for (int gi = 0; gi < grammars_.size(); ++gi) {
+    for (unsigned i=0; i<input_.size() + 1 - l; ++i) {
+      unsigned j = i + l;
+      for (unsigned gi = 0; gi < grammars_.size(); ++gi) {
         const Grammar& g = *grammars_[gi];
         if (g.HasRuleForSpan(i, j, input_.Distance(i, j))) {
           act_chart_[gi]->AdvanceDotsForAllItemsInCell(i, j, input_);
@@ -248,7 +248,7 @@ bool PassiveChart::Parse() {
       }
       ApplyUnaryRules(i,j);
 
-      for (int gi = 0; gi < grammars_.size(); ++gi) {
+      for (unsigned gi = 0; gi < grammars_.size(); ++gi) {
         const Grammar& g = *grammars_[gi];
           // deal with non-terminals that were just proved
           if (g.HasRuleForSpan(i, j, input_.Distance(i,j)))
@@ -256,7 +256,7 @@ bool PassiveChart::Parse() {
       }
     }
     const vector<int>& dh = chart_(0, input_.size());
-    for (int di = 0; di < dh.size(); ++di) {
+    for (unsigned di = 0; di < dh.size(); ++di) {
       const Hypergraph::Node& node = forest_->nodes_[dh[di]];
       if (node.cat_ == goal_cat_) {
         Hypergraph::TailNodeVector ant(1, node.id_);
@@ -272,7 +272,7 @@ bool PassiveChart::Parse() {
 }
 
 PassiveChart::~PassiveChart() {
-  for (int i = 0; i < act_chart_.size(); ++i)
+  for (unsigned i = 0; i < act_chart_.size(); ++i)
     delete act_chart_[i];
 }
 

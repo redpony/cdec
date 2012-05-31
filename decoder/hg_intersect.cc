@@ -19,12 +19,12 @@ using namespace std;
 struct RuleFilter {
   unordered_map<vector<WordID>, bool, boost::hash<vector<WordID> > > exists_;
   bool true_lattice;
-  RuleFilter(const Lattice& target, int max_phrase_size) {
+  RuleFilter(const Lattice& target, unsigned max_phrase_size) {
     true_lattice = false;
-    for (int i = 0; i < target.size(); ++i) {
+    for (unsigned i = 0; i < target.size(); ++i) {
       vector<WordID> phrase;
-      int lim = min(static_cast<int>(target.size()), i + max_phrase_size);
-      for (int j = i; j < lim; ++j) {
+      const unsigned lim = min(static_cast<unsigned>(target.size()), i + max_phrase_size);
+      for (unsigned j = i; j < lim; ++j) {
         if (target[j].size() > 1) { true_lattice = true; break; }
         phrase.push_back(target[j][0].label);
         exists_[phrase] = true;
@@ -37,10 +37,10 @@ struct RuleFilter {
     // TODO do some smarter filtering for lattices
     if (true_lattice) return false;  // don't filter "true lattice" input
     const vector<WordID>& e = r.e();
-    for (int i = 0; i < e.size(); ++i) {
+    for (unsigned i = 0; i < e.size(); ++i) {
       if (e[i] <= 0) continue;
       vector<WordID> phrase;
-      for (int j = i; j < e.size(); ++j) {
+      for (unsigned j = i; j < e.size(); ++j) {
         if (e[j] <= 0) break;
         phrase.push_back(e[j]);
         if (exists_.count(phrase) == 0) return true;
@@ -55,7 +55,7 @@ static bool FastLinearIntersect(const Lattice& target, Hypergraph* hg) {
   vector<bool> prune(hg->edges_.size(), false);
   set<int> cov;
   map<const TRule*, TRulePtr> inverted_rules;
-  for (int i = 0; i < prune.size(); ++i) {
+  for (unsigned i = 0; i < prune.size(); ++i) {
     Hypergraph::Edge& edge = hg->edges_[i];
     if (edge.Arity() == 0) {
       const int trg_index = edge.prev_i_;
@@ -87,12 +87,12 @@ bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
 
   vector<bool> rem(hg->edges_.size(), false);
   const RuleFilter filter(target, 15);   // TODO make configurable
-  for (int i = 0; i < rem.size(); ++i)
+  for (unsigned i = 0; i < rem.size(); ++i)
     rem[i] = filter(*hg->edges_[i].rule_);
   hg->PruneEdges(rem, true);
 
-  const int nedges = hg->edges_.size();
-  const int nnodes = hg->nodes_.size();
+  const unsigned nedges = hg->edges_.size();
+  const unsigned nnodes = hg->nodes_.size();
 
   TextGrammar* g = new TextGrammar;
   GrammarPtr gp(g);
@@ -100,7 +100,7 @@ bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
   // each node in the translation forest becomes a "non-terminal" in the new
   // grammar, create the labels here
   const string kSEP = "_";
-  for (int i = 0; i < nnodes; ++i) {
+  for (unsigned i = 0; i < nnodes; ++i) {
     const char* pstr = "CAT";
     if (hg->nodes_[i].cat_ < 0)
       pstr = TD::Convert(-hg->nodes_[i].cat_);
@@ -108,7 +108,7 @@ bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
   }
 
   // construct the grammar
-  for (int i = 0; i < nedges; ++i) {
+  for (unsigned i = 0; i < nedges; ++i) {
     const Hypergraph::Edge& edge = hg->edges_[i];
     const vector<WordID>& tgt = edge.rule_->e();
     const vector<WordID>& src = edge.rule_->f();
@@ -122,7 +122,7 @@ bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
     e.resize(src.size());   // parses using the source side!
     Hypergraph::TailNodeVector tn(edge.tail_nodes_.size());
     int ntc = 0;
-    for (int j = 0; j < tgt.size(); ++j) {
+    for (unsigned j = 0; j < tgt.size(); ++j) {
       const WordID& cur = tgt[j];
       if (cur > 0) {
         f[j] = cur;
@@ -133,7 +133,7 @@ bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
       }
     }
     ntc = 0;
-    for (int j = 0; j < src.size(); ++j) {
+    for (unsigned j = 0; j < src.size(); ++j) {
       const WordID& cur = src[j];
       if (cur > 0) {
         e[j] = cur;

@@ -52,7 +52,7 @@ bool ReadSparseVectorString(const string& s, SparseVector<double>* v) {
   vector<string> fields;
   Tokenize(s, ';', &fields);
   if (fields.empty()) return false;
-  for (int i = 0; i < fields.size(); ++i) {
+  for (unsigned i = 0; i < fields.size(); ++i) {
     vector<string> pair(2);
     Tokenize(fields[i], '=', &pair);
     if (pair.size() != 2) {

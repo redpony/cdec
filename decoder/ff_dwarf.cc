@@ -519,7 +519,7 @@ void Dwarf::neighboringFWs(const Lattice& l, const int& i, const int& j, const m
   while (idx>=0) {
     if (l[idx].size()>0) { 
       if (fw_hash.find(l[idx][0].label)!=fw_hash.end()) {
-        *lfw++;  
+        lfw++;  
       }
     }
     idx-=l[idx][0].dist2next;
@@ -528,7 +528,7 @@ void Dwarf::neighboringFWs(const Lattice& l, const int& i, const int& j, const m
   while (idx<l.size()) {
     if (l[idx].size()>0) { 
       if (fw_hash.find(l[idx][0].label)!=fw_hash.end()) {
-        *rfw++;
+        rfw++;
       }
     }
     idx+=l[idx][0].dist2next;
@@ -787,7 +787,7 @@ bool Dwarf::generalizeOrientation(CountTable* table, const std::map<WordID,WordI
       }
     }
   }
-
+  return false; // no idea if this is right
 }
  
 

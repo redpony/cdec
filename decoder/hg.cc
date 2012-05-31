@@ -56,7 +56,7 @@ struct less_ve {
 
 Hypergraph::Edge const* Hypergraph::ViterbiSortInEdges(EdgeProbs const& ev)
 {
-  for (int i=0;i<nodes_.size();++i) {
+  for (unsigned i=0;i<nodes_.size();++i) {
     EdgesVector &ie=nodes_[i].in_edges_;
     std::sort(ie.begin(),ie.end(),less_ve(ev));
   }
@@ -70,9 +70,9 @@ prob_t Hypergraph::ComputeEdgeViterbi(EdgeProbs *ev) const {
 }
 
 prob_t Hypergraph::ComputeEdgeViterbi(NodeProbs const& nv,EdgeProbs *ev) const {
-  int ne=edges_.size();
+  unsigned ne=edges_.size();
   ev->resize(ne);
-  for (int i=0;i<ne;++i) {
+  for (unsigned i=0;i<ne;++i) {
     Edge const& e=edges_[i];
     prob_t r=e.edge_prob_;
     TailNodeVector const& t=e.tail_nodes_;
@@ -162,7 +162,7 @@ prob_t Hypergraph::ComputeEdgePosteriors(double scale, vector<prob_t>* posts) co
                   SparseVector<prob_t>,
                   ScaledTransitionEventWeightFunction>(*this, &pv, weight, w2);
   posts->resize(edges_.size());
-  for (int i = 0; i < edges_.size(); ++i)
+  for (unsigned i = 0; i < edges_.size(); ++i)
     (*posts)[i] = prob_t(pv.value(i));
   return inside;
 }
@@ -175,7 +175,7 @@ prob_t Hypergraph::ComputeBestPathThroughEdges(vector<prob_t>* post) const {
                   SparseVector<TropicalValue>,
                   ViterbiTransitionEventWeightFunction>(*this, &pv);
   post->resize(edges_.size());
-  for (int i = 0; i < edges_.size(); ++i)
+  for (unsigned i = 0; i < edges_.size(); ++i)
     (*post)[i] = pv.value(i).v_;
   return viterbi_weight.v_;
 }
@@ -183,12 +183,12 @@ prob_t Hypergraph::ComputeBestPathThroughEdges(vector<prob_t>* post) const {
 void Hypergraph::PushWeightsToSource(double scale) {
   vector<prob_t> posts;
   ComputeEdgePosteriors(scale, &posts);
-  for (int i = 0; i < nodes_.size(); ++i) {
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
     const Hypergraph::Node& node = nodes_[i];
     prob_t z = prob_t::Zero();
-    for (int j = 0; j < node.out_edges_.size(); ++j)
+    for (unsigned j = 0; j < node.out_edges_.size(); ++j)
       z += posts[node.out_edges_[j]];
-    for (int j = 0; j < node.out_edges_.size(); ++j) {
+    for (unsigned j = 0; j < node.out_edges_.size(); ++j) {
       edges_[node.out_edges_[j]].edge_prob_ = posts[node.out_edges_[j]] / z;
     }
   }
@@ -201,7 +201,7 @@ struct vpusher : public vector<TropicalValue> {
   void operator()(int n,int /*ei*/,Hypergraph::Edge &e) const {
     Hypergraph::TailNodeVector const& t=e.tail_nodes_;
     prob_t p=e.edge_prob_;
-    for (int i=0;i<t.size();++i)
+    for (unsigned i=0;i<t.size();++i)
       p*=(*this)[t[i]].v_;
     e.feature_values_.set_value(fid,log(e.edge_prob_=p/(*this)[n].v_));
   }
@@ -229,12 +229,12 @@ prob_t Hypergraph::PushViterbiWeightsToGoal(int fid) {
 prob_t Hypergraph::PushWeightsToGoal(double scale) {
   vector<prob_t> posts;
   const prob_t inside_z = ComputeEdgePosteriors(scale, &posts);
-  for (int i = 0; i < nodes_.size(); ++i) {
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
     const Hypergraph::Node& node = nodes_[i];
     prob_t z = prob_t::Zero();
-    for (int j = 0; j < node.in_edges_.size(); ++j)
+    for (unsigned j = 0; j < node.in_edges_.size(); ++j)
       z += posts[node.in_edges_[j]];
-    for (int j = 0; j < node.in_edges_.size(); ++j) {
+    for (unsigned j = 0; j < node.in_edges_.size(); ++j) {
       edges_[node.in_edges_[j]].edge_prob_ = posts[node.in_edges_[j]] / z;
     }
   }
@@ -257,7 +257,7 @@ void Hypergraph::PruneEdges(const EdgeMask& prune_edge, bool run_inside_algorith
   if (run_inside_algorithm) {
     const EdgeExistsWeightFunction wf(prune_edge);
     vector<Boolean> reachable;
-    bool goal_derivable = Inside/* <Boolean, EdgeExistsWeightFunction> */(*this, &reachable, wf);
+    bool goal_derivable = Inside<Boolean, EdgeExistsWeightFunction>(*this, &reachable, wf);
     if (!goal_derivable) {
       edges_.clear();
       nodes_.clear();
@@ -266,11 +266,11 @@ void Hypergraph::PruneEdges(const EdgeMask& prune_edge, bool run_inside_algorith
     }
 
     assert(reachable.size() == nodes_.size());
-    for (int i = 0; i < edges_.size(); ++i) {
+    for (unsigned i = 0; i < edges_.size(); ++i) {
       bool prune = prune_edge[i];
       if (!prune) {
         const Edge& edge = edges_[i];
-        for (int j = 0; j < edge.tail_nodes_.size(); ++j) {
+        for (unsigned j = 0; j < edge.tail_nodes_.size(); ++j) {
           if (!reachable[edge.tail_nodes_[j]]) {
             prune = true;
             break;
@@ -299,7 +299,7 @@ void Hypergraph::MarginPrune(vector<prob_t> const& io,prob_t cutoff,vector<bool>
     cerr<<"Finishing prune for "<<prune.size()<<" edges; CUTOFF=" << cutoff << endl;
   }
   unsigned pc = 0;
-  for (int i = 0; i < io.size(); ++i) {
+  for (unsigned i = 0; i < io.size(); ++i) {
     cutoff*=creep; // start more permissive, then become less generous.  this is barely more than 1.  we want to do this because it's a disaster if something lower in a derivation tree is deleted, but the higher thing remains (unless safe_inside)
     const bool prune_edge = (io[i] < cutoff);
     if (prune_edge) {
@@ -325,11 +325,11 @@ bool Hypergraph::PruneInsideOutside(double alpha,double density,const EdgeMask* 
   assert(!use_beam||alpha>0);
   assert(!use_density||density>=1);
   assert(!use_sum_prod_semiring||scale>0);
-  int rnum=edges_.size();
+  unsigned rnum=edges_.size();
   if (use_density) {
     const int plen = ViterbiPathLength(*this);
     vector<WordID> bp;
-    rnum = min(rnum, static_cast<int>(density * static_cast<double>(plen)));
+    rnum = min(rnum, static_cast<unsigned>(density * plen));
     cerr << "Density pruning: keep "<<rnum<<" of "<<edges_.size()<<" edges (viterbi = "<<plen<<" edges)"<<endl;
     if (rnum == edges_.size()) {
       cerr << "No pruning required: denisty already sufficient\n";
@@ -357,7 +357,7 @@ bool Hypergraph::PruneInsideOutside(double alpha,double density,const EdgeMask* 
   if (use_beam) {
     prob_t best=prob_t::One();
     if (use_sum_prod_semiring) {
-      for (int i = 0; i < mm.size(); ++i)
+      for (unsigned i = 0; i < mm.size(); ++i)
         if (mm[i] > best) best = mm[i];
     }
     prob_t beam_cut=best*prob_t::exp(-alpha);
@@ -386,10 +386,10 @@ void Hypergraph::PrintGraphviz() const {
          << "\" shape=\"rect\"];\n";
     Hypergraph::TailNodeVector indorder(edge.tail_nodes_.size(), 0);
     int ntc = 0;
-    for (int i = 0; i < edge.rule_->e_.size(); ++i) {
+    for (unsigned i = 0; i < edge.rule_->e_.size(); ++i) {
       if (edge.rule_->e_[i] <= 0) indorder[ntc++] = 1 + (-1 * edge.rule_->e_[i]);
     }
-    for (int i = 0; i < edge.tail_nodes_.size(); ++i) {
+    for (unsigned i = 0; i < edge.tail_nodes_.size(); ++i) {
       cerr << "     " << edge.tail_nodes_[i] << " -> A_" << ei;
       if (edge.tail_nodes_.size() > 1) {
         cerr << " [label=\"" << indorder[i] << "\"]";
@@ -414,8 +414,8 @@ void Hypergraph::PrintGraphviz() const {
 void Hypergraph::Union(const Hypergraph& other) {
   if (&other == this) return;
   if (nodes_.empty()) { nodes_ = other.nodes_; edges_ = other.edges_; return; }
-  int noff = nodes_.size();
-  int eoff = edges_.size();
+  unsigned noff = nodes_.size();
+  unsigned eoff = edges_.size();
   int ogoal = other.nodes_.size() - 1;
   int cgoal = noff - 1;
   // keep a single goal node, so add nodes.size - 1
@@ -428,15 +428,15 @@ void Hypergraph::Union(const Hypergraph& other) {
     Node& cn = nodes_[i + noff];
     cn.id_ = i + noff;
     cn.in_edges_.resize(on.in_edges_.size());
-    for (int j = 0; j < on.in_edges_.size(); ++j)
+    for (unsigned j = 0; j < on.in_edges_.size(); ++j)
       cn.in_edges_[j] = on.in_edges_[j] + eoff;
 
     cn.out_edges_.resize(on.out_edges_.size());
-    for (int j = 0; j < on.out_edges_.size(); ++j)
+    for (unsigned j = 0; j < on.out_edges_.size(); ++j)
       cn.out_edges_[j] = on.out_edges_[j] + eoff;
   }
 
-  for (int i = 0; i < other.edges_.size(); ++i) {
+  for (unsigned i = 0; i < other.edges_.size(); ++i) {
     const Edge& oe = other.edges_[i];
     Edge& ce = edges_[i + eoff];
     ce.id_ = i + eoff;
@@ -449,7 +449,7 @@ void Hypergraph::Union(const Hypergraph& other) {
       ce.head_node_ = oe.head_node_ + noff;
     }
     ce.tail_nodes_.resize(oe.tail_nodes_.size());
-    for (int j = 0; j < oe.tail_nodes_.size(); ++j)
+    for (unsigned j = 0; j < oe.tail_nodes_.size(); ++j)
       ce.tail_nodes_[j] = oe.tail_nodes_[j] + noff;
   }
 
@@ -458,16 +458,6 @@ void Hypergraph::Union(const Hypergraph& other) {
 
 void Hypergraph::PruneUnreachable(int goal_node_id) {
   TopologicallySortNodesAndEdges(goal_node_id, NULL);
-}
-
-void Hypergraph::RemoveNoncoaccessibleStates(int goal_node_id) {
-  if (goal_node_id < 0) goal_node_id += nodes_.size();
-  assert(goal_node_id >= 0);
-  assert(goal_node_id < nodes_.size());
-
-  // I don't get it: does TopologicallySortNodesAndEdges not remove things that don't connect to goal_index?  it uses goal_index just to order things?  InsideOutside pruning can do this anyway (nearly infinite beam, viterbi semiring)
-  // TODO finish implementation
-  abort();
 }
 
 struct DFSContext {
@@ -559,7 +549,7 @@ void Hypergraph::TopologicallySortNodesAndEdges(int goal_index,
   }
 #ifndef HG_EDGES_TOPO_SORTED
   int ec = 0;
-  for (int i = 0; i < reloc_edge.size(); ++i) {
+  for (unsigned i = 0; i < reloc_edge.size(); ++i) {
     int& cp = reloc_edge[i];
     if (cp >= 0) { cp = ec++; }
   }
@@ -576,34 +566,34 @@ void Hypergraph::TopologicallySortNodesAndEdges(int goal_index,
   cerr << endl;
 #endif
   bool no_op = true;
-  for (int i = 0; i < reloc_node.size() && no_op; ++i)
-    if (reloc_node[i] != i) no_op = false;
-  for (int i = 0; i < reloc_edge.size() && no_op; ++i)
-    if (reloc_edge[i] != i) no_op = false;
+  for (unsigned i = 0; i < reloc_node.size() && no_op; ++i)
+    if (reloc_node[i] != static_cast<int>(i)) no_op = false;
+  for (unsigned i = 0; i < reloc_edge.size() && no_op; ++i)
+    if (reloc_edge[i] != static_cast<int>(i)) no_op = false;
   if (no_op) return;
-  for (int i = 0; i < reloc_node.size(); ++i) {
+  for (unsigned i = 0; i < reloc_node.size(); ++i) {
     Node& node = nodes_[i];
     node.id_ = reloc_node[i];
     int c = 0;
-    for (int j = 0; j < node.in_edges_.size(); ++j) {
+    for (unsigned j = 0; j < node.in_edges_.size(); ++j) {
       const int new_index = reloc_edge[node.in_edges_[j]];
       if (new_index >= 0)
         node.in_edges_[c++] = new_index;
     }
     node.in_edges_.resize(c);
     c = 0;
-    for (int j = 0; j < node.out_edges_.size(); ++j) {
+    for (unsigned j = 0; j < node.out_edges_.size(); ++j) {
       const int new_index = reloc_edge[node.out_edges_[j]];
       if (new_index >= 0)
         node.out_edges_[c++] = new_index;
     }
     node.out_edges_.resize(c);
   }
-  for (int i = 0; i < reloc_edge.size(); ++i) {
+  for (unsigned i = 0; i < reloc_edge.size(); ++i) {
     Edge& edge = edges_[i];
     edge.id_ = reloc_edge[i];
     edge.head_node_ = reloc_node[edge.head_node_];
-    for (int j = 0; j < edge.tail_nodes_.size(); ++j)
+    for (unsigned j = 0; j < edge.tail_nodes_.size(); ++j)
       edge.tail_nodes_[j] = reloc_node[edge.tail_nodes_[j]];
   }
   edges_.erase(remove_if(edges_.begin(), edges_.end(), BadId<Edge>()), edges_.end());
@@ -623,7 +613,7 @@ void Hypergraph::EpsilonRemove(WordID eps) {
     kUnaryRule.reset(new TRule("[X] ||| [X,1] ||| [X,1]"));
   }
   vector<bool> kill(edges_.size(), false);
-  for (int i = 0; i < edges_.size(); ++i) {
+  for (unsigned i = 0; i < edges_.size(); ++i) {
     const Edge& edge = edges_[i];
     if (edge.tail_nodes_.empty() &&
         edge.rule_->f_.size() == 1 &&
@@ -637,7 +627,7 @@ void Hypergraph::EpsilonRemove(WordID eps) {
           // same sequence via different paths through the input forest
           // this needs to be investigated and fixed
         } else {
-          for (int j = 0; j < node.out_edges_.size(); ++j)
+          for (unsigned j = 0; j < node.out_edges_.size(); ++j)
             edges_[node.out_edges_[j]].feature_values_ += edge.feature_values_;
           // cerr << "PROMOTED " << edge.feature_values_ << endl;
 	}
@@ -646,19 +636,19 @@ void Hypergraph::EpsilonRemove(WordID eps) {
   }
   bool created_eps = false;
   PruneEdges(kill);
-  for (int i = 0; i < nodes_.size(); ++i) {
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
     const Node& node = nodes_[i];
     if (node.in_edges_.empty()) {
-      for (int j = 0; j < node.out_edges_.size(); ++j) {
+      for (unsigned j = 0; j < node.out_edges_.size(); ++j) {
         Edge& edge = edges_[node.out_edges_[j]];
         if (edge.rule_->Arity() == 2) {
           assert(edge.rule_->f_.size() == 2);
           assert(edge.rule_->e_.size() == 2);
           edge.rule_ = kUnaryRule;
-          int cur = node.id_;
+          unsigned cur = node.id_;
           int t = -1;
           assert(edge.tail_nodes_.size() == 2);
-          for (int i = 0; i < 2; ++i) if (edge.tail_nodes_[i] != cur) { t = edge.tail_nodes_[i]; }
+          for (unsigned i = 0; i < 2u; ++i) if (edge.tail_nodes_[i] != cur) { t = edge.tail_nodes_[i]; }
           assert(t != -1);
           edge.tail_nodes_.resize(1);
           edge.tail_nodes_[0] = t;
@@ -712,14 +702,14 @@ HypergraphP Hypergraph::CreateEdgeSubset(EdgeMask &keep_edges) const {
 HypergraphP Hypergraph::CreateEdgeSubset(EdgeMask &keep_edges,NodeMask &kn) const {
   kn.clear();
   kn.resize(nodes_.size());
-  for (int n=0;n<nodes_.size();++n) { // this nested iteration gives us edges in topo order too
+  for (unsigned n=0;n<nodes_.size();++n) { // this nested iteration gives us edges in topo order too
     EdgesVector const& es=nodes_[n].in_edges_;
-    for (int i=0;i<es.size();++i) {
+    for (unsigned i=0;i<es.size();++i) {
       int ei=es[i];
       if (keep_edges[ei]) {
         const Edge& e = edges_[ei];
         TailNodeVector const& tails=e.tail_nodes_;
-        for (int j=0;j<e.tail_nodes_.size();++j) {
+        for (unsigned j=0;j<e.tail_nodes_.size();++j) {
           if (!kn[tails[j]]) {
             keep_edges[ei]=false;
             goto next_edge;
@@ -738,11 +728,11 @@ HypergraphP Hypergraph::CreateNodeEdgeSubset(NodeMask const& keep_nodes,EdgeMask
   indices_after e2(keep_edges);
   HypergraphP ret(new Hypergraph(n2.n_kept, e2.n_kept, is_linear_chain_));
   Nodes &rn=ret->nodes_;
-  for (int i=0;i<nodes_.size();++i)
+  for (unsigned i=0;i<nodes_.size();++i)
     if (n2.keeping(i))
       rn[n2[i]].copy_reindex(nodes_[i],n2,e2);
   Edges &re=ret->edges_;
-  for (int i=0;i<edges_.size();++i)
+  for (unsigned i=0;i<edges_.size();++i)
     if (e2.keeping(i))
       re[e2[i]].copy_reindex(edges_[i],n2,e2);
   return ret;
@@ -750,11 +740,11 @@ HypergraphP Hypergraph::CreateNodeEdgeSubset(NodeMask const& keep_nodes,EdgeMask
 
 void Hypergraph::TightenEdgeMask(EdgeMask &ke,NodeMask const& kn) const
 {
-  for (int i = 0; i < edges_.size(); ++i) {
+  for (unsigned i = 0; i < edges_.size(); ++i) {
     if (ke[i]) {
       const Edge& edge = edges_[i];
       TailNodeVector const& tails=edge.tail_nodes_;
-      for (int j = 0; j < edge.tail_nodes_.size(); ++j) {
+      for (unsigned j = 0; j < edge.tail_nodes_.size(); ++j) {
         if (!kn[tails[j]]) {
           ke[i]=false;
           goto next_edge;
@@ -766,18 +756,18 @@ void Hypergraph::TightenEdgeMask(EdgeMask &ke,NodeMask const& kn) const
 }
 
 void Hypergraph::set_ids() {
-  for (int i = 0; i < edges_.size(); ++i)
+  for (unsigned i = 0; i < edges_.size(); ++i)
     edges_[i].id_=i;
-  for (int i = 0; i < nodes_.size(); ++i)
+  for (unsigned i = 0; i < nodes_.size(); ++i)
     nodes_[i].id_=i;
 }
 
 void Hypergraph::check_ids() const
 {
-  for (int i = 0; i < edges_.size(); ++i)
-    assert(edges_[i].id_==i);
-  for (int i = 0; i < nodes_.size(); ++i)
-    assert(nodes_[i].id_==i);
+  for (unsigned i = 0; i < edges_.size(); ++i)
+    assert(edges_[i].id_==static_cast<int>(i));
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    assert(nodes_[i].id_==static_cast<int>(i));
 }
 
 HypergraphP Hypergraph::CreateViterbiHypergraph(const vector<bool>* edges) const {
@@ -796,15 +786,15 @@ HypergraphP Hypergraph::CreateViterbiHypergraph(const vector<bool>* edges) const
   set_ids();
 # endif
   EdgeMask used(edges_.size());
-  for (int i = 0; i < vit_edges.size(); ++i)
+  for (unsigned i = 0; i < vit_edges.size(); ++i)
     used[vit_edges[i]->id_]=true;
   return CreateEdgeSubset(used);
 #else
   map<int, int> old2new_node;
   int num_new_nodes = 0;
-  for (int i = 0; i < vit_edges.size(); ++i) {
+  for (unsigned i = 0; i < vit_edges.size(); ++i) {
     const Edge& edge = *vit_edges[i];
-    for (int j = 0; j < edge.tail_nodes_.size(); ++j) assert(old2new_node.count(edge.tail_nodes_[j]) > 0);
+    for (unsigned j = 0; j < edge.tail_nodes_.size(); ++j) assert(old2new_node.count(edge.tail_nodes_[j]) > 0);
     if (old2new_node.count(edge.head_node_) == 0) {
       old2new_node[edge.head_node_] = num_new_nodes;
       ++num_new_nodes;
@@ -820,7 +810,7 @@ HypergraphP Hypergraph::CreateViterbiHypergraph(const vector<bool>* edges) const
     new_node.id_ = it->second;
   }
 
-  for (int i = 0; i < vit_edges.size(); ++i) {
+  for (unsigned i = 0; i < vit_edges.size(); ++i) {
     const Edge& old_edge = *vit_edges[i];
     Edge& new_edge = out->edges_[i];
     new_edge = old_edge;
@@ -828,7 +818,7 @@ HypergraphP Hypergraph::CreateViterbiHypergraph(const vector<bool>* edges) const
     const int new_head_node = old2new_node[old_edge.head_node_];
     new_edge.head_node_ = new_head_node;
     out->nodes_[new_head_node].in_edges_.push_back(i);
-    for (int j = 0; j < old_edge.tail_nodes_.size(); ++j) {
+    for (unsigned j = 0; j < old_edge.tail_nodes_.size(); ++j) {
       const int new_tail_node = old2new_node[old_edge.tail_nodes_[j]];
       new_edge.tail_nodes_[j] = new_tail_node;
       out->nodes_[new_tail_node].out_edges_.push_back(i);

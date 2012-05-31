@@ -7,7 +7,7 @@ static bool is_digit(char x) { return x >= '0' && x <= '9'; }
 boost::shared_ptr<Array2D<bool> > AlignmentIO::ReadPharaohAlignmentGrid(const string& al) {
   int max_x = 0;
   int max_y = 0;
-  int i = 0;
+  unsigned i = 0;
   size_t pos = al.rfind(" ||| ");
   if (pos != string::npos) { i = pos + 5; }
   while (i < al.size()) {
@@ -65,8 +65,8 @@ boost::shared_ptr<Array2D<bool> > AlignmentIO::ReadPharaohAlignmentGrid(const st
 void AlignmentIO::SerializePharaohFormat(const Array2D<bool>& alignment, ostream* o) {
   ostream& out = *o;
   bool need_space = false;
-  for (int i = 0; i < alignment.width(); ++i)
-    for (int j = 0; j < alignment.height(); ++j)
+  for (unsigned i = 0; i < alignment.width(); ++i)
+    for (unsigned j = 0; j < alignment.height(); ++j)
       if (alignment(i,j)) {
         if (need_space) out << ' '; else need_space = true;
         out << i << '-' << j;
@@ -77,8 +77,8 @@ void AlignmentIO::SerializePharaohFormat(const Array2D<bool>& alignment, ostream
 void AlignmentIO::SerializeTypedAlignment(const Array2D<AlignmentType>& alignment, ostream* o) {
   ostream& out = *o;
   bool need_space = false;
-  for (int i = 0; i < alignment.width(); ++i)
-    for (int j = 0; j < alignment.height(); ++j) {
+  for (unsigned i = 0; i < alignment.width(); ++i)
+    for (unsigned j = 0; j < alignment.height(); ++j) {
       const AlignmentType& aij = alignment(i,j);
       if (aij != kNONE) {
         if (need_space) out << ' '; else need_space = true;

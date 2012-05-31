@@ -6,7 +6,9 @@
 
 #include "hg.h"
 #include "ff.h"
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 // everything in this file is deprecated and may be broken.
 // Chris Dyer, Mar 2011

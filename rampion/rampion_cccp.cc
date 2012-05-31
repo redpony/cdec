@@ -14,6 +14,7 @@
 #include "viterbi.h"
 #include "ns.h"
 #include "ns_docscorer.h"
+#include "candidate_set.h"
 
 using namespace std;
 namespace po = boost::program_options;
@@ -25,6 +26,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("weights,w",po::value<string>(), "[REQD] Weights files from current iterations")
         ("input,i",po::value<string>()->default_value("-"), "Input file to map (- is STDIN)")
         ("evaluation_metric,m",po::value<string>()->default_value("IBM_BLEU"), "Evaluation metric (ibm_bleu, koehn_bleu, nist_bleu, ter, meteor, etc.)")
+        ("kbest_repository,R",po::value<string>(), "Accumulate k-best lists from previous iterations (parameter is path to repository)")
         ("kbest_size,k",po::value<unsigned>()->default_value(500u), "Top k-hypotheses to extract")
         ("cccp_iterations,I", po::value<unsigned>()->default_value(10u), "CCCP iterations (T')")
         ("ssd_iterations,J", po::value<unsigned>()->default_value(5u), "Stochastic subgradient iterations (T'')")
@@ -50,37 +52,35 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
 }
 
-struct HypInfo {
-  HypInfo() : g(-100.0f) {}
-  HypInfo(const vector<WordID>& h,
-          const SparseVector<weight_t>& feats,
-          const SegmentEvaluator& scorer, const EvaluationMetric* metric) : hyp(h), x(feats) {
-    SufficientStats ss;
-    scorer.Evaluate(hyp, &ss);
-    g = metric->ComputeScore(ss);
+struct GainFunction {
+  explicit GainFunction(const EvaluationMetric* m) : metric(m) {}
+  float operator()(const SufficientStats& eval_feats) const {
+    float g = metric->ComputeScore(eval_feats);
     if (!metric->IsErrorMetric()) g = 1 - g;
+    return g;
   }
-
-  vector<WordID> hyp;
-  float g;
-  SparseVector<weight_t> x;
+  const EvaluationMetric* metric;
 };
 
-void CostAugmentedSearch(const vector<HypInfo>& kbest,
+template <typename GainFunc>
+void CostAugmentedSearch(const GainFunc& gain,
+                         const training::CandidateSet& cs,
                          const SparseVector<double>& w,
                          double alpha,
                          SparseVector<double>* fmap) {
   unsigned best_i = 0;
   double best = -numeric_limits<double>::infinity();
-  for (unsigned i = 0; i < kbest.size(); ++i) {
-    double s = kbest[i].x.dot(w) + alpha * kbest[i].g;
+  for (unsigned i = 0; i < cs.size(); ++i) {
+    double s = cs[i].fmap.dot(w) + alpha * gain(cs[i].eval_feats);
     if (s > best) {
       best = s;
       best_i = i;
     }
   }
-  *fmap = kbest[best_i].x;
+  *fmap = cs[best_i].fmap;
 }
+
+
 
 // runs lines 4--15 of rampion algorithm
 int main(int argc, char** argv) {
@@ -97,6 +97,11 @@ int main(int argc, char** argv) {
   Hypergraph hg;
   string last_file;
   ReadFile in_read(conf["input"].as<string>());
+  string kbest_repo;
+  if (conf.count("kbest_repository")) {
+    kbest_repo = conf["kbest_repository"].as<string>();
+    MkDirP(kbest_repo);
+  }
   istream &in=*in_read.stream();
   const unsigned kbest_size = conf["kbest_size"].as<unsigned>();
   const unsigned tp = conf["cccp_iterations"].as<unsigned>();
@@ -112,40 +117,44 @@ int main(int argc, char** argv) {
     Weights::InitSparseVector(vweights, &weights);
   }
   string line, file;
-  vector<vector<HypInfo> > kis;
+  vector<training::CandidateSet> kis;
   cerr << "Loading hypergraphs...\n";
   while(getline(in, line)) {
     istringstream is(line);
     int sent_id;
     kis.resize(kis.size() + 1);
-    vector<HypInfo>& curkbest = kis.back();
+    training::CandidateSet& curkbest = kis.back();
+    string kbest_file;
+    if (kbest_repo.size()) {
+      ostringstream os;
+      os << kbest_repo << "/kbest." << sent_id << ".txt.gz";
+      kbest_file = os.str();
+      if (FileExists(kbest_file))
+        curkbest.ReadFromFile(kbest_file);
+    }
     is >> file >> sent_id;
     ReadFile rf(file);
     if (kis.size() % 5 == 0) { cerr << '.'; }
     if (kis.size() % 200 == 0) { cerr << " [" << kis.size() << "]\n"; }
     HypergraphIO::ReadFromJSON(rf.stream(), &hg);
     hg.Reweight(weights);
-    KBest::KBestDerivations<vector<WordID>, ESentenceTraversal> kbest(hg, kbest_size);
-
-    for (int i = 0; i < kbest_size; ++i) {
-      const KBest::KBestDerivations<vector<WordID>, ESentenceTraversal>::Derivation* d =
-        kbest.LazyKthBest(hg.nodes_.size() - 1, i);
-      if (!d) break;
-      curkbest.push_back(HypInfo(d->yield, d->feature_values, *ds[sent_id], metric));
-    }
+    curkbest.AddKBestCandidates(hg, kbest_size, ds[sent_id]);
+    if (kbest_file.size())
+      curkbest.WriteToFile(kbest_file);
   }
   cerr << "\nHypergraphs loaded.\n";
 
   vector<SparseVector<weight_t> > goals(kis.size());  // f(x_i,y+,h+)
   SparseVector<weight_t> fear;  // f(x,y-,h-)
+  const GainFunction gain(metric);
   for (unsigned iterp = 1; iterp <= tp; ++iterp) {
     cerr << "CCCP Iteration " << iterp << endl;
-    for (int i = 0; i < goals.size(); ++i)
-      CostAugmentedSearch(kis[i], weights, goodsign * alpha, &goals[i]);
+    for (unsigned i = 0; i < goals.size(); ++i)
+      CostAugmentedSearch(gain, kis[i], weights, goodsign * alpha, &goals[i]);
     for (unsigned iterpp = 1; iterpp <= tpp; ++iterpp) {
       cerr << "  SSD Iteration " << iterpp << endl;
-      for (int i = 0; i < goals.size(); ++i) {
-        CostAugmentedSearch(kis[i], weights, badsign * alpha, &fear);
+      for (unsigned i = 0; i < goals.size(); ++i) {
+        CostAugmentedSearch(gain, kis[i], weights, badsign * alpha, &fear);
         weights -= weights * (eta * reg / goals.size());
         weights += (goals[i] - fear) * eta;
       }
