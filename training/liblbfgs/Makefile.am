@@ -1,6 +1,8 @@
 TESTS = ll_test
 noinst_PROGRAMS = ll_test
+
 ll_test_SOURCES = ll_test.cc
+ll_test_LDADD = liblbfgs.a -lz
 
 noinst_LIBRARIES = liblbfgs.a
 
