@@ -1,7 +1,4 @@
-cdec/
-creg/bin/
-creg/creg
-creg/json_feature_map_lexer.cc
+./cdec/
 decoder/bin/
 gi/pf/align-tl
 gi/pf/bayes_lattice_score
