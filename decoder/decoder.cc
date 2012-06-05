@@ -122,13 +122,16 @@ inline bool store_conf(po::variables_map const& conf,std::string const& name,V *
 inline boost::shared_ptr<FeatureFunction> make_ff(string const& ffp,bool verbose_feature_functions,char const* pre="") {
   string ff, param;
   SplitCommandAndParam(ffp, &ff, &param);
-  cerr << pre << "feature: " << ff;
-  if (param.size() > 0) cerr << " (with config parameters '" << param << "')\n";
-  else cerr << " (no config parameters)\n";
+  if (verbose_feature_functions && !SILENT)
+    cerr << pre << "feature: " << ff;
+  if (!SILENT) {
+    if (param.size() > 0) cerr << " (with config parameters '" << param << "')\n";
+    else cerr << " (no config parameters)\n";
+  }
   boost::shared_ptr<FeatureFunction> pf = ff_registry.Create(ff, param);
   if (!pf) exit(1);
   int nbyte=pf->NumBytesContext();
-  if (verbose_feature_functions)
+  if (verbose_feature_functions && !SILENT)
     cerr<<"State is "<<nbyte<<" bytes for "<<pre<<"feature "<<ffp<<endl;
   return pf;
 }
@@ -142,7 +145,7 @@ inline boost::shared_ptr<FsaFeatureFunction> make_fsa_ff(string const& ffp,bool 
   else cerr << " (no config parameters)\n";
   boost::shared_ptr<FsaFeatureFunction> pf = fsa_ff_registry.Create(ff, param);
   if (!pf) exit(1);
-  if (verbose_feature_functions)
+  if (verbose_feature_functions && !SILENT)
     cerr<<"State is "<<pf->state_bytes()<<" bytes for "<<pre<<"feature "<<ffp<<endl;
   return pf;
 }
@@ -211,8 +214,10 @@ struct DecoderImpl {
       }
       forest.PruneInsideOutside(beam_prune,density_prune,pm,false,1);
       if (!forestname.empty()) forestname=" "+forestname;
-      forest_stats(forest,"  Pruned "+forestname+" forest",false,false);
-      cerr << "  Pruned "<<forestname<<" forest portion of edges kept: "<<forest.edges_.size()/presize<<endl;
+      if (!SILENT) { 
+        forest_stats(forest,"  Pruned "+forestname+" forest",false,false);
+        cerr << "  Pruned "<<forestname<<" forest portion of edges kept: "<<forest.edges_.size()/presize<<endl;
+      }
     }
   }
 
