@@ -1,1 +1,1 @@
-from _cdec import Decoder, Hypergraph
+from _cdec import Decoder, Hypergraph, Lattice
