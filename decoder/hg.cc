@@ -13,6 +13,7 @@
 #include "viterbi.h"
 #include "inside_outside.h"
 #include "tdict.h"
+#include "verbose.h"
 
 using namespace std;
 
@@ -330,9 +331,9 @@ bool Hypergraph::PruneInsideOutside(double alpha,double density,const EdgeMask* 
     const int plen = ViterbiPathLength(*this);
     vector<WordID> bp;
     rnum = min(rnum, static_cast<unsigned>(density * plen));
-    cerr << "Density pruning: keep "<<rnum<<" of "<<edges_.size()<<" edges (viterbi = "<<plen<<" edges)"<<endl;
+    if (!SILENT) cerr << "Density pruning: keep "<<rnum<<" of "<<edges_.size()<<" edges (viterbi = "<<plen<<" edges)"<<endl;
     if (rnum == edges_.size()) {
-      cerr << "No pruning required: denisty already sufficient\n";
+      if (!SILENT) cerr << "No pruning required: denisty already sufficient\n";
       if (!use_beam)
         return false;
       use_density=false;
