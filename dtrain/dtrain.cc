@@ -261,7 +261,7 @@ main(int argc, char** argv)
       cerr << setw(25) << "l1 reg " << l1_reg << " '" << cfg["l1_reg"].as<string>() << "'" << endl;
     if (rescale)
       cerr << setw(25) << "rescale " << rescale << endl;
-    cerr << "max pairs " << max_pairs << endl; 
+    cerr << setw(25) << "max pairs " << max_pairs << endl;
     cerr << setw(25) << "cdec cfg " << "'" << cfg["decoder_config"].as<string>() << "'" << endl;
     cerr << setw(25) << "input " << "'" << input_fn << "'" << endl;
 #ifdef DTRAIN_LOCAL

@@ -128,6 +128,7 @@ SmoothSingleBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
   return brevity_penalty(hyp_len, ref_len) * sum;
 }
 
+// TODO single variants!
 
 /*
  * approx. bleu
@@ -136,7 +137,8 @@ SmoothSingleBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  *        and Structural Translation Features"
  * (Chiang et al. '08)
  *
- * NOTE: needs some more code in dtrain.cc
+ * NOTE: Needs some more code in dtrain.cc .
+ *       No scaling by src len.
  */
 score_t
 ApproxBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
@@ -158,7 +160,7 @@ ApproxBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
     glob_ref_len_ = discount_ * (glob_ref_len_ + ref_len);
     glob_src_len_ = discount_ * (glob_src_len_ + src_len);
   }
-  return (score_t)glob_src_len_ * score;
+  return score;
 }
 
 /*
