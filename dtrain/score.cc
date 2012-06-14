@@ -80,7 +80,7 @@ StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  *        to Machine Translation"
  * (Liang et al. '06)
  *
- * NOTE: max is 0.9375
+ * NOTE: max is 0.9375 (with N=4)
  */
 score_t
 SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
@@ -108,9 +108,13 @@ SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
   return brevity_penalty(hyp_len, ref_len) * sum;
 }
 
-// variant of smooth_bleu; i-Bleu scores only single 'i'
+/*
+ * 'sum' bleu
+ *
+ * sum up Ngram precisions
+ */
 score_t
-SmoothSingleBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+SumBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
                         const unsigned /*rank*/, const unsigned /*src_len*/)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
@@ -128,7 +132,57 @@ SmoothSingleBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
   return brevity_penalty(hyp_len, ref_len) * sum;
 }
 
-// TODO single variants!
+/*
+ * 'sum' (exp) bleu
+ *
+ * sum up exp(Ngram precisions)
+ */
+score_t
+SumExpBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                        const unsigned /*rank*/, const unsigned /*src_len*/)
+{
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
+  if (hyp_len == 0 || ref_len == 0) return 0.;
+  NgramCounts counts = make_ngram_counts(hyp, ref, N_);
+  unsigned M = N_;
+  if (ref_len < N_) M = ref_len;
+  score_t sum = 0.;
+  unsigned j = 1;
+  for (unsigned i = 0; i < M; i++) {
+    if (counts.sum_[i] == 0 || counts.clipped_[i] == 0) break;
+    sum += exp(((score_t)counts.clipped_[i]/counts.sum_[i]))/pow(2., N_-j+1);
+    j++;
+  }
+  return brevity_penalty(hyp_len, ref_len) * sum;
+}
+
+/*
+ * 'sum' (whatever) bleu
+ *
+ * sum up exp(weight * log(Ngram precisions))
+ */
+score_t
+SumWhateverBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                        const unsigned /*rank*/, const unsigned /*src_len*/)
+{
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
+  if (hyp_len == 0 || ref_len == 0) return 0.;
+  NgramCounts counts = make_ngram_counts(hyp, ref, N_);
+  unsigned M = N_;
+  vector<score_t> v = w_;
+  if (ref_len < N_) {
+    M = ref_len;
+    for (unsigned i = 0; i < M; i++) v[i] = 1/((score_t)M);
+  }
+  score_t sum = 0.;
+  unsigned j = 1;
+  for (unsigned i = 0; i < M; i++) {
+    if (counts.sum_[i] == 0 || counts.clipped_[i] == 0) break;
+    sum += exp(v[i] * log(((score_t)counts.clipped_[i]/counts.sum_[i])))/pow(2., N_-j+1);
+    j++;
+  }
+  return brevity_penalty(hyp_len, ref_len) * sum;
+}
 
 /*
  * approx. bleu
