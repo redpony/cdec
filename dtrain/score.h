@@ -153,7 +153,17 @@ struct SmoothBleuScorer : public LocalScorer
   score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
 };
 
-struct SmoothSingleBleuScorer : public LocalScorer
+struct SumBleuScorer : public LocalScorer
+{
+   score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
+};
+
+struct SumExpBleuScorer : public LocalScorer
+{
+   score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
+};
+
+struct SumWhateverBleuScorer : public LocalScorer
 {
    score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
 };

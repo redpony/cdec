@@ -58,6 +58,8 @@ Next
 + bigger LM, feats (target side Ng., word alignments etc.)
 + merge kbest lists
 + proper eval, pairwise ranking, forced transl
++ smmoth bleu variants X
++ MMERT exp
 
 Legal
 -----
