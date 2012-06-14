@@ -41,27 +41,13 @@ cdef class Decoder:
 
     def __cinit__(self, char* config):
         decoder.register_feature_functions()
-        cdef istringstream* config_stream = new istringstream(config) # ConfigStream(kwargs)
-        #cdef ReadFile* config_file = new ReadFile(string(config))
-        #cdef istream* config_stream = config_file.stream()
+        cdef istringstream* config_stream = new istringstream(config)
         self.dec = new decoder.Decoder(config_stream)
         del config_stream
-        #del config_file
         self.weights = Weights(self)
 
     def __dealloc__(self):
         del self.dec
-
-    @classmethod
-    def fromconfig(cls, ini):
-        cdef dict config = {}
-        with open(ini) as fp:
-            for line in fp:
-                line = line.strip()
-                if not line or line.startswith('#'): continue
-                param, value = line.split('=')
-                config[param.strip()] = value.strip()
-        return cls(**config)
 
     def read_weights(self, cfg):
         with open(cfg) as fp:
@@ -73,10 +59,9 @@ cdef class Decoder:
     def translate(self, unicode sentence, grammar=None):
         if grammar:
             self.dec.SetSentenceGrammarFromString(string(<char *> grammar))
-        #sgml = '<seg grammar="%s">%s</seg>' % (grammar, sentence.encode('utf8'))
-        sgml = sentence.strip().encode('utf8')
+        inp = sentence.strip().encode('utf8')
         cdef decoder.BasicObserver observer = decoder.BasicObserver()
-        self.dec.Decode(string(<char *>sgml), &observer)
+        self.dec.Decode(string(<char *>inp), &observer)
         if observer.hypergraph == NULL:
             raise ParseFailed()
         cdef Hypergraph hg = Hypergraph()
@@ -169,12 +154,3 @@ cdef class Lattice:
         del self.lattice
 
 # TODO: wrap SparseVector
-
-"""
-def params_str(params):
-    return '\n'.join('%s=%s' % (param, value) for param, value in params.iteritems())
-
-cdef istringstream* ConfigStream(dict params):
-    ini = params_str(params)
-    return new istringstream(<char *> ini)
-"""
