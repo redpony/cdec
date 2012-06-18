@@ -5,8 +5,10 @@
 #include "prob.h"
 #include "hg.h"
 #include "tdict.h"
+#include "filelib.h"
+#include <boost/make_shared.hpp>
 
-std::string viterbi_stats(Hypergraph const& hg, std::string const& name="forest", bool estring=true, bool etree=false, bool derivation_tree=false);
+std::string viterbi_stats(Hypergraph const& hg, std::string const& name="forest", bool estring=true, bool etree=false, bool derivation_tree=false, bool extract_rules=false, boost::shared_ptr<WriteFile> extract_file = boost::make_shared<WriteFile>());
 
 /// computes for each hg node the best (according to WeightType/WeightFunction) derivation, and some homomorphism (bottom up expression tree applied through Traversal) of it. T is the "return type" of Traversal, which is called only once for the best edge for a node's result (i.e. result will start default constructed)
 //TODO: make T a typename inside Traversal and WeightType a typename inside WeightFunction?
@@ -201,6 +203,7 @@ struct FeatureVectorTraversal {
 std::string JoshuaVisualizationString(const Hypergraph& hg);
 prob_t ViterbiESentence(const Hypergraph& hg, std::vector<WordID>* result);
 std::string ViterbiETree(const Hypergraph& hg);
+void ViterbiRules(const Hypergraph& hg, std::ostream* s);
 prob_t ViterbiFSentence(const Hypergraph& hg, std::vector<WordID>* result);
 std::string ViterbiFTree(const Hypergraph& hg);
 int ViterbiELength(const Hypergraph& hg);
