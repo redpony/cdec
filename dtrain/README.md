@@ -39,28 +39,6 @@ For an example of local usage (with the 'distributed' format)
 the see test/example/ . This expects dtrain to be built without
 DTRAIN_LOCAL.
 
-Next
-----
-+ approx. Bleu? proper lc_bleu (init with X)
-+ turn off inclusion
-+ (dtrain|decoder) more meta-parameters testing
-+ feature selection directly in dtrain
-+ feature template: target side rule ngrams
-+ sa-extract -> leave-one-out for grammar of training set?
-+ make svm doable; no subgradient?
-+ reranking while sgd?
-+ try PRO, mira emulations
-+ sampling (MBR)
-+ forest (on train)?
-+ best BLEU transl (Sokolov)?
-+ entire reg. path
-+ resharding [nfold cross val.]
-+ bigger LM, feats (target side Ng., word alignments etc.)
-+ merge kbest lists
-+ proper eval, pairwise ranking, forced transl
-+ smmoth bleu variants X
-+ MMERT exp
-
 Legal
 -----
 Copyright (c) 2012 by Patrick Simianer <p@simianer.de>
