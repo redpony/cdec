@@ -5,11 +5,12 @@
 #include <vector>
 #include "hg.h"
 
+
 //#define DEBUG_VITERBI_SORT
 
 using namespace std;
 
-std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool estring, bool etree,bool show_derivation)
+std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool estring, bool etree,bool show_derivation, bool extract_rules, boost::shared_ptr<WriteFile> extract_file)
 {
   ostringstream o;
   o << hg.stats(name);
@@ -21,6 +22,9 @@ std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool es
   }
   if (etree) {
     o<<name<<"          tree: "<<ViterbiETree(hg)<<endl;
+  }
+  if (extract_rules) {
+    ViterbiRules(hg, extract_file->stream());
   }
   if (show_derivation) {
     o<<name<<"          derivation: ";
@@ -36,6 +40,12 @@ std::string viterbi_stats(Hypergraph const& hg, std::string const& name, bool es
   return o.str();
 }
 
+void ViterbiRules(const Hypergraph& hg, ostream* o) {
+   vector<Hypergraph::Edge const*> edges;
+   Viterbi<ViterbiPathTraversal>(hg, &edges);
+   for (unsigned i = 0; i < edges.size(); i++)
+      (*o) << edges[i]->rule_->AsString(true) << endl;
+}
 
 string ViterbiETree(const Hypergraph& hg) {
   vector<WordID> tmp;

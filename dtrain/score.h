@@ -20,7 +20,7 @@ struct NgramCounts
   inline void
   operator+=(const NgramCounts& rhs)
   {
-    assert(N_ == rhs.N_);
+    if (rhs.N_ > N_) Resize(rhs.N_);
     for (unsigned i = 0; i < N_; i++) {
       this->clipped_[i] += rhs.clipped_.find(i)->second;
       this->sum_[i] += rhs.sum_.find(i)->second;
@@ -59,10 +59,18 @@ struct NgramCounts
   inline void
   Zero()
   {
-    unsigned i;
-    for (i = 0; i < N_; i++) {
+    for (unsigned i = 0; i < N_; i++) {
       clipped_[i] = 0.;
       sum_[i] = 0.;
+    }
+  }
+
+  inline void
+  One()
+  {
+    for (unsigned i = 0; i < N_; i++) {
+      clipped_[i] = 1.;
+      sum_[i] = 1.;
     }
   }
 
@@ -73,6 +81,23 @@ struct NgramCounts
       cout << i+1 << "grams (clipped):\t" << clipped_[i] << endl;
       cout << i+1 << "grams:\t\t\t" << sum_[i] << endl;
     }
+  }
+
+  inline void Resize(unsigned N)
+  {
+    if (N == N_) return;
+    else if (N > N_) {
+      for (unsigned i = N_; i < N; i++) {
+        clipped_[i] = 0.;
+        sum_[i] = 0.;
+      }
+    } else { // N < N_
+      for (unsigned i = N_-1; i > N-1; i--) {
+        clipped_.erase(i);
+        sum_.erase(i);
+      }
+    }
+    N_ = N;
   }
 };
 
@@ -128,6 +153,21 @@ struct SmoothBleuScorer : public LocalScorer
   score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
 };
 
+struct SumBleuScorer : public LocalScorer
+{
+   score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
+};
+
+struct SumExpBleuScorer : public LocalScorer
+{
+   score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
+};
+
+struct SumWhateverBleuScorer : public LocalScorer
+{
+   score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
+};
+
 struct ApproxBleuScorer : public BleuScorer
 {
   NgramCounts glob_onebest_counts_;
@@ -145,6 +185,24 @@ struct ApproxBleuScorer : public BleuScorer
   }
 
   score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank, const unsigned src_len);
+};
+
+struct LinearBleuScorer : public BleuScorer
+{
+  unsigned onebest_len_;
+  NgramCounts onebest_counts_;
+
+  LinearBleuScorer(unsigned N) : onebest_len_(1), onebest_counts_(N)
+  {
+    onebest_counts_.One();
+  }
+
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank, const unsigned /*src_len*/);
+
+  inline void Reset() {
+    onebest_len_ = 1;
+    onebest_counts_.One();
+  }
 };
 
 
