@@ -88,7 +88,7 @@ class FastSparseVector {
     }
     const bool local_;
     PairIntT<T>* local_it_;
-    typename std::map<unsigned, T>::iterator remote_it_;
+    typename SPARSE_HASH_MAP<unsigned, T>::iterator remote_it_;
     std::pair<const unsigned, T>& operator*() const {
       if (local_)
         return *reinterpret_cast<std::pair<const unsigned, T>*>(local_it_);
@@ -142,7 +142,7 @@ class FastSparseVector {
     }
     const bool local_;
     const PairIntT<T>* local_it_;
-    typename std::map<unsigned, T>::const_iterator remote_it_;
+    typename SPARSE_HASH_MAP<unsigned, T>::const_iterator remote_it_;
     const std::pair<const unsigned, T>& operator*() const {
       if (local_)
         return *reinterpret_cast<const std::pair<const unsigned, T>*>(local_it_);
@@ -181,7 +181,7 @@ class FastSparseVector {
   }
   FastSparseVector(const FastSparseVector& other) {
     std::memcpy(this, &other, sizeof(FastSparseVector));
-    if (is_remote_) data_.rbmap = new std::map<unsigned, T>(*data_.rbmap);
+    if (is_remote_) data_.rbmap = new SPARSE_HASH_MAP<unsigned, T>(*data_.rbmap);
   }
   FastSparseVector(std::pair<unsigned, T>* first, std::pair<unsigned, T>* last) {
     const ptrdiff_t n = last - first;
@@ -191,7 +191,7 @@ class FastSparseVector {
       std::memcpy(data_.local, first, sizeof(std::pair<unsigned, T>) * n);
     } else {
       is_remote_ = true;
-      data_.rbmap = new std::map<unsigned, T>(first, last);
+      data_.rbmap = new SPARSE_HASH_MAP<unsigned, T>(first, last);
     }
   }
   void erase(int k) {
@@ -213,7 +213,7 @@ class FastSparseVector {
     clear();
     std::memcpy(this, &other, sizeof(FastSparseVector));
     if (is_remote_)
-      data_.rbmap = new std::map<unsigned, T>(*data_.rbmap);
+      data_.rbmap = new SPARSE_HASH_MAP<unsigned, T>(*data_.rbmap);
     return *this;
   }
   T const& get_singleton() const {
@@ -237,7 +237,7 @@ class FastSparseVector {
   }
   inline T value(unsigned k) const {
     if (is_remote_) {
-      typename std::map<unsigned, T>::const_iterator it = data_.rbmap->find(k);
+      typename SPARSE_HASH_MAP<unsigned, T>::const_iterator it = data_.rbmap->find(k);
       if (it != data_.rbmap->end()) return it->second;
     } else {
       for (unsigned i = 0; i < local_size_; ++i) {
@@ -322,8 +322,8 @@ class FastSparseVector {
   }
   inline FastSparseVector& operator*=(const T& scalar) {
     if (is_remote_) {
-      const typename std::map<unsigned, T>::iterator end = data_.rbmap->end();
-      for (typename std::map<unsigned, T>::iterator it = data_.rbmap->begin(); it != end; ++it)
+      const typename SPARSE_HASH_MAP<unsigned, T>::iterator end = data_.rbmap->end();
+      for (typename SPARSE_HASH_MAP<unsigned, T>::iterator it = data_.rbmap->begin(); it != end; ++it)
         it->second *= scalar;
     } else {
       for (int i = 0; i < local_size_; ++i)
@@ -333,8 +333,8 @@ class FastSparseVector {
   }
   inline FastSparseVector& operator/=(const T& scalar) {
     if (is_remote_) {
-      const typename std::map<unsigned, T>::iterator end = data_.rbmap->end();
-      for (typename std::map<unsigned, T>::iterator it = data_.rbmap->begin(); it != end; ++it)
+      const typename SPARSE_HASH_MAP<unsigned, T>::iterator end = data_.rbmap->end();
+      for (typename SPARSE_HASH_MAP<unsigned, T>::iterator it = data_.rbmap->begin(); it != end; ++it)
         it->second /= scalar;
     } else {
       for (int i = 0; i < local_size_; ++i)
@@ -431,17 +431,19 @@ class FastSparseVector {
   void swap_local_rbmap() {
     if (is_remote_) { // data is in rbmap, move to local
       assert(data_.rbmap->size() < LOCAL_MAX);
-      const std::map<unsigned, T>* m = data_.rbmap;
+      const SPARSE_HASH_MAP<unsigned, T>* m = data_.rbmap;
       local_size_ = m->size();
       int i = 0;
-      for (typename std::map<unsigned, T>::const_iterator it = m->begin();
+      for (typename SPARSE_HASH_MAP<unsigned, T>::const_iterator it = m->begin();
            it != m->end(); ++it) {
         data_.local[i] = *it;
         ++i;
       }
       is_remote_ = false;
     } else { // data is local, move to rbmap
-      std::map<unsigned, T>* m = new std::map<unsigned, T>(&data_.local[0], &data_.local[local_size_]);
+      SPARSE_HASH_MAP<unsigned, T>* m = new SPARSE_HASH_MAP<unsigned, T>(
+         reinterpret_cast<std::pair<unsigned, T>*>(&data_.local[0]),
+         reinterpret_cast<std::pair<unsigned, T>*>(&data_.local[local_size_]), local_size_ * 1.5 + 1);
       data_.rbmap = m;
       is_remote_ = true;
     }
@@ -449,7 +451,7 @@ class FastSparseVector {
 
   union {
     PairIntT<T> local[LOCAL_MAX];
-    std::map<unsigned, T>* rbmap;
+    SPARSE_HASH_MAP<unsigned, T>* rbmap;
   } data_;
   unsigned char local_size_;
   bool is_remote_;
