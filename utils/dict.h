@@ -12,7 +12,8 @@
 
 class Dict {
  typedef
- HASH_MAP<std::string, WordID, boost::hash<std::string> > Map;
+ //HASH_MAP<std::string, WordID, boost::hash<std::string> > Map;
+ HASH_MAP<std::string, WordID> Map;
  public:
   Dict() : b0_("<bad0>") {
     HASH_MAP_EMPTY(d_,"<bad1>");
