@@ -593,12 +593,12 @@ main(int argc, char** argv)
       o.precision(17);
       o << _np;
       if (average) {
-        for (SparseVector<weight_t>::const_iterator it = w_average.begin(); it != w_average.end(); ++it) {
+        for (SparseVector<weight_t>::iterator it = w_average.begin(); it != w_average.end(); ++it) {
 	      if (it->second == 0) continue;
           o << FD::Convert(it->first) << '\t' << it->second << endl;
         }
       } else {
-        for (SparseVector<weight_t>::const_iterator it = lambdas.begin(); it != lambdas.end(); ++it) {
+        for (SparseVector<weight_t>::iterator it = lambdas.begin(); it != lambdas.end(); ++it) {
 	      if (it->second == 0) continue;
           o << FD::Convert(it->first) << '\t' << it->second << endl;
         }

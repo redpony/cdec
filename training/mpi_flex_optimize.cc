@@ -356,7 +356,7 @@ int main(int argc, char** argv) {
           gg.clear();
           gg.resize(FD::NumFeats());
           if (gg.size() != cur_weights.size()) { cur_weights.resize(gg.size()); }
-          for (SparseVector<double>::const_iterator it = g.begin(); it != g.end(); ++it)
+          for (SparseVector<double>::iterator it = g.begin(); it != g.end(); ++it)
             if (it->first) { gg[it->first] = it->second; }
           g.clear();
           double r = ApplyRegularizationTerms(regularization_strength,

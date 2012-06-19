@@ -5,7 +5,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #include "m.h"
-#include "lattice.h"
+#include "corpus_tools.h"
 #include "stringlib.h"
 #include "filelib.h"
 #include "ttables.h"
@@ -19,6 +19,7 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("iterations,i",po::value<unsigned>()->default_value(5),"Number of iterations of EM training")
         ("beam_threshold,t",po::value<double>()->default_value(-4),"log_10 of beam threshold (-10000 to include everything, 0 max)")
+        ("bidir,b", "Run bidirectional alignment")
         ("no_null_word,N","Do not generate from the null token")
         ("write_alignments,A", "Write alignments instead of parameters")
         ("favor_diagonal,d", "Use a static alignment distribution that assigns higher probabilities to alignments near the diagonal")
@@ -51,6 +52,15 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   return true;
 }
 
+// src and trg are source and target strings, respectively (not really lattices)
+double PosteriorInference(const vector<WordID>& src, const vector<WordID>& trg) {
+  double llh = 0;
+  static vector<double> unnormed_a_i;
+  if (src.size() > unnormed_a_i.size())
+    unnormed_a_i.resize(src.size());
+  return llh;
+}
+
 int main(int argc, char** argv) {
   po::variables_map conf;
   if (!InitCommandLine(argc, argv, &conf)) return 1;
@@ -74,8 +84,8 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  TTable tt;
-  TTable::Word2Word2Double was_viterbi;
+  TTable s2t, t2s;
+  TTable::Word2Word2Double s2t_viterbi;
   double tot_len_ratio = 0;
   double mean_srclen_multiplier = 0;
   vector<double> unnormed_a_i;
@@ -96,14 +106,11 @@ int main(int argc, char** argv) {
       ++lc;
       if (lc % 1000 == 0) { cerr << '.'; flag = true; }
       if (lc %50000 == 0) { cerr << " [" << lc << "]\n" << flush; flag = false; }
-      ParseTranslatorInput(line, &ssrc, &strg);
-      Lattice src, trg;
-      LatticeTools::ConvertTextToLattice(ssrc, &src);
-      LatticeTools::ConvertTextToLattice(strg, &trg);
+      vector<WordID> src, trg;
+      CorpusTools::ReadLine(line, &src, &trg);
       if (src.size() == 0 || trg.size() == 0) {
         cerr << "Error: " << lc << "\n" << line << endl;
-        assert(src.size() > 0);
-        assert(trg.size() > 0);
+        return 1;
       }
       if (src.size() > unnormed_a_i.size())
         unnormed_a_i.resize(src.size());
@@ -113,13 +120,13 @@ int main(int argc, char** argv) {
       vector<double> probs(src.size() + 1);
       bool first_al = true;  // used for write_alignments
       for (int j = 0; j < trg.size(); ++j) {
-        const WordID& f_j = trg[j][0].label;
+        const WordID& f_j = trg[j];
         double sum = 0;
         const double j_over_ts = double(j) / trg.size();
         double prob_a_i = 1.0 / (src.size() + use_null);  // uniform (model 1)
         if (use_null) {
           if (favor_diagonal) prob_a_i = prob_align_null;
-          probs[0] = tt.prob(kNULL, f_j) * prob_a_i;
+          probs[0] = s2t.prob(kNULL, f_j) * prob_a_i;
           sum += probs[0];
         }
         double az = 0;
@@ -133,7 +140,7 @@ int main(int argc, char** argv) {
         for (int i = 1; i <= src.size(); ++i) {
           if (favor_diagonal)
             prob_a_i = unnormed_a_i[i-1] / az;
-          probs[i] = tt.prob(src[i-1][0].label, f_j) * prob_a_i;
+          probs[i] = s2t.prob(src[i-1], f_j) * prob_a_i;
           sum += probs[i];
         }
         if (final_iteration) {
@@ -150,7 +157,7 @@ int main(int argc, char** argv) {
               if (probs[i] > max_p) {
                 max_index = i;
                 max_p = probs[i];
-                max_i = src[i-1][0].label;
+                max_i = src[i-1];
               }
             }
             if (write_alignments) {
@@ -159,13 +166,13 @@ int main(int argc, char** argv) {
                 cout << (max_index - 1) << "-" << j;
               }
             }
-            was_viterbi[max_i][f_j] = 1.0;
+            s2t_viterbi[max_i][f_j] = 1.0;
           }
         } else {
           if (use_null)
-            tt.Increment(kNULL, f_j, probs[0] / sum);
+            s2t.Increment(kNULL, f_j, probs[0] / sum);
           for (int i = 1; i <= src.size(); ++i)
-            tt.Increment(src[i-1][0].label, f_j, probs[i] / sum);
+            s2t.Increment(src[i-1], f_j, probs[i] / sum);
         }
         likelihood += log(sum);
       }
@@ -186,9 +193,9 @@ int main(int argc, char** argv) {
     cerr << "      perplexity: " << pow(2.0, -base2_likelihood / denom) << endl;
     if (!final_iteration) {
       if (variational_bayes)
-        tt.NormalizeVB(alpha);
+        s2t.NormalizeVB(alpha);
       else
-        tt.Normalize();
+        s2t.Normalize();
     }
   }
   if (testset.size()) {
@@ -199,23 +206,21 @@ int main(int argc, char** argv) {
     string ssrc, strg, line;
     while (getline(in, line)) {
       ++lc;
-      ParseTranslatorInput(line, &ssrc, &strg);
-      Lattice src, trg;
-      LatticeTools::ConvertTextToLattice(ssrc, &src);
-      LatticeTools::ConvertTextToLattice(strg, &trg);
+      vector<WordID> src, trg;
+      CorpusTools::ReadLine(line, &src, &trg);
       double log_prob = Md::log_poisson(trg.size(), 0.05 + src.size() * mean_srclen_multiplier);
       if (src.size() > unnormed_a_i.size())
         unnormed_a_i.resize(src.size());
 
       // compute likelihood
       for (int j = 0; j < trg.size(); ++j) {
-        const WordID& f_j = trg[j][0].label;
+        const WordID& f_j = trg[j];
         double sum = 0;
         const double j_over_ts = double(j) / trg.size();
         double prob_a_i = 1.0 / (src.size() + use_null);  // uniform (model 1)
         if (use_null) {
           if (favor_diagonal) prob_a_i = prob_align_null;
-          sum += tt.prob(kNULL, f_j) * prob_a_i;
+          sum += s2t.prob(kNULL, f_j) * prob_a_i;
         }
         double az = 0;
         if (favor_diagonal) {
@@ -228,7 +233,7 @@ int main(int argc, char** argv) {
         for (int i = 1; i <= src.size(); ++i) {
           if (favor_diagonal)
             prob_a_i = unnormed_a_i[i-1] / az;
-          sum += tt.prob(src[i-1][0].label, f_j) * prob_a_i;
+          sum += s2t.prob(src[i-1], f_j) * prob_a_i;
         }
         log_prob += log(sum);
       }
@@ -240,16 +245,16 @@ int main(int argc, char** argv) {
 
   if (write_alignments) return 0;
 
-  for (TTable::Word2Word2Double::iterator ei = tt.ttable.begin(); ei != tt.ttable.end(); ++ei) {
+  for (TTable::Word2Word2Double::iterator ei = s2t.ttable.begin(); ei != s2t.ttable.end(); ++ei) {
     const TTable::Word2Double& cpd = ei->second;
-    const TTable::Word2Double& vit = was_viterbi[ei->first];
+    const TTable::Word2Double& vit = s2t_viterbi[ei->first];
     const string& esym = TD::Convert(ei->first);
     double max_p = -1;
     for (TTable::Word2Double::const_iterator fi = cpd.begin(); fi != cpd.end(); ++fi)
       if (fi->second > max_p) max_p = fi->second;
     const double threshold = max_p * BEAM_THRESHOLD;
     for (TTable::Word2Double::const_iterator fi = cpd.begin(); fi != cpd.end(); ++fi) {
-      if (fi->second > threshold || (vit.count(fi->first) > 0)) {
+      if (fi->second > threshold || (vit.find(fi->first) != vit.end())) {
         cout << esym << ' ' << TD::Convert(fi->first) << ' ' << log(fi->second) << endl;
       }
     } 
