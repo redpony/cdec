@@ -1,6 +1,14 @@
 #ifndef _DTRAIN_H_
 #define _DTRAIN_H_
 
+#undef DTRAIN_FASTER_PERCEPTRON // only look at misranked pairs
+                                 // DO NOT USE WITH SVM!
+#define DTRAIN_LOCAL
+#define DTRAIN_DOTS 10 // after how many inputs to display a '.'
+#define DTRAIN_GRAMMAR_DELIM "########EOS########"
+#define DTRAIN_SCALE 100000
+
+
 #include <iomanip>
 #include <climits>
 #include <string.h>
@@ -13,11 +21,7 @@
 
 #include "filelib.h"
 
-#undef DTRAIN_LOCAL
 
-#define DTRAIN_DOTS 10 // after how many inputs to display a '.'
-#define DTRAIN_GRAMMAR_DELIM "########EOS########"
-#define DTRAIN_SCALE 100000
 
 using namespace std;
 using namespace dtrain;
@@ -32,7 +36,7 @@ inline void register_and_convert(const vector<string>& strs, vector<WordID>& ids
 
 inline string gettmpf(const string path, const string infix)
 {
-  char fn[1024];
+  char fn[path.size() + infix.size() + 8];
   strcpy(fn, path.c_str());
   strcat(fn, "/");
   strcat(fn, infix.c_str());
