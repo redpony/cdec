@@ -126,12 +126,12 @@ int main(int argc, char** argv) {
       u.logeq(tot_feats.dot(weights));
       prob_t w = u / q;
       zhat += w;
-      for (SparseVector<double>::const_iterator it = tot_feats.begin(); it != tot_feats.end(); ++it)
+      for (SparseVector<double>::iterator it = tot_feats.begin(); it != tot_feats.end(); ++it)
         sampled_exp.add_value(it->first, w * prob_t(it->second));
     }
     sampled_exp /= zhat;
     SparseVector<double> tot_m;
-    for (SparseVector<prob_t>::const_iterator it = sampled_exp.begin(); it != sampled_exp.end(); ++it)
+    for (SparseVector<prob_t>::iterator it = sampled_exp.begin(); it != sampled_exp.end(); ++it)
       tot_m.add_value(it->first, it->second.as_float());
     //cerr << "DIFF: " << (tot_m - corpus[i].features) << endl;
     const double eta = 0.03;

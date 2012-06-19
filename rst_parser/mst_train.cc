@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
   for (int iter = 0; iter < iterations; ++iter) {
     cerr << "ITERATION " << iter << " " << flush;
     fill(g.begin(), g.end(), 0.0);
-    for (SparseVector<double>::const_iterator it = empirical.begin(); it != empirical.end(); ++it)
+    for (SparseVector<double>::iterator it = empirical.begin(); it != empirical.end(); ++it)
       g[it->first] = -it->second;
     double obj = -empirical.dot(weights);
     vector<boost::shared_ptr<GradientWorker> > jobs;
