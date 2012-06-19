@@ -19,10 +19,12 @@ cmp_hyp_by_score_d(ScoredHyp a, ScoredHyp b)
 }
 
 inline void
-all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float _unused=1)
+all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, unsigned max, float _unused=1)
 {
   sort(s->begin(), s->end(), cmp_hyp_by_score_d);
   unsigned sz = s->size();
+  bool b = false;
+  unsigned count = 0;
   for (unsigned i = 0; i < sz-1; i++) {
     for (unsigned j = i+1; j < sz; j++) {
       if (threshold > 0) {
@@ -32,7 +34,12 @@ all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, sc
         if ((*s)[i].score != (*s)[j].score)
           training.push_back(make_pair((*s)[i], (*s)[j]));
       }
+      if (++count == max) {
+        b = true;
+        break;
+      }
     }
+    if (b) break;
   }
 }
 
@@ -44,13 +51,22 @@ all_pairs(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, sc
  */
 
 inline void
-partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float hi_lo)
+partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, unsigned max, float hi_lo)
 {
-  sort(s->begin(), s->end(), cmp_hyp_by_score_d);
   unsigned sz = s->size();
+  if (sz < 2) return;
+  sort(s->begin(), s->end(), cmp_hyp_by_score_d);
   unsigned sep = round(sz*hi_lo);
-  for (unsigned i = 0; i < sep; i++) {
-    for (unsigned j = sep; j < sz; j++) {
+  unsigned sep_hi = sep;
+  if (sz > 4) while (sep_hi < sz && (*s)[sep_hi-1].score == (*s)[sep_hi].score) ++sep_hi;
+  else sep_hi = 1;
+  bool b = false;
+  unsigned count = 0;
+  for (unsigned i = 0; i < sep_hi; i++) {
+    for (unsigned j = sep_hi; j < sz; j++) {
+#ifdef DTRAIN_FASTER_PERCEPTRON
+      if ((*s)[i].model <= (*s)[j].model) {
+#endif
       if (threshold > 0) {
         if (accept_pair((*s)[i].score, (*s)[j].score, threshold))
           training.push_back(make_pair((*s)[i], (*s)[j]));
@@ -58,10 +74,23 @@ partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, scor
         if ((*s)[i].score != (*s)[j].score)
           training.push_back(make_pair((*s)[i], (*s)[j]));
       }
+      if (++count == max) {
+        b = true;
+        break;
+      }
+#ifdef DTRAIN_FASTER_PERCEPTRON
+      }
+#endif
     }
+    if (b) break;
   }
-  for (unsigned i = sep; i < sz-sep; i++) {
-    for (unsigned j = sz-sep; j < sz; j++) {
+  unsigned sep_lo = sz-sep;
+  while (sep_lo > 0 && (*s)[sep_lo-1].score == (*s)[sep_lo].score) --sep_lo;
+  for (unsigned i = sep_hi; i < sz-sep_lo; i++) {
+    for (unsigned j = sz-sep_lo; j < sz; j++) {
+#ifdef DTRAIN_FASTER_PERCEPTRON
+      if ((*s)[i].model <= (*s)[j].model) {
+#endif
       if (threshold > 0) {
         if (accept_pair((*s)[i].score, (*s)[j].score, threshold))
           training.push_back(make_pair((*s)[i], (*s)[j]));
@@ -69,6 +98,10 @@ partXYX(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, scor
         if ((*s)[i].score != (*s)[j].score)
           training.push_back(make_pair((*s)[i], (*s)[j]));
       }
+      if (++count == max) return;
+#ifdef DTRAIN_FASTER_PERCEPTRON
+      }
+#endif
     }
   }
 }
@@ -86,7 +119,7 @@ _PRO_cmp_pair_by_diff_d(pair<ScoredHyp,ScoredHyp> a, pair<ScoredHyp,ScoredHyp> b
   return (fabs(a.first.score - a.second.score)) > (fabs(b.first.score - b.second.score));
 }
 inline void
-PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, float _unused=1)
+PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, unsigned max, float _unused=1)
 {
   unsigned max_count = 5000, count = 0, sz = s->size();
   bool b = false;

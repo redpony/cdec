@@ -6,37 +6,39 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
 {
   po::options_description ini("Configuration File Options");
   ini.add_options()
-    ("input",             po::value<string>()->default_value("-"),                                                "input file")
-    ("output",            po::value<string>()->default_value("-"),                       "output weights file, '-' for STDOUT")
-    ("input_weights",     po::value<string>(),                             "input weights file (e.g. from previous iteration)")
-    ("decoder_config",    po::value<string>(),                                                   "configuration file for cdec")
-    ("print_weights",     po::value<string>(),                                            "weights to print on each iteration")
-    ("stop_after",        po::value<unsigned>()->default_value(0),                              "stop after X input sentences")
-    ("tmp",               po::value<string>()->default_value("/tmp"),                                        "temp dir to use")
-    ("keep",              po::value<bool>()->zero_tokens(),                            "keep weights files for each iteration")
-    ("hstreaming",        po::value<string>(),                                "run in hadoop streaming mode, arg is a task id")
-    ("epochs",            po::value<unsigned>()->default_value(10),                            "# of iterations T (per shard)")
-    ("k",                 po::value<unsigned>()->default_value(100),                         "how many translations to sample")
-    ("sample_from",       po::value<string>()->default_value("kbest"),  "where to sample translations from: 'kbest', 'forest'")
-    ("filter",            po::value<string>()->default_value("uniq"),                       "filter kbest list: 'not', 'uniq'")
-    ("pair_sampling",     po::value<string>()->default_value("XYX"),              "how to sample pairs: 'all', 'XYX' or 'PRO'")
-    ("hi_lo",             po::value<float>()->default_value(0.1),                "hi and lo (X) for XYX (default 0.1), <= 0.5")
-    ("pair_threshold",    po::value<score_t>()->default_value(0.),                      "bleu [0,1] threshold to filter pairs")
-    ("N",                 po::value<unsigned>()->default_value(4),                                       "N for Ngrams (BLEU)")
-    ("scorer",            po::value<string>()->default_value("stupid_bleu"),        "scoring: bleu, stupid_, smooth_, approx_")
-    ("learning_rate",     po::value<weight_t>()->default_value(0.0001),                                        "learning rate")
-    ("gamma",             po::value<weight_t>()->default_value(0.),                         "gamma for SVM (0 for perceptron)")
-    ("select_weights",    po::value<string>()->default_value("last"),  "output best, last, avg weights ('VOID' to throw away)")
-    ("rescale",           po::value<bool>()->zero_tokens(),                           "rescale weight vector after each input")
-    ("l1_reg",            po::value<string>()->default_value("none"),   "apply l1 regularization as in 'Tsuroka et al' (2010)")
-    ("l1_reg_strength",   po::value<weight_t>(),                                                  "l1 regularization strength")
-    ("fselect",           po::value<weight_t>()->default_value(-1), "TODO select top x percent (or by threshold) of features after each epoch")
-    ("approx_bleu_d",     po::value<score_t>()->default_value(0.9),                                "discount for approx. BLEU")
-    ("scale_bleu_diff",   po::value<bool>()->zero_tokens(),                   "learning rate <- bleu diff of a misranked pair")
+    ("input",             po::value<string>()->default_value("-"),                                                   "input file")
+    ("output",            po::value<string>()->default_value("-"),                          "output weights file, '-' for STDOUT")
+    ("input_weights",     po::value<string>(),                                "input weights file (e.g. from previous iteration)")
+    ("decoder_config",    po::value<string>(),                                                      "configuration file for cdec")
+    ("print_weights",     po::value<string>(),                                               "weights to print on each iteration")
+    ("stop_after",        po::value<unsigned>()->default_value(0),                                 "stop after X input sentences")
+    ("tmp",               po::value<string>()->default_value("/tmp"),                                           "temp dir to use")
+    ("keep",              po::value<bool>()->zero_tokens(),                               "keep weights files for each iteration")
+    ("hstreaming",        po::value<string>(),                                   "run in hadoop streaming mode, arg is a task id")
+    ("epochs",            po::value<unsigned>()->default_value(10),                               "# of iterations T (per shard)")
+    ("k",                 po::value<unsigned>()->default_value(100),                            "how many translations to sample")
+    ("sample_from",       po::value<string>()->default_value("kbest"),     "where to sample translations from: 'kbest', 'forest'")
+    ("filter",            po::value<string>()->default_value("uniq"),                          "filter kbest list: 'not', 'uniq'")
+    ("pair_sampling",     po::value<string>()->default_value("XYX"),                 "how to sample pairs: 'all', 'XYX' or 'PRO'")
+    ("hi_lo",             po::value<float>()->default_value(0.1),                   "hi and lo (X) for XYX (default 0.1), <= 0.5")
+    ("pair_threshold",    po::value<score_t>()->default_value(0.),                         "bleu [0,1] threshold to filter pairs")
+    ("N",                 po::value<unsigned>()->default_value(4),                                          "N for Ngrams (BLEU)")
+    ("scorer",            po::value<string>()->default_value("stupid_bleu"),      "scoring: bleu, stupid_, smooth_, approx_, lc_")
+    ("learning_rate",     po::value<weight_t>()->default_value(0.0001),                                           "learning rate")
+    ("gamma",             po::value<weight_t>()->default_value(0.),                            "gamma for SVM (0 for perceptron)")
+    ("select_weights",    po::value<string>()->default_value("last"),     "output best, last, avg weights ('VOID' to throw away)")
+    ("rescale",           po::value<bool>()->zero_tokens(),                              "rescale weight vector after each input")
+    ("l1_reg",            po::value<string>()->default_value("none"),      "apply l1 regularization as in 'Tsuroka et al' (2010)")
+    ("l1_reg_strength",   po::value<weight_t>(),                                                     "l1 regularization strength")
+    ("fselect",           po::value<weight_t>()->default_value(-1), "select top x percent (or by threshold) of features after each epoch NOT IMPL") // TODO
+    ("approx_bleu_d",     po::value<score_t>()->default_value(0.9),                                   "discount for approx. BLEU")
+    ("scale_bleu_diff",   po::value<bool>()->zero_tokens(),                      "learning rate <- bleu diff of a misranked pair")
+    ("loss_margin",       po::value<weight_t>()->default_value(0.),  "update if no error in pref pair but model scores this near")
+    ("max_pairs",         po::value<unsigned>()->default_value(std::numeric_limits<unsigned>::max()), "max. # of pairs per Sent.")
 #ifdef DTRAIN_LOCAL
-    ("refs,r",            po::value<string>(),                                                      "references in local mode")
+    ("refs,r",            po::value<string>(),                                                         "references in local mode")
 #endif
-    ("noup",              po::value<bool>()->zero_tokens(),                                            "do not update weights");
+    ("noup",              po::value<bool>()->zero_tokens(),                                               "do not update weights");
   po::options_description cl("Command Line Options");
   cl.add_options()
     ("config,c",         po::value<string>(),              "dtrain config file")
@@ -134,6 +136,9 @@ main(int argc, char** argv)
   const string select_weights = cfg["select_weights"].as<string>();
   const float hi_lo = cfg["hi_lo"].as<float>();
   const score_t approx_bleu_d = cfg["approx_bleu_d"].as<score_t>();
+  const unsigned max_pairs = cfg["max_pairs"].as<unsigned>();
+  weight_t loss_margin = cfg["loss_margin"].as<weight_t>();
+  if (loss_margin > 9998.) loss_margin = std::numeric_limits<float>::max();
   bool scale_bleu_diff = false;
   if (cfg.count("scale_bleu_diff")) scale_bleu_diff = true;
   bool average = false;
@@ -160,8 +165,16 @@ main(int argc, char** argv)
     scorer = dynamic_cast<StupidBleuScorer*>(new StupidBleuScorer);
   } else if (scorer_str == "smooth_bleu") {
     scorer = dynamic_cast<SmoothBleuScorer*>(new SmoothBleuScorer);
+  } else if (scorer_str == "sum_bleu") {
+    scorer = dynamic_cast<SumBleuScorer*>(new SumBleuScorer);
+  } else if (scorer_str == "sumexp_bleu") {
+    scorer = dynamic_cast<SumExpBleuScorer*>(new SumExpBleuScorer);
+  } else if (scorer_str == "sumwhatever_bleu") {
+    scorer = dynamic_cast<SumWhateverBleuScorer*>(new SumWhateverBleuScorer);
   } else if (scorer_str == "approx_bleu") {
     scorer = dynamic_cast<ApproxBleuScorer*>(new ApproxBleuScorer(N, approx_bleu_d));
+  } else if (scorer_str == "lc_bleu") {
+    scorer = dynamic_cast<LinearBleuScorer*>(new LinearBleuScorer(N));
   } else {
     cerr << "Don't know scoring metric: '" << scorer_str << "', exiting." << endl;
     exit(1);
@@ -220,7 +233,7 @@ main(int argc, char** argv)
   grammar_buf_out.open(grammar_buf_fn.c_str());
 #endif
 
-  unsigned in_sz = UINT_MAX; // input index, input size
+  unsigned in_sz = std::numeric_limits<unsigned>::max(); // input index, input size
   vector<pair<score_t, score_t> > all_scores;
   score_t max_score = 0.;
   unsigned best_it = 0;
@@ -242,6 +255,7 @@ main(int argc, char** argv)
     if (!scale_bleu_diff) cerr << setw(25) << "learning rate " << eta << endl;
     else cerr << setw(25) << "learning rate " << "bleu diff" << endl;
     cerr << setw(25) << "gamma " << gamma << endl;
+    cerr << setw(25) << "loss margin " << loss_margin << endl;
     cerr << setw(25) << "pairs " << "'" << pair_sampling << "'" << endl;
     if (pair_sampling == "XYX")
       cerr << setw(25) << "hi lo " << hi_lo << endl;
@@ -251,6 +265,7 @@ main(int argc, char** argv)
       cerr << setw(25) << "l1 reg " << l1_reg << " '" << cfg["l1_reg"].as<string>() << "'" << endl;
     if (rescale)
       cerr << setw(25) << "rescale " << rescale << endl;
+    cerr << setw(25) << "max pairs " << max_pairs << endl;
     cerr << setw(25) << "cdec cfg " << "'" << cfg["decoder_config"].as<string>() << "'" << endl;
     cerr << setw(25) << "input " << "'" << input_fn << "'" << endl;
 #ifdef DTRAIN_LOCAL
@@ -415,21 +430,27 @@ main(int argc, char** argv)
       // get pairs
       vector<pair<ScoredHyp,ScoredHyp> > pairs;
       if (pair_sampling == "all")
-        all_pairs(samples, pairs, pair_threshold);
+        all_pairs(samples, pairs, pair_threshold, max_pairs);
       if (pair_sampling == "XYX")
-        partXYX(samples, pairs, pair_threshold, hi_lo);
+        partXYX(samples, pairs, pair_threshold, max_pairs, hi_lo);
       if (pair_sampling == "PRO")
-        PROsampling(samples, pairs, pair_threshold);
+        PROsampling(samples, pairs, pair_threshold, max_pairs);
       npairs += pairs.size();
 
       for (vector<pair<ScoredHyp,ScoredHyp> >::iterator it = pairs.begin();
            it != pairs.end(); it++) {
+#ifdef DTRAIN_FASTER_PERCEPTRON
+        bool rank_error = true; // pair sampling already did this for us
+        rank_errors++;
+        score_t margin = std::numeric_limits<float>::max();
+#else
         bool rank_error = it->first.model <= it->second.model;
         if (rank_error) rank_errors++;
-        score_t margin = fabs(it->first.model - it->second.model);
-        if (!rank_error && margin < 1) margin_violations++;
+        score_t margin = fabs(fabs(it->first.model) - fabs(it->second.model));
+        if (!rank_error && margin < loss_margin) margin_violations++;
+#endif
         if (scale_bleu_diff) eta = it->first.score - it->second.score;
-        if (rank_error || (gamma && margin<1)) {
+        if (rank_error || margin < loss_margin) {
           SparseVector<weight_t> diff_vec = it->first.f - it->second.f;
           lambdas.plus_eq_v_times_s(diff_vec, eta);
           if (gamma)
@@ -486,7 +507,7 @@ main(int argc, char** argv)
 
   if (average) w_average += lambdas;
 
-  if (scorer_str == "approx_bleu") scorer->Reset();
+  if (scorer_str == "approx_bleu" || scorer_str == "lc_bleu") scorer->Reset();
 
   if (t == 0) {
     in_sz = ii; // remember size of input (# lines)
@@ -534,8 +555,10 @@ main(int argc, char** argv)
     cerr << _np << npairs/(float)in_sz << endl;
     cerr << "        avg # rank err: ";
     cerr << rank_errors/(float)in_sz << endl;
+#ifndef DTRAIN_FASTER_PERCEPTRON
     cerr << "     avg # margin viol: ";
     cerr << margin_violations/(float)in_sz << endl;
+#endif
     cerr << "    non0 feature count: " <<  nonz << endl;
     cerr << "           avg list sz: " << list_sz/(float)in_sz << endl;
     cerr << "           avg f count: " << f_count/(float)list_sz << endl;

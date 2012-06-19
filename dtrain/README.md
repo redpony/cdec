@@ -39,16 +39,6 @@ For an example of local usage (with the 'distributed' format)
 the see test/example/ . This expects dtrain to be built without
 DTRAIN_LOCAL.
 
-Next
-----
-+ (dtrain|decoder) more meta-parameters testing
-+ feature selection directly in dtrain
-+ feature template: target side rule ngrams
-+ sa-extract -> leave-one-out for grammar of training set?
-+ make svm doable; no subgradient?
-+ reranking while sgd?
-+ try PRO, mira emulations
-
 Legal
 -----
 Copyright (c) 2012 by Patrick Simianer <p@simianer.de>

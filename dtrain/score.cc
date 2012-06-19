@@ -80,7 +80,7 @@ StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  *        to Machine Translation"
  * (Liang et al. '06)
  *
- * NOTE: max is 0.9375
+ * NOTE: max is 0.9375 (with N=4)
  */
 score_t
 SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
@@ -103,7 +103,83 @@ SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
         i_bleu[j] += (1/((score_t)j+1)) * i_ng;
       }
     }
-    sum += exp(i_bleu[i])/(pow(2.0, static_cast<double>(N_-i)));
+    sum += exp(i_bleu[i])/(pow(2.0, N_-i));
+  }
+  return brevity_penalty(hyp_len, ref_len) * sum;
+}
+
+/*
+ * 'sum' bleu
+ *
+ * sum up Ngram precisions
+ */
+score_t
+SumBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                        const unsigned /*rank*/, const unsigned /*src_len*/)
+{
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
+  if (hyp_len == 0 || ref_len == 0) return 0.;
+  NgramCounts counts = make_ngram_counts(hyp, ref, N_);
+  unsigned M = N_;
+  if (ref_len < N_) M = ref_len;
+  score_t sum = 0.;
+  unsigned j = 1;
+  for (unsigned i = 0; i < M; i++) {
+    if (counts.sum_[i] == 0 || counts.clipped_[i] == 0) break;
+    sum += ((score_t)counts.clipped_[i]/counts.sum_[i])/pow(2., N_-j+1);
+    j++;
+  }
+  return brevity_penalty(hyp_len, ref_len) * sum;
+}
+
+/*
+ * 'sum' (exp) bleu
+ *
+ * sum up exp(Ngram precisions)
+ */
+score_t
+SumExpBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                        const unsigned /*rank*/, const unsigned /*src_len*/)
+{
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
+  if (hyp_len == 0 || ref_len == 0) return 0.;
+  NgramCounts counts = make_ngram_counts(hyp, ref, N_);
+  unsigned M = N_;
+  if (ref_len < N_) M = ref_len;
+  score_t sum = 0.;
+  unsigned j = 1;
+  for (unsigned i = 0; i < M; i++) {
+    if (counts.sum_[i] == 0 || counts.clipped_[i] == 0) break;
+    sum += exp(((score_t)counts.clipped_[i]/counts.sum_[i]))/pow(2., N_-j+1);
+    j++;
+  }
+  return brevity_penalty(hyp_len, ref_len) * sum;
+}
+
+/*
+ * 'sum' (whatever) bleu
+ *
+ * sum up exp(weight * log(Ngram precisions))
+ */
+score_t
+SumWhateverBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                        const unsigned /*rank*/, const unsigned /*src_len*/)
+{
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
+  if (hyp_len == 0 || ref_len == 0) return 0.;
+  NgramCounts counts = make_ngram_counts(hyp, ref, N_);
+  unsigned M = N_;
+  vector<score_t> v = w_;
+  if (ref_len < N_) {
+    M = ref_len;
+    for (unsigned i = 0; i < M; i++) v[i] = 1/((score_t)M);
+  }
+  score_t sum = 0.;
+  unsigned j = 1;
+  for (unsigned i = 0; i < M; i++) {
+    if (counts.sum_[i] == 0 || counts.clipped_[i] == 0) break;
+    sum += exp(v[i] * log(((score_t)counts.clipped_[i]/counts.sum_[i])))/pow(2., N_-j+1);
+    j++;
   }
   return brevity_penalty(hyp_len, ref_len) * sum;
 }
@@ -115,7 +191,8 @@ SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  *        and Structural Translation Features"
  * (Chiang et al. '08)
  *
- * NOTE: needs some more code in dtrain.cc
+ * NOTE: Needs some more code in dtrain.cc .
+ *       No scaling by src len.
  */
 score_t
 ApproxBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
@@ -137,7 +214,39 @@ ApproxBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
     glob_ref_len_ = discount_ * (glob_ref_len_ + ref_len);
     glob_src_len_ = discount_ * (glob_src_len_ + src_len);
   }
-  return (score_t)glob_src_len_ * score;
+  return score;
+}
+
+/*
+ * Linear (Corpus) Bleu
+ *
+ * as in "Lattice Minimum Bayes-Risk Decoding
+ *        for Statistical Machine Translation"
+ * (Tromble et al. '08)
+ *
+ */
+score_t
+LinearBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                        const unsigned rank, const unsigned /*src_len*/)
+{
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
+  if (ref_len == 0) return 0.;
+  unsigned M = N_;
+  if (ref_len < N_) M = ref_len;
+  NgramCounts counts(M);
+  if (hyp_len > 0)
+    counts = make_ngram_counts(hyp, ref, M);
+  score_t ret = 0.;
+  for (unsigned i = 0; i < M; i++) {
+    if (counts.sum_[i] == 0 || onebest_counts_.sum_[i] == 0) break;
+    ret += counts.sum_[i]/onebest_counts_.sum_[i];
+  }
+  ret = -(hyp_len/(score_t)onebest_len_) + (1./M) * ret;
+  if (rank == 0) {
+    onebest_len_ += hyp_len;
+    onebest_counts_ += counts;
+  }
+  return ret;
 }
 
 
