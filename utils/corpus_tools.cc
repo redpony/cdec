@@ -8,6 +8,26 @@
 
 using namespace std;
 
+void CorpusTools::ReadLine(const string& line,
+                           vector<WordID>* src,
+                           vector<WordID>* trg) {
+  static const WordID kDIV = TD::Convert("|||");
+  static vector<WordID> tmp;
+  src->clear();
+  trg->clear();
+  TD::ConvertSentence(line, &tmp);
+  unsigned i = 0;
+  while(i < tmp.size() && tmp[i] != kDIV) {
+    src->push_back(tmp[i]);
+    ++i;
+  }
+  if (i < tmp.size() && tmp[i] == kDIV) {
+    ++i;
+    for (; i < tmp.size() ; ++i)
+      trg->push_back(tmp[i]);
+  }
+}
+
 void CorpusTools::ReadFromFile(const string& filename,
                            vector<vector<WordID> >* src,
                            set<WordID>* src_vocab,

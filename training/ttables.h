@@ -4,6 +4,7 @@
 #include <iostream>
 #include <tr1/unordered_map>
 
+#include "sparse_vector.h"
 #include "m.h"
 #include "wordid.h"
 #include "tdict.h"
@@ -68,18 +69,18 @@ class TTable {
     }
     return *this;
   }
-  void ShowTTable() {
-    for (Word2Word2Double::iterator it = ttable.begin(); it != ttable.end(); ++it) {
-      Word2Double& cpd = it->second;
-      for (Word2Double::iterator j = cpd.begin(); j != cpd.end(); ++j) {
+  void ShowTTable() const {
+    for (Word2Word2Double::const_iterator it = ttable.begin(); it != ttable.end(); ++it) {
+      const Word2Double& cpd = it->second;
+      for (Word2Double::const_iterator j = cpd.begin(); j != cpd.end(); ++j) {
         std::cerr << "P(" << TD::Convert(j->first) << '|' << TD::Convert(it->first) << ") = " << j->second << std::endl;
       }
     }
   }
-  void ShowCounts() {
-    for (Word2Word2Double::iterator it = counts.begin(); it != counts.end(); ++it) {
-      Word2Double& cpd = it->second;
-      for (Word2Double::iterator j = cpd.begin(); j != cpd.end(); ++j) {
+  void ShowCounts() const {
+    for (Word2Word2Double::const_iterator it = counts.begin(); it != counts.end(); ++it) {
+      const Word2Double& cpd = it->second;
+      for (Word2Double::const_iterator j = cpd.begin(); j != cpd.end(); ++j) {
         std::cerr << "c(" << TD::Convert(j->first) << '|' << TD::Convert(it->first) << ") = " << j->second << std::endl;
       }
     }

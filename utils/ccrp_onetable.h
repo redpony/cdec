@@ -183,7 +183,7 @@ class CCRP_OneTable {
     assert(has_discount_prior() || has_alpha_prior());
     DiscountResampler dr(*this);
     ConcentrationResampler cr(*this);
-    for (int iter = 0; iter < nloop; ++iter) {
+    for (unsigned iter = 0; iter < nloop; ++iter) {
       if (has_alpha_prior()) {
         alpha_ = slice_sampler1d(cr, alpha_, *rng, 0.0,
                                std::numeric_limits<double>::infinity(), 0.0, niterations, 100*niterations);

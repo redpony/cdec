@@ -66,6 +66,60 @@ BOOST_STATIC_ASSERT(sizeof(PairIntT<float>) == sizeof(std::pair<unsigned,float>)
 template <typename T, unsigned LOCAL_MAX = (sizeof(T) == sizeof(float) ? 15u : 7u)>
 class FastSparseVector {
  public:
+  struct iterator {
+    iterator(FastSparseVector<T>& v, const bool is_end) : local_(!v.is_remote_) {
+      if (local_) {
+        local_it_ = &v.data_.local[is_end ? v.local_size_ : 0];
+      } else {
+        if (is_end)
+          remote_it_ = v.data_.rbmap->end();
+        else
+          remote_it_ = v.data_.rbmap->begin();
+      }
+    }
+    iterator(FastSparseVector<T>& v, const bool, const unsigned k) : local_(!v.is_remote_) {
+      if (local_) {
+        unsigned i = 0;
+        while(i < v.local_size_ && v.data_.local[i].first() != k) { ++i; }
+        local_it_ = &v.data_.local[i];
+      } else {
+        remote_it_ = v.data_.rbmap->find(k);
+      }
+    }
+    const bool local_;
+    PairIntT<T>* local_it_;
+    typename std::map<unsigned, T>::iterator remote_it_;
+    std::pair<const unsigned, T>& operator*() const {
+      if (local_)
+        return *reinterpret_cast<std::pair<const unsigned, T>*>(local_it_);
+      else
+        return *remote_it_;
+    }
+
+    std::pair<const unsigned, T>* operator->() const {
+      if (local_)
+        return reinterpret_cast<std::pair<const unsigned, T>*>(local_it_);
+      else
+        return &*remote_it_;
+    }
+
+    iterator& operator++() {
+      if (local_) ++local_it_; else ++remote_it_;
+      return *this;
+    }
+
+    inline bool operator==(const iterator& o) const {
+      if (o.local_ != local_) return false;
+      if (local_) {
+        return local_it_ == o.local_it_;
+      } else {
+        return remote_it_ == o.remote_it_;
+      }
+    }
+    inline bool operator!=(const iterator& o) const {
+      return !(o == *this);
+    }
+  };
   struct const_iterator {
     const_iterator(const FastSparseVector<T>& v, const bool is_end) : local_(!v.is_remote_) {
       if (local_) {
@@ -77,12 +131,21 @@ class FastSparseVector {
           remote_it_ = v.data_.rbmap->begin();
       }
     }
+    const_iterator(const FastSparseVector<T>& v, const bool, const unsigned k) : local_(!v.is_remote_) {
+      if (local_) {
+        unsigned i = 0;
+        while(i < v.local_size_ && v.data_.local[i].first() != k) { ++i; }
+        local_it_ = &v.data_.local[i];
+      } else {
+        remote_it_ = v.data_.rbmap->find(k);
+      }
+    }
     const bool local_;
     const PairIntT<T>* local_it_;
     typename std::map<unsigned, T>::const_iterator remote_it_;
     const std::pair<const unsigned, T>& operator*() const {
       if (local_)
-        return *reinterpret_cast<const std::pair<const unsigned, float>*>(local_it_);
+        return *reinterpret_cast<const std::pair<const unsigned, T>*>(local_it_);
       else
         return *remote_it_;
     }
@@ -159,6 +222,9 @@ class FastSparseVector {
   }
   bool nonzero(unsigned k) const {
     return static_cast<bool>(value(k));
+  }
+  inline T& operator[](unsigned k) {
+    return get_or_create_bin(k);
   }
   inline void set_value(unsigned k, const T& v) {
     get_or_create_bin(k) = v;
@@ -282,6 +348,18 @@ class FastSparseVector {
       if (fabs(it->second) > EPSILON) o.set_value(it->first, it->second);
     }
     return o;
+  }
+  iterator find(unsigned k) {
+    return iterator(*this, false, k);
+  }
+  iterator begin() {
+    return iterator(*this, false);
+  }
+  iterator end() {
+    return iterator(*this, true);
+  }
+  const_iterator find(unsigned k) const {
+    return const_iterator(*this, false, k);
   }
   const_iterator begin() const {
     return const_iterator(*this, false);

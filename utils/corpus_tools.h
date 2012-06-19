@@ -7,6 +7,10 @@
 #include "wordid.h"
 
 struct CorpusTools {
+  static void ReadLine(const std::string& line,
+                       std::vector<WordID>* src,
+                       std::vector<WordID>* trg);
+
   static void ReadFromFile(const std::string& filename,
                            std::vector<std::vector<WordID> >* src,
                            std::set<WordID>* src_vocab = NULL,
