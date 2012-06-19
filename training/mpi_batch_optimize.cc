@@ -15,6 +15,8 @@ namespace mpi = boost::mpi;
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "sentence_metadata.h"
+#include "cllh_observer.h"
 #include "verbose.h"
 #include "hg.h"
 #include "prob.h"
@@ -36,14 +38,14 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   opts.add_options()
         ("input_weights,w",po::value<string>(),"Input feature weights file")
         ("training_data,t",po::value<string>(),"Training data")
-        ("decoder_config,d",po::value<string>(),"Decoder configuration file")
+        ("test_data,T",po::value<string>(),"(optional) test data")
+        ("decoder_config,c",po::value<string>(),"Decoder configuration file")
         ("output_weights,o",po::value<string>()->default_value("-"),"Output feature weights file")
         ("optimization_method,m", po::value<string>()->default_value("lbfgs"), "Optimization method (sgd, lbfgs, rprop)")
 	("correction_buffers,M", po::value<int>()->default_value(10), "Number of gradients for LBFGS to maintain in memory")
         ("gaussian_prior,p","Use a Gaussian prior on the weights")
-        ("means,u", po::value<string>(), "File containing the means for Gaussian prior")
-        ("per_sentence_grammar_scratch,P", po::value<string>(), "(Optional) location of scratch space to copy per-sentence grammars for fast access, useful if a RAM disk is available")
-        ("sigma_squared", po::value<double>()->default_value(1.0), "Sigma squared term for spherical Gaussian prior");
+        ("sigma_squared", po::value<double>()->default_value(1.0), "Sigma squared term for spherical Gaussian prior")
+        ("means,u", po::value<string>(), "(optional) file containing the means for Gaussian prior");
   po::options_description clo("Command line options");
   clo.add_options()
         ("config", po::value<string>(), "Configuration file")
@@ -86,6 +88,7 @@ struct TrainingObserver : public DecoderObserver {
     acc_grad.clear();
     acc_obj = 0;
     total_complete = 0;
+    trg_words = 0;
   } 
 
   void SetLocalGradientAndObjective(vector<double>* g, double* o) const {
@@ -143,6 +146,7 @@ struct TrainingObserver : public DecoderObserver {
     ref_exp -= cur_model_exp;
     acc_grad -= ref_exp;
     acc_obj += (cur_obj - log_ref_z);
+    trg_words += smeta.GetReference().size();
   }
 
   virtual void NotifyDecodingComplete(const SentenceMetadata& smeta) {
@@ -157,6 +161,7 @@ struct TrainingObserver : public DecoderObserver {
   SparseVector<prob_t> acc_grad;
   double acc_obj;
   double cur_obj;
+  unsigned trg_words;
   int state;
 };
 
@@ -186,36 +191,6 @@ struct VectorPlus : public binary_function<vector<T>, vector<T>, vector<T> >  {
     return v;
   } 
 }; 
-
-void MovePerSentenceGrammars(const string& root, int size, int rank, vector<string>* c) {
-  if (!DirectoryExists(root)) {
-    cerr << "Can't find scratch space at " << root << endl;
-    abort();
-  }
-  ostringstream os;
-  os << root << "/psg." << size << "_of_" << rank;
-  const string path = os.str();
-  MkDirP(path);
-  string sent;
-  map<string, string> attr;
-  for (unsigned i = 0; i < c->size(); ++i) {
-    sent = (*c)[i];
-    attr.clear();
-    ProcessAndStripSGML(&sent, &attr);
-    map<string, string>::iterator it = attr.find("grammar");
-    if (it != attr.end()) {
-      string src_file = it->second;
-      bool is_gzipped = (src_file.size() > 3) && (src_file.rfind(".gz") == (src_file.size() - 3));
-      string new_name = path + "/" + md5(sent);
-      if (is_gzipped) new_name += ".gz";
-      CopyFile(src_file, new_name);
-      it->second = new_name;
-    }
-    ostringstream ns;
-    ns << SGMLOpenSegTag(attr) << ' ' << sent << " </seg>";
-    (*c)[i] = ns.str();
-  }
-}
 
 int main(int argc, char** argv) {
 #ifdef HAVE_MPI
@@ -284,22 +259,24 @@ int main(int argc, char** argv) {
   rcv_grad.clear();
   bool converged = false;
 
-  vector<string> corpus;
+  vector<string> corpus, test_corpus;
   ReadTrainingCorpus(conf["training_data"].as<string>(), rank, size, &corpus);
   assert(corpus.size() > 0);
-
-  if (conf.count("per_sentence_grammar_scratch"))
-    MovePerSentenceGrammars(conf["per_sentence_grammar_scratch"].as<string>(), rank, size, &corpus);
+  if (conf.count("test_data"))
+    ReadTrainingCorpus(conf["test_data"].as<string>(), rank, size, &test_corpus);
 
   TrainingObserver observer;
+  ConditionalLikelihoodObserver cllh_observer;
   while (!converged) {
     observer.Reset();
+    cllh_observer.Reset();
 #ifdef HAVE_MPI
     mpi::timer timer;
     world.barrier();
 #endif
     if (rank == 0) {
       cerr << "Starting decoding... (~" << corpus.size() << " sentences / proc)\n";
+      cerr << "  Testset size: " << test_corpus.size() << " sentences / proc)\n";
     }
     for (int i = 0; i < corpus.size(); ++i)
       decoder->Decode(corpus[i], &observer);
@@ -307,18 +284,38 @@ int main(int argc, char** argv) {
     fill(gradient.begin(), gradient.end(), 0);
     observer.SetLocalGradientAndObjective(&gradient, &objective);
 
-    double to = 0;
+    unsigned total_words = 0;
 #ifdef HAVE_MPI
+    double to = 0;
     rcv_grad.resize(num_feats, 0.0);
     mpi::reduce(world, &gradient[0], gradient.size(), &rcv_grad[0], plus<double>(), 0);
     swap(gradient, rcv_grad);
     rcv_grad.clear();
 
+    reduce(world, observer.trg_words, total_words, std::plus<unsigned>(), 0);
     mpi::reduce(world, objective, to, plus<double>(), 0);
     objective = to;
+#else
+    total_words = observer.trg_words;
+#endif
+    if (rank == 0)
+      cerr << "TRAINING CORPUS: ln p(f|e)=" << objective << "\t log_2 p(f|e) = " << (objective/log(2)) << "\t cond. entropy = " << (objective/log(2) / total_words) << "\t ppl = " << pow(2, (objective/log(2) / total_words)) << endl;
+
+    for (int i = 0; i < test_corpus.size(); ++i)
+      decoder->Decode(test_corpus[i], &cllh_observer);
+
+    double test_objective = 0;
+    unsigned test_total_words = 0;
+#ifdef HAVE_MPI
+    reduce(world, cllh_observer.acc_obj, test_objective, std::plus<double>(), 0);
+    reduce(world, cllh_observer.trg_words, test_total_words, std::plus<unsigned>(), 0);
+#else
+    test_objective = observer.acc_obj;
 #endif
 
     if (rank == 0) {  // run optimizer only on rank=0 node
+      if (test_corpus.size())
+        cerr << "    TEST CORPUS: ln p(f|e)=" << test_objective << "\t log_2 p(f|e) = " << (test_objective/log(2)) << "\t cond. entropy = " << (test_objective/log(2) / test_total_words) << "\t ppl = " << pow(2, (test_objective/log(2) / test_total_words)) << endl;
       if (gaussian_prior) {
         const double sigsq = conf["sigma_squared"].as<double>();
         double norm = 0;
