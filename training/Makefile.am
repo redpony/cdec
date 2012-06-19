@@ -41,10 +41,10 @@ mpi_extract_reachable_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mtev
 mpi_extract_features_SOURCES = mpi_extract_features.cc
 mpi_extract_features_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
-mpi_batch_optimize_SOURCES = mpi_batch_optimize.cc
+mpi_batch_optimize_SOURCES = mpi_batch_optimize.cc cllh_observer.cc
 mpi_batch_optimize_LDADD = libtraining.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
-mpi_compute_cllh_SOURCES = mpi_compute_cllh.cc
+mpi_compute_cllh_SOURCES = mpi_compute_cllh.cc cllh_observer.cc
 mpi_compute_cllh_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 augment_grammar_SOURCES = augment_grammar.cc
