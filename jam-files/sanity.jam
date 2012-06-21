@@ -19,9 +19,8 @@ ldflags = [ os.environ "LDFLAGS" ] ;
 
 #Run g++ with empty main and these arguments to see if it passes.  
 rule test_flags ( flags * ) {
-  local add = $(CXXFLAGS) $(LDFLAGS) ;
-  add ?= "" ;
-  local cmd = "bash -c \"g++ $(add) "$(flags:J=" ")" -x c++ - <<<'int main() {}' -o /dev/null >/dev/null 2>/dev/null\"" ;
+  flags = $(cxxflags) $(ldflags) $(flags) ;
+  local cmd = "bash -c \"g++ "$(flags:J=" ")" -x c++ - <<<'int main() {}' -o /dev/null >/dev/null 2>/dev/null\"" ;
   local ret = [ SHELL $(cmd) : exit-status ] ;
   if --debug-configuration in [ modules.peek : ARGV ] {
     echo $(cmd) ;
@@ -159,8 +158,8 @@ rule external-lib ( name : search-path * ) {
 }
 
 {
-  #Boost jam's static clang is buggy.  
-  requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <toolset>clang:<link>shared ;
+  #Boost jam's static clang for Linux is buggy.
+  requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<toolset>clang:<link>shared ;
 
   #libSegFault prints a stack trace on segfault.  Link against it if available.  
   if [ test_flags "-lSegFault" ] {
