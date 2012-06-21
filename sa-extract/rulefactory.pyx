@@ -1321,7 +1321,7 @@ cdef class HieroCachingRuleFactory:
           candidate.append([next_id,curr[1]+jump])
     return sorted(result);
 
-  def input(self, fwords, meta):
+  def input(self, fwords, meta=None, output=None):
     '''When this function is called on the RuleFactory,
     it looks up all of the rules that can be used to translate
     the input sentence'''
@@ -1342,13 +1342,14 @@ cdef class HieroCachingRuleFactory:
     nodes_isteps_away_buffer = {}
     hit = 0
     reachable_buffer = {}
-    #print "id = ",meta
-    #print "rule_file = ",self.rule_file
-    dattrs = sgml.attrs_to_dict(meta)
-    id = dattrs.get('id', 'NOID')
-    if self.per_sentence_grammar:
+    if meta:
+        dattrs = sgml.attrs_to_dict(meta)
+        id = dattrs.get('id', 'NOID')
+        self.excluded_sent_id = int(dattrs.get('exclude', '-1'))
+    if output:
+      self.rule_filehandler = output
+    elif self.per_sentence_grammar:
       self.rule_filehandler = open(self.rule_file+'.'+id, 'w')
-    self.excluded_sent_id = int(dattrs.get('exclude', '-1'))
 
     #print "max_initial_size = %i" % self.max_initial_size
 

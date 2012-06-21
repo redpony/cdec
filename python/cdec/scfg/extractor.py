@@ -1,5 +1,5 @@
-#!/usr/bin/env python
 import StringIO
+from itertools import chain
 
 import clex
 import rulefactory
@@ -9,11 +9,11 @@ import cdat
 import sym
 import log
 
-log.level = -1
-
 from features import EgivenFCoherent, SampleCountF, CountEF,\
         MaxLexEgivenF, MaxLexFgivenE, IsSingletonF, IsSingletonFE
 from features import contextless
+
+log.level = -1
 
 class Output(StringIO.StringIO):
     def close(self):
@@ -21,8 +21,6 @@ class Output(StringIO.StringIO):
 
     def __str__(self):
         return self.getvalue()
-
-from itertools import chain
 
 def get_cn(sentence):
     sentence = chain(('<s>',), sentence.split(), ('</s>',))
@@ -93,9 +91,11 @@ class GrammarExtractor:
         self.models = tuple(contextless(feature) for feature in self.models)
 
     def grammar(self, sentence):
+        if isinstance(sentence, unicode):
+            sentence = sentence.encode('utf8')
         out = Output()
         cn = get_cn(sentence)
-        self.factory.input_file(cn, out)
+        self.factory.input(cn, output=out)
         return str(out)
 
 def main(config):

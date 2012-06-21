@@ -4,11 +4,8 @@
 
 # vim:tabstop=4:autoindent:expandtab
 
-import sys
-import math
 import sym
 import log
-import sgml
 
 epsilon = sym.fromstring('*EPS*');
 
@@ -142,23 +139,26 @@ class ConfusionNet(object):
                 
     
 
-
-#file = open(sys.argv[1], "rb")
-#sent = sgml.process_sgml_line(file.read())
-#print sent
-#cn = ConfusionNet(sent)
-#print cn
-#results = cn.listdown()
-#for result in results:
-#    print sym.tostring(result)
-#print cn.next(0);
-#print cn.next(1);
-#print cn.next(2);
-#print cn.next(3);
-#print cn
-#cn = ConfusionNet()
-#k = 0
-#while (cn.read(file)):
-#  print cn
-  
-#print cn.stats
+"""
+import sys
+import sgml
+file = open(sys.argv[1], "rb")
+sent = sgml.process_sgml_line(file.read())
+print sent
+cn = ConfusionNet(sent)
+print cn
+results = cn.listdown()
+for result in results:
+    print sym.tostring(result)
+print cn.next(0);
+print cn.next(1);
+print cn.next(2);
+print cn.next(3);
+print cn
+cn = ConfusionNet()
+k = 0
+while (cn.read(file)):
+  print cn
+ 
+print cn.stats
+"""

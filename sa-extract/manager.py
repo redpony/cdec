@@ -1,5 +1,6 @@
 import csuf
 import cdat
+import cintlist
 
 class Sampler(object):
 	'''A Sampler implements a logic for choosing
@@ -13,7 +14,6 @@ class Sampler(object):
 
 	def sample(self, phrase_location):
 		return cintlist.CIntList()
-
 
 
 class Extractor(object):
