@@ -1,4 +1,3 @@
-
 class Model(object):
     def __init__(self, name=None):
         object.__init__(self)
@@ -6,7 +5,3 @@ class Model(object):
             self.name = self.__class__.__name__
         else:
             self.name = name
-
-    def input(self, fwords, meta):
-        pass
-
