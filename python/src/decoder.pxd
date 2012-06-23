@@ -4,7 +4,7 @@ from hypergraph cimport Hypergraph
 from utils cimport istream, weight_t
 
 cdef extern from "decoder/ff_register.h":
-    cdef void register_feature_functions()
+    void register_feature_functions()
 
 cdef extern from "decoder/decoder.h":
     cdef cppclass SentenceMetadata:
@@ -16,20 +16,20 @@ cdef extern from "decoder/decoder.h":
     cdef cppclass Decoder:
         Decoder(int argc, char** argv)
         Decoder(istream* config_file)
-        bint Decode(string input, DecoderObserver* observer)
+        bint Decode(string& inp, DecoderObserver* observer)
 
         # access this to either *read* or *write* to the decoder's last
         # weight vector (i.e., the weights of the finest past)
         vector[weight_t]& CurrentWeightVector()
 
-        void SetId(int id)
-        #const boost::program_options::variables_map& GetConf() const { return conf }
+        # void SetId(int id)
+        # const boost::program_options::variables_map& GetConf() const { return conf }
 
         # add grammar rules (currently only supported by SCFG decoders)
         # that will be used on subsequent calls to Decode. rules should be in standard
         # text format. This function does NOT read from a file.
-        void SetSupplementalGrammar(string grammar)
-        void SetSentenceGrammarFromString(string grammar_str)
+        void SetSupplementalGrammar(string& grammar)
+        void SetSentenceGrammarFromString(string& grammar_str)
 
 cdef extern from "observer.h":
     cdef cppclass BasicObserver(DecoderObserver):
