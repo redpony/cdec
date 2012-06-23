@@ -54,6 +54,7 @@ struct TaggerImpl {
       const int new_node_id = forest->AddNode(kXCAT)->id_;
       for (int k = 0; k < tagset_.size(); ++k) {
         TRulePtr rule(TRule::CreateLexicalRule(src, tagset_[k]));
+        rule->lhs_ = kXCAT;
         Hypergraph::Edge* edge = forest->AddEdge(rule, Hypergraph::TailNodeVector());
         edge->i_ = i;
         edge->j_ = i+1;
