@@ -27,7 +27,8 @@ noinst_LIBRARIES = libtraining.a
 libtraining_a_SOURCES = \
   candidate_set.cc \
   optimize.cc \
-  online_optimizer.cc
+  online_optimizer.cc \
+  risk.cc
 
 mpi_online_optimize_SOURCES = mpi_online_optimize.cc
 mpi_online_optimize_LDADD = libtraining.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
