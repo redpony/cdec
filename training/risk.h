@@ -9,6 +9,7 @@ namespace training {
   class CandidateSet;
 
   class CandidateSetRisk {
+   public:
     explicit CandidateSetRisk(const CandidateSet& cs, const EvaluationMetric& metric) :
        cands_(cs),
        metric_(metric) {}
