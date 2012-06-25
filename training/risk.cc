@@ -31,7 +31,9 @@ double CandidateSetRisk::operator()(const vector<double>& params,
   for (unsigned i = 0; i < cands_.size(); ++i) {
     const double log_prob = cands_[i].fmap.dot(params) - log_z;
     const double prob = exp(log_prob);
-    const double r = prob * metric_.ComputeScore(cands_[i].eval_feats);
+    const double cost = metric_.IsErrorMetric() ? metric_.ComputeScore(cands_[i].eval_feats)
+                                                : 1.0 - metric_.ComputeScore(cands_[i].eval_feats);
+    const double r = prob * cost;
     risk += r;
     if (g) (*g) += (cands_[i].fmap - exp_feats) * r;
   }
