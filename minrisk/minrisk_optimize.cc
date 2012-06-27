@@ -105,6 +105,13 @@ int main(int argc, char** argv) {
   vector<weight_t> weights;
   const string weightsf = conf["weights"].as<string>();
   Weights::InitFromFile(weightsf, &weights);
+  double t = 0;
+  for (unsigned i = 0; i < weights.size(); ++i)
+    t += weights[i] * weights[i];
+  if (t > 0) {
+    for (unsigned i = 0; i < weights.size(); ++i)
+      weights[i] /= sqrt(t);
+  }
   string line, file;
   vector<training::CandidateSet> kis;
   cerr << "Loading hypergraphs...\n";
