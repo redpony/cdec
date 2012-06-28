@@ -133,7 +133,7 @@ if ($metric =~ /^ter$|^aer$/i) {
 my $refs_comma_sep = get_comma_sep_refs('r',$refFiles);
 
 unless ($dir){
-	$dir = "rampion";
+	$dir = "minrisk";
 }
 unless ($dir =~ /^\//){  # convert relative path to absolute path
 	my $basedir = check_output("pwd");
