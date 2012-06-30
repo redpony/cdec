@@ -17,6 +17,7 @@
 #include "ns_docscorer.h"
 #include "candidate_set.h"
 #include "risk.h"
+#include "entropy.h"
 
 using namespace std;
 namespace po = boost::program_options;
@@ -28,6 +29,9 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("weights,w",po::value<string>(), "[REQD] Weights files from current iterations")
         ("input,i",po::value<string>()->default_value("-"), "Input file to map (- is STDIN)")
         ("evaluation_metric,m",po::value<string>()->default_value("IBM_BLEU"), "Evaluation metric (ibm_bleu, koehn_bleu, nist_bleu, ter, meteor, etc.)")
+        ("temperature,T",po::value<double>()->default_value(0.0), "Temperature parameter for objective (>0 increases the entropy)")
+        ("l1_strength,C",po::value<double>()->default_value(0.0), "L1 regularization strength")
+        ("memory_buffers,M",po::value<unsigned>()->default_value(20), "Memory buffers used in LBFGS")
         ("kbest_repository,R",po::value<string>(), "Accumulate k-best lists from previous iterations (parameter is path to repository)")
         ("kbest_size,k",po::value<unsigned>()->default_value(500u), "Top k-hypotheses to extract")
         ("help,h", "Help");
@@ -52,36 +56,80 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
 EvaluationMetric* metric = NULL;
 
 struct RiskObjective {
-  explicit RiskObjective(const vector<training::CandidateSet>& tr) : training(tr) {}
+  explicit RiskObjective(const vector<training::CandidateSet>& tr, const double temp) : training(tr), T(temp) {}
   double operator()(const vector<double>& x, double* g) const {
     fill(g, g + x.size(), 0.0);
     double obj = 0;
+    double h = 0;
     for (unsigned i = 0; i < training.size(); ++i) {
       training::CandidateSetRisk risk(training[i], *metric);
-      SparseVector<double> tg;
+      training::CandidateSetEntropy entropy(training[i]);
+      SparseVector<double> tg, hg;
       double r = risk(x, &tg);
+      double hh = entropy(x, &hg);
+      h += hh;
       obj += r;
       for (SparseVector<double>::iterator it = tg.begin(); it != tg.end(); ++it)
         g[it->first] += it->second;
+      if (T) {
+        for (SparseVector<double>::iterator it = hg.begin(); it != hg.end(); ++it)
+          g[it->first] += T * it->second;
+      }
     }
-    cerr << (1-(obj / training.size())) << endl;
-    return obj;
+    cerr << (1-(obj / training.size())) << "  H=" << h << endl;
+    return obj - T * h;
   }
   const vector<training::CandidateSet>& training;
+  const double T; // temperature for entropy regularization
 };  
 
 double LearnParameters(const vector<training::CandidateSet>& training,
+                       const double temp, // > 0 increases the entropy, < 0 decreases the entropy
                        const double C1,
                        const unsigned memory_buffers,
                        vector<weight_t>* px) {
-  RiskObjective obj(training);
+  RiskObjective obj(training, temp);
   LBFGS<RiskObjective> lbfgs(px, obj, memory_buffers, C1);
   lbfgs.MinimizeFunction();
   return 0;
 }
 
-// runs lines 4--15 of rampion algorithm
+#if 0
+struct FooLoss {
+  double operator()(const vector<double>& x, double* g) const {
+    fill(g, g + x.size(), 0.0);
+    training::CandidateSet cs;
+    training::CandidateSetEntropy cse(cs);
+    cs.cs.resize(3);
+    cs.cs[0].fmap.set_value(FD::Convert("F1"), -1.0);
+    cs.cs[1].fmap.set_value(FD::Convert("F2"), 1.0);
+    cs.cs[2].fmap.set_value(FD::Convert("F1"), 2.0);
+    cs.cs[2].fmap.set_value(FD::Convert("F2"), 0.5);
+    SparseVector<double> xx;
+    double h = cse(x, &xx);
+    cerr << cse(x, &xx) << endl; cerr << "G: " << xx << endl;
+    for (SparseVector<double>::iterator i = xx.begin(); i != xx.end(); ++i)
+      g[i->first] += i->second;
+    return -h;
+  }
+};
+#endif
+
 int main(int argc, char** argv) {
+#if 0
+  training::CandidateSet cs;
+  training::CandidateSetEntropy cse(cs);
+  cs.cs.resize(3);
+  cs.cs[0].fmap.set_value(FD::Convert("F1"), -1.0);
+  cs.cs[1].fmap.set_value(FD::Convert("F2"), 1.0);
+  cs.cs[2].fmap.set_value(FD::Convert("F1"), 2.0);
+  cs.cs[2].fmap.set_value(FD::Convert("F2"), 0.5);
+  FooLoss foo;
+  vector<double> ww(FD::NumFeats()); ww[FD::Convert("F1")] = 1.0;
+  LBFGS<FooLoss> lbfgs(&ww, foo, 100, 0.0);
+  lbfgs.MinimizeFunction();
+  return 1;
+#endif
   po::variables_map conf;
   InitCommandLine(argc, argv, &conf);
   const string evaluation_metric = conf["evaluation_metric"].as<string>();
@@ -89,8 +137,6 @@ int main(int argc, char** argv) {
   metric = EvaluationMetric::Instance(evaluation_metric);
   DocumentScorer ds(metric, conf["reference"].as<vector<string> >());
   cerr << "Loaded " << ds.size() << " references for scoring with " << evaluation_metric << endl;
-  double goodsign = -1;
-  double badsign = -goodsign;
 
   Hypergraph hg;
   string last_file;
@@ -141,7 +187,10 @@ int main(int argc, char** argv) {
   cerr << "\nHypergraphs loaded.\n";
   weights.resize(FD::NumFeats());
 
-  LearnParameters(kis, 0.0, 100, &weights);
+  double c1 = conf["l1_strength"].as<double>();
+  double temp = conf["temperature"].as<double>();
+  unsigned m = conf["memory_buffers"].as<unsigned>();
+  LearnParameters(kis, temp, c1, m, &weights);
   Weights::WriteToFile("-", weights);
   return 0;
 }

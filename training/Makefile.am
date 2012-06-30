@@ -26,6 +26,7 @@ TESTS = lbfgs_test optimize_test
 noinst_LIBRARIES = libtraining.a
 libtraining_a_SOURCES = \
   candidate_set.cc \
+  entropy.cc \
   optimize.cc \
   online_optimizer.cc \
   risk.cc
