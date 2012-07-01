@@ -6,11 +6,11 @@ cimport decoder
 include "vectors.pxi"
 include "hypergraph.pxi"
 include "lattice.pxi"
+include "mteval.pxi"
 
 SetSilent(True)
 
-class ParseFailed(Exception):
-    pass
+class ParseFailed(Exception): pass
 
 cdef class Decoder:
     cdef decoder.Decoder* dec

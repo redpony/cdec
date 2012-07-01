@@ -53,7 +53,7 @@ cdef class SparseVector:
             return self.vector.dot((<DenseVector> other).vector[0])
         elif isinstance(other, SparseVector):
             return self.vector.dot((<SparseVector> other).vector[0])
-        raise ValueError('cannot take the dot product of %s and SparseVector' % type(other))
+        raise TypeError('cannot take the dot product of %s and SparseVector' % type(other))
 
     def todense(self):
         cdef DenseVector dense = DenseVector()
@@ -61,11 +61,11 @@ cdef class SparseVector:
         self.vector.init_vector(dense.vector)
         return dense
     
-    def __richcmp__(SparseVector self, SparseVector other, int op):
+    def __richcmp__(SparseVector x, SparseVector y, int op):
         if op == 2: # ==
-            return self.vector[0] == other.vector[0]
+            return x.vector[0] == y.vector[0]
         elif op == 3: # !=
-            return not (self == other)
+            return not (x == y)
         raise NotImplemented('comparison not implemented for SparseVector')
 
     def __len__(self):
@@ -90,12 +90,30 @@ cdef class SparseVector:
         self.vector[0] /= scalar
         return self
 
-    def __add__(SparseVector self, SparseVector other):
+    def __add__(SparseVector x, SparseVector y):
         cdef SparseVector result = SparseVector()
-        result.vector = new FastSparseVector[weight_t](self.vector[0] + other.vector[0])
+        result.vector = new FastSparseVector[weight_t](x.vector[0] + y.vector[0])
         return result
 
-    def __sub__(SparseVector self, SparseVector other):
+    def __sub__(SparseVector x, SparseVector y):
         cdef SparseVector result = SparseVector()
-        result.vector = new FastSparseVector[weight_t](self.vector[0] - other.vector[0])
+        result.vector = new FastSparseVector[weight_t](x.vector[0] - y.vector[0])
+        return result
+
+    def __mul__(x, y):
+        cdef SparseVector vector
+        cdef float scalar
+        if isinstance(x, SparseVector): vector, scalar = x, y
+        else: vector, scalar = y, x
+        cdef SparseVector result = SparseVector()
+        result.vector = new FastSparseVector[weight_t](vector.vector[0] * scalar)
+        return result
+
+    def __div__(x, y):
+        cdef SparseVector vector
+        cdef float scalar
+        if isinstance(x, SparseVector): vector, scalar = x, y
+        else: vector, scalar = y, x
+        cdef SparseVector result = SparseVector()
+        result.vector = new FastSparseVector[weight_t](vector.vector[0] / scalar)
         return result

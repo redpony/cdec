@@ -31,9 +31,11 @@ print ' FTree[0]:', forest.viterbi_source_tree().encode('utf8')
 print 'LgProb[0]:', forest.viterbi_features().dot(decoder.weights)
 
 # Get k-best translations
-for i, (sentence, tree) in enumerate(zip(forest.kbest(5), forest.kbest_tree(5)), 1):
+kbest = zip(forest.kbest(5), forest.kbest_tree(5), forest.kbest_features(5))
+for i, (sentence, tree, features) in enumerate(kbest, 1):
     print 'Output[%d]:' % i, sentence.encode('utf8')
     print '  Tree[%d]:' % i, tree.encode('utf8')
+    print ' FVect[%d]:' % i, dict(features)
 
 # Sample translations from the forest
 for sentence in forest.sample(5):

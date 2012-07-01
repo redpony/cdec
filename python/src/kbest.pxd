@@ -9,6 +9,8 @@ cdef extern from "decoder/viterbi.h":
         pass
     cdef cppclass FTreeTraversal:
         pass
+    cdef cppclass FeatureVectorTraversal:
+        pass
 
 cdef extern from "decoder/kbest.h" namespace "KBest":
     cdef cppclass KBestDerivations[T, Traversal]:

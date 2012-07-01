@@ -53,6 +53,19 @@ cdef class Hypergraph:
             yield tree.decode('utf8')
         del derivations
 
+    def kbest_features(self, size):
+        cdef kb.KBestDerivations[FastSparseVector[weight_t], kb.FeatureVectorTraversal]* derivations = new kb.KBestDerivations[FastSparseVector[weight_t], kb.FeatureVectorTraversal](self.hg[0], size)
+        cdef kb.KBestDerivations[FastSparseVector[weight_t], kb.FeatureVectorTraversal].Derivation* derivation
+        cdef SparseVector fmap
+        cdef unsigned k
+        for k in range(size):
+            derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
+            if not derivation: break
+            fmap = SparseVector()
+            fmap.vector = new FastSparseVector[weight_t](derivation._yield)
+            yield fmap
+        del derivations
+
     def sample(self, unsigned n):
         cdef vector[hypergraph.Hypothesis]* hypos = new vector[hypergraph.Hypothesis]()
         if self.rng == NULL:
@@ -87,6 +100,6 @@ cdef class Hypergraph:
         elif isinstance(weights, DenseVector):
             self.hg.Reweight((<DenseVector> weights).vector[0])
         else:
-            raise ValueError('cannot reweight hypergraph with %s' % type(weights))
+            raise TypeError('cannot reweight hypergraph with %s' % type(weights))
 
     # TODO get feature expectations, get partition function ("inside" score)
