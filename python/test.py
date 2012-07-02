@@ -60,3 +60,6 @@ print forest.viterbi_source_tree()
 # Compare 1best and reference feature vectors
 fref = forest.viterbi_features()
 print dict(fsrc - fref)
+
+# Prune hypergraph
+forest.prune(density=100)

@@ -56,6 +56,37 @@ cdef class SufficientStats:
         result.metric = x.metric
         return result
 
+cdef class CandidateSet:
+    cdef shared_ptr[mteval.SegmentEvaluator]* scorer
+    cdef mteval.EvaluationMetric* metric
+    cdef mteval.CandidateSet* cs
+
+    def __cinit__(self, SegmentEvaluator evaluator):
+        self.scorer = new shared_ptr[mteval.SegmentEvaluator](evaluator.scorer[0])
+        self.metric = evaluator.metric
+        self.cs = new mteval.CandidateSet()
+
+    def __dealloc__(self):
+        del self.scorer
+        del self.cs
+
+    def __len__(self):
+        return self.cs.size()
+
+    def __getitem__(self, unsigned k):
+        cdef Candidate candidate = Candidate()
+        candidate.candidate = &self.cs[0][k]
+        candidate.score = self.metric.ComputeScore(self.cs[0][k].eval_feats)
+        return candidate
+
+    def __iter__(self):
+        cdef unsigned i
+        for i in range(len(self)):
+            yield self[i]
+
+    def add_kbest(self, Hypergraph hypergraph, unsigned k):
+        self.cs.AddKBestCandidates(hypergraph.hg[0], k, self.scorer.get())
+
 cdef class SegmentEvaluator:
     cdef shared_ptr[mteval.SegmentEvaluator]* scorer
     cdef mteval.EvaluationMetric* metric
@@ -72,23 +103,17 @@ cdef class SegmentEvaluator:
         self.scorer.get().Evaluate(hyp, sf.stats)
         return sf
 
-    def candidate_set(self, Hypergraph hypergraph, unsigned k):
-        cdef mteval.CandidateSet* cs = new mteval.CandidateSet()
-        cs.AddKBestCandidates(hypergraph.hg[0], k, self.scorer.get())
-        cdef Candidate candidate
-        cdef unsigned i
-        for i in range(cs.size()):
-            candidate = Candidate()
-            candidate.candidate = &cs[0][i]
-            candidate.score = self.metric.ComputeScore(cs[0][i].eval_feats)
-            yield candidate
-        del cs
+    def candidate_set(self):
+        return CandidateSet(self)
 
 cdef class Scorer:
     cdef string* name
 
     def __cinit__(self, char* name):
         self.name = new string(name)
+
+    def __dealloc__(self):
+        del self.name
     
     def __call__(self, refs):
         cdef mteval.EvaluationMetric* metric = mteval.Instance(self.name[0])
