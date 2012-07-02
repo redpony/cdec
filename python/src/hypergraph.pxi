@@ -32,39 +32,45 @@ cdef class Hypergraph:
     def kbest(self, size):
         cdef kb.KBestDerivations[vector[WordID], kb.ESentenceTraversal]* derivations = new kb.KBestDerivations[vector[WordID], kb.ESentenceTraversal](self.hg[0], size)
         cdef kb.KBestDerivations[vector[WordID], kb.ESentenceTraversal].Derivation* derivation
-        cdef str sentence
+        cdef bytes sentence
         cdef unsigned k
-        for k in range(size):
-            derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
-            if not derivation: break
-            sentence = GetString(derivation._yield).c_str()
-            yield sentence.decode('utf8')
-        del derivations
+        try:
+            for k in range(size):
+                derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
+                if not derivation: break
+                sentence = GetString(derivation._yield).c_str()
+                yield sentence.decode('utf8')
+        finally:
+            del derivations
 
     def kbest_tree(self, size):
         cdef kb.KBestDerivations[vector[WordID], kb.ETreeTraversal]* derivations = new kb.KBestDerivations[vector[WordID], kb.ETreeTraversal](self.hg[0], size)
         cdef kb.KBestDerivations[vector[WordID], kb.ETreeTraversal].Derivation* derivation
         cdef str tree
         cdef unsigned k
-        for k in range(size):
-            derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
-            if not derivation: break
-            tree = GetString(derivation._yield).c_str()
-            yield tree.decode('utf8')
-        del derivations
+        try:
+            for k in range(size):
+                derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
+                if not derivation: break
+                tree = GetString(derivation._yield).c_str()
+                yield tree.decode('utf8')
+        finally:
+            del derivations
 
     def kbest_features(self, size):
         cdef kb.KBestDerivations[FastSparseVector[weight_t], kb.FeatureVectorTraversal]* derivations = new kb.KBestDerivations[FastSparseVector[weight_t], kb.FeatureVectorTraversal](self.hg[0], size)
         cdef kb.KBestDerivations[FastSparseVector[weight_t], kb.FeatureVectorTraversal].Derivation* derivation
         cdef SparseVector fmap
         cdef unsigned k
-        for k in range(size):
-            derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
-            if not derivation: break
-            fmap = SparseVector()
-            fmap.vector = new FastSparseVector[weight_t](derivation._yield)
-            yield fmap
-        del derivations
+        try:
+            for k in range(size):
+                derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
+                if not derivation: break
+                fmap = SparseVector()
+                fmap.vector = new FastSparseVector[weight_t](derivation._yield)
+                yield fmap
+        finally:
+            del derivations
 
     def sample(self, unsigned n):
         cdef vector[hypergraph.Hypothesis]* hypos = new vector[hypergraph.Hypothesis]()
@@ -73,10 +79,12 @@ cdef class Hypergraph:
         hypergraph.sample_hypotheses(self.hg[0], n, self.rng, hypos)
         cdef str sentence
         cdef unsigned k
-        for k in range(hypos.size()):
-            sentence = GetString(hypos[0][k].words).c_str()
-            yield sentence.decode('utf8')
-        del hypos
+        try:
+            for k in range(hypos.size()):
+                sentence = GetString(hypos[0][k].words).c_str()
+                yield sentence.decode('utf8')
+        finally:
+            del hypos
 
     # TODO richer k-best/sample output (feature vectors, trees?)
 
@@ -89,6 +97,8 @@ cdef class Hypergraph:
              preserve_mask = new hypergraph.EdgeMask(self.hg.edges_.size())
              preserve_mask[0][hypergraph.GetFullWordEdgeIndex(self.hg[0])] = True
         self.hg.PruneInsideOutside(beam_alpha, density, preserve_mask, False, 1, False)
+        if preserve_mask:
+            del preserve_mask
 
     def lattice(self): # TODO direct hg -> lattice conversion in cdec
         cdef str plf = hypergraph.AsPLF(self.hg[0], True).c_str()
