@@ -48,6 +48,9 @@ struct State {
 
 namespace {
   string Escape(const string& x) {
+    if (x.find('=') == string::npos && x.find(';') == string::npos) {
+      return x;
+    }
     string y = x;
     for (int i = 0; i < y.size(); ++i) {
       if (y[i] == '=') y[i]='_';
@@ -57,10 +60,17 @@ namespace {
   }
 }
 
-static bool ParseArgs(string const& in, bool* explicit_markers, unsigned* order) {
+static bool ParseArgs(string const& in, bool* explicit_markers, unsigned* order, vector<string>& prefixes, string& target_separator) {
   vector<string> const& argv=SplitOnWhitespace(in);
   *explicit_markers = false;
   *order = 3;
+  prefixes.push_back("NOT-USED");
+  prefixes.push_back("U:"); // default unigram prefix
+  prefixes.push_back("B:"); // default bigram prefix
+  prefixes.push_back("T:"); // ...etc
+  prefixes.push_back("4:"); // ...etc
+  prefixes.push_back("5:"); // max allowed!
+  target_separator = "_";
 #define LMSPEC_NEXTARG if (i==argv.end()) {            \
     cerr << "Missing argument for "<<*last<<". "; goto usage; \
     } else { ++i; }
@@ -73,6 +83,30 @@ static bool ParseArgs(string const& in, bool* explicit_markers, unsigned* order)
       case 'x':
         *explicit_markers = true;
         break;
+      case 'U':
+	LMSPEC_NEXTARG;
+	prefixes[1] = *i;
+	break;
+      case 'B':
+	LMSPEC_NEXTARG;
+	prefixes[2] = *i;
+	break;
+      case 'T':
+	LMSPEC_NEXTARG;
+	prefixes[3] = *i;
+	break;
+      case '4':
+	LMSPEC_NEXTARG;
+	prefixes[4] = *i;
+	break;
+      case '5':
+	LMSPEC_NEXTARG;
+	prefixes[5] = *i;
+	break;
+      case 'S':
+	LMSPEC_NEXTARG;
+	target_separator = *i;
+	break;
       case 'o':
         LMSPEC_NEXTARG; *order=atoi((*i).c_str());
         break;
@@ -86,7 +120,29 @@ static bool ParseArgs(string const& in, bool* explicit_markers, unsigned* order)
   }
   return true;
 usage:
-  cerr << "NgramFeatures is incorrect!\n";
+  cerr << "Wrong parameters for NgramFeatures.\n\n"
+
+       << "NgramFeatures Usage: \n"			     
+       << " feature_function=NgramFeatures filename.lm [-x] [-o <order>] \n"
+       << " [-U <unigram-prefix>] [-B <bigram-prefix>][-T <trigram-prefix>]\n"
+       << " [-4 <4-gram-prefix>] [-5 <5-gram-prefix>] [-S <separator>]\n\n" 
+    
+       << "Defaults: \n"
+       << "  <order>          = 3\n" 
+       << "  <unigram-prefix> = U:\n"
+       << "  <bigram-prefix>  = B:\n"
+       << "  <trigram-prefix> = T:\n"
+       << "  <4-gram-prefix>  = 4:\n"
+       << "  <5-gram-prefix>  = 5:\n"
+       << "  <separator>      = _\n"
+       << "  -x (i.e. explicit sos/eos markers) is turned off\n\n"
+
+       << "Example configuration: \n"
+       << "  feature_function=NgramFeatures -o 3 -T tri: -S |\n\n"
+
+       << "Example feature instantiation: \n"
+       << "  tri:a|b|c \n\n";
+
   return false;
 }
 
@@ -158,16 +214,12 @@ class NgramDetectorImpl {
       int& fid = ft->fids[curword];
       ++n;
       if (!fid) {
-        const char* code="_UBT456789"; // prefix code (unigram, bigram, etc.)
         ostringstream os;
-        os << code[n] << ':';
+        os << prefixes_[n];
         for (int i = n-1; i >= 0; --i) {
-          os << (i != n-1 ? "_" : "");
+          os << (i != n-1 ? target_separator_ : "");
           const string& tok = TD::Convert(buf[i]);
-          if (tok.find('=') == string::npos)
-            os << tok;
-          else
-            os << Escape(tok);
+	  os << Escape(tok);
         }
         fid = FD::Convert(os.str());
       }
@@ -297,7 +349,8 @@ class NgramDetectorImpl {
   }
 
  public:
-  explicit NgramDetectorImpl(bool explicit_markers, unsigned order) :
+  explicit NgramDetectorImpl(bool explicit_markers, unsigned order,
+			     vector<string>& prefixes, string& target_separator) :
       kCDEC_UNK(TD::Convert("<unk>")) ,
       add_sos_eos_(!explicit_markers) {
     order_ = order;
@@ -305,6 +358,8 @@ class NgramDetectorImpl {
     unscored_size_offset_ = (order_ - 1) * sizeof(WordID);
     is_complete_offset_ = unscored_size_offset_ + 1;
     unscored_words_offset_ = is_complete_offset_ + 1;
+    prefixes_ = prefixes;
+    target_separator_ = target_separator;
 
     // special handling of beginning / ending sentence markers
     dummy_state_ = new char[state_size_];
@@ -340,6 +395,8 @@ class NgramDetectorImpl {
   char* dummy_state_;
   vector<const void*> dummy_ants_;
   TRulePtr dummy_rule_;
+  vector<string> prefixes_;
+  string target_separator_;
   struct FidTree {
     map<WordID, int> fids;
     map<WordID, FidTree> levels;
@@ -348,11 +405,13 @@ class NgramDetectorImpl {
 };
 
 NgramDetector::NgramDetector(const string& param) {
-  string filename, mapfile, featname;
+  string filename, mapfile, featname, target_separator;
+  vector<string> prefixes;
   bool explicit_markers = false;
   unsigned order = 3;
-  ParseArgs(param, &explicit_markers, &order);
-  pimpl_ = new NgramDetectorImpl(explicit_markers, order);
+  ParseArgs(param, &explicit_markers, &order, prefixes, target_separator);
+  pimpl_ = new NgramDetectorImpl(explicit_markers, order, prefixes, 
+				 target_separator);
   SetStateSize(pimpl_->ReserveStateSize());
 }
 
