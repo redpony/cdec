@@ -3,8 +3,8 @@ from distutils.extension import Extension
 from Cython.Distutils import build_ext
 import os
 
-INC = ['..', 'src/', '../decoder', '../utils']
-LIB = ['../decoder', '../utils', '../mteval', '../klm/lm', '../klm/util']
+INC = ['..', 'src/', '../decoder', '../utils', '../mteval']
+LIB = ['../decoder', '../utils', '../mteval', '../training', '../klm/lm', '../klm/util']
 
 BOOST_ROOT = os.getenv('BOOST_ROOT')
 if BOOST_ROOT:
@@ -18,7 +18,8 @@ ext_modules = [
         include_dirs=INC,
         library_dirs=LIB,
         libraries=['boost_program_options-mt', 'z',
-                   'cdec', 'utils', 'mteval', 'klm', 'klm_util'])
+                   'cdec', 'utils', 'mteval', 'training', 'klm', 'klm_util'],
+        extra_compile_args=['-DHAVE_CONFIG_H']),
 ]
 
 setup(
