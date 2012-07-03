@@ -33,6 +33,8 @@ struct FD {
     assert(dict_.max() == 0);  // dictionary must not have
                                // been added to
     hash_ = new PerfectHashFunction(cmph_file);
+#else
+    (void) cmph_file;
 #endif
   }
   static inline int NumFeats() {

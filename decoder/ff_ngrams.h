@@ -10,7 +10,7 @@
 struct NgramDetectorImpl;
 class NgramDetector : public FeatureFunction {
  public:
-  // param = "filename.lm [-o n]"
+  // param = "filename.lm [-o <order>] [-U <unigram-prefix>] [-B <bigram-prefix>] [-T <trigram-prefix>] [-4 <4-gram-prefix>] [-5 <5-gram-prefix>] [-S <separator>]
   NgramDetector(const std::string& param);
   ~NgramDetector();
   virtual void FinalTraversalFeatures(const void* context,
