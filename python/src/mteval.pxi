@@ -73,7 +73,9 @@ cdef class CandidateSet:
     def __len__(self):
         return self.cs.size()
 
-    def __getitem__(self, unsigned k):
+    def __getitem__(self,int k):
+        if not 0 <= k < self.cs.size():
+            raise IndexError('candidate set index out of range')
         cdef Candidate candidate = Candidate()
         candidate.candidate = &self.cs[0][k]
         candidate.score = self.metric.ComputeScore(self.cs[0][k].eval_feats)
