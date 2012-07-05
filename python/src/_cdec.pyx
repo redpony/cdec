@@ -14,7 +14,7 @@ class ParseFailed(Exception): pass
 
 cdef class Decoder:
     cdef decoder.Decoder* dec
-    cdef public DenseVector weights
+    cdef DenseVector weights
 
     def __cinit__(self, char* config):
         decoder.register_feature_functions()
@@ -26,6 +26,22 @@ cdef class Decoder:
 
     def __dealloc__(self):
         del self.dec
+
+    property weights:
+        def __get__(self):
+            return self.weights
+
+        def __set__(self, weights):
+            if isinstance(weights, DenseVector):
+                self.weights.vector[0] = (<DenseVector> weights).vector[0]
+            elif isinstance(weights, SparseVector):
+                self.weights.vector.clear()
+                ((<SparseVector> weights).vector[0]).init_vector(self.weights.vector)
+            elif isinstance(weights, dict):
+                for fname, fval in weights.items():
+                    self.weights[fname] = fval
+            else:
+                raise TypeError('cannot initialize weights with %s' % type(weights))
 
     def read_weights(self, cfg):
         with open(cfg) as fp:
