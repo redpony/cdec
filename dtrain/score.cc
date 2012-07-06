@@ -103,7 +103,7 @@ SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
         i_bleu[j] += (1/((score_t)j+1)) * i_ng;
       }
     }
-    sum += exp(i_bleu[i])/(pow(2.0, N_-i));
+    sum += exp(i_bleu[i])/pow(2.0, (double)(N_-i));
   }
   return brevity_penalty(hyp_len, ref_len) * sum;
 }
@@ -126,7 +126,7 @@ SumBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
   unsigned j = 1;
   for (unsigned i = 0; i < M; i++) {
     if (counts.sum_[i] == 0 || counts.clipped_[i] == 0) break;
-    sum += ((score_t)counts.clipped_[i]/counts.sum_[i])/pow(2., N_-j+1);
+    sum += ((score_t)counts.clipped_[i]/counts.sum_[i])/pow(2.0, (double) (N_-j+1));
     j++;
   }
   return brevity_penalty(hyp_len, ref_len) * sum;
@@ -150,7 +150,7 @@ SumExpBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
   unsigned j = 1;
   for (unsigned i = 0; i < M; i++) {
     if (counts.sum_[i] == 0 || counts.clipped_[i] == 0) break;
-    sum += exp(((score_t)counts.clipped_[i]/counts.sum_[i]))/pow(2., N_-j+1);
+    sum += exp(((score_t)counts.clipped_[i]/counts.sum_[i]))/pow(2.0, (double) (N_-j+1));
     j++;
   }
   return brevity_penalty(hyp_len, ref_len) * sum;
@@ -178,7 +178,7 @@ SumWhateverBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
   unsigned j = 1;
   for (unsigned i = 0; i < M; i++) {
     if (counts.sum_[i] == 0 || counts.clipped_[i] == 0) break;
-    sum += exp(v[i] * log(((score_t)counts.clipped_[i]/counts.sum_[i])))/pow(2., N_-j+1);
+    sum += exp(v[i] * log(((score_t)counts.clipped_[i]/counts.sum_[i])))/pow(2.0, (double) (N_-j+1));
     j++;
   }
   return brevity_penalty(hyp_len, ref_len) * sum;
