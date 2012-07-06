@@ -10,6 +10,15 @@ cdef char* as_str(sentence, error_msg='Cannot convert type %s to str'):
         raise TypeError(error_msg % type(sentence))
     return ret
 
+cdef SufficientStats as_stats(x, y):
+    if isinstance(x, SufficientStats):
+        return x
+    elif x == 0 and isinstance(y, SufficientStats):
+        stats = SufficientStats()
+        stats.stats = new mteval.SufficientStats()
+        stats.metric = (<SufficientStats> y).metric
+        return stats
+
 cdef class Candidate:
     cdef mteval.Candidate* candidate
     cdef public float score
@@ -50,10 +59,12 @@ cdef class SufficientStats:
         self.stats[0] += other.stats[0]
         return self
 
-    def __add__(SufficientStats x, SufficientStats y):
+    def __add__(x, y):
+        cdef SufficientStats sx = as_stats(x, y)
+        cdef SufficientStats sy = as_stats(y, x)
         cdef SufficientStats result = SufficientStats()
-        result.stats = new mteval.SufficientStats(mteval.add(x.stats[0], y.stats[0]))
-        result.metric = x.metric
+        result.stats = new mteval.SufficientStats(mteval.add(sx.stats[0], sy.stats[0]))
+        result.metric = sx.metric
         return result
 
 cdef class CandidateSet:
@@ -73,7 +84,9 @@ cdef class CandidateSet:
     def __len__(self):
         return self.cs.size()
 
-    def __getitem__(self, unsigned k):
+    def __getitem__(self,int k):
+        if not 0 <= k < self.cs.size():
+            raise IndexError('candidate set index out of range')
         cdef Candidate candidate = Candidate()
         candidate.candidate = &self.cs[0][k]
         candidate.score = self.metric.ComputeScore(self.cs[0][k].eval_feats)

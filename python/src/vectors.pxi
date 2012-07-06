@@ -80,6 +80,12 @@ cdef class SparseVector:
 
     def __contains__(self, char* fname):
         return self.vector.nonzero(FDConvert(fname))
+
+    def __neg__(self):
+        cdef SparseVector result = SparseVector()
+        result.vector = new FastSparseVector[weight_t](self.vector[0])
+        result.vector[0] *= -1.0
+        return result
     
     def __iadd__(SparseVector self, SparseVector other):
         self.vector[0] += other.vector[0]
