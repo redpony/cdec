@@ -4,6 +4,7 @@
 
 #include <boost/functional/hash.hpp>
 
+#include "verbose.h"
 #include "ns.h"
 #include "filelib.h"
 #include "wordid.h"
@@ -118,7 +119,7 @@ void CandidateSet::WriteToFile(const string& file) const {
 }
 
 void CandidateSet::ReadFromFile(const string& file) {
-  cerr << "Reading candidates from " << file << endl;
+  if(!SILENT) cerr << "Reading candidates from " << file << endl;
   ReadFile rf(file);
   istream& in = *rf.stream();
   string cand;
@@ -133,11 +134,11 @@ void CandidateSet::ReadFromFile(const string& file) {
     ParseSparseVector(feats, 0, &cs.back().fmap);
     cs.back().eval_feats = SufficientStats(ss);
   }
-  cerr << "  read " << cs.size() << " candidates\n";
+  if(!SILENT) cerr << "  read " << cs.size() << " candidates\n";
 }
 
 void CandidateSet::Dedup() {
-  cerr << "Dedup in=" << cs.size();
+  if(!SILENT) cerr << "Dedup in=" << cs.size();
   tr1::unordered_set<Candidate, CandidateHasher, CandidateCompare> u;
   while(cs.size() > 0) {
     u.insert(cs.back());
@@ -148,7 +149,7 @@ void CandidateSet::Dedup() {
     cs.push_back(*it);
     it = u.erase(it);
   }
-  cerr << "  out=" << cs.size() << endl;
+  if(!SILENT) cerr << "  out=" << cs.size() << endl;
 }
 
 void CandidateSet::AddKBestCandidates(const Hypergraph& hg, size_t kbest_size, const SegmentEvaluator* scorer) {

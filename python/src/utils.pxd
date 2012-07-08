@@ -50,16 +50,19 @@ cdef extern from "utils/sparse_vector.h":
 
     FastSparseVector[weight_t] operator+(FastSparseVector[weight_t]&, FastSparseVector[weight_t]&)
     FastSparseVector[weight_t] operator-(FastSparseVector[weight_t]&, FastSparseVector[weight_t]&)
+    FastSparseVector[weight_t] operator*(FastSparseVector[weight_t]&, double&)
+    FastSparseVector[weight_t] operator/(FastSparseVector[weight_t]&, double&)
     ostream operator<<(ostream& out, FastSparseVector[weight_t]& v)
 
 cdef extern from "utils/weights.h" namespace "Weights":
     void InitSparseVector(vector[weight_t]& dv, FastSparseVector[weight_t]* sv)
 
-cdef extern from "utils/tdict.cc" namespace "TD":
+cdef extern from "utils/tdict.h" namespace "TD":
     string GetString(vector[WordID]& st)
     unsigned NumWords()
     WordID TDConvert "TD::Convert" (char*)
     char* TDConvert "TD::Convert" (WordID)
+    void ConvertSentence(string& sent, vector[WordID]* ids)
 
 cdef extern from "utils/verbose.h":
     void SetSilent(bint)
@@ -76,3 +79,8 @@ cdef extern from "utils/filelib.h":
 cdef extern from "utils/sampler.h":
     cdef cppclass MT19937:
         pass
+
+cdef extern from "<boost/shared_ptr.hpp>" namespace "boost":
+    cdef cppclass shared_ptr[T]:
+        shared_ptr(shared_ptr& r)
+        T* get()
