@@ -54,3 +54,15 @@ cdef class Lattice:
 
     def __dealloc__(self):
         del self.lattice
+
+    def todot(self):
+        def lines():
+            yield 'digraph lattice {'
+            yield 'rankdir = LR;'
+            yield 'node [shape=circle];'
+            for i in range(len(self)):
+                for label, weight, delta in self[i]:
+                    yield '%d -> %d [label="%s"];' % (i, i+delta, label.replace('"', '\\"'))
+            yield '%d [shape=doublecircle]' % len(self)
+            yield '}'
+        return '\n'.join(lines()).encode('utf8')
