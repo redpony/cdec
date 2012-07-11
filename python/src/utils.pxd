@@ -9,7 +9,6 @@ cdef extern from "<iostream>" namespace "std":
         pass
     cdef cppclass istringstream(istream):
         istringstream(char*)
-    ostream cout
 
 cdef extern from "utils/weights.h":
     ctypedef double weight_t
@@ -25,7 +24,8 @@ cdef extern from "utils/wordid.h":
 
 cdef extern from "utils/small_vector.h":
     cdef cppclass SmallVector[T]:
-        pass
+        T& operator[](unsigned)
+        unsigned size()
 
 cdef extern from "utils/sparse_vector.h":
     cdef cppclass FastSparseVector[T]:
@@ -84,3 +84,11 @@ cdef extern from "<boost/shared_ptr.hpp>" namespace "boost":
     cdef cppclass shared_ptr[T]:
         shared_ptr(shared_ptr& r)
         T* get()
+
+cdef extern from "<boost/program_options.hpp>":
+    cdef cppclass variable_value "const boost::program_options::variable_value":
+        string as_str "as<std::string>" ()
+
+    cdef cppclass variables_map "const boost::program_options::variables_map":
+        unsigned count(char* name)
+        variable_value& operator[](char* name)

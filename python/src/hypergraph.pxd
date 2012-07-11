@@ -3,32 +3,43 @@ from libcpp.vector cimport vector
 from utils cimport *
 from lattice cimport Lattice
 
+cdef extern from "decoder/trule.h":
+    cdef cppclass TRule:
+        vector[WordID] f_
+        vector[WordID] e_
+        FastSparseVector[weight_t] scores_
+        WordID lhs_
+        int arity_
+        bint IsUnary()
+        bint IsGoal()
+
 cdef extern from "decoder/hg.h":
     cdef cppclass EdgeMask "std::vector<bool>":
         EdgeMask(int size)
         bint& operator[](int)
 
+    cdef cppclass HypergraphEdge "const Hypergraph::Edge":
+        int id_
+        int head_node_ # position in hg.nodes_
+        SmallVector[unsigned] tail_nodes_ # positions in hg.nodes_
+        shared_ptr[TRule] rule_
+        FastSparseVector[weight_t] feature_values_
+        LogVal[double] edge_prob_ # weights.dot(feature_values_)
+        # typically source span:
+        short int i_
+        short int j_
+
+    cdef cppclass HypergraphNode "const Hypergraph::Node":
+        int id_
+        WordID cat_ # non-terminal category if <0, 0 if not set
+        vector[int] in_edges_ # positions in hg.edge_prob_
+        vector[int] out_edges_ # positions in hg.edge_prob_
+
     cdef cppclass Hypergraph:
-        cppclass Edge:
-            int id_
-            int head_node_ # position in hg.nodes_
-            SmallVector[unsigned] tail_nodes_ # positions in hg.nodes_
-            #TRulePtr rule_
-            FastSparseVector[weight_t] feature_values_
-            LogVal[double] edge_prob_
-            short int i_
-            short int j_
-            short int prev_i_
-            short int prev_j_
-        cppclass Node:
-            int id_
-            WordID cat_
-            WordID NT()
-            vector[Edge] in_edges_
-            vector[Edge] out_edges_
         Hypergraph(Hypergraph)
-        vector[Node] nodes_
-        vector[Edge] edges_
+        vector[HypergraphNode] nodes_
+        vector[HypergraphEdge] edges_
+        int GoalNode()
         void Reweight(vector[weight_t]& weights)
         void Reweight(FastSparseVector& weights)
         bint PruneInsideOutside(double beam_alpha,
@@ -47,6 +58,7 @@ cdef extern from "decoder/viterbi.h":
     FastSparseVector[weight_t] ViterbiFeatures(Hypergraph& hg, 
             FastSparseVector[weight_t]* weights,
             bint fatal_dotprod_disagreement)
+    string JoshuaVisualizationString(Hypergraph& hg)
 
 cdef extern from "decoder/hg_io.h" namespace "HypergraphIO":
     bint ReadFromJSON(istream* inp, Hypergraph* out)
@@ -62,7 +74,7 @@ cdef extern from "decoder/hg_intersect.h" namespace "HG":
 cdef extern from "decoder/hg_sampler.h" namespace "HypergraphSampler":
     cdef cppclass Hypothesis:
         vector[WordID] words
-        FastSparseVector[double] fmap
+        FastSparseVector[weight_t] fmap
         LogVal[double] model_score
     void sample_hypotheses(Hypergraph& hg, 
                            unsigned n, 
