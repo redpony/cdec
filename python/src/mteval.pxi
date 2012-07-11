@@ -1,15 +1,5 @@
 cimport mteval
 
-cdef char* as_str(sentence, error_msg='Cannot convert type %s to str'):
-    cdef bytes ret
-    if isinstance(sentence, unicode):
-        ret = sentence.encode('utf8')
-    elif isinstance(sentence, str):
-        ret = sentence
-    else:
-        raise TypeError(error_msg % type(sentence))
-    return ret
-
 cdef SufficientStats as_stats(x, y):
     if isinstance(x, SufficientStats):
         return x

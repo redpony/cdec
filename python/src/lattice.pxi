@@ -22,12 +22,11 @@ cdef class Lattice:
         arcs = []
         cdef vector[lattice.LatticeArc] arc_vector = self.lattice[0][index]
         cdef lattice.LatticeArc* arc
-        cdef str label
         cdef unsigned i
         for i in range(arc_vector.size()):
             arc = &arc_vector[i]
-            label = TDConvert(arc.label)
-            arcs.append((label.decode('utf8'), arc.cost, arc.dist2next))
+            label = unicode(TDConvert(arc.label), 'utf8')
+            arcs.append((label, arc.cost, arc.dist2next))
         return tuple(arcs)
 
     def __setitem__(self, int index, tuple arcs):

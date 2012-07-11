@@ -3,22 +3,55 @@ from libcpp.vector cimport vector
 from utils cimport *
 cimport decoder
 
+cdef char* as_str(sentence, error_msg='Cannot convert type %s to str'):
+    cdef bytes ret
+    if isinstance(sentence, unicode):
+        ret = sentence.encode('utf8')
+    elif isinstance(sentence, str):
+        ret = sentence
+    else:
+        raise TypeError(error_msg % type(sentence))
+    return ret
+
 include "vectors.pxi"
 include "hypergraph.pxi"
 include "lattice.pxi"
 include "mteval.pxi"
 
 SetSilent(True)
+decoder.register_feature_functions()
 
+class InvalidConfig(Exception): pass
 class ParseFailed(Exception): pass
+
+def _make_config(config):
+    for key, value in config.items():
+        if isinstance(value, dict):
+            for name, info in value.items():
+                yield key, '%s %s' % (name, info)
+        elif isinstance(value, list):
+            for name in value:
+                yield key, name
+        else:
+            yield key, bytes(value)
 
 cdef class Decoder:
     cdef decoder.Decoder* dec
     cdef DenseVector weights
 
-    def __cinit__(self, char* config):
-        decoder.register_feature_functions()
-        cdef istringstream* config_stream = new istringstream(config)
+    def __cinit__(self, config_str=None, **config):
+        """ Configuration can be given as a string:
+                Decoder('formalism = scfg')
+            or using keyword arguments:
+                Decoder(formalism='scfg')
+        """
+        if config_str is None:
+            formalism = config.get('formalism', None)
+            if formalism not in ('scfg', 'fst', 'lextrans', 'pb',
+                    'csplit', 'tagger', 'lexalign'):
+                raise InvalidConfig('formalism "%s" unknown' % formalism)
+            config_str = '\n'.join('%s = %s' % kv for kv in _make_config(config))
+        cdef istringstream* config_stream = new istringstream(config_str)
         self.dec = new decoder.Decoder(config_stream)
         del config_stream
         self.weights = DenseVector()
@@ -43,9 +76,15 @@ cdef class Decoder:
             else:
                 raise TypeError('cannot initialize weights with %s' % type(weights))
 
-    def read_weights(self, cfg):
-        with open(cfg) as fp:
+    property formalism:
+        def __get__(self):
+            cdef variables_map* conf = &self.dec.GetConf()
+            return conf[0]['formalism'].as_str().c_str()
+
+    def read_weights(self, weights):
+        with open(weights) as fp:
             for line in fp:
+                if line.strip().startswith('#'): continue
                 fname, value = line.split()
                 self.weights[fname.strip()] = float(value)
 
