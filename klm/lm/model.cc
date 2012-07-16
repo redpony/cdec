@@ -53,9 +53,6 @@ template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT
   search_.LoadedBinary();
 }
 
-namespace {
-} // namespace
-
 template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::InitializeFromARPA(const char *file, const Config &config) {
   // Backing file is the ARPA.  Steal it so we can make the backing file the mmap output if any.  
   util::FilePiece f(backing_.file.release(), file, config.messages);
@@ -126,7 +123,7 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
     return ret;
   }
   // i is the order of the backoff we're looking for.
-  unsigned char order_minus_2 = 0;
+  unsigned char order_minus_2 = start - 2;
   for (const WordIndex *i = context_rbegin + start - 1; i < context_rend; ++i, ++order_minus_2) {
     typename Search::MiddlePointer p(search_.LookupMiddle(order_minus_2, *i, node, independent_left, extend_left));
     if (!p.Found()) break;
