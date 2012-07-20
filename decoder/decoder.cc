@@ -743,15 +743,13 @@ bool Decoder::Decode(const string& input, DecoderObserver* o) {
 }
 vector<weight_t>& Decoder::CurrentWeightVector() { return pimpl_->CurrentWeightVector(); }
 const vector<weight_t>& Decoder::CurrentWeightVector() const { return pimpl_->CurrentWeightVector(); }
-void Decoder::SetSupplementalGrammar(const std::string& grammar_string) {
-  assert(pimpl_->translator->GetDecoderType() == "SCFG");
-  static_cast<SCFGTranslator&>(*pimpl_->translator).SetSupplementalGrammar(grammar_string);
+void Decoder::AddSupplementalGrammar(GrammarPtr gp) {
+  static_cast<SCFGTranslator&>(*pimpl_->translator).AddSupplementalGrammar(gp);
 }
-void Decoder::SetSentenceGrammarFromString(const std::string& grammar_str) {
+void Decoder::AddSupplementalGrammarFromString(const std::string& grammar_string) {
   assert(pimpl_->translator->GetDecoderType() == "SCFG");
-  static_cast<SCFGTranslator&>(*pimpl_->translator).SetSentenceGrammarFromString(grammar_str);
+  static_cast<SCFGTranslator&>(*pimpl_->translator).AddSupplementalGrammarFromString(grammar_string);
 }
-
 
 bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   string buf = input;

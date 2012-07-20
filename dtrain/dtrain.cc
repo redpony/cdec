@@ -364,7 +364,7 @@ main(int argc, char** argv)
       boost::replace_all(in, "\t", "\n");
       in += "\n";
       grammar_buf_out << in << DTRAIN_GRAMMAR_DELIM << " " << in_split[0] << endl;
-      decoder.SetSentenceGrammarFromString(in);
+      decoder.AddSupplementalGrammarFromString(in);
       src_str_buf.push_back(in_split[1]);
       // decode
       observer->SetRef(ref_ids);
@@ -378,7 +378,7 @@ main(int argc, char** argv)
         if (boost::starts_with(rule, DTRAIN_GRAMMAR_DELIM)) break;
         grammar_str += rule + "\n";
       }
-      decoder.SetSentenceGrammarFromString(grammar_str);
+      decoder.AddSupplementalGrammarFromString(grammar_str);
       // decode
       observer->SetRef(ref_ids_buf[ii]);
       decoder.Decode(src_str_buf[ii], observer);
