@@ -20,7 +20,6 @@
 #define reverse_foreach BOOST_REVERSE_FOREACH
 
 using namespace std;
-static bool usingSentenceGrammar = false;
 static bool printGrammarsUsed = false;
 
 struct SCFGTranslatorImpl {
@@ -91,31 +90,31 @@ struct SCFGTranslatorImpl {
   bool show_tree_structure_;
   unsigned int ctf_iterations_;
   vector<GrammarPtr> grammars;
-  GrammarPtr sup_grammar_;
+  set<GrammarPtr> sup_grammars_;
 
-  struct Equals { Equals(const GrammarPtr& v) : v_(v) {}
-                  bool operator()(const GrammarPtr& x) const { return x == v_; } const GrammarPtr& v_; };
+  struct ContainedIn {
+    ContainedIn(const set<GrammarPtr>& gs) : gs_(gs) {}
+    bool operator()(const GrammarPtr& x) const { return gs_.find(x) != gs_.end(); }
+    const set<GrammarPtr>& gs_;
+  };
 
-  void SetSupplementalGrammar(const std::string& grammar_string) {
-    grammars.erase(remove_if(grammars.begin(), grammars.end(), Equals(sup_grammar_)), grammars.end());
+  void AddSupplementalGrammarFromString(const std::string& grammar_string) {
+    grammars.erase(remove_if(grammars.begin(), grammars.end(), ContainedIn(sup_grammars_)), grammars.end());
     istringstream in(grammar_string);
-    sup_grammar_.reset(new TextGrammar(&in));
-    grammars.push_back(sup_grammar_);
-  }
-
-  struct NameEquals { NameEquals(const string name) : name_(name) {}
-                      bool operator()(const GrammarPtr& x) const { return x->GetGrammarName() == name_; } const string name_; };
-
-  void SetSentenceGrammarFromString(const std::string& grammar_str) {
-    assert(grammar_str != "");
-    if (!SILENT) cerr << "Setting sentence grammar" << endl;
-    usingSentenceGrammar = true;
-    istringstream in(grammar_str);
     TextGrammar* sent_grammar = new TextGrammar(&in);
     sent_grammar->SetMaxSpan(max_span_limit);
-    sent_grammar->SetGrammarName("__psg");
-    grammars.erase(remove_if(grammars.begin(), grammars.end(), NameEquals("__psg")), grammars.end());
-    grammars.push_back(GrammarPtr(sent_grammar));
+    sent_grammar->SetGrammarName("SupFromString");
+    AddSupplementalGrammar(GrammarPtr(sent_grammar));
+  }
+
+  void AddSupplementalGrammar(GrammarPtr gp) {
+    sup_grammars_.insert(gp);
+    grammars.push_back(gp);
+  }
+
+  void RemoveSupplementalGrammars() {
+    grammars.erase(remove_if(grammars.begin(), grammars.end(), ContainedIn(sup_grammars_)), grammars.end());
+    sup_grammars_.clear();
   }
 
   bool Translate(const string& input,
@@ -301,34 +300,22 @@ Check for grammar pointer in the sentence markup, for use with sentence specific
 void SCFGTranslator::ProcessMarkupHintsImpl(const map<string, string>& kv) {
   map<string,string>::const_iterator it = kv.find("grammar");
 
-
-  if (it == kv.end()) {
-    usingSentenceGrammar= false;
-    return;
-  }
-  //Create sentence specific grammar from specified file name and load grammar into list of grammars
-  usingSentenceGrammar = true;
   TextGrammar* sentGrammar = new TextGrammar(it->second);
   sentGrammar->SetMaxSpan(pimpl_->max_span_limit);
   sentGrammar->SetGrammarName(it->second);
-  pimpl_->grammars.push_back(GrammarPtr(sentGrammar));
-
+  pimpl_->AddSupplementalGrammar(GrammarPtr(sentGrammar));
 }
 
-void SCFGTranslator::SetSupplementalGrammar(const std::string& grammar) {
-  pimpl_->SetSupplementalGrammar(grammar);
+void SCFGTranslator::AddSupplementalGrammarFromString(const std::string& grammar) {
+  pimpl_->AddSupplementalGrammarFromString(grammar);
 }
 
-void SCFGTranslator::SetSentenceGrammarFromString(const std::string& grammar_str) {
-  pimpl_->SetSentenceGrammarFromString(grammar_str);
+void SCFGTranslator::AddSupplementalGrammar(GrammarPtr grammar) {
+  pimpl_->AddSupplementalGrammar(grammar);
 }
 
 void SCFGTranslator::SentenceCompleteImpl() {
-
-  if(usingSentenceGrammar)      // Drop the last sentence grammar from the list of grammars
-    {
-      pimpl_->grammars.pop_back();
-    }
+  pimpl_->RemoveSupplementalGrammars();
 }
 
 std::string SCFGTranslator::GetDecoderType() const {

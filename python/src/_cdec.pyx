@@ -98,7 +98,7 @@ cdef class Decoder:
         else:
             raise TypeError('Cannot translate input type %s' % type(sentence))
         if grammar:
-            self.dec.SetSentenceGrammarFromString(string(<char *> grammar))
+            self.dec.AddSupplementalGrammarFromString(string(<char *> grammar))
         cdef decoder.BasicObserver observer = decoder.BasicObserver()
         self.dec.Decode(string(<char *>inp), &observer)
         if observer.hypergraph == NULL:
