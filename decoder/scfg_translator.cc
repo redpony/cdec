@@ -299,11 +299,12 @@ Check for grammar pointer in the sentence markup, for use with sentence specific
  */
 void SCFGTranslator::ProcessMarkupHintsImpl(const map<string, string>& kv) {
   map<string,string>::const_iterator it = kv.find("grammar");
-
-  TextGrammar* sentGrammar = new TextGrammar(it->second);
-  sentGrammar->SetMaxSpan(pimpl_->max_span_limit);
-  sentGrammar->SetGrammarName(it->second);
-  pimpl_->AddSupplementalGrammar(GrammarPtr(sentGrammar));
+  if (it != kv.end()) {
+    TextGrammar* sentGrammar = new TextGrammar(it->second);
+    sentGrammar->SetMaxSpan(pimpl_->max_span_limit);
+    sentGrammar->SetGrammarName(it->second);
+    pimpl_->AddSupplementalGrammar(GrammarPtr(sentGrammar));
+  }
 }
 
 void SCFGTranslator::AddSupplementalGrammarFromString(const std::string& grammar) {
