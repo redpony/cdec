@@ -47,6 +47,7 @@ cdef extern from "utils/sparse_vector.h":
         bint operator==(FastSparseVector[T]&)
         T dot(vector[weight_t]&) # cython bug when [T]
         T dot(FastSparseVector[T]&)
+        void clear()
 
     FastSparseVector[weight_t] operator+(FastSparseVector[weight_t]&, FastSparseVector[weight_t]&)
     FastSparseVector[weight_t] operator-(FastSparseVector[weight_t]&, FastSparseVector[weight_t]&)
@@ -82,6 +83,7 @@ cdef extern from "utils/sampler.h":
 
 cdef extern from "<boost/shared_ptr.hpp>" namespace "boost":
     cdef cppclass shared_ptr[T]:
+        shared_ptr(T* ptr)
         shared_ptr(shared_ptr& r)
         T* get()
 

@@ -3,7 +3,7 @@ cimport lattice
 cdef class Lattice:
     cdef lattice.Lattice* lattice
 
-    def __init__(self, inp):
+    def __cinit__(self, inp):
         if isinstance(inp, tuple):
             self.lattice = new lattice.Lattice(len(inp))
             for i, arcs in enumerate(inp):

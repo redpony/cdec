@@ -1,7 +1,8 @@
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from hypergraph cimport Hypergraph
-from utils cimport istream, weight_t, variables_map
+from grammar cimport Grammar
+from utils cimport *
 
 cdef extern from "decoder/ff_register.h":
     void register_feature_functions()
@@ -28,8 +29,8 @@ cdef extern from "decoder/decoder.h":
         # add grammar rules (currently only supported by SCFG decoders)
         # that will be used on subsequent calls to Decode. rules should be in standard
         # text format. This function does NOT read from a file.
-        void SetSupplementalGrammar(string& grammar)
-        void SetSentenceGrammarFromString(string& grammar_str)
+        void AddSupplementalGrammarFromString(string& grammar_str)
+        void AddSupplementalGrammar(shared_ptr[Grammar] grammar)
 
 cdef extern from "observer.h":
     cdef cppclass BasicObserver(DecoderObserver):

@@ -1,17 +1,8 @@
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from utils cimport *
+from grammar cimport TRule
 from lattice cimport Lattice
-
-cdef extern from "decoder/trule.h":
-    cdef cppclass TRule:
-        vector[WordID] f_
-        vector[WordID] e_
-        FastSparseVector[weight_t] scores_
-        WordID lhs_
-        int arity_
-        bint IsUnary()
-        bint IsGoal()
 
 cdef extern from "decoder/hg.h":
     cdef cppclass EdgeMask "std::vector<bool>":
@@ -40,6 +31,7 @@ cdef extern from "decoder/hg.h":
         vector[HypergraphNode] nodes_
         vector[HypergraphEdge] edges_
         int GoalNode()
+        double NumberOfPaths()
         void Reweight(vector[weight_t]& weights)
         void Reweight(FastSparseVector& weights)
         bint PruneInsideOutside(double beam_alpha,
@@ -83,3 +75,6 @@ cdef extern from "decoder/hg_sampler.h" namespace "HypergraphSampler":
 
 cdef extern from "decoder/csplit.h" namespace "CompoundSplit":
     int GetFullWordEdgeIndex(Hypergraph& forest)
+
+cdef extern from "decoder/inside_outside.h":
+    LogVal[double] InsideOutside "InsideOutside<prob_t, EdgeProb, SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>" (Hypergraph& hg, FastSparseVector[LogVal[double]]* result)

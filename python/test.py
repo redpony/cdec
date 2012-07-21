@@ -45,6 +45,9 @@ for sentence in forest.sample(5):
 # Get feature vector for 1best
 fsrc = forest.viterbi_features()
 
+# Feature expectations
+print 'Feature expectations:', dict(forest.inside_outside())
+
 # Reference lattice
 lattice = ((('australia',0,1),),(('is',0,1),),(('one',0,1),),(('of',0,1),),(('the',0,4),('a',0,4),('a',0,1),('the',0,1),),(('small',0,1),('tiny',0,1),('miniscule',0,1),('handful',0,2),),(('number',0,1),('group',0,1),),(('of',0,2),),(('few',0,1),),(('countries',0,1),),(('that',0,1),),(('has',0,1),('have',0,1),),(('diplomatic',0,1),),(('relations',0,1),),(('with',0,1),),(('north',0,1),),(('korea',0,1),),(('.',0,1),),)
 
