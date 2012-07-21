@@ -54,6 +54,7 @@ cdef class SparseVector:
 
     def __iter__(self):
         cdef FastSparseVector[weight_t].const_iterator* it = new FastSparseVector[weight_t].const_iterator(self.vector[0], False)
+        cdef unsigned i
         try:
             for i in range(self.vector.size()):
                 yield (FDConvert(it[0].ptr().first).c_str(), it[0].ptr().second)

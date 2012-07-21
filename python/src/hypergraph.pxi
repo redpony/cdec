@@ -109,8 +109,6 @@ cdef class Hypergraph:
         else:
             raise TypeError('cannot reweight hypergraph with %s' % type(weights))
 
-    # TODO get feature expectations, get partition function ("inside" score)
-
     property edges:
         def __get__(self):
             cdef unsigned i
@@ -127,19 +125,35 @@ cdef class Hypergraph:
         def __get__(self):
             return HypergraphNode().init(self.hg, self.hg.GoalNode())
 
+    property npaths:
+        def __get__(self):
+            return self.hg.NumberOfPaths()
 
-include "trule.pxi"
+    def inside_outside(self):
+        cdef FastSparseVector[LogVal[double]]* result = new FastSparseVector[LogVal[double]]()
+        cdef LogVal[double] z = hypergraph.InsideOutside(self.hg[0], result)
+        result[0] /= z
+        cdef SparseVector vector = SparseVector()
+        vector.vector = new FastSparseVector[double]()
+        cdef FastSparseVector[LogVal[double]].const_iterator* it = new FastSparseVector[LogVal[double]].const_iterator(result[0], False)
+        cdef unsigned i
+        for i in range(result.size()):
+            vector.vector.set_value(it[0].ptr().first, log(it[0].ptr().second))
+            pinc(it[0]) # ++it
+        del it
+        del result
+        return vector
 
 cdef class HypergraphEdge:
     cdef hypergraph.Hypergraph* hg
     cdef hypergraph.HypergraphEdge* edge
-    cdef public TRule trule
+    cdef public BaseTRule trule
 
     cdef init(self, hypergraph.Hypergraph* hg, unsigned i):
         self.hg = hg
         self.edge = &hg.edges_[i]
-        self.trule = TRule()
-        self.trule.rule = self.edge.rule_.get()
+        self.trule = BaseTRule()
+        self.trule.rule = new shared_ptr[grammar.TRule](self.edge.rule_)
         return self
 
     def __len__(self):
