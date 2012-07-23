@@ -1,1 +1,1 @@
-from _cdec import BLEU, TER
+from _cdec import BLEU, TER, Metric

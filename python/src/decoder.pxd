@@ -27,8 +27,6 @@ cdef extern from "decoder/decoder.h":
         variables_map& GetConf()
 
         # add grammar rules (currently only supported by SCFG decoders)
-        # that will be used on subsequent calls to Decode. rules should be in standard
-        # text format. This function does NOT read from a file.
         void AddSupplementalGrammarFromString(string& grammar_str)
         void AddSupplementalGrammar(shared_ptr[Grammar] grammar)
 

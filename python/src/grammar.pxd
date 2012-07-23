@@ -3,7 +3,6 @@ from libcpp.string cimport string
 from utils cimport *
 
 cdef extern from "decoder/trule.h":
-
     cdef cppclass AlignmentPoint:
         AlignmentPoint(int s, int t)
         AlignmentPoint Inverted()
