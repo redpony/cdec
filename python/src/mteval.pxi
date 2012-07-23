@@ -43,7 +43,12 @@ cdef class SufficientStats:
 
     def __iter__(self):
         for i in range(len(self)):
-            yield self.stats[0][i]
+            yield self[i]
+
+    def __getitem__(self, int index):
+        if not 0 <= index < len(self):
+            raise IndexError('sufficient stats vector index out of range')
+        return self.stats[0][index]
 
     def __iadd__(SufficientStats self, SufficientStats other):
         self.stats[0] += other.stats[0]
@@ -111,15 +116,17 @@ cdef class SegmentEvaluator:
 
 cdef class Scorer:
     cdef string* name
+    cdef mteval.EvaluationMetric* metric
 
-    def __cinit__(self, char* name):
-        self.name = new string(name)
+    def __cinit__(self, bytes name=None):
+        if name:
+            self.name = new string(name)
+            self.metric = mteval.MetricInstance(self.name[0])
 
     def __dealloc__(self):
         del self.name
     
     def __call__(self, refs):
-        cdef mteval.EvaluationMetric* metric = mteval.Instance(self.name[0])
         if isinstance(refs, unicode) or isinstance(refs, str):
             refs = [refs]
         cdef vector[vector[WordID]]* refsv = new vector[vector[WordID]]()
@@ -132,13 +139,53 @@ cdef class Scorer:
             del refv
         cdef unsigned i
         cdef SegmentEvaluator evaluator = SegmentEvaluator()
-        evaluator.metric = metric
-        evaluator.scorer = new shared_ptr[mteval.SegmentEvaluator](metric.CreateSegmentEvaluator(refsv[0]))
+        evaluator.metric = self.metric
+        evaluator.scorer = new shared_ptr[mteval.SegmentEvaluator](
+                self.metric.CreateSegmentEvaluator(refsv[0]))
         del refsv # in theory should not delete but store in SegmentEvaluator
         return evaluator
 
     def __str__(self):
         return self.name.c_str()
+
+cdef float _compute_score(void* metric_, mteval.SufficientStats* stats):
+    cdef Metric metric = <Metric> metric_
+    cdef list ss = []
+    cdef unsigned i
+    for i in range(stats.size()):
+        ss.append(stats[0][i])
+    return metric.score(ss)
+
+cdef void _compute_sufficient_stats(void* metric_, 
+        string* hyp,
+        vector[string]* refs,
+        mteval.SufficientStats* out):
+    cdef Metric metric = <Metric> metric_
+    cdef list refs_ = []
+    cdef unsigned i
+    for i in range(refs.size()):
+        refs_.append(refs[0][i].c_str())
+    cdef list ss = metric.evaluate(hyp.c_str(), refs_)
+    out.fields.resize(len(ss))
+    for i in range(len(ss)):
+        out.fields[i] = ss[i]
+
+cdef class Metric:
+    cdef Scorer scorer
+    def __cinit__(self):
+        self.scorer = Scorer()
+        self.scorer.name = new string(as_str(self.__class__.__name__))
+        self.scorer.metric = mteval.PyMetricInstance(self.scorer.name[0],
+                <void*> self, _compute_sufficient_stats, _compute_score)
+
+    def __call__(self, refs):
+        return self.scorer(refs)
+
+    def score(SufficientStats stats):
+        return 0
+
+    def evaluate(self, hyp, refs):
+        return []
 
 BLEU = Scorer('IBM_BLEU')
 TER = Scorer('TER')
