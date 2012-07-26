@@ -1,5 +1,5 @@
 %.c: %.pyx
-	cython $< -o $@
+	cython -X cdivision=True $< -o $@
 
 %.o: %.cc
 	g++ -O6 -g -fPIC -c $<
