@@ -189,3 +189,4 @@ cdef class Metric:
 
 BLEU = Scorer('IBM_BLEU')
 TER = Scorer('TER')
+CER = Scorer('CER')
