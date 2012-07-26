@@ -223,7 +223,7 @@ cdef class SuffixArray:
     f.close()
 
 
-  cdef __search_high(self, word_id, offset, low, high):
+  cdef int __search_high(self, int word_id, int offset, int low, int high):
     cdef int midpoint
 
     if low >= high:
@@ -235,7 +235,7 @@ cdef class SuffixArray:
       return self.__search_high(word_id, offset, low, midpoint)
 
 
-  cdef __search_low(self, int word_id, int offset, int low, int high):
+  cdef int __search_low(self, int word_id, int offset, int low, int high):
     cdef int midpoint
 
     if low >= high:
@@ -269,7 +269,8 @@ cdef class SuffixArray:
       return self.__lookup_helper(word_id, offset, midpoint+1, high)
 
 
-  def lookup(self, word, offset, int low, int high):
+  def lookup(self, word, int offset, int low, int high):
+    cdef int wordid
     if low == -1: 
       low = 0
     if high == -1:
