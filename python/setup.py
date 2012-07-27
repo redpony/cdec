@@ -34,17 +34,19 @@ else:
 ext_modules = [
     Extension(name='_cdec',
         sources=['src/_cdec.cpp'],
-        language='C++', 
         include_dirs=INC,
         library_dirs=LIB,
         libraries=[BOOST_PROGRAM_OPTIONS, 'z',
                    'cdec', 'utils', 'mteval', 'training', 'klm', 'klm_util'],
         extra_compile_args=['-DHAVE_CONFIG_H'],
         extra_link_args=LINK_ARGS),
+    Extension(name='_cdec_sa',
+        sources=['src/sa/_cdec_sa.c', 'src/sa/strmap.cc'])
 ]
 
 setup(
     name='cdec',
     ext_modules=ext_modules,
-    packages=['cdec', 'cdec.scfg']
+    requires=['configobj'],
+    packages=['cdec', 'cdec.sa']
 )

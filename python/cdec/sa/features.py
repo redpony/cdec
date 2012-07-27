@@ -1,10 +1,6 @@
 from __future__ import division
 import math
-import sym
-
-def contextless(feature):
-    feature.compute_contextless_score = feature
-    return feature
+import cdec.sa
 
 MAXSCORE = 99
 
@@ -26,8 +22,9 @@ def CoherenceProb(fphrase, ephrase, paircount, fcount, fsample_count):
 
 def MaxLexEgivenF(ttable):
     def feature(fphrase, ephrase, paircount, fcount, fsample_count):
-        fwords = [sym.tostring(w) for w in fphrase if not sym.isvar(w)] + ['NULL']
-        ewords = (sym.tostring(w) for w in ephrase if not sym.isvar(w))
+        fwords = [cdec.sa.sym_tostring(w) for w in fphrase if not cdec.sa.sym_isvar(w)]
+        fwords.append('NULL')
+        ewords = (cdec.sa.sym_tostring(w) for w in ephrase if not cdec.sa.sym_isvar(w))
         def score():
             for e in ewords:
               maxScore = max(ttable.get_score(f, e, 0) for f in fwords)
@@ -37,8 +34,9 @@ def MaxLexEgivenF(ttable):
 
 def MaxLexFgivenE(ttable):
     def feature(fphrase, ephrase, paircount, fcount, fsample_count):
-        fwords = (sym.tostring(w) for w in fphrase if not sym.isvar(w))
-        ewords = [sym.tostring(w) for w in ephrase if not sym.isvar(w)] + ['NULL']
+        fwords = (cdec.sa.sym_tostring(w) for w in fphrase if not cdec.sa.sym_isvar(w))
+        ewords = [cdec.sa.sym_tostring(w) for w in ephrase if not cdec.sa.sym_isvar(w)]
+        ewords.append('NULL')
         def score():
             for f in fwords:
               maxScore = max(ttable.get_score(f, e, 1) for e in ewords)
