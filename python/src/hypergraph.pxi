@@ -21,7 +21,7 @@ cdef class Hypergraph:
         return (f_tree, e_tree)
     
     def viterbi_features(self):
-        cdef SparseVector fmap = SparseVector()
+        cdef SparseVector fmap = SparseVector.__new__(SparseVector)
         fmap.vector = new FastSparseVector[weight_t](hypergraph.ViterbiFeatures(self.hg[0]))
         return fmap
 
@@ -67,7 +67,7 @@ cdef class Hypergraph:
             for k in range(size):
                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
                 if not derivation: break
-                fmap = SparseVector()
+                fmap = SparseVector.__new__(SparseVector)
                 fmap.vector = new FastSparseVector[weight_t](derivation._yield)
                 yield fmap
         finally:
@@ -130,12 +130,12 @@ cdef class Hypergraph:
             return self.hg.NumberOfPaths()
 
     def inside_outside(self):
-        cdef FastSparseVector[LogVal[double]]* result = new FastSparseVector[LogVal[double]]()
-        cdef LogVal[double] z = hypergraph.InsideOutside(self.hg[0], result)
+        cdef FastSparseVector[prob_t]* result = new FastSparseVector[prob_t]()
+        cdef prob_t z = hypergraph.InsideOutside(self.hg[0], result)
         result[0] /= z
-        cdef SparseVector vector = SparseVector()
+        cdef SparseVector vector = SparseVector.__new__(SparseVector)
         vector.vector = new FastSparseVector[double]()
-        cdef FastSparseVector[LogVal[double]].const_iterator* it = new FastSparseVector[LogVal[double]].const_iterator(result[0], False)
+        cdef FastSparseVector[prob_t].const_iterator* it = new FastSparseVector[prob_t].const_iterator(result[0], False)
         cdef unsigned i
         for i in range(result.size()):
             vector.vector.set_value(it[0].ptr().first, log(it[0].ptr().second))
@@ -147,12 +147,12 @@ cdef class Hypergraph:
 cdef class HypergraphEdge:
     cdef hypergraph.Hypergraph* hg
     cdef hypergraph.HypergraphEdge* edge
-    cdef public BaseTRule trule
+    cdef public TRule trule
 
     cdef init(self, hypergraph.Hypergraph* hg, unsigned i):
         self.hg = hg
         self.edge = &hg.edges_[i]
-        self.trule = BaseTRule()
+        self.trule = TRule.__new__(TRule)
         self.trule.rule = new shared_ptr[grammar.TRule](self.edge.rule_)
         return self
 
@@ -175,7 +175,7 @@ cdef class HypergraphEdge:
 
     property feature_values:
         def __get__(self):
-            cdef SparseVector vector = SparseVector()
+            cdef SparseVector vector = SparseVector.__new__(SparseVector)
             vector.vector = new FastSparseVector[double](self.edge.feature_values_)
             return vector
 
