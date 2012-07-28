@@ -2,7 +2,7 @@
 import argparse
 import os
 import logging
-import configobj
+import cdec.configobj
 import cdec.sa
 
 MAX_PHRASE_LENGTH = 4
@@ -80,7 +80,7 @@ def main():
     lex.write_binary(lex_bin)
     
     # Write configuration
-    config = configobj.ConfigObj(args.config, unrepr=True)
+    config = cdec.configobj.ConfigObj(args.config, unrepr=True)
     config['f_sa_file'] = f_sa_bin
     config['e_file'] = e_bin
     config['a_file'] = a_bin

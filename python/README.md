@@ -2,10 +2,6 @@ pycdec is a Python interface to cdec
 
 ## Installation
 
-pycdec depends on the configobj module:
-
-	pip install configobj
-
 Build and install pycdec:
 
 	python setup.py install

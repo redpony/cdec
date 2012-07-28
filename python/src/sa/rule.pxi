@@ -2,8 +2,6 @@ from libc.stdlib cimport malloc, calloc, realloc, free, strtof, strtol
 from libc.string cimport strsep, strcpy, strlen
         
 cdef class Phrase:
-    cdef int *syms
-    cdef int n, *varpos, n_vars
 
     def __cinit__(self, words):
         cdef int i, j, n, n_vars
@@ -12,14 +10,14 @@ cdef class Phrase:
         self.syms = <int *>malloc(n*sizeof(int))
         for i from 0 <= i < n:
             self.syms[i] = words[i]
-            if ALPHABET.isvar(self.syms[i]):
+            if sym_isvar(self.syms[i]):
                 n_vars += 1
         self.n = n
         self.n_vars = n_vars
         self.varpos = <int *>malloc(n_vars*sizeof(int))
         j = 0
         for i from 0 <= i < n:
-            if ALPHABET.isvar(self.syms[i]):
+            if sym_isvar(self.syms[i]):
                 self.varpos[j] = i
                 j = j + 1
 
@@ -32,7 +30,7 @@ cdef class Phrase:
         cdef int i, s
         for i from 0 <= i < self.n:
             s = self.syms[i]
-            strs.append(ALPHABET.tostring(s))
+            strs.append(sym_tostring(s))
         return " ".join(strs)
 
     def handle(self):
@@ -44,8 +42,8 @@ cdef class Phrase:
         j = 0
         for j from 0 <= j < self.n:
             s = self.syms[j]
-            if ALPHABET.isvar(s):
-                s = ALPHABET.setindex(s,i)
+            if sym_isvar(s):
+                s = sym_setindex(s,i)
                 i = i + 1
             norm.append(s)
         return tuple(norm)
@@ -58,10 +56,10 @@ cdef class Phrase:
         j = 0
         for j from 0 <= j < self.n:
             s = self.syms[j]
-            if ALPHABET.isvar(s):
-                s = ALPHABET.setindex(s,i)
+            if sym_isvar(s):
+                s = sym_setindex(s,i)
                 i = i + 1
-            norm.append(ALPHABET.tostring(s))
+            norm.append(sym_tostring(s))
         return " ".join(norm)
 
     def arity(self):
@@ -142,33 +140,30 @@ cdef class Phrase:
 
     def __iter__(self):
         cdef int i
-        l = []
         for i from 0 <= i < self.n:
-            l.append(self.syms[i])
-        return iter(l)
+            yield self.syms[i]
 
     def subst(self, start, children):
         cdef int i
         for i from 0 <= i < self.n:
-            if ALPHABET.isvar(self.syms[i]):
-                start = start + children[ALPHABET.getindex(self.syms[i])-1]
+            if sym_isvar(self.syms[i]):
+                start = start + children[sym_getindex(self.syms[i])-1]
             else:
                 start = start + (self.syms[i],)
         return start
+    
+    property words:
+        def __get__(self):
+            return [sym_tostring(w) for w in self if not sym_isvar(w)]
 
 cdef class Rule:
-    cdef public int lhs
-    cdef readonly Phrase f, e
-    cdef float *cscores
-    cdef int n_scores
-    cdef public word_alignments
 
     def __cinit__(self, int lhs, Phrase f, Phrase e,
             scores=None, word_alignments=None):
         cdef int i, n
         cdef char *rest
 
-        if not ALPHABET.isvar(lhs):
+        if not sym_isvar(lhs):
             raise Exception('Invalid LHS symbol: %d' % lhs)
 
         self.lhs = lhs
@@ -214,7 +209,7 @@ cdef class Rule:
         scorestrs = []
         for i from 0 <= i < self.n_scores:
             scorestrs.append(str(self.cscores[i]))
-        fields = [ALPHABET.tostring(self.lhs), str(self.f), str(self.e), " ".join(scorestrs)]
+        fields = [sym_tostring(self.lhs), str(self.f), str(self.e), " ".join(scorestrs)]
         if self.word_alignments is not None:
             alignstr = []
             for i from 0 <= i < len(self.word_alignments):

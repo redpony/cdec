@@ -975,7 +975,6 @@ cdef class HieroCachingRuleFactory:
                     continue
                 
                 phrase = prefix + (word_id,)
-                str_phrase = map(sym_tostring, phrase)
                 hiero_phrase = Phrase(phrase)
                 arity = hiero_phrase.arity()
 
@@ -1019,7 +1018,7 @@ cdef class HieroCachingRuleFactory:
                         else:
                             # Suffix array search
                             phrase_location = node.phrase_location
-                            sa_range = self.fsa.lookup(str_phrase[-1], len(str_phrase)-1, phrase_location.sa_low, phrase_location.sa_high)
+                            sa_range = self.fsa.lookup(sym_tostring(phrase[-1]), len(phrase)-1, phrase_location.sa_low, phrase_location.sa_high)
                             if sa_range is not None:
                                 phrase_location = PhraseLocation(sa_low=sa_range[0], sa_high=sa_range[1])
                             else:
