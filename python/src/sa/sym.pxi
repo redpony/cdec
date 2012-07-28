@@ -101,5 +101,5 @@ cdef int sym_getindex(int sym):
 cdef int sym_setindex(int sym, int id):
     return ALPHABET.setindex(sym, id)
 
-def sym_fromstring(bytes string, bint terminal):
+def sym_fromstring(char* string, bint terminal):
     return ALPHABET.fromstring(string, terminal)
