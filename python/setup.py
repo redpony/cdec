@@ -48,5 +48,6 @@ setup(
     name='cdec',
     ext_modules=ext_modules,
     requires=['configobj'],
-    packages=['cdec', 'cdec.sa']
+    packages=['cdec', 'cdec.sa'],
+    package_dir={'': 'pkg'}
 )
