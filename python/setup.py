@@ -32,7 +32,7 @@ else:
     BOOST_PROGRAM_OPTIONS = 'boost_program_options'
 
 ext_modules = [
-    Extension(name='_cdec',
+    Extension(name='cdec._cdec',
         sources=['src/_cdec.cpp'],
         include_dirs=INC,
         library_dirs=LIB,
@@ -40,13 +40,14 @@ ext_modules = [
                    'cdec', 'utils', 'mteval', 'training', 'klm', 'klm_util'],
         extra_compile_args=['-DHAVE_CONFIG_H'],
         extra_link_args=LINK_ARGS),
-    Extension(name='_cdec_sa',
-        sources=['src/sa/_cdec_sa.c', 'src/sa/strmap.cc'])
+    Extension(name='cdec.sa._sa',
+        sources=['src/sa/_sa.c', 'src/sa/strmap.cc'])
 ]
 
 setup(
     name='cdec',
     ext_modules=ext_modules,
     requires=['configobj'],
-    packages=['cdec', 'cdec.sa']
+    packages=['cdec', 'cdec.sa'],
+    package_dir={'': 'pkg'}
 )

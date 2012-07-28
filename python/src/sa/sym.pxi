@@ -53,14 +53,12 @@ cdef class Alphabet:
         if self.isvar(sym):
             if sym in self.id2sym:
                 return self.id2sym[sym]
-
             ind = self.getindex(sym)
             if ind > 0:
                 self.id2sym[sym] = "[%s,%d]" % (self.tocat(sym), ind)
             else:
                 self.id2sym[sym] = "[%s]" % self.tocat(sym)
             return self.id2sym[sym]
-                
         else:
             return self.terminals.word(sym)
 
@@ -88,14 +86,20 @@ cdef class Alphabet:
 
 cdef Alphabet ALPHABET = Alphabet()
 
-def sym_tostring(int sym):
+cdef char* sym_tostring(int sym):
     return ALPHABET.tostring(sym)
 
-def sym_fromstring(bytes string, bint terminal):
-    return ALPHABET.fromstring(string, terminal)
+cdef char* sym_tocat(int sym):
+    return ALPHABET.tocat(sym)
 
-def sym_isvar(int sym):
+cdef int sym_isvar(int sym):
     return ALPHABET.isvar(sym)
+
+cdef int sym_getindex(int sym):
+    return ALPHABET.getindex(sym)
 
 cdef int sym_setindex(int sym, int id):
     return ALPHABET.setindex(sym, id)
+
+def sym_fromstring(char* string, bint terminal):
+    return ALPHABET.fromstring(string, terminal)

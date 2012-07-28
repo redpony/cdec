@@ -16,6 +16,9 @@ cdef class Lattice:
             self.lattice = new lattice.Lattice()
             lattice.ConvertTextToLattice(string(<char *>inp), self.lattice)
 
+    def __dealloc__(self):
+        del self.lattice
+
     def __getitem__(self, int index):
         if not 0 <= index < len(self):
             raise IndexError('lattice index out of range')
@@ -50,9 +53,6 @@ cdef class Lattice:
         cdef unsigned i
         for i in range(len(self)):
             yield self[i]
-
-    def __dealloc__(self):
-        del self.lattice
 
     def todot(self):
         def lines():

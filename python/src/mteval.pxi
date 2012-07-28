@@ -10,7 +10,7 @@ cdef SufficientStats as_stats(x, y):
         return stats
 
 cdef class Candidate:
-    cdef mteval.Candidate* candidate
+    cdef mteval.const_Candidate* candidate
     cdef public float score
 
     property words:
@@ -19,7 +19,7 @@ cdef class Candidate:
 
     property fmap:
         def __get__(self):
-            cdef SparseVector fmap = SparseVector()
+            cdef SparseVector fmap = SparseVector.__new__(SparseVector)
             fmap.vector = new FastSparseVector[weight_t](self.candidate.fmap)
             return fmap
 

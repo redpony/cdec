@@ -21,17 +21,20 @@ cdef extern from "decoder/trule.h":
         void ComputeArity()
 
 cdef extern from "decoder/grammar.h":
-    cdef cppclass RuleBin "const RuleBin":
+    cdef cppclass RuleBin:
         int GetNumRules()
         shared_ptr[TRule] GetIthRule(int i)
         int Arity()
 
-    cdef cppclass GrammarIter "const GrammarIter":
-        RuleBin* GetRules()
-        GrammarIter* Extend(int symbol)
+    ctypedef RuleBin const_RuleBin "const RuleBin"
+
+    cdef cppclass GrammarIter:
+        const_RuleBin* GetRules()
+
+    ctypedef GrammarIter const_GrammarIter "const GrammarIter"
 
     cdef cppclass Grammar:
-        GrammarIter* GetRoot()
+        const_GrammarIter* GetRoot()
         bint HasRuleForSpan(int i, int j, int distance)
         unsigned GetCTFLevels()
         string GetGrammarName()
