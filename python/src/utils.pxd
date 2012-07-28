@@ -17,7 +17,9 @@ cdef extern from "utils/logval.h":
     cdef cppclass LogVal[T]:
         double as_float()
 
-    double log(LogVal[double]&)
+    ctypedef LogVal[double] prob_t
+
+    double log(prob_t&)
 
 cdef extern from "utils/wordid.h":
     ctypedef int WordID
@@ -33,7 +35,6 @@ cdef extern from "utils/sparse_vector.h":
             const_iterator(FastSparseVector[T]&, bint is_end)
             pair[unsigned, T]* ptr "operator->" ()
             const_iterator& operator++()
-            bint operator==(const_iterator&)
             bint operator!=(const_iterator&)
         FastSparseVector()
         FastSparseVector(FastSparseVector[T]&)

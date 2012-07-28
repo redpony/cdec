@@ -9,22 +9,26 @@ cdef extern from "decoder/hg.h":
         EdgeMask(int size)
         bint& operator[](int)
 
-    cdef cppclass HypergraphEdge "const Hypergraph::Edge":
+    cdef cppclass HypergraphEdge "Hypergraph::Edge":
         int id_
         int head_node_ # position in hg.nodes_
         SmallVector[unsigned] tail_nodes_ # positions in hg.nodes_
         shared_ptr[TRule] rule_
         FastSparseVector[weight_t] feature_values_
-        LogVal[double] edge_prob_ # weights.dot(feature_values_)
+        prob_t edge_prob_ # weights.dot(feature_values_)
         # typically source span:
         short int i_
         short int j_
 
-    cdef cppclass HypergraphNode "const Hypergraph::Node":
+    ctypedef HypergraphEdge const_HypergraphEdge "const Hypergraph::Edge"
+
+    cdef cppclass HypergraphNode "Hypergraph::Node":
         int id_
         WordID cat_ # non-terminal category if <0, 0 if not set
         vector[int] in_edges_ # positions in hg.edge_prob_
         vector[int] out_edges_ # positions in hg.edge_prob_
+
+    ctypedef HypergraphNode const_HypergraphNode "const Hypergraph::Node"
 
     cdef cppclass Hypergraph:
         Hypergraph(Hypergraph)
@@ -42,9 +46,9 @@ cdef extern from "decoder/hg.h":
                                 bint safe_inside)
 
 cdef extern from "decoder/viterbi.h":
-    LogVal[double] ViterbiESentence(Hypergraph& hg, vector[WordID]* trans)
+    prob_t ViterbiESentence(Hypergraph& hg, vector[WordID]* trans)
     string ViterbiETree(Hypergraph& hg)
-    LogVal[double] ViterbiFSentence(Hypergraph& hg, vector[WordID]* trans)
+    prob_t ViterbiFSentence(Hypergraph& hg, vector[WordID]* trans)
     string ViterbiFTree(Hypergraph& hg)
     FastSparseVector[weight_t] ViterbiFeatures(Hypergraph& hg)
     FastSparseVector[weight_t] ViterbiFeatures(Hypergraph& hg, 
@@ -67,7 +71,7 @@ cdef extern from "decoder/hg_sampler.h" namespace "HypergraphSampler":
     cdef cppclass Hypothesis:
         vector[WordID] words
         FastSparseVector[weight_t] fmap
-        LogVal[double] model_score
+        prob_t model_score
     void sample_hypotheses(Hypergraph& hg, 
                            unsigned n, 
                            MT19937* rng, 
@@ -77,4 +81,4 @@ cdef extern from "decoder/csplit.h" namespace "CompoundSplit":
     int GetFullWordEdgeIndex(Hypergraph& forest)
 
 cdef extern from "decoder/inside_outside.h":
-    LogVal[double] InsideOutside "InsideOutside<prob_t, EdgeProb, SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>" (Hypergraph& hg, FastSparseVector[LogVal[double]]* result)
+    prob_t InsideOutside "InsideOutside<prob_t, EdgeProb, SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>" (Hypergraph& hg, FastSparseVector[prob_t]* result)

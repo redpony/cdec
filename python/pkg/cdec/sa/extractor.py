@@ -1,4 +1,6 @@
 from itertools import chain
+import os
+import cdec.configobj
 from cdec.sa.features import EgivenFCoherent, SampleCountF, CountEF,\
         MaxLexEgivenF, MaxLexFgivenE, IsSingletonF, IsSingletonFE
 import cdec.sa
@@ -8,7 +10,10 @@ MAX_INITIAL_SIZE = 15
 
 class GrammarExtractor:
     def __init__(self, config):
-        # TODO if str, read config
+        if isinstance(config, str) or isinstance(config, unicode):
+            if not os.path.exists(config):
+                raise IOError('cannot read configuration from {0}'.format(config))
+            config = cdec.configobj.ConfigObj(config, unrepr=True)
         alignment = cdec.sa.Alignment(from_binary=config['a_file'])
         self.factory = cdec.sa.HieroCachingRuleFactory(
                 # compiled alignment object (REQUIRED)

@@ -3,14 +3,14 @@ from libcpp.vector cimport vector
 from utils cimport *
 cimport decoder
 
-cdef char* as_str(data, error_msg='Cannot convert type %s to str'):
+cdef char* as_str(data, char* error_msg='Cannot convert type %s to str'):
     cdef bytes ret
     if isinstance(data, unicode):
         ret = data.encode('utf8')
     elif isinstance(data, str):
         ret = data
     else:
-        raise TypeError(error_msg % type(data))
+        raise TypeError(error_msg.format(type(data)))
     return ret
 
 include "vectors.pxi"
@@ -55,8 +55,9 @@ cdef class Decoder:
         cdef istringstream* config_stream = new istringstream(config_str)
         self.dec = new decoder.Decoder(config_stream)
         del config_stream
-        self.weights = DenseVector()
+        self.weights = DenseVector.__new__(DenseVector)
         self.weights.vector = &self.dec.CurrentWeightVector()
+        self.weights.owned = True
 
     def __dealloc__(self):
         del self.dec
@@ -72,6 +73,7 @@ cdef class Decoder:
                 self.weights.vector.clear()
                 ((<SparseVector> weights).vector[0]).init_vector(self.weights.vector)
             elif isinstance(weights, dict):
+                self.weights.vector.clear()
                 for fname, fval in weights.items():
                     self.weights[fname] = fval
             else:
@@ -80,7 +82,7 @@ cdef class Decoder:
     property formalism:
         def __get__(self):
             cdef variables_map* conf = &self.dec.GetConf()
-            return conf[0]['formalism'].as_str().c_str()
+            return conf[0]['formalism'].as_str()
 
     def read_weights(self, weights):
         with open(weights) as fp:

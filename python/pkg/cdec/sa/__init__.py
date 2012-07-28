@@ -1,4 +1,4 @@
-from _cdec_sa import sym_tostring, sym_isvar, sym_fromstring,\
+from cdec.sa._sa import sym_fromstring,\
         SuffixArray, DataArray, LCP, Precomputation, Alignment, BiLex,\
         HieroCachingRuleFactory, Sampler
-from extractor import GrammarExtractor
+from cdec.sa.extractor import GrammarExtractor

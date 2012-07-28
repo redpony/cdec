@@ -38,15 +38,17 @@ cdef extern from "py_scorer.h":
             string& metric_id, void*, MetricStatsCallback, MetricScoreCallback)
 
 cdef extern from "training/candidate_set.h" namespace "training":
-    cdef cppclass Candidate "const training::Candidate":
+    cdef cppclass Candidate:
         vector[WordID] ewords
         FastSparseVector[weight_t] fmap
         SufficientStats eval_feats
 
+    ctypedef Candidate const_Candidate "const training::Candidate"
+
     cdef cppclass CandidateSet:
         CandidateSet()
         unsigned size()
-        Candidate& operator[](unsigned i)
+        const_Candidate& operator[](unsigned i)
         void ReadFromFile(string& file)
         void WriteToFile(string& file)
         void AddKBestCandidates(Hypergraph& hg,

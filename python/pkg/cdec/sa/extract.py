@@ -3,7 +3,6 @@ import sys
 import os
 import argparse
 import logging
-import configobj
 import cdec.sa
 
 def main():
@@ -18,7 +17,7 @@ def main():
     if not os.path.exists(args.grammars):
         os.mkdir(args.grammars)
 
-    extractor = cdec.sa.GrammarExtractor(configobj.ConfigObj(args.config, unrepr=True))
+    extractor = cdec.sa.GrammarExtractor(args.config)
     for i, sentence in enumerate(sys.stdin):
         sentence = sentence[:-1]
         grammar_file = os.path.join(args.grammars, 'grammar.{0}'.format(i))
