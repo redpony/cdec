@@ -14,7 +14,7 @@ cdef class DataArray:
     cdef IntList sent_index
     cdef bint use_sent_id
 
-    def __cinit__(self, from_binary=None, from_text=None, bint use_sent_id=False):
+    def __cinit__(self, from_binary=None, from_text=None, side=None, bint use_sent_id=False):
         self.word2id = {"END_OF_FILE":0, "END_OF_LINE":1}
         self.id2word = ["END_OF_FILE", "END_OF_LINE"]
         self.data = IntList(1000,1000)
@@ -24,7 +24,10 @@ cdef class DataArray:
         if from_binary:
             self.read_binary(from_binary)
         elif from_text:
-            self.read_text(from_text)
+            if side:
+                self.read_bitext(from_text, (0 if side == 'source' else 1))
+            else:
+                self.read_text(from_text)
 
     def __len__(self):
         return len(self.data)
@@ -62,21 +65,30 @@ cdef class DataArray:
                     f.write("\n")
 
     def read_text(self, char* filename):
-        cdef int word_count = 0
         with gzip_or_text(filename) as fp:
-            for line_num, line in enumerate(fp):
-                self.sent_index.append(word_count)
-                for word in line.split():
-                    self.data.append(self.get_id(word))
-                    if self.use_sent_id:
-                        self.sent_id.append(line_num)
-                    word_count = word_count + 1
-                self.data.append(1)
+            self.read_text_data(fp)
+
+    def read_bitext(self, char* filename, int side):
+        with gzip_or_text(filename) as fp:
+            data = (line.split(' ||| ')[side] for line in fp)
+            self.read_text_data(data)
+
+    def read_text_data(self, data):
+        cdef int word_count = 0
+        for line_num, line in enumerate(data):
+            self.sent_index.append(word_count)
+            for word in line.split():
+                self.data.append(self.get_id(word))
                 if self.use_sent_id:
                     self.sent_id.append(line_num)
                 word_count = word_count + 1
-            self.data.append(0)
-            self.sent_index.append(word_count)
+            self.data.append(1)
+            if self.use_sent_id:
+                self.sent_id.append(line_num)
+            word_count = word_count + 1
+        self.data.append(0)
+        self.sent_index.append(word_count)
+
 
     def read_binary(self, char* filename):
         cdef FILE* f
