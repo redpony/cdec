@@ -8,14 +8,14 @@ cdef class SuffixArray:
     cdef IntList sa
     cdef IntList ha
 
-    def __cinit__(self, from_binary=None, from_text=None):
+    def __cinit__(self, from_binary=None, from_text=None, side=None):
         self.darray = DataArray()
         self.sa = IntList()
         self.ha = IntList()
         if from_binary:
             self.read_binary(from_binary)
         elif from_text:
-            self.read_text(from_text)
+            self.read_text(from_text, side)
 
     def __getitem__(self, i):
         return self.sa.arr[i]
@@ -29,13 +29,13 @@ cdef class SuffixArray:
     def getSentPos(self, loc):
         return self.darray.getSentPos(loc)
 
-    def read_text(self, char* filename):
+    def read_text(self, filename, side):
         '''Constructs suffix array using the algorithm
         of Larsson & Sadahkane (1999)'''
         cdef int V, N, i, j, h, a_i, n, current_run, skip
         cdef IntList isa, word_count
 
-        self.darray = DataArray(from_text=filename, use_sent_id=True)
+        self.darray = DataArray(from_text=filename, side=side, use_sent_id=True)
         N = len(self.darray)
         V = len(self.darray.id2word)
 

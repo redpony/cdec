@@ -37,15 +37,21 @@ def main():
                         help='Number of pre-computed super-frequent patterns)')
     parser.add_argument('-c', '--config', default='/dev/stdout',
                         help='Output configuration')
-    parser.add_argument('-o', '--output', required=True,
-                        help='Output path')
-    parser.add_argument('-f', '--source', required=True,
+    parser.add_argument('-f', '--source',
                         help='Source language corpus')
-    parser.add_argument('-e', '--target', required=True,
+    parser.add_argument('-e', '--target',
                         help='Target language corpus')
+    parser.add_argument('-b', '--bitext',
+                        help='Parallel text (source ||| target)')
     parser.add_argument('-a', '--alignment', required=True,
                         help='Bitext word alignment')
+    parser.add_argument('-o', '--output', required=True,
+                        help='Output path')
     args = parser.parse_args()
+
+    if not ((args.source and args.target) or args.bitext):
+        parser.error('a parallel corpus is required\n'
+        '\tuse -f (source) with -e (target) or -b (bitext)')
 
     param_names = ("max_len", "max_nt", "max_size", "min_gap", "rank1", "rank2")
     params = (args.maxlen, args.maxnt, args.maxsize, args.mingap, args.rank1, args.rank2)
@@ -61,11 +67,17 @@ def main():
     lex_bin = os.path.join(args.output, 'lex.bin')
 
     logger.info('Compiling source suffix array')
-    f_sa = cdec.sa.SuffixArray(from_text=args.source)
+    if args.bitext:
+        f_sa = cdec.sa.SuffixArray(from_text=args.bitext, side='source')
+    else:
+        f_sa = cdec.sa.SuffixArray(from_text=args.source)
     f_sa.write_binary(f_sa_bin)
 
     logger.info('Compiling target data array')
-    e = cdec.sa.DataArray(from_text=args.target)
+    if args.bitext:
+        e = cdec.sa.DataArray(from_text=args.bitext, side='target')
+    else:
+        e = cdec.sa.DataArray(from_text=args.target)
     e.write_binary(e_bin)
 
     logger.info('Precomputing frequent phrases')
