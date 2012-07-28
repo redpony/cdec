@@ -85,4 +85,17 @@ class FSTTranslator : public Translator {
   boost::shared_ptr<FSTTranslatorImpl> pimpl_;
 };
 
+class RescoreTranslatorImpl;
+class RescoreTranslator : public Translator {
+ public:
+  RescoreTranslator(const boost::program_options::variables_map& conf);
+ private:
+  bool TranslateImpl(const std::string& src,
+                 SentenceMetadata* smeta,
+                 const std::vector<double>& weights,
+                 Hypergraph* minus_lm_forest);
+ private:
+  boost::shared_ptr<RescoreTranslatorImpl> pimpl_;
+};
+
 #endif
