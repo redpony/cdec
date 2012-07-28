@@ -237,9 +237,9 @@ void TRule::ComputeArity() {
 string TRule::AsString(bool verbose) const {
   ostringstream os;
   int idx = 0;
-  if (lhs_ && verbose) {
+  if (lhs_) {
     os << '[' << TD::Convert(lhs_ * -1) << "] |||";
-  }
+  } else { os << "NOLHS |||"; }
   for (unsigned i = 0; i < f_.size(); ++i) {
     const WordID& w = f_[i];
     if (w < 0) {

@@ -527,8 +527,8 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
   }
 
   formalism = LowercaseString(str("formalism",conf));
-  if (formalism != "scfg" && formalism != "fst" && formalism != "lextrans" && formalism != "pb" && formalism != "csplit" && formalism != "tagger" && formalism != "lexalign") {
-    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 'csplit', 'lextrans', 'lexalign', or 'tagger'\n";
+  if (formalism != "scfg" && formalism != "fst" && formalism != "lextrans" && formalism != "pb" && formalism != "csplit" && formalism != "tagger" && formalism != "lexalign" && formalism != "rescore") {
+    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 'csplit', 'lextrans', 'lexalign', 'rescore', or 'tagger'\n";
     cerr << dcmdline_options << endl;
     exit(1);
   }
@@ -675,6 +675,8 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
     translator.reset(new LexicalTrans(conf));
   else if (formalism == "lexalign")
     translator.reset(new LexicalAlign(conf));
+  else if (formalism == "rescore")
+    translator.reset(new RescoreTranslator(conf));
   else if (formalism == "tagger")
     translator.reset(new Tagger(conf));
   else
