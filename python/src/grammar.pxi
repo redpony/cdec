@@ -6,9 +6,9 @@ def _phrase(phrase):
     return ' '.join(w.encode('utf8') if isinstance(w, unicode) else str(w) for w in phrase)
 
 cdef class NT:
-    cdef public char* cat
+    cdef public bytes cat
     cdef public unsigned ref
-    def __init__(self, cat, ref=0):
+    def __init__(self, char* cat, unsigned ref=0):
         self.cat = cat
         self.ref = ref
 
@@ -19,7 +19,7 @@ cdef class NT:
 
 cdef class NTRef:
     cdef public unsigned ref
-    def __init__(self, ref):
+    def __init__(self, unsigned ref):
         self.ref = ref
 
     def __str__(self):
