@@ -166,6 +166,18 @@ cdef class TRule:
         return '%s ||| %s ||| %s ||| %s' % (self.lhs,
                 _phrase(self.f), _phrase(self.e), scores)
 
+cdef class MRule(TRule):
+    def __init__(self, lhs, rhs, scores, a=None):
+        cdef unsigned i = 1
+        e = []
+        for s in rhs:
+            if isinstance(s, NT):
+                e.append(NTRef(i))
+                i += 1
+            else:
+                e.append(s)
+        super(MRule, self).__init__(lhs, rhs, e, scores, a)
+
 cdef class Grammar:
     cdef shared_ptr[grammar.Grammar]* grammar
     
