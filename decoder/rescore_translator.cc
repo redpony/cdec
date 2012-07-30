@@ -20,6 +20,7 @@ struct RescoreTranslatorImpl {
   bool Translate(const string& input,
                  const vector<double>& weights,
                  Hypergraph* forest) {
+    if (input == "{}") return false;
     if (input.find("{\"rules\"") == 0) {
       istringstream is(input);
       Hypergraph src_cfg_hg;
