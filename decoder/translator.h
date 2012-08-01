@@ -58,8 +58,8 @@ class SCFGTranslatorImpl;
 class SCFGTranslator : public Translator {
  public:
   SCFGTranslator(const boost::program_options::variables_map& conf);
-  void SetSupplementalGrammar(const std::string& grammar);
-  void SetSentenceGrammarFromString(const std::string& grammar);
+  void AddSupplementalGrammar(GrammarPtr gp);
+  void AddSupplementalGrammarFromString(const std::string& grammar);
   virtual std::string GetDecoderType() const;
  protected:
   bool TranslateImpl(const std::string& src,
@@ -83,6 +83,19 @@ class FSTTranslator : public Translator {
                  Hypergraph* minus_lm_forest);
  private:
   boost::shared_ptr<FSTTranslatorImpl> pimpl_;
+};
+
+class RescoreTranslatorImpl;
+class RescoreTranslator : public Translator {
+ public:
+  RescoreTranslator(const boost::program_options::variables_map& conf);
+ private:
+  bool TranslateImpl(const std::string& src,
+                 SentenceMetadata* smeta,
+                 const std::vector<double>& weights,
+                 Hypergraph* minus_lm_forest);
+ private:
+  boost::shared_ptr<RescoreTranslatorImpl> pimpl_;
 };
 
 #endif

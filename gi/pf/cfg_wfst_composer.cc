@@ -16,6 +16,7 @@
 #include "sparse_vector.h"
 #include "tdict.h"
 #include "hg.h"
+#include "hg_remove_eps.h"
 
 namespace po = boost::program_options;
 using namespace std;
@@ -359,7 +360,7 @@ class CFG_WFSTComposerImpl {
     }
     if (goal_node) {
       forest->PruneUnreachable(goal_node->id_);
-      forest->EpsilonRemove(kEPS);
+      RemoveEpsilons(forest, kEPS);
     }
     FreeAll();
     return goal_node;
