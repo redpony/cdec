@@ -3,7 +3,7 @@ cimport lattice
 cdef class Lattice:
     cdef lattice.Lattice* lattice
 
-    def __init__(self, inp):
+    def __cinit__(self, inp):
         if isinstance(inp, tuple):
             self.lattice = new lattice.Lattice(len(inp))
             for i, arcs in enumerate(inp):
@@ -16,18 +16,20 @@ cdef class Lattice:
             self.lattice = new lattice.Lattice()
             lattice.ConvertTextToLattice(string(<char *>inp), self.lattice)
 
+    def __dealloc__(self):
+        del self.lattice
+
     def __getitem__(self, int index):
         if not 0 <= index < len(self):
             raise IndexError('lattice index out of range')
         arcs = []
         cdef vector[lattice.LatticeArc] arc_vector = self.lattice[0][index]
         cdef lattice.LatticeArc* arc
-        cdef str label
         cdef unsigned i
         for i in range(arc_vector.size()):
             arc = &arc_vector[i]
-            label = TDConvert(arc.label)
-            arcs.append((label.decode('utf8'), arc.cost, arc.dist2next))
+            label = unicode(TDConvert(arc.label), 'utf8')
+            arcs.append((label, arc.cost, arc.dist2next))
         return tuple(arcs)
 
     def __setitem__(self, int index, tuple arcs):
@@ -51,9 +53,6 @@ cdef class Lattice:
         cdef unsigned i
         for i in range(len(self)):
             yield self[i]
-
-    def __dealloc__(self):
-        del self.lattice
 
     def todot(self):
         def lines():

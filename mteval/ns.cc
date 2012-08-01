@@ -2,6 +2,7 @@
 #include "ns_ter.h"
 #include "ns_ext.h"
 #include "ns_comb.h"
+#include "ns_cer.h"
 
 #include <cstdio>
 #include <cassert>
@@ -254,6 +255,8 @@ EvaluationMetric* EvaluationMetric::Instance(const string& imetric_id) {
       m = new ExternalMetric("METEOR", "java -Xmx1536m -jar /Users/cdyer/software/meteor/meteor-1.3.jar - - -mira -lower -t tune -l en");
     } else if (metric_id.find("COMB:") == 0) {
       m = new CombinationMetric(metric_id);
+    } else if (metric_id == "CER") {
+      m = new CERMetric;
     } else {
       cerr << "Implement please: " << metric_id << endl;
       abort();

@@ -9,7 +9,6 @@ cdef extern from "<iostream>" namespace "std":
         pass
     cdef cppclass istringstream(istream):
         istringstream(char*)
-    ostream cout
 
 cdef extern from "utils/weights.h":
     ctypedef double weight_t
@@ -18,14 +17,17 @@ cdef extern from "utils/logval.h":
     cdef cppclass LogVal[T]:
         double as_float()
 
-    double log(LogVal[double]&)
+    ctypedef LogVal[double] prob_t
+
+    double log(prob_t&)
 
 cdef extern from "utils/wordid.h":
     ctypedef int WordID
 
 cdef extern from "utils/small_vector.h":
     cdef cppclass SmallVector[T]:
-        pass
+        T& operator[](unsigned)
+        unsigned size()
 
 cdef extern from "utils/sparse_vector.h":
     cdef cppclass FastSparseVector[T]:
@@ -33,7 +35,6 @@ cdef extern from "utils/sparse_vector.h":
             const_iterator(FastSparseVector[T]&, bint is_end)
             pair[unsigned, T]* ptr "operator->" ()
             const_iterator& operator++()
-            bint operator==(const_iterator&)
             bint operator!=(const_iterator&)
         FastSparseVector()
         FastSparseVector(FastSparseVector[T]&)
@@ -47,6 +48,7 @@ cdef extern from "utils/sparse_vector.h":
         bint operator==(FastSparseVector[T]&)
         T dot(vector[weight_t]&) # cython bug when [T]
         T dot(FastSparseVector[T]&)
+        void clear()
 
     FastSparseVector[weight_t] operator+(FastSparseVector[weight_t]&, FastSparseVector[weight_t]&)
     FastSparseVector[weight_t] operator-(FastSparseVector[weight_t]&, FastSparseVector[weight_t]&)
@@ -82,5 +84,14 @@ cdef extern from "utils/sampler.h":
 
 cdef extern from "<boost/shared_ptr.hpp>" namespace "boost":
     cdef cppclass shared_ptr[T]:
+        shared_ptr(T* ptr)
         shared_ptr(shared_ptr& r)
         T* get()
+
+cdef extern from "<boost/program_options.hpp>":
+    cdef cppclass variable_value "const boost::program_options::variable_value":
+        string as_str "as<std::string>" ()
+
+    cdef cppclass variables_map "const boost::program_options::variables_map":
+        unsigned count(char* name)
+        variable_value& operator[](char* name)

@@ -10,6 +10,7 @@ cdef extern from "mteval/ns.h":
         unsigned size()
         float operator[](unsigned i)
         void swap(SufficientStats& other)
+        vector[float] fields
 
     SufficientStats add "operator+" (SufficientStats&, SufficientStats&)
 
@@ -26,20 +27,28 @@ cdef extern from "mteval/ns.h":
                                     vector[WordID]& refs,
                                     SufficientStats* out)
 
-cdef extern from "mteval/ns.h" namespace "EvaluationMetric":
-    EvaluationMetric* Instance(string& metric_id)
-    EvaluationMetric* Instance() # IBM_BLEU
+    cdef EvaluationMetric* MetricInstance "EvaluationMetric::Instance" (string& metric_id)
+
+cdef extern from "py_scorer.h":
+    ctypedef float (*MetricScoreCallback)(void*, SufficientStats* stats)
+    ctypedef void (*MetricStatsCallback)(void*, 
+            string* hyp, vector[string]* refs, SufficientStats* out)
+    
+    cdef EvaluationMetric* PyMetricInstance "PythonEvaluationMetric::Instance"(
+            string& metric_id, void*, MetricStatsCallback, MetricScoreCallback)
 
 cdef extern from "training/candidate_set.h" namespace "training":
-    cdef cppclass Candidate "const training::Candidate":
+    cdef cppclass Candidate:
         vector[WordID] ewords
         FastSparseVector[weight_t] fmap
         SufficientStats eval_feats
 
+    ctypedef Candidate const_Candidate "const training::Candidate"
+
     cdef cppclass CandidateSet:
         CandidateSet()
         unsigned size()
-        Candidate& operator[](unsigned i)
+        const_Candidate& operator[](unsigned i)
         void ReadFromFile(string& file)
         void WriteToFile(string& file)
         void AddKBestCandidates(Hypergraph& hg,

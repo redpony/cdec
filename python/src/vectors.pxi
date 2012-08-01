@@ -1,7 +1,16 @@
 from cython.operator cimport preincrement as pinc
 
 cdef class DenseVector:
-    cdef vector[weight_t]* vector # Not owned by DenseVector
+    cdef vector[weight_t]* vector
+    cdef bint owned # if True, do not manage memory
+
+    def __init__(self):
+        self.vector = new vector[weight_t]()
+        self.owned = False
+
+    def __dealloc__(self):
+        if not self.owned:
+            del self.vector
 
     def __len__(self):
         return self.vector.size()
@@ -28,13 +37,16 @@ cdef class DenseVector:
         return other.dot(self)
 
     def tosparse(self):
-        cdef SparseVector sparse = SparseVector()
+        cdef SparseVector sparse = SparseVector.__new__(SparseVector)
         sparse.vector = new FastSparseVector[weight_t]()
         InitSparseVector(self.vector[0], sparse.vector)
         return sparse
 
 cdef class SparseVector:
     cdef FastSparseVector[weight_t]* vector
+
+    def __init__(self):
+        self.vector = new FastSparseVector[weight_t]()
 
     def __dealloc__(self):
         del self.vector
@@ -54,6 +66,7 @@ cdef class SparseVector:
 
     def __iter__(self):
         cdef FastSparseVector[weight_t].const_iterator* it = new FastSparseVector[weight_t].const_iterator(self.vector[0], False)
+        cdef unsigned i
         try:
             for i in range(self.vector.size()):
                 yield (FDConvert(it[0].ptr().first).c_str(), it[0].ptr().second)
@@ -82,7 +95,7 @@ cdef class SparseVector:
         return self.vector.nonzero(FDConvert(fname))
 
     def __neg__(self):
-        cdef SparseVector result = SparseVector()
+        cdef SparseVector result = SparseVector.__new__(SparseVector)
         result.vector = new FastSparseVector[weight_t](self.vector[0])
         result.vector[0] *= -1.0
         return result
@@ -104,12 +117,12 @@ cdef class SparseVector:
         return self
 
     def __add__(SparseVector x, SparseVector y):
-        cdef SparseVector result = SparseVector()
+        cdef SparseVector result = SparseVector.__new__(SparseVector)
         result.vector = new FastSparseVector[weight_t](x.vector[0] + y.vector[0])
         return result
 
     def __sub__(SparseVector x, SparseVector y):
-        cdef SparseVector result = SparseVector()
+        cdef SparseVector result = SparseVector.__new__(SparseVector)
         result.vector = new FastSparseVector[weight_t](x.vector[0] - y.vector[0])
         return result
 
@@ -118,7 +131,7 @@ cdef class SparseVector:
         cdef float scalar
         if isinstance(x, SparseVector): vector, scalar = x, y
         else: vector, scalar = y, x
-        cdef SparseVector result = SparseVector()
+        cdef SparseVector result = SparseVector.__new__(SparseVector)
         result.vector = new FastSparseVector[weight_t](vector.vector[0] * scalar)
         return result
 
@@ -127,6 +140,6 @@ cdef class SparseVector:
         cdef float scalar
         if isinstance(x, SparseVector): vector, scalar = x, y
         else: vector, scalar = y, x
-        cdef SparseVector result = SparseVector()
+        cdef SparseVector result = SparseVector.__new__(SparseVector)
         result.vector = new FastSparseVector[weight_t](vector.vector[0] / scalar)
         return result

@@ -9,6 +9,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
+#include "inside_outside.h"
 #include "tdict.h"
 #include "filelib.h"
 #include "hg.h"
@@ -69,6 +70,32 @@ void FilterAndCheckCorrectness(int goal, Hypergraph* hg) {
   if (hg->nodes_.size() != old_size) {
     cerr << "Warning! During sorting " << (old_size - hg->nodes_.size()) << " disappeared!\n";
   }
+  vector<double> inside; // inside score at each node
+  double p = Inside<double, TransitionCountWeightFunction>(*hg, &inside);
+  if (!p) {
+    cerr << "Warning! Grammar defines the empty language!\n";
+    hg->clear();
+    return;
+  }
+  vector<bool> prune(hg->edges_.size(), false);
+  int bad_edges = 0;
+  for (unsigned i = 0; i < hg->edges_.size(); ++i) {
+    Hypergraph::Edge& edge = hg->edges_[i];
+    bool bad = false;
+    for (unsigned j = 0; j < edge.tail_nodes_.size(); ++j) {
+      if (!inside[edge.tail_nodes_[j]]) {
+        bad = true;
+        ++bad_edges;
+      }
+    }
+    prune[i] = bad;
+  }
+  cerr << "Removing " << bad_edges << " bad edges from the grammar.\n";
+  for (unsigned i = 0; i < hg->edges_.size(); ++i) {
+    if (prune[i])
+      cerr << "   " << hg->edges_[i].rule_->AsString() << endl;
+  }
+  hg->PruneEdges(prune);
 }
 
 void CreateEdge(const TRulePtr& r, const Hypergraph::TailNodeVector& tail, Hypergraph::Node* head_node, Hypergraph* hg) {
