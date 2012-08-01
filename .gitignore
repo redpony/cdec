@@ -174,3 +174,4 @@ phrasinator/gibbs_train_plm
 phrasinator/gibbs_train_plm_notables
 previous.sh
 dist
+python/build/

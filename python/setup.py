@@ -6,7 +6,7 @@ import glob
 
 INC = ['..', 'src/', '../decoder', '../utils', '../mteval']
 LIB = ['../decoder', '../utils', '../mteval', '../training', '../klm/lm', '../klm/util']
-LINK_ARGS = []
+LINK_ARGS = ['-lz']
 
 # Detect Boost
 BOOST_ROOT = os.getenv('BOOST_ROOT')
