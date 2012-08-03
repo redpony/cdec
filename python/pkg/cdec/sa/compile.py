@@ -93,11 +93,11 @@ def main():
     
     # Write configuration
     config = cdec.configobj.ConfigObj(args.config, unrepr=True)
-    config['f_sa_file'] = f_sa_bin
-    config['e_file'] = e_bin
-    config['a_file'] = a_bin
-    config['lex_file'] = lex_bin
-    config['precompute_file'] = precomp_bin
+    config['f_sa_file'] = os.path.abspath(f_sa_bin)
+    config['e_file'] = os.path.abspath(e_bin)
+    config['a_file'] = os.path.abspath(a_bin)
+    config['lex_file'] = os.path.abspath(lex_bin)
+    config['precompute_file'] = os.path.abspath(precomp_bin)
     for name, value in zip(param_names, params):
         config[name] = value
     config.write()
