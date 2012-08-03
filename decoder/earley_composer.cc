@@ -16,6 +16,7 @@
 #include "sparse_vector.h"
 #include "tdict.h"
 #include "hg.h"
+#include "hg_remove_eps.h"
 
 using namespace std;
 using namespace std::tr1;
@@ -47,6 +48,27 @@ static void InitializeConstants() {
   }
 }
 ////////////////////////////////////////////////////////////
+
+TRulePtr CreateBinaryRule(int lhs, int rhs1, int rhs2) {
+  TRule* r = new TRule(*kX1X2);
+  r->lhs_ = lhs;
+  r->f_[0] = rhs1;
+  r->f_[1] = rhs2;
+  return TRulePtr(r);
+}
+
+TRulePtr CreateUnaryRule(int lhs, int rhs1) {
+  TRule* r = new TRule(*kX1);
+  r->lhs_ = lhs;
+  r->f_[0] = rhs1;
+  return TRulePtr(r);
+}
+
+TRulePtr CreateEpsilonRule(int lhs) {
+  TRule* r = new TRule(*kEPSRule);
+  r->lhs_ = lhs;
+  return TRulePtr(r);
+}
 
 class EGrammarNode {
   friend bool EarleyComposer::Compose(const Hypergraph& src_forest, Hypergraph* trg_forest);
@@ -356,7 +378,7 @@ class EarleyComposerImpl {
     }
     if (goal_node) {
       forest->PruneUnreachable(goal_node->id_);
-      forest->EpsilonRemove(kEPS);
+      RemoveEpsilons(forest, kEPS);
     }
     FreeAll();
     return goal_node;
@@ -557,24 +579,30 @@ class EarleyComposerImpl {
     }
     Hypergraph::Node*& head_node = edge2node[edge];
     if (!head_node)
-      head_node = hg->AddNode(kPHRASE);
+      head_node = hg->AddNode(edge->cat);
     if (edge->cat == start_cat_ && edge->q == q_0_ && edge->r == q_0_ && edge->IsPassive()) {
       assert(goal_node == NULL || goal_node == head_node);
       goal_node = head_node;
     }
+    int rhs1 = 0;
+    int rhs2 = 0;
     Hypergraph::TailNodeVector tail;
     SparseVector<double> extra;
     if (edge->IsCreatedByPredict()) {
       // extra.set_value(FD::Convert("predict"), 1);
     } else if (edge->IsCreatedByScan()) {
       tail.push_back(edge2node[edge->active_parent]->id_);
+      rhs1 = edge->active_parent->cat;
       if (tps) {
         tail.push_back(tps->id_);
+        rhs2 = kPHRASE;
       }
       //extra.set_value(FD::Convert("scan"), 1);
     } else if (edge->IsCreatedByComplete()) {
       tail.push_back(edge2node[edge->active_parent]->id_);
+      rhs1 = edge->active_parent->cat;
       tail.push_back(edge2node[edge->passive_parent]->id_);
+      rhs2 = edge->passive_parent->cat;
       //extra.set_value(FD::Convert("complete"), 1);
     } else {
       assert(!"unexpected edge type!");
@@ -592,11 +620,11 @@ class EarleyComposerImpl {
 #endif
     Hypergraph::Edge* hg_edge = NULL;
     if (tail.size() == 0) {
-      hg_edge = hg->AddEdge(kEPSRule, tail);
+      hg_edge = hg->AddEdge(CreateEpsilonRule(edge->cat), tail);
     } else if (tail.size() == 1) {
-      hg_edge = hg->AddEdge(kX1, tail);
+      hg_edge = hg->AddEdge(CreateUnaryRule(edge->cat, rhs1), tail);
     } else if (tail.size() == 2) {
-      hg_edge = hg->AddEdge(kX1X2, tail);
+      hg_edge = hg->AddEdge(CreateBinaryRule(edge->cat, rhs1, rhs2), tail);
     }
     if (edge->features)
       hg_edge->feature_values_ += *edge->features;

@@ -41,10 +41,6 @@ WeightType Inside(const Hypergraph& hg,
     WeightType* const cur_node_inside_score = &inside_score[i];
     Hypergraph::EdgesVector const& in=hg.nodes_[i].in_edges_;
     const unsigned num_in_edges = in.size();
-    if (num_in_edges == 0) {
-      *cur_node_inside_score = WeightType(1); //FIXME: why not call weight(edge) instead?
-      continue;
-    }
     for (unsigned j = 0; j < num_in_edges; ++j) {
       const Hypergraph::Edge& edge = hg.edges_[in[j]];
       WeightType score = weight(edge);

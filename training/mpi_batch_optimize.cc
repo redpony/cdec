@@ -310,7 +310,8 @@ int main(int argc, char** argv) {
     reduce(world, cllh_observer.acc_obj, test_objective, std::plus<double>(), 0);
     reduce(world, cllh_observer.trg_words, test_total_words, std::plus<unsigned>(), 0);
 #else
-    test_objective = observer.acc_obj;
+    test_objective = cllh_observer.acc_obj;
+    test_total_words = cllh_observer.trg_words;
 #endif
 
     if (rank == 0) {  // run optimizer only on rank=0 node

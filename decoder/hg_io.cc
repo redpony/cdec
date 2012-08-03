@@ -261,6 +261,7 @@ static void WriteRule(const TRule& r, ostream* out) {
 }
 
 bool HypergraphIO::WriteToJSON(const Hypergraph& hg, bool remove_rules, ostream* out) {
+  if (hg.empty()) { *out << "{}\n"; return true; }
   map<const TRule*, int> rid;
   ostream& o = *out;
   rid[NULL] = 0;

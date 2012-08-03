@@ -37,6 +37,8 @@ struct DecoderObserver {
   virtual void NotifyDecodingComplete(const SentenceMetadata& smeta);
 };
 
+struct Grammar;  // TODO once the decoder interface is cleaned up,
+                 // this should be somewhere else
 struct Decoder {
   Decoder(int argc, char** argv);
   Decoder(std::istream* config_file);
@@ -54,8 +56,8 @@ struct Decoder {
   // add grammar rules (currently only supported by SCFG decoders)
   // that will be used on subsequent calls to Decode. rules should be in standard
   // text format. This function does NOT read from a file.
-  void SetSupplementalGrammar(const std::string& grammar);
-  void SetSentenceGrammarFromString(const std::string& grammar_str);
+  void AddSupplementalGrammar(boost::shared_ptr<Grammar> gp);
+  void AddSupplementalGrammarFromString(const std::string& grammar_string);
  private:
   boost::program_options::variables_map conf;
   boost::shared_ptr<DecoderImpl> pimpl_;

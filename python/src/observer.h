@@ -1,6 +1,5 @@
 #include "decoder/hg.h"
 #include "decoder/decoder.h"
-#include <iostream>
 
 struct BasicObserver: public DecoderObserver {
     Hypergraph* hypergraph;

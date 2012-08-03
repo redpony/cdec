@@ -8,6 +8,17 @@
 
 using namespace std;
 
+namespace {
+  string Escape(const string& x) {
+    string y = x;
+    for (int i = 0; i < y.size(); ++i) {
+      if (y[i] == '=') y[i]='_';
+      if (y[i] == ';') y[i]='_';
+    }
+    return y;
+  }
+}
+
 Tagger_BigramIndicator::Tagger_BigramIndicator(const std::string& param) :
   FeatureFunction(sizeof(WordID)) {
    no_uni_ = (LowercaseString(param) == "no_uni");
@@ -28,7 +39,7 @@ void Tagger_BigramIndicator::FireFeature(const WordID& left,
       os << '_';
       if (right < 0) { os << "EOS"; } else { os << TD::Convert(right); }
     }
-    fid = FD::Convert(os.str());
+    fid = FD::Convert(Escape(os.str()));
   }
   features->set_value(fid, 1.0);
 }
@@ -90,7 +101,7 @@ void LexicalPairIndicator::FireFeature(WordID src,
   if (!fid) {
     ostringstream os;
     os << name_ << ':' << TD::Convert(src) << ':' << TD::Convert(trg);
-    fid = FD::Convert(os.str());
+    fid = FD::Convert(Escape(os.str()));
   }
   features->set_value(fid, 1.0);
 }
@@ -127,7 +138,7 @@ void OutputIndicator::FireFeature(WordID trg,
     if (escape.count(trg)) trg = escape[trg];
     ostringstream os;
     os << "T:" << TD::Convert(trg);
-    fid = FD::Convert(os.str());
+    fid = FD::Convert(Escape(os.str()));
   }
   features->set_value(fid, 1.0);
 }
