@@ -527,8 +527,8 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
   }
 
   formalism = LowercaseString(str("formalism",conf));
-  if (formalism != "scfg" && formalism != "fst" && formalism != "lextrans" && formalism != "pb" && formalism != "csplit" && formalism != "tagger" && formalism != "lexalign") {
-    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 'csplit', 'lextrans', 'lexalign', or 'tagger'\n";
+  if (formalism != "scfg" && formalism != "fst" && formalism != "lextrans" && formalism != "pb" && formalism != "csplit" && formalism != "tagger" && formalism != "lexalign" && formalism != "rescore") {
+    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 'csplit', 'lextrans', 'lexalign', 'rescore', or 'tagger'\n";
     cerr << dcmdline_options << endl;
     exit(1);
   }
@@ -675,6 +675,8 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
     translator.reset(new LexicalTrans(conf));
   else if (formalism == "lexalign")
     translator.reset(new LexicalAlign(conf));
+  else if (formalism == "rescore")
+    translator.reset(new RescoreTranslator(conf));
   else if (formalism == "tagger")
     translator.reset(new Tagger(conf));
   else
@@ -743,15 +745,13 @@ bool Decoder::Decode(const string& input, DecoderObserver* o) {
 }
 vector<weight_t>& Decoder::CurrentWeightVector() { return pimpl_->CurrentWeightVector(); }
 const vector<weight_t>& Decoder::CurrentWeightVector() const { return pimpl_->CurrentWeightVector(); }
-void Decoder::SetSupplementalGrammar(const std::string& grammar_string) {
-  assert(pimpl_->translator->GetDecoderType() == "SCFG");
-  static_cast<SCFGTranslator&>(*pimpl_->translator).SetSupplementalGrammar(grammar_string);
+void Decoder::AddSupplementalGrammar(GrammarPtr gp) {
+  static_cast<SCFGTranslator&>(*pimpl_->translator).AddSupplementalGrammar(gp);
 }
-void Decoder::SetSentenceGrammarFromString(const std::string& grammar_str) {
+void Decoder::AddSupplementalGrammarFromString(const std::string& grammar_string) {
   assert(pimpl_->translator->GetDecoderType() == "SCFG");
-  static_cast<SCFGTranslator&>(*pimpl_->translator).SetSentenceGrammarFromString(grammar_str);
+  static_cast<SCFGTranslator&>(*pimpl_->translator).AddSupplementalGrammarFromString(grammar_string);
 }
-
 
 bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   string buf = input;

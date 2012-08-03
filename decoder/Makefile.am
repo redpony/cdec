@@ -37,9 +37,11 @@ libcdec_a_SOURCES = \
   fst_translator.cc \
   csplit.cc \
   translator.cc \
+  rescore_translator.cc \
   scfg_translator.cc \
   hg.cc \
   hg_io.cc \
+  hg_remove_eps.cc \
   decoder.cc \
   hg_intersect.cc \
   hg_sampler.cc \
