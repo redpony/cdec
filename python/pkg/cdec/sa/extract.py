@@ -25,7 +25,7 @@ def main():
             for rule in extractor.grammar(sentence):
                 output.write(str(rule)+'\n')
         grammar_file = os.path.abspath(grammar_file)
-        print('<seg grammar="{0}">{1}</seg>'.format(grammar_file, sentence))
+        print('<seg grammar="{0}" id="{1}">{2}</seg>'.format(grammar_file, i, sentence))
 
 if __name__ == '__main__':
     main()
