@@ -76,6 +76,10 @@ cdef extern from "decoder/hg_sampler.h" namespace "HypergraphSampler":
                            unsigned n, 
                            MT19937* rng, 
                            vector[Hypothesis]* hypos)
+    void sample_trees(Hypergraph& hg, 
+                      unsigned n, 
+                      MT19937* rng, 
+                      vector[string]* trees)
 
 cdef extern from "decoder/csplit.h" namespace "CompoundSplit":
     int GetFullWordEdgeIndex(Hypergraph& forest)
