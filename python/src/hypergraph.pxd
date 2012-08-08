@@ -31,30 +31,30 @@ cdef extern from "decoder/hg.h":
     ctypedef HypergraphNode const_HypergraphNode "const Hypergraph::Node"
 
     cdef cppclass Hypergraph:
-        Hypergraph(Hypergraph)
+        Hypergraph(Hypergraph) nogil
         vector[HypergraphNode] nodes_
         vector[HypergraphEdge] edges_
         int GoalNode()
         double NumberOfPaths()
-        void Reweight(vector[weight_t]& weights)
-        void Reweight(FastSparseVector& weights)
+        void Reweight(vector[weight_t]& weights) nogil
+        void Reweight(FastSparseVector& weights) nogil
         bint PruneInsideOutside(double beam_alpha,
                                 double density,
                                 EdgeMask* preserve_mask,
                                 bint use_sum_prod_semiring,
                                 double scale,
-                                bint safe_inside)
+                                bint safe_inside) nogil
 
 cdef extern from "decoder/viterbi.h":
-    prob_t ViterbiESentence(Hypergraph& hg, vector[WordID]* trans)
-    string ViterbiETree(Hypergraph& hg)
-    prob_t ViterbiFSentence(Hypergraph& hg, vector[WordID]* trans)
-    string ViterbiFTree(Hypergraph& hg)
-    FastSparseVector[weight_t] ViterbiFeatures(Hypergraph& hg)
+    prob_t ViterbiESentence(Hypergraph& hg, vector[WordID]* trans) nogil
+    string ViterbiETree(Hypergraph& hg) nogil
+    prob_t ViterbiFSentence(Hypergraph& hg, vector[WordID]* trans) nogil
+    string ViterbiFTree(Hypergraph& hg) nogil
+    FastSparseVector[weight_t] ViterbiFeatures(Hypergraph& hg) nogil
     FastSparseVector[weight_t] ViterbiFeatures(Hypergraph& hg, 
             FastSparseVector[weight_t]* weights,
-            bint fatal_dotprod_disagreement)
-    string JoshuaVisualizationString(Hypergraph& hg)
+            bint fatal_dotprod_disagreement) nogil
+    string JoshuaVisualizationString(Hypergraph& hg) nogil
 
 cdef extern from "decoder/hg_io.h" namespace "HypergraphIO":
     bint ReadFromJSON(istream* inp, Hypergraph* out)
@@ -65,7 +65,7 @@ cdef extern from "decoder/hg_io.h" namespace "HypergraphIO":
     string AsPLF(Lattice& lat, bint include_global_parentheses)
 
 cdef extern from "decoder/hg_intersect.h" namespace "HG":
-    bint Intersect(Lattice& target, Hypergraph* hg)
+    bint Intersect(Lattice& target, Hypergraph* hg) nogil
 
 cdef extern from "decoder/hg_sampler.h" namespace "HypergraphSampler":
     cdef cppclass Hypothesis:
@@ -75,14 +75,14 @@ cdef extern from "decoder/hg_sampler.h" namespace "HypergraphSampler":
     void sample_hypotheses(Hypergraph& hg, 
                            unsigned n, 
                            MT19937* rng, 
-                           vector[Hypothesis]* hypos)
+                           vector[Hypothesis]* hypos) nogil
     void sample_trees(Hypergraph& hg, 
                       unsigned n, 
                       MT19937* rng, 
-                      vector[string]* trees)
+                      vector[string]* trees) nogil
 
 cdef extern from "decoder/csplit.h" namespace "CompoundSplit":
     int GetFullWordEdgeIndex(Hypergraph& forest)
 
 cdef extern from "decoder/inside_outside.h":
-    prob_t InsideOutside "InsideOutside<prob_t, EdgeProb, SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>" (Hypergraph& hg, FastSparseVector[prob_t]* result)
+    prob_t InsideOutside "InsideOutside<prob_t, EdgeProb, SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>" (Hypergraph& hg, FastSparseVector[prob_t]* result) nogil

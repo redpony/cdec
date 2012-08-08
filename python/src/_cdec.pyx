@@ -25,6 +25,9 @@ decoder.register_feature_functions()
 class InvalidConfig(Exception): pass
 class ParseFailed(Exception): pass
 
+def set_silent(yn):
+    SetSilent(yn)
+
 def _make_config(config):
     for key, value in config.items():
         if isinstance(value, dict):
@@ -82,7 +85,7 @@ cdef class Decoder:
     property formalism:
         def __get__(self):
             cdef variables_map* conf = &self.dec.GetConf()
-            return conf[0]['formalism'].as_str()
+            return conf[0]['formalism'].as_str().c_str()
 
     def read_weights(self, weights):
         with open(weights) as fp:
