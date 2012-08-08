@@ -32,6 +32,7 @@ rampion/rampion_cccp
 rst_parser/mst_train
 rst_parser/rst_parse
 rst_parser/rst_train
+rst_parser/random_tree
 training/liblbfgs/bin/
 training/liblbfgs/ll_test
 utils/atools

@@ -1,45 +1,41 @@
 from distutils.core import setup
 from distutils.extension import Extension
 import sys
-import os
-import glob
+import re
+
+def fail(msg):
+    sys.stderr.write(msg)
+    sys.exit(1)
 
 INC = ['..', 'src/', '../decoder', '../utils', '../mteval']
 LIB = ['../decoder', '../utils', '../mteval', '../training', '../klm/lm', '../klm/util']
-LINK_ARGS = []
 
-# Detect Boost
-BOOST_ROOT = os.getenv('BOOST_ROOT')
-if BOOST_ROOT:
-    BOOST_INC = os.path.join(BOOST_ROOT, 'include')
-    BOOST_LIB = os.path.join(BOOST_ROOT, 'lib')
-    if not os.path.exists(BOOST_INC):
-        sys.stderr.write('Error: could not find Boost headers in <%s>\n' % BOOST_INC)
-        sys.exit(1)
-    if not os.path.exists(BOOST_LIB):
-        sys.stderr.write('Error: could not find Boost libraries in <%s>\n' % BOOST_LIB)
-        sys.exit(1)
-    INC.append(BOOST_INC)
-    LIB.append(BOOST_LIB)
-    LINK_ARGS += ['-Wl,-rpath', '-Wl,'+BOOST_LIB]
-else:
-    BOOST_LIB = '/usr/local/lib'
-
-# Detect -mt
-if glob.glob(os.path.join(BOOST_LIB, 'libboost_program_options-mt.*')):
-    BOOST_PROGRAM_OPTIONS = 'boost_program_options-mt'
-else:
-    BOOST_PROGRAM_OPTIONS = 'boost_program_options'
+try:
+    with open('../config.status') as config:
+        config = config.read()
+    subs = dict(re.findall('s,@(\w+)@,\|#_!!_#\|(.*),g', config)) # sed
+    if not subs:
+        subs = dict(re.findall('S\["(\w+)"\]="(.*)"', config)) # awk
+    if not subs:
+        fail('Cannot parse config.status\n'
+             'Please report this bug to the developers')
+    LIBS = re.findall('-l([^\s]+)', subs['LIBS'])
+    CPPFLAGS = re.findall('-[^R][^\s]+', subs['CPPFLAGS'])
+    LDFLAGS = re.findall('-[^\s]+', subs['LDFLAGS'])
+    LDFLAGS = [opt.replace('-R', '-Wl,-rpath,') for opt in LDFLAGS]
+except IOError:
+    fail('Did you run ./configure? Cannot find config.status')
+except KeyError as e:
+    fail('Cannot find option {0} in config.status'.format(e))
 
 ext_modules = [
     Extension(name='cdec._cdec',
         sources=['src/_cdec.cpp'],
         include_dirs=INC,
         library_dirs=LIB,
-        libraries=[BOOST_PROGRAM_OPTIONS, 'z',
-                   'cdec', 'utils', 'mteval', 'training', 'klm', 'klm_util'],
-        extra_compile_args=['-DHAVE_CONFIG_H'],
-        extra_link_args=LINK_ARGS),
+        libraries=LIBS + ['z', 'cdec', 'utils', 'mteval', 'training', 'klm', 'klm_util'],
+        extra_compile_args=CPPFLAGS,
+        extra_link_args=LDFLAGS),
     Extension(name='cdec.sa._sa',
         sources=['src/sa/_sa.c', 'src/sa/strmap.cc'])
 ]
