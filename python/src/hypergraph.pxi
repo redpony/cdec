@@ -85,6 +85,18 @@ cdef class Hypergraph:
         finally:
             del hypos
 
+    def sample_trees(self, unsigned n):
+       cdef vector[string]* trees = new vector[string]()
+       if self.rng == NULL:
+           self.rng = new MT19937()
+       hypergraph.sample_trees(self.hg[0], n, self.rng, trees)
+       cdef unsigned k
+       try:
+           for k in range(trees.size()):
+               yield unicode(trees[0][k].c_str(), 'utf8')
+       finally:
+           del trees
+
     def intersect(self, Lattice lat):
         return hypergraph.Intersect(lat.lattice[0], self.hg)
 
