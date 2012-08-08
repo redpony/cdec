@@ -1,5 +1,5 @@
 bin_PROGRAMS = \
-  mst_train rst_train rst_parse
+  mst_train rst_train rst_parse random_tree
 
 noinst_LIBRARIES = librst.a
 
@@ -13,5 +13,8 @@ rst_train_LDADD = librst.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/
 
 rst_parse_SOURCES = rst_parse.cc
 rst_parse_LDADD = librst.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+
+random_tree_SOURCES = random_tree.cc
+random_tree_LDADD = librst.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I$(top_srcdir)/decoder -I$(top_srcdir)/training -I$(top_srcdir)/utils -I$(top_srcdir)/mteval -I../klm
