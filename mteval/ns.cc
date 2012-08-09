@@ -252,7 +252,7 @@ EvaluationMetric* EvaluationMetric::Instance(const string& imetric_id) {
     } else if (metric_id == "TER") {
       m = new TERMetric;
     } else if (metric_id == "METEOR") {
-      m = new ExternalMetric("METEOR", "java -Xmx1536m -jar /Users/cdyer/software/meteor/meteor-1.3.jar - - -mira -lower -t tune -l en");
+      m = new ExternalMetric("METEOR", "java -Xmx1536m -jar /cab0/tools/meteor-1.3/meteor-1.3.jar - - -mira -lower -t tune -l en");
     } else if (metric_id.find("COMB:") == 0) {
       m = new CombinationMetric(metric_id);
     } else if (metric_id == "CER") {

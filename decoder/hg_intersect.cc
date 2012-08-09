@@ -101,7 +101,7 @@ bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
   // grammar, create the labels here
   const string kSEP = "_";
   for (unsigned i = 0; i < nnodes; ++i) {
-    const char* pstr = "CAT";
+    string pstr = "CAT";
     if (hg->nodes_[i].cat_ < 0)
       pstr = TD::Convert(-hg->nodes_[i].cat_);
     cats[i] = TD::Convert(pstr + kSEP + lexical_cast<string>(i)) * -1;

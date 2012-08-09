@@ -600,7 +600,7 @@ void HypergraphIO::WriteAsCFG(const Hypergraph& hg) {
   // grammar, create the labels here
   const string kSEP = "_";
   for (int i = 0; i < hg.nodes_.size(); ++i) {
-    const char* pstr = "CAT";
+    string pstr = "CAT";
     if (hg.nodes_[i].cat_ < 0)
       pstr = TD::Convert(-hg.nodes_[i].cat_);
     cats[i] = TD::Convert(pstr + kSEP + boost::lexical_cast<string>(i)) * -1;
