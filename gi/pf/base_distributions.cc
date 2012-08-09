@@ -37,7 +37,7 @@ TableLookupBase::TableLookupBase(const string& fname) {
       } else if (cc == 1) {
         x.e_.push_back(cur);
       } else if (cc == 2) {
-        table[x].logeq(atof(TD::Convert(cur)));
+        table[x].logeq(atof(TD::Convert(cur).c_str()));
         ++cc;
       } else {
         if (flag) cerr << endl;

@@ -88,7 +88,7 @@ void BasicCSplitFeaturesImpl::TraversalFeaturesImpl(
   features->set_value(letters_sq_, (edge.j_ - edge.i_) * (edge.j_ - edge.i_));
   features->set_value(letters_sqrt_, sqrt(edge.j_ - edge.i_));
   const WordID word = edge.rule_->e_[1];
-  const char* sword = TD::Convert(word);
+  const char* sword = TD::Convert(word).c_str();
   const int len = strlen(sword);
   int cur = 0;
   int chars = 0;

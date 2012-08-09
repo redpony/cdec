@@ -410,7 +410,7 @@ class CFG_WFSTComposerImpl {
         std::cerr << "TERMINAL SYMBOL: " << TD::Convert(git->first) << endl;
         abort();
       }
-      std::vector<std::pair<const WFSTNode*, TRulePtr> > extensions = r->ExtendInput(atoi(TD::Convert(git->first)));
+      std::vector<std::pair<const WFSTNode*, TRulePtr> > extensions = r->ExtendInput(atoi(TD::Convert(git->first).c_str()));
       for (unsigned nsi = 0; nsi < extensions.size(); ++nsi) {
         const WFSTNode* next_r = extensions[nsi].first;
         const EGrammarNode* next_dot = &git->second;
