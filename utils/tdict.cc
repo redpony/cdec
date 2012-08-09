@@ -13,22 +13,6 @@ using namespace std;
 
 Dict TD::dict_;
 
-unsigned int TD::NumWords() {
-  return dict_.max();
-}
-
-WordID TD::Convert(const std::string& s) {
-  return dict_.Convert(s);
-}
-
-WordID TD::Convert(char const* s) {
-  return dict_.Convert(string(s));
-}
-
-const char* TD::Convert(WordID w) {
-  return dict_.Convert(w).c_str();
-}
-
 void TD::GetWordIDs(const std::vector<std::string>& strings, std::vector<WordID>* ids) {
   ids->clear();
   for (vector<string>::const_iterator i = strings.begin(); i != strings.end(); ++i)
@@ -57,7 +41,8 @@ std::string TD::GetString(WordID const* i,WordID const* e) {
 
 int TD::AppendString(const WordID& w, int pos, int bufsize, char* buffer)
 {
-  const char* word = TD::Convert(w);
+  const string& s = TD::Convert(w);
+  const char* word = s.c_str();
   const char* const end_buf = buffer + bufsize;
   char* dest = buffer + pos;
   while(dest < end_buf && *word) {
