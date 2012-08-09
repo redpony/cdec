@@ -10,6 +10,11 @@ cdef class Hypergraph:
         if self.rng != NULL:
             del self.rng
 
+    cdef MT19937* _rng(self):
+        if self.rng == NULL:
+            self.rng = new MT19937()
+        return self.rng
+
     def viterbi(self):
         cdef vector[WordID] trans
         hypergraph.ViterbiESentence(self.hg[0], &trans)
@@ -75,9 +80,7 @@ cdef class Hypergraph:
 
     def sample(self, unsigned n):
         cdef vector[hypergraph.Hypothesis]* hypos = new vector[hypergraph.Hypothesis]()
-        if self.rng == NULL:
-            self.rng = new MT19937()
-        hypergraph.sample_hypotheses(self.hg[0], n, self.rng, hypos)
+        hypergraph.sample_hypotheses(self.hg[0], n, self._rng(), hypos)
         cdef unsigned k
         try:
             for k in range(hypos.size()):
@@ -87,9 +90,7 @@ cdef class Hypergraph:
 
     def sample_trees(self, unsigned n):
        cdef vector[string]* trees = new vector[string]()
-       if self.rng == NULL:
-           self.rng = new MT19937()
-       hypergraph.sample_trees(self.hg[0], n, self.rng, trees)
+       hypergraph.sample_trees(self.hg[0], n, self._rng(), trees)
        cdef unsigned k
        try:
            for k in range(trees.size()):

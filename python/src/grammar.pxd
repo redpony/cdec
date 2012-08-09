@@ -35,11 +35,9 @@ cdef extern from "decoder/grammar.h":
 
     cdef cppclass Grammar:
         const_GrammarIter* GetRoot()
-        bint HasRuleForSpan(int i, int j, int distance)
-        unsigned GetCTFLevels()
         string GetGrammarName()
         void SetGrammarName(string)
 
     cdef cppclass TextGrammar(Grammar):
         TextGrammar()
-        void AddRule(shared_ptr[TRule]& rule)
+        void AddRule(shared_ptr[TRule]& rule) nogil
