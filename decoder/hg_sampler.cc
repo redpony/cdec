@@ -122,7 +122,7 @@ void HypergraphSampler::sample_trees(const Hypergraph& hg,
     }
     vector<WordID> tmp;
     Viterbi(hg, &tmp, ETreeTraversal(), SampledDerivationWeightFunction(sampled_edges));
-    (*trees)[n] = TD::GetString(tmp);
+    (*trees)[i] = TD::GetString(tmp);
   }
 }
 
