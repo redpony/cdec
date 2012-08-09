@@ -11,6 +11,7 @@
 #include "tdict.h"
 #include "sampler.h"
 #include "ccrp.h"
+#include "gamma_poisson.h"
 
 // A not very memory-efficient implementation of an 1-gram LM based on PYPs
 // as described in Y.-W. Teh. (2006) A Hierarchical Bayesian Language Model
@@ -54,49 +55,90 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
 }
 
+struct Histogram {
+  void increment(unsigned bin, unsigned delta = 1u) {
+    data[bin] += delta;
+  }
+  void decrement(unsigned bin, unsigned delta = 1u) {
+    data[bin] -= delta;
+  }
+  void move(unsigned from_bin, unsigned to_bin, unsigned delta = 1u) {
+    decrement(from_bin, delta);
+    increment(to_bin, delta);
+  }
+  map<unsigned, unsigned> data;
+  // SparseVector<unsigned> data;
+};
+
+// Lord Rothschild. 1986. THE DISTRIBUTION OF ENGLISH DICTIONARY WORD LENGTHS.
+// Journal of Statistical Planning and Inference 14 (1986) 311-322
+struct PoissonLengthUniformCharWordModel {
+  explicit PoissonLengthUniformCharWordModel(unsigned vocab_size) : plen(5,5), uc(-log(50)), llh() {}
+  void increment(WordID w, MT19937*) {
+    llh += log(prob(w)); // this isn't quite right
+    plen.increment(TD::Convert(w).size() - 1);
+  }
+  void decrement(WordID w, MT19937*) {
+    plen.decrement(TD::Convert(w).size() - 1);
+    llh -= log(prob(w)); // this isn't quite right
+  }
+  double prob(WordID w) const {
+    size_t len = TD::Convert(w).size();
+    return plen.prob(len - 1) * exp(uc * len);
+  }
+  double log_likelihood() const { return llh; }
+  void resample_hyperparameters(MT19937*) {}
+  GammaPoisson plen;
+  const double uc;
+  double llh;
+};
+
 // uniform base distribution (0-gram model)
 struct UniformWordModel {
   explicit UniformWordModel(unsigned vocab_size) : p0(1.0 / vocab_size), draws() {}
-  void increment() { ++draws; }
-  void decrement() { --draws; assert(draws >= 0); }
+  void increment(WordID, MT19937*) { ++draws; }
+  void decrement(WordID, MT19937*) { --draws; assert(draws >= 0); }
   double prob(WordID) const { return p0; } // all words have equal prob
   double log_likelihood() const { return draws * log(p0); }
+  void resample_hyperparameters(MT19937*) {}
   const double p0;
   int draws;
 };
 
 // represents an Unigram LM
+template <class BaseGenerator>
 struct UnigramLM {
   UnigramLM(unsigned vs, double da, double db, double ss, double sr) :
-      uniform_vocab(vs),
+      base(vs),
       crp(da, db, ss, sr, 0.8, 1.0) {}
   void increment(WordID w, MT19937* rng) {
-    const double backoff = uniform_vocab.prob(w);
+    const double backoff = base.prob(w);
     if (crp.increment(w, backoff, rng))
-      uniform_vocab.increment();
+      base.increment(w, rng);
   }
   void decrement(WordID w, MT19937* rng) {
     if (crp.decrement(w, rng))
-      uniform_vocab.decrement();
+      base.decrement(w, rng);
   }
   double prob(WordID w) const {
-    const double backoff = uniform_vocab.prob(w);
+    const double backoff = base.prob(w);
     return crp.prob(w, backoff);
   }
 
   double log_likelihood() const {
-    double llh = uniform_vocab.log_likelihood();
+    double llh = base.log_likelihood();
     llh += crp.log_crp_prob();
     return llh;
   }
 
   void resample_hyperparameters(MT19937* rng) {
     crp.resample_hyperparameters(rng);
+    base.resample_hyperparameters(rng);
   }
 
   double discount_a, discount_b, strength_s, strength_r;
   double d, strength;
-  UniformWordModel uniform_vocab;
+  BaseGenerator base;
   CCRP<WordID> crp;
 };
 
@@ -121,15 +163,19 @@ int main(int argc, char** argv) {
     CorpusTools::ReadFromFile(conf["test"].as<string>(), &test);
   else
     test = corpuse;
-  UnigramLM lm(vocabe.size(),
-               conf["discount_prior_a"].as<double>(),
-               conf["discount_prior_b"].as<double>(),
-               conf["strength_prior_s"].as<double>(),
-               conf["strength_prior_r"].as<double>());
-  for (int SS=0; SS < samples; ++SS) {
-    for (int ci = 0; ci < corpuse.size(); ++ci) {
+#if 1
+  UnigramLM<PoissonLengthUniformCharWordModel> lm(vocabe.size(),
+#else
+  UnigramLM<UniformWordModel> lm(vocabe.size(),
+#endif
+                                 conf["discount_prior_a"].as<double>(),
+                                 conf["discount_prior_b"].as<double>(),
+                                 conf["strength_prior_s"].as<double>(),
+                                 conf["strength_prior_r"].as<double>());
+  for (unsigned SS=0; SS < samples; ++SS) {
+    for (unsigned ci = 0; ci < corpuse.size(); ++ci) {
       const vector<WordID>& s = corpuse[ci];
-      for (int i = 0; i <= s.size(); ++i) {
+      for (unsigned i = 0; i <= s.size(); ++i) {
         WordID w = (i < s.size() ? s[i] : kEOS);
         if (SS > 0) lm.decrement(w, &rng);
         lm.increment(w, &rng);
@@ -137,21 +183,21 @@ int main(int argc, char** argv) {
       if (SS > 0) lm.decrement(kEOS, &rng);
       lm.increment(kEOS, &rng);
     }
-    cerr << "LLH=" << lm.log_likelihood() << endl;
-    //if (SS % 10 == 9) lm.resample_hyperparameters(&rng);
+    cerr << "LLH=" << lm.log_likelihood() << "\t tables=" << lm.crp.num_tables() << " " << endl;
+    if (SS % 10 == 9) lm.resample_hyperparameters(&rng);
   }
   double llh = 0;
   unsigned cnt = 0;
   unsigned oovs = 0;
-  for (int ci = 0; ci < test.size(); ++ci) {
+  for (unsigned ci = 0; ci < test.size(); ++ci) {
     const vector<WordID>& s = test[ci];
-    for (int i = 0; i <= s.size(); ++i) {
+    for (unsigned i = 0; i <= s.size(); ++i) {
       WordID w = (i < s.size() ? s[i] : kEOS);
       double lp = log(lm.prob(w)) / log(2);
       if (i < s.size() && vocabe.count(w) == 0) {
         cerr << "**OOV ";
         ++oovs;
-        lp = 0;
+        //lp = 0;
       }
       cerr << "p(" << TD::Convert(w) << ") = " << lp << endl;
       llh -= lp;
