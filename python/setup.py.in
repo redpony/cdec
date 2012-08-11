@@ -10,6 +10,9 @@ def fail(msg):
 INC = ['..', 'src/', '../decoder', '../utils', '../mteval']
 LIB = ['../decoder', '../utils', '../mteval', '../training', '../klm/lm', '../klm/util']
 
+# set automatically by configure
+raw_config_libs = '@LIBS@'
+
 try:
     with open('../config.status') as config:
         config = config.read()
