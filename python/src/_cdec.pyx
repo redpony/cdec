@@ -37,7 +37,7 @@ def _make_config(config):
             for name in value:
                 yield key, name
         else:
-            yield key, bytes(value)
+            yield key, str(value)
 
 cdef class Decoder:
     cdef decoder.Decoder* dec
@@ -85,7 +85,7 @@ cdef class Decoder:
     property formalism:
         def __get__(self):
             cdef variables_map* conf = &self.dec.GetConf()
-            return conf[0]['formalism'].as_str().c_str()
+            return str(conf[0]['formalism'].as_str().c_str())
 
     def read_weights(self, weights):
         with open(weights) as fp:

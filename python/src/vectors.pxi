@@ -31,7 +31,7 @@ cdef class DenseVector:
     def __iter__(self):
         cdef unsigned fid
         for fid in range(1, self.vector.size()):
-            yield FDConvert(fid).c_str(), self.vector[0][fid]
+            yield str(FDConvert(fid).c_str()), self.vector[0][fid]
 
     def dot(self, SparseVector other):
         return other.dot(self)
@@ -69,7 +69,7 @@ cdef class SparseVector:
         cdef unsigned i
         try:
             for i in range(self.vector.size()):
-                yield (FDConvert(it[0].ptr().first).c_str(), it[0].ptr().second)
+                yield (str(FDConvert(it[0].ptr().first).c_str()), it[0].ptr().second)
                 pinc(it[0]) # ++it
         finally:
             del it

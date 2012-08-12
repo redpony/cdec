@@ -36,7 +36,7 @@ cdef class SufficientStats:
 
     property detail:
         def __get__(self):
-            return self.metric.DetailedScore(self.stats[0]).c_str()
+            return str(self.metric.DetailedScore(self.stats[0]).c_str())
 
     def __len__(self):
         return self.stats.size()
@@ -131,7 +131,6 @@ cdef class Scorer:
             refs = [refs]
         cdef vector[vector[WordID]]* refsv = new vector[vector[WordID]]()
         cdef vector[WordID]* refv
-        cdef bytes ref_str
         for ref in refs:
             refv = new vector[WordID]()
             ConvertSentence(string(as_str(ref.strip())), refv)
@@ -146,7 +145,7 @@ cdef class Scorer:
         return evaluator
 
     def __str__(self):
-        return self.name.c_str()
+        return str(self.name.c_str())
 
 cdef float _compute_score(void* metric_, mteval.SufficientStats* stats):
     cdef Metric metric = <Metric> metric_
@@ -164,8 +163,8 @@ cdef void _compute_sufficient_stats(void* metric_,
     cdef list refs_ = []
     cdef unsigned i
     for i in range(refs.size()):
-        refs_.append(refs[0][i].c_str())
-    cdef list ss = metric.evaluate(hyp.c_str(), refs_)
+        refs_.append(str(refs[0][i].c_str()))
+    cdef list ss = metric.evaluate(str(hyp.c_str()), refs_)
     out.fields.resize(len(ss))
     for i in range(len(ss)):
         out.fields[i] = ss[i]

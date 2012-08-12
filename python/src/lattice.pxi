@@ -28,7 +28,7 @@ cdef class Lattice:
         cdef unsigned i
         for i in range(arc_vector.size()):
             arc = &arc_vector[i]
-            label = unicode(TDConvert(arc.label), 'utf8')
+            label = unicode(TDConvert(arc.label).c_str(), 'utf8')
             arcs.append((label, arc.cost, arc.dist2next))
         return tuple(arcs)
 
@@ -47,7 +47,7 @@ cdef class Lattice:
         return self.lattice.size()
 
     def __str__(self):
-        return hypergraph.AsPLF(self.lattice[0], True).c_str()
+        return str(hypergraph.AsPLF(self.lattice[0], True).c_str())
 
     def __iter__(self):
         cdef unsigned i
