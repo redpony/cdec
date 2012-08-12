@@ -8,7 +8,7 @@ def _phrase(phrase):
 cdef class NT:
     cdef public bytes cat
     cdef public unsigned ref
-    def __init__(self, char* cat, unsigned ref=0):
+    def __init__(self, bytes cat, unsigned ref=0):
         self.cat = cat
         self.ref = ref
 
@@ -78,9 +78,9 @@ cdef class TRule:
                 w = f_[0][i]
                 if w < 0:
                     idx += 1
-                    f.append(NT(TDConvert(-w), idx))
+                    f.append(NT(TDConvert(-w).c_str(), idx))
                 else:
-                    f.append(unicode(TDConvert(w), encoding='utf8'))
+                    f.append(unicode(TDConvert(w).c_str(), encoding='utf8'))
             return f
 
         def __set__(self, f):
@@ -107,7 +107,7 @@ cdef class TRule:
                     idx += 1
                     e.append(NTRef(1-w))
                 else:
-                    e.append(unicode(TDConvert(w), encoding='utf8'))
+                    e.append(unicode(TDConvert(w).c_str(), encoding='utf8'))
             return e
 
         def __set__(self, e):
@@ -154,7 +154,7 @@ cdef class TRule:
 
     property lhs:
         def __get__(self):
-            return NT(TDConvert(-self.rule.get().lhs_))
+            return NT(TDConvert(-self.rule.get().lhs_).c_str())
 
         def __set__(self, lhs):
             if not isinstance(lhs, NT):
@@ -196,7 +196,7 @@ cdef class Grammar:
 
     property name:
         def __get__(self):
-            self.grammar.get().GetGrammarName().c_str()
+            str(self.grammar.get().GetGrammarName().c_str())
 
         def __set__(self, name):
             self.grammar.get().SetGrammarName(string(<char *>name))

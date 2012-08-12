@@ -63,7 +63,7 @@ cdef extern from "utils/tdict.h" namespace "TD":
     string GetString(vector[WordID]& st)
     unsigned NumWords()
     WordID TDConvert "TD::Convert" (char*)
-    char* TDConvert "TD::Convert" (WordID)
+    string& TDConvert "TD::Convert" (WordID)
     void ConvertSentence(string& sent, vector[WordID]* ids)
 
 cdef extern from "utils/verbose.h":

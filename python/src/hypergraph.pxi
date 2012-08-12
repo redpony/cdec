@@ -111,7 +111,7 @@ cdef class Hypergraph:
             del preserve_mask
 
     def lattice(self): # TODO direct hg -> lattice conversion in cdec
-        cdef str plf = hypergraph.AsPLF(self.hg[0], True).c_str()
+        cdef bytes plf = hypergraph.AsPLF(self.hg[0], True).c_str()
         return Lattice(eval(plf))
 
     def reweight(self, weights):
@@ -231,7 +231,7 @@ cdef class HypergraphNode:
     property cat:
         def __get__(self):
             if self.node.cat_:
-                return TDConvert(-self.node.cat_)
+                return str(TDConvert(-self.node.cat_).c_str())
 
     def __richcmp__(HypergraphNode x, HypergraphNode y, int op):
         if op == 2: # ==
