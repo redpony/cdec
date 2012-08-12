@@ -160,7 +160,7 @@ struct HieroLMModel {
       p *= q;
       for (CCRP<TRule>::const_iterator it = nts[i].begin(); it != nts[i].end(); ++it) {
         prob_t tp = p0(it->first);
-        tp.poweq(it->second.table_counts_.size());
+        tp.poweq(it->second.num_tables());
         p *= tp;
       }
     }
@@ -169,7 +169,7 @@ struct HieroLMModel {
       p *= q;
       for (CCRP<TRule>::const_iterator it = q0.begin(); it != q0.end(); ++it) {
         prob_t tp = base(it->first);
-        tp.poweq(it->second.table_counts_.size());
+        tp.poweq(it->second.num_tables());
         p *= tp;
       }
     }

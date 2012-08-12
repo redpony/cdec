@@ -31,7 +31,7 @@ struct ConditionalPYPWordModel {
     for (RuleModelHash::const_iterator it = r.begin(); it != r.end(); ++it) {
       cerr << TD::Convert(it->first) << "   \tPYP(d=" << it->second.discount() << ",s=" << it->second.strength() << ") --------------------------" << endl;
       for (CCRP<vector<WordID> >::const_iterator i2 = it->second.begin(); i2 != it->second.end(); ++i2)
-        cerr << "   " << i2->second.total_dish_count_ << '\t' << TD::GetString(i2->first) << endl;
+        cerr << "   " << i2->second << endl;
     }
   }
 
