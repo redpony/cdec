@@ -93,6 +93,10 @@ struct CRPTableManager {
     }
   }
 
+  typedef CRPHistogram::const_iterator const_iterator;
+  const_iterator begin() const { return h.begin(); }
+  const_iterator end() const { return h.end(); }
+
   unsigned customers;
   unsigned tables;
   CRPHistogram h;
@@ -100,7 +104,7 @@ struct CRPTableManager {
 
 std::ostream& operator<<(std::ostream& os, const CRPTableManager& tm) {
   os << '[' << tm.num_customers() << " total customers at " << tm.num_tables() << " tables ||| ";
-  for (CRPHistogram::const_iterator it = tm.h.begin(); it != tm.h.end(); ++it) {
+  for (CRPHistogram::const_iterator it = tm.begin(); it != tm.end(); ++it) {
     if (it != tm.h.begin()) os << "  --  ";
     os << '(' << it->first << ") x " << it->second;
   }
