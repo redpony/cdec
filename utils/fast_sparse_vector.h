@@ -194,18 +194,19 @@ class FastSparseVector {
       data_.rbmap = new SPARSE_HASH_MAP<unsigned, T>(first, last);
     }
   }
-  void erase(int k) {
+  void erase(unsigned k) {
     if (is_remote_) {
       data_.rbmap->erase(k);
     } else {
-      for (int i = 0; i < local_size_; ++i) {
+      for (unsigned i = 0; i < local_size_; ++i) {
         if (data_.local[i].first() == k) {
-          for (int j = i+1; j < local_size_; ++j) {
+          for (unsigned j = i+1; j < local_size_; ++j) {
             data_.local[j-1].first() = data_.local[j].first();
             data_.local[j-1].second() = data_.local[j].second();
           }
         }
       }
+      --local_size_;
     }
   }
   const FastSparseVector<T>& operator=(const FastSparseVector<T>& other) {
