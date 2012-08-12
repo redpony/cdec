@@ -47,8 +47,7 @@ struct PYPWordModel {
     std::cerr << "PYPWordModel: generations=" << r.num_customers()
          << " PYP(d=" << r.discount() << ",s=" << r.strength() << ')' << std::endl;
     for (typename CCRP<std::vector<WordID> >::const_iterator it = r.begin(); it != r.end(); ++it) {
-      std::cerr << "   " << it->second.total_dish_count_
-                << " (on " << it->second.table_counts_.size() << " tables) "
+      std::cerr << "  " << it->second
                 << TD::GetString(it->first) << std::endl;
     }
   }
