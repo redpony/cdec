@@ -132,7 +132,7 @@ AC_CONFIG_FILES([gi/pf/Makefile])
 AC_CONFIG_FILES([gi/markov_al/Makefile])
 AC_CONFIG_FILES([rst_parser/Makefile])
 
-AC_CONFIG_FILES([python/setup.py],[chmod +x python/setup.py])
+AC_CONFIG_FILES([python/setup.py])
 
 AC_OUTPUT
 
