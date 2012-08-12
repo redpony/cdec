@@ -167,8 +167,6 @@ int main(int argc, char** argv) {
         lm.increment(w, ctx, &rng);
         ctx.push_back(w);
       }
-      if (SS > 0) lm.decrement(kEOS, ctx, &rng);
-      lm.increment(kEOS, ctx, &rng);
     }
     if (SS % 10 == 9) {
       cerr << " [LLH=" << lm.log_likelihood() << "]" << endl;
