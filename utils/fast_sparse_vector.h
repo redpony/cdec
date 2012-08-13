@@ -13,6 +13,7 @@
 #include <map>
 #include <cassert>
 #include <vector>
+#include <limits>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -192,6 +193,7 @@ class FastSparseVector {
     } else {
       is_remote_ = true;
       data_.rbmap = new SPARSE_HASH_MAP<unsigned, T>(first, last);
+      HASH_MAP_DELETED(*data_.rbmap, std::numeric_limits<unsigned>::max());
     }
   }
   void erase(unsigned k) {
@@ -213,8 +215,11 @@ class FastSparseVector {
     if (&other == this) return *this;
     clear();
     std::memcpy(this, &other, sizeof(FastSparseVector));
-    if (is_remote_)
+    if (is_remote_) {
       data_.rbmap = new SPARSE_HASH_MAP<unsigned, T>(*data_.rbmap);
+      // TODO: do i need to set_deleted on a copy?
+      HASH_MAP_DELETED(*data_.rbmap, std::numeric_limits<unsigned>::max());
+    }
     return *this;
   }
   T const& get_singleton() const {
@@ -445,6 +450,7 @@ class FastSparseVector {
       SPARSE_HASH_MAP<unsigned, T>* m = new SPARSE_HASH_MAP<unsigned, T>(
          reinterpret_cast<std::pair<unsigned, T>*>(&data_.local[0]),
          reinterpret_cast<std::pair<unsigned, T>*>(&data_.local[local_size_]), local_size_ * 1.5 + 1);
+      HASH_MAP_DELETED(*m, std::numeric_limits<unsigned>::max());
       data_.rbmap = m;
       is_remote_ = true;
     }
