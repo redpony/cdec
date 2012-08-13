@@ -16,7 +16,6 @@ SUBDIRS = \
   pro-train \
   rampion \
   minrisk \
-  extools \
   gi/pf \
   gi/markov_al \
   rst_parser
@@ -26,3 +25,4 @@ SUBDIRS = \
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS =  -D_GLIBCXX_PARALLEL
+

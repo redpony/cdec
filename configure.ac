@@ -113,7 +113,6 @@ CPPFLAGS="-DPIC -fPIC $CPPFLAGS -DHAVE_CONFIG_H"
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([utils/Makefile])
 AC_CONFIG_FILES([mteval/Makefile])
-AC_CONFIG_FILES([extools/Makefile])
 AC_CONFIG_FILES([decoder/Makefile])
 AC_CONFIG_FILES([phrasinator/Makefile])
 AC_CONFIG_FILES([training/Makefile])
