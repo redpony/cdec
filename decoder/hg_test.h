@@ -68,6 +68,7 @@ void AddNullEdge(Hypergraph* hg) {
   TRule x;
   x.arity_ = 0;
   hg->nodes_[0].in_edges_.push_back(hg->AddEdge(TRulePtr(new TRule(x)), Hypergraph::TailNodeVector())->id_);
+  hg->edges_.back().head_node_ = 0;
 }
 
 void HGSetup::CreateTinyLatticeHG(Hypergraph* hg) {
