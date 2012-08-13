@@ -6,6 +6,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "gamma_poisson.h"
 #include "corpus_tools.h"
 #include "m.h"
 #include "tdict.h"
@@ -59,11 +60,9 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
 }
 
-template <unsigned N> struct PYPLM;
-
-// uniform base distribution (0-gram model)
-template<> struct PYPLM<0> {
-  PYPLM(unsigned vs, double, double, double, double) : p0(1.0 / vs), draws() {}
+// uniform distribution over a fixed vocabulary
+struct UniformVocabulary {
+  UniformVocabulary(unsigned vs, double, double, double, double) : p0(1.0 / vs), draws() {}
   void increment(WordID, const vector<WordID>&, MT19937*) { ++draws; }
   void decrement(WordID, const vector<WordID>&, MT19937*) { --draws; assert(draws >= 0); }
   double prob(WordID, const vector<WordID>&) const { return p0; }
@@ -72,6 +71,73 @@ template<> struct PYPLM<0> {
   const double p0;
   int draws;
 };
+
+// Lord Rothschild. 1986. THE DISTRIBUTION OF ENGLISH DICTIONARY WORD LENGTHS.
+// Journal of Statistical Planning and Inference 14 (1986) 311-322
+struct PoissonLengthUniformCharWordModel {
+  explicit PoissonLengthUniformCharWordModel(unsigned vocab_size, double, double, double, double) : plen(5,5), uc(-log(95)), llh() {}
+  void increment(WordID w, const vector<WordID>& v, MT19937*) {
+    llh += log(prob(w, v)); // this isn't quite right
+    plen.increment(TD::Convert(w).size() - 1);
+  }
+  void decrement(WordID w, const vector<WordID>& v, MT19937*) {
+    plen.decrement(TD::Convert(w).size() - 1);
+    llh -= log(prob(w, v)); // this isn't quite right
+  }
+  double prob(WordID w, const vector<WordID>&) const {
+    const unsigned len = TD::Convert(w).size();
+    return plen.prob(len - 1) * exp(uc * len);
+  }
+  double log_likelihood() const { return llh; }
+  void resample_hyperparameters(MT19937*) {}
+  GammaPoisson plen;
+  const double uc;
+  double llh;
+};
+
+struct PYPAdaptedPoissonLengthUniformCharWordModel {
+  explicit PYPAdaptedPoissonLengthUniformCharWordModel(unsigned vocab_size, double, double, double, double) :
+    base(vocab_size,1,1,1,1),
+    crp(1,1,1,1) {}
+  void increment(WordID w, const vector<WordID>& v, MT19937* rng) {
+    double p0 = base.prob(w, v);
+    if (crp.increment(w, p0, rng))
+      base.increment(w, v, rng);
+  }
+  void decrement(WordID w, const vector<WordID>& v, MT19937* rng) {
+    if (crp.decrement(w, rng))
+      base.decrement(w, v, rng);
+  }
+  double prob(WordID w, const vector<WordID>& v) const {
+    double p0 = base.prob(w, v);
+    return crp.prob(w, p0);
+  }
+  double log_likelihood() const { return crp.log_crp_prob() + base.log_likelihood(); }
+  void resample_hyperparameters(MT19937* rng) { crp.resample_hyperparameters(rng); }
+  PoissonLengthUniformCharWordModel base;
+  CCRP<WordID> crp;
+};
+
+template <unsigned N> struct PYPLM;
+
+#if 1
+template<> struct PYPLM<0> : public UniformVocabulary {
+  PYPLM(unsigned vs, double a, double b, double c, double d) :
+    UniformVocabulary(vs, a, b, c, d) {}
+};
+#else
+#if 0
+template<> struct PYPLM<0> : public PoissonLengthUniformCharWordModel {
+  PYPLM(unsigned vs, double a, double b, double c, double d) :
+    PoissonLengthUniformCharWordModel(vs, a, b, c, d) {}
+};
+#else
+template<> struct PYPLM<0> : public PYPAdaptedPoissonLengthUniformCharWordModel {
+  PYPLM(unsigned vs, double a, double b, double c, double d) :
+    PYPAdaptedPoissonLengthUniformCharWordModel(vs, a, b, c, d) {}
+};
+#endif
+#endif
 
 // represents an N-gram LM
 template <unsigned N> struct PYPLM {
@@ -170,7 +236,7 @@ int main(int argc, char** argv) {
     }
     if (SS % 10 == 9) {
       cerr << " [LLH=" << lm.log_likelihood() << "]" << endl;
-      if (SS % 20 == 19) lm.resample_hyperparameters(&rng);
+      if (SS % 30 == 29) lm.resample_hyperparameters(&rng);
     } else { cerr << '.' << flush; }
   }
   double llh = 0;
