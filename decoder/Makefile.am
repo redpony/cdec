@@ -44,6 +44,7 @@ libcdec_a_SOURCES = \
   hg_remove_eps.cc \
   decoder.cc \
   hg_intersect.cc \
+  hg_union.cc \
   hg_sampler.cc \
   factored_lexicon_helper.cc \
   viterbi.cc \
