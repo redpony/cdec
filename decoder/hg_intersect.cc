@@ -79,7 +79,9 @@ static bool FastLinearIntersect(const Lattice& target, Hypergraph* hg) {
   return (cov.size() == target.size());
 }
 
-bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
+namespace HG {
+
+bool Intersect(const Lattice& target, Hypergraph* hg) {
   // there are a number of faster algorithms available for restricted
   // classes of hypergraph and/or target.
   if (hg->IsLinearChain() && target.IsSentence())
@@ -158,5 +160,7 @@ bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
   else
     hg->swap(tforest);
   return true;
+}
+
 }
 
