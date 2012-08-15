@@ -98,7 +98,14 @@ cdef class Hypergraph:
        finally:
            del trees
 
-    def intersect(self, Lattice lat):
+    def intersect(self, inp):
+        cdef Lattice lat
+        if isinstance(inp, Lattice):
+            lat = <Lattice> inp
+        elif isinstance(inp, basestring):
+            lat = Lattice(inp)
+        else:
+            raise TypeError('cannot intersect hypergraph with %s' % type(inp))
         return hypergraph.Intersect(lat.lattice[0], self.hg)
 
     def prune(self, beam_alpha=0, density=0, **kwargs):
@@ -113,6 +120,9 @@ cdef class Hypergraph:
     def lattice(self): # TODO direct hg -> lattice conversion in cdec
         cdef bytes plf = hypergraph.AsPLF(self.hg[0], True).c_str()
         return Lattice(eval(plf))
+
+    def plf(self):
+        return bytes(hypergraph.AsPLF(self.hg[0], True).c_str())
 
     def reweight(self, weights):
         if isinstance(weights, SparseVector):

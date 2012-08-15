@@ -12,10 +12,9 @@ cdef extern from "decoder/lattice.h":
 
     cdef cppclass Lattice(vector): # (vector[vector[LatticeArc]])
         Lattice()
-        Lattice(unsigned t)
-        Lattice(unsigned t, vector[LatticeArc]& v)
         bint IsSentence()
         vector[LatticeArc]& operator[](unsigned)
+        void resize(unsigned)
 
 cdef extern from "decoder/lattice.h" namespace "LatticeTools":
-    void ConvertTextToLattice(string& text, Lattice* pl)
+    void ConvertTextOrPLF(string& text, Lattice* pl)

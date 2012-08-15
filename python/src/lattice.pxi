@@ -3,18 +3,20 @@ cimport lattice
 cdef class Lattice:
     cdef lattice.Lattice* lattice
 
-    def __cinit__(self, inp):
+    def __cinit__(self):
+        self.lattice = new lattice.Lattice()
+
+    def __init__(self, inp):
         if isinstance(inp, tuple):
-            self.lattice = new lattice.Lattice(len(inp))
+            self.lattice.resize(len(inp))
             for i, arcs in enumerate(inp):
                 self[i] = arcs
         else:
             if isinstance(inp, unicode):
                 inp = inp.encode('utf8')
             if not isinstance(inp, str):
-                raise TypeError('Cannot create lattice from %s' % type(inp))
-            self.lattice = new lattice.Lattice()
-            lattice.ConvertTextToLattice(string(<char *>inp), self.lattice)
+                raise TypeError('cannot create lattice from %s' % type(inp))
+            lattice.ConvertTextOrPLF(string(<char *>inp), self.lattice)
 
     def __dealloc__(self):
         del self.lattice
@@ -49,6 +51,9 @@ cdef class Lattice:
     def __str__(self):
         return str(hypergraph.AsPLF(self.lattice[0], True).c_str())
 
+    def __unicode__(self):
+        return unicode(str(self), 'utf8')
+
     def __iter__(self):
         cdef unsigned i
         for i in range(len(self)):
@@ -65,3 +70,10 @@ cdef class Lattice:
             yield '%d [shape=doublecircle]' % len(self)
             yield '}'
         return '\n'.join(lines()).encode('utf8')
+
+    def as_hypergraph(self):
+        cdef Hypergraph result = Hypergraph.__new__(Hypergraph)
+        result.hg = new hypergraph.Hypergraph()
+        cdef bytes plf = str(self)
+        hypergraph.ReadFromPLF(string(plf), result.hg)
+        return result

@@ -31,6 +31,7 @@ cdef extern from "decoder/hg.h":
     ctypedef HypergraphNode const_HypergraphNode "const Hypergraph::Node"
 
     cdef cppclass Hypergraph:
+        Hypergraph()
         Hypergraph(Hypergraph) nogil
         vector[HypergraphNode] nodes_
         vector[HypergraphEdge] edges_
@@ -57,10 +58,13 @@ cdef extern from "decoder/viterbi.h":
     string JoshuaVisualizationString(Hypergraph& hg) nogil
 
 cdef extern from "decoder/hg_io.h" namespace "HypergraphIO":
+    # Hypergraph JSON I/O
     bint ReadFromJSON(istream* inp, Hypergraph* out)
     bint WriteToJSON(Hypergraph& hg, bint remove_rules, ostream* out)
-    void ReadFromPLF(string& inp, Hypergraph* out, int line)
+    # Hypergraph PLF I/O
+    void ReadFromPLF(string& inp, Hypergraph* out)
     string AsPLF(Hypergraph& hg, bint include_global_parentheses)
+    # Lattice PLF I/O
     void PLFtoLattice(string& plf, Lattice* pl)
     string AsPLF(Lattice& lat, bint include_global_parentheses)
 

@@ -96,14 +96,14 @@ cdef class Decoder:
 
     def translate(self, sentence, grammar=None):
         cdef bytes input_str
-        if isinstance(sentence, unicode) or isinstance(sentence, str):
+        if isinstance(sentence, basestring):
             input_str = as_str(sentence.strip())
         elif isinstance(sentence, Lattice):
             input_str = str(sentence) # PLF format
         else:
             raise TypeError('Cannot translate input type %s' % type(sentence))
         if grammar:
-            if isinstance(grammar, str) or isinstance(grammar, unicode):
+            if isinstance(grammar, basestring):
                 self.dec.AddSupplementalGrammarFromString(string(as_str(grammar)))
             else:
                 self.dec.AddSupplementalGrammar(TextGrammar(grammar).grammar[0])

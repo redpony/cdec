@@ -7,10 +7,6 @@ from libc.stdlib cimport malloc, realloc, free
 from libc.string cimport memset, memcpy
 
 cdef class IntList:
-    cdef int size
-    cdef int increment
-    cdef int len
-    cdef int* arr
 
     def __cinit__(self, int size=0, int increment=1, int initial_len=0):
         if initial_len > size:
@@ -81,6 +77,11 @@ cdef class IntList:
 
     def __dealloc__(self):
         free(self.arr)
+
+    def __iter__(self):
+        cdef int i
+        for i in range(self.len):
+            yield self.arr[i]
 
     def __getitem__(self, index):
         cdef int i, j, k

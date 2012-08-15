@@ -7,10 +7,6 @@ from libc.stdlib cimport malloc, realloc, free
 from libc.string cimport memset, strcpy, strlen
 
 cdef class FloatList:
-    cdef int size
-    cdef int increment
-    cdef int len
-    cdef float* arr
 
     def __cinit__(self, int size=0, int increment=1, int initial_len=0):
         if initial_len > size:
