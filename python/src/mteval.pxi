@@ -127,7 +127,7 @@ cdef class Scorer:
         del self.name
     
     def __call__(self, refs):
-        if isinstance(refs, unicode) or isinstance(refs, str):
+        if isinstance(refs, basestring):
             refs = [refs]
         cdef vector[vector[WordID]]* refsv = new vector[vector[WordID]]()
         cdef vector[WordID]* refv

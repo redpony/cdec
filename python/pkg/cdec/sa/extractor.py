@@ -57,8 +57,8 @@ class GrammarExtractor:
         # lexical weighting tables
         tt = cdec.sa.BiLex(from_binary=config['lex_file'])
 
-        self.models = (EgivenFCoherent, SampleCountF, CountEF, 
-                MaxLexFgivenE(tt), MaxLexEgivenF(tt), IsSingletonF, IsSingletonFE)
+        scorer = cdec.sa.Scorer(EgivenFCoherent, SampleCountF, CountEF, 
+            MaxLexFgivenE(tt), MaxLexEgivenF(tt), IsSingletonF, IsSingletonFE)
 
         fsarray = cdec.sa.SuffixArray(from_binary=config['f_sa_file'])
         edarray = cdec.sa.DataArray(from_binary=config['e_file'])
@@ -67,7 +67,7 @@ class GrammarExtractor:
         # -1 = don't sample, use all data (VERY SLOW!)
         sampler = cdec.sa.Sampler(300, fsarray)
 
-        self.factory.configure(fsarray, edarray, sampler)
+        self.factory.configure(fsarray, edarray, sampler, scorer)
 
     def grammar(self, sentence):
         if isinstance(sentence, unicode):
@@ -75,4 +75,4 @@ class GrammarExtractor:
         cnet = chain(('<s>',), sentence.split(), ('</s>',))
         cnet = (cdec.sa.sym_fromstring(word, terminal=True) for word in cnet)
         cnet = tuple(((word, None, 1), ) for word in cnet)
-        return self.factory.input(cnet, self.models)
+        return self.factory.input(cnet)

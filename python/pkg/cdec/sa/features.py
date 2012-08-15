@@ -20,7 +20,7 @@ def CoherenceProb(fphrase, ephrase, paircount, fcount, fsample_count):
     return -math.log10(fcount/fsample_count)
 
 def MaxLexEgivenF(ttable):
-    def feature(fphrase, ephrase, paircount, fcount, fsample_count):
+    def MaxLexEgivenF(fphrase, ephrase, paircount, fcount, fsample_count):
         fwords = fphrase.words
         fwords.append('NULL')
         def score():
@@ -28,10 +28,10 @@ def MaxLexEgivenF(ttable):
               maxScore = max(ttable.get_score(f, e, 0) for f in fwords)
               yield -math.log10(maxScore) if maxScore > 0 else MAXSCORE
         return sum(score())
-    return feature
+    return MaxLexEgivenF
 
 def MaxLexFgivenE(ttable):
-    def feature(fphrase, ephrase, paircount, fcount, fsample_count):
+    def MaxLexFgivenE(fphrase, ephrase, paircount, fcount, fsample_count):
         ewords = ephrase.words
         ewords.append('NULL')
         def score():
@@ -39,7 +39,7 @@ def MaxLexFgivenE(ttable):
               maxScore = max(ttable.get_score(f, e, 1) for e in ewords)
               yield -math.log10(maxScore) if maxScore > 0 else MAXSCORE
         return sum(score())
-    return feature
+    return MaxLexFgivenE
 
 def IsSingletonF(fphrase, ephrase, paircount, fcount, fsample_count):
     return (fcount == 1)

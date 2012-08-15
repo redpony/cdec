@@ -26,11 +26,8 @@ cdef class NTRef:
         return '[%d]' % self.ref
 
 cdef TRule convert_rule(_sa.Rule rule):
-    cdef unsigned i
-    cdef lhs = _sa.sym_tocat(rule.lhs)
-    cdef scores = {}
-    for i in range(rule.n_scores):
-        scores['PhraseModel_'+str(i)] = rule.cscores[i]
+    lhs = _sa.sym_tocat(rule.lhs)
+    scores = dict(rule.scores)
     f, e = [], []
     cdef int* fsyms = rule.f.syms
     for i in range(rule.f.n):
@@ -44,7 +41,7 @@ cdef TRule convert_rule(_sa.Rule rule):
             e.append(NTRef(_sa.sym_getindex(esyms[i])))
         else:
             e.append(_sa.sym_tostring(esyms[i]))
-    cdef a = [(point/65536, point%65536) for point in rule.word_alignments]
+    a = list(rule.alignments())
     return TRule(lhs, f, e, scores, a)
 
 cdef class TRule:
@@ -92,7 +89,7 @@ cdef class TRule:
                 if isinstance(f[i], NT):
                     f_[0][i] = -TDConvert(<char *>f[i].cat)
                 else:
-                    f_[0][i] = TDConvert(<char *>as_str(f[i]))
+                    f_[0][i] = TDConvert(as_str(f[i]))
 
     property e:
         def __get__(self):
@@ -118,7 +115,7 @@ cdef class TRule:
                 if isinstance(e[i], NTRef):
                     e_[0][i] = 1-e[i].ref
                 else:
-                    e_[0][i] = TDConvert(<char *>as_str(e[i]))
+                    e_[0][i] = TDConvert(as_str(e[i]))
 
     property a:
         def __get__(self):
@@ -148,7 +145,7 @@ cdef class TRule:
             cdef int fid
             cdef float fval
             for fname, fval in scores.items():
-                fid = FDConvert(<char *>as_str(fname))
+                fid = FDConvert(as_str(fname))
                 if fid < 0: raise KeyError(fname)
                 scores_.set_value(fid, fval)
 
