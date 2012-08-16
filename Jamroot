@@ -14,7 +14,7 @@ boost 104400 ;
 external-lib z ;
 
 with-google-hash = [ option.get "with-google-hash" ] ;
-if [ test_header google/dense_hash_map ] || $(with-google-hash) {
+if [ test_header sparsehash/dense_hash_map ] || $(with-google-hash) {
   requirements += <define>HAVE_SPARSEHASH <include>$(with-google-hash) ;
 }
 
