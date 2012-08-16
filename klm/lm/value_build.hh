@@ -10,9 +10,9 @@
 namespace lm {
 namespace ngram {
 
-class Config;
-class BackoffValue;
-class RestValue;
+struct Config;
+struct BackoffValue;
+struct RestValue;
 
 class NoRestBuild {
   public:
