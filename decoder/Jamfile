@@ -55,6 +55,9 @@ lib decoder :
   JSON_parser.c
   json_parse.cc
   grammar.cc
+  rescore_translator.cc
+  hg_remove_eps.cc
+  hg_union.cc
   $(glc)
   ..//utils
   ..//mteval
