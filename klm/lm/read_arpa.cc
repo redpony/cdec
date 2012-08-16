@@ -7,8 +7,13 @@
 #include <vector>
 
 #include <ctype.h>
+#include <math.h>
 #include <string.h>
 #include <stdint.h>
+
+#ifdef WIN32
+#include <float.h>
+#endif
 
 namespace lm {
 
@@ -93,7 +98,16 @@ void ReadBackoff(util::FilePiece &in, float &backoff) {
     case '\t':
       backoff = in.ReadFloat();
       if (backoff == ngram::kExtensionBackoff) backoff = ngram::kNoExtensionBackoff;
-      if ((in.get() != '\n')) UTIL_THROW(FormatLoadException, "Expected newline after backoff");
+      {
+#ifdef WIN32
+		int float_class = _fpclass(backoff);
+        UTIL_THROW_IF(float_class == _FPCLASS_SNAN || float_class == _FPCLASS_QNAN || float_class == _FPCLASS_NINF || float_class == _FPCLASS_PINF, FormatLoadException, "Bad backoff " << backoff);
+#else
+        int float_class = fpclassify(backoff);
+        UTIL_THROW_IF(float_class == FP_NAN || float_class == FP_INFINITE, FormatLoadException, "Bad backoff " << backoff);
+#endif
+      }
+      UTIL_THROW_IF(in.get() != '\n', FormatLoadException, "Expected newline after backoff");
       break;
     case '\n':
       backoff = ngram::kNoExtensionBackoff;
