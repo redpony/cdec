@@ -8,7 +8,7 @@ from libc.stdlib cimport malloc, realloc, free
 from libc.string cimport memset, memcpy
 from libc.math cimport fmod, ceil, floor, log
 
-from collections import defaultdict, Counter
+from collections import defaultdict
 
 cdef int PRECOMPUTE = 0
 cdef int MERGE = 1
@@ -1078,8 +1078,8 @@ cdef class HieroCachingRuleFactory:
                         extract_stop = monitor_cpu()
                         self.extract_time = self.extract_time + extract_stop - extract_start
                         if len(extracts) > 0:
-                            fcount = Counter()
-                            fphrases = defaultdict(lambda: defaultdict(Counter))
+                            fcount = defaultdict(int)
+                            fphrases = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
                             for f, e, count, als in extracts:
                                 fcount[f] += count
                                 fphrases[f][e][als] += count
