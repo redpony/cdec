@@ -8,6 +8,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #ifdef WIN32
 #include "util/getopt.hh"
