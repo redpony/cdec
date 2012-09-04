@@ -38,7 +38,7 @@ cdef extern from "decoder/hg.h":
         int GoalNode()
         double NumberOfPaths()
         void Reweight(vector[weight_t]& weights) nogil
-        void Reweight(FastSparseVector& weights) nogil
+        void Reweight(FastSparseVector[weight_t]& weights) nogil
         bint PruneInsideOutside(double beam_alpha,
                                 double density,
                                 EdgeMask* preserve_mask,

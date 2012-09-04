@@ -117,6 +117,7 @@ phrasinator/gibbs_train_plm_notables
 previous.sh
 pro-train/mr_pro_map
 pro-train/mr_pro_reduce
+python/setup.py
 rampion/rampion_cccp
 rst_parser/mst_train
 rst_parser/random_tree
