@@ -9,7 +9,7 @@ import cdec.sa
 MAX_INITIAL_SIZE = 15
 
 class GrammarExtractor:
-    def __init__(self, config):
+    def __init__(self, config, features=None):
         if isinstance(config, str) or isinstance(config, unicode):
             if not os.path.exists(config):
                 raise IOError('cannot read configuration from {0}'.format(config))
@@ -58,7 +58,8 @@ class GrammarExtractor:
         tt = cdec.sa.BiLex(from_binary=config['lex_file'])
 
         scorer = cdec.sa.Scorer(EgivenFCoherent, SampleCountF, CountEF, 
-            MaxLexFgivenE(tt), MaxLexEgivenF(tt), IsSingletonF, IsSingletonFE)
+            MaxLexFgivenE(tt), MaxLexEgivenF(tt), IsSingletonF, IsSingletonFE,
+            *cdec.sa._SA_FEATURES)
 
         fsarray = cdec.sa.SuffixArray(from_binary=config['f_sa_file'])
         edarray = cdec.sa.DataArray(from_binary=config['e_file'])

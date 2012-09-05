@@ -11,16 +11,16 @@ from libc.math cimport fmod, ceil, floor, log
 
 from collections import defaultdict, Counter, namedtuple
 
-FeatureContext = namedtuple("FeatureContext",
-  ["fphrase", 
-   "ephrase", 
-   "paircount", 
-   "fcount", 
-   "fsample_count",
-   "input_span",
-   "matches",
-   "test_sentence"
-  ])
+FeatureContext = namedtuple('FeatureContext',
+    ['fphrase', 
+     'ephrase', 
+     'paircount', 
+     'fcount', 
+     'fsample_count',
+     'input_span',
+     'matches',
+     'test_sentence'
+    ])
 
 cdef int PRECOMPUTE = 0
 cdef int MERGE = 1

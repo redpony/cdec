@@ -1,4 +1,4 @@
-cdef StringMap FD = StringMap()
+cdef StringMap FD = StringMap() # Feature name dictionary
 
 INITIAL_CAPACITY = 7 # default number of features
 INCREMENT = INITIAL_CAPACITY # double size
@@ -26,8 +26,8 @@ cdef class Scorer:
         names = [FD.index(<char *>model.__name__) for model in models]
         self.models = zip(names, models)
 
-    cdef FeatureVector score(self, c):
+    cdef FeatureVector score(self, ctx):
         cdef FeatureVector scores = FeatureVector()
         for name, model in self.models:
-            scores.set(name, model(c.fphrase, c.ephrase, c.paircount, c.fcount, c.fsample_count))
+            scores.set(name, model(ctx))
         return scores

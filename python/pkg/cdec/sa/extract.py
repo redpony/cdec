@@ -8,11 +8,19 @@ import signal
 import cdec.sa
 
 extractor, prefix = None, None
-def make_extractor(config, grammars):
+def make_extractor(config, grammars, features):
     global extractor, prefix
     signal.signal(signal.SIGINT, signal.SIG_IGN) # Let parent process catch Ctrl+C
+    if features: load_features(features)
     extractor = cdec.sa.GrammarExtractor(config)
     prefix = grammars
+
+def load_features(features):
+    logging.info('Loading additional feature definitions from %s', features)
+    prefix = os.path.dirname(features)
+    sys.path.append(prefix)
+    __import__(os.path.basename(features).replace('.py', ''))
+    sys.path.remove(prefix)
 
 def extract(inp):
     global extractor, prefix
@@ -25,7 +33,6 @@ def extract(inp):
     grammar_file = os.path.abspath(grammar_file)
     return '<seg grammar="{0}" id="{1}">{2}</seg>'.format(grammar_file, i, sentence)
 
-
 def main():
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(description='Extract grammars from a compiled corpus.')
@@ -37,18 +44,28 @@ def main():
                         help='number of parallel extractors')
     parser.add_argument('-s', '--chunksize', type=int, default=10,
                         help='number of sentences / chunk')
+    parser.add_argument('-f', '--features', type=str, default=None,
+                        help='additional feature definitions')
     args = parser.parse_args()
 
     if not os.path.exists(args.grammars):
         os.mkdir(args.grammars)
-
-    logging.info('Starting %d workers; chunk size: %d', args.jobs, args.chunksize)
-    pool = mp.Pool(args.jobs, make_extractor, (args.config, args.grammars))
-    try:
-        for output in pool.imap(extract, enumerate(sys.stdin), args.chunksize):
+    if not args.features.endswith('.py'):
+        sys.stderr.write('Error: feature definition file should be a python module\n')
+        sys.exit(1)
+    
+    if args.jobs > 1:
+        logging.info('Starting %d workers; chunk size: %d', args.jobs, args.chunksize)
+        pool = mp.Pool(args.jobs, make_extractor, (args.config, args.grammars, args.features))
+        try:
+            for output in pool.imap(extract, enumerate(sys.stdin), args.chunksize):
+                print(output)
+        except KeyboardInterrupt:
+            pool.terminate()
+    else:
+        make_extractor(args.config, args.grammars, args.features)
+        for output in map(extract, enumerate(sys.stdin)):
             print(output)
-    except KeyboardInterrupt:
-        pool.terminate()
 
 if __name__ == '__main__':
     main()
