@@ -50,7 +50,7 @@ def main():
 
     if not os.path.exists(args.grammars):
         os.mkdir(args.grammars)
-    if not args.features.endswith('.py'):
+    if not (args.features is None or args.features.endswith('.py')):
         sys.stderr.write('Error: feature definition file should be a python module\n')
         sys.exit(1)
     
