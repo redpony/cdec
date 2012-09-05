@@ -122,7 +122,7 @@ cdef class IntList:
     def __len__(self):
         return self.len
 
-    def getSize(self):
+    def get_size(self):
         return self.size
 
     def append(self, int val):

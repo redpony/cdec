@@ -32,10 +32,10 @@ cdef class DataArray:
     def __len__(self):
         return len(self.data)
 
-    def getSentId(self, i):
+    def get_sentence_id(self, i):
         return self.sent_id.arr[i]
 
-    def getSent(self, i):
+    def get_sentence(self, i):
         cdef int j, start, stop
         sent = []
         start = self.sent_index.arr[i]
@@ -44,7 +44,7 @@ cdef class DataArray:
             sent.append(self.id2word[self.data.arr[i]])
         return sent
 
-    def getSentPos(self, loc):
+    def get_sentence_position(self, loc):
         return loc - self.sent_index.arr[self.sent_id.arr[loc]]
 
     def get_id(self, word):

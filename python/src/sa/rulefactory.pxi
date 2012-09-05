@@ -1098,12 +1098,13 @@ cdef class HieroCachingRuleFactory:
                                 fphrases[f][e][als].append(loc)
                             for f, elist in fphrases.iteritems():
                                 for e, alslist in elist.iteritems():
-                                    alignment = max(alslist.iteritems(), key=lambda x: len(x[1]))[0]
+                                    alignment, max_locs = max(alslist.iteritems(), key=lambda x: len(x[1]))
                                     locs = tuple(itertools.chain(alslist.itervalues()))
-                                    count = len(locs)
+                                    # count = len(locs) # Should be?
+                                    count = len(max_locs) # Was
                                     scores = self.scorer.score(FeatureContext(
                                                f, e, count, fcount[f], num_samples,
-                                               (k,i), locs, fwords
+                                               (k, i), locs, fwords
                                                ))
                                     yield Rule(self.category, f, e, scores, alignment)
 
