@@ -4,7 +4,7 @@
 
 from libc.stdio cimport FILE, fopen, fread, fwrite, fclose
 from libc.stdlib cimport malloc, realloc, free
-from libc.string cimport memset, strcpy, strlen
+from libc.string cimport memset, strcpy
 
 cdef struct _node:
     _node* smaller
@@ -74,7 +74,6 @@ cdef class BiLex:
         cdef int *fsent, *esent, *alignment, *links, *ealigned, *faligned
         cdef _node** dict
         cdef int *fmargin, *emargin, *count
-        cdef bytes word
         cdef int null_word
 
         null_word = 0
@@ -215,32 +214,28 @@ cdef class BiLex:
     cdef write_wordlist(self, wordlist, FILE* f):
         cdef int word_len
         cdef int num_words
-        cdef char* c_word
 
         num_words = len(wordlist)
         fwrite(&(num_words), sizeof(int), 1, f)
         for word in wordlist:
-            c_word = word
-            word_len = strlen(c_word) + 1
+            word_len = len(word) + 1
             fwrite(&(word_len), sizeof(int), 1, f)
-            fwrite(c_word, sizeof(char), word_len, f)
+            fwrite(<char *>word, sizeof(char), word_len, f)
 
 
     cdef read_wordlist(self, word2id, id2word, FILE* f):
         cdef int num_words
         cdef int word_len
-        cdef char* c_word
-        cdef bytes py_word
+        cdef char* word
 
         fread(&(num_words), sizeof(int), 1, f)
         for i from 0 <= i < num_words:
             fread(&(word_len), sizeof(int), 1, f)
-            c_word = <char*> malloc (word_len * sizeof(char))
-            fread(c_word, sizeof(char), word_len, f)
-            py_word = c_word
-            free(c_word)
-            word2id[py_word] = len(id2word)
-            id2word.append(py_word)
+            word = <char*> malloc (word_len * sizeof(char))
+            fread(word, sizeof(char), word_len, f)
+            word2id[word] = len(id2word)
+            id2word.append(word)
+            free(word)
 
     def read_binary(self, char* filename):
         cdef FILE* f
