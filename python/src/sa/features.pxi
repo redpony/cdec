@@ -26,9 +26,8 @@ cdef class Scorer:
         names = [FD.index(<char *>model.__name__) for model in models]
         self.models = zip(names, models)
 
-    cdef FeatureVector score(self, Phrase fphrase, Phrase ephrase,
-            unsigned paircount, unsigned fcount, unsigned fsample_count):
+    cdef FeatureVector score(self, c):
         cdef FeatureVector scores = FeatureVector()
         for name, model in self.models:
-            scores.set(name, model(fphrase, ephrase, paircount, fcount, fsample_count))
+            scores.set(name, model(c.fphrase, c.ephrase, c.paircount, c.fcount, c.fsample_count))
         return scores
