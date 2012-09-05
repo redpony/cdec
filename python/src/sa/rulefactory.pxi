@@ -1103,7 +1103,7 @@ cdef class HieroCachingRuleFactory:
                                     count = len(locs)
                                     scores = self.scorer.score(FeatureContext(
                                                f, e, count, fcount[f], num_samples,
-                                               (k,i), locs, fwords
+                                               (k,i+spanlen), locs, fwords
                                                ))
                                     yield Rule(self.category, f, e, scores, alignment)
 
