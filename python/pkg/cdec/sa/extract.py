@@ -45,7 +45,7 @@ def main():
                         help='number of parallel extractors')
     parser.add_argument('-s', '--chunksize', type=int, default=10,
                         help='number of sentences / chunk')
-    parser.add_argument('-f', '--features', action='append',
+    parser.add_argument('-f', '--features', nargs='*', default=[],
                         help='additional feature definitions')
     args = parser.parse_args()
 
