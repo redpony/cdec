@@ -19,7 +19,9 @@ FeatureContext = namedtuple('FeatureContext',
      'fsample_count',
      'input_span',
      'matches',
-     'test_sentence'
+     'test_sentence',
+     'f_text',
+     'e_text'
     ])
 
 cdef int PRECOMPUTE = 0
@@ -1103,7 +1105,7 @@ cdef class HieroCachingRuleFactory:
                                     count = len(locs)
                                     scores = self.scorer.score(FeatureContext(
                                                f, e, count, fcount[f], num_samples,
-                                               (k,i+spanlen), locs, fwords
+                                               (k,i+spanlen), locs, fwords, self.fda, self.eda
                                                ))
                                     yield Rule(self.category, f, e, scores, alignment)
 
