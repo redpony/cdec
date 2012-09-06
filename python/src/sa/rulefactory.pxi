@@ -1101,9 +1101,8 @@ cdef class HieroCachingRuleFactory:
                             for f, elist in fphrases.iteritems():
                                 for e, alslist in elist.iteritems():
                                     alignment, max_locs = max(alslist.iteritems(), key=lambda x: len(x[1]))
-                                    locs = tuple(itertools.chain(alslist.itervalues()))
-                                    # count = len(locs) # Should be?
-                                    count = len(max_locs) # Was
+                                    locs = tuple(itertools.chain.from_iterable(alslist.itervalues()))
+                                    count = len(locs)
                                     scores = self.scorer.score(FeatureContext(
                                                f, e, count, fcount[f], num_samples,
                                                (k,i+spanlen), locs, fwords, self.fda, self.eda
