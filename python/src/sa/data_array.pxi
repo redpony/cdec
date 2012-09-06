@@ -9,8 +9,8 @@ from libc.string cimport memset, strcpy
 cdef class DataArray:
     cdef word2id
     cdef id2word
-    cdef IntList data
-    cdef IntList sent_id
+    cdef public IntList data
+    cdef public IntList sent_id
     cdef IntList sent_index
     cdef bint use_sent_id
 
@@ -31,9 +31,6 @@ cdef class DataArray:
 
     def __len__(self):
         return len(self.data)
-
-    def get_data(self):
-        return self.data
 
     def get_sentence_id(self, i):
         return self.sent_id.arr[i]
