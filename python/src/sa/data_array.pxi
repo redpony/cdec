@@ -32,6 +32,9 @@ cdef class DataArray:
     def __len__(self):
         return len(self.data)
 
+    def get_data(self):
+        return self.data
+
     def get_sentence_id(self, i):
         return self.sent_id.arr[i]
 
