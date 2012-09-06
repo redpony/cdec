@@ -71,10 +71,14 @@ class GrammarExtractor:
         sampler = cdec.sa.Sampler(300, fsarray)
 
         self.factory.configure(fsarray, edarray, sampler, scorer)
+        # Initialize feature definitions with configuration
+        for fn in cdec.sa._SA_CONFIGURE:
+            fn(config)
 
     def grammar(self, sentence):
         if isinstance(sentence, unicode):
             sentence = sentence.encode('utf8')
-        words = chain(('<s>',), sentence.split(), ('</s>',))
+        words = tuple(chain(('<s>',), sentence.split(), ('</s>',)))
+        meta = cdec.sa.annotate(words)
         cnet = cdec.sa.make_lattice(words)
-        return self.factory.input(cnet)
+        return self.factory.input(cnet, meta)

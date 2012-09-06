@@ -21,7 +21,8 @@ FeatureContext = namedtuple('FeatureContext',
      'matches',
      'test_sentence',
      'f_text',
-     'e_text'
+     'e_text',
+     'meta'
     ])
 
 cdef int PRECOMPUTE = 0
@@ -934,7 +935,7 @@ cdef class HieroCachingRuleFactory:
                     candidate.append([next_id,curr[1]+jump])
         return sorted(result);
 
-    def input(self, fwords):
+    def input(self, fwords, meta):
         '''When this function is called on the RuleFactory,
         it looks up all of the rules that can be used to translate
         the input sentence'''
@@ -1105,8 +1106,8 @@ cdef class HieroCachingRuleFactory:
                                     count = len(locs)
                                     scores = self.scorer.score(FeatureContext(
                                                f, e, count, fcount[f], num_samples,
-                                               (k,i+spanlen), locs, fwords, self.fda, self.eda
-                                               ))
+                                               (k,i+spanlen), locs, fwords, self.fda, self.eda,
+                                               meta))
                                     yield Rule(self.category, f, e, scores, alignment)
 
                 if len(phrase) < self.max_length and i+spanlen < len(fwords) and pathlen+1 <= self.max_initial_size:
