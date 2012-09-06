@@ -7,11 +7,11 @@ from libc.stdlib cimport malloc, realloc, free
 from libc.string cimport memset, strcpy
 
 cdef class DataArray:
-    cdef word2id
-    cdef id2word
+    cdef public word2id
+    cdef public id2word
     cdef public IntList data
     cdef public IntList sent_id
-    cdef IntList sent_index
+    cdef public IntList sent_index
     cdef bint use_sent_id
 
     def __cinit__(self, from_binary=None, from_text=None, side=None, bint use_sent_id=False):
@@ -44,17 +44,18 @@ cdef class DataArray:
             sent.append(self.id2word[self.data.arr[i]])
         return sent
 
-    def get_sentence_position(self, loc):
-        return loc - self.sent_index.arr[self.sent_id.arr[loc]]
-
     def get_id(self, word):
         if not word in self.word2id:
             self.word2id[word] = len(self.id2word)
             self.id2word.append(word)
         return self.word2id[word]
 
-    def get_word(self, id):
-        return self.id2word[id]
+    def __getitem__(self, loc):
+        return self.id2word[self.data.arr[loc]]
+
+    def get_sentence_bounds(self, loc):
+        cdef int sid = self.sent_id.arr[loc]
+        return (self.sent_index.arr[sid], self.sent_index.arr[sid+1])
 
     def write_text(self, char* filename):
         with open(filename, "w") as f:
