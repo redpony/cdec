@@ -57,6 +57,8 @@ class GrammarExtractor:
         # lexical weighting tables
         tt = cdec.sa.BiLex(from_binary=config['lex_file'])
 
+        # TODO: use @cdec.sa.features decorator for standard features too
+        # + add a mask to disable features
         scorer = cdec.sa.Scorer(EgivenFCoherent, SampleCountF, CountEF, 
             MaxLexFgivenE(tt), MaxLexEgivenF(tt), IsSingletonF, IsSingletonFE,
             *cdec.sa._SA_FEATURES)
