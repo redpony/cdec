@@ -75,7 +75,6 @@ class GrammarExtractor:
     def grammar(self, sentence):
         if isinstance(sentence, unicode):
             sentence = sentence.encode('utf8')
-        cnet = chain(('<s>',), sentence.split(), ('</s>',))
-        cnet = (cdec.sa.sym_fromstring(word, terminal=True) for word in cnet)
-        cnet = tuple(((word, None, 1), ) for word in cnet)
+        words = chain(('<s>',), sentence.split(), ('</s>',))
+        cnet = cdec.sa.make_lattice(words)
         return self.factory.input(cnet)
