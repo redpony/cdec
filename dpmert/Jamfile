@@ -16,6 +16,7 @@ lib dpmert :
   : :
   <library>..//utils
   <library>..//mteval
+  <library>..//decoder
   <library>../klm/lm//kenlm
   <library>..//boost_program_options
   <include>.
