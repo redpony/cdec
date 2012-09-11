@@ -11,7 +11,6 @@
 #include <string>
 #include <limits>
 
-#include <unistd.h>
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
