@@ -26,7 +26,7 @@ if [ test_header boost/serialization/map.hpp ] && [ test_library boost_serializa
   requirements += <define>HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP ;
 }
 
-project : requirements $(requirements) <toolset>darwin:<link>static ;
+project : requirements $(requirements) <toolset>darwin:<link>static <library>boost_system ;
 project : default-build <warnings>on <variant>release ;
 
 install-bin-libs dpmert//programs utils//programs mteval//programs klm/lm//programs training//liblbfgs decoder//cdec phrasinator//programs mira//kbest_mira ;
@@ -40,6 +40,6 @@ rule all_tests ( targets * : dependencies : properties * ) {
   targets ?= [ glob *_test.cc ] ;
   for t in $(targets) {
     local base = [ MATCH "^(.*).cc$" : $(t) ] ;
-    unit-test $(base) : $(t) $(dependencies) ..//boost_unit_test_framework : $(properties) ;
+    unit-test $(base) : $(t) $(dependencies) /top//boost_unit_test_framework : $(properties) ;
   }
 }
