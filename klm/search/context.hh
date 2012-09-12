@@ -6,7 +6,6 @@
 #include "search/final.hh"
 #include "search/types.hh"
 #include "search/vertex.hh"
-#include "search/word.hh"
 #include "util/exception.hh"
 
 #include <boost/pool/object_pool.hpp>

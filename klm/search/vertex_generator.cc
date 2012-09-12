@@ -38,7 +38,7 @@ void VertexGenerator::NewHypothesis(const lm::ngram::ChartState &state, const Ed
     // Found it already.  
     Final &exists = *got.first->second;
     if (exists.Bound() < partial.score) {
-      exists.Reset(partial.score, from.GetRule(), partial.nt[0].End(), partial.nt[1].End());
+      exists.Reset(partial.score, from, partial.nt[0].End(), partial.nt[1].End());
     }
     --to_pop_;
     return;
@@ -91,7 +91,7 @@ Final *VertexGenerator::CompleteTransition(VertexGenerator::Trie &starter, const
   assert(node.State().left.full == state.left.full);
   assert(!node.End());
   Final *final = context_.NewFinal();
-  final->Reset(partial.score, from.GetRule(), partial.nt[0].End(), partial.nt[1].End());
+  final->Reset(partial.score, from, partial.nt[0].End(), partial.nt[1].End());
   node.SetEnd(final);
   return final;
 }

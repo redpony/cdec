@@ -2,9 +2,9 @@
 #define SEARCH_RULE__
 
 #include "lm/left.hh"
+#include "lm/word_index.hh"
 #include "search/arity.hh"
 #include "search/types.hh"
-#include "search/word.hh"
 
 #include <boost/array.hpp>
 
@@ -19,14 +19,10 @@ class Rule {
   public:
     Rule() : arity_(0) {}
 
-    void AppendTerminal(Word w) { items_.push_back(w); }
+    static const lm::WordIndex kNonTerminal = lm::kMaxWordIndex;
 
-    void AppendNonTerminal() {
-      items_.resize(items_.size() + 1);
-      ++arity_;
-    }
-
-    template <class Model> void FinishedAdding(const Context<Model> &context, Score additive, bool prepend_bos);
+    // Use kNonTerminal for non-terminals.  
+    template <class Model> void Init(const Context<Model> &context, Score additive, const std::vector<lm::WordIndex> &words, bool prepend_bos);
 
     Score Bound() const { return bound_; }
 
@@ -38,22 +34,13 @@ class Rule {
       return lexical_[index];
     }
 
-    // For printing.  
-    typedef const std::vector<Word> ItemsRet;
-    ItemsRet &Items() const { return items_; }
-
   private:
     Score bound_, additive_;
 
     unsigned int arity_;
 
-    // TODO: pool?
-    std::vector<Word> items_;
-
     std::vector<lm::ngram::ChartState> lexical_;
 };
-
-std::ostream &operator<<(std::ostream &o, const Rule &rule);
 
 } // namespace search
 
