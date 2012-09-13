@@ -1,1 +1,1 @@
-exe kbest_mira : kbest_mira.cc ..//decoder ;
+exe kbest_mira : kbest_mira.cc ../decoder//decoder ;
