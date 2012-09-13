@@ -93,11 +93,21 @@ LazyBase *LazyBase::Load(const char *model_file, const std::vector<weight_t> &we
   }
 }
 
+void PrintFinal(const Hypergraph &hg, const search::Edge *edge_base, const search::Final &final) {
+  const std::vector<WordID> &words = hg.edges_[&final.From() - edge_base].rule_->e();
+  boost::array<const search::Final*, search::kMaxArity>::const_iterator child(final.Children().begin());
+  for (std::vector<WordID>::const_iterator i = words.begin(); i != words.end(); ++i) {
+    if (*i > 0) {
+      std::cout << TD::Convert(*i) << ' ';
+    } else {
+      PrintFinal(hg, edge_base, **child++);
+    }
+  }
+}
+
 template <class Model> void Lazy<Model>::Search(const Hypergraph &hg) const {
   boost::scoped_array<search::Vertex> out_vertices(new search::Vertex[hg.nodes_.size()]);
   boost::scoped_array<search::Edge> out_edges(new search::Edge[hg.edges_.size()]);
-
-
   search::Context<Model> context(config_, m_);
 
   for (unsigned int i = 0; i < hg.nodes_.size(); ++i) {
@@ -120,7 +130,8 @@ template <class Model> void Lazy<Model>::Search(const Hypergraph &hg) const {
       top.Split(continuation);
       top = continuation;
     }
-    std::cout << top.End().Bound() << std::endl;
+    PrintFinal(hg, out_edges.get(), top.End());
+    std::cout << "||| " << top.End().Bound() << std::endl;
   }
 }
 
@@ -145,7 +156,7 @@ template <class Model> void Lazy<Model>::ConvertEdge(const search::Context<Model
 
   float additive = in.rule_->GetFeatureValues().dot(cdec_weights_);
   UTIL_THROW_IF(isnan(additive), util::Exception, "Bad dot product");
-  additive -= terminals * context.GetWeights().WordPenalty() * static_cast<float>(terminals) / M_LN10;
+  additive -= static_cast<float>(terminals) * context.GetWeights().WordPenalty() / M_LN10;
 
   out.InitRule().Init(context, additive, words, final);
 }
