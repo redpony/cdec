@@ -9,14 +9,14 @@ lib dpmert :
   mert_geometry.cc
   ..//utils
   ..//mteval
-  ..//decoder
+  ../decoder//decoder
   ../klm/lm//kenlm
   ..//boost_program_options
   : <include>.
   : :
   <library>..//utils
   <library>..//mteval
-  <library>..//decoder
+  <library>../decoder//decoder
   <library>../klm/lm//kenlm
   <library>..//boost_program_options
   <include>.
