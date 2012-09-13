@@ -49,6 +49,8 @@ Weights::Weights(StringPiece text) {
   word_penalty_ = Steal("WordPenalty");
 }
 
+Weights::Weights(Score lm, Score oov, Score word_penalty) : lm_(lm), oov_(oov), word_penalty_(word_penalty) {}
+
 search::Score Weights::DotNoLM(StringPiece text) const {
   DotProduct dot;
   Parse<const Map, DotProduct>(text, map_, dot);

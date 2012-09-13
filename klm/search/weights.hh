@@ -23,25 +23,28 @@ class Weights {
     // Parses weights, sets lm_weight_, removes it from map_.
     explicit Weights(StringPiece text);
 
-    search::Score DotNoLM(StringPiece text) const;
+    // Just the three scores we care about adding.   
+    Weights(Score lm, Score oov, Score word_penalty);
 
-    search::Score LM() const { return lm_; }
+    Score DotNoLM(StringPiece text) const;
 
-    search::Score OOV() const { return oov_; }
+    Score LM() const { return lm_; }
 
-    search::Score WordPenalty() const { return word_penalty_; }
+    Score OOV() const { return oov_; }
+
+    Score WordPenalty() const { return word_penalty_; }
 
     // Mostly for testing.  
-    const boost::unordered_map<std::string, search::Score> &GetMap() const { return map_; }
+    const boost::unordered_map<std::string, Score> &GetMap() const { return map_; }
 
   private:
     float Steal(const std::string &str);
 
-    typedef boost::unordered_map<std::string, search::Score> Map;
+    typedef boost::unordered_map<std::string, Score> Map;
 
     Map map_;
 
-    search::Score lm_, oov_, word_penalty_;
+    Score lm_, oov_, word_penalty_;
 };
 
 } // namespace search

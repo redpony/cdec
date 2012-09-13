@@ -8,15 +8,15 @@ namespace search {
 
 class Config {
   public:
-    Config(StringPiece weight_str, unsigned int pop_limit) :
-      weights_(weight_str), pop_limit_(pop_limit) {}
+    Config(const Weights &weights, unsigned int pop_limit) :
+      weights_(weights), pop_limit_(pop_limit) {}
 
     const Weights &GetWeights() const { return weights_; }
 
     unsigned int PopLimit() const { return pop_limit_; }
 
   private:
-    search::Weights weights_;
+    Weights weights_;
     unsigned int pop_limit_;
 };
 

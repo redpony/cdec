@@ -38,6 +38,7 @@
 #include "sampler.h"
 
 #include "forest_writer.h" // TODO this section should probably be handled by an Observer
+#include "lazy.h"
 #include "hg_io.h"
 #include "aligner.h"
 
@@ -831,6 +832,9 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
 
   if (conf.count("show_target_graph"))
     HypergraphIO::WriteTarget(conf["show_target_graph"].as<string>(), sent_id, forest);
+
+  if (conf.count("lazy_search"))
+    PassToLazy(forest, CurrentWeightVector());
 
   for (int pass = 0; pass < rescoring_passes.size(); ++pass) {
     const RescoringPass& rp = rescoring_passes[pass];
