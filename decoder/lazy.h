@@ -6,6 +6,6 @@
 
 class Hypergraph;
 
-void PassToLazy(const char *model_file, const std::vector<weight_t> &weights, const Hypergraph &hg);
+void PassToLazy(const char *model_file, const std::vector<weight_t> &weights, unsigned int pop_limit, const Hypergraph &hg);
 
 #endif // _LAZY_H_
