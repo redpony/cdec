@@ -44,13 +44,13 @@ class LazyBase {
   public:
     LazyBase(const std::vector<weight_t> &weights) : 
       cdec_weights_(weights),
-      config_(search::Weights(weights[FD::Convert("KLanguageModel")], weights[FD::Convert("KLanguageModel_OOV")], weights[FD::Convert("WordPenalty")]), 1000) {
-      std::cerr << "Weights KLanguageModel " << config_.GetWeights().LM() << " KLanguageModel_OOV " << config_.GetWeights().OOV() << " WordPenalty " << config_.GetWeights().WordPenalty()  << std::endl;
+      weights_(weights[FD::Convert("KLanguageModel")], weights[FD::Convert("KLanguageModel_OOV")], weights[FD::Convert("WordPenalty")]) {
+      std::cerr << "Weights KLanguageModel " << weights_.LM() << " KLanguageModel_OOV " << weights_.OOV() << " WordPenalty " << weights_.WordPenalty() << std::endl;
     }
 
     virtual ~LazyBase() {}
 
-    virtual void Search(const Hypergraph &hg) const = 0;
+    virtual void Search(unsigned int pop_limit, const Hypergraph &hg) const = 0;
 
     static LazyBase *Load(const char *model_file, const std::vector<weight_t> &weights);
 
@@ -65,14 +65,14 @@ class LazyBase {
 
     const std::vector<weight_t> &cdec_weights_;
 
-    const search::Config config_;
+    const search::Weights weights_;
 };
 
 template <class Model> class Lazy : public LazyBase {
   public:
     Lazy(const char *model_file, const std::vector<weight_t> &weights) : LazyBase(weights), m_(model_file, GetConfig()) {}
 
-    void Search(const Hypergraph &hg) const;
+    void Search(unsigned int pop_limit, const Hypergraph &hg) const;
 
   private:
     void ConvertEdge(const search::Context<Model> &context, bool final, search::Vertex *vertices, const Hypergraph::Edge &in, search::Edge &out) const;
@@ -105,10 +105,11 @@ void PrintFinal(const Hypergraph &hg, const search::Edge *edge_base, const searc
   }
 }
 
-template <class Model> void Lazy<Model>::Search(const Hypergraph &hg) const {
+template <class Model> void Lazy<Model>::Search(unsigned int pop_limit, const Hypergraph &hg) const {
   boost::scoped_array<search::Vertex> out_vertices(new search::Vertex[hg.nodes_.size()]);
   boost::scoped_array<search::Edge> out_edges(new search::Edge[hg.edges_.size()]);
-  search::Context<Model> context(config_, m_);
+  search::Config config(weights_, pop_limit);
+  search::Context<Model> context(config, m_);
 
   for (unsigned int i = 0; i < hg.nodes_.size(); ++i) {
     search::Vertex &out_vertex = out_vertices[i];
@@ -165,9 +166,9 @@ boost::scoped_ptr<LazyBase> AwfulGlobalLazy;
 
 } // namespace
 
-void PassToLazy(const char *model_file, const std::vector<weight_t> &weights, const Hypergraph &hg) {
+void PassToLazy(const char *model_file, const std::vector<weight_t> &weights, unsigned int pop_limit, const Hypergraph &hg) {
   if (!AwfulGlobalLazy.get()) {
     AwfulGlobalLazy.reset(LazyBase::Load(model_file, weights));
   }
-  AwfulGlobalLazy->Search(hg);
+  AwfulGlobalLazy->Search(pop_limit, hg);
 }

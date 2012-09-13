@@ -835,7 +835,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     HypergraphIO::WriteTarget(conf["show_target_graph"].as<string>(), sent_id, forest);
 
   if (conf.count("lazy_search"))
-    PassToLazy(conf["lazy_search"].as<string>().c_str(), CurrentWeightVector(), forest);
+    PassToLazy(conf["lazy_search"].as<string>().c_str(), CurrentWeightVector(), pop_limit, forest);
 
   for (int pass = 0; pass < rescoring_passes.size(); ++pass) {
     const RescoringPass& rp = rescoring_passes[pass];
