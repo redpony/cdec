@@ -58,10 +58,12 @@ lib decoder :
   rescore_translator.cc
   hg_remove_eps.cc
   hg_union.cc
+  lazy.cc
   $(glc)
   ..//utils
   ..//mteval
   ../klm/lm//kenlm
+  ../klm/search//search
   ..//boost_program_options
   : <include>.
   : :
