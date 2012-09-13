@@ -10,7 +10,7 @@
 
 path-constant TOP : . ;
 include $(TOP)/jam-files/sanity.jam ;
-boost 104400 ;
+boost 104200 ;
 external-lib z ;
 
 with-google-hash = [ option.get "with-google-hash" ] ;
