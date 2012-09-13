@@ -44,7 +44,9 @@ class LazyBase {
   public:
     LazyBase(const std::vector<weight_t> &weights) : 
       cdec_weights_(weights),
-      config_(search::Weights(weights[FD::Convert("KLanguageModel")], weights[FD::Convert("KLanguageModel_OOV")], weights[FD::Convert("WordPenalty")]), 1000) {}
+      config_(search::Weights(weights[FD::Convert("KLanguageModel")], weights[FD::Convert("KLanguageModel_OOV")], weights[FD::Convert("WordPenalty")]), 1000) {
+      std::cerr << "Weights KLanguageModel " << config_.GetWeights().LM() << " KLanguageModel_OOV " << config_.GetWeights().OOV() << " WordPenalty " << config_.GetWeights().WordPenalty()  << std::endl;
+    }
 
     virtual ~LazyBase() {}
 
@@ -95,6 +97,7 @@ template <class Model> void Lazy<Model>::Search(const Hypergraph &hg) const {
   boost::scoped_array<search::Vertex> out_vertices(new search::Vertex[hg.nodes_.size()]);
   boost::scoped_array<search::Edge> out_edges(new search::Edge[hg.edges_.size()]);
 
+
   search::Context<Model> context(config_, m_);
 
   for (unsigned int i = 0; i < hg.nodes_.size(); ++i) {
@@ -141,6 +144,7 @@ template <class Model> void Lazy<Model>::ConvertEdge(const search::Context<Model
   }
 
   float additive = in.rule_->GetFeatureValues().dot(cdec_weights_);
+  UTIL_THROW_IF(isnan(additive), util::Exception, "Bad dot product");
   additive -= terminals * context.GetWeights().WordPenalty() * static_cast<float>(terminals) / M_LN10;
 
   out.InitRule().Init(context, additive, words, final);
@@ -150,9 +154,9 @@ boost::scoped_ptr<LazyBase> AwfulGlobalLazy;
 
 } // namespace
 
-void PassToLazy(const Hypergraph &hg, const std::vector<weight_t> &weights) {
+void PassToLazy(const char *model_file, const std::vector<weight_t> &weights, const Hypergraph &hg) {
   if (!AwfulGlobalLazy.get()) {
-    AwfulGlobalLazy.reset(LazyBase::Load("lm", weights));
+    AwfulGlobalLazy.reset(LazyBase::Load(model_file, weights));
   }
   AwfulGlobalLazy->Search(hg);
 }
