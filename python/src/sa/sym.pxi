@@ -101,5 +101,16 @@ cdef int sym_getindex(int sym):
 cdef int sym_setindex(int sym, int id):
     return ALPHABET.setindex(sym, id)
 
-def sym_fromstring(char* string, bint terminal):
+cdef int sym_fromstring(char* string, bint terminal):
     return ALPHABET.fromstring(string, terminal)
+
+def make_lattice(words):
+    word_ids = (sym_fromstring(word, True) for word in words)
+    return tuple(((word, None, 1), ) for word in word_ids)
+
+def decode_lattice(lattice):
+    return tuple((sym_tostring(sym), weight, dist) for (sym, weight, dist) in arc
+            for arc in node for node in lattice)
+
+def decode_sentence(lattice):
+    return tuple(sym_tostring(sym) for ((sym, _, _),) in lattice)
