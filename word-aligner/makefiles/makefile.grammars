@@ -16,7 +16,7 @@ STEM_E = $(SCRIPT_DIR)/stemmers/$(E_LANG).pl
 
 CLASSIFY = $(SUPPORT_DIR)/classify.pl
 MAKE_LEX_GRAMMAR = $(SUPPORT_DIR)/make_lex_grammar.pl
-MODEL1 = $(TRAINING_DIR)/model1
+MODEL1 = $(TRAINING_DIR)/fast_align
 MERGE_CORPUS = $(SUPPORT_DIR)/merge_corpus.pl
 
 e.voc: corpus.e
@@ -66,16 +66,16 @@ corpus.e-f: corpus.f corpus.e
 	$(MERGE_CORPUS) corpus.e corpus.f > $@
 
 corpus.f-e.model1: corpus.f-e
-	$(MODEL1) -v corpus.f-e > $@
+	$(MODEL1) -p -v -i corpus.f-e > $@
 
 corpus.e-f.model1: corpus.e-f
-	$(MODEL1) -v -V corpus.e-f > $@
+	$(MODEL1) -p -v -V -i corpus.e-f > $@
 
 corpus.f-e.full-model1: corpus.f-e
-	$(MODEL1) -t -999999 -v -V corpus.f-e > $@
+	$(MODEL1) -p -t -999999 -v -V -i corpus.f-e > $@
 
 corpus.e-f.full-model1: corpus.e-f
-	$(MODEL1) -t -999999 -v -V corpus.e-f > $@
+	$(MODEL1) -p -t -999999 -v -V -i corpus.e-f > $@
 
 corpus.f-e.lex-grammar.gz: corpus.f-e corpus.f-e.model1 corpus.e-f.model1
 	$(MAKE_LEX_GRAMMAR) corpus.f-e corpus.f-e.model1 corpus.e-f.model1 | $(GZIP) -9 > $@

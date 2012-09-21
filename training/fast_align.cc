@@ -17,18 +17,20 @@ using namespace std;
 bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
   opts.add_options()
-        ("iterations,i",po::value<unsigned>()->default_value(5),"Number of iterations of EM training")
-        ("beam_threshold,t",po::value<double>()->default_value(-4),"log_10 of beam threshold (-10000 to include everything, 0 max)")
-        ("bidir,b", "Run bidirectional alignment")
-        ("no_null_word,N","Do not generate from the null token")
-        ("write_alignments,A", "Write alignments instead of parameters")
+        ("input,i",po::value<string>(),"Parallel corpus input file")
+        ("reverse,r","Reverse estimation (swap source and target during training)")
+        ("iterations,I",po::value<unsigned>()->default_value(5),"Number of iterations of EM training")
+        //("bidir,b", "Run bidirectional alignment")
         ("favor_diagonal,d", "Use a static alignment distribution that assigns higher probabilities to alignments near the diagonal")
-        ("diagonal_tension,T", po::value<double>()->default_value(4.0), "How sharp or flat around the diagonal is the alignment distribution (<1 = flat >1 = sharp)")
         ("prob_align_null", po::value<double>()->default_value(0.08), "When --favor_diagonal is set, what's the probability of a null alignment?")
-        ("variational_bayes,v","Add a symmetric Dirichlet prior and infer VB estimate of weights")
-        ("testset,x", po::value<string>(), "After training completes, compute the log likelihood of this set of sentence pairs under the learned model")
+        ("diagonal_tension,T", po::value<double>()->default_value(4.0), "How sharp or flat around the diagonal is the alignment distribution (<1 = flat >1 = sharp)")
+        ("variational_bayes,v","Infer VB estimate of parameters under a symmetric Dirichlet prior")
         ("alpha,a", po::value<double>()->default_value(0.01), "Hyperparameter for optional Dirichlet prior")
-        ("no_add_viterbi,V","Do not add Viterbi alignment points (may generate a grammar where some training sentence pairs are unreachable)");
+        ("no_null_word,N","Do not generate from a null token")
+        ("output_parameters,p", "Write model parameters instead of alignments")
+        ("beam_threshold,t",po::value<double>()->default_value(-4),"When writing parameters, log_10 of beam threshold for writing parameter (-10000 to include everything, 0 max parameter only)")
+        ("testset,x", po::value<string>(), "After training completes, compute the log likelihood of this set of sentence pairs under the learned model")
+        ("no_add_viterbi,V","When writing model parameters, do not add Viterbi alignment points (may generate a grammar where some training sentence pairs are unreachable)");
   po::options_description clo("Command line options");
   clo.add_options()
         ("config", po::value<string>(), "Configuration file")
@@ -44,15 +46,14 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   }
   po::notify(*conf);
 
-  if (argc < 2 || conf->count("help")) {
-    cerr << "Usage " << argv[0] << " [OPTIONS] corpus.fr-en\n";
+  if (conf->count("help") || conf->count("input") == 0) {
+    cerr << "Usage " << argv[0] << " [OPTIONS] -i corpus.fr-en\n";
     cerr << dcmdline_options << endl;
     return false;
   }
   return true;
 }
 
-// src and trg are source and target strings, respectively (not really lattices)
 double PosteriorInference(const vector<WordID>& src, const vector<WordID>& trg) {
   double llh = 0;
   static vector<double> unnormed_a_i;
@@ -64,14 +65,15 @@ double PosteriorInference(const vector<WordID>& src, const vector<WordID>& trg) 
 int main(int argc, char** argv) {
   po::variables_map conf;
   if (!InitCommandLine(argc, argv, &conf)) return 1;
-  const string fname = argv[argc - 1];
+  const string fname = conf["input"].as<string>();
+  const bool reverse = conf.count("reverse") > 0;
   const int ITERATIONS = conf["iterations"].as<unsigned>();
   const double BEAM_THRESHOLD = pow(10.0, conf["beam_threshold"].as<double>());
   const bool use_null = (conf.count("no_null_word") == 0);
   const WordID kNULL = TD::Convert("<eps>");
   const bool add_viterbi = (conf.count("no_add_viterbi") == 0);
   const bool variational_bayes = (conf.count("variational_bayes") > 0);
-  const bool write_alignments = (conf.count("write_alignments") > 0);
+  const bool write_alignments = (conf.count("output_parameters") == 0);
   const double diagonal_tension = conf["diagonal_tension"].as<double>();
   const double prob_align_null = conf["prob_align_null"].as<double>();
   string testset;
@@ -100,14 +102,16 @@ int main(int argc, char** argv) {
     bool flag = false;
     string line;
     string ssrc, strg;
+    vector<WordID> src, trg;
     while(true) {
       getline(in, line);
       if (!in) break;
       ++lc;
       if (lc % 1000 == 0) { cerr << '.'; flag = true; }
       if (lc %50000 == 0) { cerr << " [" << lc << "]\n" << flush; flag = false; }
-      vector<WordID> src, trg;
+      src.clear(); trg.clear();
       CorpusTools::ReadLine(line, &src, &trg);
+      if (reverse) swap(src, trg);
       if (src.size() == 0 || trg.size() == 0) {
         cerr << "Error: " << lc << "\n" << line << endl;
         return 1;
@@ -163,7 +167,10 @@ int main(int argc, char** argv) {
             if (write_alignments) {
               if (max_index > 0) {
                 if (first_al) first_al = false; else cout << ' ';
-                cout << (max_index - 1) << "-" << j;
+                if (reverse)
+                  cout << j << '-' << (max_index - 1);
+                else
+                  cout << (max_index - 1) << '-' << j;
               }
             }
             s2t_viterbi[max_i][f_j] = 1.0;
