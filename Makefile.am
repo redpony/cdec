@@ -11,6 +11,7 @@ SUBDIRS = \
   training \
   training/liblbfgs \
   mira \
+  latent_svm \
   dtrain \
   dpmert \
   pro-train \
@@ -18,7 +19,7 @@ SUBDIRS = \
   minrisk \
   gi/pf \
   gi/markov_al \
-  rst_parser
+  rst_parser 
 
 #gi/pyp-topics/src gi/clda/src gi/posterior-regularisation/prjava
 
