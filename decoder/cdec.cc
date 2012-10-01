@@ -4,6 +4,7 @@
 #include "decoder.h"
 #include "ff_register.h"
 #include "verbose.h"
+#include "util/usage.hh"
 
 using namespace std;
 
@@ -38,6 +39,7 @@ int main(int argc, char** argv) {
       cout << FD::Convert(i) << endl;
     }
   }
+  util::PrintUsage(std::cerr);
   return 0;
 }
 
