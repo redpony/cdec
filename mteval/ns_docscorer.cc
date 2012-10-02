@@ -16,7 +16,7 @@ void DocumentScorer::Init(const EvaluationMetric* metric,
             const string& src_file,
             bool verbose) {
   scorers_.clear();
-  cerr << "Loading references (" << ref_files.size() << " files)\n";
+  if (verbose) cerr << "Loading references (" << ref_files.size() << " files)\n";
   assert(src_file.empty());
   std::vector<ReadFile> ifs(ref_files.begin(),ref_files.end());
   for (int i=0; i < ref_files.size(); ++i) ifs[i].Init(ref_files[i]);
@@ -55,6 +55,6 @@ void DocumentScorer::Init(const EvaluationMetric* metric,
       ++line;
     }
   }
-  cerr << "Loaded reference translations for " << scorers_.size() << " sentences.\n";
+  if (verbose) cerr << "Loaded reference translations for " << scorers_.size() << " sentences.\n";
 }
 

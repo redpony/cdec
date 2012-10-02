@@ -7,7 +7,6 @@ SUBDIRS = \
   klm/util \
   klm/lm \
   decoder \
-  phrasinator \
   training \
   training/liblbfgs \
   mira \
@@ -15,10 +14,7 @@ SUBDIRS = \
   dpmert \
   pro-train \
   rampion \
-  minrisk \
-  gi/pf \
-  gi/markov_al \
-  rst_parser
+  minrisk
 
 #gi/pyp-topics/src gi/clda/src gi/posterior-regularisation/prjava
 

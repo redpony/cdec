@@ -3,16 +3,13 @@ bin_PROGRAMS = reconstruct_weights atools
 noinst_PROGRAMS = \
   ts \
   phmt \
-  mfcr_test \
-  crp_test \
   dict_test \
   m_test \
   weights_test \
   logval_test \
-  small_vector_test \
-  unigram_pyp_lm
+  small_vector_test
 
-TESTS = ts mfcr_test crp_test small_vector_test logval_test weights_test dict_test m_test
+TESTS = ts small_vector_test logval_test weights_test dict_test m_test
 
 noinst_LIBRARIES = libutils.a
 
