@@ -66,7 +66,7 @@ class SmallVector {
   //TODO: figure out iterator traits to allow this to be selcted for any iterator range
   template <class I>
   SmallVector(I const* begin,I const* end) {
-    int s=end-begin;
+    unsigned s=end-begin;
     Alloc(s);
     if (s <= SV_MAX) {
       for (unsigned i = 0; i < s; ++i,++begin) data_.vals[i] = *begin;
