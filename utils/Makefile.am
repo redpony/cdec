@@ -45,18 +45,12 @@ m_test_SOURCES = m_test.cc
 m_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
 dict_test_SOURCES = dict_test.cc
 dict_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
-mfcr_test_SOURCES = mfcr_test.cc
-mfcr_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
 weights_test_SOURCES = weights_test.cc
 weights_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
-crp_test_SOURCES = crp_test.cc
-crp_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
 logval_test_SOURCES = logval_test.cc
 logval_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
 small_vector_test_SOURCES = small_vector_test.cc
 small_vector_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
-unigram_pyp_lm_SOURCES = unigram_pyp_lm.cc
-unigram_pyp_lm_LDADD = libutils.a -lz
 
 ################################################################
 # do NOT NOT NOT add any other -I includes NO NO NO NO NO ######

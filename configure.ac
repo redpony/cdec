@@ -124,7 +124,6 @@ AC_CONFIG_FILES([klm/util/Makefile])
 AC_CONFIG_FILES([klm/lm/Makefile])
 AC_CONFIG_FILES([mira/Makefile])
 AC_CONFIG_FILES([dtrain/Makefile])
-AC_CONFIG_FILES([rst_parser/Makefile])
 
 AC_CONFIG_FILES([python/setup.py])
 
