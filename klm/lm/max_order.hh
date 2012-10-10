@@ -8,5 +8,5 @@
 #define KENLM_MAX_ORDER 6
 #endif
 #ifndef KENLM_ORDER_MESSAGE
-#define KENLM_ORDER_MESSAGE "Edit klm/lm/max_order.hh."
+#define KENLM_ORDER_MESSAGE "If your build system supports changing KENLM_MAX_ORDER, change it there and recompile.  In the KenLM tarball or Moses, use e.g. `bjam --kenlm-max-order=6 -a'.  Otherwise, edit lm/max_order.hh."
 #endif
