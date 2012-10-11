@@ -1,8 +1,0 @@
-import testing ;
-
-lib mteval : ter.cc comb_scorer.cc aer_scorer.cc scorer.cc external_scorer.cc ns.cc ns_ter.cc ns_ext.cc ns_comb.cc ns_docscorer.cc ns_cer.cc ..//utils : <include>. : : <include>. <library>..//z ;
-exe fast_score : fast_score.cc mteval ..//utils ..//boost_program_options ;
-exe mbr_kbest : mbr_kbest.cc mteval ..//utils ..//boost_program_options ;
-alias programs : fast_score mbr_kbest ;
-
-unit-test scorer_test : scorer_test.cc mteval ..//utils ..//z ..//boost_unit_test_framework : <testing.arg>$(TOP)/mteval/test_data ;
