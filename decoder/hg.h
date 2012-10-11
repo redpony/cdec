@@ -503,9 +503,9 @@ public:
 
   template <class V>
   void visit_edges_topo(V &v) {
-    for (int i = 0; i < nodes_.size(); ++i) {
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
       EdgesVector const& in=nodes_[i].in_edges_;
-      for (int j=0;j<in.size();++j) {
+      for (unsigned j=0;j<in.size();++j) {
         int e=in[j];
         v(i,e,edges_[e]);
       }

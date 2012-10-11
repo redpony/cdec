@@ -5,13 +5,14 @@
 #include "util/mmap.hh"
 #ifdef WIN32
 #include <io.h>
+#else
+#include <unistd.h>
 #endif // WIN32
 
 #include <iostream>
 #include <string>
 #include <limits>
 
-#include <unistd.h>
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
