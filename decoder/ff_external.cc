@@ -30,6 +30,7 @@ ExternalFeature::ExternalFeature(const string& param) {
     abort();
   }
   ff_ext = (*fn)(nparam);
+  SetStateSize(ff_ext->StateSize());
 }
 
 ExternalFeature::~ExternalFeature() {
