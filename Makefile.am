@@ -14,7 +14,8 @@ SUBDIRS = \
   dpmert \
   pro-train \
   rampion \
-  minrisk
+  minrisk \
+  example_extff
 
 #gi/pyp-topics/src gi/clda/src gi/posterior-regularisation/prjava
 
