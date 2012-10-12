@@ -27,6 +27,7 @@ typedef std::vector<WordID> Features; // set of features ids
 // depends on context, you may also need to implement
 // FinalTraversalFeatures(...)
 class FeatureFunction {
+  friend class ExternalFeature;
  public:
   std::string name_; // set by FF factory using usage()
   bool debug_; // also set by FF factory checking param for immediate initial "debug"

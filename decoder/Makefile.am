@@ -33,6 +33,7 @@ libcdec_a_SOURCES = \
   cfg.cc \
   dwarf.cc \
   ff_dwarf.cc \
+  ff_external.cc \
   rule_lexer.cc \
   fst_translator.cc \
   csplit.cc \

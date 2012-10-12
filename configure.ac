@@ -14,7 +14,8 @@ BOOST_REQUIRE([1.44])
 BOOST_PROGRAM_OPTIONS
 BOOST_TEST
 AM_PATH_PYTHON
-# TODO detect Cython, generate python/Makefile that calls "python setup.py build"
+AC_CHECK_HEADER(dlfcn.h,AC_DEFINE(HAVE_DLFCN_H))
+AC_CHECK_LIB(dl, dlopen)
 
 AC_ARG_ENABLE(mpi,
  [ --enable-mpi  Build MPI binaries, assumes mpi.h is present ],
