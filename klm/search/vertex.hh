@@ -16,8 +16,6 @@ namespace search {
 
 class ContextBase;
 
-class Edge;
-
 class VertexNode {
   public:
     VertexNode() : end_(NULL) {}
@@ -103,6 +101,10 @@ class PartialVertex {
 
     unsigned char Length() const { return back_->Length(); }
 
+    bool HasAlternative() const {
+      return index_ + 1 < back_->Size();
+    }
+
     // Split into continuation and alternative, rendering this the alternative.
     bool Split(PartialVertex &continuation) {
       assert(!Complete());
@@ -128,35 +130,26 @@ extern PartialVertex kBlankPartialVertex;
 
 class Vertex {
   public:
-    Vertex() 
-#ifdef DEBUG
-      : finished_adding_(false)
-#endif
-    {}
-
-    void Add(Edge &edge) {
-#ifdef DEBUG
-      assert(!finished_adding_);
-#endif
-      edges_.push_back(&edge);
-    }
-
-    void FinishedAdding() {
-#ifdef DEBUG
-      assert(!finished_adding_);
-      finished_adding_ = true;
-#endif
-    }
+    Vertex() {}
 
     PartialVertex RootPartial() const { return PartialVertex(root_); }
 
+    const Final *BestChild() const {
+      PartialVertex top(RootPartial());
+      if (top.Empty()) {
+        return NULL;
+      } else {
+        PartialVertex continuation;
+        while (!top.Complete()) {
+          top.Split(continuation);
+          top = continuation;
+        }
+        return &top.End();
+      }
+    }
+
   private:
     friend class VertexGenerator;
-    std::vector<Edge*> edges_;
-
-#ifdef DEBUG
-    bool finished_adding_;
-#endif
 
     VertexNode root_;
 };

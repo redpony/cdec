@@ -1,10 +1,9 @@
 #ifndef SEARCH_VERTEX_GENERATOR__
 #define SEARCH_VERTEX_GENERATOR__
 
-#include "search/edge.hh"
-#include "search/edge_generator.hh"
+#include "search/note.hh"
+#include "search/vertex.hh"
 
-#include <boost/pool/pool.hpp>
 #include <boost/unordered_map.hpp>
 
 #include <queue>
@@ -17,18 +16,21 @@ class ChartState;
 
 namespace search {
 
-template <class Model> class Context;
 class ContextBase;
 class Final;
+struct PartialEdge;
 
 class VertexGenerator {
   public:
-    template <class Model> VertexGenerator(Context<Model> &context, Vertex &gen);
+    VertexGenerator(ContextBase &context, Vertex &gen);
 
-    PartialEdge *MallocPartialEdge() { return static_cast<PartialEdge*>(partial_edge_pool_.malloc()); }
-    void FreePartialEdge(PartialEdge *value) { partial_edge_pool_.free(value); }
+    void NewHypothesis(const PartialEdge &partial, Note note);
 
-    void NewHypothesis(const lm::ngram::ChartState &state, const Edge &from, const PartialEdge &partial);
+    void FinishedSearch() {
+      root_.under->SortAndSet(context_, NULL);
+    }
+
+    const Vertex &Generating() const { return gen_; }
 
   private:
     // Parallel structure to VertexNode.  
@@ -41,29 +43,16 @@ class VertexGenerator {
 
     Trie &FindOrInsert(Trie &node, uint64_t added, const lm::ngram::ChartState &state, unsigned char left, bool left_full, unsigned char right, bool right_full);
 
-    Final *CompleteTransition(Trie &node, const lm::ngram::ChartState &state, const Edge &from, const PartialEdge &partial);
+    Final *CompleteTransition(Trie &node, const lm::ngram::ChartState &state, Note note, const PartialEdge &partial);
 
     ContextBase &context_;
 
-    std::vector<EdgeGenerator> edges_;
-
-    struct LessByTop : public std::binary_function<const EdgeGenerator *, const EdgeGenerator *, bool> {
-      bool operator()(const EdgeGenerator *first, const EdgeGenerator *second) const {
-        return first->Top() < second->Top();
-      }
-    };
-
-    typedef std::priority_queue<EdgeGenerator*, std::vector<EdgeGenerator*>, LessByTop> Generate;
-    Generate generate_;
+    Vertex &gen_;
 
     Trie root_;
 
     typedef boost::unordered_map<uint64_t, Final*> Existing;
     Existing existing_;
-
-    int to_pop_;
-
-    boost::pool<> partial_edge_pool_;
 };
 
 } // namespace search
