@@ -138,10 +138,12 @@ template <class Model> unsigned char Lazy<Model>::ConvertEdge(const search::Cont
   std::vector<lm::WordIndex> words;
   unsigned int terminals = 0;
   unsigned char nt = 0;
+  out.score = 0.0;
   for (std::vector<WordID>::const_iterator word = e.begin(); word != e.end(); ++word) {
     if (*word <= 0) {
       out.nt[nt] = vertices[in.tail_nodes_[-*word]].RootPartial();
       if (out.nt[nt].Empty()) return 255;
+      out.score += out.nt[nt].Bound();
       ++nt;
       words.push_back(lm::kMaxWordIndex);
     } else {
@@ -150,14 +152,14 @@ template <class Model> unsigned char Lazy<Model>::ConvertEdge(const search::Cont
     }
   }
   for (unsigned char fill = nt; fill < search::kMaxArity; ++fill) {
-    out.nt[nt] = search::kBlankPartialVertex;
+    out.nt[fill] = search::kBlankPartialVertex;
   }
 
   if (final) {
     words.push_back(m_.GetVocabulary().EndSentence());
   }
 
-  out.score = in.rule_->GetFeatureValues().dot(cdec_weights_);
+  out.score += in.rule_->GetFeatureValues().dot(cdec_weights_);
   out.score -= static_cast<float>(terminals) * context.GetWeights().WordPenalty() / M_LN10;
   out.score += search::ScoreRule(context, words, final, out.between);
   return nt;
