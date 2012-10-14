@@ -2,7 +2,9 @@
 #define SEARCH_EDGE_GENERATOR__
 
 #include "search/edge.hh"
+#include "search/note.hh"
 
+#include <boost/pool/pool.hpp>
 #include <boost/unordered_map.hpp>
 
 #include <functional>
@@ -28,26 +30,28 @@ struct PartialEdgePointerLess : std::binary_function<const PartialEdge *, const 
 
 class EdgeGenerator {
   public:
-    // True if it has a hypothesis.  
-    bool Init(Edge &edge, VertexGenerator &parent);
+    EdgeGenerator(PartialEdge &root, unsigned char arity, Note note);
 
-    Score Top() const {
-      return top_;
+    Score TopScore() const {
+      return top_score_;
     }
 
-    template <class Model> bool Pop(Context<Model> &context, VertexGenerator &parent);
+    Note GetNote() const {
+      return note_;
+    }
+
+    // Pop.  If there's a complete hypothesis, return it.  Otherwise return NULL.  
+    template <class Model> PartialEdge *Pop(Context<Model> &context, boost::pool<> &partial_edge_pool);
 
   private:
-    const Rule &GetRule() const {
-      return from_->GetRule();
-    }
+    Score top_score_;
 
-    Score top_;
+    unsigned char arity_;
 
     typedef std::priority_queue<PartialEdge*, std::vector<PartialEdge*>, PartialEdgePointerLess> Generate;
     Generate generate_;
 
-    Edge *from_;
+    Note note_;
 };
 
 } // namespace search
