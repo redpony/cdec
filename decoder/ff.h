@@ -51,17 +51,9 @@ class FeatureFunction {
   }
 
   // if there's some state left when you transition to the goal state, score
-  // it here.  For example, the language model computes the cost of adding
+  // it here.  For example, a language model might the cost of adding
   // <s> and </s>.
-
-protected:
   virtual void FinalTraversalFeatures(const void* residual_state,
-                                      SparseVector<double>* final_features) const;
-public:
-  //override either this or one of above.
-  virtual void FinalTraversalFeatures(const SentenceMetadata& /* smeta */,
-                                      const HG::Edge& /* edge */,
-                                      const void* residual_state,
                                       SparseVector<double>* final_features) const;
 
  protected:

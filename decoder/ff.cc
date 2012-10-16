@@ -25,13 +25,6 @@ string FeatureFunction::usage_helper(std::string const& name,std::string const& 
   return r;
 }
 
-void FeatureFunction::FinalTraversalFeatures(const SentenceMetadata& /* smeta */,
-                                      const HG::Edge& /* edge */,
-                                      const void* residual_state,
-                                      SparseVector<double>* final_features) const {
-  FinalTraversalFeatures(residual_state,final_features);
-}
-
 void FeatureFunction::TraversalFeaturesImpl(const SentenceMetadata&,
                                         const Hypergraph::Edge&,
                                         const std::vector<const void*>&,
