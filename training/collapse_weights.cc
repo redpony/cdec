@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
     if (line.empty()) continue;
     TRule tr(line, true);
     const double lp = tr.GetFeatureValues().dot(w);
-    if (isinf(lp)) { continue; }
+    if (std::isinf(lp)) { continue; }
     tr.scores_.clear();
 
     cout << tr.AsString() << " ||| F_and_E=" << lp - log(tot);
