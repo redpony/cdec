@@ -1,7 +1,9 @@
 #include "ff_external.h"
-#include "stringlib.h"
 
 #include <dlfcn.h>
+
+#include "stringlib.h"
+#include "hg.h"
 
 using namespace std;
 
@@ -50,8 +52,8 @@ void ExternalFeature::FinalTraversalFeatures(const void* context,
 void ExternalFeature::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
-                                     FeatureVector* features,
-                                     FeatureVector* estimated_features,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
                                      void* context) const {
   ff_ext->TraversalFeaturesImpl(smeta, edge, ant_contexts, features, estimated_features, context);
 }

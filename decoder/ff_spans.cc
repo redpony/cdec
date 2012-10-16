@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cmath>
 
+#include "hg.h"
+#include "tdict.h"
 #include "filelib.h"
 #include "stringlib.h"
 #include "sentence_metadata.h"

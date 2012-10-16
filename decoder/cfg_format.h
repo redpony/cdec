@@ -100,7 +100,7 @@ struct CFGFormat {
     }
   }
 
-  void print_features(std::ostream &o,prob_t p,FeatureVector const& fv=FeatureVector()) const {
+  void print_features(std::ostream &o,prob_t p,SparseVector<double> const& fv=SparseVector<double>()) const {
     bool logp=(logprob_feat && p!=prob_t::One());
     if (features || logp) {
       o << partsep;

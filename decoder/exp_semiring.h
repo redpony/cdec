@@ -59,7 +59,7 @@ struct PRWeightFunction {
   explicit PRWeightFunction(const PWeightFunction& pwf = PWeightFunction(),
                             const RWeightFunction& rwf = RWeightFunction()) :
     pweight(pwf), rweight(rwf) {}
-  PRPair<P,R> operator()(const Hypergraph::Edge& e) const {
+  PRPair<P,R> operator()(const HG::Edge& e) const {
     const P p = pweight(e);
     const R r = rweight(e);
     return PRPair<P,R>(p, r * p);
