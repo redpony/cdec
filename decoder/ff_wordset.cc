@@ -1,5 +1,6 @@
 #include "ff_wordset.h"
 
+#include "hg.h"
 #include "fdict.h"
 #include <sstream>
 #include <iostream>

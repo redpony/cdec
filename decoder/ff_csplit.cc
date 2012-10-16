@@ -5,6 +5,7 @@
 
 #include "klm/lm/model.hh"
 
+#include "hg.h"
 #include "sentence_metadata.h"
 #include "lattice.h"
 #include "tdict.h"

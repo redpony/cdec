@@ -48,7 +48,7 @@ namespace KBest {
     }
 
     struct Derivation {
-      Derivation(const Hypergraph::Edge& e,
+      Derivation(const HG::Edge& e,
                  const SmallVectorInt& jv,
                  const WeightType& w,
                  const SparseVector<double>& f) :
@@ -58,11 +58,11 @@ namespace KBest {
         feature_values(f) {}
 
       // dummy constructor, just for query
-      Derivation(const Hypergraph::Edge& e,
+      Derivation(const HG::Edge& e,
                  const SmallVectorInt& jv) : edge(&e), j(jv) {}
 
       T yield;
-      const Hypergraph::Edge* const edge;
+      const HG::Edge* const edge;
       const SmallVectorInt j;
       const WeightType score;
       const SparseVector<double> feature_values;
@@ -82,8 +82,8 @@ namespace KBest {
       Derivation const* d;
       explicit EdgeHandle(Derivation const* d) : d(d) {  }
 //      operator bool() const { return d->edge; }
-      operator Hypergraph::Edge const* () const { return d->edge; }
-//      Hypergraph::Edge const * operator ->() const { return d->edge; }
+      operator HG::Edge const* () const { return d->edge; }
+//      HG::Edge const * operator ->() const { return d->edge; }
     };
 
     EdgeHandle operator()(unsigned t,unsigned taili,EdgeHandle const& parent) const {
@@ -158,7 +158,7 @@ namespace KBest {
     // the yield is computed in LazyKthBest before the derivation is added to D
     // returns NULL if j refers to derivation numbers larger than the
     // antecedent structure define
-    Derivation* CreateDerivation(const Hypergraph::Edge& e, const SmallVectorInt& j) {
+    Derivation* CreateDerivation(const HG::Edge& e, const SmallVectorInt& j) {
       WeightType score = w(e);
       SparseVector<double> feats = e.feature_values_;
       for (int i = 0; i < e.Arity(); ++i) {
@@ -177,7 +177,7 @@ namespace KBest {
 
       const Hypergraph::Node& node = g.nodes_[v];
       for (unsigned i = 0; i < node.in_edges_.size(); ++i) {
-        const Hypergraph::Edge& edge = g.edges_[node.in_edges_[i]];
+        const HG::Edge& edge = g.edges_[node.in_edges_[i]];
         SmallVectorInt jv(edge.Arity(), 0);
         Derivation* d = CreateDerivation(edge, jv);
         assert(d);

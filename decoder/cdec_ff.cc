@@ -1,6 +1,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ff.h"
+#include "ff_basic.h"
 #include "ff_context.h"
 #include "ff_spans.h"
 #include "ff_lm.h"
