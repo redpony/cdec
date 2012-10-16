@@ -14,10 +14,10 @@ std::string viterbi_stats(Hypergraph const& hg, std::string const& name="forest"
 //TODO: make T a typename inside Traversal and WeightType a typename inside WeightFunction?
 // Traversal must implement:
 //  typedef T Result;
-//  void operator()(Hypergraph::Edge const& e,const vector<const Result*>& ants, Result* result) const;
+//  void operator()(HG::Edge const& e,const vector<const Result*>& ants, Result* result) const;
 // WeightFunction must implement:
 //  typedef prob_t Weight;
-//  Weight operator()(Hypergraph::Edge const& e) const;
+//  Weight operator()(HG::Edge const& e) const;
 template<class Traversal,class WeightFunction>
 typename WeightFunction::Weight Viterbi(const Hypergraph& hg,
                    typename Traversal::Result* result,
@@ -39,9 +39,9 @@ typename WeightFunction::Weight Viterbi(const Hypergraph& hg,
       *cur_node_best_weight = WeightType(1);
       continue;
     }
-    Hypergraph::Edge const* edge_best=0;
+    HG::Edge const* edge_best=0;
     for (unsigned j = 0; j < num_in_edges; ++j) {
-      const Hypergraph::Edge& edge = hg.edges_[cur_node.in_edges_[j]];
+      const HG::Edge& edge = hg.edges_[cur_node.in_edges_[j]];
       WeightType score = weight(edge);
       for (unsigned k = 0; k < edge.tail_nodes_.size(); ++k)
         score *= vit_weight[edge.tail_nodes_[k]];
@@ -51,7 +51,7 @@ typename WeightFunction::Weight Viterbi(const Hypergraph& hg,
       }
     }
     assert(edge_best);
-    Hypergraph::Edge const& edgeb=*edge_best;
+    HG::Edge const& edgeb=*edge_best;
     std::vector<const T*> antsb(edgeb.tail_nodes_.size());
     for (unsigned k = 0; k < edgeb.tail_nodes_.size(); ++k)
       antsb[k] = &vit_result[edgeb.tail_nodes_[k]];
@@ -98,7 +98,7 @@ prob_t Viterbi(const Hypergraph& hg,
 
 struct PathLengthTraversal {
   typedef int Result;
-  void operator()(const Hypergraph::Edge& edge,
+  void operator()(const HG::Edge& edge,
                   const std::vector<const int*>& ants,
                   int* result) const {
     (void) edge;
@@ -109,7 +109,7 @@ struct PathLengthTraversal {
 
 struct ESentenceTraversal {
   typedef std::vector<WordID> Result;
-  void operator()(const Hypergraph::Edge& edge,
+  void operator()(const HG::Edge& edge,
                   const std::vector<const Result*>& ants,
                   Result* result) const {
     edge.rule_->ESubstitute(ants, result);
@@ -118,7 +118,7 @@ struct ESentenceTraversal {
 
 struct ELengthTraversal {
   typedef int Result;
-  void operator()(const Hypergraph::Edge& edge,
+  void operator()(const HG::Edge& edge,
                   const std::vector<const int*>& ants,
                   int* result) const {
     *result = edge.rule_->ELength() - edge.rule_->Arity();
@@ -128,7 +128,7 @@ struct ELengthTraversal {
 
 struct FSentenceTraversal {
   typedef std::vector<WordID> Result;
-  void operator()(const Hypergraph::Edge& edge,
+  void operator()(const HG::Edge& edge,
                   const std::vector<const Result*>& ants,
                   Result* result) const {
     edge.rule_->FSubstitute(ants, result);
@@ -142,7 +142,7 @@ struct ETreeTraversal {
   const std::string space;
   const std::string right;
   typedef std::vector<WordID> Result;
-  void operator()(const Hypergraph::Edge& edge,
+  void operator()(const HG::Edge& edge,
                   const std::vector<const Result*>& ants,
                   Result* result) const {
     Result tmp;
@@ -162,7 +162,7 @@ struct FTreeTraversal {
   const std::string space;
   const std::string right;
   typedef std::vector<WordID> Result;
-  void operator()(const Hypergraph::Edge& edge,
+  void operator()(const HG::Edge& edge,
                   const std::vector<const Result*>& ants,
                   Result* result) const {
     Result tmp;
@@ -177,8 +177,8 @@ struct FTreeTraversal {
 };
 
 struct ViterbiPathTraversal {
-  typedef std::vector<Hypergraph::Edge const*> Result;
-  void operator()(const Hypergraph::Edge& edge,
+  typedef std::vector<HG::Edge const*> Result;
+  void operator()(const HG::Edge& edge,
                   std::vector<Result const*> const& ants,
                   Result* result) const {
     for (unsigned i = 0; i < ants.size(); ++i)
@@ -189,8 +189,8 @@ struct ViterbiPathTraversal {
 };
 
 struct FeatureVectorTraversal {
-  typedef FeatureVector Result;
-  void operator()(Hypergraph::Edge const& edge,
+  typedef SparseVector<double> Result;
+  void operator()(HG::Edge const& edge,
                   std::vector<Result const*> const& ants,
                   Result* result) const {
     for (unsigned i = 0; i < ants.size(); ++i)
@@ -210,6 +210,6 @@ int ViterbiELength(const Hypergraph& hg);
 int ViterbiPathLength(const Hypergraph& hg);
 
 /// if weights supplied, assert viterbi prob = features.dot(*weights) (exception if fatal, cerr warn if not).  return features (sum over all edges in viterbi derivation)
-FeatureVector ViterbiFeatures(Hypergraph const& hg,WeightVector const* weights=0,bool fatal_dotprod_disagreement=false);
+SparseVector<double> ViterbiFeatures(Hypergraph const& hg,WeightVector const* weights=0,bool fatal_dotprod_disagreement=false);
 
 #endif

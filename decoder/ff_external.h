@@ -13,10 +13,10 @@ class ExternalFeature : public FeatureFunction {
                                       SparseVector<double>* features) const;
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
-                                     FeatureVector* features,
-                                     FeatureVector* estimated_features,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
                                      void* context) const;
  private:
   void* lib_handle;

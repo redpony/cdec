@@ -28,7 +28,7 @@ struct HGReader : public JSONParser {
       hg.ConnectEdgeToHeadNode(&hg.edges_[in_edges[i]], node);
     }
   }
-  void CreateEdge(const TRulePtr& rule, FeatureVector* feats, const SmallVectorUnsigned& tail) {
+  void CreateEdge(const TRulePtr& rule, SparseVector<double>* feats, const SmallVectorUnsigned& tail) {
     Hypergraph::Edge* edge = hg.AddEdge(rule, tail);
     feats->swap(edge->feature_values_);
     edge->i_ = spans[0];

@@ -2,6 +2,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "hg.h"
+
 using namespace std;
 
 // example of a "stateful" feature made available as an external library

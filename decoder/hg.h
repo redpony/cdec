@@ -490,14 +490,14 @@ private:
 // for generic Viterbi/Inside algorithms
 struct EdgeProb {
   typedef prob_t Weight;
-  inline const prob_t& operator()(const Hypergraph::Edge& e) const { return e.edge_prob_; }
+  inline const prob_t& operator()(const HG::Edge& e) const { return e.edge_prob_; }
 };
 
 struct EdgeSelectEdgeWeightFunction {
   typedef prob_t Weight;
   typedef std::vector<bool> EdgeMask;
   EdgeSelectEdgeWeightFunction(const EdgeMask& v) : v_(v) {}
-  inline prob_t operator()(const Hypergraph::Edge& e) const {
+  inline prob_t operator()(const HG::Edge& e) const {
     if (v_[e.id_]) return prob_t::One();
     else return prob_t::Zero();
   }
@@ -507,7 +507,7 @@ private:
 
 struct ScaledEdgeProb {
   ScaledEdgeProb(const double& alpha) : alpha_(alpha) {}
-  inline prob_t operator()(const Hypergraph::Edge& e) const { return e.edge_prob_.pow(alpha_); }
+  inline prob_t operator()(const HG::Edge& e) const { return e.edge_prob_.pow(alpha_); }
   const double alpha_;
   typedef prob_t Weight;
 };
@@ -516,7 +516,7 @@ struct ScaledEdgeProb {
 struct EdgeFeaturesAndProbWeightFunction {
   typedef SparseVector<prob_t> Weight;
   typedef Weight Result; //TODO: change Result->Weight everywhere?
-  inline const Weight operator()(const Hypergraph::Edge& e) const {
+  inline const Weight operator()(const HG::Edge& e) const {
     SparseVector<prob_t> res;
     for (SparseVector<double>::const_iterator it = e.feature_values_.begin();
          it != e.feature_values_.end(); ++it)
@@ -527,7 +527,7 @@ struct EdgeFeaturesAndProbWeightFunction {
 
 struct TransitionCountWeightFunction {
   typedef double Weight;
-  inline double operator()(const Hypergraph::Edge& e) const { (void)e; return 1.0; }
+  inline double operator()(const HG::Edge& e) const { (void)e; return 1.0; }
 };
 
 #endif
