@@ -2,6 +2,7 @@
 #define _FF_WORDSET_H_
 
 #include "ff.h"
+#include "tdict.h"
 
 #include <tr1/unordered_set>
 #include <boost/algorithm/string.hpp>
@@ -32,11 +33,9 @@ class WordSet : public FeatureFunction {
   ~WordSet() {
   }
 
-  Features features() const { return single_feature(fid_); }
-
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,

@@ -25,9 +25,9 @@ struct CFGTest : public TestWithParam<HgW> {
   Hypergraph hg;
   CFG cfg;
   CFGFormat form;
-  FeatureVector weights;
+  SparseVector<double> weights;
 
-  static void JsonFN(Hypergraph &hg,CFG &cfg,FeatureVector &featw,std::string file
+  static void JsonFN(Hypergraph &hg,CFG &cfg,SparseVector<double> &featw,std::string file
                      ,std::string const& wts="Model_0 1 EgivenF 1 f1 1")
   {
     istringstream ws(wts);

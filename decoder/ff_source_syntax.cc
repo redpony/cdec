@@ -3,6 +3,7 @@
 #include <sstream>
 #include <stack>
 
+#include "hg.h"
 #include "sentence_metadata.h"
 #include "array2d.h"
 #include "filelib.h"

@@ -10,7 +10,9 @@
 #include "tdict.h"
 #include "grammar.h"
 #include "bottom_up_parser.h"
+#include "hg.h"
 #include "ff.h"
+#include "ffset.h"
 #include "weights.h"
 
 using namespace std;

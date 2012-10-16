@@ -94,7 +94,7 @@ struct any_printer  : public boost::function<void (Ostream &,boost::any const&)>
   {}
 
   template <class T>
-  explicit any_printer(T const* tag) : F(typed_print<T>()) {
+  explicit any_printer(T const*) : F(typed_print<T>()) {
   }
 
   template <class T>
