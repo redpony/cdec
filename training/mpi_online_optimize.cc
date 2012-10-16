@@ -143,7 +143,7 @@ struct TrainingObserver : public DecoderObserver {
       cerr << "DIFF. ERR! log_model_z < log_ref_z: " << cur_obj << " " << log_ref_z << endl;
       exit(1);
     }
-    assert(!isnan(log_ref_z));
+    assert(!std::isnan(log_ref_z));
     ref_exp -= cur_model_exp;
     acc_grad += ref_exp;
     acc_obj += (cur_obj - log_ref_z);
@@ -330,7 +330,7 @@ int main(int argc, char** argv) {
       if (rank == 0) {
         converged = (iter == max_iteration);
         Weights::SanityCheck(lambdas);
-        Weights::ShowLargestFeatures(lambdas);
+        static int cc = 0; ++cc; if (cc > 1) { Weights::ShowLargestFeatures(lambdas); }
         string fname = "weights.cur.gz";
         if (iter % write_weights_every_ith == 0) {
           ostringstream o; o << "weights.epoch_" << (ai+1) << '.' << iter << ".gz";
