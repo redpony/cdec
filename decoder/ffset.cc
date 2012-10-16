@@ -65,7 +65,7 @@ void ModelSet::AddFinalFeatures(const FFState& state, HG::Edge* edge,SentenceMet
       int spos = model_state_pos_[i];
       ant_state = &state[spos];
     }
-    ff.FinalTraversalFeatures(smeta, *edge, ant_state, &edge->feature_values_);
+    ff.FinalTraversalFeatures(ant_state, &edge->feature_values_);
   }
   edge->edge_prob_.logeq(edge->feature_values_.dot(weights_));
 }
