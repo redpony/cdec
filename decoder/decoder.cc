@@ -871,13 +871,13 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     if (rp.fid_summary) {
       if (summary_feature_type == kEDGE_PROB) {
         const prob_t z = forest.PushWeightsToGoal(1.0);
-        if (!isfinite(log(z)) || isnan(log(z))) {
+        if (!std::isfinite(log(z)) || std::isnan(log(z))) {
           cerr << "  " << passtr << " !!! Invalid partition detected, abandoning.\n";
         } else {
           for (int i = 0; i < forest.edges_.size(); ++i) {
             const double log_prob_transition = log(forest.edges_[i].edge_prob_); // locally normalized by the edge
                                                                               // head node by forest.PushWeightsToGoal
-            if (!isfinite(log_prob_transition) || isnan(log_prob_transition)) {
+            if (!std::isfinite(log_prob_transition) || std::isnan(log_prob_transition)) {
               cerr << "Edge: i=" << i << " got bad inside prob: " << *forest.edges_[i].rule_ << endl;
               abort();
             }
@@ -889,7 +889,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       } else if (summary_feature_type == kNODE_RISK) {
         Hypergraph::EdgeProbs posts;
         const prob_t z = forest.ComputeEdgePosteriors(1.0, &posts);
-        if (!isfinite(log(z)) || isnan(log(z))) {
+        if (!std::isfinite(log(z)) || std::isnan(log(z))) {
           cerr << "  " << passtr << " !!! Invalid partition detected, abandoning.\n";
         } else {
           for (int i = 0; i < forest.nodes_.size(); ++i) {
@@ -898,7 +898,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
             for (int j = 0; j < in_edges.size(); ++j)
               node_post += (posts[in_edges[j]] / z);
             const double log_np = log(node_post);
-            if (!isfinite(log_np) || isnan(log_np)) {
+            if (!std::isfinite(log_np) || std::isnan(log_np)) {
               cerr << "got bad posterior prob for node " << i << endl;
               abort();
             }
@@ -913,13 +913,13 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       } else if (summary_feature_type == kEDGE_RISK) {
         Hypergraph::EdgeProbs posts;
         const prob_t z = forest.ComputeEdgePosteriors(1.0, &posts);
-        if (!isfinite(log(z)) || isnan(log(z))) {
+        if (!std::isfinite(log(z)) || std::isnan(log(z))) {
           cerr << "  " << passtr << " !!! Invalid partition detected, abandoning.\n";
         } else {
           assert(posts.size() == forest.edges_.size());
           for (int i = 0; i < posts.size(); ++i) {
             const double log_np = log(posts[i] / z);
-            if (!isfinite(log_np) || isnan(log_np)) {
+            if (!std::isfinite(log_np) || std::isnan(log_np)) {
               cerr << "got bad posterior prob for node " << i << endl;
               abort();
             }
@@ -1090,7 +1090,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
           cerr << "DIFF. ERR! log_z < log_ref_z: " << log_z << " " << log_ref_z << endl;
           exit(1);
         }
-        assert(!isnan(log_ref_z));
+        assert(!std::isnan(log_ref_z));
         ref_exp -= full_exp;
         acc_vec += ref_exp;
         acc_obj += (log_z - log_ref_z);
