@@ -175,7 +175,7 @@ void ModelSet::AddFeaturesToEdge(const SentenceMetadata& smeta,
                                  Hypergraph::Edge* edge,
                                  FFState* context,
                                  prob_t* combination_cost_estimate) const {
-  edge->reset_info();
+  //edge->reset_info();
   context->resize(state_size_);
   if (state_size_ > 0) {
     memset(&(*context)[0], 0, state_size_);
@@ -203,7 +203,7 @@ void ModelSet::AddFeaturesToEdge(const SentenceMetadata& smeta,
 
 void ModelSet::AddFinalFeatures(const FFState& state, Hypergraph::Edge* edge,SentenceMetadata const& smeta) const {
   assert(1 == edge->rule_->Arity());
-  edge->reset_info();
+  //edge->reset_info();
   for (int i = 0; i < models_.size(); ++i) {
     const FeatureFunction& ff = *models_[i];
     const void* ant_state = NULL;
