@@ -21,9 +21,9 @@ struct GreaterByBound : public std::binary_function<const VertexNode *, const Ve
 
 void VertexNode::SortAndSet(ContextBase &context, VertexNode **parent_ptr) {
   if (Complete()) {
-    assert(end_);
+    assert(end_.Valid());
     assert(extend_.empty());
-    bound_ = end_->Bound();
+    bound_ = end_.GetScore();
     return;
   }
   if (extend_.size() == 1 && parent_ptr) {
@@ -38,11 +38,5 @@ void VertexNode::SortAndSet(ContextBase &context, VertexNode **parent_ptr) {
   std::sort(extend_.begin(), extend_.end(), GreaterByBound());
   bound_ = extend_.front()->Bound();
 }
-
-namespace {
-VertexNode kBlankVertexNode;
-} // namespace
-
-PartialVertex kBlankPartialVertex(kBlankVertexNode);
 
 } // namespace search

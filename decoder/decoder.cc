@@ -39,7 +39,7 @@
 #include "sampler.h"
 
 #include "forest_writer.h" // TODO this section should probably be handled by an Observer
-#include "lazy.h"
+#include "incremental.h"
 #include "hg_io.h"
 #include "aligner.h"
 
@@ -412,7 +412,7 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
         ("show_conditional_prob", "Output the conditional log prob to STDOUT instead of a translation")
         ("show_cfg_search_space", "Show the search space as a CFG")
         ("show_target_graph", po::value<string>(), "Directory to write the target hypergraphs to")
-        ("lazy_search", po::value<string>(), "Run lazy search with this language model file")
+        ("incremental_search", po::value<string>(), "Run lazy search with this language model file")
         ("coarse_to_fine_beam_prune", po::value<double>(), "Prune paths from coarse parse forest before fine parse, keeping paths within exp(alpha>=0)")
         ("ctf_beam_widen", po::value<double>()->default_value(2.0), "Expand coarse pass beam by this factor if no fine parse is found")
         ("ctf_num_widenings", po::value<int>()->default_value(2), "Widen coarse beam this many times before backing off to full parse")
@@ -828,8 +828,8 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
   if (conf.count("show_target_graph"))
     HypergraphIO::WriteTarget(conf["show_target_graph"].as<string>(), sent_id, forest);
 
-  if (conf.count("lazy_search")) {
-    PassToLazy(conf["lazy_search"].as<string>().c_str(), CurrentWeightVector(), pop_limit, forest);
+  if (conf.count("incremental_search")) {
+    PassToIncremental(conf["incremental_search"].as<string>().c_str(), CurrentWeightVector(), pop_limit, forest);
     o->NotifyDecodingComplete(smeta);
     return true;
   }

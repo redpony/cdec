@@ -6,6 +6,7 @@ SUBDIRS = \
   mteval \
   klm/util \
   klm/lm \
+  klm/search \
   decoder \
   training \
   training/liblbfgs \

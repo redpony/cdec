@@ -17,7 +17,7 @@ trule_test_SOURCES = trule_test.cc
 trule_test_LDADD = $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a -lz
 
 cdec_SOURCES = cdec.cc
-cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
+cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a ../klm/search/libksearch.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
 AM_CPPFLAGS = -DBOOST_TEST_DYN_LINK -W -Wno-sign-compare $(GTEST_CPPFLAGS) -I.. -I../mteval -I../utils -I../klm
 
@@ -73,6 +73,7 @@ libcdec_a_SOURCES = \
   ff_source_syntax.cc \
   ff_bleu.cc \
   ff_factory.cc \
+  incremental.cc \
   lexalign.cc \
   lextrans.cc \
   tagger.cc \
