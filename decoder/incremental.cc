@@ -124,7 +124,7 @@ template <class Model> void Incremental<Model>::Search(unsigned int pop_limit, c
     gen.Search(context, vertex_gen);
   }
   const search::Final top = out_vertices[hg.nodes_.size() - 2].BestChild();
-  if (top.Valid()) {
+  if (!top.Valid()) {
     std::cout << "NO PATH FOUND" << std::endl;
   } else {
     PrintFinal(hg, top);
