@@ -14,7 +14,8 @@ BOOST_REQUIRE([1.44])
 BOOST_PROGRAM_OPTIONS
 BOOST_TEST
 AM_PATH_PYTHON
-# TODO detect Cython, generate python/Makefile that calls "python setup.py build"
+AC_CHECK_HEADER(dlfcn.h,AC_DEFINE(HAVE_DLFCN_H))
+AC_CHECK_LIB(dl, dlopen)
 
 AC_ARG_ENABLE(mpi,
  [ --enable-mpi  Build MPI binaries, assumes mpi.h is present ],
@@ -114,7 +115,6 @@ AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([utils/Makefile])
 AC_CONFIG_FILES([mteval/Makefile])
 AC_CONFIG_FILES([decoder/Makefile])
-AC_CONFIG_FILES([phrasinator/Makefile])
 AC_CONFIG_FILES([training/Makefile])
 AC_CONFIG_FILES([training/liblbfgs/Makefile])
 AC_CONFIG_FILES([dpmert/Makefile])
@@ -125,11 +125,7 @@ AC_CONFIG_FILES([klm/util/Makefile])
 AC_CONFIG_FILES([klm/lm/Makefile])
 AC_CONFIG_FILES([mira/Makefile])
 AC_CONFIG_FILES([dtrain/Makefile])
-AC_CONFIG_FILES([gi/pyp-topics/src/Makefile])
-AC_CONFIG_FILES([gi/clda/src/Makefile])
-AC_CONFIG_FILES([gi/pf/Makefile])
-AC_CONFIG_FILES([gi/markov_al/Makefile])
-AC_CONFIG_FILES([rst_parser/Makefile])
+AC_CONFIG_FILES([example_extff/Makefile])
 
 AC_CONFIG_FILES([python/setup.py])
 

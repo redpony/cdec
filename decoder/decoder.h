@@ -24,7 +24,7 @@ private:
 #endif
 
 class SentenceMetadata;
-struct Hypergraph;
+class Hypergraph;
 struct DecoderImpl;
 
 struct DecoderObserver {

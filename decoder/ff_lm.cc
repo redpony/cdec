@@ -519,10 +519,6 @@ LanguageModel::LanguageModel(const string& param) {
   SetStateSize(LanguageModelImpl::OrderToStateSize(order));
 }
 
-Features LanguageModel::features() const {
-  return single_feature(fid_);
-}
-
 LanguageModel::~LanguageModel() {
   delete pimpl_;
 }

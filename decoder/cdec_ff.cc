@@ -1,6 +1,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ff.h"
+#include "ff_basic.h"
 #include "ff_context.h"
 #include "ff_spans.h"
 #include "ff_lm.h"
@@ -18,6 +19,7 @@
 #include "ff_charset.h"
 #include "ff_wordset.h"
 #include "ff_dwarf.h"
+#include "ff_external.h"
 
 #ifdef HAVE_GLC
 #include <cdec/ff_glc.h>
@@ -69,6 +71,7 @@ void register_feature_functions() {
   ff_registry.Register("WordPairFeatures", new FFFactory<WordPairFeatures>);
   ff_registry.Register("WordSet", new FFFactory<WordSet>);
   ff_registry.Register("Dwarf", new FFFactory<Dwarf>);
+  ff_registry.Register("External", new FFFactory<ExternalFeature>);
 #ifdef HAVE_GLC
   ff_registry.Register("ContextCRF", new FFFactory<Model1Features>);
 #endif

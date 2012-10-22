@@ -327,11 +327,6 @@ KLanguageModel<Model>::KLanguageModel(const string& param) {
 }
 
 template <class Model>
-Features KLanguageModel<Model>::features() const {
-  return single_feature(fid_);
-}
-
-template <class Model>
 KLanguageModel<Model>::~KLanguageModel() {
   delete pimpl_;
 }
@@ -362,7 +357,6 @@ void KLanguageModel<Model>::FinalTraversalFeatures(const void* ant_state,
 
 template <class Model> boost::shared_ptr<FeatureFunction> CreateModel(const std::string &param) {
   KLanguageModel<Model> *ret = new KLanguageModel<Model>(param);
-  ret->Init();
   return boost::shared_ptr<FeatureFunction>(ret);
 }
 

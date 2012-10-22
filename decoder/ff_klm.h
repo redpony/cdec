@@ -20,10 +20,9 @@ class KLanguageModel : public FeatureFunction {
   virtual void FinalTraversalFeatures(const void* context,
                                       SparseVector<double>* features) const;
   static std::string usage(bool param,bool verbose);
-  Features features() const;
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,

@@ -1,16 +1,16 @@
-#ifndef _FFCHARSET_H_
-#define _FFCHARSET_H_
+#ifndef _FFEXTERNAL_H_
+#define _FFEXTERNAL_H_
 
-#include <string>
-#include <map>
 #include "ff.h"
-#include "hg.h"
 
-class SentenceMetadata;
-
-class NonLatinCount : public FeatureFunction {
+// dynamically loaded feature function
+class ExternalFeature : public FeatureFunction {
  public:
-  NonLatinCount(const std::string& param);
+  ExternalFeature(const std::string& param);
+  ~ExternalFeature();
+  virtual void PrepareForInput(const SentenceMetadata& smeta);
+  virtual void FinalTraversalFeatures(const void* context,
+                                      SparseVector<double>* features) const;
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const HG::Edge& edge,
@@ -19,8 +19,8 @@ class NonLatinCount : public FeatureFunction {
                                      SparseVector<double>* estimated_features,
                                      void* context) const;
  private:
-  mutable std::map<WordID, bool> is_non_latin_;
-  const int fid_;
+  void* lib_handle;
+  FeatureFunction* ff_ext;
 };
 
 #endif
