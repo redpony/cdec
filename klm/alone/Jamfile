@@ -1,4 +1,0 @@
-lib standalone : assemble.cc read.cc threading.cc vocab.cc ../lm//kenlm ../util//kenutil ../search//search : <include>.. : : <include>.. <library>../search//search <library>../lm//kenlm ;
-
-exe decode : main.cc standalone main.cc : <threading>multi:<library>..//boost_thread ;
-exe just_vocab : just_vocab.cc standalone : <threading>multi:<library>..//boost_thread ;
