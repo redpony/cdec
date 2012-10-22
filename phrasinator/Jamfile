@@ -1,4 +1,0 @@
-exe gibbs_train_plm : gibbs_train_plm.cc ..//utils ..//z ..//boost_program_options ;
-exe gibbs_train_plm_notables : gibbs_train_plm.notables.cc ..//utils ..//z ..//boost_program_options ;
-
-alias programs : gibbs_train_plm gibbs_train_plm_notables ;

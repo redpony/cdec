@@ -19,8 +19,8 @@ namespace po = boost::program_options;
 
 void SanityCheck(const vector<double>& w) {
   for (int i = 0; i < w.size(); ++i) {
-    assert(!isnan(w[i]));
-    assert(!isinf(w[i]));
+    assert(!std::isnan(w[i]));
+    assert(!std::isinf(w[i]));
   }
 }
 

@@ -5,12 +5,14 @@
 #include <cassert>
 #include <cmath>
 
+#include "hg.h"
 #include "filelib.h"
 #include "stringlib.h"
 #include "sentence_metadata.h"
 #include "lattice.h"
 #include "fdict.h"
 #include "verbose.h"
+#include "tdict.h"
 
 RuleContextFeatures::RuleContextFeatures(const string& param) {
   //  cerr << "initializing RuleContextFeatures with parameters: " << param;

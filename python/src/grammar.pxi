@@ -9,6 +9,7 @@ cdef class NT:
     cdef public bytes cat
     cdef public unsigned ref
     def __init__(self, bytes cat, unsigned ref=0):
+        """NT(bytes cat, int ref=0) -> Non-terminal from category `cat`."""
         self.cat = cat
         self.ref = ref
 
@@ -20,6 +21,7 @@ cdef class NT:
 cdef class NTRef:
     cdef public unsigned ref
     def __init__(self, unsigned ref):
+        """NTRef(int ref) -> Non-terminal reference."""
         self.ref = ref
 
     def __str__(self):
@@ -48,6 +50,12 @@ cdef class TRule:
     cdef shared_ptr[grammar.TRule]* rule
 
     def __init__(self, lhs, f, e, scores, a=None):
+        """TRule(lhs, f, e, scores, a=None) -> Translation rule.
+        lhs: left hand side non-terminal
+        f: source phrase (list of words/NT)
+        e: target phrase (list of words/NTRef)
+        scores: dictionary of feature scores
+        a: optional list of alignment points"""
         self.rule = new shared_ptr[grammar.TRule](new grammar.TRule())
         self.lhs = lhs
         self.e = e
@@ -87,9 +95,10 @@ cdef class TRule:
             cdef int idx = 0
             for i in range(len(f)):
                 if isinstance(f[i], NT):
-                    f_[0][i] = -TDConvert(<char *>f[i].cat)
+                    f_[0][i] = -TDConvert((<NT> f[i]).cat)
                 else:
-                    f_[0][i] = TDConvert(as_str(f[i]))
+                    fi = as_str(f[i])
+                    f_[0][i] = TDConvert(fi)
 
     property e:
         def __get__(self):
@@ -115,7 +124,8 @@ cdef class TRule:
                 if isinstance(e[i], NTRef):
                     e_[0][i] = 1-e[i].ref
                 else:
-                    e_[0][i] = TDConvert(as_str(e[i]))
+                    ei = as_str(e[i])
+                    e_[0][i] = TDConvert(ei)
 
     property a:
         def __get__(self):
@@ -145,7 +155,8 @@ cdef class TRule:
             cdef int fid
             cdef float fval
             for fname, fval in scores.items():
-                fid = FDConvert(as_str(fname))
+                fn = as_str(fname)
+                fid = FDConvert(fn)
                 if fid < 0: raise KeyError(fname)
                 scores_.set_value(fid, fval)
 
@@ -156,7 +167,7 @@ cdef class TRule:
         def __set__(self, lhs):
             if not isinstance(lhs, NT):
                 lhs = NT(lhs)
-            self.rule.get().lhs_ = -TDConvert(<char *>lhs.cat)
+            self.rule.get().lhs_ = -TDConvert((<NT> lhs).cat)
 
     def __str__(self):
         scores = ' '.join('%s=%s' % feat for feat in self.scores)
@@ -164,7 +175,11 @@ cdef class TRule:
                 _phrase(self.f), _phrase(self.e), scores)
 
 cdef class MRule(TRule):
-    def __init__(self, lhs, rhs, scores, a=None):
+    def __init__(self, lhs, rhs, scores):
+        """MRule(lhs, rhs, scores, a=None) -> Monolingual rule.
+        lhs: left hand side non-terminal
+        rhs: right hand side phrase (list of words/NT)
+        scores: dictionary of feature scores"""
         cdef unsigned i = 1
         e = []
         for s in rhs:
@@ -173,7 +188,7 @@ cdef class MRule(TRule):
                 i += 1
             else:
                 e.append(s)
-        super(MRule, self).__init__(lhs, rhs, e, scores, a)
+        super(MRule, self).__init__(lhs, rhs, e, scores, None)
 
 cdef class Grammar:
     cdef shared_ptr[grammar.Grammar]* grammar
@@ -196,10 +211,12 @@ cdef class Grammar:
             str(self.grammar.get().GetGrammarName().c_str())
 
         def __set__(self, name):
-            self.grammar.get().SetGrammarName(string(<char *>name))
+            name = as_str(name)
+            self.grammar.get().SetGrammarName(name)
 
 cdef class TextGrammar(Grammar):
-    def __cinit__(self, rules):
+    def __init__(self, rules):
+        """TextGrammar(rules) -> SCFG Grammar containing the rules."""
         self.grammar = new shared_ptr[grammar.Grammar](new grammar.TextGrammar())
         cdef grammar.TextGrammar* _g = <grammar.TextGrammar*> self.grammar.get()
         for trule in rules:

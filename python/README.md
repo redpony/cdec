@@ -12,6 +12,10 @@ Compile a parallel corpus and a word alignment into a suffix array representatio
 
 	python -m cdec.sa.compile -f f.txt -e e.txt -a a.txt -o output/ -c extract.ini
 
+Or, if your parallel corpus is in a single-file format (with source and target sentences on a single line, separated by a triple pipe `|||`), use:
+
+	python -m cdec.sa.compile -b f-e.txt -a a.txt -o output/ -c extract.ini
+
 Extract grammar rules from the compiled corpus:
 	
 	cat input.txt | python -m cdec.sa.extract -c extract.ini -g grammars/

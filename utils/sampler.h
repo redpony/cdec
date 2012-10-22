@@ -19,7 +19,7 @@
 
 #include "prob.h"
 
-template <typename F> struct SampleSet;
+template <typename F> class SampleSet;
 
 template <typename RNG>
 struct RandomNumberGenerator {

@@ -1,5 +1,5 @@
 bin_PROGRAMS = \
-  model1 \
+  fast_align \
   lbl_model \
   test_ngram \
   mr_em_map_adapter \
@@ -55,8 +55,8 @@ augment_grammar_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/lib
 test_ngram_SOURCES = test_ngram.cc
 test_ngram_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a ../klm/lm/libklm.a ../klm/util/libklm_util.a -lz
 
-model1_SOURCES = model1.cc ttables.cc
-model1_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
+fast_align_SOURCES = fast_align.cc ttables.cc
+fast_align_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz
 
 lbl_model_SOURCES = lbl_model.cc
 lbl_model_LDADD = libtraining.a $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/utils/libutils.a -lz

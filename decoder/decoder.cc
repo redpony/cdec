@@ -29,6 +29,7 @@
 #include "oracle_bleu.h"
 #include "apply_models.h"
 #include "ff.h"
+#include "ffset.h"
 #include "ff_factory.h"
 #include "viterbi.h"
 #include "kbest.h"
@@ -91,11 +92,6 @@ inline void ShowBanner() {
   cerr << "cdec v1.0 (c) 2009-2011 by Chris Dyer\n";
 }
 
-inline void show_models(po::variables_map const& conf,ModelSet &ms,char const* header) {
-  cerr<<header<<": ";
-  ms.show_features(cerr,cerr,conf.count("warn_0_weight"));
-}
-
 inline string str(char const* name,po::variables_map const& conf) {
   return conf[name].as<string>();
 }
@@ -133,7 +129,7 @@ inline boost::shared_ptr<FeatureFunction> make_ff(string const& ffp,bool verbose
   }
   boost::shared_ptr<FeatureFunction> pf = ff_registry.Create(ff, param);
   if (!pf) exit(1);
-  int nbyte=pf->NumBytesContext();
+  int nbyte=pf->StateSize();
   if (verbose_feature_functions && !SILENT)
     cerr<<"State is "<<nbyte<<" bytes for "<<pre<<"feature "<<ffp<<endl;
   return pf;
@@ -644,8 +640,6 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
       prev_weights = rp.weight_vector;
     }
     rp.models.reset(new ModelSet(*rp.weight_vector, rp.ffs));
-    string ps = "Pass1 "; ps[4] += pass;
-    if (!SILENT) show_models(conf,*rp.models,ps.c_str());
   }
 
   // show configuration of rescoring passes
@@ -879,13 +873,13 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     if (rp.fid_summary) {
       if (summary_feature_type == kEDGE_PROB) {
         const prob_t z = forest.PushWeightsToGoal(1.0);
-        if (!isfinite(log(z)) || isnan(log(z))) {
+        if (!std::isfinite(log(z)) || std::isnan(log(z))) {
           cerr << "  " << passtr << " !!! Invalid partition detected, abandoning.\n";
         } else {
           for (int i = 0; i < forest.edges_.size(); ++i) {
             const double log_prob_transition = log(forest.edges_[i].edge_prob_); // locally normalized by the edge
                                                                               // head node by forest.PushWeightsToGoal
-            if (!isfinite(log_prob_transition) || isnan(log_prob_transition)) {
+            if (!std::isfinite(log_prob_transition) || std::isnan(log_prob_transition)) {
               cerr << "Edge: i=" << i << " got bad inside prob: " << *forest.edges_[i].rule_ << endl;
               abort();
             }
@@ -897,7 +891,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       } else if (summary_feature_type == kNODE_RISK) {
         Hypergraph::EdgeProbs posts;
         const prob_t z = forest.ComputeEdgePosteriors(1.0, &posts);
-        if (!isfinite(log(z)) || isnan(log(z))) {
+        if (!std::isfinite(log(z)) || std::isnan(log(z))) {
           cerr << "  " << passtr << " !!! Invalid partition detected, abandoning.\n";
         } else {
           for (int i = 0; i < forest.nodes_.size(); ++i) {
@@ -906,7 +900,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
             for (int j = 0; j < in_edges.size(); ++j)
               node_post += (posts[in_edges[j]] / z);
             const double log_np = log(node_post);
-            if (!isfinite(log_np) || isnan(log_np)) {
+            if (!std::isfinite(log_np) || std::isnan(log_np)) {
               cerr << "got bad posterior prob for node " << i << endl;
               abort();
             }
@@ -921,13 +915,13 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       } else if (summary_feature_type == kEDGE_RISK) {
         Hypergraph::EdgeProbs posts;
         const prob_t z = forest.ComputeEdgePosteriors(1.0, &posts);
-        if (!isfinite(log(z)) || isnan(log(z))) {
+        if (!std::isfinite(log(z)) || std::isnan(log(z))) {
           cerr << "  " << passtr << " !!! Invalid partition detected, abandoning.\n";
         } else {
           assert(posts.size() == forest.edges_.size());
           for (int i = 0; i < posts.size(); ++i) {
             const double log_np = log(posts[i] / z);
-            if (!isfinite(log_np) || isnan(log_np)) {
+            if (!std::isfinite(log_np) || std::isnan(log_np)) {
               cerr << "got bad posterior prob for node " << i << endl;
               abort();
             }
@@ -967,7 +961,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
 
   // Oracle Rescoring
   if(get_oracle_forest) {
-    assert(!"this is broken"); FeatureVector dummy; // = last_weights
+    assert(!"this is broken"); SparseVector<double> dummy; // = last_weights
     Oracle oc=oracle.ComputeOracle(smeta,&forest,dummy,10,conf["forest_output"].as<std::string>());
     if (!SILENT) cerr << "  +Oracle BLEU forest (nodes/edges): " << forest.nodes_.size() << '/' << forest.edges_.size() << endl;
     if (!SILENT) cerr << "  +Oracle BLEU (paths): " << forest.NumberOfPaths() << endl;
@@ -1098,7 +1092,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
           cerr << "DIFF. ERR! log_z < log_ref_z: " << log_z << " " << log_ref_z << endl;
           exit(1);
         }
-        assert(!isnan(log_ref_z));
+        assert(!std::isnan(log_ref_z));
         ref_exp -= full_exp;
         acc_vec += ref_exp;
         acc_obj += (log_z - log_ref_z);

@@ -43,7 +43,6 @@ template<class FF>
 struct FFFactory : public FactoryBase<FeatureFunction> {
   FP Create(std::string param) const {
     FF *ret=new FF(param);
-    ret->Init();
     return FP(ret);
   }
   virtual std::string usage(bool params,bool verbose) const {
@@ -57,7 +56,6 @@ template<class FF>
 struct FsaFactory : public FactoryBase<FsaFeatureFunction> {
   FP Create(std::string param) const {
     FF *ret=new FF(param);
-    ret->Init();
     return FP(ret);
   }
   virtual std::string usage(bool params,bool verbose) const {
@@ -98,8 +96,6 @@ struct FactoryRegistry : public UntypedFactoryRegistry {
     if (debug)
       cerr<<"debug enabled for "<<ffname<< " - remaining options: '"<<param<<"'\n";
     FP res = dynamic_cast<FB const&>(*it->second).Create(param);
-    res->init_name_debug(ffname,debug);
-    // could add a res->Init() here instead of in Create if we wanted feature id to potentially differ based on the registered name rather than static usage() - of course, specific feature ids can be computed on the basis of feature param as well; this only affects the default single feature id=name
     return res;
   }
 };

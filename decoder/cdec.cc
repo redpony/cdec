@@ -4,6 +4,7 @@
 #include "decoder.h"
 #include "ff_register.h"
 #include "verbose.h"
+#include "timing_stats.h"
 #include "util/usage.hh"
 
 using namespace std;
@@ -28,6 +29,7 @@ int main(int argc, char** argv) {
     if (buf.empty()) continue;
     decoder.Decode(buf);
   }
+  Timer::Summarize();
 #ifdef CP_TIME
     cerr << "Time required for Cube Pruning execution: "
     << CpTime::Get()

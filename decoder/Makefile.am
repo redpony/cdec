@@ -33,6 +33,7 @@ libcdec_a_SOURCES = \
   cfg.cc \
   dwarf.cc \
   ff_dwarf.cc \
+  ff_external.cc \
   rule_lexer.cc \
   fst_translator.cc \
   csplit.cc \
@@ -55,6 +56,8 @@ libcdec_a_SOURCES = \
   phrasetable_fst.cc \
   trule.cc \
   ff.cc \
+  ffset.cc \
+  ff_basic.cc \
   ff_rules.cc \
   ff_wordset.cc \
   ff_context.cc \
