@@ -56,7 +56,10 @@ double LineOptimizer::LineOptimize(
 	//cerr << "NEW BEST: " << pos << "  (score=" << cur_best_score << ")\n";
       }
       // string xx = metric->DetailedScore(acc); cerr << "---- " << xx;
-      // cerr << "---- s=" << sco << "\n";
+#undef SHOW_ERROR_SURFACES
+#ifdef SHOW_ERROR_SURFACES
+      cerr << "x=" << seg.x << "\ts=" << sco << "\n";
+#endif
       last_boundary = seg.x;
     }
     // cerr << "x-boundary=" << seg.x << "\n";
