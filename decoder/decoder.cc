@@ -4,6 +4,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "program_options.h"
 #include "stringlib.h"
@@ -325,6 +326,8 @@ struct DecoderImpl {
   bool feature_expectations; // TODO Observer
   bool output_training_vector; // TODO Observer
   bool remove_intersected_rule_annotations;
+  boost::scoped_ptr<IncrementalBase> incremental;
+
 
   static void ConvertSV(const SparseVector<prob_t>& src, SparseVector<double>* trg) {
     for (SparseVector<prob_t>::const_iterator it = src.begin(); it != src.end(); ++it)
@@ -727,6 +730,10 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
   sent_id = -1;
   acc_obj = 0; // accumulate objective
   g_count = 0;    // number of gradient pieces computed
+
+  if (conf.count("incremental_search")) {
+    incremental.reset(IncrementalBase::Load(conf["incremental_search"].as<string>().c_str(), CurrentWeightVector()));
+  }
 }
 
 Decoder::Decoder(istream* cfg) { pimpl_.reset(new DecoderImpl(conf,0,0,cfg)); }
@@ -829,7 +836,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     HypergraphIO::WriteTarget(conf["show_target_graph"].as<string>(), sent_id, forest);
 
   if (conf.count("incremental_search")) {
-    PassToIncremental(conf["incremental_search"].as<string>().c_str(), CurrentWeightVector(), pop_limit, forest);
+    incremental->Search(pop_limit, forest);
     o->NotifyDecodingComplete(smeta);
     return true;
   }
