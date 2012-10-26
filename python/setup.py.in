@@ -3,7 +3,7 @@ from distutils.extension import Extension
 import re
 
 INC = ['..', 'src/', '../decoder', '../utils', '../mteval']
-LIB = ['../decoder', '../utils', '../mteval', '../training', '../klm/lm', '../klm/util']
+LIB = ['../decoder', '../utils', '../mteval', '../training', '../klm/lm', '../klm/util', '../klm/search']
 
 # Set automatically by configure
 LIBS = re.findall('-l([^\s]+)', '@LIBS@')
@@ -17,7 +17,7 @@ ext_modules = [
         sources=['src/_cdec.cpp'],
         include_dirs=INC,
         library_dirs=LIB,
-        libraries=LIBS + ['z', 'cdec', 'utils', 'mteval', 'training', 'klm', 'klm_util'],
+        libraries=LIBS + ['z', 'cdec', 'utils', 'mteval', 'training', 'klm', 'klm_util', 'ksearch'],
         extra_compile_args=CPPFLAGS,
         extra_link_args=LDFLAGS),
     Extension(name='cdec.sa._sa',
