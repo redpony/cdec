@@ -15,12 +15,72 @@
 #include "tdict.h"
 #include "viterbi.h"
 #include "verbose.h"
+#include <tr1/unordered_map>
 
 #define foreach         BOOST_FOREACH
 #define reverse_foreach BOOST_REVERSE_FOREACH
 
 using namespace std;
+using namespace std::tr1;
 static bool printGrammarsUsed = false;
+
+struct GlueGrammar : public TextGrammar {
+  // read glue grammar from file
+  explicit GlueGrammar(const std::string& file);
+  GlueGrammar(const std::string& goal_nt, const std::string& default_nt, const unsigned int ctf_level=0);  // "S", "X"
+  virtual bool HasRuleForSpan(int i, int j, int distance) const;
+};
+
+struct PassThroughGrammar : public TextGrammar {
+  PassThroughGrammar(const Lattice& input, const std::string& cat, const unsigned int ctf_level=0);
+  virtual bool HasRuleForSpan(int i, int j, int distance) const;
+};
+
+GlueGrammar::GlueGrammar(const string& file) : TextGrammar(file) {}
+
+static void RefineRule(TRulePtr pt, const unsigned int ctf_level){
+  for (unsigned int i=0; i<ctf_level; ++i){
+    TRulePtr r(new TRule(*pt));
+    pt->fine_rules_.reset(new vector<TRulePtr>);
+    pt->fine_rules_->push_back(r);
+    pt = r;
+  }
+}
+
+GlueGrammar::GlueGrammar(const string& goal_nt, const string& default_nt, const unsigned int ctf_level) {
+  TRulePtr stop_glue(new TRule("[" + goal_nt + "] ||| [" + default_nt + ",1] ||| [1]"));
+  AddRule(stop_glue);
+  RefineRule(stop_glue, ctf_level);
+  TRulePtr glue(new TRule("[" + goal_nt + "] ||| [" + goal_nt + ",1] ["+ default_nt + ",2] ||| [1] [2] ||| Glue=1"));
+  AddRule(glue);
+  RefineRule(glue, ctf_level);
+}
+
+bool GlueGrammar::HasRuleForSpan(int i, int /* j */, int /* distance */) const {
+  return (i == 0);
+}
+
+PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat, const unsigned int ctf_level) {
+  unordered_set<WordID> ss;
+  for (int i = 0; i < input.size(); ++i) {
+    const vector<LatticeArc>& alts = input[i];
+    for (int k = 0; k < alts.size(); ++k) {
+      const int j = alts[k].dist2next + i;
+      const string& src = TD::Convert(alts[k].label);
+      if (ss.count(alts[k].label) == 0) {
+        TRulePtr pt(new TRule("[" + cat + "] ||| " + src + " ||| " + src + " ||| PassThrough=1"));
+        pt->a_.push_back(AlignmentPoint(0,0));
+        AddRule(pt);
+        RefineRule(pt, ctf_level);
+        ss.insert(alts[k].label);
+      }
+    }
+  }
+}
+
+bool PassThroughGrammar::HasRuleForSpan(int, int, int distance) const {
+  return (distance < 2);
+}
 
 struct SCFGTranslatorImpl {
   SCFGTranslatorImpl(const boost::program_options::variables_map& conf) :
