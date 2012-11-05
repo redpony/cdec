@@ -20,15 +20,6 @@ cdef class SuffixArray:
     def __getitem__(self, i):
         return self.sa.arr[i]
 
-    def getSentId(self, i):
-        return self.darray.getSentId(i)
-
-    def getSent(self, i):
-        return self.darray.getSent(i)
-
-    def getSentPos(self, loc):
-        return self.darray.getSentPos(loc)
-
     def read_text(self, filename, side):
         '''Constructs suffix array using the algorithm
         of Larsson & Sadahkane (1999)'''

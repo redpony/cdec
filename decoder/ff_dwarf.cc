@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include "hg.h"
 #include "ff_dwarf.h"
 #include "dwarf.h"
 #include "wordid.h"

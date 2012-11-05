@@ -5,6 +5,8 @@
 #include "util/mmap.hh"
 #ifdef WIN32
 #include <io.h>
+#else
+#include <unistd.h>
 #endif // WIN32
 
 #include <iostream>
@@ -27,7 +29,7 @@ ParseNumberException::ParseNumberException(StringPiece value) throw() {
 #ifdef HAVE_ZLIB
 GZException::GZException(gzFile file) {
   int num;
-  *this << gzerror( file, &num) << " from zlib";
+  *this << gzerror(file, &num) << " from zlib";
 }
 #endif // HAVE_ZLIB
 

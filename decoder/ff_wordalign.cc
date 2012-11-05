@@ -549,7 +549,7 @@ void IdentityCycleDetector::TraversalFeaturesImpl(const SentenceMetadata& smeta,
       static map<WordID, bool> big_enough;
       map<WordID,bool>::iterator it = big_enough_.find(word);
       if (it == big_enough_.end()) {
-        out_is_identity = big_enough_[word] = strlen(TD::Convert(word)) >= length_min_;
+        out_is_identity = big_enough_[word] = TD::Convert(word).size() >= length_min_;
       } else {
         out_is_identity = it->second;
       }

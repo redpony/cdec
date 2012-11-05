@@ -1,5 +1,7 @@
 #include "ff_ruleshape.h"
 
+#include "trule.h"
+#include "hg.h"
 #include "fdict.h"
 #include <sstream>
 

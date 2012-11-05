@@ -13,6 +13,7 @@
 #include <map>
 #include <cassert>
 #include <vector>
+#include <limits>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -192,28 +193,33 @@ class FastSparseVector {
     } else {
       is_remote_ = true;
       data_.rbmap = new SPARSE_HASH_MAP<unsigned, T>(first, last);
+      HASH_MAP_DELETED(*data_.rbmap, std::numeric_limits<unsigned>::max());
     }
   }
-  void erase(int k) {
+  void erase(unsigned k) {
     if (is_remote_) {
       data_.rbmap->erase(k);
     } else {
-      for (int i = 0; i < local_size_; ++i) {
+      for (unsigned i = 0; i < local_size_; ++i) {
         if (data_.local[i].first() == k) {
-          for (int j = i+1; j < local_size_; ++j) {
+          for (unsigned j = i+1; j < local_size_; ++j) {
             data_.local[j-1].first() = data_.local[j].first();
             data_.local[j-1].second() = data_.local[j].second();
           }
         }
       }
+      --local_size_;
     }
   }
   const FastSparseVector<T>& operator=(const FastSparseVector<T>& other) {
     if (&other == this) return *this;
     clear();
     std::memcpy(this, &other, sizeof(FastSparseVector));
-    if (is_remote_)
+    if (is_remote_) {
       data_.rbmap = new SPARSE_HASH_MAP<unsigned, T>(*data_.rbmap);
+      // TODO: do i need to set_deleted on a copy?
+      HASH_MAP_DELETED(*data_.rbmap, std::numeric_limits<unsigned>::max());
+    }
     return *this;
   }
   T const& get_singleton() const {
@@ -444,6 +450,7 @@ class FastSparseVector {
       SPARSE_HASH_MAP<unsigned, T>* m = new SPARSE_HASH_MAP<unsigned, T>(
          reinterpret_cast<std::pair<unsigned, T>*>(&data_.local[0]),
          reinterpret_cast<std::pair<unsigned, T>*>(&data_.local[local_size_]), local_size_ * 1.5 + 1);
+      HASH_MAP_DELETED(*m, std::numeric_limits<unsigned>::max());
       data_.rbmap = m;
       is_remote_ = true;
     }
@@ -515,7 +522,7 @@ const FastSparseVector<T> operator-(const FastSparseVector<T>& x, const FastSpar
 }
 
 template <class T>
-std::size_t hash_value(FastSparseVector<T> const& x) {
+std::size_t hash_value(FastSparseVector<T> const&) {
   assert(!"not implemented");
   return 0;
 }

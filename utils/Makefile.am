@@ -3,15 +3,13 @@ bin_PROGRAMS = reconstruct_weights atools
 noinst_PROGRAMS = \
   ts \
   phmt \
-  mfcr_test \
-  crp_test \
   dict_test \
   m_test \
   weights_test \
   logval_test \
   small_vector_test
 
-TESTS = ts mfcr_test crp_test small_vector_test logval_test weights_test dict_test m_test
+TESTS = ts small_vector_test logval_test weights_test dict_test m_test
 
 noinst_LIBRARIES = libutils.a
 
@@ -47,12 +45,8 @@ m_test_SOURCES = m_test.cc
 m_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
 dict_test_SOURCES = dict_test.cc
 dict_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
-mfcr_test_SOURCES = mfcr_test.cc
-mfcr_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
 weights_test_SOURCES = weights_test.cc
 weights_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
-crp_test_SOURCES = crp_test.cc
-crp_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
 logval_test_SOURCES = logval_test.cc
 logval_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) -lz
 small_vector_test_SOURCES = small_vector_test.cc

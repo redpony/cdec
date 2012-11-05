@@ -6,8 +6,8 @@ SUBDIRS = \
   mteval \
   klm/util \
   klm/lm \
+  klm/search \
   decoder \
-  phrasinator \
   training \
   training/liblbfgs \
   mira \
@@ -16,13 +16,11 @@ SUBDIRS = \
   pro-train \
   rampion \
   minrisk \
-  extools \
-  gi/pf \
-  gi/markov_al \
-  rst_parser
+  example_extff
 
 #gi/pyp-topics/src gi/clda/src gi/posterior-regularisation/prjava
 
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS =  -D_GLIBCXX_PARALLEL -march=native -mtune=native -O2 -pipe -fomit-frame-pointer -Wall
+AM_CPPFLAGS =  -D_GLIBCXX_PARALLEL
+

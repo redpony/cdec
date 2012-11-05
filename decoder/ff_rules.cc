@@ -10,6 +10,8 @@
 #include "lattice.h"
 #include "fdict.h"
 #include "verbose.h"
+#include "tdict.h"
+#include "hg.h"
 
 using namespace std;
 

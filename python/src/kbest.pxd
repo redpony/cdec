@@ -16,5 +16,5 @@ cdef extern from "decoder/kbest.h" namespace "KBest":
     cdef cppclass KBestDerivations[T, Traversal]:
         cppclass Derivation:
             T _yield "yield"
-        KBestDerivations(Hypergraph& hg, unsigned k)
-        Derivation* LazyKthBest(unsigned v, unsigned k)
+        KBestDerivations(Hypergraph& hg, unsigned k) nogil
+        Derivation* LazyKthBest(unsigned v, unsigned k) nogil

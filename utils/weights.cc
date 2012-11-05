@@ -34,7 +34,7 @@ void Weights::InitFromFile(const string& filename,
     int weight_count = 0;
     bool fl = false;
     string buf;
-    weight_t val = 0;
+    double val = 0;
     while (in) {
       getline(in, buf);
       if (buf.size() == 0) continue;
@@ -53,7 +53,7 @@ void Weights::InitFromFile(const string& filename,
       if (feature_list) { feature_list->push_back(buf.substr(start, end - start)); }
       while(end < buf.size() && buf[end] == ' ') ++end;
       val = strtod(&buf.c_str()[end], NULL);
-      if (isnan(val)) {
+      if (std::isnan(val)) {
         cerr << FD::Convert(fid) << " has weight NaN!\n";
         abort();
       }
@@ -127,8 +127,8 @@ void Weights::InitSparseVector(const vector<weight_t>& dv,
 
 void Weights::SanityCheck(const vector<weight_t>& w) {
   for (unsigned i = 0; i < w.size(); ++i) {
-    assert(!isnan(w[i]));
-    assert(!isinf(w[i]));
+    assert(!std::isnan(w[i]));
+    assert(!std::isinf(w[i]));
   }
 }
 

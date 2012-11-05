@@ -3,55 +3,55 @@ import math
 
 MAXSCORE = 99
 
-def EgivenF(fphrase, ephrase, paircount, fcount, fsample_count): # p(e|f)
-    return -math.log10(paircount/fcount)
+def EgivenF(ctx): # p(e|f) = c(e, f)/c(f)
+    return -math.log10(ctx.paircount/ctx.fcount)
 
-def CountEF(fphrase, ephrase, paircount, fcount, fsample_count):
-    return math.log10(1 + paircount)
+def CountEF(ctx): # c(e, f)
+    return math.log10(1 + ctx.paircount)
 
-def SampleCountF(fphrase, ephrase, paircount, fcount, fsample_count):
-    return math.log10(1 + fsample_count)
+def SampleCountF(ctx): # sample c(f)
+    return math.log10(1 + ctx.fsample_count)
 
-def EgivenFCoherent(fphrase, ephrase, paircount, fcount, fsample_count):
-    prob = paircount/fsample_count
+def EgivenFCoherent(ctx): # c(e, f) / sample c(f)
+    prob = ctx.paircount/ctx.fsample_count
     return -math.log10(prob) if prob > 0 else MAXSCORE
 
-def CoherenceProb(fphrase, ephrase, paircount, fcount, fsample_count):
-    return -math.log10(fcount/fsample_count)
+def CoherenceProb(ctx): # c(f) / sample c(f)
+    return -math.log10(ctx.fcount/ctx.fsample_count)
 
 def MaxLexEgivenF(ttable):
-    def feature(fphrase, ephrase, paircount, fcount, fsample_count):
-        fwords = fphrase.words
+    def MaxLexEgivenF(ctx):
+        fwords = ctx.fphrase.words
         fwords.append('NULL')
         def score():
-            for e in ephrase.words:
+            for e in ctx.ephrase.words:
               maxScore = max(ttable.get_score(f, e, 0) for f in fwords)
               yield -math.log10(maxScore) if maxScore > 0 else MAXSCORE
         return sum(score())
-    return feature
+    return MaxLexEgivenF
 
 def MaxLexFgivenE(ttable):
-    def feature(fphrase, ephrase, paircount, fcount, fsample_count):
-        ewords = ephrase.words
+    def MaxLexFgivenE(ctx):
+        ewords = ctx.ephrase.words
         ewords.append('NULL')
         def score():
-            for f in fphrase.words:
+            for f in ctx.fphrase.words:
               maxScore = max(ttable.get_score(f, e, 1) for e in ewords)
               yield -math.log10(maxScore) if maxScore > 0 else MAXSCORE
         return sum(score())
-    return feature
+    return MaxLexFgivenE
 
-def IsSingletonF(fphrase, ephrase, paircount, fcount, fsample_count):
-    return (fcount == 1)
+def IsSingletonF(ctx):
+    return (ctx.fcount == 1)
 
-def IsSingletonFE(fphrase, ephrase, paircount, fcount, fsample_count):
-    return (paircount == 1)
+def IsSingletonFE(ctx):
+    return (ctx.paircount == 1)
 
-def IsNotSingletonF(fphrase, ephrase, paircount, fcount, fsample_count):
-    return (fcount > 1)
+def IsNotSingletonF(ctx):
+    return (ctx.fcount > 1)
 
-def IsNotSingletonFE(fphrase, ephrase, paircount, fcount, fsample_count):
-    return (paircount > 1)
+def IsNotSingletonFE(ctx):
+    return (ctx.paircount > 1)
 
-def IsFEGreaterThanZero(fphrase, ephrase, paircount, fcount, fsample_count):
-    return (paircount > 0.01)
+def IsFEGreaterThanZero(ctx):
+    return (ctx.paircount > 0.01)

@@ -65,7 +65,10 @@ class scoped_FILE {
     std::FILE *file_;
 };
 
+// Open for read only.  
 int OpenReadOrThrow(const char *name);
+// Create file if it doesn't exist, truncate if it does.  Opened for write.   
+int CreateOrThrow(const char *name);
 
 // Return value for SizeFile when it can't size properly.  
 const uint64_t kBadSize = (uint64_t)-1;
@@ -77,6 +80,7 @@ void ReadOrThrow(int fd, void *to, std::size_t size);
 std::size_t ReadOrEOF(int fd, void *to_void, std::size_t amount);
 
 void WriteOrThrow(int fd, const void *data_void, std::size_t size);
+void WriteOrThrow(FILE *to, const void *data, std::size_t size);
 
 void FSyncOrThrow(int fd);
 
@@ -87,12 +91,14 @@ void SeekEnd(int fd);
 
 std::FILE *FDOpenOrThrow(scoped_fd &file);
 
+std::FILE *FOpenOrThrow(const char *path, const char *mode);
+
 class TempMaker {
   public:
     explicit TempMaker(const std::string &prefix);
 
+    // These will already be unlinked for you.  
     int Make() const;
-
     std::FILE *MakeFile() const;
 
   private:

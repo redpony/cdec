@@ -5,6 +5,7 @@ cdef class DenseVector:
     cdef bint owned # if True, do not manage memory
 
     def __init__(self):
+        """DenseVector() -> Dense weight/feature vector."""
         self.vector = new vector[weight_t]()
         self.owned = False
 
@@ -22,7 +23,7 @@ cdef class DenseVector:
         raise KeyError(fname)
     
     def __setitem__(self, char* fname, float value):
-        cdef int fid = FDConvert(<char *>fname)
+        cdef int fid = FDConvert(fname)
         if fid < 0: raise KeyError(fname)
         if self.vector.size() <= fid:
             self.vector.resize(fid + 1)
@@ -31,12 +32,14 @@ cdef class DenseVector:
     def __iter__(self):
         cdef unsigned fid
         for fid in range(1, self.vector.size()):
-            yield FDConvert(fid).c_str(), self.vector[0][fid]
+            yield str(FDConvert(fid).c_str()), self.vector[0][fid]
 
     def dot(self, SparseVector other):
+        """vector.dot(SparseVector other) -> Dot product of the two vectors."""
         return other.dot(self)
 
     def tosparse(self):
+        """vector.tosparse() -> Equivalent SparseVector."""
         cdef SparseVector sparse = SparseVector.__new__(SparseVector)
         sparse.vector = new FastSparseVector[weight_t]()
         InitSparseVector(self.vector[0], sparse.vector)
@@ -46,12 +49,14 @@ cdef class SparseVector:
     cdef FastSparseVector[weight_t]* vector
 
     def __init__(self):
+        """SparseVector() -> Sparse feature/weight vector."""
         self.vector = new FastSparseVector[weight_t]()
 
     def __dealloc__(self):
         del self.vector
 
     def copy(self):
+        """vector.copy() -> SparseVector copy."""
         return self * 1
 
     def __getitem__(self, char* fname):
@@ -60,7 +65,7 @@ cdef class SparseVector:
         return self.vector.value(fid)
     
     def __setitem__(self, char* fname, float value):
-        cdef int fid = FDConvert(<char *>fname)
+        cdef int fid = FDConvert(fname)
         if fid < 0: raise KeyError(fname)
         self.vector.set_value(fid, value)
 
@@ -69,12 +74,13 @@ cdef class SparseVector:
         cdef unsigned i
         try:
             for i in range(self.vector.size()):
-                yield (FDConvert(it[0].ptr().first).c_str(), it[0].ptr().second)
+                yield (str(FDConvert(it[0].ptr().first).c_str()), it[0].ptr().second)
                 pinc(it[0]) # ++it
         finally:
             del it
 
     def dot(self, other):
+        """vector.dot(SparseVector/DenseVector other) -> Dot product of the two vectors."""
         if isinstance(other, DenseVector):
             return self.vector.dot((<DenseVector> other).vector[0])
         elif isinstance(other, SparseVector):

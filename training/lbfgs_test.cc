@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
+#include <cmath>
 #include "lbfgs.h"
 #include "sparse_vector.h"
 #include "fdict.h"
@@ -95,8 +96,9 @@ void TestSparseVector() {
   cout << data << endl;
   SparseVector<double> v;
   double obj;
-  assert(B64::Decode(&obj, &v, &data[0], data.size()));
+  bool decode_b64 = B64::Decode(&obj, &v, &data[0], data.size());
   cerr << obj << "\t" << v << endl;
+  assert(decode_b64);
   assert(obj == iobj);
   assert(g.size() == v.size());
 }
@@ -104,7 +106,7 @@ void TestSparseVector() {
 int main() {
   double o1 = TestOptimizer();
   double o2 = TestPersistentOptimizer();
-  if (o1 != o2) {
+  if (fabs(o1 - o2) > 1e-5) {
     cerr << "OPTIMIZERS PERFORMED DIFFERENTLY!\n" << o1 << " vs. " << o2 << endl;
     return 1;
   }

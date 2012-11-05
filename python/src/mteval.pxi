@@ -36,7 +36,7 @@ cdef class SufficientStats:
 
     property detail:
         def __get__(self):
-            return self.metric.DetailedScore(self.stats[0]).c_str()
+            return str(self.metric.DetailedScore(self.stats[0]).c_str())
 
     def __len__(self):
         return self.stats.size()
@@ -93,6 +93,8 @@ cdef class CandidateSet:
             yield self[i]
 
     def add_kbest(self, Hypergraph hypergraph, unsigned k):
+        """cs.add_kbest(Hypergraph hypergraph, int k) -> Extract K-best hypotheses 
+        from the hypergraph and add them to the candidate set."""
         self.cs.AddKBestCandidates(hypergraph.hg[0], k, self.scorer.get())
 
 cdef class SegmentEvaluator:
@@ -103,15 +105,17 @@ cdef class SegmentEvaluator:
         del self.scorer
 
     def evaluate(self, sentence):
+        """se.evaluate(sentence) -> SufficientStats for the given hypothesis."""
         cdef vector[WordID] hyp
         cdef SufficientStats sf = SufficientStats()
         sf.metric = self.metric
         sf.stats = new mteval.SufficientStats()
-        ConvertSentence(string(as_str(sentence.strip())), &hyp)
+        ConvertSentence(as_str(sentence.strip()), &hyp)
         self.scorer.get().Evaluate(hyp, sf.stats)
         return sf
 
     def candidate_set(self):
+        """se.candidate_set() -> Candidate set using this segment evaluator for scoring."""
         return CandidateSet(self)
 
 cdef class Scorer:
@@ -127,14 +131,13 @@ cdef class Scorer:
         del self.name
     
     def __call__(self, refs):
-        if isinstance(refs, unicode) or isinstance(refs, str):
+        if isinstance(refs, basestring):
             refs = [refs]
         cdef vector[vector[WordID]]* refsv = new vector[vector[WordID]]()
         cdef vector[WordID]* refv
-        cdef bytes ref_str
         for ref in refs:
             refv = new vector[WordID]()
-            ConvertSentence(string(as_str(ref.strip())), refv)
+            ConvertSentence(as_str(ref.strip()), refv)
             refsv.push_back(refv[0])
             del refv
         cdef unsigned i
@@ -146,7 +149,7 @@ cdef class Scorer:
         return evaluator
 
     def __str__(self):
-        return self.name.c_str()
+        return str(self.name.c_str())
 
 cdef float _compute_score(void* metric_, mteval.SufficientStats* stats):
     cdef Metric metric = <Metric> metric_
@@ -164,8 +167,8 @@ cdef void _compute_sufficient_stats(void* metric_,
     cdef list refs_ = []
     cdef unsigned i
     for i in range(refs.size()):
-        refs_.append(refs[0][i].c_str())
-    cdef list ss = metric.evaluate(hyp.c_str(), refs_)
+        refs_.append(str(refs[0][i].c_str()))
+    cdef list ss = metric.evaluate(str(hyp.c_str()), refs_)
     out.fields.resize(len(ss))
     for i in range(len(ss)):
         out.fields[i] = ss[i]
@@ -174,7 +177,8 @@ cdef class Metric:
     cdef Scorer scorer
     def __cinit__(self):
         self.scorer = Scorer()
-        self.scorer.name = new string(as_str(self.__class__.__name__))
+        cdef bytes class_name = self.__class__.__name__
+        self.scorer.name = new string(class_name)
         self.scorer.metric = mteval.PyMetricInstance(self.scorer.name[0],
                 <void*> self, _compute_sufficient_stats, _compute_score)
 

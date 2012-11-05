@@ -28,7 +28,7 @@ struct HGReader : public JSONParser {
       hg.ConnectEdgeToHeadNode(&hg.edges_[in_edges[i]], node);
     }
   }
-  void CreateEdge(const TRulePtr& rule, FeatureVector* feats, const SmallVectorUnsigned& tail) {
+  void CreateEdge(const TRulePtr& rule, SparseVector<double>* feats, const SmallVectorUnsigned& tail) {
     Hypergraph::Edge* edge = hg.AddEdge(rule, tail);
     feats->swap(edge->feature_values_);
     edge->i_ = spans[0];
@@ -392,8 +392,8 @@ string HypergraphIO::AsPLF(const Hypergraph& hg, bool include_global_parentheses
         const Hypergraph::Edge& e = hg.edges_[hg.nodes_[i].out_edges_[j]];
         const string output = e.rule_->e_.size() ==2 ? Escape(TD::Convert(e.rule_->e_[1])) : EPS;
         double prob = log(e.edge_prob_);
-        if (isinf(prob)) { prob = -9e20; }
-        if (isnan(prob)) { prob = 0; }
+        if (std::isinf(prob)) { prob = -9e20; }
+        if (std::isnan(prob)) { prob = 0; }
         os << "('" << output << "'," << prob << "," << e.head_node_ - i << "),";
       }
       os << "),";
@@ -600,7 +600,7 @@ void HypergraphIO::WriteAsCFG(const Hypergraph& hg) {
   // grammar, create the labels here
   const string kSEP = "_";
   for (int i = 0; i < hg.nodes_.size(); ++i) {
-    const char* pstr = "CAT";
+    string pstr = "CAT";
     if (hg.nodes_[i].cat_ < 0)
       pstr = TD::Convert(-hg.nodes_[i].cat_);
     cats[i] = TD::Convert(pstr + kSEP + boost::lexical_cast<string>(i)) * -1;

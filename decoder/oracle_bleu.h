@@ -12,6 +12,7 @@
 #include "scorer.h"
 #include "hg.h"
 #include "ff_factory.h"
+#include "ffset.h"
 #include "ff_bleu.h"
 #include "sparse_vector.h"
 #include "viterbi.h"
@@ -26,7 +27,7 @@
 struct Translation {
   typedef std::vector<WordID> Sentence;
   Sentence sentence;
-  FeatureVector features;
+  SparseVector<double> features;
   Translation() {  }
   Translation(Hypergraph const& hg,WeightVector *feature_weights=0)
   {
@@ -57,14 +58,14 @@ struct Oracle {
   }
   // feature 0 will be the error rate in fear and hope
   // move toward hope
-  FeatureVector ModelHopeGradient() const {
-    FeatureVector r=hope.features-model.features;
+  SparseVector<double> ModelHopeGradient() const {
+    SparseVector<double> r=hope.features-model.features;
     r.set_value(0,0);
     return r;
   }
   // move toward hope from fear
-  FeatureVector FearHopeGradient() const {
-    FeatureVector r=hope.features-fear.features;
+  SparseVector<double> FearHopeGradient() const {
+    SparseVector<double> r=hope.features-fear.features;
     r.set_value(0,0);
     return r;
   }

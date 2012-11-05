@@ -11,6 +11,8 @@
 
 #ifdef WIN32
 #include "util/getopt.hh"
+#else
+#include <unistd.h>
 #endif
 
 namespace lm {
@@ -25,7 +27,11 @@ void Usage(const char *name) {
 "-i allows buggy models from IRSTLM by mapping positive log probability to 0.\n"
 "-w mmap|after determines how writing is done.\n"
 "   mmap maps the binary file and writes to it.  Default for trie.\n"
-"   after allocates anonymous memory, builds, and writes.  Default for probing.\n\n"
+"   after allocates anonymous memory, builds, and writes.  Default for probing.\n"
+"-r \"order1.arpa order2 order3 order4\" adds lower-order rest costs from these\n"
+"   model files.  order1.arpa must be an ARPA file.  All others may be ARPA or\n"
+"   the same data structure as being built.  All files must have the same\n"
+"   vocabulary.  For probing, the unigrams must be in the same order.\n\n"
 "type is either probing or trie.  Default is probing.\n\n"
 "probing uses a probing hash table.  It is the fastest but uses the most memory.\n"
 "-p sets the space multiplier and must be >1.0.  The default is 1.5.\n\n"
@@ -81,16 +87,16 @@ void ShowSizes(const char *file, const lm::ngram::Config &config) {
   std::vector<uint64_t> counts;
   util::FilePiece f(file);
   lm::ReadARPACounts(f, counts);
-  std::size_t sizes[6];
+  uint64_t sizes[6];
   sizes[0] = ProbingModel::Size(counts, config);
   sizes[1] = RestProbingModel::Size(counts, config);
   sizes[2] = TrieModel::Size(counts, config);
   sizes[3] = QuantTrieModel::Size(counts, config);
   sizes[4] = ArrayTrieModel::Size(counts, config);
   sizes[5] = QuantArrayTrieModel::Size(counts, config);
-  std::size_t max_length = *std::max_element(sizes, sizes + sizeof(sizes) / sizeof(size_t));
-  std::size_t min_length = *std::min_element(sizes, sizes + sizeof(sizes) / sizeof(size_t));
-  std::size_t divide;
+  uint64_t max_length = *std::max_element(sizes, sizes + sizeof(sizes) / sizeof(uint64_t));
+  uint64_t min_length = *std::min_element(sizes, sizes + sizeof(sizes) / sizeof(uint64_t));
+  uint64_t divide;
   char prefix;
   if (min_length < (1 << 10) * 10) {
     prefix = ' ';
@@ -111,7 +117,7 @@ void ShowSizes(const char *file, const lm::ngram::Config &config) {
   for (long int i = 0; i < length - 2; ++i) std::cout << ' ';
   std::cout << prefix << "B\n"
     "probing " << std::setw(length) << (sizes[0] / divide) << " assuming -p " << config.probing_multiplier << "\n"
-    "probing " << std::setw(length) << (sizes[1] / divide) << " assuming -r -p " << config.probing_multiplier << "\n"
+    "probing " << std::setw(length) << (sizes[1] / divide) << " assuming -r models -p " << config.probing_multiplier << "\n"
     "trie    " << std::setw(length) << (sizes[2] / divide) << " without quantization\n"
     "trie    " << std::setw(length) << (sizes[3] / divide) << " assuming -q " << (unsigned)config.prob_bits << " -b " << (unsigned)config.backoff_bits << " quantization \n"
     "trie    " << std::setw(length) << (sizes[4] / divide) << " assuming -a " << (unsigned)config.pointer_bhiksha_bits << " array pointer compression\n"
