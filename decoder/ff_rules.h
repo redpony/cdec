@@ -5,6 +5,7 @@
 #include <map>
 #include "trule.h"
 #include "ff.h"
+#include "hg.h"
 #include "array2d.h"
 #include "wordid.h"
 

@@ -4,17 +4,17 @@ Reading test/example/nc-wmt11.en.srilm.gz
 ----5---10---15---20---25---30---35---40---45---50---55---60---65---70---75---80---85---90---95--100
 ****************************************************************************************************
   Example feature: Shape_S00000_T00000
-Seeding random number sequence to 2108658507
+Seeding random number sequence to 2912000813
 
 dtrain
 Parameters:
                        k 100
                        N 4
-                       T 3
+                       T 2
                  scorer 'stupid_bleu'
              sample from 'kbest'
                   filter 'uniq'
-           learning rate 0.0001
+           learning rate 1
                    gamma 0
              loss margin 0
                    pairs 'XYX'
@@ -26,90 +26,64 @@ Parameters:
                 cdec cfg 'test/example/cdec.ini'
                    input 'test/example/nc-wmt11.1k.gz'
                   output '-'
-              stop_after 100
+              stop_after 10
 (a dot represents 10 inputs)
-Iteration #1 of 3.
- .......... 100
-Stopping after 100 input sentences.
+Iteration #1 of 2.
+ . 10
+Stopping after 10 input sentences.
 WEIGHTS
-              Glue = -0.236
-       WordPenalty = +0.056111
-     LanguageModel = +0.71011
- LanguageModel_OOV = -0.489
-     PhraseModel_0 = -0.21332
-     PhraseModel_1 = -0.13038
-     PhraseModel_2 = +0.085148
-     PhraseModel_3 = -0.16982
-     PhraseModel_4 = -0.026332
-     PhraseModel_5 = +0.2133
-     PhraseModel_6 = +0.1002
-       PassThrough = -0.5541
+              Glue = -637
+       WordPenalty = +1064
+     LanguageModel = +1175.3
+ LanguageModel_OOV = -1437
+     PhraseModel_0 = +1935.6
+     PhraseModel_1 = +2499.3
+     PhraseModel_2 = +964.96
+     PhraseModel_3 = +1410.8
+     PhraseModel_4 = -5977.9
+     PhraseModel_5 = +522
+     PhraseModel_6 = +1089
+       PassThrough = -1308
         ---
-       1best avg score: 0.16928 (+0.16928)
- 1best avg model score: 2.4454 (+2.4454)
-           avg # pairs: 1616.2
-        avg # rank err: 769.6
+       1best avg score: 0.16963 (+0.16963)
+ 1best avg model score: 64485 (+64485)
+           avg # pairs: 1494.4
+        avg # rank err: 702.6
      avg # margin viol: 0
-    non0 feature count: 4068
-           avg list sz: 96.65
-           avg f count: 118.01
-(time 1.3 min, 0.79 s/S)
+    non0 feature count: 528
+           avg list sz: 85.7
+           avg f count: 102.75
+(time 0.083 min, 0.5 s/S)
 
-Iteration #2 of 3.
- .......... 100
+Iteration #2 of 2.
+ . 10
 WEIGHTS
-              Glue = -0.1721
-       WordPenalty = -0.14132
-     LanguageModel = +0.56023
- LanguageModel_OOV = -0.6786
-     PhraseModel_0 = +0.14155
-     PhraseModel_1 = +0.34218
-     PhraseModel_2 = +0.22954
-     PhraseModel_3 = -0.24762
-     PhraseModel_4 = -0.25848
-     PhraseModel_5 = -0.0453
-     PhraseModel_6 = -0.0264
-       PassThrough = -0.7436
+              Glue = -1196
+       WordPenalty = +809.52
+     LanguageModel = +3112.1
+ LanguageModel_OOV = -1464
+     PhraseModel_0 = +3895.5
+     PhraseModel_1 = +4683.4
+     PhraseModel_2 = +1092.8
+     PhraseModel_3 = +1079.6
+     PhraseModel_4 = -6827.7
+     PhraseModel_5 = -888
+     PhraseModel_6 = +142
+       PassThrough = -1335
         ---
-       1best avg score: 0.19585 (+0.02657)
- 1best avg model score: -16.311 (-18.757)
-           avg # pairs: 1475.8
-        avg # rank err: 668.48
+       1best avg score: 0.277 (+0.10736)
+ 1best avg model score: -3110.5 (-67595)
+           avg # pairs: 1144.2
+        avg # rank err: 529.1
      avg # margin viol: 0
-    non0 feature count: 6300
-           avg list sz: 96.08
-           avg f count: 114.92
-(time 1.3 min, 0.76 s/S)
-
-Iteration #3 of 3.
- .......... 100
-WEIGHTS
-              Glue = -0.1577
-       WordPenalty = -0.086902
-     LanguageModel = +0.30136
- LanguageModel_OOV = -0.7848
-     PhraseModel_0 = +0.11743
-     PhraseModel_1 = +0.11142
-     PhraseModel_2 = -0.0053865
-     PhraseModel_3 = -0.18731
-     PhraseModel_4 = -0.67144
-     PhraseModel_5 = +0.1236
-     PhraseModel_6 = -0.2665
-       PassThrough = -0.8498
-        ---
-       1best avg score: 0.20034 (+0.0044978)
- 1best avg model score: -7.2775 (+9.0336)
-           avg # pairs: 1578.6
-        avg # rank err: 705.77
-     avg # margin viol: 0
-    non0 feature count: 7313
-           avg list sz: 96.84
-           avg f count: 124.48
-(time 1.5 min, 0.9 s/S)
+    non0 feature count: 859
+           avg list sz: 74.9
+           avg f count: 112.84
+(time 0.067 min, 0.4 s/S)
 
 Writing weights file to '-' ...
 done
 
 ---
-Best iteration: 3 [SCORE 'stupid_bleu'=0.20034].
-This took 4.0833 min.
+Best iteration: 2 [SCORE 'stupid_bleu'=0.277].
+This took 0.15 min.
