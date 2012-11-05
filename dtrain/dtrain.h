@@ -3,7 +3,7 @@
 
 #undef DTRAIN_FASTER_PERCEPTRON // only look at misranked pairs
                                  // DO NOT USE WITH SVM!
-#define DTRAIN_LOCAL
+//#define DTRAIN_LOCAL
 #define DTRAIN_DOTS 10 // after how many inputs to display a '.'
 #define DTRAIN_GRAMMAR_DELIM "########EOS########"
 #define DTRAIN_SCALE 100000
@@ -20,7 +20,6 @@
 #include "pairsampling.h"
 
 #include "filelib.h"
-
 
 
 using namespace std;
