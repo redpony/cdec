@@ -11,7 +11,7 @@ class SourceSyntaxFeatures : public FeatureFunction {
   ~SourceSyntaxFeatures();
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
@@ -28,7 +28,7 @@ class SourceSpanSizeFeatures : public FeatureFunction {
   ~SourceSpanSizeFeatures();
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,

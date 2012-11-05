@@ -5,7 +5,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-struct EvaluationMetric;
+class EvaluationMetric;
 struct SegmentEvaluator;
 class DocumentScorer {
  public:

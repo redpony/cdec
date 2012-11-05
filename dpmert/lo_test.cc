@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( TestCheckNaN) {
   double x = 0;
   double y = 0;
   double z = x / y;
-  BOOST_CHECK_EQUAL(true, isnan(z));
+  BOOST_CHECK_EQUAL(true, std::isnan(z));
 }
 
 BOOST_AUTO_TEST_CASE(TestConvexHull) {

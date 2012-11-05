@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <string>
 #include "sparse_vector.h"
 #include "sampler.h"
 #include "wordid.h"
@@ -22,6 +23,12 @@ struct HypergraphSampler {
                     unsigned n,   // how many samples to draw
                     MT19937* rng,
                     std::vector<Hypothesis>* hypos);
+
+  static void
+  sample_trees(const Hypergraph& hg,
+               unsigned n,
+               MT19937* rng,
+               std::vector<std::string>* trees);
 };
 
 #endif

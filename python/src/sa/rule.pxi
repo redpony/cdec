@@ -31,7 +31,7 @@ cdef class Phrase:
         for i from 0 <= i < self.n:
             s = self.syms[i]
             strs.append(sym_tostring(s))
-        return " ".join(strs)
+        return ' '.join(strs)
 
     def handle(self):
         """return a hashable representation that normalizes the ordering
@@ -60,7 +60,7 @@ cdef class Phrase:
                 s = sym_setindex(s,i)
                 i = i + 1
             norm.append(sym_tostring(s))
-        return " ".join(norm)
+        return ' '.join(norm)
 
     def arity(self):
         return self.n_vars
@@ -158,45 +158,20 @@ cdef class Phrase:
 
 cdef class Rule:
 
-    def __cinit__(self, int lhs, Phrase f, Phrase e,
-            scores=None, word_alignments=None):
-        cdef int i, n
-        cdef char *rest
-
-        if not sym_isvar(lhs):
-            raise Exception('Invalid LHS symbol: %d' % lhs)
-
+    def __cinit__(self, int lhs, Phrase f, Phrase e, scores=None, word_alignments=None):
+        if not sym_isvar(lhs): raise Exception('Invalid LHS symbol: %d' % lhs)
         self.lhs = lhs
         self.f = f
         self.e = e
-
         self.word_alignments = word_alignments
-        if scores is None:
-            self.cscores = NULL
-            self.n_scores = 0
-        else:
-            n = len(scores)
-            self.cscores = <float *>malloc(n*sizeof(float))
-            self.n_scores = n
-            for i from 0 <= i < n:
-                self.cscores[i] = scores[i]
-
-    def __dealloc__(self):
-        if self.cscores != NULL:
-            free(self.cscores)
+        self.scores = scores
 
     def __hash__(self):
         return hash((self.lhs, self.f, self.e))
 
     def __cmp__(self, Rule other):
-        return cmp((self.lhs, self.f, self.e, self.word_alignments), (other.lhs, other.f, other.e, self.word_alignments))
-
-    def __iadd__(self, Rule other):
-        if self.n_scores != other.n_scores:
-            raise ValueError
-        for i from 0 <= i < self.n_scores:
-            self.cscores[i] = self.cscores[i] + other.cscores[i]
-        return self
+        return cmp((self.lhs, self.f, self.e, self.word_alignments),
+                (other.lhs, other.f, other.e, self.word_alignments))
 
     def fmerge(self, Phrase f):
         if self.f == f:
@@ -206,31 +181,12 @@ cdef class Rule:
         return self.f.arity()
 
     def __str__(self):
-        scorestrs = []
-        for i from 0 <= i < self.n_scores:
-            scorestrs.append(str(self.cscores[i]))
-        fields = [sym_tostring(self.lhs), str(self.f), str(self.e), " ".join(scorestrs)]
+        cdef unsigned i
+        fields = [sym_tostring(self.lhs), str(self.f), str(self.e), str(self.scores)]
         if self.word_alignments is not None:
-            alignstr = []
-            for i from 0 <= i < len(self.word_alignments):
-                alignstr.append("%d-%d" % (self.word_alignments[i]/65536, self.word_alignments[i]%65536))
-            #for s,t in self.word_alignments:
-                 #alignstr.append("%d-%d" % (s,t)) 
-            fields.append(" ".join(alignstr))
-        
-        return " ||| ".join(fields)
+            fields.append(' '.join('%d-%d' % a for a in self.alignments()))
+        return ' ||| '.join(fields)
 
-    property scores:
-        def __get__(self):
-            s = [None]*self.n_scores
-            for i from 0 <= i < self.n_scores:
-                s[i] = self.cscores[i]
-            return s
-
-        def __set__(self, s):
-            if self.cscores != NULL:
-                free(self.cscores)
-            self.cscores = <float *>malloc(len(s)*sizeof(float))
-            self.n_scores = len(s)
-            for i from 0 <= i < self.n_scores:
-                self.cscores[i] = s[i]
+    def alignments(self):
+        for point in self.word_alignments:
+            yield point/65536, point%65536

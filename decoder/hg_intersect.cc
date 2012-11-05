@@ -79,7 +79,9 @@ static bool FastLinearIntersect(const Lattice& target, Hypergraph* hg) {
   return (cov.size() == target.size());
 }
 
-bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
+namespace HG {
+
+bool Intersect(const Lattice& target, Hypergraph* hg) {
   // there are a number of faster algorithms available for restricted
   // classes of hypergraph and/or target.
   if (hg->IsLinearChain() && target.IsSentence())
@@ -101,7 +103,7 @@ bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
   // grammar, create the labels here
   const string kSEP = "_";
   for (unsigned i = 0; i < nnodes; ++i) {
-    const char* pstr = "CAT";
+    string pstr = "CAT";
     if (hg->nodes_[i].cat_ < 0)
       pstr = TD::Convert(-hg->nodes_[i].cat_);
     cats[i] = TD::Convert(pstr + kSEP + lexical_cast<string>(i)) * -1;
@@ -158,5 +160,7 @@ bool HG::Intersect(const Lattice& target, Hypergraph* hg) {
   else
     hg->swap(tforest);
   return true;
+}
+
 }
 

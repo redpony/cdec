@@ -1,5 +1,7 @@
 #include "ff_charset.h"
 
+#include "tdict.h"
+#include "hg.h"
 #include "fdict.h"
 #include "stringlib.h"
 
@@ -7,9 +9,9 @@ using namespace std;
 
 NonLatinCount::NonLatinCount(const string& param) : FeatureFunction(), fid_(FD::Convert("NonLatinCount")) {}
 
-bool ContainsNonLatin(const char* word) {
-  int cur = 0;
-  while(word[cur]) {
+bool ContainsNonLatin(const string& word) {
+  unsigned cur = 0;
+  while(cur < word.size()) {
     const int size = UTF8Len(word[cur]);
     if (size > 1) return true;
     cur += size;  
@@ -20,8 +22,8 @@ bool ContainsNonLatin(const char* word) {
 void NonLatinCount::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                           const Hypergraph::Edge& edge,
                                           const std::vector<const void*>& ant_contexts,
-                                          FeatureVector* features,
-                                          FeatureVector* estimated_features,
+                                          SparseVector<double>* features,
+                                          SparseVector<double>* estimated_features,
                                           void* context) const {
   const vector<WordID>& e = edge.rule_->e();
   int count = 0;

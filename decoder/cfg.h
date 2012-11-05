@@ -130,7 +130,7 @@ struct CFG {
     int lhs; // index into nts
     RHS rhs;
     prob_t p; // h unused for now (there's nothing admissable, and p is already using 1st pass inside as pushed toward top)
-    FeatureVector f; // may be empty, unless copy_features on Init
+    SparseVector<double> f; // may be empty, unless copy_features on Init
     IF_CFG_TRULE(TRulePtr rule;)
     int size() const { // for stats only
       return rhs.size();

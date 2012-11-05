@@ -142,7 +142,7 @@ struct TrainingObserver : public DecoderObserver {
       cerr << "DIFF. ERR! log_model_z < log_ref_z: " << cur_obj << " " << log_ref_z << endl;
       exit(1);
     }
-    assert(!isnan(log_ref_z));
+    assert(!std::isnan(log_ref_z));
     ref_exp -= cur_model_exp;
     acc_grad -= ref_exp;
     acc_obj += (cur_obj - log_ref_z);

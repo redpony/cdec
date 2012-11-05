@@ -81,18 +81,4 @@ struct TextGrammar : public Grammar {
 
 };
 
-struct GlueGrammar : public TextGrammar {
-  // read glue grammar from file
-  explicit GlueGrammar(const std::string& file);
-  GlueGrammar(const std::string& goal_nt, const std::string& default_nt, const unsigned int ctf_level=0);  // "S", "X"
-  virtual bool HasRuleForSpan(int i, int j, int distance) const;
-};
-
-struct PassThroughGrammar : public TextGrammar {
-  PassThroughGrammar(const Lattice& input, const std::string& cat, const unsigned int ctf_level=0);
-  virtual bool HasRuleForSpan(int i, int j, int distance) const;
-};
-
-void RefineRule(TRulePtr pt, const unsigned int ctf_level);
-
 #endif

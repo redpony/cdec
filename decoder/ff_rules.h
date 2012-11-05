@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include "trule.h"
 #include "ff.h"
 #include "array2d.h"
 #include "wordid.h"
@@ -12,7 +13,7 @@ class RuleIdentityFeatures : public FeatureFunction {
   RuleIdentityFeatures(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
@@ -42,7 +43,7 @@ class RuleTargetBigramFeatures : public FeatureFunction {
   RuleTargetBigramFeatures(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,

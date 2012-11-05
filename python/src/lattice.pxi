@@ -3,18 +3,20 @@ cimport lattice
 cdef class Lattice:
     cdef lattice.Lattice* lattice
 
-    def __cinit__(self, inp):
+    def __cinit__(self):
+        self.lattice = new lattice.Lattice()
+
+    def __init__(self, inp):
+        """Lattice(tuple) -> Lattice from node list.
+        Lattice(string) -> Lattice from PLF representation."""
         if isinstance(inp, tuple):
-            self.lattice = new lattice.Lattice(len(inp))
+            self.lattice.resize(len(inp))
             for i, arcs in enumerate(inp):
                 self[i] = arcs
+        elif isinstance(inp, basestring):
+            lattice.ConvertTextOrPLF(as_str(inp), self.lattice)
         else:
-            if isinstance(inp, unicode):
-                inp = inp.encode('utf8')
-            if not isinstance(inp, str):
-                raise TypeError('Cannot create lattice from %s' % type(inp))
-            self.lattice = new lattice.Lattice()
-            lattice.ConvertTextToLattice(string(<char *>inp), self.lattice)
+            raise TypeError('cannot create lattice from %s' % type(inp))
 
     def __dealloc__(self):
         del self.lattice
@@ -28,7 +30,7 @@ cdef class Lattice:
         cdef unsigned i
         for i in range(arc_vector.size()):
             arc = &arc_vector[i]
-            label = unicode(TDConvert(arc.label), 'utf8')
+            label = unicode(TDConvert(arc.label).c_str(), 'utf8')
             arcs.append((label, arc.cost, arc.dist2next))
         return tuple(arcs)
 
@@ -37,9 +39,8 @@ cdef class Lattice:
             raise IndexError('lattice index out of range')
         cdef lattice.LatticeArc* arc
         for (label, cost, dist2next) in arcs:
-            if isinstance(label, unicode):
-                label = label.encode('utf8')
-            arc = new lattice.LatticeArc(TDConvert(<char *>label), cost, dist2next)
+            label_str = as_str(label)
+            arc = new lattice.LatticeArc(TDConvert(label_str), cost, dist2next)
             self.lattice[0][index].push_back(arc[0])
             del arc
 
@@ -47,7 +48,10 @@ cdef class Lattice:
         return self.lattice.size()
 
     def __str__(self):
-        return hypergraph.AsPLF(self.lattice[0], True).c_str()
+        return str(hypergraph.AsPLF(self.lattice[0], True).c_str())
+
+    def __unicode__(self):
+        return unicode(str(self), 'utf8')
 
     def __iter__(self):
         cdef unsigned i
@@ -55,6 +59,7 @@ cdef class Lattice:
             yield self[i]
 
     def todot(self):
+        """lattice.todot() -> Representation of the lattice in GraphViz dot format."""
         def lines():
             yield 'digraph lattice {'
             yield 'rankdir = LR;'
@@ -65,3 +70,11 @@ cdef class Lattice:
             yield '%d [shape=doublecircle]' % len(self)
             yield '}'
         return '\n'.join(lines()).encode('utf8')
+
+    def as_hypergraph(self):
+        """lattice.as_hypergraph() -> Hypergraph representation of the lattice."""
+        cdef Hypergraph result = Hypergraph.__new__(Hypergraph)
+        result.hg = new hypergraph.Hypergraph()
+        cdef bytes plf = str(self)
+        hypergraph.ReadFromPLF(plf, result.hg)
+        return result

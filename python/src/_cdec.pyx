@@ -3,7 +3,7 @@ from libcpp.vector cimport vector
 from utils cimport *
 cimport decoder
 
-cdef char* as_str(data, char* error_msg='Cannot convert type %s to str'):
+cdef bytes as_str(data, char* error_msg='Cannot convert type %s to str'):
     cdef bytes ret
     if isinstance(data, unicode):
         ret = data.encode('utf8')
@@ -25,6 +25,10 @@ decoder.register_feature_functions()
 class InvalidConfig(Exception): pass
 class ParseFailed(Exception): pass
 
+def set_silent(yn):
+    """set_silent(bool): Configure the verbosity of cdec."""
+    SetSilent(yn)
+
 def _make_config(config):
     for key, value in config.items():
         if isinstance(value, dict):
@@ -34,18 +38,16 @@ def _make_config(config):
             for name in value:
                 yield key, name
         else:
-            yield key, bytes(value)
+            yield key, str(value)
 
 cdef class Decoder:
     cdef decoder.Decoder* dec
     cdef DenseVector weights
 
-    def __cinit__(self, config_str=None, **config):
-        """ Configuration can be given as a string:
-                Decoder('formalism = scfg')
-            or using keyword arguments:
-                Decoder(formalism='scfg')
-        """
+    def __init__(self, config_str=None, **config):
+        """Decoder('formalism = scfg') -> initialize from configuration string
+        Decoder(formalism='scfg') -> initialize from named parameters
+        Create a decoder using a given configuration. Formalism is required."""
         if config_str is None:
             formalism = config.get('formalism', None)
             if formalism not in ('scfg', 'fst', 'lextrans', 'pb',
@@ -82,9 +84,10 @@ cdef class Decoder:
     property formalism:
         def __get__(self):
             cdef variables_map* conf = &self.dec.GetConf()
-            return conf[0]['formalism'].as_str()
+            return str(conf[0]['formalism'].as_str().c_str())
 
     def read_weights(self, weights):
+        """decoder.read_weights(filename): Read decoder weights from a file."""
         with open(weights) as fp:
             for line in fp:
                 if line.strip().startswith('#'): continue
@@ -92,20 +95,22 @@ cdef class Decoder:
                 self.weights[fname.strip()] = float(value)
 
     def translate(self, sentence, grammar=None):
+        """decoder.translate(sentence, grammar=None) -> Hypergraph
+        Translate a sentence (string/Lattice) with a grammar (string/list of rules)."""
         cdef bytes input_str
-        if isinstance(sentence, unicode) or isinstance(sentence, str):
+        if isinstance(sentence, basestring):
             input_str = as_str(sentence.strip())
         elif isinstance(sentence, Lattice):
             input_str = str(sentence) # PLF format
         else:
             raise TypeError('Cannot translate input type %s' % type(sentence))
         if grammar:
-            if isinstance(grammar, str) or isinstance(grammar, unicode):
-                self.dec.AddSupplementalGrammarFromString(string(as_str(grammar)))
+            if isinstance(grammar, basestring):
+                self.dec.AddSupplementalGrammarFromString(as_str(grammar))
             else:
                 self.dec.AddSupplementalGrammar(TextGrammar(grammar).grammar[0])
         cdef decoder.BasicObserver observer = decoder.BasicObserver()
-        self.dec.Decode(string(input_str), &observer)
+        self.dec.Decode(input_str, &observer)
         if observer.hypergraph == NULL:
             raise ParseFailed()
         cdef Hypergraph hg = Hypergraph()

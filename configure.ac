@@ -12,7 +12,12 @@ AC_PROG_CXX
 AC_LANG_CPLUSPLUS
 BOOST_REQUIRE([1.44])
 BOOST_PROGRAM_OPTIONS
+BOOST_SYSTEM
 BOOST_TEST
+AM_PATH_PYTHON
+AC_CHECK_HEADER(dlfcn.h,AC_DEFINE(HAVE_DLFCN_H))
+AC_CHECK_LIB(dl, dlopen)
+
 AC_ARG_ENABLE(mpi,
  [ --enable-mpi  Build MPI binaries, assumes mpi.h is present ],
  [ mpi=yes
@@ -69,22 +74,15 @@ fi
 
 #BOOST_THREADS
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-LDFLAGS="$LDFLAGS $BOOST_PROGRAM_OPTIONS_LDFLAGS"
+LDFLAGS="$LDFLAGS $BOOST_PROGRAM_OPTIONS_LDFLAGS $BOOST_SYSTEM_LDFLAGS"
 # $BOOST_THREAD_LDFLAGS"
-LIBS="$LIBS $BOOST_PROGRAM_OPTIONS_LIBS"
+LIBS="$LIBS $BOOST_PROGRAM_OPTIONS_LIBS $BOOST_SYSTEM_LIBS"
 # $BOOST_THREAD_LIBS"
 
 AC_CHECK_HEADER(google/dense_hash_map,
                [AC_DEFINE([HAVE_SPARSEHASH], [1], [flag for google::dense_hash_map])])
 
 AC_PROG_INSTALL
-
-AM_CONDITIONAL([RAND_LM], false)
-AC_ARG_WITH(randlm,
-            [AC_HELP_STRING([--with-randlm=PATH], [(optional) path to RandLM toolkit])],
-            [with_randlm=$withval],
-            [with_randlm=no]
-           )
 
 AM_CONDITIONAL([GLC], false)
 AC_ARG_WITH(glc,
@@ -93,24 +91,6 @@ AC_ARG_WITH(glc,
             [with_glc=no]
            )
 FF_GLC=""
-
-if test "x$with_randlm" != 'xno'
-then
-  SAVE_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS -I${with_randlm}/include"
-
-  AC_CHECK_HEADER(RandLM.h,
-                 [AC_DEFINE([HAVE_RANDLM], [], [flag for RandLM])],
-                 [AC_MSG_ERROR([Cannot find RandLM!])])
-
-
-  LIB_RANDLM="-lrandlm"
-  LDFLAGS="$LDFLAGS -L${with_randlm}/lib"
-  LIBS="$LIBS $LIB_RANDLM"
-  FMTLIBS="$FMTLIBS librandlm.a"
-  AM_CONDITIONAL([RAND_LM], true)
-fi
-
 
 if test "x$with_glc" != 'xno'
 then
@@ -132,4 +112,24 @@ fi
 
 CPPFLAGS="-DPIC -fPIC $CPPFLAGS -DHAVE_CONFIG_H"
 
-AC_OUTPUT(Makefile rst_parser/Makefile utils/Makefile mteval/Makefile extools/Makefile decoder/Makefile phrasinator/Makefile training/Makefile training/liblbfgs/Makefile dpmert/Makefile pro-train/Makefile rampion/Makefile minrisk/Makefile klm/util/Makefile klm/lm/Makefile mira/Makefile dtrain/Makefile gi/pyp-topics/src/Makefile gi/clda/src/Makefile gi/pf/Makefile gi/markov_al/Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([utils/Makefile])
+AC_CONFIG_FILES([mteval/Makefile])
+AC_CONFIG_FILES([decoder/Makefile])
+AC_CONFIG_FILES([training/Makefile])
+AC_CONFIG_FILES([training/liblbfgs/Makefile])
+AC_CONFIG_FILES([dpmert/Makefile])
+AC_CONFIG_FILES([pro-train/Makefile])
+AC_CONFIG_FILES([rampion/Makefile])
+AC_CONFIG_FILES([minrisk/Makefile])
+AC_CONFIG_FILES([klm/util/Makefile])
+AC_CONFIG_FILES([klm/lm/Makefile])
+AC_CONFIG_FILES([klm/search/Makefile])
+AC_CONFIG_FILES([mira/Makefile])
+AC_CONFIG_FILES([dtrain/Makefile])
+AC_CONFIG_FILES([example_extff/Makefile])
+
+AC_CONFIG_FILES([python/setup.py])
+
+AC_OUTPUT
+

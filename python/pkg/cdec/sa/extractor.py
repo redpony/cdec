@@ -9,7 +9,7 @@ import cdec.sa
 MAX_INITIAL_SIZE = 15
 
 class GrammarExtractor:
-    def __init__(self, config):
+    def __init__(self, config, features=None):
         if isinstance(config, str) or isinstance(config, unicode):
             if not os.path.exists(config):
                 raise IOError('cannot read configuration from {0}'.format(config))
@@ -57,8 +57,11 @@ class GrammarExtractor:
         # lexical weighting tables
         tt = cdec.sa.BiLex(from_binary=config['lex_file'])
 
-        self.models = (EgivenFCoherent, SampleCountF, CountEF, 
-                MaxLexFgivenE(tt), MaxLexEgivenF(tt), IsSingletonF, IsSingletonFE)
+        # TODO: use @cdec.sa.features decorator for standard features too
+        # + add a mask to disable features
+        scorer = cdec.sa.Scorer(EgivenFCoherent, SampleCountF, CountEF, 
+            MaxLexFgivenE(tt), MaxLexEgivenF(tt), IsSingletonF, IsSingletonFE,
+            *cdec.sa._SA_FEATURES)
 
         fsarray = cdec.sa.SuffixArray(from_binary=config['f_sa_file'])
         edarray = cdec.sa.DataArray(from_binary=config['e_file'])
@@ -67,12 +70,15 @@ class GrammarExtractor:
         # -1 = don't sample, use all data (VERY SLOW!)
         sampler = cdec.sa.Sampler(300, fsarray)
 
-        self.factory.configure(fsarray, edarray, sampler)
+        self.factory.configure(fsarray, edarray, sampler, scorer)
+        # Initialize feature definitions with configuration
+        for fn in cdec.sa._SA_CONFIGURE:
+            fn(config)
 
     def grammar(self, sentence):
         if isinstance(sentence, unicode):
             sentence = sentence.encode('utf8')
-        cnet = chain(('<s>',), sentence.split(), ('</s>',))
-        cnet = (cdec.sa.sym_fromstring(word, terminal=True) for word in cnet)
-        cnet = tuple(((word, None, 1), ) for word in cnet)
-        return self.factory.input(cnet, self.models)
+        words = tuple(chain(('<s>',), sentence.split(), ('</s>',)))
+        meta = cdec.sa.annotate(words)
+        cnet = cdec.sa.make_lattice(words)
+        return self.factory.input(cnet, meta)
