@@ -1,1 +1,2 @@
-~/cdec/training/mpi_batch_optimize -w weights.cur.gz -t dev.in-ref -d cdec-train.ini -M 200
+~/cdec/training/mpi_batch_optimize -w weights.trained -t dev.in-ref -p -c cdec-train.ini -M 200
+
