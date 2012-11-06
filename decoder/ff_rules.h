@@ -5,6 +5,7 @@
 #include <map>
 #include "trule.h"
 #include "ff.h"
+#include "hg.h"
 #include "array2d.h"
 #include "wordid.h"
 
@@ -23,9 +24,24 @@ class RuleIdentityFeatures : public FeatureFunction {
   mutable std::map<const TRule*, int> rule2_fid_;
 };
 
-class RuleNgramFeatures : public FeatureFunction {
+class RuleSourceBigramFeatures : public FeatureFunction {
  public:
-  RuleNgramFeatures(const std::string& param);
+  RuleSourceBigramFeatures(const std::string& param);
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const Hypergraph::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const;
+  virtual void PrepareForInput(const SentenceMetadata& smeta);
+ private:
+  mutable std::map<const TRule*, SparseVector<double> > rule2_feats_;
+};
+
+class RuleTargetBigramFeatures : public FeatureFunction {
+ public:
+  RuleTargetBigramFeatures(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const HG::Edge& edge,

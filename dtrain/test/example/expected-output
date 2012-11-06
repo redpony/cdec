@@ -1,31 +1,20 @@
                 cdec cfg 'test/example/cdec.ini'
-feature: WordPenalty (no config parameters)
-State is 0 bytes for feature WordPenalty
-feature: KLanguageModel (with config parameters 'test/example/nc-wmt11.en.srilm.gz')
 Loading the LM will be faster if you build a binary file.
 Reading test/example/nc-wmt11.en.srilm.gz
 ----5---10---15---20---25---30---35---40---45---50---55---60---65---70---75---80---85---90---95--100
 ****************************************************************************************************
-Loaded 5-gram KLM from test/example/nc-wmt11.en.srilm.gz (MapSize=49581)
-State is 98 bytes for feature KLanguageModel test/example/nc-wmt11.en.srilm.gz
-feature: RuleIdentityFeatures (no config parameters)
-State is 0 bytes for feature RuleIdentityFeatures
-feature: RuleNgramFeatures (no config parameters)
-State is 0 bytes for feature RuleNgramFeatures
-feature: RuleShape (no config parameters)
   Example feature: Shape_S00000_T00000
-State is 0 bytes for feature RuleShape
-Seeding random number sequence to 1072059181
+Seeding random number sequence to 2912000813
 
 dtrain
 Parameters:
                        k 100
                        N 4
-                       T 3
+                       T 2
                  scorer 'stupid_bleu'
              sample from 'kbest'
                   filter 'uniq'
-           learning rate 0.0001
+           learning rate 1
                    gamma 0
              loss margin 0
                    pairs 'XYX'
@@ -33,93 +22,68 @@ Parameters:
           pair threshold 0
           select weights 'VOID'
                   l1 reg 0 'none'
+               max pairs 4294967295
                 cdec cfg 'test/example/cdec.ini'
                    input 'test/example/nc-wmt11.1k.gz'
                   output '-'
               stop_after 10
 (a dot represents 10 inputs)
-Iteration #1 of 3.
+Iteration #1 of 2.
  . 10
 Stopping after 10 input sentences.
 WEIGHTS
-              Glue = -0.0293
-       WordPenalty = +0.049075
-     LanguageModel = +0.24345
- LanguageModel_OOV = -0.2029
-     PhraseModel_0 = +0.0084102
-     PhraseModel_1 = +0.021729
-     PhraseModel_2 = +0.014922
-     PhraseModel_3 = +0.104
-     PhraseModel_4 = -0.14308
-     PhraseModel_5 = +0.0247
-     PhraseModel_6 = -0.012
-       PassThrough = -0.2161
+              Glue = -637
+       WordPenalty = +1064
+     LanguageModel = +1175.3
+ LanguageModel_OOV = -1437
+     PhraseModel_0 = +1935.6
+     PhraseModel_1 = +2499.3
+     PhraseModel_2 = +964.96
+     PhraseModel_3 = +1410.8
+     PhraseModel_4 = -5977.9
+     PhraseModel_5 = +522
+     PhraseModel_6 = +1089
+       PassThrough = -1308
         ---
-       1best avg score: 0.16872 (+0.16872)
- 1best avg model score: -1.8276 (-1.8276)
-           avg # pairs: 1121.1
-        avg # rank err: 555.6
+       1best avg score: 0.16963 (+0.16963)
+ 1best avg model score: 64485 (+64485)
+           avg # pairs: 1494.4
+        avg # rank err: 702.6
      avg # margin viol: 0
-    non0 feature count: 277
-           avg list sz: 77.2
-           avg f count: 90.96
-(time 0.1 min, 0.6 s/S)
-
-Iteration #2 of 3.
- . 10
-WEIGHTS
-              Glue = -0.3526
-       WordPenalty = +0.067576
-     LanguageModel = +1.155
- LanguageModel_OOV = -0.2728
-     PhraseModel_0 = -0.025529
-     PhraseModel_1 = +0.095869
-     PhraseModel_2 = +0.094567
-     PhraseModel_3 = +0.12482
-     PhraseModel_4 = -0.36533
-     PhraseModel_5 = +0.1068
-     PhraseModel_6 = -0.1517
-       PassThrough = -0.286
-        ---
-       1best avg score: 0.18394 (+0.015221)
- 1best avg model score: 3.205 (+5.0326)
-           avg # pairs: 1168.3
-        avg # rank err: 594.8
-     avg # margin viol: 0
-    non0 feature count: 543
-           avg list sz: 77.5
-           avg f count: 85.916
+    non0 feature count: 528
+           avg list sz: 85.7
+           avg f count: 102.75
 (time 0.083 min, 0.5 s/S)
 
-Iteration #3 of 3.
+Iteration #2 of 2.
  . 10
 WEIGHTS
-              Glue = -0.392
-       WordPenalty = +0.071963
-     LanguageModel = +0.81266
- LanguageModel_OOV = -0.4177
-     PhraseModel_0 = -0.2649
-     PhraseModel_1 = -0.17931
-     PhraseModel_2 = +0.038261
-     PhraseModel_3 = +0.20261
-     PhraseModel_4 = -0.42621
-     PhraseModel_5 = +0.3198
-     PhraseModel_6 = -0.1437
-       PassThrough = -0.4309
+              Glue = -1196
+       WordPenalty = +809.52
+     LanguageModel = +3112.1
+ LanguageModel_OOV = -1464
+     PhraseModel_0 = +3895.5
+     PhraseModel_1 = +4683.4
+     PhraseModel_2 = +1092.8
+     PhraseModel_3 = +1079.6
+     PhraseModel_4 = -6827.7
+     PhraseModel_5 = -888
+     PhraseModel_6 = +142
+       PassThrough = -1335
         ---
-       1best avg score: 0.2962 (+0.11225)
- 1best avg model score: -36.274 (-39.479)
-           avg # pairs: 1109.6
-        avg # rank err: 515.9
+       1best avg score: 0.277 (+0.10736)
+ 1best avg model score: -3110.5 (-67595)
+           avg # pairs: 1144.2
+        avg # rank err: 529.1
      avg # margin viol: 0
-    non0 feature count: 741
-           avg list sz: 77
-           avg f count: 88.982
-(time 0.083 min, 0.5 s/S)
+    non0 feature count: 859
+           avg list sz: 74.9
+           avg f count: 112.84
+(time 0.067 min, 0.4 s/S)
 
 Writing weights file to '-' ...
 done
 
 ---
-Best iteration: 3 [SCORE 'stupid_bleu'=0.2962].
-This took 0.26667 min.
+Best iteration: 2 [SCORE 'stupid_bleu'=0.277].
+This took 0.15 min.

@@ -49,8 +49,9 @@ void register_feature_functions() {
   ff_registry.Register("RuleIdentityFeatures", new FFFactory<RuleIdentityFeatures>());
   ff_registry.Register("SourceSyntaxFeatures", new FFFactory<SourceSyntaxFeatures>);
   ff_registry.Register("SourceSpanSizeFeatures", new FFFactory<SourceSpanSizeFeatures>);
-  ff_registry.Register("RuleNgramFeatures", new FFFactory<RuleNgramFeatures>());
   ff_registry.Register("CMR2008ReorderingFeatures", new FFFactory<CMR2008ReorderingFeatures>());
+  ff_registry.Register("RuleSourceBigramFeatures", new FFFactory<RuleSourceBigramFeatures>());
+  ff_registry.Register("RuleTargetBigramFeatures", new FFFactory<RuleTargetBigramFeatures>());
   ff_registry.Register("KLanguageModel", new KLanguageModelFactory());
   ff_registry.Register("NonLatinCount", new FFFactory<NonLatinCount>);
   ff_registry.Register("RuleShape", new FFFactory<RuleShapeFeatures>);
