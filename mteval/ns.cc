@@ -12,6 +12,7 @@
 #include <sstream>
 
 #include "tdict.h"
+#include "filelib.h"
 #include "stringlib.h"
 
 using namespace std;
@@ -234,7 +235,13 @@ struct BleuMetric : public EvaluationMetric {
 
 EvaluationMetric* EvaluationMetric::Instance(const string& imetric_id) {
   static bool is_first = true;
+  static string meteor_jar_path = "/cab0/tools/meteor-1.3/meteor-1.3.jar";
   if (is_first) {
+    const char* ppath = getenv("METEOR_JAR");
+    if (ppath) {
+      cerr << "METEOR_JAR environment variable set to " << ppath << endl;
+      meteor_jar_path = ppath;
+    }
     instances_["NULL"] = NULL;
     is_first = false;
   }
@@ -252,7 +259,11 @@ EvaluationMetric* EvaluationMetric::Instance(const string& imetric_id) {
     } else if (metric_id == "TER") {
       m = new TERMetric;
     } else if (metric_id == "METEOR") {
-      m = new ExternalMetric("METEOR", "java -Xmx1536m -jar /cab0/tools/meteor-1.3/meteor-1.3.jar - - -mira -lower -t tune -l en");
+      if (!FileExists(meteor_jar_path)) {
+        cerr << meteor_jar_path << " not found. Set METEOR_JAR environment variable.\n";
+        abort();
+      }
+      m = new ExternalMetric("METEOR", "java -Xmx1536m -jar " + meteor_jar_path + " - - -mira -lower -t tune -l en");
     } else if (metric_id.find("COMB:") == 0) {
       m = new CombinationMetric(metric_id);
     } else if (metric_id == "CER") {
