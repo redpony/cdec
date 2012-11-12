@@ -67,6 +67,7 @@ my $bleu_weight=1;
 my $use_make = 1;  # use make to parallelize line search
 my $useqsub;
 my $pass_suffix = '';
+my $devset = '';
 my $cpbin=1;
 # Process command-line options
 Getopt::Long::Configure("no_auto_abbrev");
@@ -85,12 +86,13 @@ if (GetOptions(
 	"pmem=s" => \$pmem,
         "cpbin!" => \$cpbin,
 	"random-directions=i" => \$rand_directions,
+        "devset=s" => \$devset,
 	"ref-files=s" => \$refFiles,
 	"metric=s" => \$metric,
 	"source-file=s" => \$srcFile,
 	"weights=s" => \$initialWeights,
 	"workdir=s" => \$dir,
-    "opt-iterations=i" => \$optimization_iters,
+        "opt-iterations=i" => \$optimization_iters,
 ) == 0 || @ARGV!=1 || $help) {
 	print_help();
 	exit;
@@ -102,8 +104,17 @@ if ($useqsub) {
 }
 
 my @missing_args = ();
-if (!defined $srcFile) { push @missing_args, "--source-file"; }
-if (!defined $refFiles) { push @missing_args, "--ref-files"; }
+if (defined $srcFile || defined $refFiles) {
+  die <<EOT;
+
+  The options --ref-files and --source-file are no longer supported.
+  Please specify the input file and its reference translations with
+  --devset FILE
+
+EOT
+}
+
+if (!defined $devset) { push @missing_args, "--devset"; }
 if (!defined $initialWeights) { push @missing_args, "--weights"; }
 die "Please specify missing arguments: " . join (', ', @missing_args) . "\n" if (@missing_args);
 
@@ -132,8 +143,6 @@ my $DIR_FLAG = '-r';
 if ($metric =~ /^ter$|^aer$/i) {
   $DIR_FLAG = '';
 }
-
-my $refs_comma_sep = get_comma_sep_refs('r',$refFiles);
 
 unless ($dir){
 	$dir = "dpmert";
@@ -229,8 +238,10 @@ if ($dryrun){
 check_call("cp $iniFile $newIniFile");
 $iniFile = $newIniFile;
 
+split_devset($devset, "$dir/dev.input.raw", "$dir/dev.refs");
+my $refs = "-r $dir/dev.refs";
 my $newsrc = "$dir/dev.input";
-enseg($srcFile, $newsrc);
+enseg("$dir/dev.input.raw", $newsrc);
 $srcFile = $newsrc;
 my $devSize = 0;
 open F, "<$srcFile" or die "Can't read $srcFile: $!";
@@ -293,7 +304,7 @@ while (1){
 	    $retries++;
 	}
 	die "Dev set contains $devSize sentences, but we don't have topbest and hypergraphs for all these! Decoder failure? Check $decoderLog\n" if ($devSize != $num_hgs || $devSize != $num_topbest);
-	my $dec_score = check_output("cat $runFile | $SCORER $refs_comma_sep -m $metric");
+	my $dec_score = check_output("cat $runFile | $SCORER $refs -m $metric");
 	chomp $dec_score;
 	print STDERR "DECODER SCORE: $dec_score\n";
 
@@ -346,7 +357,7 @@ while (1){
 			$mapoutput =~ s/mapinput/mapoutput/;
 			push @mapoutputs, "$dir/splag.$im1/$mapoutput";
 			$o2i{"$dir/splag.$im1/$mapoutput"} = "$dir/splag.$im1/$shard";
-			my $script = "$MAPPER -s $srcFile -m $metric $refs_comma_sep < $dir/splag.$im1/$shard | sort -t \$'\\t' -k 1 > $dir/splag.$im1/$mapoutput";
+			my $script = "$MAPPER -s $srcFile -m $metric $refs < $dir/splag.$im1/$shard | sort -t \$'\\t' -k 1 > $dir/splag.$im1/$mapoutput";
 			if ($use_make) {
 				my $script_file = "$dir/scripts/map.$shard";
 				open F, ">$script_file" or die "Can't write $script_file: $!";
@@ -490,14 +501,6 @@ sub get_lines {
   return $lc;
 }
 
-sub get_comma_sep_refs {
-  my ($r,$p) = @_;
-  my $o = check_output("echo $p");
-  chomp $o;
-  my @files = split /\s+/, $o;
-  return "-$r " . join(" -$r ", @files);
-}
-
 sub read_weights_file {
   my ($file) = @_;
   open F, "<$file" or die "Couldn't read $file: $!";
@@ -530,8 +533,7 @@ sub write_config {
 	print $fh "DECODER:          $decoder\n";
 	print $fh "INI FILE:         $iniFile\n";
 	print $fh "WORKING DIR:      $dir\n";
-	print $fh "SOURCE (DEV):     $srcFile\n";
-	print $fh "REFS (DEV):       $refFiles\n";
+	print $fh "DEVSET:           $devset\n";
 	print $fh "EVAL METRIC:      $metric\n";
 	print $fh "START ITERATION:  $iteration\n";
 	print $fh "MAX ITERATIONS:   $max_iterations\n";
@@ -698,3 +700,21 @@ sub escaped_shell_args_str {
 sub escaped_cmdline {
     return "$0 ".&escaped_shell_args_str(@ORIG_ARGV);
 }
+
+sub split_devset {
+  my ($infile, $outsrc, $outref) = @_;
+  open F, "<$infile" or die "Can't read $infile: $!";
+  open S, ">$outsrc" or die "Can't write $outsrc: $!";
+  open R, ">$outref" or die "Can't write $outref: $!";
+  while(<F>) {
+    chomp;
+    my ($src, @refs) = split /\s*\|\|\|\s*/;
+    die "Malformed devset line: $_\n" unless scalar @refs > 0;
+    print S "$src\n";
+    print R join(' ||| ', @refs) . "\n";
+  }
+  close R;
+  close S;
+  close F;
+}
+
