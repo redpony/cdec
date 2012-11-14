@@ -832,11 +832,13 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     abort();
   }
 
-  if (conf.count("show_target_graph"))
+  if (conf.count("show_target_graph")) {
     HypergraphIO::WriteTarget(conf["show_target_graph"].as<string>(), sent_id, forest);
-
+  }
   if (conf.count("incremental_search")) {
     incremental->Search(pop_limit, forest);
+  }
+  if (conf.count("show_target_graph") || conf.count("incremental_search")) {
     o->NotifyDecodingComplete(smeta);
     return true;
   }
