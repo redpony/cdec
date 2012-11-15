@@ -7,15 +7,14 @@ my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR 
 # Skip local config (used for distributing jobs) if we're running in local-only mode
 use LocalConfig;
 use Getopt::Long;
-use IPC::Open2;
-use POSIX ":sys_wait_h";
-my $QSUB_CMD = qsub_args(mert_memory());
-
+use File::Basename qw(basename);
 require "libcall.pl";
 
+my $QSUB_CMD = qsub_args(mert_memory());
+
 # Default settings
-my $srcFile;
-my $refFiles;
+my $srcFile;  # deprecated
+my $refFiles; # deprecated
 my $default_jobs = env_default_jobs();
 my $bin_dir = $SCRIPT_DIR;
 die "Bin directory $bin_dir missing/inaccessible" unless -d $bin_dir;
@@ -37,7 +36,7 @@ die "Can't find decoder in $cdec" unless -x $cdec;
 die "Can't find $parallelize" unless -x $parallelize;
 die "Can't find $libcall" unless -e $libcall;
 my $decoder = $cdec;
-my $lines_per_mapper = 400;
+my $lines_per_mapper = 200;
 my $rand_directions = 15;
 my $iteration = 1;
 my $best_weights;
@@ -47,53 +46,35 @@ my $jobs = $default_jobs;   # number of decode nodes
 my $pmem = "9g";
 my $disable_clean = 0;
 my %seen_weights;
-my $normalize;
 my $help = 0;
 my $epsilon = 0.0001;
-my $interval = 5;
-my $dryrun = 0;
 my $last_score = -10000000;
 my $metric = "ibm_bleu";
 my $dir;
 my $iniFile;
 my $weights;
 my $initialWeights;
-my $decoderOpt;
-my $noprimary;
-my $maxsim=0;
-my $oraclen=0;
-my $oracleb=20;
 my $bleu_weight=1;
 my $use_make = 1;  # use make to parallelize line search
 my $useqsub;
 my $pass_suffix = '';
-my $devset = '';
-my $cpbin=1;
+my $devset;
 # Process command-line options
-Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
-	"decoder=s" => \$decoderOpt,
-	"jobs=i" => \$jobs,
-	"dont-clean" => \$disable_clean,
-	"pass-suffix=s" => \$pass_suffix,
-	"dry-run" => \$dryrun,
-	"epsilon=s" => \$epsilon,
-	"help" => \$help,
-	"interval" => \$interval,
-	"qsub" => \$useqsub,
-	"max-iterations=i" => \$max_iterations,
-	"normalize=s" => \$normalize,
-	"pmem=s" => \$pmem,
-        "cpbin!" => \$cpbin,
-	"random-directions=i" => \$rand_directions,
+	"config=s" => \$iniFile,
+	"weights=s" => \$initialWeights,
         "devset=s" => \$devset,
-	"ref-files=s" => \$refFiles,
+	"jobs=i" => \$jobs,
+	"pass-suffix=s" => \$pass_suffix,
+	"help" => \$help,
+	"qsub" => \$useqsub,
+	"iterations=i" => \$max_iterations,
+	"pmem=s" => \$pmem,
+	"random-directions=i" => \$rand_directions,
 	"metric=s" => \$metric,
 	"source-file=s" => \$srcFile,
-	"weights=s" => \$initialWeights,
-	"workdir=s" => \$dir,
-        "opt-iterations=i" => \$optimization_iters,
-) == 0 || @ARGV!=1 || $help) {
+	"output-dir=s" => \$dir,
+) == 0 || @ARGV!=0 || $help) {
 	print_help();
 	exit;
 }
@@ -114,22 +95,17 @@ if (defined $srcFile || defined $refFiles) {
 EOT
 }
 
+if (!defined $iniFile) { push @missing_args, "--config"; }
 if (!defined $devset) { push @missing_args, "--devset"; }
 if (!defined $initialWeights) { push @missing_args, "--weights"; }
-die "Please specify missing arguments: " . join (', ', @missing_args) . "\n" if (@missing_args);
+die "Please specify missing arguments: " . join (', ', @missing_args) . "\nUse --help for more information.\n" if (@missing_args);
 
 if ($metric =~ /^(combi|ter)$/i) {
   $lines_per_mapper = 40;
 } elsif ($metric =~ /^meteor$/i) {
-  $lines_per_mapper = 2000;   # start up time is really high
+  $lines_per_mapper = 2000;   # start up time is really high for METEOR
 }
 
-($iniFile) = @ARGV;
-
-
-sub write_config;
-sub enseg;
-sub print_help;
 
 my $nodelist;
 my $host =check_output("hostname"); chomp $host;
@@ -153,8 +129,6 @@ unless ($dir =~ /^\//){  # convert relative path to absolute path
 	$dir = "$basedir/$dir";
 }
 
-if ($decoderOpt){ $decoder = $decoderOpt; }
-
 
 # Initializations and helper functions
 srand;
@@ -169,73 +143,47 @@ sub cleanup {
 	exit 1;
 };
 # Always call cleanup, no matter how we exit
-*CORE::GLOBAL::exit = 
-    sub{ cleanup(); }; 
+*CORE::GLOBAL::exit = sub{ cleanup(); }; 
 $SIG{INT} = "cleanup";
 $SIG{TERM} = "cleanup";
 $SIG{HUP} = "cleanup";
 
-my $decoderBase = check_output("basename $decoder"); chomp $decoderBase;
+my $decoderBase = basename($decoder); chomp $decoderBase;
 my $newIniFile = "$dir/$decoderBase.ini";
 my $inputFileName = "$dir/input";
 my $user = $ENV{"USER"};
 
-
 # process ini file
 -e $iniFile || die "Error: could not open $iniFile for reading\n";
-open(INI, $iniFile);
 
-use File::Basename qw(basename);
-#pass bindir, refs to vars holding bin
-sub modbin {
-    local $_;
-    my $bindir=shift;
-    check_call("mkdir -p $bindir");
-    -d $bindir || die "couldn't make bindir $bindir";
-    for (@_) {
-        my $src=$$_;
-        $$_="$bindir/".basename($src);
-        check_call("cp -p $src $$_");
-    }
-}
 sub dirsize {
     opendir ISEMPTY,$_[0];
     return scalar(readdir(ISEMPTY))-1;
 }
-if ($dryrun){
-	write_config(*STDERR);
-	exit 0;
+if (-e $dir) {
+	# allow preexisting logfile, binaries, but not dist-dpmert.pl outputs
+	die "ERROR: output directory $dir already exists (remove or use --output-dir dir)\n\n";
 } else {
-	if (-e $dir && dirsize($dir)>1 && -e "$dir/hgs" ){ # allow preexisting logfile, binaries, but not dist-dpmert.pl outputs
-	  die "ERROR: working dir $dir already exists\n\n";
-	} else {
-		-e $dir || mkdir $dir;
-		mkdir "$dir/hgs";
-        modbin("$dir/bin",\$LocalConfig,\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize,\$sentserver,\$sentclient,\$libcall) if $cpbin;
-    mkdir "$dir/scripts";
-        my $cmdfile="$dir/rerun-dpmert.sh";
-        open CMD,'>',$cmdfile;
-        print CMD "cd ",&getcwd,"\n";
-#        print CMD &escaped_cmdline,"\n"; #buggy - last arg is quoted.
-        my $cline=&cmdline."\n";
-        print CMD $cline;
-        close CMD;
-        print STDERR $cline;
-        chmod(0755,$cmdfile);
-		unless (-e $initialWeights) {
-			print STDERR "Please specify an initial weights file with --initial-weights\n";
-			print_help();
-			exit;
-		}
-		check_call("cp $initialWeights $dir/weights.0");
-		die "Can't find weights.0" unless (-e "$dir/weights.0");
-	}
-	write_config(*STDERR);
+	mkdir "$dir" or die "Can't mkdir $dir: $!";
+	mkdir "$dir/hgs" or die;
+	mkdir "$dir/scripts" or die;
+	print STDERR <<EOT;
+	DECODER:          $decoder
+	INI FILE:         $iniFile
+	WORKING DIR:      $dir
+	DEVSET:           $devset
+	EVAL METRIC:      $metric
+	MAX ITERATIONS:   $max_iterations
+	PARALLEL JOBS:    $jobs
+	HEAD NODE:        $host
+	PMEM (DECODING):  $pmem
+	INITIAL WEIGHTS:  $initialWeights
+EOT
 }
-
 
 # Generate initial files and values
 check_call("cp $iniFile $newIniFile");
+check_call("cp $initialWeights $dir/weights.0");
 $iniFile = $newIniFile;
 
 split_devset($devset, "$dir/dev.input.raw", "$dir/dev.refs");
@@ -280,9 +228,9 @@ while (1){
 	my $decoder_cmd = "$decoder -c $iniFile --weights$pass_suffix $weightsFile -O $dir/hgs";
 	my $pcmd;
 	if ($use_make) {
-		$pcmd = "cat $srcFile | $parallelize --use-fork -p $pmem -e $logdir -j $jobs --";
+		$pcmd = "cat $srcFile | $parallelize --workdir $dir --use-fork -p $pmem -e $logdir -j $jobs --";
 	} else {
-		$pcmd = "cat $srcFile | $parallelize -p $pmem -e $logdir -j $jobs --";
+		$pcmd = "cat $srcFile | $parallelize --workdir $dir -p $pmem -e $logdir -j $jobs --";
 	}
 	my $cmd = "$pcmd $decoder_cmd 2> $decoderLog 1> $runFile";
 	print STDERR "COMMAND:\n$cmd\n";
@@ -469,29 +417,11 @@ while (1){
 	print STDERR "\n==========\n";
 }
 
-print STDERR "\nFINAL WEIGHTS: $lastWeightsFile\n(Use -w <this file> with the decoder)\n\n";
-
-print STDOUT "$lastWeightsFile\n";
-
+check_call("cp $lastWeightsFile $dir/weights.final");
+print STDERR "\nFINAL WEIGHTS: $dir/weights.final\n(Use -w <this file> with the decoder)\n\n";
+print STDOUT "$dir/weights.final\n";
 exit 0;
 
-sub normalize_weights {
-  my ($rfn, $rpts, $feat) = @_;
-  my @feat_names = @$rfn;
-  my @pts = @$rpts;
-  my $z = 1.0;
-  for (my $i=0; $i < scalar @feat_names; $i++) {
-    if ($feat_names[$i] eq $feat) {
-      $z = $pts[$i];
-      last;
-    }
-  }
-  for (my $i=0; $i < scalar @feat_names; $i++) {
-    $pts[$i] /= $z;
-  }
-  print STDERR " NORM WEIGHTS: @pts\n";
-  return @pts;
-}
 
 sub get_lines {
   my $fn = shift @_;
@@ -521,27 +451,6 @@ sub read_weights_file {
   }
   close F;
   return join ' ', @r;
-}
-
-# subs
-sub write_config {
-	my $fh = shift;
-	my $cleanup = "yes";
-	if ($disable_clean) {$cleanup = "no";}
-
-	print $fh "\n";
-	print $fh "DECODER:          $decoder\n";
-	print $fh "INI FILE:         $iniFile\n";
-	print $fh "WORKING DIR:      $dir\n";
-	print $fh "DEVSET:           $devset\n";
-	print $fh "EVAL METRIC:      $metric\n";
-	print $fh "START ITERATION:  $iteration\n";
-	print $fh "MAX ITERATIONS:   $max_iterations\n";
-	print $fh "PARALLEL JOBS:    $jobs\n";
-	print $fh "HEAD NODE:        $host\n";
-	print $fh "PMEM (DECODING):  $pmem\n";
-	print $fh "CLEANUP:          $cleanup\n";
-	print $fh "INITIAL WEIGHTS:  $initialWeights\n";
 }
 
 sub update_weights_file {
@@ -585,22 +494,34 @@ sub enseg {
 
 sub print_help {
 
-	my $executable = check_output("basename $0"); chomp $executable;
-    print << "Help";
+	my $executable = basename($0); chomp $executable;
+	print << "Help";
 
 Usage: $executable [options] <ini file>
 
-	$executable [options] <ini file>
-		Runs a complete MERT optimization using the decoder configuration
-                in <ini file>. Required options are --weights, --source-file, and
-		--ref-files.
+	$executable [options]
+		Runs a complete MERT optimization. Required options are --weights,
+		--devset, and --config.
 
 Options:
 
-	--help
-		Print this message and exit.
+	--config <file>   [-c <file>]
+		The decoder configuration file.
 
-	--max-iterations <M>
+	--devset <file>   [-d <file>]
+		The source *and* references for the development set.
+
+	--weights <file>  [-w <file>]
+		A file specifying initial feature weights.  The format is
+		FeatureName_1 value1
+		FeatureName_2 value2
+		**All and only the weights listed in <file> will be optimized!**
+
+	--metric <name>
+		Metric to optimize.
+		Example values: IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, Combi
+
+	--iterations <M>
 		Maximum number of iterations to run.  If not specified, defaults
 		to 10.
 
@@ -608,39 +529,15 @@ Options:
 		If the decoder is doing multi-pass decoding, the pass suffix "2",
 		"3", etc., is used to control what iteration of weights is set.
 
-	--ref-files <files>
-		Dev set ref files.  This option takes only a single string argument.
-		To use multiple files (including file globbing), this argument should
-		be quoted.
-
-	--metric <method>
-		Metric to optimize.
-		Example values: IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, Combi
-
-	--normalize <feature-name>
-		After each iteration, rescale all feature weights such that feature-
-		name has a weight of 1.0.
-
 	--rand-directions <num>
 		MERT will attempt to optimize along all of the principle directions,
 		set this parameter to explore other directions. Defaults to 5.
 
-	--source-file <file>
-		Dev set source file.
+	--output-dir <dir>
+		Directory for intermediate and output files.
 
-	--weights <file>
-		A file specifying initial feature weights.  The format is
-		FeatureName_1 value1
-		FeatureName_2 value2
-		**All and only the weights listed in <file> will be optimized!**
-
-	--workdir <dir>
-		Directory for intermediate and output files.  If not specified, the
-		name is derived from the ini filename.  Assuming that the ini
-		filename begins with the decoder name and ends with ini, the default
-		name of the working directory is inferred from the middle part of
-		the filename.  E.g. an ini file named decoder.foo.ini would have
-		a default working directory name foo.
+	--help
+		Print this message and exit.
 
 Job control options:
 

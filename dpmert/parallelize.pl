@@ -40,7 +40,7 @@ my $stay_alive;      # dont let server die when having zero clients
 my $joblist = "";
 my $errordir="";
 my $multiline;
-my @files_to_stage;
+my $workdir = '.';
 my $numnodes = 8;
 my $user = $ENV{"USER"};
 my $pmem = "9g";
@@ -128,7 +128,7 @@ unless (GetOptions(
       "recycle-clients" => \$recycle_clients,
       "error-dir=s" => \$errordir,
       "multi-line" => \$multiline,
-      "file=s" => \@files_to_stage,
+      "workdir=s" => \$workdir,
       "use-fork" => \$use_fork,
       "verbose" => \$verbose,
       "jobs=i" => \$numnodes,
@@ -363,7 +363,7 @@ sub launch_job_fork {
 }
 
 sub get_temp_script {
-  my ($fh, $filename) = tempfile( "workXXXX", SUFFIX => '.sh');
+  my ($fh, $filename) = tempfile( "$workdir/workXXXX", SUFFIX => '.sh');
   return ($fh, $filename);
 }
 

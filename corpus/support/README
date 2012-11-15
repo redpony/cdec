@@ -1,0 +1,2 @@
+Run ./tokenize.sh to tokenize text
+Edit eng_token_patterns and eng_token_list to add rules for things not to segment
