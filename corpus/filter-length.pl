@@ -24,6 +24,7 @@ my $rat_max = log(9);
 my $lrm = 0;
 my $zerof = 0;
 my $zeroe = 0;
+my $bad_format = 0;
 my $absbadrat = 0;
 my $overlene = 0;
 my $overlenf = 0;
@@ -34,7 +35,13 @@ while(<F>) {
   if ($lines % 100000 == 0) { print STDERR " [$lines]\n"; }
   elsif ($lines % 2500 == 0) { print STDERR "."; }
   my ($sf, $se, @d) = split / \|\|\| /;
-  die "Bad format: $_" if scalar @d != 0 or !defined $se;
+  if (scalar @d != 0 or !defined $se) {
+    $bad_format++;
+    if ($bad_format > 100 && ($bad_format / $lines) > 0.02) {
+      die "Corpus appears to be incorretly formatted, example: $_";
+    }
+    next;
+  }
   my @fs = split /\s+/, $sf;
   my @es = split /\s+/, $se;
   my $flen = scalar @fs;
@@ -78,7 +85,7 @@ for my $lr (@lograts) {
 $lsd = sqrt($lsd / scalar @lograts);
 @lograts = ();
 
-my $pass1_discard = $zerof + $zeroe + $absbadrat + $overlene + $overlenf;
+my $pass1_discard = $zerof + $zeroe + $absbadrat + $overlene + $overlenf + $bad_format;
 my $discard_rate = int(10000 * $pass1_discard / $lines) / 100;
 print STDERR "      Total lines: $lines\n";
 print STDERR " Already discared: $pass1_discard\t(discard rate = $discard_rate%)\n";
@@ -96,7 +103,8 @@ while(<F>) {
   $lines++;
   if ($lines % 100000 == 0) { print STDERR " [$lines]\n"; }
   elsif ($lines % 2500 == 0) { print STDERR "."; }
-  my ($sf, $se) = split / \|\|\| /;
+  my ($sf, $se, @d) = split / \|\|\| /;
+  if (scalar @d != 0 or !defined $se) { next; }
   my @fs = split /\s+/, $sf;
   my @es = split /\s+/, $se;
   my $flen = scalar @fs;
