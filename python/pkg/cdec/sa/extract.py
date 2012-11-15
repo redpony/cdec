@@ -3,6 +3,7 @@ import sys
 import os
 import argparse
 import logging
+import re
 import multiprocessing as mp
 import signal
 import cdec.sa
@@ -27,12 +28,17 @@ def extract(inp):
     global extractor, prefix
     i, sentence = inp
     sentence = sentence[:-1]
+    fields = re.split('\s*\|\|\|\s*', sentence)
+    suffix = ''
+    if len(fields) > 1:
+        sentence = fields[0]
+        suffix = ' ||| ' + ' ||| '.join(fields[1:])
     grammar_file = os.path.join(prefix, 'grammar.{0}'.format(i))
     with open(grammar_file, 'w') as output:
         for rule in extractor.grammar(sentence):
             output.write(str(rule)+'\n')
     grammar_file = os.path.abspath(grammar_file)
-    return '<seg grammar="{0}" id="{1}">{2}</seg>'.format(grammar_file, i, sentence)
+    return '<seg grammar="{0}" id="{1}"> {2} </seg>{3}'.format(grammar_file, i, sentence, suffix)
 
 def main():
     logging.basicConfig(level=logging.INFO)
