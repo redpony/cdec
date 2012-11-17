@@ -13,6 +13,7 @@ AC_LANG_CPLUSPLUS
 BOOST_REQUIRE([1.44])
 BOOST_PROGRAM_OPTIONS
 BOOST_SYSTEM
+BOOST_SERIALIZATION
 BOOST_TEST
 AM_PATH_PYTHON
 AC_CHECK_HEADER(dlfcn.h,AC_DEFINE(HAVE_DLFCN_H))
@@ -26,10 +27,24 @@ AM_CONDITIONAL([MPI], [test "x$mpi" = xyes])
 
 if test "x$mpi" = xyes
 then
-  BOOST_SERIALIZATION
   AC_DEFINE([HAVE_MPI], [1], [flag for MPI])
-  # TODO BOOST_MPI needs to be implemented
-  LIBS="$LIBS -lboost_mpi $BOOST_SERIALIZATION_LIBS"
+  LIBS="$LIBS -lboost_mpi"
+fi
+
+AM_CONDITIONAL([HAVE_METEOR], false)
+AC_ARG_WITH(meteor,
+            [AC_HELP_STRING([--with-meteor=PATH], [(optional) path to METEOR jar])],
+            [with_meteor=$withval],
+            [with_meteor=no]
+           )
+
+if test "x$with_meteor" != 'xno'
+then
+  AC_CHECK_FILE([$with_meteor],
+                [AC_DEFINE([HAVE_METEOR], [1], [flag for METEOR jar library])],
+                [AC_MSG_ERROR([Cannot find METEOR jar!])])
+  AC_SUBST(METEOR_JAR,"${with_meteor}")
+  AM_CONDITIONAL([HAVE_METEOR], true)
 fi
 
 AM_CONDITIONAL([HAVE_CMPH], false)
@@ -128,6 +143,8 @@ AC_CONFIG_FILES([klm/search/Makefile])
 AC_CONFIG_FILES([mira/Makefile])
 AC_CONFIG_FILES([dtrain/Makefile])
 AC_CONFIG_FILES([example_extff/Makefile])
+
+AC_CONFIG_FILES([mteval/meteor_jar.cc])
 
 AC_CONFIG_FILES([python/setup.py])
 
