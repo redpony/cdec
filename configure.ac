@@ -68,25 +68,6 @@ then
   AM_CONDITIONAL([HAVE_CMPH], true)
 fi
 
-AM_CONDITIONAL([HAVE_EIGEN], false)
-AC_ARG_WITH(eigen,
-            [AC_HELP_STRING([--with-eigen=PATH], [(optional) path to Eigen linear algebra library])],
-            [with_eigen=$withval],
-            [with_eigen=no]
-           )
-
-if test "x$with_eigen" != 'xno'
-then
-  SAVE_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS -I${with_eigen}"
-
-  AC_CHECK_HEADER(Eigen/Dense,
-                 [AC_DEFINE([HAVE_EIGEN], [1], [flag for Eigen linear algebra library])],
-                 [AC_MSG_ERROR([Cannot find Eigen!])])
-
-  AM_CONDITIONAL([HAVE_EIGEN], true)
-fi
-
 #BOOST_THREADS
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 LDFLAGS="$LDFLAGS $BOOST_PROGRAM_OPTIONS_LDFLAGS $BOOST_SYSTEM_LDFLAGS"
@@ -98,32 +79,6 @@ AC_CHECK_HEADER(google/dense_hash_map,
                [AC_DEFINE([HAVE_SPARSEHASH], [1], [flag for google::dense_hash_map])])
 
 AC_PROG_INSTALL
-
-AM_CONDITIONAL([GLC], false)
-AC_ARG_WITH(glc,
-            [AC_HELP_STRING([--with-glc=PATH], [(optional) path to Global Lexical Coherence package (Context CRF)])],
-            [with_glc=$withval],
-            [with_glc=no]
-           )
-FF_GLC=""
-
-if test "x$with_glc" != 'xno'
-then
-  SAVE_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS -I${with_glc} -I${with_glc}/cdec"
-
-  #AC_CHECK_HEADER(ff_glc.h,
-  #               [AC_DEFINE([HAVE_GLC], [], [flag for GLC])],
-  #               [AC_MSG_ERROR([Cannot find GLC!])])
-
-  AC_DEFINE([HAVE_GLC], [], [flag for GLC])
-  #LIB_RANDLM="-lrandlm"
-  #LDFLAGS="$LDFLAGS -L${with_glc}/lib"
-  #LIBS="$LIBS $LIB_RANDLM"
-  #FMTLIBS="$FMTLIBS libglc.a"
-  AC_SUBST(FF_GLC,"${with_glc}/cdec/ff_glc.cc")
-  AM_CONDITIONAL([GLC], true)
-fi
 
 CPPFLAGS="-DPIC -fPIC $CPPFLAGS -DHAVE_CONFIG_H"
 
