@@ -83,7 +83,3 @@ libcdec_a_SOURCES = \
   json_parse.cc \
   grammar.cc
 
-if GLC
-  # Until we build GLC as a library...
-  libcdec_a_SOURCES += ff_glc.cc string_util.cc feature-factory.cc
-endif
