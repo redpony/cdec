@@ -197,7 +197,6 @@ training/mira/kbest_mira
 training/pro/mr_pro_map
 training/pro/mr_pro_reduce
 training/rampion/rampion_cccp
-training/utils/Makefile.am
 training/utils/lbfgs_test
 training/utils/optimize_test
 training/utils/sentclient
