@@ -1,9 +1,0 @@
-If you want to run dist-vest.pl on a very large shared memory machine, do the
-following:
-
-  ./dist-vest.pl --use-make I --decode-nodes J --weights weights.init --source-file=dev.src --ref-files=dev.ref.* cdec.ini
-
-This will use I jobs for doing the line search and J jobs to run the decoder. Typically, since the
-decoder must load grammars, language models, etc., J should be smaller than I, but this will depend
-on the system you are running on and the complexity of the models used for decoding.
-

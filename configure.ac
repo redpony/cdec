@@ -82,26 +82,34 @@ AC_PROG_INSTALL
 
 CPPFLAGS="-DPIC -fPIC $CPPFLAGS -DHAVE_CONFIG_H"
 
+# core cdec stuff
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([utils/Makefile])
 AC_CONFIG_FILES([mteval/Makefile])
+AC_CONFIG_FILES([mteval/meteor_jar.cc])
 AC_CONFIG_FILES([decoder/Makefile])
-AC_CONFIG_FILES([training/Makefile])
-AC_CONFIG_FILES([training/liblbfgs/Makefile])
-AC_CONFIG_FILES([dpmert/Makefile])
-AC_CONFIG_FILES([pro/Makefile])
-AC_CONFIG_FILES([rampion/Makefile])
-AC_CONFIG_FILES([minrisk/Makefile])
+AC_CONFIG_FILES([python/setup.py])
+AC_CONFIG_FILES([word-aligner/Makefile])
+
+# KenLM stuff
 AC_CONFIG_FILES([klm/util/Makefile])
 AC_CONFIG_FILES([klm/lm/Makefile])
 AC_CONFIG_FILES([klm/search/Makefile])
-AC_CONFIG_FILES([mira/Makefile])
-AC_CONFIG_FILES([dtrain/Makefile])
+
+# training stuff
+AC_CONFIG_FILES([training/Makefile])
+AC_CONFIG_FILES([training/utils/Makefile])
+AC_CONFIG_FILES([training/liblbfgs/Makefile])
+AC_CONFIG_FILES([training/crf/Makefile])
+AC_CONFIG_FILES([training/dpmert/Makefile])
+AC_CONFIG_FILES([training/pro/Makefile])
+AC_CONFIG_FILES([training/rampion/Makefile])
+AC_CONFIG_FILES([training/minrisk/Makefile])
+AC_CONFIG_FILES([training/mira/Makefile])
+AC_CONFIG_FILES([training/dtrain/Makefile])
+
+# external feature function example code
 AC_CONFIG_FILES([example_extff/Makefile])
-
-AC_CONFIG_FILES([mteval/meteor_jar.cc])
-
-AC_CONFIG_FILES([python/setup.py])
 
 AC_OUTPUT
 

@@ -2,7 +2,7 @@
 use strict;
 my @ORIG_ARGV=@ARGV;
 use Cwd qw(getcwd);
-my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../environment"; }
+my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../../environment"; }
 
 # Skip local config (used for distributing jobs) if we're running in local-only mode
 use LocalConfig;
@@ -16,16 +16,16 @@ require "libcall.pl";
 my $default_jobs = env_default_jobs();
 my $bin_dir = $SCRIPT_DIR;
 die "Bin directory $bin_dir missing/inaccessible" unless -d $bin_dir;
-my $FAST_SCORE="$bin_dir/../mteval/fast_score";
+my $FAST_SCORE="$bin_dir/../../mteval/fast_score";
 die "Can't execute $FAST_SCORE" unless -x $FAST_SCORE;
 my $parallelize = "$bin_dir/parallelize.pl";
 my $libcall = "$bin_dir/libcall.pl";
 my $sentserver = "$bin_dir/sentserver";
 my $sentclient = "$bin_dir/sentclient";
-my $LocalConfig = "$SCRIPT_DIR/../environment/LocalConfig.pm";
+my $LocalConfig = "$SCRIPT_DIR/../../environment/LocalConfig.pm";
 
 my $SCORER = $FAST_SCORE;
-my $cdec = "$bin_dir/../decoder/cdec";
+my $cdec = "$bin_dir/../../decoder/cdec";
 die "Can't find decoder in $cdec" unless -x $cdec;
 die "Can't find $parallelize" unless -x $parallelize;
 die "Can't find $libcall" unless -e $libcall;
