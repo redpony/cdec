@@ -13,7 +13,7 @@ SUBDIRS = \
   mira \
   dtrain \
   dpmert \
-  pro-train \
+  pro \
   rampion \
   minrisk \
   example_extff
