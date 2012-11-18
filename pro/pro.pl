@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 use strict;
+use File::Basename qw(basename);
 my @ORIG_ARGV=@ARGV;
 use Cwd qw(getcwd);
 my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../environment"; }
@@ -60,42 +61,29 @@ my $use_make = 1;  # use make to parallelize
 my $useqsub = 0;
 my $initial_weights;
 my $pass_suffix = '';
-my $cpbin=1;
+my $devset;
 
 # regularization strength
-my $tune_regularizer = 0;
 my $reg = 500;
 my $reg_previous = 5000;
 
 # Process command-line options
-Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
+	"config=s" => \$iniFile,
+	"weights=s" => \$initial_weights,
+        "devset=s" => \$devset,
 	"jobs=i" => \$jobs,
-	"dont-clean" => \$disable_clean,
+	"metric=s" => \$metric,
 	"pass-suffix=s" => \$pass_suffix,
         "qsub" => \$useqsub,
-	"dry-run" => \$dryrun,
-	"epsilon=s" => \$epsilon,
-	"interpolate-with-weights=f" => \$psi,
 	"help" => \$help,
-        "weights=s" => \$initial_weights,
-	"tune-regularizer" => \$tune_regularizer,
 	"reg=f" => \$reg,
 	"reg-previous=f" => \$reg_previous,
-	"use-make=i" => \$use_make,
-	"max-iterations=i" => \$max_iterations,
-	"pmem=s" => \$pmem,
-        "cpbin!" => \$cpbin,
-	"ref-files=s" => \$refFiles,
-	"metric=s" => \$metric,
-	"source-file=s" => \$srcFile,
-	"workdir=s" => \$dir,
-) == 0 || @ARGV!=1 || $help) {
+	"output-dir=s" => \$dir,
+) == 0 || @ARGV!=0 || $help) {
 	print_help();
 	exit;
 }
-
-die "--tune-regularizer is no longer supported with --reg-previous and --reg. Please tune manually.\n" if $tune_regularizer;
 
 if ($useqsub) {
   $use_make = 0;
@@ -103,8 +91,8 @@ if ($useqsub) {
 }
 
 my @missing_args = ();
-if (!defined $srcFile) { push @missing_args, "--source-file"; }
-if (!defined $refFiles) { push @missing_args, "--ref-files"; }
+if (!defined $iniFile) { push @missing_args, "--config"; }
+if (!defined $devset) { push @missing_args, "--devset"; }
 if (!defined $initial_weights) { push @missing_args, "--weights"; }
 die "Please specify missing arguments: " . join (', ', @missing_args) . "\n" if (@missing_args);
 
@@ -112,14 +100,6 @@ if ($metric =~ /^(combi|ter)$/i) {
   $lines_per_mapper = 5;
 }
 
-($iniFile) = @ARGV;
-
-
-sub write_config;
-sub enseg;
-sub print_help;
-
-my $nodelist;
 my $host =check_output("hostname"); chomp $host;
 my $bleu;
 my $interval_count = 0;
@@ -132,17 +112,14 @@ if ($metric =~ /^ter$|^aer$/i) {
   $DIR_FLAG = '';
 }
 
-my $refs_comma_sep = get_comma_sep_refs('r',$refFiles);
-
 unless ($dir){
-	$dir = "protrain";
+	$dir = 'pro';
 }
 unless ($dir =~ /^\//){  # convert relative path to absolute path
 	my $basedir = check_output("pwd");
 	chomp $basedir;
 	$dir = "$basedir/$dir";
 }
-
 
 # Initializations and helper functions
 srand;
@@ -173,57 +150,35 @@ my $user = $ENV{"USER"};
 -e $iniFile || die "Error: could not open $iniFile for reading\n";
 open(INI, $iniFile);
 
-use File::Basename qw(basename);
-#pass bindir, refs to vars holding bin
-sub modbin {
-    local $_;
-    my $bindir=shift;
-    check_call("mkdir -p $bindir");
-    -d $bindir || die "couldn't make bindir $bindir";
-    for (@_) {
-        my $src=$$_;
-        $$_="$bindir/".basename($src);
-        check_call("cp -p $src $$_");
-    }
-}
-sub dirsize {
-    opendir ISEMPTY,$_[0];
-    return scalar(readdir(ISEMPTY))-1;
-}
-my @allweights;
-if ($dryrun){
-	write_config(*STDERR);
-	exit 0;
+if (-e $dir) {
+	die "ERROR: working dir $dir already exists\n\n";
 } else {
-	if (-e $dir && dirsize($dir)>1 && -e "$dir/hgs" ){ # allow preexisting logfile, binaries, but not dist-pro.pl outputs
-	  die "ERROR: working dir $dir already exists\n\n";
-	} else {
-		-e $dir || mkdir $dir;
-		mkdir "$dir/hgs";
-        modbin("$dir/bin",\$LocalConfig,\$cdec,\$SCORER,\$MAPINPUT,\$MAPPER,\$REDUCER,\$parallelize,\$sentserver,\$sentclient,\$libcall) if $cpbin;
-    mkdir "$dir/scripts";
-        my $cmdfile="$dir/rerun-pro.sh";
-        open CMD,'>',$cmdfile;
-        print CMD "cd ",&getcwd,"\n";
-#        print CMD &escaped_cmdline,"\n"; #buggy - last arg is quoted.
-        my $cline=&cmdline."\n";
-        print CMD $cline;
-        close CMD;
-        print STDERR $cline;
-        chmod(0755,$cmdfile);
-	check_call("cp $initial_weights $dir/weights.0");
-	die "Can't find weights.0" unless (-e "$dir/weights.0");
-	}
-	write_config(*STDERR);
+	mkdir "$dir" or die "Can't mkdir $dir: $!";
+	mkdir "$dir/hgs" or die;
+	mkdir "$dir/scripts" or die;
+	print STDERR <<EOT;
+	DECODER:          $decoder
+	INI FILE:         $iniFile
+	WORKING DIR:      $dir
+	DEVSET:           $devset
+	EVAL METRIC:      $metric
+	MAX ITERATIONS:   $max_iterations
+	PARALLEL JOBS:    $jobs
+	HEAD NODE:        $host
+	PMEM (DECODING):  $pmem
+	INITIAL WEIGHTS:  $initial_weights
+EOT
 }
-
 
 # Generate initial files and values
 check_call("cp $iniFile $newIniFile");
+check_call("cp $initial_weights $dir/weights.0");
 $iniFile = $newIniFile;
 
+my $refs = "$dir/dev.refs";
+split_devset($devset, "$dir/dev.input.raw", $refs);
 my $newsrc = "$dir/dev.input";
-enseg($srcFile, $newsrc);
+enseg("$dir/dev.input.raw", $newsrc);
 $srcFile = $newsrc;
 my $devSize = 0;
 open F, "<$srcFile" or die "Can't read $srcFile: $!";
@@ -238,6 +193,7 @@ my $random_seed = int(time / 1000);
 my $lastWeightsFile;
 my $lastPScore = 0;
 # main optimization loop
+my @allweights;
 while (1){
 	print STDERR "\n\nITERATION $iteration\n==========\n";
 
@@ -288,7 +244,7 @@ while (1){
 	    $retries++;
 	}
 	die "Dev set contains $devSize sentences, but we don't have topbest and hypergraphs for all these! Decoder failure? Check $decoderLog\n" if ($devSize != $num_hgs || $devSize != $num_topbest);
-	my $dec_score = check_output("cat $runFile | $SCORER $refs_comma_sep -m $metric");
+	my $dec_score = check_output("cat $runFile | $SCORER -r $refs -m $metric");
 	chomp $dec_score;
 	print STDERR "DECODER SCORE: $dec_score\n";
 
@@ -338,7 +294,7 @@ while (1){
 		$mapoutput =~ s/mapinput/mapoutput/;
 		push @mapoutputs, "$dir/splag.$im1/$mapoutput";
 		$o2i{"$dir/splag.$im1/$mapoutput"} = "$dir/splag.$im1/$shard";
-		my $script = "$MAPPER -s $srcFile -m $metric $refs_comma_sep -w $inweights -K $dir/kbest < $dir/splag.$im1/$shard > $dir/splag.$im1/$mapoutput";
+		my $script = "$MAPPER -s $srcFile -m $metric -r $refs -w $inweights -K $dir/kbest < $dir/splag.$im1/$shard > $dir/splag.$im1/$mapoutput";
 		if ($use_make) {
 			my $script_file = "$dir/scripts/map.$shard";
 			open F, ">$script_file" or die "Can't write $script_file: $!";
@@ -371,20 +327,7 @@ while (1){
 	}
 	my @dev_outs = ();
 	my @devtest_outs = ();
-	if ($tune_regularizer) {
-		for (my $i = 0; $i < scalar @mapoutputs; $i++) {
-			if ($i % 3 == 1) {
-				push @devtest_outs, $mapoutputs[$i];
-			} else {
-				push @dev_outs, $mapoutputs[$i];
-			}
-		}
-		if (scalar @devtest_outs == 0) {
-			die "Not enough training instances for regularization tuning! Rerun without --tune-regularizer\n";
-		}
-	} else {
-		@dev_outs = @mapoutputs;
-	}
+	@dev_outs = @mapoutputs;
 	if ($use_make) {
 		print $mkfile "$dir/splag.$im1/map.done: @mkouts\n\ttouch $dir/splag.$im1/map.done\n\n";
 		close $mkfile;
@@ -405,63 +348,24 @@ while (1){
 	my $tol = 0;
 	my $til = 0;
 	my $dev_test_file = "$dir/splag.$im1/devtest.gz";
-	if ($tune_regularizer) {
-		my $cmd = "cat @devtest_outs | gzip > $dev_test_file";
-		check_bash_call($cmd);
-		die "Can't find file $dev_test_file" unless -f $dev_test_file;
-	}
-        #print STDERR "MO: @mapoutputs\n";
-	for my $mo (@mapoutputs) {
-		#my $olines = get_lines($mo);
-		#my $ilines = get_lines($o2i{$mo});
-		#die "$mo: no training instances generated!" if $olines == 0;
-	}
 	print STDERR "\nRUNNING CLASSIFIER (REDUCER)\n";
 	print STDERR unchecked_output("date");
 	$cmd="cat @dev_outs | $REDUCER -w $dir/weights.$im1 -C $reg -y $reg_previous --interpolate_with_weights $psi";
-	if ($tune_regularizer) {
-		$cmd .= " -T -t $dev_test_file";
-	}
         $cmd .= " > $dir/weights.$iteration";
 	print STDERR "COMMAND:\n$cmd\n";
 	check_bash_call($cmd);
 	$lastWeightsFile = "$dir/weights.$iteration";
-	if ($tune_regularizer) {
-		open W, "<$lastWeightsFile" or die "Can't read $lastWeightsFile: $!";
-		my $line = <W>;
-		close W;
-		my ($sharp, $label, $nreg) = split /\s|=/, $line;
-		print STDERR "REGULARIZATION STRENGTH ($label) IS $nreg\n";
-		$reg = $nreg;
-		# only tune regularizer on first iteration?
-		$tune_regularizer = 0;
-	}
 	$lastPScore = $score;
 	$iteration++;
 	print STDERR "\n==========\n";
 }
 
-print STDERR "\nFINAL WEIGHTS: $lastWeightsFile\n(Use -w <this file> with the decoder)\n\n";
 
-print STDOUT "$lastWeightsFile\n";
+check_call("cp $lastWeightsFile $dir/weights.final");
+print STDERR "\nFINAL WEIGHTS: $dir/weights.final\n(Use -w <this file> with the decoder)\n\n";
+print STDOUT "$dir/weights.final\n";
 
 exit 0;
-
-sub get_lines {
-  my $fn = shift @_;
-  open FL, "<$fn" or die "Couldn't read $fn: $!";
-  my $lc = 0;
-  while(<FL>) { $lc++; }
-  return $lc;
-}
-
-sub get_comma_sep_refs {
-  my ($r,$p) = @_;
-  my $o = check_output("echo $p");
-  chomp $o;
-  my @files = split /\s+/, $o;
-  return "-$r " . join(" -$r ", @files);
-}
 
 sub read_weights_file {
   my ($file) = @_;
@@ -483,42 +387,6 @@ sub read_weights_file {
   }
   close F;
   return join ' ', @r;
-}
-
-# subs
-sub write_config {
-	my $fh = shift;
-	my $cleanup = "yes";
-	if ($disable_clean) {$cleanup = "no";}
-
-	print $fh "\n";
-	print $fh "DECODER:          $decoder\n";
-	print $fh "INI FILE:         $iniFile\n";
-	print $fh "WORKING DIR:      $dir\n";
-	print $fh "SOURCE (DEV):     $srcFile\n";
-	print $fh "REFS (DEV):       $refFiles\n";
-	print $fh "EVAL METRIC:      $metric\n";
-	print $fh "MAX ITERATIONS:   $max_iterations\n";
-	print $fh "JOBS:             $jobs\n";
-	print $fh "HEAD NODE:        $host\n";
-	print $fh "PMEM (DECODING):  $pmem\n";
-	print $fh "CLEANUP:          $cleanup\n";
-}
-
-sub update_weights_file {
-  my ($neww, $rfn, $rpts) = @_;
-  my @feats = @$rfn;
-  my @pts = @$rpts;
-  my $num_feats = scalar @feats;
-  my $num_pts = scalar @pts;
-  die "$num_feats (num_feats) != $num_pts (num_pts)" unless $num_feats == $num_pts;
-  open G, ">$neww" or die;
-  for (my $i = 0; $i < $num_feats; $i++) {
-    my $f = $feats[$i];
-    my $lambda = $pts[$i];
-    print G "$f $lambda\n";
-  }
-  close G;
 }
 
 sub enseg {
@@ -547,23 +415,21 @@ sub enseg {
 
 sub print_help {
 
-	my $executable = check_output("basename $0"); chomp $executable;
+	my $executable = basename($0); chomp $executable;
 	print << "Help";
 
-Usage: $executable [options] <ini file>
+Usage: $executable [options]
 
-	$executable [options] <ini file>
+	$executable [options]
 		Runs a complete PRO optimization using the ini file specified.
 
 Required:
 
-	--ref-files <files>
-		Dev set ref files.  This option takes only a single string argument.
-		To use multiple files (including file globbing), this argument should
-		be quoted.
+	--config <cdec.ini>
+		Decoder configuration file.
 
-	--source-file <file>
-		Dev set source file.
+	--devset <files>
+		Dev set source and reference data.
 
 	--weights <file>
 		Initial weights file (use empty file to start from 0)
@@ -669,3 +535,21 @@ sub escaped_shell_args_str {
 sub escaped_cmdline {
     return "$0 ".&escaped_shell_args_str(@ORIG_ARGV);
 }
+
+sub split_devset {
+  my ($infile, $outsrc, $outref) = @_;
+  open F, "<$infile" or die "Can't read $infile: $!";
+  open S, ">$outsrc" or die "Can't write $outsrc: $!";
+  open R, ">$outref" or die "Can't write $outref: $!";
+  while(<F>) {
+    chomp;
+    my ($src, @refs) = split /\s*\|\|\|\s*/;
+    die "Malformed devset line: $_\n" unless scalar @refs > 0;
+    print S "$src\n";
+    print R join(' ||| ', @refs) . "\n";
+  }
+  close R;
+  close S;
+  close F;
+}
+
