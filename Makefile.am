@@ -10,12 +10,7 @@ SUBDIRS = \
   decoder \
   training \
   training/liblbfgs \
-  mira \
-  dtrain \
-  dpmert \
-  pro \
-  rampion \
-  minrisk \
+  word-aligner \
   example_extff
 
 #gi/pyp-topics/src gi/clda/src gi/posterior-regularisation/prjava

@@ -1,19 +1,11 @@
 bin_PROGRAMS = \
   mr_dpmert_map \
   mr_dpmert_reduce \
-  mr_dpmert_generate_mapper_input \
-  sentserver \
-  sentclient
+  mr_dpmert_generate_mapper_input
 
 noinst_PROGRAMS = \
   lo_test
 TESTS = lo_test
-
-sentserver_SOURCES = sentserver.c
-sentserver_LDFLAGS = -pthread
-
-sentclient_SOURCES = sentclient.c
-sentclient_LDFLAGS = -pthread
 
 mr_dpmert_generate_mapper_input_SOURCES = mr_dpmert_generate_mapper_input.cc line_optimizer.cc
 mr_dpmert_generate_mapper_input_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a -lz

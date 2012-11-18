@@ -3,7 +3,7 @@ use strict;
 use File::Basename qw(basename);
 my @ORIG_ARGV=@ARGV;
 use Cwd qw(getcwd);
-my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../environment"; }
+my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0)); push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../../environment", "$SCRIPT_DIR/../utils"; }
 
 # Skip local config (used for distributing jobs) if we're running in local-only mode
 use LocalConfig;
@@ -13,28 +13,28 @@ use POSIX ":sys_wait_h";
 my $QSUB_CMD = qsub_args(mert_memory());
 my $default_jobs = env_default_jobs();
 
-my $VEST_DIR="$SCRIPT_DIR/../dpmert";
-require "$VEST_DIR/libcall.pl";
+my $UTILS_DIR="$SCRIPT_DIR/../utils";
+require "$UTILS_DIR/libcall.pl";
 
 # Default settings
 my $srcFile;
 my $refFiles;
 my $bin_dir = $SCRIPT_DIR;
 die "Bin directory $bin_dir missing/inaccessible" unless -d $bin_dir;
-my $FAST_SCORE="$bin_dir/../mteval/fast_score";
+my $FAST_SCORE="$bin_dir/../../mteval/fast_score";
 die "Can't execute $FAST_SCORE" unless -x $FAST_SCORE;
 my $MAPINPUT = "$bin_dir/mr_pro_generate_mapper_input.pl";
 my $MAPPER = "$bin_dir/mr_pro_map";
 my $REDUCER = "$bin_dir/mr_pro_reduce";
-my $parallelize = "$VEST_DIR/parallelize.pl";
-my $libcall = "$VEST_DIR/libcall.pl";
-my $sentserver = "$VEST_DIR/sentserver";
-my $sentclient = "$VEST_DIR/sentclient";
-my $LocalConfig = "$SCRIPT_DIR/../environment/LocalConfig.pm";
+my $parallelize = "$UTILS_DIR/parallelize.pl";
+my $libcall = "$UTILS_DIR/libcall.pl";
+my $sentserver = "$UTILS_DIR/sentserver";
+my $sentclient = "$UTILS_DIR/sentclient";
+my $LocalConfig = "$SCRIPT_DIR/../../environment/LocalConfig.pm";
 
 my $SCORER = $FAST_SCORE;
 die "Can't find $MAPPER" unless -x $MAPPER;
-my $cdec = "$bin_dir/../decoder/cdec";
+my $cdec = "$bin_dir/../../decoder/cdec";
 die "Can't find decoder in $cdec" unless -x $cdec;
 die "Can't find $parallelize" unless -x $parallelize;
 die "Can't find $libcall" unless -e $libcall;
