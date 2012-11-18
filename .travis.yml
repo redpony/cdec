@@ -11,3 +11,6 @@ script: make
 after_script:
  - make check
  - ./tests/run-system-tests.pl
+ - cd python
+ - python setup.py install
+ - nosetests tests
