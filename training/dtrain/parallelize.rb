@@ -7,9 +7,10 @@ if ARGV.size != 5
   exit
 end
 
-dtrain_bin = '/home/pks/bin/dtrain_local'
+cdec_dir   = '/path/to/cdec_dir'
+dtrain_bin = "#{cdec_dir}/training/dtrain/dtrain_local"
 ruby       = '/usr/bin/ruby'
-lplp_rb    = '/home/pks/mt/cdec-dtrain/dtrain/hstreaming/lplp.rb'
+lplp_rb    = "#{cdec_dir}/training/dtrain/hstreaming/lplp.rb"
 lplp_args  = 'l2 select_k 100000'
 gzip       = '/bin/gzip'
 
