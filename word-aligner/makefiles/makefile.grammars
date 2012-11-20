@@ -4,7 +4,7 @@ clean:
 	$(RM) orthonorm-dict.* voc2class* corpus.class.* corpus.e-f corpus.f-e corpus.f-e.lex-grammar* *.model1 *voc corpus.e-f.lex-grammar* *stem* freq* wordpairs*
 
 SUPPORT_DIR = $(SCRIPT_DIR)/support
-GZIP = /usr/bin/gzip
+GZIP = gzip
 ZCAT = zcat
 EXTRACT_GRAMMAR = $(SUPPORT_DIR)/extract_grammar.pl
 EXTRACT_VOCAB = $(SUPPORT_DIR)/extract_vocab.pl
