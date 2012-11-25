@@ -11,17 +11,21 @@
 struct DiagonalAlignment {
 
   static double UnnormalizedProb(const unsigned i, const unsigned j, const unsigned m, const unsigned n, const double alpha) {
+#if 0
     assert(i > 0);
     assert(n > 0);
     assert(m >= i);
     assert(n >= j);
+#endif
     return exp(feat(i, j, m, n) * alpha);
   }
 
   static double ComputeZ(const unsigned i, const unsigned m, const unsigned n, const double alpha) {
+#if 0
     assert(i > 0);
     assert(n > 0);
     assert(m >= i);
+#endif
     const double split = double(i) * n / m;
     const unsigned floor = split;
     unsigned ceil = floor + 1;
