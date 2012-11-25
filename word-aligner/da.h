@@ -17,7 +17,7 @@ struct DiagonalAlignment {
     assert(m >= i);
     assert(n >= j);
 #endif
-    return exp(feat(i, j, m, n) * alpha);
+    return exp(Feature(i, j, m, n) * alpha);
   }
 
   static double ComputeZ(const unsigned i, const unsigned m, const unsigned n, const double alpha) {
@@ -51,21 +51,21 @@ struct DiagonalAlignment {
     double pct = 0;
     double pcb = 0;
     if (num_top) {
-      pct = arithmetico_geometric_series(feat(i, ceil, m, n), UnnormalizedProb(i, ceil, m, n, alpha), ratio, d, num_top);
+      pct = arithmetico_geometric_series(Feature(i, ceil, m, n), UnnormalizedProb(i, ceil, m, n, alpha), ratio, d, num_top);
       //cerr << "PCT = " << pct << endl;
     }
     if (floor) {
-      pcb = arithmetico_geometric_series(feat(i, floor, m, n), UnnormalizedProb(i, floor, m, n, alpha), ratio, d, floor);
+      pcb = arithmetico_geometric_series(Feature(i, floor, m, n), UnnormalizedProb(i, floor, m, n, alpha), ratio, d, floor);
       //cerr << "PCB = " << pcb << endl;
     }
     return (pct + pcb) / z;
   }
 
- private:
-  inline static double feat(const unsigned i, const unsigned j, const unsigned m, const unsigned n) {
+  inline static double Feature(const unsigned i, const unsigned j, const unsigned m, const unsigned n) {
     return -fabs(double(j) / n - double(i) / m);
   }
 
+ private:
   inline static double arithmetico_geometric_series(const double a_1, const double g_1, const double r, const double d, const unsigned n) {
     const double g_np1 = g_1 * pow(r, n);
     const double a_n = d * (n - 1) + a_1;

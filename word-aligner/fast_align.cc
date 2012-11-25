@@ -1,6 +1,9 @@
 #include <iostream>
 #include <cmath>
+#include <utility>
+#include <tr1/unordered_map>
 
+#include <boost/functional/hash.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
@@ -14,6 +17,7 @@
 
 namespace po = boost::program_options;
 using namespace std;
+using namespace std::tr1;
 
 bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");
@@ -25,6 +29,7 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("favor_diagonal,d", "Use a static alignment distribution that assigns higher probabilities to alignments near the diagonal")
         ("prob_align_null", po::value<double>()->default_value(0.08), "When --favor_diagonal is set, what's the probability of a null alignment?")
         ("diagonal_tension,T", po::value<double>()->default_value(4.0), "How sharp or flat around the diagonal is the alignment distribution (<1 = flat >1 = sharp)")
+        ("optimize_tension,o", "Optimize diagonal tension during EM")
         ("variational_bayes,v","Infer VB estimate of parameters under a symmetric Dirichlet prior")
         ("alpha,a", po::value<double>()->default_value(0.01), "Hyperparameter for optional Dirichlet prior")
         ("no_null_word,N","Do not generate from a null token")
@@ -68,7 +73,8 @@ int main(int argc, char** argv) {
   const bool add_viterbi = (conf.count("no_add_viterbi") == 0);
   const bool variational_bayes = (conf.count("variational_bayes") > 0);
   const bool write_alignments = (conf.count("output_parameters") == 0);
-  const double diagonal_tension = conf["diagonal_tension"].as<double>();
+  double diagonal_tension = conf["diagonal_tension"].as<double>();
+  bool optimize_tension = conf.count("optimize_tension");
   const bool hide_training_alignments = (conf.count("hide_training_alignments") > 0);
   string testset;
   if (conf.count("testset")) testset = conf["testset"].as<string>();
@@ -83,8 +89,10 @@ int main(int argc, char** argv) {
 
   TTable s2t, t2s;
   TTable::Word2Word2Double s2t_viterbi;
+  unordered_map<pair<short, short>, unsigned, boost::hash<pair<short, short> > > size_counts;
   double tot_len_ratio = 0;
   double mean_srclen_multiplier = 0;
+  vector<double> probs;
   for (int iter = 0; iter < ITERATIONS; ++iter) {
     const bool final_iteration = (iter == (ITERATIONS - 1));
     cerr << "ITERATION " << (iter + 1) << (final_iteration ? " (FINAL)" : "") << endl;
@@ -98,6 +106,7 @@ int main(int argc, char** argv) {
     string ssrc, strg;
     vector<WordID> src, trg;
     double c0 = 0;
+    double emp_feat = 0;
     double toks = 0;
     while(true) {
       getline(in, line);
@@ -115,7 +124,9 @@ int main(int argc, char** argv) {
       if (iter == 0)
         tot_len_ratio += static_cast<double>(trg.size()) / static_cast<double>(src.size());
       denom += trg.size();
-      vector<double> probs(src.size() + 1);
+      probs.resize(src.size() + 1);
+      if (iter == 0)
+        ++size_counts[make_pair<short,short>(trg.size(), src.size())];
       bool first_al = true;  // used for write_alignments
       toks += trg.size();
       for (unsigned j = 0; j < trg.size(); ++j) {
@@ -170,8 +181,11 @@ int main(int argc, char** argv) {
             c0 += count;
             s2t.Increment(kNULL, f_j, count);
           }
-          for (unsigned i = 1; i <= src.size(); ++i)
-            s2t.Increment(src[i-1], f_j, probs[i] / sum);
+          for (unsigned i = 1; i <= src.size(); ++i) {
+            const double p = probs[i] / sum;
+            s2t.Increment(src[i-1], f_j, p);
+            emp_feat += DiagonalAlignment::Feature(j, i, trg.size(), src.size()) * p;
+          }
         }
         likelihood += log(sum);
       }
@@ -186,17 +200,38 @@ int main(int argc, char** argv) {
       mean_srclen_multiplier = tot_len_ratio / lc;
       cerr << "expected target length = source length * " << mean_srclen_multiplier << endl;
     }
+    emp_feat /= toks;
     cerr << "  log_e likelihood: " << likelihood << endl;
     cerr << "  log_2 likelihood: " << base2_likelihood << endl;
     cerr << "     cross entropy: " << (-base2_likelihood / denom) << endl;
     cerr << "        perplexity: " << pow(2.0, -base2_likelihood / denom) << endl;
+    cerr << "      posterior p0: " << c0 / toks << endl;
+    cerr << " posterior al-feat: " << emp_feat << endl;
+    //cerr << "     model tension: " << mod_feat / toks << endl;
+    cerr << "       size counts: " << size_counts.size() << endl;
     if (!final_iteration) {
+      if (favor_diagonal && optimize_tension && iter > 0) {
+        for (int ii = 0; ii < 8; ++ii) {
+          double mod_feat = 0;
+          unordered_map<pair<short,short>,unsigned>::iterator it = size_counts.begin();
+          for(; it != size_counts.end(); ++it) {
+            const pair<short,short>& p = it->first;
+            for (short j = 1; j <= p.first; ++j)
+              mod_feat += it->second * DiagonalAlignment::ComputeDLogZ(j, p.first, p.second, diagonal_tension);
+          }
+          mod_feat /= toks;
+          cerr << "  " << ii + 1 << "  model al-feat: " << mod_feat << " (tension=" << diagonal_tension << ")\n";
+          diagonal_tension += (emp_feat - mod_feat) * 20.0;
+          if (diagonal_tension <= 0.1) diagonal_tension = 0.1;
+          if (diagonal_tension > 14) diagonal_tension = 14;
+        }
+        cerr << "     final tension: " << diagonal_tension << endl;
+      }
       if (variational_bayes)
         s2t.NormalizeVB(alpha);
       else
         s2t.Normalize();
-      cerr << "                p0: " << c0 / toks << endl;
-      //prob_align_null *= 0.8;
+      //prob_align_null *= 0.8; // XXX
       //prob_align_null += (c0 / toks) * 0.2;
       prob_align_not_null = 1.0 - prob_align_null;
     }
