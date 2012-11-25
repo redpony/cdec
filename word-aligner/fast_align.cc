@@ -10,6 +10,7 @@
 #include "filelib.h"
 #include "ttables.h"
 #include "tdict.h"
+#include "da.h"
 
 namespace po = boost::program_options;
 using namespace std;
@@ -68,11 +69,11 @@ int main(int argc, char** argv) {
   const bool variational_bayes = (conf.count("variational_bayes") > 0);
   const bool write_alignments = (conf.count("output_parameters") == 0);
   const double diagonal_tension = conf["diagonal_tension"].as<double>();
-  const double prob_align_null = conf["prob_align_null"].as<double>();
   const bool hide_training_alignments = (conf.count("hide_training_alignments") > 0);
   string testset;
   if (conf.count("testset")) testset = conf["testset"].as<string>();
-  const double prob_align_not_null = 1.0 - prob_align_null;
+  double prob_align_null = conf["prob_align_null"].as<double>();
+  double prob_align_not_null = 1.0 - prob_align_null;
   const double alpha = conf["alpha"].as<double>();
   const bool favor_diagonal = conf.count("favor_diagonal");
   if (variational_bayes && alpha <= 0.0) {
@@ -84,7 +85,6 @@ int main(int argc, char** argv) {
   TTable::Word2Word2Double s2t_viterbi;
   double tot_len_ratio = 0;
   double mean_srclen_multiplier = 0;
-  vector<double> unnormed_a_i;
   for (int iter = 0; iter < ITERATIONS; ++iter) {
     const bool final_iteration = (iter == (ITERATIONS - 1));
     cerr << "ITERATION " << (iter + 1) << (final_iteration ? " (FINAL)" : "") << endl;
@@ -97,6 +97,8 @@ int main(int argc, char** argv) {
     string line;
     string ssrc, strg;
     vector<WordID> src, trg;
+    double c0 = 0;
+    double toks = 0;
     while(true) {
       getline(in, line);
       if (!in) break;
@@ -110,17 +112,15 @@ int main(int argc, char** argv) {
         cerr << "Error: " << lc << "\n" << line << endl;
         return 1;
       }
-      if (src.size() > unnormed_a_i.size())
-        unnormed_a_i.resize(src.size());
       if (iter == 0)
         tot_len_ratio += static_cast<double>(trg.size()) / static_cast<double>(src.size());
       denom += trg.size();
       vector<double> probs(src.size() + 1);
       bool first_al = true;  // used for write_alignments
-      for (int j = 0; j < trg.size(); ++j) {
+      toks += trg.size();
+      for (unsigned j = 0; j < trg.size(); ++j) {
         const WordID& f_j = trg[j];
         double sum = 0;
-        const double j_over_ts = double(j) / trg.size();
         double prob_a_i = 1.0 / (src.size() + use_null);  // uniform (model 1)
         if (use_null) {
           if (favor_diagonal) prob_a_i = prob_align_null;
@@ -128,16 +128,11 @@ int main(int argc, char** argv) {
           sum += probs[0];
         }
         double az = 0;
-        if (favor_diagonal) {
-          for (int ta = 0; ta < src.size(); ++ta) {
-            unnormed_a_i[ta] = exp(-fabs(double(ta) / src.size() - j_over_ts) * diagonal_tension);
-            az += unnormed_a_i[ta];
-          }
-          az /= prob_align_not_null;
-        }
-        for (int i = 1; i <= src.size(); ++i) {
+        if (favor_diagonal)
+          az = DiagonalAlignment::ComputeZ(j+1, trg.size(), src.size(), diagonal_tension) / prob_align_not_null;
+        for (unsigned i = 1; i <= src.size(); ++i) {
           if (favor_diagonal)
-            prob_a_i = unnormed_a_i[i-1] / az;
+            prob_a_i = DiagonalAlignment::UnnormalizedProb(j + 1, i, trg.size(), src.size(), diagonal_tension) / az;
           probs[i] = s2t.prob(src[i-1], f_j) * prob_a_i;
           sum += probs[i];
         }
@@ -151,7 +146,7 @@ int main(int argc, char** argv) {
               max_index = 0;
               max_p = probs[0];
             }
-            for (int i = 1; i <= src.size(); ++i) {
+            for (unsigned i = 1; i <= src.size(); ++i) {
               if (probs[i] > max_p) {
                 max_index = i;
                 max_p = probs[i];
@@ -170,9 +165,12 @@ int main(int argc, char** argv) {
             s2t_viterbi[max_i][f_j] = 1.0;
           }
         } else {
-          if (use_null)
-            s2t.Increment(kNULL, f_j, probs[0] / sum);
-          for (int i = 1; i <= src.size(); ++i)
+          if (use_null) {
+            double count = probs[0] / sum;
+            c0 += count;
+            s2t.Increment(kNULL, f_j, count);
+          }
+          for (unsigned i = 1; i <= src.size(); ++i)
             s2t.Increment(src[i-1], f_j, probs[i] / sum);
         }
         likelihood += log(sum);
@@ -190,13 +188,17 @@ int main(int argc, char** argv) {
     }
     cerr << "  log_e likelihood: " << likelihood << endl;
     cerr << "  log_2 likelihood: " << base2_likelihood << endl;
-    cerr << "   cross entropy: " << (-base2_likelihood / denom) << endl;
-    cerr << "      perplexity: " << pow(2.0, -base2_likelihood / denom) << endl;
+    cerr << "     cross entropy: " << (-base2_likelihood / denom) << endl;
+    cerr << "        perplexity: " << pow(2.0, -base2_likelihood / denom) << endl;
     if (!final_iteration) {
       if (variational_bayes)
         s2t.NormalizeVB(alpha);
       else
         s2t.Normalize();
+      cerr << "                p0: " << c0 / toks << endl;
+      //prob_align_null *= 0.8;
+      //prob_align_null += (c0 / toks) * 0.2;
+      prob_align_not_null = 1.0 - prob_align_null;
     }
   }
   if (testset.size()) {
@@ -212,16 +214,13 @@ int main(int argc, char** argv) {
       cout << TD::GetString(src) << " ||| " << TD::GetString(trg) << " |||";
       if (reverse) swap(src, trg);
       double log_prob = Md::log_poisson(trg.size(), 0.05 + src.size() * mean_srclen_multiplier);
-      if (src.size() > unnormed_a_i.size())
-        unnormed_a_i.resize(src.size());
 
       // compute likelihood
-      for (int j = 0; j < trg.size(); ++j) {
+      for (unsigned j = 0; j < trg.size(); ++j) {
         const WordID& f_j = trg[j];
         double sum = 0;
         int a_j = 0;
         double max_pat = 0;
-        const double j_over_ts = double(j) / trg.size();
         double prob_a_i = 1.0 / (src.size() + use_null);  // uniform (model 1)
         if (use_null) {
           if (favor_diagonal) prob_a_i = prob_align_null;
@@ -229,16 +228,11 @@ int main(int argc, char** argv) {
           sum += max_pat;
         }
         double az = 0;
-        if (favor_diagonal) {
-          for (int ta = 0; ta < src.size(); ++ta) {
-            unnormed_a_i[ta] = exp(-fabs(double(ta) / src.size() - j_over_ts) * diagonal_tension);
-            az += unnormed_a_i[ta];
-          }
-          az /= prob_align_not_null;
-        }
-        for (int i = 1; i <= src.size(); ++i) {
+        if (favor_diagonal)
+          az = DiagonalAlignment::ComputeZ(j+1, trg.size(), src.size(), diagonal_tension) / prob_align_not_null;
+        for (unsigned i = 1; i <= src.size(); ++i) {
           if (favor_diagonal)
-            prob_a_i = unnormed_a_i[i-1] / az;
+            prob_a_i = DiagonalAlignment::UnnormalizedProb(j + 1, i, trg.size(), src.size(), diagonal_tension) / az;
           double pat = s2t.prob(src[i-1], f_j) * prob_a_i;
           if (pat > max_pat) { max_pat = pat; a_j = i; }
           sum += pat;
