@@ -107,23 +107,14 @@ my $orig_token_total = 0;
 my $deep_proc_token_total = 0;
 my $new_token_total = 0;
 
-my $line_total = 0;
-my $content_line_total = 0;
-
 while(<STDIN>){
     chomp();
-
-    $line_total ++;
-    if ($line_total % 100000 == 0) { print STDERR " [$line_total]\n"; }
-    elsif ($line_total % 2500 == 0) { print STDERR "."; }
 
     if(/^(\[b\s+|\]b|\]f|\[f\s+)/ || (/^\[[bf]$/) || (/^\s*$/) || /^<DOC/ || /^<\/DOC/) {
 	## markup
 	print STDOUT "$_\n";
 	next;
     }
-
-    $content_line_total ++;
 
     my $orig_num = 0;
     my $deep_proc_num = 0;
