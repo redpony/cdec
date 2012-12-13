@@ -35,6 +35,8 @@ def main():
                         help='Number of pre-computed frequent patterns')
     parser.add_argument('--rank2', '-r2', type=int, default=10,
                         help='Number of pre-computed super-frequent patterns)')
+    parser.add_argument('--loose', action='store_true',
+                        help='Enable loose phrase extraction (default: tight)')
     parser.add_argument('-c', '--config', default='/dev/stdout',
                         help='Output configuration')
     parser.add_argument('-f', '--source',
@@ -53,8 +55,10 @@ def main():
         parser.error('a parallel corpus is required\n'
         '\tuse -f (source) with -e (target) or -b (bitext)')
 
-    param_names = ("max_len", "max_nt", "max_size", "min_gap", "rank1", "rank2")
-    params = (args.maxlen, args.maxnt, args.maxsize, args.mingap, args.rank1, args.rank2)
+    param_names = ('max_len', 'max_nt', 'max_size', 'min_gap',
+            'rank1', 'rank2', 'tight_phrases')
+    params = (args.maxlen, args.maxnt, args.maxsize, args.mingap,
+            args.rank1, args.rank2, not args.loose)
 
     if not os.path.exists(args.output):
         os.mkdir(args.output)
