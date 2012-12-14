@@ -10,4 +10,8 @@
 //#define HAVE_BOOST
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #endif // UTIL_HAVE__
