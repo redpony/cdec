@@ -78,6 +78,13 @@ LIBS="$LIBS $BOOST_PROGRAM_OPTIONS_LIBS $BOOST_SERIALIZATION_LIBS $BOOST_SYSTEM_
 AC_CHECK_HEADER(google/dense_hash_map,
                [AC_DEFINE([HAVE_SPARSEHASH], [1], [flag for google::dense_hash_map])])
 
+AC_CHECK_HEADER(zlib.h,
+               [AC_DEFINE([HAVE_ZLIB], [1], [zlib])])
+AC_CHECK_HEADER(bzlib.h,
+               [AC_DEFINE([HAVE_BZLIB], [1], [bzlib])])
+AC_CHECK_HEADER(lzma.h,
+               [AC_DEFINE([HAVE_XZLIB], [1], [xzlib])])
+
 AC_PROG_INSTALL
 
 CPPFLAGS="-DPIC -fPIC $CPPFLAGS -DHAVE_CONFIG_H"
