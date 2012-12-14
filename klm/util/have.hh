@@ -11,7 +11,8 @@
 #endif
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+// Chris; uncomment this line.  
+//#include "config.h"
 #endif
 
 #endif // UTIL_HAVE__
