@@ -18,6 +18,23 @@ BOOST_TEST
 AM_PATH_PYTHON
 AC_CHECK_HEADER(dlfcn.h,AC_DEFINE(HAVE_DLFCN_H))
 AC_CHECK_LIB(dl, dlopen)
+AC_CHECK_HEADERS(zlib.h,
+    AC_CHECK_LIB(z, gzread,[
+        AC_DEFINE(HAVE_ZLIB,[],[Do we have zlib])
+        ZLIBS="$ZLIBS -lz"
+    ]))
+
+AC_CHECK_HEADERS(bzlib.h,
+    AC_CHECK_LIB(bz2, BZ2_bzReadOpen,[
+        AC_DEFINE(HAVE_BZLIB,[],[Do we have bzlib])
+        ZLIBS="$ZLIBS -lbz2"
+    ]))
+
+AC_CHECK_HEADERS(lzma.h,
+    AC_CHECK_LIB(lzma, lzma_code,[
+        AC_DEFINE(HAVE_XZLIB,[],[Do we have lzma])
+        ZLIBS="$ZLIBS -llzma"
+    ]))
 
 AC_ARG_ENABLE(mpi,
  [ --enable-mpi  Build MPI binaries, assumes mpi.h is present ],
@@ -72,18 +89,11 @@ fi
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 LDFLAGS="$LDFLAGS $BOOST_PROGRAM_OPTIONS_LDFLAGS $BOOST_SERIALIZATION_LDFLAGS $BOOST_SYSTEM_LDFLAGS"
 # $BOOST_THREAD_LDFLAGS"
-LIBS="$LIBS $BOOST_PROGRAM_OPTIONS_LIBS $BOOST_SERIALIZATION_LIBS $BOOST_SYSTEM_LIBS"
+LIBS="$LIBS $BOOST_PROGRAM_OPTIONS_LIBS $BOOST_SERIALIZATION_LIBS $BOOST_SYSTEM_LIBS $ZLIBS"
 # $BOOST_THREAD_LIBS"
 
 AC_CHECK_HEADER(google/dense_hash_map,
                [AC_DEFINE([HAVE_SPARSEHASH], [1], [flag for google::dense_hash_map])])
-
-AC_CHECK_HEADER(zlib.h,
-               [AC_DEFINE([HAVE_ZLIB], [1], [zlib])])
-AC_CHECK_HEADER(bzlib.h,
-               [AC_DEFINE([HAVE_BZLIB], [1], [bzlib])])
-AC_CHECK_HEADER(lzma.h,
-               [AC_DEFINE([HAVE_XZLIB], [1], [xzlib])])
 
 AC_PROG_INSTALL
 
