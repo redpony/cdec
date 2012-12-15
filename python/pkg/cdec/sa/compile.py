@@ -4,9 +4,10 @@ import os
 import logging
 import cdec.configobj
 import cdec.sa
+import sys
 
 MAX_PHRASE_LENGTH = 4
-def precompute(f_sa, max_len, max_nt, max_size, min_gap, rank1, rank2):
+def precompute(f_sa, max_len, max_nt, max_size, min_gap, rank1, rank2, tight_phrases):
     lcp = cdec.sa.LCP(f_sa)
     stats = sorted(lcp.compute_stats(MAX_PHRASE_LENGTH), reverse=True)
     precomp = cdec.sa.Precomputation(from_stats=stats,
@@ -20,6 +21,8 @@ def precompute(f_sa, max_len, max_nt, max_size, min_gap, rank1, rank2):
     return precomp
 
 def main():
+    sys.setrecursionlimit(sys.getrecursionlimit() * 100)
+
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger('cdec.sa.compile')
     parser = argparse.ArgumentParser(description='Compile a corpus into a suffix array.')
