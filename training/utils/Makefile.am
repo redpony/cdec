@@ -2,7 +2,8 @@ noinst_LIBRARIES = libtraining_utils.a
 
 bin_PROGRAMS = \
   sentserver \
-  sentclient
+  sentclient \
+  grammar_convert
 
 noinst_PROGRAMS = \
   lbfgs_test \
@@ -25,6 +26,9 @@ libtraining_utils_a_SOURCES = \
 
 optimize_test_SOURCES = optimize_test.cc
 optimize_test_LDADD = libtraining_utils.a $(top_srcdir)/utils/libutils.a
+
+grammar_convert_SOURCES = grammar_convert.cc
+grammar_convert_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a
 
 lbfgs_test_SOURCES = lbfgs_test.cc
 lbfgs_test_LDADD = $(top_srcdir)/utils/libutils.a
