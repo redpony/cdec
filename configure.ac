@@ -13,10 +13,28 @@ AC_LANG_CPLUSPLUS
 BOOST_REQUIRE([1.44])
 BOOST_PROGRAM_OPTIONS
 BOOST_SYSTEM
+BOOST_SERIALIZATION
 BOOST_TEST
 AM_PATH_PYTHON
 AC_CHECK_HEADER(dlfcn.h,AC_DEFINE(HAVE_DLFCN_H))
 AC_CHECK_LIB(dl, dlopen)
+AC_CHECK_HEADERS(zlib.h,
+    AC_CHECK_LIB(z, gzread,[
+        AC_DEFINE(HAVE_ZLIB,[],[Do we have zlib])
+        ZLIBS="$ZLIBS -lz"
+    ]))
+
+AC_CHECK_HEADERS(bzlib.h,
+    AC_CHECK_LIB(bz2, BZ2_bzReadOpen,[
+        AC_DEFINE(HAVE_BZLIB,[],[Do we have bzlib])
+        ZLIBS="$ZLIBS -lbz2"
+    ]))
+
+AC_CHECK_HEADERS(lzma.h,
+    AC_CHECK_LIB(lzma, lzma_code,[
+        AC_DEFINE(HAVE_XZLIB,[],[Do we have lzma])
+        ZLIBS="$ZLIBS -llzma"
+    ]))
 
 AC_ARG_ENABLE(mpi,
  [ --enable-mpi  Build MPI binaries, assumes mpi.h is present ],
@@ -26,10 +44,24 @@ AM_CONDITIONAL([MPI], [test "x$mpi" = xyes])
 
 if test "x$mpi" = xyes
 then
-  BOOST_SERIALIZATION
   AC_DEFINE([HAVE_MPI], [1], [flag for MPI])
-  # TODO BOOST_MPI needs to be implemented
-  LIBS="$LIBS -lboost_mpi $BOOST_SERIALIZATION_LIBS"
+  LIBS="$LIBS -lboost_mpi"
+fi
+
+AM_CONDITIONAL([HAVE_METEOR], false)
+AC_ARG_WITH(meteor,
+            [AC_HELP_STRING([--with-meteor=PATH], [(optional) path to METEOR jar])],
+            [with_meteor=$withval],
+            [with_meteor=no]
+           )
+
+if test "x$with_meteor" != 'xno'
+then
+  AC_CHECK_FILE([$with_meteor],
+                [AC_DEFINE([HAVE_METEOR], [1], [flag for METEOR jar library])],
+                [AC_MSG_ERROR([Cannot find METEOR jar!])])
+  AC_SUBST(METEOR_JAR,"${with_meteor}")
+  AM_CONDITIONAL([HAVE_METEOR], true)
 fi
 
 AM_CONDITIONAL([HAVE_CMPH], false)
@@ -53,30 +85,11 @@ then
   AM_CONDITIONAL([HAVE_CMPH], true)
 fi
 
-AM_CONDITIONAL([HAVE_EIGEN], false)
-AC_ARG_WITH(eigen,
-            [AC_HELP_STRING([--with-eigen=PATH], [(optional) path to Eigen linear algebra library])],
-            [with_eigen=$withval],
-            [with_eigen=no]
-           )
-
-if test "x$with_eigen" != 'xno'
-then
-  SAVE_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS -I${with_eigen}"
-
-  AC_CHECK_HEADER(Eigen/Dense,
-                 [AC_DEFINE([HAVE_EIGEN], [1], [flag for Eigen linear algebra library])],
-                 [AC_MSG_ERROR([Cannot find Eigen!])])
-
-  AM_CONDITIONAL([HAVE_EIGEN], true)
-fi
-
 #BOOST_THREADS
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-LDFLAGS="$LDFLAGS $BOOST_PROGRAM_OPTIONS_LDFLAGS $BOOST_SYSTEM_LDFLAGS"
+LDFLAGS="$LDFLAGS $BOOST_PROGRAM_OPTIONS_LDFLAGS $BOOST_SERIALIZATION_LDFLAGS $BOOST_SYSTEM_LDFLAGS"
 # $BOOST_THREAD_LDFLAGS"
-LIBS="$LIBS $BOOST_PROGRAM_OPTIONS_LIBS $BOOST_SYSTEM_LIBS"
+LIBS="$LIBS $BOOST_PROGRAM_OPTIONS_LIBS $BOOST_SERIALIZATION_LIBS $BOOST_SYSTEM_LIBS $ZLIBS"
 # $BOOST_THREAD_LIBS"
 
 AC_CHECK_HEADER(google/dense_hash_map,
@@ -84,52 +97,36 @@ AC_CHECK_HEADER(google/dense_hash_map,
 
 AC_PROG_INSTALL
 
-AM_CONDITIONAL([GLC], false)
-AC_ARG_WITH(glc,
-            [AC_HELP_STRING([--with-glc=PATH], [(optional) path to Global Lexical Coherence package (Context CRF)])],
-            [with_glc=$withval],
-            [with_glc=no]
-           )
-FF_GLC=""
+CPPFLAGS="-DPIC -fPIC $CPPFLAGS -DHAVE_CONFIG_H -DKENLM_MAX_ORDER=6"
 
-if test "x$with_glc" != 'xno'
-then
-  SAVE_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS -I${with_glc} -I${with_glc}/cdec"
-
-  #AC_CHECK_HEADER(ff_glc.h,
-  #               [AC_DEFINE([HAVE_GLC], [], [flag for GLC])],
-  #               [AC_MSG_ERROR([Cannot find GLC!])])
-
-  AC_DEFINE([HAVE_GLC], [], [flag for GLC])
-  #LIB_RANDLM="-lrandlm"
-  #LDFLAGS="$LDFLAGS -L${with_glc}/lib"
-  #LIBS="$LIBS $LIB_RANDLM"
-  #FMTLIBS="$FMTLIBS libglc.a"
-  AC_SUBST(FF_GLC,"${with_glc}/cdec/ff_glc.cc")
-  AM_CONDITIONAL([GLC], true)
-fi
-
-CPPFLAGS="-DPIC -fPIC $CPPFLAGS -DHAVE_CONFIG_H"
-
+# core cdec stuff
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([utils/Makefile])
 AC_CONFIG_FILES([mteval/Makefile])
+AC_CONFIG_FILES([mteval/meteor_jar.cc])
 AC_CONFIG_FILES([decoder/Makefile])
-AC_CONFIG_FILES([training/Makefile])
-AC_CONFIG_FILES([training/liblbfgs/Makefile])
-AC_CONFIG_FILES([dpmert/Makefile])
-AC_CONFIG_FILES([pro-train/Makefile])
-AC_CONFIG_FILES([rampion/Makefile])
-AC_CONFIG_FILES([minrisk/Makefile])
+AC_CONFIG_FILES([python/setup.py])
+AC_CONFIG_FILES([word-aligner/Makefile])
+
+# KenLM stuff
 AC_CONFIG_FILES([klm/util/Makefile])
 AC_CONFIG_FILES([klm/lm/Makefile])
 AC_CONFIG_FILES([klm/search/Makefile])
-AC_CONFIG_FILES([mira/Makefile])
-AC_CONFIG_FILES([dtrain/Makefile])
-AC_CONFIG_FILES([example_extff/Makefile])
 
-AC_CONFIG_FILES([python/setup.py])
+# training stuff
+AC_CONFIG_FILES([training/Makefile])
+AC_CONFIG_FILES([training/utils/Makefile])
+AC_CONFIG_FILES([training/liblbfgs/Makefile])
+AC_CONFIG_FILES([training/crf/Makefile])
+AC_CONFIG_FILES([training/dpmert/Makefile])
+AC_CONFIG_FILES([training/pro/Makefile])
+AC_CONFIG_FILES([training/rampion/Makefile])
+AC_CONFIG_FILES([training/minrisk/Makefile])
+AC_CONFIG_FILES([training/mira/Makefile])
+AC_CONFIG_FILES([training/dtrain/Makefile])
+
+# external feature function example code
+AC_CONFIG_FILES([example_extff/Makefile])
 
 AC_OUTPUT
 

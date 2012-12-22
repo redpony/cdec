@@ -37,6 +37,11 @@ cdef class Hypergraph:
         fmap.vector = new FastSparseVector[weight_t](hypergraph.ViterbiFeatures(self.hg[0]))
         return fmap
 
+    def viterbi_forest(self):
+        cdef Hypergraph hg = Hypergraph()
+        hg.hg = new hypergraph.Hypergraph(self.hg[0].CreateViterbiHypergraph(NULL).get()[0])
+        return hg
+
     def viterbi_joshua(self):
         """hg.viterbi_joshua() -> Joshua representation of the best derivation."""
         return unicode(hypergraph.JoshuaVisualizationString(self.hg[0]).c_str(), 'utf8')
@@ -216,6 +221,10 @@ cdef class HypergraphEdge:
     property span:
         def __get__(self):
             return (self.edge.i_, self.edge.j_)
+
+    property src_span:
+        def __get__(self):
+            return (self.edge.prev_i_, self.edge.prev_j_)
 
     property feature_values:
         def __get__(self):

@@ -4,18 +4,14 @@
 #include "util/ersatz_progress.hh"
 #include "util/exception.hh"
 #include "util/file.hh"
-#include "util/have.hh"
 #include "util/mmap.hh"
+#include "util/read_compressed.hh"
 #include "util/string_piece.hh"
 
 #include <cstddef>
 #include <string>
 
 #include <stdint.h>
-
-#ifdef HAVE_ZLIB
-#include <zlib.h>
-#endif
 
 namespace util {
 
@@ -25,28 +21,19 @@ class ParseNumberException : public Exception {
     ~ParseNumberException() throw() {}
 };
 
-class GZException : public Exception {
-  public:
-#ifdef HAVE_ZLIB
-    explicit GZException(gzFile file);
-#endif
-    GZException() throw() {}
-    ~GZException() throw() {}
-};
-
 extern const bool kSpaces[256];
 
-// Memory backing the returned StringPiece may vanish on the next call.  
+// Memory backing the returned StringPiece may vanish on the next call.
 class FilePiece {
   public:
-    // 32 MB default.
-    explicit FilePiece(const char *file, std::ostream *show_progress = NULL, std::size_t min_buffer = 33554432);
-    // Takes ownership of fd.  name is used for messages.  
-    explicit FilePiece(int fd, const char *name, std::ostream *show_progress = NULL, std::size_t min_buffer = 33554432);
+    // 1 MB default.
+    explicit FilePiece(const char *file, std::ostream *show_progress = NULL, std::size_t min_buffer = 1048576);
+    // Takes ownership of fd.  name is used for messages.
+    explicit FilePiece(int fd, const char *name, std::ostream *show_progress = NULL, std::size_t min_buffer = 1048576);
 
     ~FilePiece();
-     
-    char get() { 
+
+    char get() {
       if (position_ == position_end_) {
         Shift();
         if (at_end_) throw EndOfFileException();
@@ -54,14 +41,14 @@ class FilePiece {
       return *(position_++);
     }
 
-    // Leaves the delimiter, if any, to be returned by get().  Delimiters defined by isspace().  
+    // Leaves the delimiter, if any, to be returned by get().  Delimiters defined by isspace().
     StringPiece ReadDelimited(const bool *delim = kSpaces) {
       SkipSpaces(delim);
       return Consume(FindDelimiterOrEOF(delim));
     }
 
     // Unlike ReadDelimited, this includes leading spaces and consumes the delimiter.
-    // It is similar to getline in that way.  
+    // It is similar to getline in that way.
     StringPiece ReadLine(char delim = '\n');
 
     float ReadFloat();
@@ -69,7 +56,7 @@ class FilePiece {
     long int ReadLong();
     unsigned long int ReadULong();
 
-    // Skip spaces defined by isspace.  
+    // Skip spaces defined by isspace.
     void SkipSpaces(const bool *delim = kSpaces) {
       for (; ; ++position_) {
         if (position_ == position_end_) Shift();
@@ -82,7 +69,7 @@ class FilePiece {
     }
 
     const std::string &FileName() const { return file_name_; }
-    
+
   private:
     void Initialize(const char *name, std::ostream *show_progress, std::size_t min_buffer);
 
@@ -122,9 +109,7 @@ class FilePiece {
 
     std::string file_name_;
 
-#ifdef HAVE_ZLIB
-    gzFile gz_file_;
-#endif // HAVE_ZLIB
+    ReadCompressed fell_back_;
 };
 
 } // namespace util

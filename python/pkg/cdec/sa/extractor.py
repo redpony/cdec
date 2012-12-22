@@ -10,7 +10,7 @@ MAX_INITIAL_SIZE = 15
 
 class GrammarExtractor:
     def __init__(self, config, features=None):
-        if isinstance(config, str) or isinstance(config, unicode):
+        if isinstance(config, basestring):
             if not os.path.exists(config):
                 raise IOError('cannot read configuration from {0}'.format(config))
             config = cdec.configobj.ConfigObj(config, unrepr=True)
@@ -50,8 +50,8 @@ class GrammarExtractor:
                 train_max_initial_size=config['max_size'],
                 # minimum span of an RHS nonterminal in a rule extracted from TRAINING DATA
                 train_min_gap_size=config['min_gap'],
-                # True if phrases should be tight, False otherwise (better but slower)
-                tight_phrases=True,
+                # False if phrases should be loose (better but slower), True otherwise
+                tight_phrases=config.get('tight_phrases', True),
                 )
 
         # lexical weighting tables

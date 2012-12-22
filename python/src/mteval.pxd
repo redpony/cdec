@@ -37,7 +37,7 @@ cdef extern from "py_scorer.h":
     cdef EvaluationMetric* PyMetricInstance "PythonEvaluationMetric::Instance"(
             string& metric_id, void*, MetricStatsCallback, MetricScoreCallback)
 
-cdef extern from "training/candidate_set.h" namespace "training":
+cdef extern from "training/utils/candidate_set.h" namespace "training":
     cdef cppclass Candidate:
         vector[WordID] ewords
         FastSparseVector[weight_t] fmap

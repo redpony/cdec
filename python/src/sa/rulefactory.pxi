@@ -257,9 +257,9 @@ cdef class HieroCachingRuleFactory:
     cdef Alignment alignment
     cdef IntList eid2symid
     cdef IntList fid2symid
-    cdef int tight_phrases
-    cdef int require_aligned_terminal
-    cdef int require_aligned_chunks
+    cdef bint tight_phrases
+    cdef bint require_aligned_terminal
+    cdef bint require_aligned_chunks
 
     cdef IntList findexes
     cdef IntList findexes1
@@ -299,8 +299,8 @@ cdef class HieroCachingRuleFactory:
             unsigned train_max_initial_size=10,
             # minimum span of an RHS nonterminal in a rule extracted from TRAINING DATA
             unsigned train_min_gap_size=2,
-            # True if phrases should be tight, False otherwise (False == slower but better results)
-            bint tight_phrases=False,
+            # False if phrases should be loose (better but slower), True otherwise
+            bint tight_phrases=True,
             # True to require use of double-binary alg, false otherwise
             bint use_baeza_yates=True,
             # True to enable used of precomputed collocations
@@ -354,22 +354,16 @@ cdef class HieroCachingRuleFactory:
         self.precompute_secondary_rank = precompute_secondary_rank
         self.use_baeza_yates = use_baeza_yates
         self.by_slack_factor = by_slack_factor
-        if tight_phrases:
-            self.tight_phrases = 1
-        else:
-            self.tight_phrases = 0
+        self.tight_phrases = tight_phrases
 
         if require_aligned_chunks:
             # one condition is a stronger version of the other.
-            self.require_aligned_chunks = 1
-            self.require_aligned_terminal = 1
+            self.require_aligned_chunks = self.require_aligned_terminal = True
         elif require_aligned_terminal:
-            self.require_aligned_chunks = 0
-            self.require_aligned_terminal = 1
+            self.require_aligned_chunks = False
+            self.require_aligned_terminal = True
         else:
-            self.require_aligned_chunks = 0
-            self.require_aligned_terminal = 0
-        
+            self.require_aligned_chunks = self.require_aligned_terminal = False
 
         # diagnostics
         self.prev_norm_prefix = ()
@@ -1315,7 +1309,7 @@ cdef class HieroCachingRuleFactory:
 
         e_x_low = e_low
         e_x_high = e_high
-        if self.tight_phrases == 0:
+        if not self.tight_phrases:
             while e_x_low > 0 and e_high - e_x_low < self.train_max_initial_size and e_links_low[e_x_low-1] == -1:
                 e_x_low = e_x_low - 1
             while e_x_high < e_sent_len and e_x_high - e_low < self.train_max_initial_size and e_links_low[e_x_high] == -1:
@@ -1331,7 +1325,7 @@ cdef class HieroCachingRuleFactory:
             j = e_gap_order[i]
             e_x_gap_low = e_gap_low[j]
             e_x_gap_high = e_gap_high[j]
-            if self.tight_phrases == 0:
+            if not self.tight_phrases:
                 while e_x_gap_low > e_x_low and e_links_low[e_x_gap_low-1] == -1:
                     e_x_gap_low = e_x_gap_low - 1
                 while e_x_gap_high < e_x_high and e_links_low[e_x_gap_high] == -1:
