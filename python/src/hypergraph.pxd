@@ -19,6 +19,8 @@ cdef extern from "decoder/hg.h":
         # typically source span:
         short int i_
         short int j_
+        short int prev_i_
+        short int prev_j_
 
     ctypedef HypergraphEdge const_HypergraphEdge "const Hypergraph::Edge"
 
@@ -45,6 +47,7 @@ cdef extern from "decoder/hg.h":
                                 bint use_sum_prod_semiring,
                                 double scale,
                                 bint safe_inside) nogil
+        shared_ptr[Hypergraph] CreateViterbiHypergraph(EdgeMask* preserve_mask) nogil
 
 cdef extern from "decoder/viterbi.h":
     prob_t ViterbiESentence(Hypergraph& hg, vector[WordID]* trans) nogil

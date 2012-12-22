@@ -1,0 +1,14 @@
+all: output.f-e.aligned
+
+clean:
+	$(RM) output.f-e.a weights.cur.gz
+
+CDEC = $(SCRIPT_DIR)/../decoder/cdec
+OPTIMIZE = $(SCRIPT_DIR)/../training/crf/mpi_online_optimize
+
+weights.cur.gz: ../grammars/wordpairs.f-e.features.gz
+	$(MPIRUN) $(OPTIMIZE) -a agenda.txt -1 -C 1.0 -t ../grammars/corpus.f-e --max_walltime 90
+
+output.f-e.aligned: weights.cur.gz
+	$(CDEC) -c cdec.ini -w $< --lextrans_align_only -i ../grammars/corpus.f-e -a > $@
+

@@ -27,6 +27,7 @@ libklm_util_a_SOURCES = \
   mmap.cc \
   murmur_hash.cc \
   pool.cc \
+	read_compressed.cc \
   string_piece.cc \
 	usage.cc
 
