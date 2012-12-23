@@ -73,7 +73,6 @@ cdef trie_node_data_extend(_Trie_Node* node, int* vals, int num_vals):
     memcpy(node.arr + node.arr_len, vals, num_vals*sizeof(int))
     node.arr_len = new_len
 
-
 cdef _Trie_Node* trie_insert(_Trie_Node* node, int val):
     cdef _Trie_Edge** cur
     cur = &node.root
@@ -116,14 +115,12 @@ cdef class TrieMap:
         self.root = <_Trie_Node**> malloc(self.V * sizeof(_Trie_Node*))
         memset(self.root, 0, self.V * sizeof(_Trie_Node*))
 
-
     def __dealloc__(self):
         cdef int i
         for i from 0 <= i < self.V:
             if self.root[i] != NULL:
                 free_trie_node(self.root[i])
         free(self.root)
-
 
     def insert(self, pattern):
         cdef int* p
@@ -134,7 +131,6 @@ cdef class TrieMap:
             p[i] = pattern[i]
         self._insert(p,l)
         free(p)
-
 
     cdef _Trie_Node* _insert(self, int* pattern, int pattern_len):
         cdef int i
@@ -184,7 +180,6 @@ cdef class TrieMap:
                 trie_node_to_map(self.root[i], result, (i,), include_zeros)
         return result
 
-
 cdef class Precomputation:
     cdef int precompute_rank
     cdef int precompute_secondary_rank
@@ -194,10 +189,8 @@ cdef class Precomputation:
     cdef int train_min_gap_size
     cdef precomputed_index
     cdef precomputed_collocations
-    cdef read_map(self, FILE* f)
-    cdef write_map(self, m, FILE* f)
 
-    def __cinit__(self, fsarray=None, from_stats=None, from_binary=None,
+    def __cinit__(self, fsarray=None, from_stats=None, from_binary=None, mmaped=False,
             precompute_rank=1000, precompute_secondary_rank=20,
             max_length=5, max_nonterminals=2,
             train_max_initial_size=10, train_min_gap_size=2):
@@ -208,12 +201,14 @@ cdef class Precomputation:
         self.train_max_initial_size = train_max_initial_size
         self.train_min_gap_size = train_min_gap_size
         if from_binary:
-            self.read_binary(from_binary)
+            if mmaped:
+                self.read_mmaped(MemoryMap(from_binary))
+            else:
+                self.read_binary(from_binary)
         elif from_stats:
             self.precompute(from_stats, fsarray)
 
-
-    def read_binary(self, char* filename):
+    def read_binary(self, bytes filename):
         cdef FILE* f
         f = fopen(filename, "r")
         fread(&(self.precompute_rank), sizeof(int), 1, f)
@@ -226,8 +221,17 @@ cdef class Precomputation:
         self.precomputed_collocations = self.read_map(f)
         fclose(f)
 
+    def read_mmaped(self, MemoryMap buf):
+        self.precompute_rank = buf.read_int()
+        self.precompute_secondary_rank = buf.read_int()
+        self.max_length = buf.read_int()
+        self.max_nonterminals = buf.read_int()
+        self.train_max_initial_size = buf.read_int()
+        self.train_min_gap_size = buf.read_int()
+        self.precomputed_index = self.read_mmaped_map(buf)
+        self.precomputed_collocations = self.read_mmaped_map(buf)
 
-    def write_binary(self, char* filename):
+    def write_binary(self, bytes filename):
         cdef FILE* f
         f = fopen(filename, "w")
         fwrite(&(self.precompute_rank), sizeof(int), 1, f)
@@ -239,7 +243,6 @@ cdef class Precomputation:
         self.write_map(self.precomputed_index, f)
         self.write_map(self.precomputed_collocations, f)
         fclose(f)
-
 
     cdef write_map(self, m, FILE* f):
         cdef int i, N
@@ -255,7 +258,6 @@ cdef class Precomputation:
                 fwrite(&(i), sizeof(int), 1, f)
             arr = val
             arr.write_handle(f)
-
 
     cdef read_map(self, FILE* f):
         cdef int i, j, k, word_id, N
@@ -274,6 +276,21 @@ cdef class Precomputation:
             m[key] = arr
         return m
 
+    cdef read_mmaped_map(self, MemoryMap buf):
+        cdef int i, j, k, word_id, N
+        cdef IntList arr
+
+        m = {}
+        N = buf.read_int()
+        for j in range(N):
+            key_size = buf.read_int()
+            key = []
+            for k in range(key_size):
+                key.append(buf.read_int())
+            arr = IntList()
+            arr.read_mmaped(buf)
+            m[tuple(key)] = arr
+        return m
 
     def precompute(self, stats, SuffixArray sarray):
         cdef int i, l, N, max_pattern_len, i1, l1, i2, l2, i3, l3, ptr1, ptr2, ptr3, is_super, sent_count, max_rank
@@ -284,9 +301,9 @@ cdef class Precomputation:
 
         data = darray.data
 
-        frequent_patterns = TrieMap(len(darray.id2word))
-        super_frequent_patterns = TrieMap(len(darray.id2word))
-        collocations = TrieMap(len(darray.id2word))
+        frequent_patterns = TrieMap(len(darray.voc.id2word))
+        super_frequent_patterns = TrieMap(len(darray.voc.id2word))
+        collocations = TrieMap(len(darray.voc.id2word))
 
         I_set = set()
         J_set = set()
@@ -419,7 +436,7 @@ cdef class Precomputation:
                     if word_id == -1:
                         s = s + "X "
                     else:
-                        s = s + darray.id2word[word_id] + " "
+                        s = s + darray.voc.id2word[word_id] + " "
                 logger.warn("ERROR: unexpected pattern %s in set of precomputed collocations", s)
             else:
                 chunk = ()

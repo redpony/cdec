@@ -8,12 +8,15 @@ cdef class SuffixArray:
     cdef IntList sa
     cdef IntList ha
 
-    def __cinit__(self, from_binary=None, from_text=None, side=None):
+    def __cinit__(self, from_binary=None, from_text=None, mmaped=False, side=None):
         self.darray = DataArray()
         self.sa = IntList()
         self.ha = IntList()
         if from_binary:
-            self.read_binary(from_binary)
+            if mmaped:
+                self.read_mmaped(MemoryMap(from_binary))
+            else:
+                self.read_binary(from_binary)
         elif from_text:
             self.read_text(from_text, side)
 
@@ -28,7 +31,7 @@ cdef class SuffixArray:
 
         self.darray = DataArray(from_text=filename, side=side, use_sent_id=True)
         N = len(self.darray)
-        V = len(self.darray.id2word)
+        V = len(self.darray.voc)
 
         self.sa = IntList(initial_len=N)
         self.ha = IntList(initial_len=V+1)
@@ -166,10 +169,10 @@ cdef class SuffixArray:
         self.q3sort(ptail+1, j, h, isa, pad+"    ")
 
 
-    def write_text(self, char* filename):
+    def write_text(self, bytes filename):
         self.darray.write_text(filename)
 
-    def read_binary(self, char* filename):
+    def read_binary(self, bytes filename):
         cdef FILE *f
         f = fopen(filename, "r")
         self.darray.read_handle(f)
@@ -177,7 +180,12 @@ cdef class SuffixArray:
         self.ha.read_handle(f)
         fclose(f)
 
-    def write_binary(self, char* filename):
+    def read_mmaped(self, MemoryMap buf):
+        self.darray.read_mmaped(buf)
+        self.sa.read_mmaped(buf)
+        self.ha.read_mmaped(buf)
+
+    def write_binary(self, bytes filename):
         cdef FILE* f
         f = fopen(filename, "w")
         self.darray.write_handle(f)
@@ -185,7 +193,7 @@ cdef class SuffixArray:
         self.ha.write_handle(f)
         fclose(f)
 
-    def write_enhanced(self, char* filename):
+    def write_enhanced(self, bytes filename):
         with open(filename, "w") as f:
             self.darray.write_enhanced_handle(f)
             for a_i in self.sa:
@@ -243,8 +251,8 @@ cdef class SuffixArray:
             low = 0
         if high == -1:
             high = len(self.sa)
-        if word in self.darray.word2id:
-            word_id = self.darray.word2id[word]
+        word_id = self.darray.voc.get(word, -1)
+        if word_id != -1:
             return self.__lookup_helper(word_id, offset, low, high)
         else:
             return None

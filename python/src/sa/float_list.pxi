@@ -16,9 +16,11 @@ cdef class FloatList:
         self.len = initial_len
         self.arr = <float*> malloc(size*sizeof(float))
         memset(self.arr, 0, initial_len*sizeof(float))
+        self.memory = self
 
     def __dealloc__(self):
-        free(self.arr)
+        if self.memory is self:
+            free(self.arr)
 
     def __getitem__(self, i):
         j = i
@@ -50,24 +52,18 @@ cdef class FloatList:
         self.len = self.len + 1
 
     cdef void write_handle(self, FILE* f):
-        fwrite(&(self.len), sizeof(float), 1, f)
+        fwrite(&(self.len), sizeof(int), 1, f)
         fwrite(self.arr, sizeof(float), self.len, f)
-
-    def write(self, char* filename):
-        cdef FILE* f
-        f = fopen(filename, "w")
-        self.write_handle(f)
-        fclose(f)
 
     cdef void read_handle(self, FILE* f):
         free(self.arr)
-        fread(&(self.len), sizeof(float), 1, f)
+        fread(&(self.len), sizeof(int), 1, f)
         self.arr = <float*> malloc(self.len * sizeof(float))
         self.size = self.len
         fread(self.arr, sizeof(float), self.len, f)
 
-    def read(self, char* filename):
-        cdef FILE* f
-        f = fopen(filename, "r")
-        self.read_handle(f)
-        fclose(f)
+    cdef void read_mmaped(self, MemoryMap buf):
+        free(self.arr)
+        self.size = self.len = buf.read_int()
+        self.arr = buf.read_float_array(self.len)
+        self.memory = buf

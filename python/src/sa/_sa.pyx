@@ -14,9 +14,11 @@ def gzip_or_text(char* filename):
 
 logger = logging.getLogger('cdec.sa')
 
+include "mmap.pxi"
 include "float_list.pxi"
 include "int_list.pxi"
 include "str_map.pxi"
+include "vocabulary.pxi"
 include "data_array.pxi"
 include "alignment.pxi"
 include "bilex.pxi"

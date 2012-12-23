@@ -1,9 +1,12 @@
 from itertools import chain
 import os
+import logging
 import cdec.configobj
 from cdec.sa.features import EgivenFCoherent, SampleCountF, CountEF,\
         MaxLexEgivenF, MaxLexFgivenE, IsSingletonF, IsSingletonFE
 import cdec.sa
+
+logger = logging.getLogger('cdec.sa')
 
 # maximum span of a grammar rule in TEST DATA
 MAX_INITIAL_SIZE = 15
@@ -14,7 +17,10 @@ class GrammarExtractor:
             if not os.path.exists(config):
                 raise IOError('cannot read configuration from {0}'.format(config))
             config = cdec.configobj.ConfigObj(config, unrepr=True)
-        alignment = cdec.sa.Alignment(from_binary=config['a_file'])
+        mmaped = config.get('memory_map', False)
+        if mmaped:
+            logger.info('Memory mapping parallel data')
+        alignment = cdec.sa.Alignment(from_binary=config['a_file'], mmaped=mmaped)
         self.factory = cdec.sa.HieroCachingRuleFactory(
                 # compiled alignment object (REQUIRED)
                 alignment,
@@ -55,7 +61,7 @@ class GrammarExtractor:
                 )
 
         # lexical weighting tables
-        tt = cdec.sa.BiLex(from_binary=config['lex_file'])
+        tt = cdec.sa.BiLex(from_binary=config['lex_file'], mmaped=mmaped)
 
         # TODO: use @cdec.sa.features decorator for standard features too
         # + add a mask to disable features
@@ -63,8 +69,8 @@ class GrammarExtractor:
             MaxLexFgivenE(tt), MaxLexEgivenF(tt), IsSingletonF, IsSingletonFE,
             *cdec.sa._SA_FEATURES)
 
-        fsarray = cdec.sa.SuffixArray(from_binary=config['f_sa_file'])
-        edarray = cdec.sa.DataArray(from_binary=config['e_file'])
+        fsarray = cdec.sa.SuffixArray(from_binary=config['f_sa_file'], mmaped=mmaped)
+        edarray = cdec.sa.DataArray(from_binary=config['e_file'], mmaped=mmaped)
 
         # lower=faster, higher=better; improvements level off above 200-300 range,
         # -1 = don't sample, use all data (VERY SLOW!)

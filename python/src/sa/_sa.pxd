@@ -1,26 +1,40 @@
 from libc.stdio cimport FILE
+from posix.unistd cimport off_t
+
+cdef class MemoryMap:
+    cdef int fd
+    cdef off_t fs
+    cdef void* map_start
+    cdef void* map_ptr
+    cdef int read_int(self)
+    cdef int* read_int_array(self, int size)
+    cdef char* read_char_array(self, int size)
+    cdef float* read_float_array(self, int size)
 
 cdef class FloatList:
     cdef int size
     cdef int increment
     cdef int len
     cdef float* arr
+    cdef object memory
     cdef void set(self, int i, float v)
     cdef void write_handle(self, FILE* f)
     cdef void read_handle(self, FILE* f)
+    cdef void read_mmaped(self, MemoryMap buf)
 
 cdef class IntList:
     cdef int size
     cdef int increment
     cdef int len
     cdef int* arr
+    cdef object memory
     cdef void set(self, int i, int val)
     cdef void _append(self, int val)
-    cdef void _extend(self, IntList other)
     cdef void _extend_arr(self, int* other, int other_len)
     cdef void _clear(self)
     cdef void write_handle(self, FILE* f)
     cdef void read_handle(self, FILE* f)
+    cdef void read_mmaped(self, MemoryMap buf)
 
 cdef class FeatureVector:
     cdef IntList names

@@ -6,23 +6,29 @@ from libc.stdio cimport FILE, fopen, fread, fwrite, fclose
 from libc.stdlib cimport malloc, realloc, free
 from libc.string cimport memset, strcpy
 
+# kept for compatibility
+INIT_VOCABULARY = ('NULL', 'END_OF_LINE')
+
 cdef class DataArray:
-    cdef public word2id
-    cdef public id2word
+    cdef public Vocabulary voc
     cdef public IntList data
     cdef public IntList sent_id
     cdef public IntList sent_index
     cdef bint use_sent_id
 
-    def __cinit__(self, from_binary=None, from_text=None, side=None, bint use_sent_id=False):
-        self.word2id = {"END_OF_FILE":0, "END_OF_LINE":1}
-        self.id2word = ["END_OF_FILE", "END_OF_LINE"]
+    def __cinit__(self, from_binary=None, from_text=None, side=None,
+            bint use_sent_id=False, mmaped=False):
+        self.voc = Vocabulary()
+        self.voc.extend(INIT_VOCABULARY)
         self.data = IntList(1000,1000)
         self.sent_id = IntList(1000,1000)
         self.sent_index = IntList(1000,1000)
         self.use_sent_id = use_sent_id
         if from_binary:
-            self.read_binary(from_binary)
+            if mmaped:
+                self.read_mmaped(MemoryMap(from_binary))
+            else:
+                self.read_binary(from_binary)
         elif from_text:
             if side:
                 self.read_bitext(from_text, (0 if side == 'source' else 1))
@@ -37,27 +43,21 @@ cdef class DataArray:
 
     def get_sentence(self, i):
         cdef int j, start, stop
-        sent = []
         start = self.sent_index.arr[i]
         stop = self.sent_index.arr[i+1]
-        for i from start <= i < stop:
-            sent.append(self.id2word[self.data.arr[i]])
-        return sent
+        sent = [self.voc.id2word[self.data.arr[j]] for j in range(start, stop)]
 
     def get_id(self, word):
-        if not word in self.word2id:
-            self.word2id[word] = len(self.id2word)
-            self.id2word.append(word)
-        return self.word2id[word]
+        return self.voc[word]
 
     def __getitem__(self, loc):
-        return self.id2word[self.data.arr[loc]]
+        return self.voc.id2word[self.data.arr[loc]]
 
     def get_sentence_bounds(self, loc):
         cdef int sid = self.sent_id.arr[loc]
         return (self.sent_index.arr[sid], self.sent_index.arr[sid+1])
 
-    def write_text(self, char* filename):
+    def write_text(self, bytes filename):
         with open(filename, "w") as f:
             for w_id in self.data:
                 if w_id > 1:
@@ -65,11 +65,11 @@ cdef class DataArray:
                 if w_id == 1:
                     f.write("\n")
 
-    def read_text(self, char* filename):
+    def read_text(self, bytes filename):
         with gzip_or_text(filename) as fp:
             self.read_text_data(fp)
 
-    def read_bitext(self, char* filename, int side):
+    def read_bitext(self, bytes filename, int side):
         with gzip_or_text(filename) as fp:
             data = (line.split(' ||| ')[side] for line in fp)
             self.read_text_data(data)
@@ -90,49 +90,33 @@ cdef class DataArray:
         self.data.append(0)
         self.sent_index.append(word_count)
 
-
-    def read_binary(self, char* filename):
+    def read_binary(self, bytes filename):
         cdef FILE* f
         f = fopen(filename, "r")
         self.read_handle(f)
         fclose(f)
 
-    cdef void read_handle(self, FILE* f):
-        cdef int num_words, word_len
-        cdef unsigned i
-        cdef char* word
+    cdef void read_mmaped(self, MemoryMap buf):
+        self.data.read_mmaped(buf)
+        self.sent_index.read_mmaped(buf)
+        self.sent_id.read_mmaped(buf)
+        self.voc.read_mmaped(buf)
+        self.use_sent_id = (len(self.sent_id) > 0)
 
+    cdef void read_handle(self, FILE* f):
         self.data.read_handle(f)
         self.sent_index.read_handle(f)
         self.sent_id.read_handle(f)
-        fread(&(num_words), sizeof(int), 1, f)
-        for i in range(num_words):
-            fread(&(word_len), sizeof(int), 1, f)
-            word = <char*> malloc (word_len * sizeof(char))
-            fread(word, sizeof(char), word_len, f)
-            self.word2id[word] = len(self.id2word)
-            self.id2word.append(word)
-            free(word)
-        if len(self.sent_id) == 0:
-            self.use_sent_id = False
-        else:
-            self.use_sent_id = True
+        self.voc.read_handle(f)
+        self.use_sent_id = (len(self.sent_id) > 0)
 
     cdef void write_handle(self, FILE* f):
-        cdef int word_len
-        cdef int num_words
-
         self.data.write_handle(f)
         self.sent_index.write_handle(f)
         self.sent_id.write_handle(f)
-        num_words = len(self.id2word) - 2
-        fwrite(&(num_words), sizeof(int), 1, f)
-        for word in self.id2word[2:]:
-            word_len = len(word) + 1
-            fwrite(&(word_len), sizeof(int), 1, f)
-            fwrite(<char *>word, sizeof(char), word_len, f)
+        self.voc.write_handle(f, len(INIT_VOCABULARY))
 
-    def write_binary(self, char* filename):
+    def write_binary(self, bytes filename):
         cdef FILE* f
         f = fopen(filename, "w")
         self.write_handle(f)
@@ -148,10 +132,10 @@ cdef class DataArray:
         for i in self.sent_id:
             f.write("%d " %i)
         f.write("\n")
-        for word in self.id2word:
-            f.write("%s %d " % (word, self.word2id[word]))
+        for w, word in enumerate(self.voc.id2word):
+            f.write("%s %d " % (word, w))
         f.write("\n")
 
-    def write_enhanced(self, char* filename):
+    def write_enhanced(self, bytes filename):
         with open(filename, "w") as f:
             self.write_enhanced_handle(self, f)

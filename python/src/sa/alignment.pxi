@@ -42,15 +42,18 @@ cdef class Alignment:
             self._unlink(self.links.arr[start + i], sent_links + (2*i), sent_links + (2*i) + 1)
         return sent_links
 
-    def __cinit__(self, from_binary=None, from_text=None):
+    def __cinit__(self, from_binary=None, from_text=None, mmaped=False):
         self.links = IntList(1000,1000)
         self.sent_index = IntList(1000,1000)
         if from_binary:
-            self.read_binary(from_binary)
+            if mmaped:
+                self.read_mmaped(MemoryMap(from_binary))
+            else:
+                self.read_binary(from_binary)
         elif from_text:
             self.read_text(from_text)
 
-    def read_text(self, char* filename):
+    def read_text(self, bytes filename):
         with gzip_or_text(filename) as f:
             for line in f:
                 self.sent_index.append(len(self.links))
@@ -60,14 +63,18 @@ cdef class Alignment:
                     self.links.append(self.link(i, j))
             self.sent_index.append(len(self.links))
 
-    def read_binary(self, char* filename):
+    def read_binary(self, bytes filename):
         cdef FILE* f
         f = fopen(filename, "r")
         self.links.read_handle(f)
         self.sent_index.read_handle(f)
         fclose(f)
 
-    def write_text(self, char* filename):
+    def read_mmaped(self, MemoryMap buf):
+        self.links.read_mmaped(buf)
+        self.sent_index.read_mmaped(buf)
+
+    def write_text(self, bytes filename):
         with open(filename, "w") as f:
             sent_num = 0
             for i, link in enumerate(self.links):
@@ -77,14 +84,14 @@ cdef class Alignment:
                 f.write("%d-%d " % self.unlink(link))
             f.write("\n")
 
-    def write_binary(self, char* filename):
+    def write_binary(self, bytes filename):
         cdef FILE* f
         f = fopen(filename, "w")
         self.links.write_handle(f)
         self.sent_index.write_handle(f)
         fclose(f)
 
-    def write_enhanced(self, char* filename):
+    def write_enhanced(self, bytes filename):
         with open(filename, "w") as f:
             sent_num = 1
             for link in self.links:

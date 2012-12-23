@@ -389,10 +389,10 @@ cdef class HieroCachingRuleFactory:
         cdef int word_id, new_word_id, N
         cdef IntList idmap
         
-        N = len(darray.id2word)
+        N = len(darray.voc)
         idmap = IntList(initial_len=N)
         for word_id from 0 <= word_id < N:
-            new_word_id = sym_fromstring(darray.id2word[word_id], True)
+            new_word_id = sym_fromstring(darray.voc.id2word[word_id], True)
             idmap.arr[word_id] = new_word_id
         return idmap
 
@@ -406,7 +406,7 @@ cdef class HieroCachingRuleFactory:
                 arity = arity + 1
                 new_id = sym_setindex(self.category, arity)
             else:
-                new_id = sym_fromstring(self.fda.id2word[word_id], True)
+                new_id = sym_fromstring(self.fda.voc.id2word[word_id], True)
             result = result + (new_id,)
         return Phrase(result)
 
@@ -421,7 +421,7 @@ cdef class HieroCachingRuleFactory:
                 arity = arity + 1
                 new_id = sym_setindex(self.category, arity)
             else:
-                new_id = sym_fromstring(self.fda.id2word[word_id], True)
+                new_id = sym_fromstring(self.fda.voc.id2word[word_id], True)
             result = result + (new_id,)
         patterns.append(Phrase(result))
         patterns.append(Phrase(result + (sym_setindex(self.category, 1),)))

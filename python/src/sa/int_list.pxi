@@ -16,67 +16,24 @@ cdef class IntList:
         self.len = initial_len
         self.arr = <int*> malloc(size*sizeof(int))
         memset(self.arr, 0, initial_len*sizeof(int))
+        self.memory = self
 
-    def __str__(self):
-        cdef unsigned i
-        ret = "IntList["
-        for idx in range(self.size):
-            if idx>0:
-                ret += ","
-            ret += str(self.arr[idx])
-        ret += "]"
-        ret += "len="
-        ret += self.len
-        return ret
+    def __repr__(self):
+        return 'IntList(%s)' % list(self)
 
     def index(self, val):
         cdef unsigned i
         for i in range(self.len):
             if self.arr[i] == val:
                 return i
-        return IndexError
-
-    def partition(self,start,end):
-        pivot = self.arr[end]
-        bottom = start-1
-        top = end
-        done = 0
-        while not done:
-            while not done:
-                bottom += 1
-                if bottom == top:
-                    done = 1
-                    break
-                if self.arr[bottom] > pivot:
-                    self.arr[top] = self.arr[bottom]
-                    break
-            while not done:
-                top -= 1
-                if top == bottom:
-                    done = 1
-                    break
-                if self.arr[top] < pivot:
-                    self.arr[bottom] = self.arr[top]
-                    break
-        self.arr[top] = pivot
-        return top
-
-    def _doquicksort(self,start,end):
-        if start < end:
-            split = self.partition(start,end)
-            self._doquicksort(start,split-1)
-            self._doquicksort(split+1,end)
-        else:
-            return
-
-    def sort(self):
-        self._doquicksort(0,self.len-1)
+        raise ValueError('%s not in list' % val)
 
     def reset(self):
         self.len = 0
 
     def __dealloc__(self):
-        free(self.arr)
+        if self.memory is self:
+            free(self.arr)
 
     def __iter__(self):
         cdef int i
@@ -122,9 +79,6 @@ cdef class IntList:
     def __len__(self):
         return self.len
 
-    def get_size(self):
-        return self.size
-
     def append(self, int val):
         self._append(val)
 
@@ -135,10 +89,7 @@ cdef class IntList:
         self.arr[self.len] = val
         self.len = self.len + 1
 
-    def extend(self, other):
-        self._extend(other)
-
-    cdef void _extend(self, IntList other):
+    def extend(self, IntList other):
         self._extend_arr(other.arr, other.len)
 
     cdef void _extend_arr(self, int* other, int other_len):
@@ -158,21 +109,15 @@ cdef class IntList:
         fwrite(&(self.len), sizeof(int), 1, f)
         fwrite(self.arr, sizeof(int), self.len, f)
 
-    def write(self, char* filename):
-        cdef FILE* f
-        f = fopen(filename, "w")
-        self.write_handle(f)
-        fclose(f)
-
     cdef void read_handle(self, FILE* f):
-        (self.arr)
+        free(self.arr)
         fread(&(self.len), sizeof(int), 1, f)
         self.arr = <int*> malloc(self.len * sizeof(int))
         self.size = self.len
         fread(self.arr, sizeof(int), self.len, f)
 
-    def read(self, char* filename):
-        cdef FILE* f
-        f = fopen(filename, "r")
-        self.read_handle(f)
-        fclose(f)
+    cdef void read_mmaped(self, MemoryMap buf):
+        free(self.arr)
+        self.size = self.len = buf.read_int()
+        self.arr = buf.read_int_array(self.len)
+        self.memory = buf
