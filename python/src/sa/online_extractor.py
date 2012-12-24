@@ -94,6 +94,7 @@ class OnlineGrammarExtractor:
         phrases = set()
 
         f_len = len(f_words)
+        e_len = len(e_words)
 
         # Pre-compute alignment info
         al = [[] for i in range(f_len)]
@@ -105,7 +106,7 @@ class OnlineGrammarExtractor:
 
         # Target side word coverage
         # TODO: Does Cython do bit vectors?
-        cover = [0] * f_len
+        cover = [0] * e_len
 
         # Extract all possible hierarchical phrases starting at a source index
         # f_ i and j are current, e_ i and j are previous
