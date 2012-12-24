@@ -111,7 +111,7 @@ class OnlineGrammarExtractor:
         # f_ i and j are current, e_ i and j are previous
         def extract(f_i, f_j, e_i, e_j, wc, links, nt, nt_open):
             # Phrase extraction limits
-            if wc > self.max_length or (f_j + 1) > f_len or \
+            if wc + len(nt) > self.max_length or (f_j + 1) > f_len or \
                     (f_j - f_i) + 1 > self.max_size:
                 return
             # Unaligned word
@@ -327,6 +327,7 @@ def main(argv):
     extractor = OnlineGrammarExtractor()
 
     for line in sys.stdin:
+        print >> sys.stderr, line.strip()
         f_words, e_words, a_str = (x.split() for x in line.split('|||'))
         alignment = sorted(tuple(int(y) for y in x.split('-')) for x in a_str)
         extractor.add_instance(f_words, e_words, alignment)
