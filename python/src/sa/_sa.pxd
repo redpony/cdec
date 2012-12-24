@@ -16,7 +16,9 @@ cdef class FloatList:
     cdef int increment
     cdef int len
     cdef float* arr
+    cdef bint mmaped
     cdef object memory
+    cdef void _free_mem(self)
     cdef void set(self, int i, float v)
     cdef void write_handle(self, FILE* f)
     cdef void read_handle(self, FILE* f)
@@ -27,11 +29,13 @@ cdef class IntList:
     cdef int increment
     cdef int len
     cdef int* arr
+    cdef bint mmaped
     cdef object memory
     cdef void set(self, int i, int val)
     cdef void _append(self, int val)
     cdef void _extend_arr(self, int* other, int other_len)
     cdef void _clear(self)
+    cdef void _free_mem(self)
     cdef void write_handle(self, FILE* f)
     cdef void read_handle(self, FILE* f)
     cdef void read_mmaped(self, MemoryMap buf)

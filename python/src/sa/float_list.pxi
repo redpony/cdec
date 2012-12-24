@@ -16,11 +16,16 @@ cdef class FloatList:
         self.len = initial_len
         self.arr = <float*> malloc(size*sizeof(float))
         memset(self.arr, 0, initial_len*sizeof(float))
-        self.memory = self
+        self.mmaped = False
+
+    cdef void _free_mem(self):
+        if self.mmaped:
+            self.memory = None
+        else:
+            free(self.arr)
 
     def __dealloc__(self):
-        if self.memory is self:
-            free(self.arr)
+        self._free_mem()
 
     def __getitem__(self, i):
         j = i
@@ -56,14 +61,15 @@ cdef class FloatList:
         fwrite(self.arr, sizeof(float), self.len, f)
 
     cdef void read_handle(self, FILE* f):
-        free(self.arr)
+        self._free_mem()
         fread(&(self.len), sizeof(int), 1, f)
         self.arr = <float*> malloc(self.len * sizeof(float))
         self.size = self.len
         fread(self.arr, sizeof(float), self.len, f)
 
     cdef void read_mmaped(self, MemoryMap buf):
-        free(self.arr)
+        self._free_mem()
         self.size = self.len = buf.read_int()
         self.arr = buf.read_float_array(self.len)
+        self.mmaped = True
         self.memory = buf

@@ -16,7 +16,7 @@ cdef class IntList:
         self.len = initial_len
         self.arr = <int*> malloc(size*sizeof(int))
         memset(self.arr, 0, initial_len*sizeof(int))
-        self.memory = self
+        self.mmaped = False
 
     def __repr__(self):
         return 'IntList(%s)' % list(self)
@@ -31,9 +31,14 @@ cdef class IntList:
     def reset(self):
         self.len = 0
 
-    def __dealloc__(self):
-        if self.memory is self:
+    cdef void _free_mem(self):
+        if self.mmaped:
+            self.memory = None
+        else:
             free(self.arr)
+
+    def __dealloc__(self):
+        self._free_mem()
 
     def __iter__(self):
         cdef int i
@@ -100,7 +105,7 @@ cdef class IntList:
         self.len = self.len + other_len
 
     cdef void _clear(self):
-        free(self.arr)
+        self._free_mem()
         self.len = 0
         self.size = 0
         self.arr = <int*> malloc(0)
@@ -110,14 +115,15 @@ cdef class IntList:
         fwrite(self.arr, sizeof(int), self.len, f)
 
     cdef void read_handle(self, FILE* f):
-        free(self.arr)
+        self._free_mem()
         fread(&(self.len), sizeof(int), 1, f)
         self.arr = <int*> malloc(self.len * sizeof(int))
         self.size = self.len
         fread(self.arr, sizeof(int), self.len, f)
 
     cdef void read_mmaped(self, MemoryMap buf):
-        free(self.arr)
+        self._free_mem()
         self.size = self.len = buf.read_int()
         self.arr = buf.read_int_array(self.len)
+        self.mmaped = True
         self.memory = buf
