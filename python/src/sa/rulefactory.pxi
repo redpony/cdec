@@ -1798,3 +1798,9 @@ cdef class HieroCachingRuleFactory:
         free(e_gap_high)
 
         return extracts
+
+    def add_instance(self, f_words, e_words, alignment):
+        logger.info("I would add:")
+        logger.info(decode_words(f_words))
+        logger.info(decode_words(e_words))
+        logger.info(alignment)
