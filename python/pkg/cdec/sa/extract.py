@@ -53,6 +53,7 @@ def extract(inp):
     # Add training instance _after_ extracting grammars
     if online:
         extractor.add_instance(sentence, reference, alignment)
+        extractor.dump_online_stats()
     grammar_file = os.path.abspath(grammar_file)
     return '<seg grammar="{0}" id="{1}"> {2} </seg>{3}'.format(grammar_file, i, sentence, suffix)
 
