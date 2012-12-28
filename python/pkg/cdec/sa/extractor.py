@@ -1,5 +1,5 @@
 from itertools import chain
-import os
+import os, sys
 import cdec.configobj
 from cdec.sa.features import EgivenFCoherent, SampleCountF, CountEF,\
         MaxLexEgivenF, MaxLexFgivenE, IsSingletonF, IsSingletonFE
@@ -82,3 +82,14 @@ class GrammarExtractor:
         meta = cdec.sa.annotate(words)
         cnet = cdec.sa.make_lattice(words)
         return self.factory.input(cnet, meta)
+
+    # Add training instance to data
+    def add_instance(self, sentence, reference, alignment):
+        f_words = cdec.sa.encode_words(sentence.split())
+        e_words = cdec.sa.encode_words(reference.split())
+        al = sorted(tuple(int(i) for i in pair.split('-')) for pair in alignment.split())
+        self.factory.add_instance(f_words, e_words, al)
+    
+    # Debugging
+    def dump_online_stats(self):
+        self.factory.dump_online_stats()

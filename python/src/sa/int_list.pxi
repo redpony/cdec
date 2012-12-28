@@ -26,7 +26,7 @@ cdef class IntList:
             ret += str(self.arr[idx])
         ret += "]"
         ret += "len="
-        ret += self.len
+        ret += str(self.len)
         return ret
 
     def index(self, val):
