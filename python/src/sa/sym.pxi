@@ -114,3 +114,9 @@ def decode_lattice(lattice):
 
 def decode_sentence(lattice):
     return tuple(sym_tostring(sym) for ((sym, _, _),) in lattice)
+
+def encode_words(words):
+    return tuple(sym_fromstring(word, True) for word in words)
+
+def decode_words(syms):
+    return tuple(sym_tostring(sym) for sym in syms)
