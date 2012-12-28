@@ -89,3 +89,7 @@ class GrammarExtractor:
         e_words = cdec.sa.encode_words(reference.split())
         al = sorted(tuple(int(i) for i in pair.split('-')) for pair in alignment.split())
         self.factory.add_instance(f_words, e_words, al)
+    
+    # Debugging
+    def dump_online_stats(self):
+        self.factory.dump_online_stats()
