@@ -1860,13 +1860,13 @@ cdef class HieroCachingRuleFactory:
                 return
             # Unaligned word
             if not al[f_j]:
-                # Open non-terminal: extend
-                if nt_open:
+                # Adjacent to non-terminal: extend (non-terminal now open)
+                if nt and nt[-1][2] == f_j - 1:
                     nt[-1][2] += 1
                     extract(f_i, f_j + 1, e_i, e_j, min_bound, wc, links, nt, True)
                     nt[-1][2] -= 1
-                # No open non-terminal: extend with word
-                else:
+                # Unless non-terminal already open, always extend with word
+                if not nt_open:
                     extract(f_i, f_j + 1, e_i, e_j, min_bound, wc + 1, links, nt, False)
                 return
             # Aligned word
@@ -1912,10 +1912,12 @@ cdef class HieroCachingRuleFactory:
                     span_inc(cover, nt[-1][4] + 1, link_j)
                     span_inc(e_nt_cover, nt[-1][4] + 1, link_j)
                     nt[-1][4] = link_j
-                # Make sure we cover all aligned words
-                if f_j >= new_min_bound:
-                    for rule in self.form_rules(f_i, new_e_i, f_words[f_i:f_j + 1], e_words[new_e_i:new_e_j + 1], nt, links):
-                        rules.add(rule)
+                # Make sure we have at least one lexical alignment link
+                if links:
+                    # Make sure we cover all aligned words
+                    if f_j >= new_min_bound:
+                        for rule in self.form_rules(f_i, new_e_i, f_words[f_i:f_j + 1], e_words[new_e_i:new_e_j + 1], nt, links):
+                            rules.add(rule)
                 extract(f_i, f_j + 1, new_e_i, new_e_j, new_min_bound, wc, links, nt, False)
                 nt[-1] = old_last_nt
                 if link_i < nt[-1][3]:
@@ -1939,9 +1941,10 @@ cdef class HieroCachingRuleFactory:
                     plus_links.append((f_j, link))
                     cover[link] += 1
                 links.append(plus_links)
-                if f_j >= new_min_bound:
-                    for rule in self.form_rules(f_i, new_e_i, f_words[f_i:f_j + 1], e_words[new_e_i:new_e_j + 1], nt, links):
-                        rules.add(rule)
+                if links:
+                    if f_j >= new_min_bound:
+                        for rule in self.form_rules(f_i, new_e_i, f_words[f_i:f_j + 1], e_words[new_e_i:new_e_j + 1], nt, links):
+                            rules.add(rule)
                 extract(f_i, f_j + 1, new_e_i, new_e_j, new_min_bound, wc + 1, links, nt, False)
                 links.pop()
                 for link in al[f_j]:
@@ -1965,7 +1968,6 @@ cdef class HieroCachingRuleFactory:
                     span_inc(cover, nt[-1][4] + 1, link_j)
                     span_inc(e_nt_cover, nt[-1][4] + 1, link_j)
                     nt[-1][4] = link_j
-                # Require at least one word in phrase
                 if links:
                     if f_j >= new_min_bound:
                         for rule in self.form_rules(f_i, new_e_i, f_words[f_i:f_j + 1], e_words[new_e_i:new_e_j + 1], nt, links):
@@ -2036,7 +2038,6 @@ cdef class HieroCachingRuleFactory:
     def form_rules(self, f_i, e_i, f_span, e_span, nt, al):
     
         # This could be more efficient but is unlikely to be the bottleneck
-    
         rules = []
     
         nt_inv = sorted(nt, cmp=lambda x, y: cmp(x[3], y[3]))
@@ -2065,6 +2066,7 @@ cdef class HieroCachingRuleFactory:
     
         # Adjusting alignment links takes some doing
         links = [list(link) for sub in al for link in sub]
+        links_inv = sorted(links, cmp=lambda x, y: cmp(x[1], y[1]))
         links_len = len(links)
         nt_len = len(nt)
         nt_i = 0
@@ -2080,12 +2082,12 @@ cdef class HieroCachingRuleFactory:
         off = e_i
         i = 0
         while i < links_len:
-            while nt_i < nt_len and links[i][1] > nt_inv[nt_i][3]:
+            while nt_i < nt_len and links_inv[i][1] > nt_inv[nt_i][3]:
                 off += (nt_inv[nt_i][4] - nt_inv[nt_i][3])
                 nt_i += 1
-            links[i][1] -= off
+            links_inv[i][1] -= off
             i += 1
-            
+        
         # Rule
         rules.append(self.new_rule(f_sym, e_sym, links))
         if len(f_sym) >= self.max_length or len(nt) >= self.max_nonterminals:
@@ -2162,7 +2164,6 @@ cdef class HieroCachingRuleFactory:
                 logger.info(self.fmt_rule(str(ph), str(ph2), self.phrases_al[ph][ph2]) + ' ||| ' + str(self.phrases_fe[ph][ph2]))
         
 # Spans are _inclusive_ on both ends [i, j]
-# Could be more efficient but probably not a bottleneck
 def span_check(vec, i, j):
     k = i
     while k <= j:
