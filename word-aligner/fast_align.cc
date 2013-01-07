@@ -213,7 +213,7 @@ int main(int argc, char** argv) {
       if (favor_diagonal && optimize_tension && iter > 0) {
         for (int ii = 0; ii < 8; ++ii) {
           double mod_feat = 0;
-          unordered_map<pair<short,short>,unsigned>::iterator it = size_counts.begin();
+          unordered_map<pair<short,short>,unsigned,boost::hash<pair<short, short> > >::iterator it = size_counts.begin();
           for(; it != size_counts.end(); ++it) {
             const pair<short,short>& p = it->first;
             for (short j = 1; j <= p.first; ++j)
