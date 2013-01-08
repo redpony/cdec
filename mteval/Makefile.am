@@ -9,6 +9,17 @@ TESTS = scorer_test
 noinst_LIBRARIES = libmteval.a
 
 libmteval_a_SOURCES = \
+  aer_scorer.h \
+  comb_scorer.h \
+  external_scorer.h \
+  ns.h \
+  ns_cer.h \
+  ns_comb.h \
+  ns_docscorer.h \
+  ns_ext.h \
+  ns_ter.h \
+  scorer.h \
+  ter.h \
   aer_scorer.cc \
   comb_scorer.cc \
   external_scorer.cc \

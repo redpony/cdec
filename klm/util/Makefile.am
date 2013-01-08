@@ -19,6 +19,26 @@
 noinst_LIBRARIES = libklm_util.a
 
 libklm_util_a_SOURCES = \
+  bit_packing.hh \
+  ersatz_progress.hh \
+  exception.hh \
+  file.hh \
+  file_piece.hh \
+  getopt.hh \
+  have.hh \
+  joint_sort.hh \
+  mmap.hh \
+  murmur_hash.hh \
+  pool.hh \
+  probing_hash_table.hh \
+  proxy_iterator.hh \
+  read_compressed.hh \
+  scoped.hh \
+  sized_iterator.hh \
+  sorted_uniform.hh \
+  string_piece.hh \
+  tokenize_piece.hh \
+  usage.hh \
   ersatz_progress.cc \
   bit_packing.cc \
   exception.cc \

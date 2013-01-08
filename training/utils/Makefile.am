@@ -18,6 +18,13 @@ sentclient_LDFLAGS = -pthread
 TESTS = lbfgs_test optimize_test
 
 libtraining_utils_a_SOURCES = \
+  candidate_set.h \
+  entropy.h \
+  lbfgs.h \
+  online_optimizer.h \
+  optimize.h \
+  risk.h \
+  sentserver.h \
   candidate_set.cc \
   entropy.cc \
   optimize.cc \

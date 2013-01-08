@@ -26,7 +26,77 @@ rule_lexer.cc: rule_lexer.ll
 
 noinst_LIBRARIES = libcdec.a
 
+EXTRA_DIST = rule_lexer.ll
+
 libcdec_a_SOURCES = \
+  JSON_parser.h \
+  aligner.h \
+  apply_fsa_models.h \
+  apply_models.h \
+  bottom_up_parser.h \
+  cfg.h \
+  cfg_binarize.h \
+  cfg_format.h \
+  cfg_options.h \
+  csplit.h \
+  decoder.h \
+  dwarf.h \
+  earley_composer.h \
+  exp_semiring.h \
+  factored_lexicon_helper.h \
+  ff.h \
+  ff_basic.h \
+  ff_bleu.h \
+  ff_charset.h \
+  ff_context.h \
+  ff_csplit.h \
+  ff_dwarf.h \
+  ff_external.h \
+  ff_factory.h \
+  ff_klm.h \
+  ff_lm.h \
+  ff_ngrams.h \
+  ff_register.h \
+  ff_rules.h \
+  ff_ruleshape.h \
+  ff_sample_fsa.h \
+  ff_source_syntax.h \
+  ff_spans.h \
+  ff_tagger.h \
+  ff_wordalign.h \
+  ff_wordset.h \
+  ffset.h \
+  forest_writer.h \
+  freqdict.h \
+  grammar.h \
+  hg.h \
+  hg_cfg.h \
+  hg_intersect.h \
+  hg_io.h \
+  hg_remove_eps.h \
+  hg_sampler.h \
+  hg_test.h \
+  hg_union.h \
+  incremental.h \
+  inside_outside.h \
+  json_parse.h \
+  kbest.h \
+  lattice.h \
+  lexalign.h \
+  lextrans.h \
+  nt_span.h \
+  oracle_bleu.h \
+  phrasebased_translator.h \
+  phrasetable_fst.h \
+  program_options.h \
+  rule_lexer.h \
+  sentence_metadata.h \
+  sentences.h \
+  tagger.h \
+  translator.h \
+  tromble_loss.h \
+  trule.h \
+  viterbi.h \
   forest_writer.cc \
   maxtrans_blunsom.cc \
   cdec_ff.cc \

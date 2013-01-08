@@ -12,6 +12,33 @@ build_binary_LDADD = libklm.a ../util/libklm_util.a -lz
 noinst_LIBRARIES = libklm.a
 
 libklm_a_SOURCES = \
+  bhiksha.hh \
+  binary_format.hh \
+  blank.hh \
+  config.hh \
+  enumerate_vocab.hh \
+  facade.hh \
+  left.hh \
+  lm_exception.hh \
+  max_order.hh \
+  model.hh \
+  model_type.hh \
+  ngram_query.hh \
+  partial.hh \
+  quantize.hh \
+  read_arpa.hh \
+  return.hh \
+  search_hashed.hh \
+  search_trie.hh \
+  state.hh \
+  trie.hh \
+  trie_sort.hh \
+  value.hh \
+  value_build.hh \
+  virtual_interface.hh \
+  vocab.hh \
+  weights.hh \
+  word_index.hh \
   bhiksha.cc \
   binary_format.cc \
   config.cc \
