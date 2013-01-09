@@ -32,13 +32,13 @@ libtraining_utils_a_SOURCES = \
   risk.cc
 
 optimize_test_SOURCES = optimize_test.cc
-optimize_test_LDADD = libtraining_utils.a $(top_srcdir)/utils/libutils.a
+optimize_test_LDADD = libtraining_utils.a ../../utils/libutils.a
 
 grammar_convert_SOURCES = grammar_convert.cc
-grammar_convert_LDADD = $(top_srcdir)/decoder/libcdec.a $(top_srcdir)/mteval/libmteval.a $(top_srcdir)/utils/libutils.a
+grammar_convert_LDADD = ../../decoder/libcdec.a ../../mteval/libmteval.a ../../utils/libutils.a
 
 lbfgs_test_SOURCES = lbfgs_test.cc
-lbfgs_test_LDADD = $(top_srcdir)/utils/libutils.a
+lbfgs_test_LDADD = ../../utils/libutils.a
 
 AM_CPPFLAGS = -W -Wall -Wno-sign-compare -I$(top_srcdir)/decoder -I$(top_srcdir)/utils -I$(top_srcdir)/mteval -I$(top_srcdir)/klm
 

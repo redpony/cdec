@@ -55,5 +55,5 @@ libklm_a_SOURCES = \
   virtual_interface.cc \
   vocab.cc
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I..
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare -I$(top_srcdir)/klm
 
