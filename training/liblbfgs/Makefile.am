@@ -17,6 +17,6 @@ liblbfgs_a_SOURCES = \
 ################################################################
 # do NOT NOT NOT add any other -I includes NO NO NO NO NO ######
 AM_LDFLAGS = liblbfgs.a -lz
-AM_CPPFLAGS = -DBOOST_TEST_DYN_LINK -W -Wall -I. -I..
+AM_CPPFLAGS = -DBOOST_TEST_DYN_LINK -W -Wall -I$(top_srcdir)/training -I$(top_srcdir)/training/liblbfgs
 ################################################################
 

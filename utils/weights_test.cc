@@ -7,6 +7,6 @@ using namespace std;
 
 BOOST_AUTO_TEST_CASE(Load) {
   vector<weight_t> v;
-  Weights::InitFromFile("test_data/weights", &v);
+  Weights::InitFromFile(TEST_DATA "/weights", &v);
   Weights::WriteToFile("-", v);
 }

@@ -13,7 +13,10 @@ TESTS = ts small_vector_test logval_test weights_test dict_test m_test
 
 noinst_LIBRARIES = libutils.a
 
+# EXTRA_DIST = test_data
+
 libutils_a_SOURCES = \
+  test_data \
   alias_sampler.h \
   alignment_io.h \
   array2d.h \
@@ -101,6 +104,6 @@ small_vector_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOS
 
 ################################################################
 # do NOT NOT NOT add any other -I includes NO NO NO NO NO ######
-AM_CPPFLAGS = -DBOOST_TEST_DYN_LINK -W -Wall -I.
+AM_CPPFLAGS = -DBOOST_TEST_DYN_LINK -W -Wall -I. -I$(top_srcdir) -DTEST_DATA=\"$(top_srcdir)/utils/test_data\"
 ################################################################
 

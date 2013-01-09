@@ -5,7 +5,7 @@ noinst_PROGRAMS = \
   hg_test \
   parser_test \
   grammar_test
- 
+
 TESTS = trule_test parser_test grammar_test hg_test
 parser_test_SOURCES = parser_test.cc
 parser_test_LDADD = $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a
@@ -19,14 +19,14 @@ trule_test_LDADD = $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEW
 cdec_SOURCES = cdec.cc
 cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a ../klm/search/libksearch.a ../klm/lm/libklm.a ../klm/util/libklm_util.a
 
-AM_CPPFLAGS = -DBOOST_TEST_DYN_LINK -W -Wno-sign-compare $(GTEST_CPPFLAGS) -I.. -I../mteval -I../utils -I../klm
+AM_CPPFLAGS = -DTEST_DATA=\"$(top_srcdir)/decoder/test_data\" -DBOOST_TEST_DYN_LINK -W -Wno-sign-compare -I$(top_srcdir) -I$(top_srcdir)/mteval -I$(top_srcdir)/utils -I$(top_srcdir)/klm
 
 rule_lexer.cc: rule_lexer.ll
 	$(LEX) -s -CF -8 -o$@ $<
 
 noinst_LIBRARIES = libcdec.a
 
-EXTRA_DIST = rule_lexer.ll
+EXTRA_DIST = test_data rule_lexer.ll
 
 libcdec_a_SOURCES = \
   JSON_parser.h \

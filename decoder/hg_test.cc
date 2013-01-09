@@ -339,7 +339,7 @@ BOOST_AUTO_TEST_CASE(TestAddExpectations) {
 
 BOOST_AUTO_TEST_CASE(Small) {
   Hypergraph hg;
-  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : "test_data");
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   CreateSmallHG(&hg, path);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("Model_0"), -2.0);

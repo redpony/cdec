@@ -51,4 +51,4 @@ libklm_util_a_SOURCES = \
   string_piece.cc \
 	usage.cc
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(GTEST_CPPFLAGS) -I..
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare -I$(top_srcdir)/klm

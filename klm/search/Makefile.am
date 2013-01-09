@@ -19,5 +19,5 @@ libksearch_a_SOURCES = \
   vertex.cc \
   vertex_generator.cc
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare -I..
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare -I$(top_srcdir)/klm
 
