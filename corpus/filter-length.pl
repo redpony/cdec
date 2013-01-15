@@ -3,8 +3,8 @@ use strict;
 use utf8;
 
 ##### EDIT THESE SETTINGS ####################################################
-my $MAX_LENGTH = 99;  # discard a sentence if it is longer than this
-my $AUTOMATIC_INCLUDE_IF_SHORTER_THAN = 6; # if both are shorter, include
+my $MAX_LENGTH = 150;  # discard a sentence if it is longer than this
+my $AUTOMATIC_INCLUDE_IF_SHORTER_THAN = 7; # if both are shorter, include
 my $MAX_ZSCORE = 1.8; # how far from the mean can the (log)ratio be?
 ##############################################################################
 
@@ -127,6 +127,8 @@ while(<F>) {
       $zviol++;
       next;
     }
+    print;
+  } else {
     print;
   }
   $to++;
