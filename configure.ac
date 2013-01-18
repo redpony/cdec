@@ -110,6 +110,7 @@ AC_CONFIG_FILES([python/setup.py])
 AC_CONFIG_FILES([word-aligner/Makefile])
 
 # KenLM stuff
+AC_CONFIG_FILES([klm/util/double-conversion/Makefile])
 AC_CONFIG_FILES([klm/util/Makefile])
 AC_CONFIG_FILES([klm/lm/Makefile])
 AC_CONFIG_FILES([klm/search/Makefile])

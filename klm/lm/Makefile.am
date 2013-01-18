@@ -1,7 +1,7 @@
 bin_PROGRAMS = build_binary
 
 build_binary_SOURCES = build_binary.cc
-build_binary_LDADD = libklm.a ../util/libklm_util.a -lz
+build_binary_LDADD = libklm.a ../util/libklm_util.a ../util/double-conversion/libklm_util_double.a -lz
 
 #noinst_PROGRAMS = \
 #  ngram_test
@@ -30,6 +30,7 @@ libklm_a_SOURCES = \
   return.hh \
   search_hashed.hh \
   search_trie.hh \
+  sizes.hh \
   state.hh \
   trie.hh \
   trie_sort.hh \
@@ -49,6 +50,7 @@ libklm_a_SOURCES = \
   read_arpa.cc \
   search_hashed.cc \
   search_trie.cc \
+  sizes.cc \
   trie.cc \
 	trie_sort.cc \
 	value_build.cc \

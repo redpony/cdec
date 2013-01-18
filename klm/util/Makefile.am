@@ -29,6 +29,7 @@ libklm_util_a_SOURCES = \
   joint_sort.hh \
   mmap.hh \
   murmur_hash.hh \
+  pcqueue.hh \
   pool.hh \
   probing_hash_table.hh \
   proxy_iterator.hh \
@@ -37,6 +38,7 @@ libklm_util_a_SOURCES = \
   sized_iterator.hh \
   sorted_uniform.hh \
   string_piece.hh \
+  thread_pool.hh \
   tokenize_piece.hh \
   usage.hh \
   ersatz_progress.cc \
@@ -48,7 +50,8 @@ libklm_util_a_SOURCES = \
   murmur_hash.cc \
   pool.cc \
 	read_compressed.cc \
+  scoped.cc \
   string_piece.cc \
 	usage.cc
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare -I$(top_srcdir)/klm
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare -I$(top_srcdir)/klm -I$(top_srcdir)/klm/util/double-conversion
