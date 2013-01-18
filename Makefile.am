@@ -4,6 +4,7 @@
 SUBDIRS = \
   utils \
   mteval \
+  klm/util/double-conversion \
   klm/util \
   klm/lm \
   klm/search \
