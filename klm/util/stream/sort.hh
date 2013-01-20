@@ -259,7 +259,8 @@ template <class Compare, class Combine> class MergingReader {
 
       while (in_offsets_->RemainingBlocks()) {
         // Use bigger buffers if there's less remaining.
-        uint64_t per_buffer = std::max(buffer_size_, total_memory_ / in_offsets_->RemainingBlocks());
+        uint64_t per_buffer = std::max(static_cast<uint64_t>(buffer_size_),
+                                       static_cast<uint64_t>(total_memory_ / in_offsets_->RemainingBlocks()));
         per_buffer -= per_buffer % entry_size;
         assert(per_buffer);
 

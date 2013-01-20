@@ -1,4 +1,4 @@
-AC_INIT([cdec],[2013-01-15])
+AC_INIT([cdec],[2013-01-19])
 AC_CONFIG_SRCDIR([decoder/cdec.cc])
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(config.h)
@@ -15,7 +15,10 @@ BOOST_REQUIRE([1.44])
 BOOST_PROGRAM_OPTIONS
 BOOST_SYSTEM
 BOOST_SERIALIZATION
+BOOST_CHRONO
+BOOST_TIMER
 BOOST_TEST
+BOOST_THREADS
 AM_PATH_PYTHON
 AC_CHECK_HEADER(dlfcn.h,AC_DEFINE(HAVE_DLFCN_H))
 AC_CHECK_LIB(dl, dlopen)
@@ -111,8 +114,10 @@ AC_CONFIG_FILES([word-aligner/Makefile])
 
 # KenLM stuff
 AC_CONFIG_FILES([klm/util/double-conversion/Makefile])
+AC_CONFIG_FILES([klm/util/stream/Makefile])
 AC_CONFIG_FILES([klm/util/Makefile])
 AC_CONFIG_FILES([klm/lm/Makefile])
+AC_CONFIG_FILES([klm/lm/builder/Makefile])
 AC_CONFIG_FILES([klm/search/Makefile])
 
 # training stuff

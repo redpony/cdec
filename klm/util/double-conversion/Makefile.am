@@ -20,4 +20,4 @@ libklm_util_double_a_SOURCES = \
   fixed-dtoa.cc \
   strtod.cc
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare -I$(top_srcdir)/klm -I$(top_srcdir)/klm/util/double-conversion
+AM_CPPFLAGS = -W -Wall -I$(top_srcdir)/klm -I$(top_srcdir)/klm/util/double-conversion
