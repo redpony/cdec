@@ -18,7 +18,7 @@ SUBDIRS = \
 
 #gi/pyp-topics/src gi/clda/src gi/posterior-regularisation/prjava
 
-EXTRA_DIST = python/pkg python/src python/tests python/examples
+EXTRA_DIST = corpus tests python/pkg python/src python/tests python/examples compound-split environment
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS =  -D_GLIBCXX_PARALLEL
