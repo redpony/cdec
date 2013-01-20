@@ -7,8 +7,6 @@ before_script:
  - sudo apt-get install libboost-regex1.48-dev
  - sudo apt-get install libboost-test1.48-dev
  - sudo apt-get install libboost-system1.48-dev
- - sudo apt-get install libboost-timer1.48-dev
- - sudo apt-get install libboost-chrono1.48-dev
  - sudo apt-get install libboost-thread1.48-dev
  - sudo apt-get install flex
  - autoreconf -ifv
