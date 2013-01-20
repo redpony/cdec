@@ -22,7 +22,7 @@ builder_SOURCES = \
   print.hh \
   sort.hh
 
-builder_LDADD = ../libklm.a ../../util/double-conversion/libklm_util_double.a ../../util/stream/libklm_util_stream.a ../../util/libklm_util.a $(BOOST_TIMER_LIBS) $(BOOST_CHRONO_LIBS) $(BOOST_THREAD_LIBS)
+builder_LDADD = ../libklm.a ../../util/double-conversion/libklm_util_double.a ../../util/stream/libklm_util_stream.a ../../util/libklm_util.a $(BOOST_THREAD_LIBS)
 
 AM_CPPFLAGS = -W -Wall -I$(top_srcdir)/klm
 
