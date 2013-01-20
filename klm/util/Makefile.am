@@ -54,4 +54,4 @@ libklm_util_a_SOURCES = \
   string_piece.cc \
 	usage.cc
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare -I$(top_srcdir)/klm -I$(top_srcdir)/klm/util/double-conversion
+AM_CPPFLAGS = -W -Wall -I$(top_srcdir)/klm -I$(top_srcdir)/klm/util/double-conversion

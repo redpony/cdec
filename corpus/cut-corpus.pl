@@ -22,7 +22,7 @@ for my $ff (@ind) {
 
 while(<>) {
   chomp;
-  my @fields = split / \|\|\| /;
+  my @fields = split /\s*\|\|\|\s*/;
   my @sf;
   for my $i (@o) {
     my $y = $fields[$i];
