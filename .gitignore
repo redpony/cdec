@@ -1,7 +1,9 @@
 example_extff/ff_example.lo
 example_extff/libff_example.la
 mteval/meteor_jar.cc
+training/utils/grammar_convert
 *.a
+*.trs
 *.aux
 *.bbl
 *.blg
