@@ -8,4 +8,6 @@ mr_pro_map_LDADD = ../../training/utils/libtraining_utils.a ../../decoder/libcde
 mr_pro_reduce_SOURCES = mr_pro_reduce.cc
 mr_pro_reduce_LDADD = ../../training/liblbfgs/liblbfgs.a ../../utils/libutils.a
 
+EXTRA_DIST = mr_pro_generate_mapper_input.pl pro.pl
+
 AM_CPPFLAGS = -W -Wall -Wno-sign-compare -I$(top_srcdir)/utils -I$(top_srcdir)/decoder -I$(top_srcdir)/mteval -I$(top_srcdir)/training/utils -I$(top_srcdir)/training

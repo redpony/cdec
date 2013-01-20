@@ -9,6 +9,8 @@ noinst_PROGRAMS = \
   lbfgs_test \
   optimize_test
 
+EXTRA_DIST = decode-and-evaluate.pl libcall.pl parallelize.pl
+
 sentserver_SOURCES = sentserver.c
 sentserver_LDFLAGS = -pthread
 

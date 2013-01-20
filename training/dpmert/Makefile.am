@@ -22,6 +22,6 @@ mr_dpmert_reduce_LDADD = ../../decoder/libcdec.a ../../mteval/libmteval.a ../../
 lo_test_SOURCES = lo_test.cc ces.cc mert_geometry.cc error_surface.cc line_optimizer.cc ces.h error_surface.h line_optimizer.h mert_geometry.h
 lo_test_LDADD = $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) ../../decoder/libcdec.a ../../mteval/libmteval.a ../../utils/libutils.a
 
-EXTRA_DIST = test_data
+EXTRA_DIST = test_data dpmert.pl
 
 AM_CPPFLAGS = -DTEST_DATA=\"$(top_srcdir)/training/dpmert/test_data\" -DBOOST_TEST_DYN_LINK -W -Wall -Wno-sign-compare -I$(top_srcdir)/utils -I$(top_srcdir)/decoder -I$(top_srcdir)/mteval
