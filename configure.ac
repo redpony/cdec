@@ -15,8 +15,10 @@ BOOST_REQUIRE([1.44])
 BOOST_PROGRAM_OPTIONS
 BOOST_SYSTEM
 BOOST_SERIALIZATION
-BOOST_CHRONO
-BOOST_TIMER
+if test $boost_major_version -ge 148; then
+  BOOST_CHRONO
+  BOOST_TIMER
+fi 
 BOOST_TEST
 BOOST_THREADS
 AM_PATH_PYTHON
@@ -117,8 +119,8 @@ AC_CONFIG_FILES([klm/util/double-conversion/Makefile])
 AC_CONFIG_FILES([klm/util/stream/Makefile])
 AC_CONFIG_FILES([klm/util/Makefile])
 AC_CONFIG_FILES([klm/lm/Makefile])
-AC_CONFIG_FILES([klm/lm/builder/Makefile])
 AC_CONFIG_FILES([klm/search/Makefile])
+AC_CONFIG_FILES([klm/lm/builder/Makefile])
 
 # training stuff
 AC_CONFIG_FILES([training/Makefile])
