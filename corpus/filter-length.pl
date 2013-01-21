@@ -44,11 +44,11 @@ while(<F>) {
   $lines++;
   if ($lines % 100000 == 0) { print STDERR " [$lines]\n"; }
   elsif ($lines % 2500 == 0) { print STDERR "."; }
-  my ($sf, $se, @d) = split / \|\|\| /;
+  my ($sf, $se, @d) = split /\s*\|\|\|\s*/;
   if (scalar @d != 0 or !defined $se) {
     $bad_format++;
     if ($bad_format > 100 && ($bad_format / $lines) > 0.02) {
-      die "Corpus appears to be incorretly formatted, example: $_";
+      die "$bad_format / $lines : Corpus appears to be incorretly formatted, example: $_";
     }
     next;
   }
