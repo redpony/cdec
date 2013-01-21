@@ -13,7 +13,57 @@ TESTS = ts small_vector_test logval_test weights_test dict_test m_test
 
 noinst_LIBRARIES = libutils.a
 
+# EXTRA_DIST = test_data
+
 libutils_a_SOURCES = \
+  test_data \
+  alias_sampler.h \
+  alignment_io.h \
+  array2d.h \
+  b64tools.h \
+  batched_append.h \
+  city.h \
+  citycrc.h \
+  corpus_tools.h \
+  dict.h \
+  fast_sparse_vector.h \
+  fdict.h \
+  feature_vector.h \
+  filelib.h \
+  gzstream.h \
+  hash.h \
+  have_64_bits.h \
+  indices_after.h \
+  kernel_string_subseq.h \
+  logval.h \
+  m.h \
+  murmur_hash.h \
+  named_enum.h \
+  null_deleter.h \
+  null_traits.h \
+  perfect_hash.h \
+  prob.h \
+  sampler.h \
+  semiring.h \
+  show.h \
+  small_vector.h \
+  sparse_vector.h \
+  static_utoa.h \
+  stringlib.h \
+  swap_pod.h \
+  tdict.h \
+  timing_stats.h \
+  utoa.h \
+  value_array.h \
+  verbose.h \
+  warning_compiler.h \
+  warning_pop.h \
+  warning_push.h \
+  weights.h \
+  wordid.h \
+  writer.h \
+  fast_lexical_cast.hpp \
+  intrusive_refcount.hpp \
   alignment_io.cc \
   b64tools.cc \
   corpus_tools.cc \
@@ -54,5 +104,6 @@ small_vector_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOS
 
 ################################################################
 # do NOT NOT NOT add any other -I includes NO NO NO NO NO ######
-AM_CPPFLAGS = -DBOOST_TEST_DYN_LINK -W -Wall -I.
+AM_CPPFLAGS = -DBOOST_TEST_DYN_LINK -W -Wall -I. -I$(top_srcdir) -DTEST_DATA=\"$(top_srcdir)/utils/test_data\"
 ################################################################
+

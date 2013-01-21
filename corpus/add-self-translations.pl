@@ -6,7 +6,7 @@ use strict;
 my %df;
 my %def;
 while(<>) {
-  print;
+#  print;
   chomp;
   my ($sf, $se) = split / \|\|\| /;
   die "Format error: $_\n" unless defined $sf && defined $se;
