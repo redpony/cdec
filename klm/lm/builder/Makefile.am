@@ -1,7 +1,7 @@
 bin_PROGRAMS = builder
 
 builder_SOURCES = \
-  main.cc \
+  lmplz_main.cc \
   adjust_counts.cc \
   adjust_counts.hh \
   corpus_count.cc \
