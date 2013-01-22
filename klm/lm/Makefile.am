@@ -1,9 +1,9 @@
 bin_PROGRAMS = build_binary ngram_query
 
-build_binary_SOURCES = build_binary.cc
+build_binary_SOURCES = build_binary_main.cc
 build_binary_LDADD = libklm.a ../util/libklm_util.a ../util/double-conversion/libklm_util_double.a -lz
 
-ngram_query_SOURCES = ngram_query.cc
+ngram_query_SOURCES = query_main.cc
 ngram_query_LDADD = libklm.a ../util/libklm_util.a ../util/double-conversion/libklm_util_double.a -lz
 
 #noinst_PROGRAMS = \
