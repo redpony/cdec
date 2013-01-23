@@ -5,8 +5,8 @@ SUBDIRS = \
   utils \
   mteval \
   klm/util/double-conversion \
-  klm/util/stream \
   klm/util \
+  klm/util/stream \
   klm/lm \
   klm/lm/builder \
   klm/search \
