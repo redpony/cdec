@@ -3,15 +3,16 @@
 
 if ARGV.size != 7
   STDERR.write "Usage: "
-  STDERR.write "ruby parallelize.rb <dtrain.ini> <epochs> <rand=true|false> <#shards|predef> <at once> <input> <refs>\n"
+  STDERR.write "ruby parallelize.rb <dtrain.ini> <epochs> <rand=true|false> <#shards|predef> <at once> <input> <refs> <qsub>\n"
   exit
 end
 
-cdec_dir   = '~/mt/cdec-dtrain/'
-dtrain_bin = "~/bin/dtrain_local"
+cdec_dir   = '~/MAREC/cdec-dtrain/'
+dtrain_bin = "~/MAREC/cdec-dtrain/training/dtrain/dtrain"
 ruby       = '/usr/bin/ruby'
 lplp_rb    = "#{cdec_dir}/training/dtrain/hstreaming/lplp.rb"
 lplp_args  = 'l2 select_k 100000'
+cat        = '/bin/cat'
 
 ini        = ARGV[0]
 epochs     = ARGV[1].to_i
@@ -27,6 +28,8 @@ end
 shards_at_once = ARGV[4].to_i
 input = ARGV[5]
 refs  = ARGV[6]
+use_qsub   = false
+use_qsub = true if ARGV[7]
 
 `mkdir work`
 
@@ -92,12 +95,16 @@ end
   remaining_shards = num_shards
   while remaining_shards > 0
     shards_at_once.times {
+      qsub_str_start = qsub_str_end = ''
+      if use_qsub
+        qsub_str_start = "qsub -cwd -sync y -b y -j y -o work/out.#{shard}.#{epoch} -N dtrain.#{shard}.#{epoch} \""
+        qsub_str_end = "\""
+      end
       pids << Kernel.fork {
-        `#{dtrain_bin} -c #{ini}\
+        `#{qsub_str_start}#{dtrain_bin} -c #{ini}\
           --input #{input_files[shard]}\
           --refs #{refs_files[shard]} #{input_weights}\
-          --output work/weights.#{shard}.#{epoch}\
-          &> work/out.#{shard}.#{epoch}`
+          --output work/weights.#{shard}.#{epoch}#{qsub_str_end}`
       }
       weights_files << "work/weights.#{shard}.#{epoch}"
       shard += 1
@@ -106,10 +113,8 @@ end
     pids.each { |pid| Process.wait(pid) }
     pids.clear
   end
-  cat = File.new('work/weights_cat', 'w+')
-  weights_files.each { |f| cat.write File.new(f, 'r').read }
-  cat.close
-  `#{ruby} #{lplp_rb} #{lplp_args} #{num_shards} < work/weights_cat &> work/weights.#{epoch}`
+  `#{cat} work/weights.*.#{epoch} > work/weights_cat`
+  `#{ruby} #{lplp_rb} #{lplp_args} #{num_shards} < work/weights_cat > work/weights.#{epoch}`
   if rand and epoch+1!=epochs
     input_files, refs_files = make_shards input, refs, num_shards, epoch+1, rand
   end
