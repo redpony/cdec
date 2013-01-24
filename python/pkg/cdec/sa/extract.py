@@ -12,10 +12,10 @@ extractor, prefix = None, None
 online = False
 
 def make_extractor(config, grammars, features):
-    global extractor, prefix
+    global extractor, prefix, online
     signal.signal(signal.SIGINT, signal.SIG_IGN) # Let parent process catch Ctrl+C
     load_features(features)
-    extractor = cdec.sa.GrammarExtractor(config)
+    extractor = cdec.sa.GrammarExtractor(config, online)
     prefix = grammars
 
 def load_features(features):
@@ -53,7 +53,7 @@ def extract(inp):
     # Add training instance _after_ extracting grammars
     if online:
         extractor.add_instance(sentence, reference, alignment)
-        extractor.dump_online_stats()
+        #extractor.dump_online_stats()
     grammar_file = os.path.abspath(grammar_file)
     return '<seg grammar="{0}" id="{1}"> {2} </seg>{3}'.format(grammar_file, i, sentence, suffix)
 
