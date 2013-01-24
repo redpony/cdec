@@ -7,10 +7,10 @@ if ARGV.size != 7
   exit
 end
 
-cdec_dir   = '~/MAREC/cdec-dtrain/'
-dtrain_bin = "~/MAREC/cdec-dtrain/training/dtrain/dtrain"
+dtrain_dir = File.expand_path File.dirname(__FILE__)
+dtrain_bin = "#{dtrain_dir}/dtrain"
 ruby       = '/usr/bin/ruby'
-lplp_rb    = "#{cdec_dir}/training/dtrain/hstreaming/lplp.rb"
+lplp_rb    = "#{dtrain_dir}/hstreaming/lplp.rb"
 lplp_args  = 'l2 select_k 100000'
 cat        = '/bin/cat'
 
@@ -96,15 +96,19 @@ end
   while remaining_shards > 0
     shards_at_once.times {
       qsub_str_start = qsub_str_end = ''
+      local_end = ''
       if use_qsub
         qsub_str_start = "qsub -cwd -sync y -b y -j y -o work/out.#{shard}.#{epoch} -N dtrain.#{shard}.#{epoch} \""
         qsub_str_end = "\""
+        local_end = '' 
+      else
+        local_end = "&>work/out.#{shard}.#{epoch}"
       end
       pids << Kernel.fork {
         `#{qsub_str_start}#{dtrain_bin} -c #{ini}\
           --input #{input_files[shard]}\
           --refs #{refs_files[shard]} #{input_weights}\
-          --output work/weights.#{shard}.#{epoch}#{qsub_str_end}`
+          --output work/weights.#{shard}.#{epoch}#{qsub_str_end} #{local_end}`
       }
       weights_files << "work/weights.#{shard}.#{epoch}"
       shard += 1
