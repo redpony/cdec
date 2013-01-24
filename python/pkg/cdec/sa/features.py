@@ -4,20 +4,39 @@ import math
 MAXSCORE = 99
 
 def EgivenF(ctx): # p(e|f) = c(e, f)/c(f)
-    return -math.log10(ctx.paircount/ctx.fcount)
+    if not ctx.online:
+        prob = ctx.paircount/ctx.fcount
+    else:
+        prob = (ctx.paircount + ctx.online.paircount) / (ctx.fcount + ctx.online.fcount)
+    return -math.log10(prob)
 
 def CountEF(ctx): # c(e, f)
-    return math.log10(1 + ctx.paircount)
+    if not ctx.online:
+        count = 1 + ctx.paircount
+    else:
+        count = 1 + ctx.paircount + ctx.online.paircount
+    return math.log10(count)
 
 def SampleCountF(ctx): # sample c(f)
-    return math.log10(1 + ctx.fsample_count)
+    if not ctx.online:
+        count = 1 + ctx.fsample_count
+    else:
+        count = 1 + ctx.fsample_count + ctx.online.fcount
+    return math.log10(count)
 
 def EgivenFCoherent(ctx): # c(e, f) / sample c(f)
-    prob = ctx.paircount/ctx.fsample_count
+    if not ctx.online:
+        prob = ctx.paircount/ctx.fsample_count
+    else:
+        prob = (ctx.paircount + ctx.online.paircount) / (ctx.fsample_count + ctx.online.fcount)
     return -math.log10(prob) if prob > 0 else MAXSCORE
 
 def CoherenceProb(ctx): # c(f) / sample c(f)
-    return -math.log10(ctx.fcount/ctx.fsample_count)
+    if not ctx.online:
+        prob = ctx.fcount/ctx.fsample_count
+    else:
+        prob = (ctx.fcount + ctx.online.fcount) / (ctx.fsample_count + ctx.online.fcount)
+    return -math.log10(prob)
 
 def MaxLexEgivenF(ttable):
     def MaxLexEgivenF(ctx):
@@ -42,16 +61,42 @@ def MaxLexFgivenE(ttable):
     return MaxLexFgivenE
 
 def IsSingletonF(ctx):
-    return (ctx.fcount == 1)
+    if not ctx.online:
+        count = ctx.fcount
+    else:
+        count = ctx.fcount + ctx.online.fcount  
+    return (count == 1)
 
 def IsSingletonFE(ctx):
-    return (ctx.paircount == 1)
+    if not ctx.online:
+        count = ctx.paircount
+    else:
+        count = ctx.paircount + ctx.online.paircount
+    return (count == 1)
 
 def IsNotSingletonF(ctx):
-    return (ctx.fcount > 1)
+    if not ctx.online:
+        count = ctx.fcount
+    else:
+        count = ctx.fcount + ctx.online.fcount
+    return (count > 1)
 
 def IsNotSingletonFE(ctx):
+    if not ctx.online:
+        count = ctx.paircount
+    else:
+        count = ctx.paircount + ctx.online.paircount
     return (ctx.paircount > 1)
 
 def IsFEGreaterThanZero(ctx):
+    if not ctx.online:
+        count = ctx.paircount
+    else:
+        count = ctx.paircount + ctx.online.paircount
     return (ctx.paircount > 0.01)
+
+def IsSupportedOnline(ctx):
+    if ctx.online:
+        return (ctx.online.fcount > 0.01)
+    else:
+        return False
