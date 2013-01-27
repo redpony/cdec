@@ -60,9 +60,9 @@ class GrammarExtractor:
 
         # TODO: clean this up
         extended_features = []
-        #extended_features.append(IsSupportedOnline)
-        if online:
-            extended_features.append(IsSupportedOnline)
+        extended_features.append(IsSupportedOnline)
+        #if online:
+        #    extended_features.append(IsSupportedOnline)
             
         # TODO: use @cdec.sa.features decorator for standard features too
         # + add a mask to disable features
@@ -102,3 +102,5 @@ class GrammarExtractor:
     # Debugging
     def dump_online_stats(self):
         self.factory.dump_online_stats()
+    def dump_online_rules(self):
+        self.factory.dump_online_rules()

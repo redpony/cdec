@@ -21,21 +21,21 @@ def SampleCountF(ctx): # sample c(f)
     if not ctx.online:
         count = 1 + ctx.fsample_count
     else:
-        count = 1 + ctx.fsample_count + ctx.online.fcount
+        count = 1 + ctx.fsample_count + ctx.online.fsample_count
     return math.log10(count)
 
 def EgivenFCoherent(ctx): # c(e, f) / sample c(f)
     if not ctx.online:
         prob = ctx.paircount/ctx.fsample_count
     else:
-        prob = (ctx.paircount + ctx.online.paircount) / (ctx.fsample_count + ctx.online.fcount)
+        prob = (ctx.paircount + ctx.online.paircount) / (ctx.fsample_count + ctx.online.fsample_count)
     return -math.log10(prob) if prob > 0 else MAXSCORE
 
 def CoherenceProb(ctx): # c(f) / sample c(f)
     if not ctx.online:
         prob = ctx.fcount/ctx.fsample_count
     else:
-        prob = (ctx.fcount + ctx.online.fcount) / (ctx.fsample_count + ctx.online.fcount)
+        prob = (ctx.fcount + ctx.online.fcount) / (ctx.fsample_count + ctx.online.fsample_count)
     return -math.log10(prob)
 
 def MaxLexEgivenF(ttable):
@@ -95,7 +95,7 @@ def IsFEGreaterThanZero(ctx):
         count = ctx.paircount + ctx.online.paircount
     return (ctx.paircount > 0.01)
 
-def IsSupportedOnline(ctx):
+def IsSupportedOnline(ctx): # Occurs in online data?
     if ctx.online:
         return (ctx.online.fcount > 0.01)
     else:
