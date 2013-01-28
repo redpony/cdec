@@ -104,6 +104,9 @@ cdef int sym_setindex(int sym, int id):
 cdef int sym_fromstring(char* string, bint terminal):
     return ALPHABET.fromstring(string, terminal)
 
+def isvar(sym):
+    return sym_isvar(sym)
+
 def make_lattice(words):
     word_ids = (sym_fromstring(word, True) for word in words)
     return tuple(((word, None, 1), ) for word in word_ids)

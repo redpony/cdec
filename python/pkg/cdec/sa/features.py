@@ -1,6 +1,8 @@
 from __future__ import division
 import math
 
+from cdec.sa import isvar
+
 MAXSCORE = 99
 
 def EgivenF(ctx): # p(e|f) = c(e, f)/c(f)
@@ -42,22 +44,48 @@ def MaxLexEgivenF(ttable):
     def MaxLexEgivenF(ctx):
         fwords = ctx.fphrase.words
         fwords.append('NULL')
-        def score():
+        if not ctx.online:
+            maxOffScore = 0.0
             for e in ctx.ephrase.words:
-              maxScore = max(ttable.get_score(f, e, 0) for f in fwords)
-              yield -math.log10(maxScore) if maxScore > 0 else MAXSCORE
-        return sum(score())
+                maxScore = max(ttable.get_score(f, e, 0) for f in fwords)
+                maxOffScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
+            return maxOffScore
+        else:
+            # For now, straight average
+            maxOffScore = 0.0
+            maxOnScore = 0.0
+            for e in ctx.ephrase.words:
+                maxScore = max(ttable.get_score(f, e, 0) for f in fwords)
+                maxOffScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
+            for e in ctx.ephrase:
+                if not isvar(e):
+                    maxScore = max((ctx.online.bilex_fe[f][e] / ctx.online.bilex_f[f]) for f in ctx.fphrase if not isvar(f))
+                    maxOnScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
+            return (maxOffScore + maxOnScore) / 2
     return MaxLexEgivenF
 
 def MaxLexFgivenE(ttable):
     def MaxLexFgivenE(ctx):
         ewords = ctx.ephrase.words
         ewords.append('NULL')
-        def score():
+        if not ctx.online:
+            maxOffScore = 0.0
             for f in ctx.fphrase.words:
-              maxScore = max(ttable.get_score(f, e, 1) for e in ewords)
-              yield -math.log10(maxScore) if maxScore > 0 else MAXSCORE
-        return sum(score())
+                maxScore = max(ttable.get_score(f, e, 1) for e in ewords)
+                maxOffScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
+            return maxOffScore
+        else:
+            # For now, straight average
+            maxOffScore = 0.0
+            maxOnScore = 0.0
+            for f in ctx.fphrase.words:
+                maxScore = max(ttable.get_score(f, e, 1) for e in ewords)
+                maxOffScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
+            for f in ctx.fphrase:
+                if not isvar(f):
+                    maxScore = max((ctx.online.bilex_fe[f][e] / ctx.online.bilex_e[e]) for e in ctx.ephrase if not isvar(e))
+                    maxOnScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
+            return (maxOffScore + maxOnScore) / 2
     return MaxLexFgivenE
 
 def IsSingletonF(ctx):

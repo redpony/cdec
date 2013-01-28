@@ -31,7 +31,9 @@ OnlineFeatureContext = namedtuple('OnlineFeatureContext',
     ['fcount',
      'fsample_count',
      'paircount',
-     'bilex'
+     'bilex_f',
+     'bilex_e',
+     'bilex_fe'
     ])
 
 cdef int PRECOMPUTE = 0
@@ -2150,7 +2152,7 @@ cdef class HieroCachingRuleFactory:
             fsample_count = self.samples_f.get(f, 0)
             d = self.phrases_fe.get(f, None)
             paircount = d.get(e, 0) if d else 0
-            return OnlineFeatureContext(fcount, fsample_count, paircount, self.bilex_fe)
+            return OnlineFeatureContext(fcount, fsample_count, paircount, self.bilex_f, self.bilex_e, self.bilex_fe)
         return None
     
     # Find all phrases that we might try to extract

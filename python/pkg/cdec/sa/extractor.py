@@ -61,13 +61,14 @@ class GrammarExtractor:
         # TODO: clean this up
         extended_features = []
         extended_features.append(IsSupportedOnline)
-        #if online:
-        #    extended_features.append(IsSupportedOnline)
+        if online:
+            extended_features.append(IsSupportedOnline)
             
         # TODO: use @cdec.sa.features decorator for standard features too
         # + add a mask to disable features
         for f in cdec.sa._SA_FEATURES:
             extended_features.append(f)
+            
         scorer = cdec.sa.Scorer(EgivenFCoherent, SampleCountF, CountEF, 
             MaxLexFgivenE(tt), MaxLexEgivenF(tt), IsSingletonF, IsSingletonFE,
             *extended_features)
