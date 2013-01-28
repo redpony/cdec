@@ -60,7 +60,6 @@ class GrammarExtractor:
 
         # TODO: clean this up
         extended_features = []
-        extended_features.append(IsSupportedOnline)
         if online:
             extended_features.append(IsSupportedOnline)
             

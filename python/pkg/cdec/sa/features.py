@@ -44,7 +44,8 @@ def MaxLexEgivenF(ttable):
     def MaxLexEgivenF(ctx):
         fwords = ctx.fphrase.words
         fwords.append('NULL')
-        if not ctx.online:
+        # Always use this for now
+        if not ctx.online or ctx.online:
             maxOffScore = 0.0
             for e in ctx.ephrase.words:
                 maxScore = max(ttable.get_score(f, e, 0) for f in fwords)
@@ -59,7 +60,12 @@ def MaxLexEgivenF(ttable):
                 maxOffScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
             for e in ctx.ephrase:
                 if not isvar(e):
-                    maxScore = max((ctx.online.bilex_fe[f][e] / ctx.online.bilex_f[f]) for f in ctx.fphrase if not isvar(f))
+                    maxScore = 0.0
+                    for f in ctx.fphrase:
+                        if not isvar(f):
+                            b_f = ctx.online.bilex_f.get(f, 0)
+                            if b_f:
+                                maxScore = max(maxScore, ctx.online.bilex_fe.get(f, {}).get(e))
                     maxOnScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
             return (maxOffScore + maxOnScore) / 2
     return MaxLexEgivenF
@@ -68,7 +74,8 @@ def MaxLexFgivenE(ttable):
     def MaxLexFgivenE(ctx):
         ewords = ctx.ephrase.words
         ewords.append('NULL')
-        if not ctx.online:
+        # Always use this for now
+        if not ctx.online or ctx.online:
             maxOffScore = 0.0
             for f in ctx.fphrase.words:
                 maxScore = max(ttable.get_score(f, e, 1) for e in ewords)
@@ -83,7 +90,12 @@ def MaxLexFgivenE(ttable):
                 maxOffScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
             for f in ctx.fphrase:
                 if not isvar(f):
-                    maxScore = max((ctx.online.bilex_fe[f][e] / ctx.online.bilex_e[e]) for e in ctx.ephrase if not isvar(e))
+                    maxScore = 0.0
+                    for e in ctx.ephrase:
+                        if not isvar(e):
+                            b_e = ctx.online.bilex_e.get(e, 0)
+                            if b_e:
+                                maxScore = max(maxScore, ctx.online.bilex_fe.get(f, {}).get(e, 0) / b_e )
                     maxOnScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
             return (maxOffScore + maxOnScore) / 2
     return MaxLexFgivenE
