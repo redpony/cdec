@@ -137,6 +137,6 @@ def IsFEGreaterThanZero(ctx):
 
 def IsSupportedOnline(ctx): # Occurs in online data?
     if ctx.online:
-        return (ctx.online.fcount > 0.01)
+        return (ctx.online.paircount > 0.01)
     else:
         return False
