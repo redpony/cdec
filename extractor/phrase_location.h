@@ -9,7 +9,7 @@ using namespace std;
 struct PhraseLocation {
   PhraseLocation(int sa_low = -1, int sa_high = -1);
 
-  PhraseLocation(shared_ptr<vector<int> > matchings, int num_subpatterns);
+  PhraseLocation(const vector<int>& matchings, int num_subpatterns);
 
   bool IsEmpty();
 

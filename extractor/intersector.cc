@@ -10,35 +10,51 @@
 #include "vocabulary.h"
 
 Intersector::Intersector(shared_ptr<Vocabulary> vocabulary,
-                         const Precomputation& precomputation,
+                         shared_ptr<Precomputation> precomputation,
                          shared_ptr<SuffixArray> suffix_array,
                          shared_ptr<MatchingComparator> comparator,
                          bool use_baeza_yates) :
     vocabulary(vocabulary),
     suffix_array(suffix_array),
     use_baeza_yates(use_baeza_yates) {
-  linear_merger = make_shared<LinearMerger>(
-      vocabulary, suffix_array->GetData(), comparator);
+  shared_ptr<DataArray> data_array = suffix_array->GetData();
+  linear_merger = make_shared<LinearMerger>(vocabulary, data_array, comparator);
   binary_search_merger = make_shared<BinarySearchMerger>(
-      vocabulary, linear_merger, suffix_array->GetData(), comparator);
+      vocabulary, linear_merger, data_array, comparator);
+  ConvertIndexes(precomputation, data_array);
+}
 
-  shared_ptr<DataArray> source_data_array = suffix_array->GetData();
+Intersector::Intersector(shared_ptr<Vocabulary> vocabulary,
+                         shared_ptr<Precomputation> precomputation,
+                         shared_ptr<SuffixArray> suffix_array,
+                         shared_ptr<LinearMerger> linear_merger,
+                         shared_ptr<BinarySearchMerger> binary_search_merger,
+                         bool use_baeza_yates) :
+    vocabulary(vocabulary),
+    suffix_array(suffix_array),
+    linear_merger(linear_merger),
+    binary_search_merger(binary_search_merger),
+    use_baeza_yates(use_baeza_yates) {
+  ConvertIndexes(precomputation, suffix_array->GetData());
+}
 
-  const Index& precomputed_index = precomputation.GetInvertedIndex();
+void Intersector::ConvertIndexes(shared_ptr<Precomputation> precomputation,
+                                 shared_ptr<DataArray> data_array) {
+  const Index& precomputed_index = precomputation->GetInvertedIndex();
   for (pair<vector<int>, vector<int> > entry: precomputed_index) {
-    vector<int> phrase = Convert(entry.first, source_data_array);
+    vector<int> phrase = ConvertPhrase(entry.first, data_array);
     inverted_index[phrase] = entry.second;
   }
 
-  const Index& precomputed_collocations = precomputation.GetCollocations();
+  const Index& precomputed_collocations = precomputation->GetCollocations();
   for (pair<vector<int>, vector<int> > entry: precomputed_collocations) {
-    vector<int> phrase = Convert(entry.first, source_data_array);
+    vector<int> phrase = ConvertPhrase(entry.first, data_array);
     collocations[phrase] = entry.second;
   }
 }
 
-vector<int> Intersector::Convert(
-    const vector<int>& old_phrase, shared_ptr<DataArray> source_data_array) {
+vector<int> Intersector::ConvertPhrase(const vector<int>& old_phrase,
+                                       shared_ptr<DataArray> data_array) {
   vector<int> new_phrase;
   new_phrase.reserve(old_phrase.size());
 
@@ -49,7 +65,7 @@ vector<int> Intersector::Convert(
       new_phrase.push_back(vocabulary->GetNonterminalIndex(arity));
     } else {
       new_phrase.push_back(
-          vocabulary->GetTerminalIndex(source_data_array->GetWord(word_id)));
+          vocabulary->GetTerminalIndex(data_array->GetWord(word_id)));
     }
   }
 
@@ -70,8 +86,7 @@ PhraseLocation Intersector::Intersect(
       && vocabulary->IsTerminal(symbols.back()));
 
   if (collocations.count(symbols)) {
-    return PhraseLocation(make_shared<vector<int> >(collocations[symbols]),
-                          phrase.Arity());
+    return PhraseLocation(collocations[symbols], phrase.Arity() + 1);
   }
 
   vector<int> locations;
@@ -91,19 +106,18 @@ PhraseLocation Intersector::Intersect(
         prefix_matchings->end(), suffix_matchings->begin(),
         suffix_matchings->end(), prefix_subpatterns, suffix_subpatterns);
   }
-  return PhraseLocation(shared_ptr<vector<int> >(new vector<int>(locations)),
-                        phrase.Arity() + 1);
+  return PhraseLocation(locations, phrase.Arity() + 1);
 }
 
 void Intersector::ExtendPhraseLocation(
     const Phrase& phrase, PhraseLocation& phrase_location) {
   int low = phrase_location.sa_low, high = phrase_location.sa_high;
-  if (phrase.Arity() || phrase_location.num_subpatterns ||
-      phrase_location.IsEmpty()) {
+  if (phrase_location.matchings != NULL) {
     return;
   }
 
   phrase_location.num_subpatterns = 1;
+  phrase_location.sa_low = phrase_location.sa_high = 0;
 
   vector<int> symbols = phrase.Get();
   if (inverted_index.count(symbols)) {

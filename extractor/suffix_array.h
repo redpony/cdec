@@ -21,16 +21,19 @@ class SuffixArray {
 
   virtual int GetSize() const;
 
-  shared_ptr<DataArray> GetData() const;
+  virtual shared_ptr<DataArray> GetData() const;
 
-  vector<int> BuildLCPArray() const;
+  virtual vector<int> BuildLCPArray() const;
 
-  int GetSuffix(int rank) const;
+  virtual int GetSuffix(int rank) const;
 
   virtual PhraseLocation Lookup(int low, int high, const string& word,
                                 int offset) const;
 
   void WriteBinary(const fs::path& filepath) const;
+
+ protected:
+  SuffixArray();
 
  private:
   void BuildSuffixArray();

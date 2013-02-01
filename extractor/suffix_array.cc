@@ -15,6 +15,8 @@ SuffixArray::SuffixArray(shared_ptr<DataArray> data_array) :
   BuildSuffixArray();
 }
 
+SuffixArray::SuffixArray() {}
+
 SuffixArray::~SuffixArray() {}
 
 void SuffixArray::BuildSuffixArray() {

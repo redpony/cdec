@@ -5,29 +5,34 @@
 #include <vector>
 
 #include "rule_factory.h"
-#include "vocabulary.h"
 
 using namespace std;
 
 class Alignment;
 class DataArray;
+class Grammar;
 class Precomputation;
+class Rule;
 class SuffixArray;
+class Vocabulary;
 
 class GrammarExtractor {
  public:
   GrammarExtractor(
       shared_ptr<SuffixArray> source_suffix_array,
       shared_ptr<DataArray> target_data_array,
-      const Alignment& alignment,
-      const Precomputation& precomputation,
+      shared_ptr<Alignment> alignment,
+      shared_ptr<Precomputation> precomputation,
+      shared_ptr<Scorer> scorer,
       int min_gap_size,
       int max_rule_span,
       int max_nonterminals,
       int max_rule_symbols,
-      bool use_baeza_yates);
+      int max_samples,
+      bool use_baeza_yates,
+      bool require_tight_phrases);
 
-  void GetGrammar(const string& sentence);
+  Grammar GetGrammar(const string& sentence);
 
  private:
   vector<int> AnnotateWords(const vector<string>& words);

@@ -2,11 +2,6 @@
 
 #include <iostream>
 #include <queue>
-#include <tr1/unordered_set>
-#include <tuple>
-#include <vector>
-
-#include <boost/functional/hash.hpp>
 
 #include "data_array.h"
 #include "suffix_array.h"
@@ -26,9 +21,8 @@ Precomputation::Precomputation(
       suffix_array, data, num_frequent_patterns, max_frequent_phrase_len,
       min_frequency);
 
-  unordered_set<vector<int>, boost::hash<vector<int> > > frequent_patterns_set;
-  unordered_set<vector<int>, boost::hash<vector<int> > >
-      super_frequent_patterns_set;
+  unordered_set<vector<int>, VectorHash> frequent_patterns_set;
+  unordered_set<vector<int>, VectorHash> super_frequent_patterns_set;
   for (size_t i = 0; i < frequent_patterns.size(); ++i) {
     frequent_patterns_set.insert(frequent_patterns[i]);
     if (i < num_super_frequent_patterns) {
@@ -59,6 +53,10 @@ Precomputation::Precomputation(
     }
   }
 }
+
+Precomputation::Precomputation() {}
+
+Precomputation::~Precomputation() {}
 
 vector<vector<int> > Precomputation::FindMostFrequentPatterns(
     shared_ptr<SuffixArray> suffix_array, const vector<int>& data,
@@ -107,7 +105,7 @@ void Precomputation::AddCollocations(
       }
 
       if (start2 - start1 - size1 >= min_gap_size
-          && start2 + size2 - size1 <= max_rule_span
+          && start2 + size2 - start1 <= max_rule_span
           && size1 + size2 + 1 <= max_rule_symbols) {
         vector<int> pattern(data.begin() + start1,
             data.begin() + start1 + size1);
@@ -126,7 +124,7 @@ void Precomputation::AddCollocations(
             }
 
             if (start3 - start2 - size2 >= min_gap_size
-                && start3 + size3 - size1 <= max_rule_span
+                && start3 + size3 - start1 <= max_rule_span
                 && size1 + size2 + size3 + 2 <= max_rule_symbols
                 && (is_super1 || is_super3)) {
               pattern.insert(pattern.end(), data.begin() + start3,

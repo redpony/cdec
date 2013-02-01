@@ -26,6 +26,9 @@ class LinearMerger {
       vector<int>::iterator suffix_start, vector<int>::iterator suffix_end,
       int prefix_subpatterns, int suffix_subpatterns) const;
 
+ protected:
+  LinearMerger();
+
  private:
   shared_ptr<Vocabulary> vocabulary;
   shared_ptr<DataArray> data_array;

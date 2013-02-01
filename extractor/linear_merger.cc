@@ -14,6 +14,8 @@ LinearMerger::LinearMerger(shared_ptr<Vocabulary> vocabulary,
                            shared_ptr<MatchingComparator> comparator) :
     vocabulary(vocabulary), data_array(data_array), comparator(comparator) {}
 
+LinearMerger::LinearMerger() {}
+
 LinearMerger::~LinearMerger() {}
 
 void LinearMerger::Merge(

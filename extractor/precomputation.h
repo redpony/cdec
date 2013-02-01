@@ -16,8 +16,8 @@ using namespace tr1;
 
 class SuffixArray;
 
-typedef boost::hash<vector<int> > vector_hash;
-typedef unordered_map<vector<int>, vector<int>, vector_hash> Index;
+typedef boost::hash<vector<int> > VectorHash;
+typedef unordered_map<vector<int>, vector<int>, VectorHash> Index;
 
 class Precomputation {
  public:
@@ -27,12 +27,17 @@ class Precomputation {
       int max_rule_symbols, int min_gap_size,
       int max_frequent_phrase_len, int min_frequency);
 
+  virtual ~Precomputation();
+
   void WriteBinary(const fs::path& filepath) const;
 
-  const Index& GetInvertedIndex() const;
-  const Index& GetCollocations() const;
+  virtual const Index& GetInvertedIndex() const;
+  virtual const Index& GetCollocations() const;
 
   static int NON_TERMINAL;
+
+ protected:
+  Precomputation();
 
  private:
   vector<vector<int> > FindMostFrequentPatterns(
@@ -40,7 +45,7 @@ class Precomputation {
       int num_frequent_patterns, int max_frequent_phrase_len,
       int min_frequency);
   void AddCollocations(
-      const vector<tuple<int, int, int> >& matchings, const vector<int>& data,
+      const vector<std::tuple<int, int, int> >& matchings, const vector<int>& data,
       int max_rule_span, int min_gap_size, int max_rule_symbols);
   void AddStartPositions(vector<int>& positions, int pos1, int pos2);
   void AddStartPositions(vector<int>& positions, int pos1, int pos2, int pos3);

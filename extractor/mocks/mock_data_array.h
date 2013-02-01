@@ -10,5 +10,6 @@ class MockDataArray : public DataArray {
   MOCK_CONST_METHOD0(GetVocabularySize, int());
   MOCK_CONST_METHOD1(HasWord, bool(const string& word));
   MOCK_CONST_METHOD1(GetWordId, int(const string& word));
+  MOCK_CONST_METHOD1(GetWord, string(int word_id));
   MOCK_CONST_METHOD1(GetSentenceId, int(int position));
 };

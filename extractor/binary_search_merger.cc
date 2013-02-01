@@ -19,6 +19,10 @@ BinarySearchMerger::BinarySearchMerger(
     data_array(data_array), comparator(comparator),
     force_binary_search_merge(force_binary_search_merge) {}
 
+BinarySearchMerger::BinarySearchMerger() {}
+
+BinarySearchMerger::~BinarySearchMerger() {}
+
 void BinarySearchMerger::Merge(
     vector<int>& locations, const Phrase& phrase, const Phrase& suffix,
     vector<int>::iterator prefix_start, vector<int>::iterator prefix_end,

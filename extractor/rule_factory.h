@@ -4,17 +4,21 @@
 #include <memory>
 #include <vector>
 
-#include "matchings_finder.h"
-#include "intersector.h"
 #include "matchings_trie.h"
 #include "phrase_builder.h"
-#include "rule_extractor.h"
 
 using namespace std;
 
 class Alignment;
 class DataArray;
+class Grammar;
+class MatchingsFinder;
+class Intersector;
 class Precomputation;
+class Rule;
+class RuleExtractor;
+class Sampler;
+class Scorer;
 class State;
 class SuffixArray;
 class Vocabulary;
@@ -24,16 +28,19 @@ class HieroCachingRuleFactory {
   HieroCachingRuleFactory(
       shared_ptr<SuffixArray> source_suffix_array,
       shared_ptr<DataArray> target_data_array,
-      const Alignment& alignment,
+      shared_ptr<Alignment> alignment,
       const shared_ptr<Vocabulary>& vocabulary,
-      const Precomputation& precomputation,
+      shared_ptr<Precomputation> precomputation,
+      shared_ptr<Scorer> scorer,
       int min_gap_size,
       int max_rule_span,
       int max_nonterminals,
       int max_rule_symbols,
-      bool use_beaza_yates);
+      int max_samples,
+      bool use_beaza_yates,
+      bool require_tight_phrases);
 
-  void GetGrammar(const vector<int>& word_ids);
+  Grammar GetGrammar(const vector<int>& word_ids);
 
  private:
   bool CannotHaveMatchings(shared_ptr<TrieNode> node, int word_id);
@@ -51,12 +58,14 @@ class HieroCachingRuleFactory {
                             const Phrase& phrase,
                             const shared_ptr<TrieNode>& node);
 
-  MatchingsFinder matchings_finder;
-  Intersector intersector;
+  shared_ptr<MatchingsFinder> matchings_finder;
+  shared_ptr<Intersector> intersector;
   MatchingsTrie trie;
-  PhraseBuilder phrase_builder;
-  RuleExtractor rule_extractor;
+  shared_ptr<PhraseBuilder> phrase_builder;
+  shared_ptr<RuleExtractor> rule_extractor;
   shared_ptr<Vocabulary> vocabulary;
+  shared_ptr<Sampler> sampler;
+  shared_ptr<Scorer> scorer;
   int min_gap_size;
   int max_rule_span;
   int max_nonterminals;

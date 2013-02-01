@@ -15,6 +15,8 @@ class PhraseBuilder {
 
   Phrase Build(const vector<int>& symbols);
 
+  Phrase Extend(const Phrase& phrase, bool start_x, bool end_x);
+
  private:
   shared_ptr<Vocabulary> vocabulary;
 };

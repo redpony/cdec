@@ -23,3 +23,32 @@ vector<int> Phrase::Get() const {
 int Phrase::GetSymbol(int position) const {
   return symbols[position];
 }
+
+int Phrase::GetNumSymbols() const {
+  return symbols.size();
+}
+
+vector<string> Phrase::GetWords() const {
+  return words;
+}
+
+int Phrase::operator<(const Phrase& other) const {
+  return symbols < other.symbols;
+}
+
+ostream& operator<<(ostream& os, const Phrase& phrase) {
+  int current_word = 0;
+  for (size_t i = 0; i < phrase.symbols.size(); ++i) {
+    if (phrase.symbols[i] < 0) {
+      os << "[X," << -phrase.symbols[i] << "]";
+    } else {
+      os << phrase.words[current_word];
+      ++current_word;
+    }
+
+    if (i + 1 < phrase.symbols.size()) {
+      os << " ";
+    }
+  }
+  return os;
+}

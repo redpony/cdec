@@ -23,8 +23,6 @@ class DataArray {
   static string END_OF_FILE_STR;
   static string END_OF_LINE_STR;
 
-  DataArray();
-
   DataArray(const string& filename);
 
   DataArray(const string& filename, const Side& side);
@@ -43,7 +41,7 @@ class DataArray {
 
   virtual int GetWordId(const string& word) const;
 
-  string GetWord(int word_id) const;
+  virtual string GetWord(int word_id) const;
 
   int GetNumSentences() const;
 
@@ -54,6 +52,9 @@ class DataArray {
   void WriteBinary(const fs::path& filepath) const;
 
   void WriteBinary(FILE* file) const;
+
+ protected:
+  DataArray();
 
  private:
   void InitializeDataArray();

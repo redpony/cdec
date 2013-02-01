@@ -31,7 +31,7 @@ Alignment::Alignment(const string& filename) {
   alignments.shrink_to_fit();
 }
 
-vector<pair<int, int> > Alignment::GetLinks(int sentence_index) const {
+const vector<pair<int, int> >& Alignment::GetLinks(int sentence_index) const {
   return alignments[sentence_index];
 }
 
