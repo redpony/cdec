@@ -77,8 +77,9 @@ int main(int argc, char** argv) {
   source_suffix_array->WriteBinary(output_dir / fs::path("f.bin"));
   target_data_array->WriteBinary(output_dir / fs::path("e.bin"));
 
-  Alignment alignment(vm["alignment"].as<string>());
-  alignment.WriteBinary(output_dir / fs::path("a.bin"));
+  shared_ptr<Alignment> alignment =
+      make_shared<Alignment>(vm["alignment"].as<string>());
+  alignment->WriteBinary(output_dir / fs::path("a.bin"));
 
   Precomputation precomputation(
       source_suffix_array,

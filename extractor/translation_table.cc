@@ -13,17 +13,17 @@ using namespace tr1;
 
 TranslationTable::TranslationTable(shared_ptr<DataArray> source_data_array,
                                    shared_ptr<DataArray> target_data_array,
-                                   const Alignment& alignment) :
+                                   shared_ptr<Alignment> alignment) :
     source_data_array(source_data_array), target_data_array(target_data_array) {
   const vector<int>& source_data = source_data_array->GetData();
   const vector<int>& target_data = target_data_array->GetData();
 
   unordered_map<int, int> source_links_count;
   unordered_map<int, int> target_links_count;
-  unordered_map<pair<int, int>, int, boost::hash<pair<int, int> > > links_count;
+  unordered_map<pair<int, int>, int, PairHash > links_count;
 
   for (size_t i = 0; i < source_data_array->GetNumSentences(); ++i) {
-    vector<pair<int, int> > links = alignment.GetLinks(i);
+    const vector<pair<int, int> >& links = alignment->GetLinks(i);
     int source_start = source_data_array->GetSentenceStart(i);
     int next_source_start = source_data_array->GetSentenceStart(i + 1);
     int target_start = target_data_array->GetSentenceStart(i);
@@ -58,7 +58,7 @@ TranslationTable::TranslationTable(shared_ptr<DataArray> source_data_array,
   }
 }
 
-double TranslationTable::GetEgivenFScore(
+double TranslationTable::GetTargetGivenSourceScore(
     const string& source_word, const string& target_word) {
   if (!source_data_array->HasWord(source_word) ||
       !target_data_array->HasWord(target_word)) {
@@ -70,7 +70,7 @@ double TranslationTable::GetEgivenFScore(
   return translation_probabilities[make_pair(source_id, target_id)].first;
 }
 
-double TranslationTable::GetFgivenEScore(
+double TranslationTable::GetSourceGivenTargetScore(
     const string& source_word, const string& target_word) {
   if (!source_data_array->HasWord(source_word) ||
       !target_data_array->HasWord(target_word) == 0) {

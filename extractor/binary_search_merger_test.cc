@@ -34,8 +34,8 @@ class BinarySearchMergerTest : public Test {
 
     // We are going to force the binary_search_merger to do all the work, so we
     // need to check that the linear_merger never gets called.
-    shared_ptr<MockLinearMerger> linear_merger = make_shared<MockLinearMerger>(
-        vocabulary, data_array, comparator);
+    shared_ptr<MockLinearMerger> linear_merger =
+        make_shared<MockLinearMerger>();
     EXPECT_CALL(*linear_merger, Merge(_, _, _, _, _, _, _, _, _)).Times(0);
 
     binary_search_merger = make_shared<BinarySearchMerger>(

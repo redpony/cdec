@@ -1,16 +1,12 @@
 #include "phrase_location.h"
 
-#include <cstdio>
-
 PhraseLocation::PhraseLocation(int sa_low, int sa_high) :
-    sa_low(sa_low), sa_high(sa_high),
-    matchings(shared_ptr<vector<int> >()),
-    num_subpatterns(0) {}
+    sa_low(sa_low), sa_high(sa_high), num_subpatterns(0) {}
 
-PhraseLocation::PhraseLocation(shared_ptr<vector<int> > matchings,
+PhraseLocation::PhraseLocation(const vector<int>& matchings,
                                int num_subpatterns) :
     sa_high(0), sa_low(0),
-    matchings(matchings),
+    matchings(make_shared<vector<int> >(matchings)),
     num_subpatterns(num_subpatterns) {}
 
 bool PhraseLocation::IsEmpty() {

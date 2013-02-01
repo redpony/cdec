@@ -13,8 +13,8 @@
 using namespace std;
 using namespace tr1;
 
-typedef boost::hash<vector<int> > vector_hash;
-typedef unordered_map<vector<int>, vector<int>, vector_hash> Index;
+typedef boost::hash<vector<int> > VectorHash;
+typedef unordered_map<vector<int>, vector<int>, VectorHash> Index;
 
 class DataArray;
 class MatchingComparator;
@@ -28,9 +28,18 @@ class Intersector {
  public:
   Intersector(
       shared_ptr<Vocabulary> vocabulary,
-      const Precomputation& precomputaiton,
+      shared_ptr<Precomputation> precomputation,
       shared_ptr<SuffixArray> source_suffix_array,
       shared_ptr<MatchingComparator> comparator,
+      bool use_baeza_yates);
+
+  // For testing.
+  Intersector(
+      shared_ptr<Vocabulary> vocabulary,
+      shared_ptr<Precomputation> precomputation,
+      shared_ptr<SuffixArray> source_suffix_array,
+      shared_ptr<LinearMerger> linear_merger,
+      shared_ptr<BinarySearchMerger> binary_search_merger,
       bool use_baeza_yates);
 
   PhraseLocation Intersect(
@@ -39,8 +48,11 @@ class Intersector {
       const Phrase& phrase);
 
  private:
-  vector<int> Convert(const vector<int>& old_phrase,
-      shared_ptr<DataArray> source_data_array);
+  void ConvertIndexes(shared_ptr<Precomputation> precomputation,
+                      shared_ptr<DataArray> data_array);
+
+  vector<int> ConvertPhrase(const vector<int>& old_phrase,
+                            shared_ptr<DataArray> data_array);
 
   void ExtendPhraseLocation(const Phrase& phrase,
       PhraseLocation& phrase_location);

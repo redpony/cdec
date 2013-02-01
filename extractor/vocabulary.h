@@ -12,7 +12,7 @@ class Vocabulary {
  public:
   virtual ~Vocabulary();
 
-  int GetTerminalIndex(const string& word);
+  virtual int GetTerminalIndex(const string& word);
 
   int GetNonterminalIndex(int position);
 

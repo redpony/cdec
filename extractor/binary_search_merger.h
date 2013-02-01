@@ -20,13 +20,18 @@ class BinarySearchMerger {
                      shared_ptr<MatchingComparator> comparator,
                      bool force_binary_search_merge = false);
 
-  void Merge(
+  virtual ~BinarySearchMerger();
+
+  virtual void Merge(
       vector<int>& locations, const Phrase& phrase, const Phrase& suffix,
       vector<int>::iterator prefix_start, vector<int>::iterator prefix_end,
       vector<int>::iterator suffix_start, vector<int>::iterator suffix_end,
       int prefix_subpatterns, int suffix_subpatterns) const;
 
   static double BAEZA_YATES_FACTOR;
+
+ protected:
+  BinarySearchMerger();
 
  private:
   bool IsIntersectionVoid(

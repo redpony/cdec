@@ -13,7 +13,7 @@ class Alignment {
  public:
   Alignment(const string& filename);
 
-  vector<pair<int, int> > GetLinks(int sentence_index) const;
+  const vector<pair<int, int> >& GetLinks(int sentence_index) const;
 
   void WriteBinary(const fs::path& filepath);
 
