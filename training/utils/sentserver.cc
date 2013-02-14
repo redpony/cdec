@@ -85,7 +85,7 @@ struct line * queue_get(int fid) {
 		if (log_mutex) fprintf(stderr, "Unlocking input mutex (%d)\n", fid);
 		pthread_mutex_unlock(&input_mutex);
 
-		cur = malloc(sizeof (struct line));
+		cur = (line*)malloc(sizeof (struct line));
 		cur->id = n_sent;
 		cur->s = s;
 		cur->next = NULL;
@@ -99,7 +99,7 @@ struct line * queue_get(int fid) {
 			fprintf(stderr, "Received ===SYNCH=== signal (fid %d)\n", fid);
 			// Note: queue_finish calls free(cur->s).
 			// Therefore we need to create a new string here.
-			synch = malloc((strlen("===SYNCH===\n")+2) * sizeof (char));
+			synch = (char*)malloc((strlen("===SYNCH===\n")+2) * sizeof (char));
 			synch = strcpy(synch, s);
 
 			if (log_mutex) fprintf(stderr, "Unlocking queue mutex (%d)\n", fid);
@@ -247,7 +247,7 @@ void queue_finish(struct line *node, char *s, int fid) {
 char * read_line(int fd, int multiline) {
   int size = 80;
   char errorbuf[100];
-  char *s = malloc(size+2);
+  char *s = (char*)malloc(size+2);
   int result, errors=0;
   int i = 0;
 
@@ -257,7 +257,7 @@ char * read_line(int fd, int multiline) {
     if (result < 0) {
       perror("read()");
       sprintf(errorbuf, "Error code: %d\n", errno);
-      fprintf(stderr, errorbuf);
+      fputs(errorbuf, stderr);
       errors++;
       if (errors > 5) {
 	free(s);
@@ -301,7 +301,7 @@ char * read_line(int fd, int multiline) {
 
       if (i == size) {
 	size = size*2;
-	s = realloc(s, size+2);
+	s = (char*)realloc(s, size+2);
       }
     }
 
@@ -343,7 +343,7 @@ void * new_client(void *arg) {
       if (result < strlen(cur->s)){
         perror("write()");
         sprintf(errorbuf, "Error code: %d\n", errno);
-        fprintf(stderr, errorbuf);
+        fputs(errorbuf, stderr);
 
         pthread_mutex_lock(&clients_mutex);
         n_clients--;
@@ -474,7 +474,7 @@ int main (int argc, char *argv[]) {
       sleep(1);
       continue;
     }
-    client = malloc(sizeof(struct clientinfo));
+    client = (clientinfo*)malloc(sizeof(struct clientinfo));
     client->s = g;
     bcopy(&from, &client->sin, len);
 

@@ -11,10 +11,10 @@ noinst_PROGRAMS = \
 
 EXTRA_DIST = decode-and-evaluate.pl libcall.pl parallelize.pl
 
-sentserver_SOURCES = sentserver.c
+sentserver_SOURCES = sentserver.cc
 sentserver_LDFLAGS = -pthread
 
-sentclient_SOURCES = sentclient.c
+sentclient_SOURCES = sentclient.cc
 sentclient_LDFLAGS = -pthread
 
 TESTS = lbfgs_test optimize_test
