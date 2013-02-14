@@ -3,7 +3,7 @@
 #include <cmath>
 
 double IsSourceSingleton::Score(const FeatureContext& context) const {
-  return context.sample_source_count == 1;
+  return context.source_phrase_count == 1;
 }
 
 string IsSourceSingleton::GetName() const {

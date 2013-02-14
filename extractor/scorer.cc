@@ -5,6 +5,10 @@
 Scorer::Scorer(const vector<shared_ptr<Feature> >& features) :
     features(features) {}
 
+Scorer::Scorer() {}
+
+Scorer::~Scorer() {}
+
 vector<double> Scorer::Score(const FeatureContext& context) const {
   vector<double> scores;
   for (auto feature: features) {

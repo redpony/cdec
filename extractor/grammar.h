@@ -13,6 +13,10 @@ class Grammar {
  public:
   Grammar(const vector<Rule>& rules, const vector<string>& feature_names);
 
+  vector<Rule> GetRules() const;
+
+  vector<string> GetFeatureNames() const;
+
   friend ostream& operator<<(ostream& os, const Grammar& grammar);
 
  private:

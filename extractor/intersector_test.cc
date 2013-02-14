@@ -34,7 +34,7 @@ class IntersectorTest : public Test {
           .WillRepeatedly(Return(words[i]));
     }
 
-    vector<int> suffixes = {0, 1, 3, 5, 2, 4, 6};
+    vector<int> suffixes = {6, 0, 5, 3, 1, 4, 2};
     suffix_array = make_shared<MockSuffixArray>();
     EXPECT_CALL(*suffix_array, GetData())
         .WillRepeatedly(Return(data_array));
@@ -103,7 +103,7 @@ TEST_F(IntersectorTest, TestLinearMergeaXb) {
   Phrase suffix = phrase_builder->Build(suffix_symbols);
   vector<int> symbols = {3, -1, 4};
   Phrase phrase = phrase_builder->Build(symbols);
-  PhraseLocation prefix_locs(1, 4), suffix_locs(4, 6);
+  PhraseLocation prefix_locs(2, 5), suffix_locs(5, 7);
 
   vector<int> ex_prefix_locs = {1, 3, 5};
   PhraseLocation extended_prefix_locs(ex_prefix_locs, 1);
@@ -135,7 +135,7 @@ TEST_F(IntersectorTest, TestBinarySearchMergeaXb) {
   Phrase suffix = phrase_builder->Build(suffix_symbols);
   vector<int> symbols = {3, -1, 4};
   Phrase phrase = phrase_builder->Build(symbols);
-  PhraseLocation prefix_locs(1, 4), suffix_locs(4, 6);
+  PhraseLocation prefix_locs(2, 5), suffix_locs(5, 7);
 
   vector<int> ex_prefix_locs = {1, 3, 5};
   PhraseLocation extended_prefix_locs(ex_prefix_locs, 1);

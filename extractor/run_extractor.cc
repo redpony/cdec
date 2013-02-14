@@ -114,8 +114,8 @@ int main(int argc, char** argv) {
       make_shared<TargetGivenSourceCoherent>(),
       make_shared<SampleSourceCount>(),
       make_shared<CountSourceTarget>(),
-      make_shared<MaxLexTargetGivenSource>(table),
       make_shared<MaxLexSourceGivenTarget>(table),
+      make_shared<MaxLexTargetGivenSource>(table),
       make_shared<IsSourceSingleton>(),
       make_shared<IsSourceTargetSingleton>()
   };
@@ -138,6 +138,10 @@ int main(int argc, char** argv) {
 
   int grammar_id = 0;
   fs::path grammar_path = vm["grammars"].as<string>();
+  if (!fs::is_directory(grammar_path)) {
+    fs::create_directory(grammar_path);
+  }
+
   string sentence, delimiter = "|||";
   while (getline(cin, sentence)) {
     string suffix = "";
@@ -148,7 +152,8 @@ int main(int argc, char** argv) {
     }
 
     Grammar grammar = extractor.GetGrammar(sentence);
-    fs::path grammar_file = grammar_path / to_string(grammar_id);
+    string file_name = "grammar." + to_string(grammar_id);
+    fs::path grammar_file = grammar_path / file_name;
     ofstream output(grammar_file.c_str());
     output << grammar;
 

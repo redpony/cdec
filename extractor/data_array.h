@@ -2,14 +2,13 @@
 #define _DATA_ARRAY_H_
 
 #include <string>
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
 using namespace std;
-using namespace tr1;
 
 enum Side {
   SOURCE,
@@ -18,9 +17,9 @@ enum Side {
 
 class DataArray {
  public:
-  static int END_OF_FILE;
+  static int NULL_WORD;
   static int END_OF_LINE;
-  static string END_OF_FILE_STR;
+  static string NULL_WORD_STR;
   static string END_OF_LINE_STR;
 
   DataArray(const string& filename);
@@ -33,6 +32,8 @@ class DataArray {
 
   virtual int AtIndex(int index) const;
 
+  virtual string GetWordAtIndex(int index) const;
+
   virtual int GetSize() const;
 
   virtual int GetVocabularySize() const;
@@ -43,9 +44,12 @@ class DataArray {
 
   virtual string GetWord(int word_id) const;
 
-  int GetNumSentences() const;
+  virtual int GetNumSentences() const;
 
-  int GetSentenceStart(int position) const;
+  virtual int GetSentenceStart(int position) const;
+
+  //TODO(pauldb): Add unit tests.
+  virtual int GetSentenceLength(int sentence_id) const;
 
   virtual int GetSentenceId(int position) const;
 

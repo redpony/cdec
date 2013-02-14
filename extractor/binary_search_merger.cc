@@ -25,8 +25,10 @@ BinarySearchMerger::~BinarySearchMerger() {}
 
 void BinarySearchMerger::Merge(
     vector<int>& locations, const Phrase& phrase, const Phrase& suffix,
-    vector<int>::iterator prefix_start, vector<int>::iterator prefix_end,
-    vector<int>::iterator suffix_start, vector<int>::iterator suffix_end,
+    const vector<int>::iterator& prefix_start,
+    const vector<int>::iterator& prefix_end,
+    const vector<int>::iterator& suffix_start,
+    const vector<int>::iterator& suffix_end,
     int prefix_subpatterns, int suffix_subpatterns) const {
   if (IsIntersectionVoid(prefix_start, prefix_end, suffix_start, suffix_end,
       prefix_subpatterns, suffix_subpatterns, suffix)) {

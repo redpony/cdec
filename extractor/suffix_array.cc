@@ -22,9 +22,9 @@ SuffixArray::~SuffixArray() {}
 void SuffixArray::BuildSuffixArray() {
   vector<int> groups = data_array->GetData();
   groups.reserve(groups.size() + 1);
-  groups.push_back(data_array->GetVocabularySize());
+  groups.push_back(DataArray::NULL_WORD);
   suffix_array.resize(groups.size());
-  word_start.resize(data_array->GetVocabularySize() + 2);
+  word_start.resize(data_array->GetVocabularySize() + 1);
 
   InitialBucketSort(groups);
 
@@ -112,6 +112,8 @@ void SuffixArray::TernaryQuicksort(int left, int right, int step,
     }
   }
 
+  TernaryQuicksort(left, mid_left - 1, step, groups);
+
   if (mid_left == mid_right) {
     groups[suffix_array[mid_left]] = mid_left;
     suffix_array[mid_left] = -1;
@@ -121,7 +123,6 @@ void SuffixArray::TernaryQuicksort(int left, int right, int step,
     }
   }
 
-  TernaryQuicksort(left, mid_left - 1, step, groups);
   TernaryQuicksort(mid_right + 1, right, step, groups);
 }
 
@@ -201,7 +202,7 @@ int SuffixArray::LookupRangeStart(int low, int high, int word_id,
   int result = high;
   while (low < high) {
     int middle = low + (high - low) / 2;
-    if (suffix_array[middle] + offset < data_array->GetSize() &&
+    if (suffix_array[middle] + offset >= data_array->GetSize() ||
         data_array->AtIndex(suffix_array[middle] + offset) < word_id) {
       low = middle + 1;
     } else {

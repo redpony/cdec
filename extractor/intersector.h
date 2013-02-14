@@ -2,7 +2,7 @@
 #define _INTERSECTOR_H_
 
 #include <memory>
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/functional/hash.hpp>
@@ -11,7 +11,6 @@
 #include "linear_merger.h"
 
 using namespace std;
-using namespace tr1;
 
 typedef boost::hash<vector<int> > VectorHash;
 typedef unordered_map<vector<int>, vector<int>, VectorHash> Index;
@@ -42,10 +41,15 @@ class Intersector {
       shared_ptr<BinarySearchMerger> binary_search_merger,
       bool use_baeza_yates);
 
-  PhraseLocation Intersect(
+  virtual ~Intersector();
+
+  virtual PhraseLocation Intersect(
       const Phrase& prefix, PhraseLocation& prefix_location,
       const Phrase& suffix, PhraseLocation& suffix_location,
       const Phrase& phrase);
+
+ protected:
+  Intersector();
 
  private:
   void ConvertIndexes(shared_ptr<Precomputation> precomputation,
@@ -64,6 +68,12 @@ class Intersector {
   Index inverted_index;
   Index collocations;
   bool use_baeza_yates;
+
+  // TODO(pauldb): Don't forget to remove these.
+ public:
+  double sort_time;
+  double linear_merge_time;
+  double binary_merge_time;
 };
 
 #endif

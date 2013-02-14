@@ -24,7 +24,7 @@ class LinearMerger {
       vector<int>& locations, const Phrase& phrase, const Phrase& suffix,
       vector<int>::iterator prefix_start, vector<int>::iterator prefix_end,
       vector<int>::iterator suffix_start, vector<int>::iterator suffix_end,
-      int prefix_subpatterns, int suffix_subpatterns) const;
+      int prefix_subpatterns, int suffix_subpatterns);
 
  protected:
   LinearMerger();
@@ -33,6 +33,10 @@ class LinearMerger {
   shared_ptr<Vocabulary> vocabulary;
   shared_ptr<DataArray> data_array;
   shared_ptr<MatchingComparator> comparator;
+
+  // TODO(pauldb): Remove this eventually.
+ public:
+  double linear_merge_time;
 };
 
 #endif

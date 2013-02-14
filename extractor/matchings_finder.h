@@ -13,7 +13,13 @@ class MatchingsFinder {
  public:
   MatchingsFinder(shared_ptr<SuffixArray> suffix_array);
 
-  PhraseLocation Find(PhraseLocation& location, const string& word, int offset);
+  virtual ~MatchingsFinder();
+
+  virtual PhraseLocation Find(PhraseLocation& location, const string& word,
+                              int offset);
+
+ protected:
+  MatchingsFinder();
 
  private:
   shared_ptr<SuffixArray> suffix_array;

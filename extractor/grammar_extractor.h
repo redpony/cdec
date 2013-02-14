@@ -32,13 +32,19 @@ class GrammarExtractor {
       bool use_baeza_yates,
       bool require_tight_phrases);
 
+  // For testing only.
+  GrammarExtractor(shared_ptr<Vocabulary> vocabulary,
+                   shared_ptr<HieroCachingRuleFactory> rule_factory);
+
   Grammar GetGrammar(const string& sentence);
 
  private:
+  vector<string> TokenizeSentence(const string& sentence);
+
   vector<int> AnnotateWords(const vector<string>& words);
 
   shared_ptr<Vocabulary> vocabulary;
-  HieroCachingRuleFactory rule_factory;
+  shared_ptr<HieroCachingRuleFactory> rule_factory;
 };
 
 #endif

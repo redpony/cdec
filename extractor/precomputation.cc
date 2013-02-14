@@ -7,7 +7,6 @@
 #include "suffix_array.h"
 
 using namespace std;
-using namespace tr1;
 
 int Precomputation::NON_TERMINAL = -1;
 
@@ -79,13 +78,16 @@ vector<vector<int> > Precomputation::FindMostFrequentPatterns(
   }
 
   vector<vector<int> > frequent_patterns;
-  for (size_t i = 0; i < num_frequent_patterns && !heap.empty(); ++i) {
+  while (frequent_patterns.size() < num_frequent_patterns && !heap.empty()) {
     int start = heap.top().second.first;
     int len = heap.top().second.second;
     heap.pop();
 
     vector<int> pattern(data.begin() + start, data.begin() + start + len);
-    frequent_patterns.push_back(pattern);
+    if (find(pattern.begin(), pattern.end(), DataArray::END_OF_LINE) ==
+        pattern.end()) {
+      frequent_patterns.push_back(pattern);
+    }
   }
   return frequent_patterns;
 }

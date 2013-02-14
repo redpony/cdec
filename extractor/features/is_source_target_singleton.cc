@@ -7,5 +7,5 @@ double IsSourceTargetSingleton::Score(const FeatureContext& context) const {
 }
 
 string IsSourceTargetSingleton::GetName() const {
-  return "IsSingletonEF";
+  return "IsSingletonFE";
 }
