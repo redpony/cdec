@@ -3,10 +3,10 @@
 #include <cmath>
 
 double TargetGivenSourceCoherent::Score(const FeatureContext& context) const {
-  double prob = context.pair_count / context.sample_source_count;
+  double prob = (double) context.pair_count / context.num_samples;
   return prob > 0 ? -log10(prob) : MAX_SCORE;
 }
 
 string TargetGivenSourceCoherent::GetName() const {
-  return "EGivenFCoherent";
+  return "EgivenFCoherent";
 }

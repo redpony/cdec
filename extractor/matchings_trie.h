@@ -2,13 +2,12 @@
 #define _MATCHINGS_TRIE_
 
 #include <memory>
-#include <tr1/unordered_map>
+#include <unordered_map>
 
 #include "phrase.h"
 #include "phrase_location.h"
 
 using namespace std;
-using namespace tr1;
 
 struct TrieNode {
   TrieNode(shared_ptr<TrieNode> suffix_link = shared_ptr<TrieNode>(),
@@ -40,6 +39,8 @@ class MatchingsTrie {
   shared_ptr<TrieNode> GetRoot() const;
 
  private:
+  void ResetTree(shared_ptr<TrieNode> root);
+
   shared_ptr<TrieNode> root;
 };
 

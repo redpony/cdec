@@ -40,7 +40,27 @@ class HieroCachingRuleFactory {
       bool use_beaza_yates,
       bool require_tight_phrases);
 
-  Grammar GetGrammar(const vector<int>& word_ids);
+  // For testing only.
+  HieroCachingRuleFactory(
+      shared_ptr<MatchingsFinder> finder,
+      shared_ptr<Intersector> intersector,
+      shared_ptr<PhraseBuilder> phrase_builder,
+      shared_ptr<RuleExtractor> rule_extractor,
+      shared_ptr<Vocabulary> vocabulary,
+      shared_ptr<Sampler> sampler,
+      shared_ptr<Scorer> scorer,
+      int min_gap_size,
+      int max_rule_span,
+      int max_nonterminals,
+      int max_chunks,
+      int max_rule_symbols);
+
+  virtual ~HieroCachingRuleFactory();
+
+  virtual Grammar GetGrammar(const vector<int>& word_ids);
+
+ protected:
+  HieroCachingRuleFactory();
 
  private:
   bool CannotHaveMatchings(shared_ptr<TrieNode> node, int word_id);

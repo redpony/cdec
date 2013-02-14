@@ -12,7 +12,12 @@ class Sampler {
  public:
   Sampler(shared_ptr<SuffixArray> suffix_array, int max_samples);
 
-  PhraseLocation Sample(const PhraseLocation& location) const;
+  virtual ~Sampler();
+
+  virtual PhraseLocation Sample(const PhraseLocation& location) const;
+
+ protected:
+  Sampler();
 
  private:
   int Round(double x) const;

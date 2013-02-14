@@ -10,9 +10,9 @@
 namespace fs = boost::filesystem;
 using namespace std;
 
-int DataArray::END_OF_FILE = 0;
+int DataArray::NULL_WORD = 0;
 int DataArray::END_OF_LINE = 1;
-string DataArray::END_OF_FILE_STR = "__END_OF_FILE__";
+string DataArray::NULL_WORD_STR = "__NULL__";
 string DataArray::END_OF_LINE_STR = "__END_OF_LINE__";
 
 DataArray::DataArray() {
@@ -47,9 +47,9 @@ DataArray::DataArray(const string& filename, const Side& side) {
 }
 
 void DataArray::InitializeDataArray() {
-  word2id[END_OF_FILE_STR] = END_OF_FILE;
-  id2word.push_back(END_OF_FILE_STR);
-  word2id[END_OF_LINE_STR] = END_OF_FILE;
+  word2id[NULL_WORD_STR] = NULL_WORD;
+  id2word.push_back(NULL_WORD_STR);
+  word2id[END_OF_LINE_STR] = END_OF_LINE;
   id2word.push_back(END_OF_LINE_STR);
 }
 
@@ -87,6 +87,10 @@ int DataArray::AtIndex(int index) const {
   return data[index];
 }
 
+string DataArray::GetWordAtIndex(int index) const {
+  return id2word[data[index]];
+}
+
 int DataArray::GetSize() const {
   return data.size();
 }
@@ -101,6 +105,11 @@ int DataArray::GetNumSentences() const {
 
 int DataArray::GetSentenceStart(int position) const {
   return sentence_start[position];
+}
+
+int DataArray::GetSentenceLength(int sentence_id) const {
+  // Ignore end of line markers.
+  return sentence_start[sentence_id + 1] - sentence_start[sentence_id] - 1;
 }
 
 int DataArray::GetSentenceId(int position) const {

@@ -9,10 +9,9 @@ PhraseBuilder::PhraseBuilder(shared_ptr<Vocabulary> vocabulary) :
 Phrase PhraseBuilder::Build(const vector<int>& symbols) {
   Phrase phrase;
   phrase.symbols = symbols;
-  phrase.words.resize(symbols.size());
   for (size_t i = 0; i < symbols.size(); ++i) {
     if (vocabulary->IsTerminal(symbols[i])) {
-      phrase.words[i] = vocabulary->GetTerminalValue(symbols[i]);
+      phrase.words.push_back(vocabulary->GetTerminalValue(symbols[i]));
     } else {
       phrase.var_pos.push_back(i);
     }
@@ -30,7 +29,7 @@ Phrase PhraseBuilder::Extend(const Phrase& phrase, bool start_x, bool end_x) {
   }
 
   for (size_t i = start_x; i < symbols.size(); ++i) {
-    if (vocabulary->IsTerminal(symbols[i])) {
+    if (!vocabulary->IsTerminal(symbols[i])) {
       ++num_nonterminals;
       symbols[i] = vocabulary->GetNonterminalIndex(num_nonterminals);
     }

@@ -24,8 +24,10 @@ class BinarySearchMerger {
 
   virtual void Merge(
       vector<int>& locations, const Phrase& phrase, const Phrase& suffix,
-      vector<int>::iterator prefix_start, vector<int>::iterator prefix_end,
-      vector<int>::iterator suffix_start, vector<int>::iterator suffix_end,
+      const vector<int>::iterator& prefix_start,
+      const vector<int>::iterator& prefix_end,
+      const vector<int>::iterator& suffix_start,
+      const vector<int>::iterator& suffix_end,
       int prefix_subpatterns, int suffix_subpatterns) const;
 
   static double BAEZA_YATES_FACTOR;

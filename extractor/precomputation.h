@@ -2,8 +2,8 @@
 #define _PRECOMPUTATION_H_
 
 #include <memory>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#include <unordered_map>
+#include <unordered_set>
 #include <tuple>
 #include <vector>
 
@@ -12,7 +12,6 @@
 
 namespace fs = boost::filesystem;
 using namespace std;
-using namespace tr1;
 
 class SuffixArray;
 

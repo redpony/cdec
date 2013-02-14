@@ -10,6 +10,6 @@ using namespace std;
 class MockBinarySearchMerger: public BinarySearchMerger {
  public:
   MOCK_CONST_METHOD9(Merge, void(vector<int>&, const Phrase&, const Phrase&,
-      vector<int>::iterator, vector<int>::iterator, vector<int>::iterator,
-      vector<int>::iterator, int, int));
+      const vector<int>::iterator&, const vector<int>::iterator&,
+      const vector<int>::iterator&, const vector<int>::iterator&, int, int));
 };

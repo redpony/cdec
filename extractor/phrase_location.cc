@@ -10,7 +10,11 @@ PhraseLocation::PhraseLocation(const vector<int>& matchings,
     num_subpatterns(num_subpatterns) {}
 
 bool PhraseLocation::IsEmpty() {
-  return sa_low >= sa_high || (num_subpatterns > 0 && matchings->size() == 0);
+  if (num_subpatterns > 0) {
+    return matchings->size() == 0;
+  } else {
+    return sa_low >= sa_high;
+  }
 }
 
 bool operator==(const PhraseLocation& a, const PhraseLocation& b) {

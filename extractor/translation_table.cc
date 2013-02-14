@@ -9,7 +9,6 @@
 #include "data_array.h"
 
 using namespace std;
-using namespace tr1;
 
 TranslationTable::TranslationTable(shared_ptr<DataArray> source_data_array,
                                    shared_ptr<DataArray> target_data_array,
@@ -20,14 +19,15 @@ TranslationTable::TranslationTable(shared_ptr<DataArray> source_data_array,
 
   unordered_map<int, int> source_links_count;
   unordered_map<int, int> target_links_count;
-  unordered_map<pair<int, int>, int, PairHash > links_count;
+  unordered_map<pair<int, int>, int, PairHash> links_count;
 
   for (size_t i = 0; i < source_data_array->GetNumSentences(); ++i) {
-    const vector<pair<int, int> >& links = alignment->GetLinks(i);
+    vector<pair<int, int> > links = alignment->GetLinks(i);
     int source_start = source_data_array->GetSentenceStart(i);
-    int next_source_start = source_data_array->GetSentenceStart(i + 1);
     int target_start = target_data_array->GetSentenceStart(i);
-    int next_target_start = target_data_array->GetSentenceStart(i + 1);
+    // Ignore END_OF_LINE markers.
+    int next_source_start = source_data_array->GetSentenceStart(i + 1) - 1;
+    int next_target_start = target_data_array->GetSentenceStart(i + 1) - 1;
     vector<int> source_sentence(source_data.begin() + source_start,
         source_data.begin() + next_source_start);
     vector<int> target_sentence(target_data.begin() + target_start,
@@ -38,15 +38,23 @@ TranslationTable::TranslationTable(shared_ptr<DataArray> source_data_array,
     for (pair<int, int> link: links) {
       source_linked_words[link.first] = 1;
       target_linked_words[link.second] = 1;
-      int source_word = source_sentence[link.first];
-      int target_word = target_sentence[link.second];
-
-      ++source_links_count[source_word];
-      ++target_links_count[target_word];
-      ++links_count[make_pair(source_word, target_word)];
+      IncreaseLinksCount(source_links_count, target_links_count, links_count,
+          source_sentence[link.first], target_sentence[link.second]);
     }
 
-    // TODO(pauldb): Something seems wrong here. No NULL word?
+    for (size_t i = 0; i < source_sentence.size(); ++i) {
+      if (!source_linked_words[i]) {
+        IncreaseLinksCount(source_links_count, target_links_count, links_count,
+                           source_sentence[i], DataArray::NULL_WORD);
+      }
+    }
+
+    for (size_t i = 0; i < target_sentence.size(); ++i) {
+      if (!target_linked_words[i]) {
+        IncreaseLinksCount(source_links_count, target_links_count, links_count,
+                           DataArray::NULL_WORD, target_sentence[i]);
+      }
+    }
   }
 
   for (pair<pair<int, int>, int> link_count: links_count) {
@@ -56,6 +64,21 @@ TranslationTable::TranslationTable(shared_ptr<DataArray> source_data_array,
     double score2 = 1.0 * link_count.second / target_links_count[target_word];
     translation_probabilities[link_count.first] = make_pair(score1, score2);
   }
+}
+
+TranslationTable::TranslationTable() {}
+
+TranslationTable::~TranslationTable() {}
+
+void TranslationTable::IncreaseLinksCount(
+    unordered_map<int, int>& source_links_count,
+    unordered_map<int, int>& target_links_count,
+    unordered_map<pair<int, int>, int, PairHash>& links_count,
+    int source_word_id,
+    int target_word_id) const {
+  ++source_links_count[source_word_id];
+  ++target_links_count[target_word_id];
+  ++links_count[make_pair(source_word_id, target_word_id)];
 }
 
 double TranslationTable::GetTargetGivenSourceScore(
@@ -73,7 +96,7 @@ double TranslationTable::GetTargetGivenSourceScore(
 double TranslationTable::GetSourceGivenTargetScore(
     const string& source_word, const string& target_word) {
   if (!source_data_array->HasWord(source_word) ||
-      !target_data_array->HasWord(target_word) == 0) {
+      !target_data_array->HasWord(target_word)) {
     return -1;
   }
 

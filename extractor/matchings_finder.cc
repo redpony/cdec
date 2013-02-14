@@ -6,6 +6,10 @@
 MatchingsFinder::MatchingsFinder(shared_ptr<SuffixArray> suffix_array) :
     suffix_array(suffix_array) {}
 
+MatchingsFinder::MatchingsFinder() {}
+
+MatchingsFinder::~MatchingsFinder() {}
+
 PhraseLocation MatchingsFinder::Find(PhraseLocation& location,
                                      const string& word, int offset) {
   if (location.sa_low == -1 && location.sa_high == -1) {

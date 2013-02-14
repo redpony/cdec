@@ -6,6 +6,10 @@
 Sampler::Sampler(shared_ptr<SuffixArray> suffix_array, int max_samples) :
     suffix_array(suffix_array), max_samples(max_samples) {}
 
+Sampler::Sampler() {}
+
+Sampler::~Sampler() {}
+
 PhraseLocation Sampler::Sample(const PhraseLocation& location) const {
   vector<int> sample;
   int num_subpatterns;
@@ -32,5 +36,6 @@ PhraseLocation Sampler::Sample(const PhraseLocation& location) const {
 }
 
 int Sampler::Round(double x) const {
-  return x + 0.5;
+  // TODO(pauldb): Remove EPS.
+  return x + 0.5 + 1e-8;
 }

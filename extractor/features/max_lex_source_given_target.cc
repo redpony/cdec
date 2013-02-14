@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include "../data_array.h"
 #include "../translation_table.h"
 
 MaxLexSourceGivenTarget::MaxLexSourceGivenTarget(
@@ -10,8 +11,8 @@ MaxLexSourceGivenTarget::MaxLexSourceGivenTarget(
 
 double MaxLexSourceGivenTarget::Score(const FeatureContext& context) const {
   vector<string> source_words = context.source_phrase.GetWords();
-  // TODO(pauldb): Add NULL to target_words, after fixing translation table.
   vector<string> target_words = context.target_phrase.GetWords();
+  target_words.push_back(DataArray::NULL_WORD_STR);
 
   double score = 0;
   for (string source_word: source_words) {
@@ -26,5 +27,5 @@ double MaxLexSourceGivenTarget::Score(const FeatureContext& context) const {
 }
 
 string MaxLexSourceGivenTarget::GetName() const {
-  return "MaxLexFGivenE";
+  return "MaxLexFgivenE";
 }

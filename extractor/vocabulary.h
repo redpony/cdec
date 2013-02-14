@@ -2,11 +2,10 @@
 #define _VOCABULARY_H_
 
 #include <string>
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include <vector>
 
 using namespace std;
-using namespace tr1;
 
 class Vocabulary {
  public:

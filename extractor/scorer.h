@@ -14,9 +14,14 @@ class Scorer {
  public:
   Scorer(const vector<shared_ptr<Feature> >& features);
 
-  vector<double> Score(const FeatureContext& context) const;
+  virtual ~Scorer();
 
-  vector<string> GetFeatureNames() const;
+  virtual vector<double> Score(const FeatureContext& context) const;
+
+  virtual vector<string> GetFeatureNames() const;
+
+ protected:
+  Scorer();
 
  private:
   vector<shared_ptr<Feature> > features;
