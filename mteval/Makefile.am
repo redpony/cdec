@@ -19,6 +19,7 @@ libmteval_a_SOURCES = \
   ns_comb.h \
   ns_docscorer.h \
   ns_ext.h \
+  ns_ssk.h \
   ns_ter.h \
   scorer.h \
   ter.h \
@@ -31,6 +32,7 @@ libmteval_a_SOURCES = \
   ns_comb.cc \
   ns_docscorer.cc \
   ns_ext.cc \
+  ns_ssk.cc \
   ns_ter.cc \
   scorer.cc \
   ter.cc
