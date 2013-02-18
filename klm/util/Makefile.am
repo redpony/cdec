@@ -38,6 +38,7 @@ libklm_util_a_SOURCES = \
   sized_iterator.hh \
   sorted_uniform.hh \
   string_piece.hh \
+  string_piece_hash.hh \
   thread_pool.hh \
   tokenize_piece.hh \
   usage.hh \

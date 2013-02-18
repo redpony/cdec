@@ -49,6 +49,18 @@ FilePiece::FilePiece(int fd, const char *name, std::ostream *show_progress, std:
   Initialize(NamePossiblyFind(fd, name).c_str(), show_progress, min_buffer);
 }
 
+FilePiece::FilePiece(std::istream &stream, const char *name, std::size_t min_buffer) :
+  total_size_(kBadSize), page_(SizePage()) {
+  InitializeNoRead(name ? name : "istream", min_buffer);
+
+  fallback_to_read_ = true;
+  data_.reset(MallocOrThrow(default_map_size_), default_map_size_, scoped_memory::MALLOC_ALLOCATED);
+  position_ = data_.begin();
+  position_end_ = position_;
+  
+  fell_back_.Reset(stream);
+}
+
 FilePiece::~FilePiece() {}
 
 StringPiece FilePiece::ReadLine(char delim) {
@@ -83,7 +95,34 @@ unsigned long int FilePiece::ReadULong() {
   return ReadNumber<unsigned long int>();
 }
 
-void FilePiece::Initialize(const char *name, std::ostream *show_progress, std::size_t min_buffer)  {
+std::size_t FilePiece::Raw(void *to, std::size_t limit) {
+  if (!limit) return 0;
+  std::size_t in_buf = static_cast<std::size_t>(position_end_ - position_);
+  if (in_buf) {
+    std::size_t amount = std::min(in_buf, limit);
+    memcpy(to, position_, amount);
+    position_ += amount;
+    return amount;
+  }
+
+  std::size_t read_return;
+  if (fallback_to_read_) {
+    read_return = fell_back_.Read(to, limit);
+    progress_.Set(fell_back_.RawAmount());
+  } else {
+    uint64_t desired_begin = mapped_offset_ + static_cast<uint64_t>(position_ - data_.begin());
+    SeekOrThrow(file_.get(), desired_begin);
+    read_return = ReadOrEOF(file_.get(), to, limit);
+    // Good thing we never rewind.  This makes desired_begin calculate the right way the next time.
+    mapped_offset_ += static_cast<uint64_t>(read_return);
+    progress_ += read_return;
+  }
+  at_end_ |= (read_return == 0);
+  return read_return;
+}
+
+// Factored out so that istream can call this.
+void FilePiece::InitializeNoRead(const char *name, std::size_t min_buffer) {
   file_name_ = name;
 
   default_map_size_ = page_ * std::max<std::size_t>((min_buffer / page_ + 1), 2);
@@ -91,6 +130,10 @@ void FilePiece::Initialize(const char *name, std::ostream *show_progress, std::s
   position_end_ = NULL;
   mapped_offset_ = 0;
   at_end_ = false;
+}
+
+void FilePiece::Initialize(const char *name, std::ostream *show_progress, std::size_t min_buffer) {
+  InitializeNoRead(name, min_buffer);
 
   if (total_size_ == kBadSize) {
     // So the assertion passes.  
@@ -239,8 +282,7 @@ void FilePiece::TransitionToRead() {
   assert(!fallback_to_read_);
   fallback_to_read_ = true;
   data_.reset();
-  data_.reset(malloc(default_map_size_), default_map_size_, scoped_memory::MALLOC_ALLOCATED);
-  UTIL_THROW_IF(!data_.get(), ErrnoException, "malloc failed for " << default_map_size_);
+  data_.reset(MallocOrThrow(default_map_size_), default_map_size_, scoped_memory::MALLOC_ALLOCATED);
   position_ = data_.begin();
   position_end_ = position_;
 
