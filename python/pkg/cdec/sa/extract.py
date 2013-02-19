@@ -7,6 +7,7 @@ import re
 import multiprocessing as mp
 import signal
 import cdec.sa
+from cdec.sa._sa import monitor_cpu
 
 extractor, prefix = None, None
 def make_extractor(config, grammars, features):
@@ -62,7 +63,8 @@ def main():
             sys.stderr.write('Error: feature definition file <{0}>'
                     ' should be a python module\n'.format(featdef))
             sys.exit(1)
-    
+
+    start_time = monitor_cpu()
     if args.jobs > 1:
         logging.info('Starting %d workers; chunk size: %d', args.jobs, args.chunksize)
         pool = mp.Pool(args.jobs, make_extractor, (args.config, args.grammars, args.features))
@@ -75,6 +77,9 @@ def main():
         make_extractor(args.config, args.grammars, args.features)
         for output in map(extract, enumerate(sys.stdin)):
             print(output)
+
+    stop_time = monitor_cpu()
+    logging.info("Overall extraction step took %f seconds", stop_time - start_time)
 
 if __name__ == '__main__':
     main()

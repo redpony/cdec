@@ -1,14 +1,17 @@
 #include "suffix_array.h"
 
+#include <chrono>
 #include <iostream>
 #include <string>
 #include <vector>
 
 #include "data_array.h"
 #include "phrase_location.h"
+#include "time_util.h"
 
 namespace fs = boost::filesystem;
 using namespace std;
+using namespace chrono;
 
 SuffixArray::SuffixArray(shared_ptr<DataArray> data_array) :
     data_array(data_array) {
@@ -39,6 +42,7 @@ void SuffixArray::BuildSuffixArray() {
   }
 
   PrefixDoublingSort(groups);
+  cerr << "\tFinalizing sort..." << endl;
 
   for (size_t i = 0; i < groups.size(); ++i) {
     suffix_array[groups[i]] = i;
@@ -46,6 +50,7 @@ void SuffixArray::BuildSuffixArray() {
 }
 
 void SuffixArray::InitialBucketSort(vector<int>& groups) {
+  Clock::time_point start_time = Clock::now();
   for (size_t i = 0; i < groups.size(); ++i) {
     ++word_start[groups[i]];
   }
@@ -62,6 +67,9 @@ void SuffixArray::InitialBucketSort(vector<int>& groups) {
   for (size_t i = 0; i < suffix_array.size(); ++i) {
     groups[i] = word_start[groups[i] + 1] - 1;
   }
+  Clock::time_point stop_time = Clock::now();
+  cerr << "\tBucket sort took " << GetDuration(start_time, stop_time)
+       << " seconds" << endl;
 }
 
 void SuffixArray::PrefixDoublingSort(vector<int>& groups) {
@@ -127,6 +135,9 @@ void SuffixArray::TernaryQuicksort(int left, int right, int step,
 }
 
 vector<int> SuffixArray::BuildLCPArray() const {
+  Clock::time_point start_time = Clock::now();
+  cerr << "Constructing LCP array..." << endl;
+
   vector<int> lcp(suffix_array.size());
   vector<int> rank(suffix_array.size());
   const vector<int>& data = data_array->GetData();
@@ -152,6 +163,10 @@ vector<int> SuffixArray::BuildLCPArray() const {
       --prefix_len;
     }
   }
+
+  Clock::time_point stop_time = Clock::now();
+  cerr << "Constructing LCP took "
+       << GetDuration(start_time, stop_time) << " seconds" << endl;
 
   return lcp;
 }

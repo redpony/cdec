@@ -1,7 +1,5 @@
 #include "intersector.h"
 
-#include <chrono>
-
 #include "data_array.h"
 #include "matching_comparator.h"
 #include "phrase.h"
@@ -10,10 +8,6 @@
 #include "suffix_array.h"
 #include "veb.h"
 #include "vocabulary.h"
-
-using namespace std::chrono;
-
-typedef high_resolution_clock Clock;
 
 Intersector::Intersector(shared_ptr<Vocabulary> vocabulary,
                          shared_ptr<Precomputation> precomputation,
@@ -92,9 +86,6 @@ PhraseLocation Intersector::Intersect(
     const Phrase& prefix, PhraseLocation& prefix_location,
     const Phrase& suffix, PhraseLocation& suffix_location,
     const Phrase& phrase) {
-  if (linear_merge_time == 0) {
-    linear_merger->linear_merge_time = 0;
-  }
   vector<int> symbols = phrase.Get();
 
   // We should never attempt to do an intersect query for a pattern starting or
@@ -116,21 +107,15 @@ PhraseLocation Intersector::Intersect(
   int prefix_subpatterns = prefix_location.num_subpatterns;
   int suffix_subpatterns = suffix_location.num_subpatterns;
   if (use_baeza_yates) {
-    double prev_linear_merge_time = linear_merger->linear_merge_time;
-    Clock::time_point start = Clock::now();
     binary_search_merger->Merge(locations, phrase, suffix,
         prefix_matchings->begin(), prefix_matchings->end(),
         suffix_matchings->begin(), suffix_matchings->end(),
         prefix_subpatterns, suffix_subpatterns);
-    Clock::time_point stop = Clock::now();
-    binary_merge_time += duration_cast<milliseconds>(stop - start).count() -
-        (linear_merger->linear_merge_time - prev_linear_merge_time);
   } else {
     linear_merger->Merge(locations, phrase, suffix, prefix_matchings->begin(),
         prefix_matchings->end(), suffix_matchings->begin(),
         suffix_matchings->end(), prefix_subpatterns, suffix_subpatterns);
   }
-  linear_merge_time = linear_merger->linear_merge_time;
   return PhraseLocation(locations, phrase.Arity() + 1);
 }
 
@@ -141,7 +126,6 @@ void Intersector::ExtendPhraseLocation(
     return;
   }
 
-  Clock::time_point sort_start = Clock::now();
 
   phrase_location.num_subpatterns = 1;
   phrase_location.sa_low = phrase_location.sa_high = 0;
@@ -167,6 +151,4 @@ void Intersector::ExtendPhraseLocation(
   }
 
   phrase_location.matchings = make_shared<vector<int> >(matchings);
-  Clock::time_point sort_stop = Clock::now();
-  sort_time += duration_cast<milliseconds>(sort_stop - sort_start).count();
 }
