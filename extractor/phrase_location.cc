@@ -5,15 +5,19 @@ PhraseLocation::PhraseLocation(int sa_low, int sa_high) :
 
 PhraseLocation::PhraseLocation(const vector<int>& matchings,
                                int num_subpatterns) :
-    sa_high(0), sa_low(0),
+    sa_low(0), sa_high(0),
     matchings(make_shared<vector<int> >(matchings)),
     num_subpatterns(num_subpatterns) {}
 
-bool PhraseLocation::IsEmpty() {
+bool PhraseLocation::IsEmpty() const {
+  return GetSize() == 0;
+}
+
+int PhraseLocation::GetSize() const {
   if (num_subpatterns > 0) {
-    return matchings->size() == 0;
+    return matchings->size();
   } else {
-    return sa_low >= sa_high;
+    return sa_high - sa_low;
   }
 }
 

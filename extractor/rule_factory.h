@@ -13,6 +13,7 @@ class Alignment;
 class DataArray;
 class Grammar;
 class MatchingsFinder;
+class FastIntersector;
 class Intersector;
 class Precomputation;
 class Rule;
@@ -37,6 +38,7 @@ class HieroCachingRuleFactory {
       int max_nonterminals,
       int max_rule_symbols,
       int max_samples,
+      bool use_fast_intersect,
       bool use_beaza_yates,
       bool require_tight_phrases);
 
@@ -44,6 +46,7 @@ class HieroCachingRuleFactory {
   HieroCachingRuleFactory(
       shared_ptr<MatchingsFinder> finder,
       shared_ptr<Intersector> intersector,
+      shared_ptr<FastIntersector> fast_intersector,
       shared_ptr<PhraseBuilder> phrase_builder,
       shared_ptr<RuleExtractor> rule_extractor,
       shared_ptr<Vocabulary> vocabulary,
@@ -53,7 +56,8 @@ class HieroCachingRuleFactory {
       int max_rule_span,
       int max_nonterminals,
       int max_chunks,
-      int max_rule_symbols);
+      int max_rule_symbols,
+      bool use_fast_intersect);
 
   virtual ~HieroCachingRuleFactory();
 
@@ -80,6 +84,7 @@ class HieroCachingRuleFactory {
 
   shared_ptr<MatchingsFinder> matchings_finder;
   shared_ptr<Intersector> intersector;
+  shared_ptr<FastIntersector> fast_intersector;
   MatchingsTrie trie;
   shared_ptr<PhraseBuilder> phrase_builder;
   shared_ptr<RuleExtractor> rule_extractor;
@@ -91,6 +96,7 @@ class HieroCachingRuleFactory {
   int max_nonterminals;
   int max_chunks;
   int max_rule_symbols;
+  bool use_fast_intersect;
 };
 
 #endif

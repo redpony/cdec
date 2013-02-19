@@ -33,10 +33,6 @@ class LinearMerger {
   shared_ptr<Vocabulary> vocabulary;
   shared_ptr<DataArray> data_array;
   shared_ptr<MatchingComparator> comparator;
-
-  // TODO(pauldb): Remove this eventually.
- public:
-  double linear_merge_time;
 };
 
 #endif

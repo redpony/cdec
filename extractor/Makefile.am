@@ -4,6 +4,7 @@ noinst_PROGRAMS = \
   alignment_test \
   binary_search_merger_test \
   data_array_test \
+  fast_intersector_test \
   feature_count_source_target_test \
   feature_is_source_singleton_test \
   feature_is_source_target_singleton_test \
@@ -32,6 +33,7 @@ noinst_PROGRAMS = \
 TESTS = alignment_test \
   binary_search_merger_test \
   data_array_test \
+  fast_intersector_test \
   feature_count_source_target_test \
   feature_is_source_singleton_test \
   feature_is_source_target_singleton_test \
@@ -63,6 +65,8 @@ binary_search_merger_test_SOURCES = binary_search_merger_test.cc
 binary_search_merger_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) $(GMOCK_LDFLAGS) $(GMOCK_LIBS) libextractor.a
 data_array_test_SOURCES = data_array_test.cc
 data_array_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libextractor.a
+fast_intersector_test_SOURCES = fast_intersector_test.cc
+fast_intersector_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) $(GMOCK_LDFLAGS) $(GMOCK_LIBS) libextractor.a
 feature_count_source_target_test_SOURCES = features/count_source_target_test.cc
 feature_count_source_target_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libextractor.a
 feature_is_source_singleton_test_SOURCES = features/is_source_singleton_test.cc
@@ -125,12 +129,14 @@ libcompile_a_SOURCES = \
   phrase_location.cc \
   precomputation.cc \
   suffix_array.cc \
+  time_util.cc \
   translation_table.cc
 
 libextractor_a_SOURCES = \
   alignment.cc \
   binary_search_merger.cc \
   data_array.cc \
+  fast_intersector.cc \
   features/count_source_target.cc \
   features/feature.cc \
   features/is_source_singleton.cc \
@@ -159,6 +165,7 @@ libextractor_a_SOURCES = \
   scorer.cc \
   suffix_array.cc \
   target_phrase_extractor.cc \
+  time_util.cc \
   translation_table.cc \
   veb.cc \
   veb_bitset.cc \

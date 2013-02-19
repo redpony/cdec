@@ -147,7 +147,8 @@ bool DataArray::HasWord(const string& word) const {
 }
 
 int DataArray::GetWordId(const string& word) const {
-  return word2id.find(word)->second;
+  auto result = word2id.find(word);
+  return result == word2id.end() ? -1 : result->second;
 }
 
 string DataArray::GetWord(int word_id) const {

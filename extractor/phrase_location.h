@@ -11,7 +11,9 @@ struct PhraseLocation {
 
   PhraseLocation(const vector<int>& matchings, int num_subpatterns);
 
-  bool IsEmpty();
+  bool IsEmpty() const;
+
+  int GetSize() const;
 
   friend bool operator==(const PhraseLocation& a, const PhraseLocation& b);
 

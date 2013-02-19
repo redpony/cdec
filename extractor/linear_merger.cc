@@ -1,6 +1,5 @@
 #include "linear_merger.h"
 
-#include <chrono>
 #include <cmath>
 
 #include "data_array.h"
@@ -9,10 +8,6 @@
 #include "phrase.h"
 #include "phrase_location.h"
 #include "vocabulary.h"
-
-using namespace std::chrono;
-
-typedef high_resolution_clock Clock;
 
 LinearMerger::LinearMerger(shared_ptr<Vocabulary> vocabulary,
                            shared_ptr<DataArray> data_array,
@@ -28,8 +23,6 @@ void LinearMerger::Merge(
     vector<int>::iterator prefix_start, vector<int>::iterator prefix_end,
     vector<int>::iterator suffix_start, vector<int>::iterator suffix_end,
     int prefix_subpatterns, int suffix_subpatterns) {
-  Clock::time_point start = Clock::now();
-
   int last_chunk_len = suffix.GetChunkLen(suffix.Arity());
   bool offset = !vocabulary->IsTerminal(suffix.GetSymbol(0));
 
@@ -69,7 +62,4 @@ void LinearMerger::Merge(
       prefix_start += prefix_subpatterns;
     }
   }
-
-  Clock::time_point stop = Clock::now();
-  linear_merge_time += duration_cast<milliseconds>(stop - start).count();
 }

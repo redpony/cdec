@@ -2,7 +2,7 @@ import logging
 import resource
 import gzip
 
-cdef float monitor_cpu():
+def monitor_cpu():
     return (resource.getrusage(resource.RUSAGE_SELF).ru_utime+
             resource.getrusage(resource.RUSAGE_SELF).ru_stime)
 
