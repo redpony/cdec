@@ -95,6 +95,13 @@ AC_ARG_WITH(gtest,
             [with_gtest=no]
            )
 
+AM_CONDITIONAL([HAVE_GMOCK], false)
+AC_ARG_WITH(gmock,
+            [AC_HELP_STRING([--with-gmock=DIR], [(optional) path to Google Mock library])],
+            [with_gmock=$withval],
+            [with_gmock=no]
+           )
+
 if test "x$with_gtest" != 'xno'
 then
   gtest_CPPFLAGS="-I${with_gtest}/include"
@@ -132,12 +139,6 @@ then
   AC_SUBST(AS_TR_CPP([GTEST_LDFLAGS]), ["$gtest_LDFLAGS"])
   AC_SUBST(AS_TR_CPP([GTEST_LIBS]), ["$gtest_LIBS"])
 
-  AM_CONDITIONAL([HAVE_GMOCK], false)
-  AC_ARG_WITH(gmock,
-              [AC_HELP_STRING([--with-gmock=DIR], [(optional) path to Google Mock library])],
-              [with_gmock=$withval],
-              [with_gmock=no]
-             )
 
   if test "x$with_gmock" != 'xno'
   then
