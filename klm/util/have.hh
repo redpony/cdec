@@ -2,16 +2,12 @@
 #ifndef UTIL_HAVE__
 #define UTIL_HAVE__
 
-#ifndef HAVE_ICU
-//#define HAVE_ICU
-#endif
-
-#ifndef HAVE_BOOST
-//#define HAVE_BOOST
-#endif
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#ifndef HAVE_ICU
+//#define HAVE_ICU
 #endif
 
 #endif // UTIL_HAVE__

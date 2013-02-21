@@ -65,7 +65,7 @@ class VertexNode {
     }
 
     // Will be invalid unless this is a leaf.   
-    const History End() const { return end_; }
+    History End() const { return end_; }
 
     const VertexNode &operator[](size_t index) const {
       return *extend_[index];
@@ -124,7 +124,7 @@ class PartialVertex {
       return ret;
     }
 
-    const History End() const {
+    History End() const {
       return back_->End();
     }
 
@@ -141,7 +141,7 @@ class Vertex {
 
     PartialVertex RootPartial() const { return PartialVertex(root_); }
 
-    const History BestChild() const {
+    History BestChild() const {
       PartialVertex top(RootPartial());
       if (top.Empty()) {
         return History();

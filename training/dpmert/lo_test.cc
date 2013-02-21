@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE( TestS1) {
   to_optimize.push_back(fPhraseModel_1);
   to_optimize.push_back(fPhraseModel_2);
 
-  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : "test_data");
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
 
   Hypergraph hg;
   ReadFile rf(path + "/0.json.gz");
