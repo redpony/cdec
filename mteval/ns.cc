@@ -3,6 +3,7 @@
 #include "ns_ext.h"
 #include "ns_comb.h"
 #include "ns_cer.h"
+#include "ns_ssk.h"
 
 #include <cstdio>
 #include <cassert>
@@ -252,6 +253,8 @@ EvaluationMetric* EvaluationMetric::Instance(const string& imetric_id) {
       m = new BleuMetric<4, NIST>;
     } else if (metric_id == "KOEHN_BLEU") {
       m = new BleuMetric<4, Koehn>;
+    } else if (metric_id == "SSK") {
+      m = new SSKMetric;
     } else if (metric_id == "TER") {
       m = new TERMetric;
     } else if (metric_id == "METEOR") {
