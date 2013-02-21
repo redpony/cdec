@@ -1,63 +1,68 @@
 bin_PROGRAMS = compile run_extractor
 
-noinst_PROGRAMS = \
-  alignment_test \
-  binary_search_merger_test \
-  data_array_test \
-  fast_intersector_test \
-  feature_count_source_target_test \
-  feature_is_source_singleton_test \
-  feature_is_source_target_singleton_test \
-  feature_max_lex_source_given_target_test \
-  feature_max_lex_target_given_source_test \
-  feature_sample_source_count_test \
-  feature_target_given_source_coherent_test \
-  grammar_extractor_test \
-  intersector_test \
-  linear_merger_test \
-  matching_comparator_test \
-  matching_test \
-  matchings_finder_test \
-  phrase_test \
-  precomputation_test \
-  rule_extractor_helper_test \
-  rule_extractor_test \
-  rule_factory_test \
-  sampler_test \
-  scorer_test \
-  suffix_array_test \
-  target_phrase_extractor_test \
-  translation_table_test \
-  veb_test
+EXTRA_PROGRAMS = alignment_test \
+    binary_search_merger_test \
+    data_array_test \
+    fast_intersector_test \
+    feature_count_source_target_test \
+    feature_is_source_singleton_test \
+    feature_is_source_target_singleton_test \
+    feature_max_lex_source_given_target_test \
+    feature_max_lex_target_given_source_test \
+    feature_sample_source_count_test \
+    feature_target_given_source_coherent_test \
+    grammar_extractor_test \
+    intersector_test \
+    linear_merger_test \
+    matching_comparator_test \
+    matching_test \
+    matchings_finder_test \
+    phrase_test \
+    precomputation_test \
+    rule_extractor_helper_test \
+    rule_extractor_test \
+    rule_factory_test \
+    sampler_test \
+    scorer_test \
+    suffix_array_test \
+    target_phrase_extractor_test \
+    translation_table_test \
+    veb_test
 
-TESTS = alignment_test \
-  binary_search_merger_test \
-  data_array_test \
-  fast_intersector_test \
-  feature_count_source_target_test \
-  feature_is_source_singleton_test \
-  feature_is_source_target_singleton_test \
-  feature_max_lex_source_given_target_test \
-  feature_max_lex_target_given_source_test \
-  feature_sample_source_count_test \
-  feature_target_given_source_coherent_test \
-  grammar_extractor_test \
-  intersector_test \
-  linear_merger_test \
-  matching_comparator_test \
-  matching_test \
-  matchings_finder_test \
-  phrase_test \
-  precomputation_test \
-  rule_extractor_helper_test \
-  rule_extractor_test \
-  rule_factory_test \
-  sampler_test \
-  scorer_test \
-  suffix_array_test \
-  target_phrase_extractor_test \
-  translation_table_test \
-  veb_test
+if HAVE_GTEST
+  RUNNABLE_TESTS = alignment_test \
+    binary_search_merger_test \
+    data_array_test \
+    fast_intersector_test \
+    feature_count_source_target_test \
+    feature_is_source_singleton_test \
+    feature_is_source_target_singleton_test \
+    feature_max_lex_source_given_target_test \
+    feature_max_lex_target_given_source_test \
+    feature_sample_source_count_test \
+    feature_target_given_source_coherent_test \
+    grammar_extractor_test \
+    intersector_test \
+    linear_merger_test \
+    matching_comparator_test \
+    matching_test \
+    matchings_finder_test \
+    phrase_test \
+    precomputation_test \
+    rule_extractor_helper_test \
+    rule_extractor_test \
+    rule_factory_test \
+    sampler_test \
+    scorer_test \
+    suffix_array_test \
+    target_phrase_extractor_test \
+    translation_table_test \
+    veb_test
+endif
+
+noinst_PROGRAMS = $(RUNNABLE_TESTS)
+
+TESTS = $(RUNNABLE_TESTS)
 
 alignment_test_SOURCES = alignment_test.cc
 alignment_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libextractor.a
