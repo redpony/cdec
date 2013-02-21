@@ -14,7 +14,8 @@ SUBDIRS = \
   training \
   training/liblbfgs \
   word-aligner \
-  example_extff
+  example_extff \
+  extractor
 
 #gi/pyp-topics/src gi/clda/src gi/posterior-regularisation/prjava
 
