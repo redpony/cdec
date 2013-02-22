@@ -21,6 +21,10 @@ def precompute(f_sa, max_len, max_nt, max_size, min_gap, rank1, rank2, tight_phr
             train_min_gap_size=min_gap)
     return precomp
 
+def my_pause():
+  for i in range(10000000):
+    print >> sys.stderr, ""
+
 def main():
     preprocess_start_time = monitor_cpu()
     sys.setrecursionlimit(sys.getrecursionlimit() * 100)
@@ -85,6 +89,8 @@ def main():
     stop_time = monitor_cpu()
     logger.info('Compiling source suffix array took %f seconds', stop_time - start_time)
 
+    my_pause()
+
     start_time = monitor_cpu()
     logger.info('Compiling target data array')
     if args.bitext:
@@ -94,6 +100,7 @@ def main():
     e.write_binary(e_bin)
     stop_time = monitor_cpu()
     logger.info('Compiling target data array took %f seconds', stop_time - start_time)
+    my_pause()
 
     start_time = monitor_cpu()
     logger.info('Precomputing frequent phrases')
@@ -101,12 +108,15 @@ def main():
     stop_time = monitor_cpu()
     logger.info('Compiling precomputations took %f seconds', stop_time - start_time)
 
+    my_pause()
+
     start_time = monitor_cpu()
     logger.info('Compiling alignment')
     a = cdec.sa.Alignment(from_text=args.alignment)
     a.write_binary(a_bin)
     stop_time = monitor_cpu()
     logger.info('Compiling alignment took %f seonds', stop_time - start_time)
+    my_pause()
 
     start_time = monitor_cpu()
     logger.info('Compiling bilexical dictionary')
@@ -114,6 +124,7 @@ def main():
     lex.write_binary(lex_bin)
     stop_time = monitor_cpu()
     logger.info('Compiling bilexical dictionary took %f seconds', stop_time - start_time)
+    my_pause()
 
     # Write configuration
     config = cdec.configobj.ConfigObj(args.config, unrepr=True)
