@@ -26,18 +26,28 @@ class DataArrayTest : public Test {
 };
 
 TEST_F(DataArrayTest, TestGetData) {
-  vector<int> expected_source_data{2, 3, 4, 5, 1, 2, 6, 7, 8, 5, 1};
+  vector<int> expected_source_data = {2, 3, 4, 5, 1, 2, 6, 7, 8, 5, 1};
+  vector<string> expected_source_words = {
+      "ana", "are", "mere", ".", "__END_OF_LINE__",
+      "ana", "bea", "mult", "lapte", ".", "__END_OF_LINE__"
+  };
   EXPECT_EQ(expected_source_data, source_data->GetData());
   EXPECT_EQ(expected_source_data.size(), source_data->GetSize());
   for (size_t i = 0; i < expected_source_data.size(); ++i) {
     EXPECT_EQ(expected_source_data[i], source_data->AtIndex(i));
+    EXPECT_EQ(expected_source_words[i], source_data->GetWordAtIndex(i));
   }
 
-  vector<int> expected_target_data{2, 3, 4, 5, 1, 2, 6, 7, 8, 9, 10, 5, 1};
+  vector<int> expected_target_data = {2, 3, 4, 5, 1, 2, 6, 7, 8, 9, 10, 5, 1};
+  vector<string> expected_target_words = {
+      "anna", "has", "apples", ".", "__END_OF_LINE__",
+      "anna", "drinks", "a", "lot", "of", "milk", ".", "__END_OF_LINE__"
+  };
   EXPECT_EQ(expected_target_data, target_data->GetData());
   EXPECT_EQ(expected_target_data.size(), target_data->GetSize());
   for (size_t i = 0; i < expected_target_data.size(); ++i) {
     EXPECT_EQ(expected_target_data[i], target_data->AtIndex(i));
+    EXPECT_EQ(expected_target_words[i], target_data->GetWordAtIndex(i));
   }
 }
 
@@ -61,10 +71,26 @@ TEST_F(DataArrayTest, TestSentenceData) {
   EXPECT_EQ(5, source_data->GetSentenceStart(1));
   EXPECT_EQ(11, source_data->GetSentenceStart(2));
 
+  EXPECT_EQ(4, source_data->GetSentenceLength(0));
+  EXPECT_EQ(5, source_data->GetSentenceLength(1));
+
+  vector<int> expected_source_ids = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1};
+  for (size_t i = 0; i < expected_source_ids.size(); ++i) {
+    EXPECT_EQ(expected_source_ids[i], source_data->GetSentenceId(i));
+  }
+
   EXPECT_EQ(2, target_data->GetNumSentences());
   EXPECT_EQ(0, target_data->GetSentenceStart(0));
   EXPECT_EQ(5, target_data->GetSentenceStart(1));
   EXPECT_EQ(13, target_data->GetSentenceStart(2));
+
+  EXPECT_EQ(4, target_data->GetSentenceLength(0));
+  EXPECT_EQ(7, target_data->GetSentenceLength(1));
+
+  vector<int> expected_target_ids = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1};
+  for (size_t i = 0; i < expected_target_ids.size(); ++i) {
+    EXPECT_EQ(expected_target_ids[i], target_data->GetSentenceId(i));
+  }
 }
 
 }  // namespace
