@@ -136,7 +136,7 @@ void SuffixArray::TernaryQuicksort(int left, int right, int step,
 
 vector<int> SuffixArray::BuildLCPArray() const {
   Clock::time_point start_time = Clock::now();
-  cerr << "Constructing LCP array..." << endl;
+  cerr << "\tConstructing LCP array..." << endl;
 
   vector<int> lcp(suffix_array.size());
   vector<int> rank(suffix_array.size());
@@ -165,7 +165,7 @@ vector<int> SuffixArray::BuildLCPArray() const {
   }
 
   Clock::time_point stop_time = Clock::now();
-  cerr << "Constructing LCP took "
+  cerr << "\tConstructing LCP took "
        << GetDuration(start_time, stop_time) << " seconds" << endl;
 
   return lcp;
