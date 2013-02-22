@@ -19,6 +19,8 @@ class Vocabulary {
 
   virtual string GetTerminalValue(int symbol);
 
+  int Size();
+
  private:
   unordered_map<string, int> dictionary;
   vector<string> words;

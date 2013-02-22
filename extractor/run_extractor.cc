@@ -31,6 +31,14 @@ namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 using namespace std;
 
+void my_pause() {
+  cerr << "pausing..." << endl;
+  for (int i = 0; i < 10000000; ++i) {
+    cerr << endl;
+  }
+  cerr << "end pause" << endl;
+}
+
 int main(int argc, char** argv) {
   // TODO(pauldb): Also take arguments from config file.
   po::options_description desc("Command line options");

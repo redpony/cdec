@@ -24,3 +24,8 @@ bool Vocabulary::IsTerminal(int symbol) {
 string Vocabulary::GetTerminalValue(int symbol) {
   return words[symbol];
 }
+
+int Vocabulary::Size() {
+  return words.size();
+}
+

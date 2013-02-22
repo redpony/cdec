@@ -220,6 +220,8 @@ Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids) {
     }
   }
 
+  cerr << "Vocabulary size = " << vocabulary->Size() << endl;
+
   Clock::time_point stop_time = Clock::now();
   cerr << "Total time for rule lookup, extraction, and scoring = "
        << GetDuration(start_time, stop_time) << " seconds" << endl;
