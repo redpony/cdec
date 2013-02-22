@@ -15,6 +15,9 @@ enum Side {
   TARGET
 };
 
+// TODO: This class has features for both the source and target data arrays.
+// Maybe we can save some memory by having more specific implementations (e.g.
+// sentence_id is only needed for the source data array).
 class DataArray {
  public:
   static int NULL_WORD;
@@ -48,7 +51,6 @@ class DataArray {
 
   virtual int GetSentenceStart(int position) const;
 
-  //TODO(pauldb): Add unit tests.
   virtual int GetSentenceLength(int sentence_id) const;
 
   virtual int GetSentenceId(int position) const;
@@ -67,8 +69,6 @@ class DataArray {
   unordered_map<string, int> word2id;
   vector<string> id2word;
   vector<int> data;
-  // TODO(pauldb): We only need sentence_id for the source language. Maybe we
-  // can save some memory here.
   vector<int> sentence_id;
   vector<int> sentence_start;
 };
