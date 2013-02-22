@@ -29,8 +29,6 @@ class GrammarExtractor {
       int max_nonterminals,
       int max_rule_symbols,
       int max_samples,
-      bool use_fast_intersect,
-      bool use_baeza_yates,
       bool require_tight_phrases);
 
   // For testing only.

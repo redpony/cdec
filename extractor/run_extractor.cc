@@ -66,13 +66,9 @@ int main(int argc, char** argv) {
         "Minimum number of occurences for a pharse to be considered frequent")
     ("max_samples", po::value<int>()->default_value(300),
         "Maximum number of samples")
-    ("fast_intersect", po::value<bool>()->default_value(false),
-        "Enable fast intersect")
     // TODO(pauldb): Check if this works when set to false.
     ("tight_phrases", po::value<bool>()->default_value(true),
-        "False if phrases may be loose (better, but slower)")
-    ("baeza_yates", po::value<bool>()->default_value(true),
-        "Use double binary search");
+        "False if phrases may be loose (better, but slower)");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -178,8 +174,6 @@ int main(int argc, char** argv) {
       vm["max_nonterminals"].as<int>(),
       vm["max_rule_symbols"].as<int>(),
       vm["max_samples"].as<int>(),
-      vm["fast_intersect"].as<bool>(),
-      vm["baeza_yates"].as<bool>(),
       vm["tight_phrases"].as<bool>());
 
   int grammar_id = 0;

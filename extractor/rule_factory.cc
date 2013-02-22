@@ -7,9 +7,7 @@
 
 #include "grammar.h"
 #include "fast_intersector.h"
-#include "intersector.h"
 #include "matchings_finder.h"
-#include "matching_comparator.h"
 #include "phrase.h"
 #include "rule.h"
 #include "rule_extractor.h"
@@ -50,8 +48,6 @@ HieroCachingRuleFactory::HieroCachingRuleFactory(
     int max_nonterminals,
     int max_rule_symbols,
     int max_samples,
-    bool use_fast_intersect,
-    bool use_baeza_yates,
     bool require_tight_phrases) :
     vocabulary(vocabulary),
     scorer(scorer),
@@ -59,13 +55,8 @@ HieroCachingRuleFactory::HieroCachingRuleFactory(
     max_rule_span(max_rule_span),
     max_nonterminals(max_nonterminals),
     max_chunks(max_nonterminals + 1),
-    max_rule_symbols(max_rule_symbols),
-    use_fast_intersect(use_fast_intersect) {
+    max_rule_symbols(max_rule_symbols) {
   matchings_finder = make_shared<MatchingsFinder>(source_suffix_array);
-  shared_ptr<MatchingComparator> comparator =
-      make_shared<MatchingComparator>(min_gap_size, max_rule_span);
-  intersector = make_shared<Intersector>(vocabulary, precomputation,
-      source_suffix_array, comparator, use_baeza_yates);
   fast_intersector = make_shared<FastIntersector>(source_suffix_array,
       precomputation, vocabulary, max_rule_span, min_gap_size);
   phrase_builder = make_shared<PhraseBuilder>(vocabulary);
@@ -78,7 +69,6 @@ HieroCachingRuleFactory::HieroCachingRuleFactory(
 
 HieroCachingRuleFactory::HieroCachingRuleFactory(
     shared_ptr<MatchingsFinder> finder,
-    shared_ptr<Intersector> intersector,
     shared_ptr<FastIntersector> fast_intersector,
     shared_ptr<PhraseBuilder> phrase_builder,
     shared_ptr<RuleExtractor> rule_extractor,
@@ -89,10 +79,8 @@ HieroCachingRuleFactory::HieroCachingRuleFactory(
     int max_rule_span,
     int max_nonterminals,
     int max_chunks,
-    int max_rule_symbols,
-    bool use_fast_intersect) :
+    int max_rule_symbols) :
     matchings_finder(finder),
-    intersector(intersector),
     fast_intersector(fast_intersector),
     phrase_builder(phrase_builder),
     rule_extractor(rule_extractor),
@@ -103,15 +91,13 @@ HieroCachingRuleFactory::HieroCachingRuleFactory(
     max_rule_span(max_rule_span),
     max_nonterminals(max_nonterminals),
     max_chunks(max_chunks),
-    max_rule_symbols(max_rule_symbols),
-    use_fast_intersect(use_fast_intersect) {}
+    max_rule_symbols(max_rule_symbols) {}
 
 HieroCachingRuleFactory::HieroCachingRuleFactory() {}
 
 HieroCachingRuleFactory::~HieroCachingRuleFactory() {}
 
 Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids) {
-  intersector->sort_time = 0;
   Clock::time_point start_time = Clock::now();
   double total_extract_time = 0;
   double total_intersect_time = 0;
@@ -164,17 +150,8 @@ Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids) {
         PhraseLocation phrase_location;
         if (next_phrase.Arity() > 0) {
           Clock::time_point intersect_start = Clock::now();
-          if (use_fast_intersect) {
-            phrase_location = fast_intersector->Intersect(
-                node->matchings, next_suffix_link->matchings, next_phrase);
-          } else {
-            phrase_location = intersector->Intersect(
-                node->phrase,
-                node->matchings,
-                next_suffix_link->phrase,
-                next_suffix_link->matchings,
-                next_phrase);
-          }
+          phrase_location = fast_intersector->Intersect(
+              node->matchings, next_suffix_link->matchings, next_phrase);
           Clock::time_point intersect_stop = Clock::now();
           total_intersect_time += GetDuration(intersect_start, intersect_stop);
         } else {

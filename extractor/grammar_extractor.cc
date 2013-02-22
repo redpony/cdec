@@ -16,13 +16,12 @@ GrammarExtractor::GrammarExtractor(
     shared_ptr<Alignment> alignment, shared_ptr<Precomputation> precomputation,
     shared_ptr<Scorer> scorer, int min_gap_size, int max_rule_span,
     int max_nonterminals, int max_rule_symbols, int max_samples,
-    bool use_fast_intersect, bool use_baeza_yates, bool require_tight_phrases) :
+    bool require_tight_phrases) :
     vocabulary(make_shared<Vocabulary>()),
     rule_factory(make_shared<HieroCachingRuleFactory>(
         source_suffix_array, target_data_array, alignment, vocabulary,
         precomputation, scorer, min_gap_size, max_rule_span, max_nonterminals,
-        max_rule_symbols, max_samples, use_fast_intersect, use_baeza_yates,
-        require_tight_phrases)) {}
+        max_rule_symbols, max_samples, require_tight_phrases)) {}
 
 GrammarExtractor::GrammarExtractor(
     shared_ptr<Vocabulary> vocabulary,
