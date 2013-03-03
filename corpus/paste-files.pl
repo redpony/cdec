@@ -41,9 +41,9 @@ while(1) {
     }
     warn "$ARGV[$anum]:$lc contains a ||| symbol - please remove.\n" if $r =~ /\|\|\|/;
     $r =~ s/\|\|\|/ /g;
-    $r =~ s/  +//g;
-    $r =~ s/^ //;
-    $r =~ s/ $//;
+    $r =~ s/\s+/ /g;
+    $r =~ s/^ +//;
+    $r =~ s/ +$//;
     $anum++;
     push @line, $r;
   }
@@ -56,5 +56,5 @@ for (my $i = 1; $i < scalar @fhs; $i++) {
   my $r = <$fh>;
   die "Mismatched number of lines.\n" if defined $r;
 }
-print STDERR "Bad lines containing ||| were $bad\n";
+print STDERR "Number of lines containing ||| was: $bad\n" if $bad > 0;
 

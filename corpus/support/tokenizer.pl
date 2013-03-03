@@ -73,6 +73,7 @@ my $dict_file = "$workdir/token_list";
 my $word_patt_file = "$workdir/token_patterns";
 
 open(my $dict_fp, "$dict_file") or die;
+binmode($dict_fp, ":utf8");
 
 # read in the list of words that should not be segmented, 
 ##  e.g.,"I.B.M.", co-operation.
@@ -89,6 +90,7 @@ while(<$dict_fp>){
 }
 
 open(my $patt_fp, "$word_patt_file") or die;
+binmode($patt_fp, ":utf8");
 my @word_patts = ();
 my $word_patt_num = 0;
 while(<$patt_fp>){
@@ -147,7 +149,6 @@ while(<STDIN>){
 
     print STDOUT " $new_line\n";
 }
-print STDERR "\n";
 
 ########################################################################
    
