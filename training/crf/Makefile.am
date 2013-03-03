@@ -4,7 +4,11 @@ bin_PROGRAMS = \
   mpi_extract_features \
   mpi_extract_reachable \
   mpi_flex_optimize \
-  mpi_online_optimize
+  mpi_online_optimize \
+  mpi_baum_welch
+
+mpi_baum_welch_SOURCES = mpi_baum_welch.cc
+mpi_baum_welch_LDADD = ../../decoder/libcdec.a ../../klm/search/libksearch.a ../../mteval/libmteval.a ../../utils/libutils.a ../../klm/lm/libklm.a ../../klm/util/libklm_util.a ../../klm/util/double-conversion/libklm_util_double.a -lz
 
 mpi_online_optimize_SOURCES = mpi_online_optimize.cc
 mpi_online_optimize_LDADD = ../../training/utils/libtraining_utils.a ../../decoder/libcdec.a ../../klm/search/libksearch.a ../../mteval/libmteval.a ../../utils/libutils.a ../../klm/lm/libklm.a ../../klm/util/libklm_util.a ../../klm/util/double-conversion/libklm_util_double.a -lz
