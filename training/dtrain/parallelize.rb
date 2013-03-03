@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 
-if ARGV.size != 7
+if ARGV.size != 8
   STDERR.write "Usage: "
   STDERR.write "ruby parallelize.rb <dtrain.ini> <epochs> <rand=true|false> <#shards|predef> <at once> <input> <refs> <qsub>\n"
   exit
@@ -95,6 +95,7 @@ end
   remaining_shards = num_shards
   while remaining_shards > 0
     shards_at_once.times {
+      break if remaining_shards==0
       qsub_str_start = qsub_str_end = ''
       local_end = ''
       if use_qsub
