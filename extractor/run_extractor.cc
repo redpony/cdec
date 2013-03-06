@@ -35,7 +35,6 @@ using namespace extractor;
 using namespace features;
 
 int main(int argc, char** argv) {
-  // TODO(pauldb): Also take arguments from config file.
   po::options_description desc("Command line options");
   desc.add_options()
     ("help,h", "Show available options")

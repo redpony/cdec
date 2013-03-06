@@ -34,7 +34,8 @@ class Precomputation {
 
   virtual const Index& GetCollocations() const;
 
-  static int NON_TERMINAL;
+  static int FIRST_NONTERMINAL;
+  static int SECOND_NONTERMINAL;
 
  protected:
   Precomputation();

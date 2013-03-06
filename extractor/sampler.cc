@@ -38,8 +38,7 @@ PhraseLocation Sampler::Sample(const PhraseLocation& location) const {
 }
 
 int Sampler::Round(double x) const {
-  // TODO(pauldb): Remove EPS.
-  return x + 0.5 + 1e-8;
+  return x + 0.5;
 }
 
 } // namespace extractor
