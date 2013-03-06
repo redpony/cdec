@@ -35,8 +35,6 @@ void RuleExtractorHelper::GetLinksSpans(
   source_low = vector<int>(source_sent_len, -1);
   source_high = vector<int>(source_sent_len, -1);
 
-  // TODO(pauldb): Adam Lopez claims this part is really inefficient. See if we
-  // can speed it up.
   target_low = vector<int>(target_sent_len, -1);
   target_high = vector<int>(target_sent_len, -1);
   vector<pair<int, int> > links = alignment->GetLinks(sentence_id);
