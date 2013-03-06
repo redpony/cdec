@@ -17,8 +17,11 @@ class PhraseTest : public Test {
  protected:
   virtual void SetUp() {
     shared_ptr<MockVocabulary> vocabulary = make_shared<MockVocabulary>();
-    EXPECT_CALL(*vocabulary, GetTerminalValue(_))
-        .WillRepeatedly(Return("word"));
+    vector<string> words = {"w1", "w2", "w3", "w4"};
+    for (size_t i = 0; i < words.size(); ++i) {
+      EXPECT_CALL(*vocabulary, GetTerminalValue(i + 1))
+          .WillRepeatedly(Return(words[i]));
+    }
     shared_ptr<PhraseBuilder> phrase_builder =
         make_shared<PhraseBuilder>(vocabulary);
 
@@ -57,6 +60,23 @@ TEST_F(PhraseTest, TestGetSymbol) {
   for (size_t i = 0; i < symbols2.size(); ++i) {
     EXPECT_EQ(symbols2[i], phrase2.GetSymbol(i));
   }
+}
+
+TEST_F(PhraseTest, TestGetNumSymbols) {
+  EXPECT_EQ(3, phrase1.GetNumSymbols());
+  EXPECT_EQ(6, phrase2.GetNumSymbols());
+}
+
+TEST_F(PhraseTest, TestGetWords) {
+  vector<string> expected_words = {"w1", "w2", "w3"};
+  EXPECT_EQ(expected_words, phrase1.GetWords());
+  expected_words = {"w1", "w2", "w3", "w4"};
+  EXPECT_EQ(expected_words, phrase2.GetWords());
+}
+
+TEST_F(PhraseTest, TestComparator) {
+  EXPECT_FALSE(phrase1 < phrase2);
+  EXPECT_TRUE(phrase2 < phrase1);
 }
 
 } // namespace
