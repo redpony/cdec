@@ -1,6 +1,6 @@
 #include <gmock/gmock.h>
 
-#include "../alignment.h"
+#include "alignment.h"
 
 namespace extractor {
 

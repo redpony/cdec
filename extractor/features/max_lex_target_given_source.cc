@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "../data_array.h"
-#include "../translation_table.h"
+#include "data_array.h"
+#include "translation_table.h"
 
 namespace extractor {
 namespace features {

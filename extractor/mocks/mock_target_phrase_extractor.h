@@ -1,6 +1,6 @@
 #include <gmock/gmock.h>
 
-#include "../target_phrase_extractor.h"
+#include "target_phrase_extractor.h"
 
 namespace extractor {
 

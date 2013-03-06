@@ -1,6 +1,6 @@
 #include <gmock/gmock.h>
 
-#include "../vocabulary.h"
+#include "vocabulary.h"
 
 namespace extractor {
 

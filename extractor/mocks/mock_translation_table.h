@@ -1,6 +1,6 @@
 #include <gmock/gmock.h>
 
-#include "../translation_table.h"
+#include "translation_table.h"
 
 namespace extractor {
 

@@ -1,6 +1,6 @@
 #include <gmock/gmock.h>
 
-#include "../data_array.h"
+#include "data_array.h"
 
 namespace extractor {
 

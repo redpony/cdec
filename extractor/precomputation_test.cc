@@ -40,7 +40,6 @@ TEST_F(PrecomputationTest, TestCollocations) {
   Precomputation precomputation(suffix_array, 3, 3, 10, 5, 1, 4, 2);
   Index collocations = precomputation.GetCollocations();
 
-  EXPECT_EQ(-1, precomputation.NON_TERMINAL);
   vector<int> key = {2, 3, -1, 2};
   vector<int> expected_value = {1, 5, 1, 8, 5, 8, 5, 11, 8, 11};
   EXPECT_EQ(expected_value, collocations[key]);
@@ -69,33 +68,33 @@ TEST_F(PrecomputationTest, TestCollocations) {
   expected_value = {1, 6, 1, 9, 5, 9};
   EXPECT_EQ(expected_value, collocations[key]);
 
-  key = {2, -1, 2, -1, 2};
+  key = {2, -1, 2, -2, 2};
   expected_value = {1, 5, 8, 5, 8, 11};
   EXPECT_EQ(expected_value, collocations[key]);
-  key = {2, -1, 2, -1, 3};
+  key = {2, -1, 2, -2, 3};
   expected_value = {1, 5, 9};
   EXPECT_EQ(expected_value, collocations[key]);
-  key = {2, -1, 3, -1, 2};
+  key = {2, -1, 3, -2, 2};
   expected_value = {1, 6, 8, 5, 9, 11};
   EXPECT_EQ(expected_value, collocations[key]);
-  key = {2, -1, 3, -1, 3};
+  key = {2, -1, 3, -2, 3};
   expected_value = {1, 6, 9};
   EXPECT_EQ(expected_value, collocations[key]);
-  key = {3, -1, 2, -1, 2};
+  key = {3, -1, 2, -2, 2};
   expected_value = {2, 5, 8, 2, 5, 11, 2, 8, 11, 6, 8, 11};
   EXPECT_EQ(expected_value, collocations[key]);
-  key = {3, -1, 2, -1, 3};
+  key = {3, -1, 2, -2, 3};
   expected_value = {2, 5, 9};
   EXPECT_EQ(expected_value, collocations[key]);
-  key = {3, -1, 3, -1, 2};
+  key = {3, -1, 3, -2, 2};
   expected_value = {2, 6, 8, 2, 6, 11, 2, 9, 11, 6, 9, 11};
   EXPECT_EQ(expected_value, collocations[key]);
-  key = {3, -1, 3, -1, 3};
+  key = {3, -1, 3, -2, 3};
   expected_value = {2, 6, 9};
   EXPECT_EQ(expected_value, collocations[key]);
 
   // Exceeds max_rule_symbols.
-  key = {2, -1, 2, -1, 2, 3};
+  key = {2, -1, 2, -2, 2, 3};
   EXPECT_EQ(0, collocations.count(key));
   // Contains non frequent pattern.
   key = {2, -1, 5};

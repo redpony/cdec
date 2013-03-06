@@ -4,10 +4,10 @@
 #include <memory>
 #include <string>
 
-#include "../mocks/mock_translation_table.h"
-#include "../mocks/mock_vocabulary.h"
-#include "../data_array.h"
-#include "../phrase_builder.h"
+#include "data_array.h"
+#include "mocks/mock_translation_table.h"
+#include "mocks/mock_vocabulary.h"
+#include "phrase_builder.h"
 #include "max_lex_target_given_source.h"
 
 using namespace std;

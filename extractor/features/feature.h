@@ -3,8 +3,7 @@
 
 #include <string>
 
-//TODO(pauldb): include headers nicely.
-#include "../phrase.h"
+#include "phrase.h"
 
 using namespace std;
 

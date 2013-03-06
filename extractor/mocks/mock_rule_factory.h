@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 
-#include "../grammar.h"
-#include "../rule_factory.h"
+#include "grammar.h"
+#include "rule_factory.h"
 
 namespace extractor {
 
