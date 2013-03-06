@@ -13,6 +13,8 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
+namespace features {
 namespace {
 
 class MaxLexTargetGivenSourceTest : public Test {
@@ -71,4 +73,6 @@ TEST_F(MaxLexTargetGivenSourceTest, TestScore) {
   EXPECT_EQ(-log10(36), feature->Score(context));
 }
 
-}  // namespace
+} // namespace
+} // namespace features
+} // namespace extractor

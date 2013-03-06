@@ -9,6 +9,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 class Phrase {
  public:
   friend Phrase PhraseBuilder::Build(const vector<int>& phrase);
@@ -37,5 +39,7 @@ class Phrase {
   vector<int> var_pos;
   vector<string> words;
 };
+
+} // namespace extractor
 
 #endif

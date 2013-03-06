@@ -9,6 +9,8 @@
 #include "suffix_array.h"
 #include "vocabulary.h"
 
+namespace extractor {
+
 FastIntersector::FastIntersector(shared_ptr<SuffixArray> suffix_array,
                                  shared_ptr<Precomputation> precomputation,
                                  shared_ptr<Vocabulary> vocabulary,
@@ -189,3 +191,5 @@ pair<int, int> FastIntersector::GetSearchRange(bool has_marginal_x) const {
     return make_pair(1, 2);
   }
 }
+
+} // namespace extractor

@@ -17,6 +17,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 class RuleExtractorTest : public Test {
@@ -163,4 +164,5 @@ TEST_F(RuleExtractorTest, TestExtractRulesAddExtremities) {
   EXPECT_EQ(4, rules.size());
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor

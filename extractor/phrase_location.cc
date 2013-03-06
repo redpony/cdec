@@ -1,5 +1,7 @@
 #include "phrase_location.h"
 
+namespace extractor {
+
 PhraseLocation::PhraseLocation(int sa_low, int sa_high) :
     sa_low(sa_low), sa_high(sa_high), num_subpatterns(0) {}
 
@@ -37,3 +39,5 @@ bool operator==(const PhraseLocation& a, const PhraseLocation& b) {
 
   return *a.matchings == *b.matchings;
 }
+
+} // namespace extractor

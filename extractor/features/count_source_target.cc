@@ -2,6 +2,9 @@
 
 #include <cmath>
 
+namespace extractor {
+namespace features {
+
 double CountSourceTarget::Score(const FeatureContext& context) const {
   return log10(1 + context.pair_count);
 }
@@ -9,3 +12,6 @@ double CountSourceTarget::Score(const FeatureContext& context) const {
 string CountSourceTarget::GetName() const {
   return "CountEF";
 }
+
+} // namespace features
+} // namespace extractor

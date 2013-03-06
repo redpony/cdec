@@ -18,6 +18,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 class RuleFactoryTest : public Test {
@@ -98,4 +99,5 @@ TEST_F(RuleFactoryTest, TestGetGrammarRepeatingWords) {
   EXPECT_EQ(28, grammar.GetRules().size());
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor

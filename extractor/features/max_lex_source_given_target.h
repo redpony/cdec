@@ -7,7 +7,11 @@
 
 using namespace std;
 
+namespace extractor {
+
 class TranslationTable;
+
+namespace features {
 
 class MaxLexSourceGivenTarget : public Feature {
  public:
@@ -20,5 +24,8 @@ class MaxLexSourceGivenTarget : public Feature {
  private:
   shared_ptr<TranslationTable> table;
 };
+
+} // namespace features
+} // namespace extractor
 
 #endif

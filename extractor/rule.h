@@ -7,6 +7,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 struct Rule {
   Rule(const Phrase& source_phrase, const Phrase& target_phrase,
        const vector<double>& scores, const vector<pair<int, int> >& alignment);
@@ -16,5 +18,7 @@ struct Rule {
   vector<double> scores;
   vector<pair<int, int> > alignment;
 };
+
+} // namespace extractor
 
 #endif

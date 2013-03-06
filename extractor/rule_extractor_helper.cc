@@ -3,6 +3,8 @@
 #include "data_array.h"
 #include "alignment.h"
 
+namespace extractor {
+
 RuleExtractorHelper::RuleExtractorHelper(
     shared_ptr<DataArray> source_data_array,
     shared_ptr<DataArray> target_data_array,
@@ -354,3 +356,5 @@ unordered_map<int, int> RuleExtractorHelper::GetSourceIndexes(
  }
  return source_indexes;
 }
+
+} // namespace extractor

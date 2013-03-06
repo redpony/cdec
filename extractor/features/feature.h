@@ -8,6 +8,9 @@
 
 using namespace std;
 
+namespace extractor {
+namespace features {
+
 struct FeatureContext {
   FeatureContext(const Phrase& source_phrase, const Phrase& target_phrase,
                  double source_phrase_count, int pair_count, int num_samples) :
@@ -32,5 +35,8 @@ class Feature {
 
   static const double MAX_SCORE;
 };
+
+} // namespace features
+} // namespace extractor
 
 #endif

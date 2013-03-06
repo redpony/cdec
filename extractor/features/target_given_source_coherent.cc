@@ -2,6 +2,9 @@
 
 #include <cmath>
 
+namespace extractor {
+namespace features {
+
 double TargetGivenSourceCoherent::Score(const FeatureContext& context) const {
   double prob = (double) context.pair_count / context.num_samples;
   return prob > 0 ? -log10(prob) : MAX_SCORE;
@@ -10,3 +13,6 @@ double TargetGivenSourceCoherent::Score(const FeatureContext& context) const {
 string TargetGivenSourceCoherent::GetName() const {
   return "EgivenFCoherent";
 }
+
+} // namespace features
+} // namespace extractor

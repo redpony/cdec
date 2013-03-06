@@ -9,6 +9,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 typedef boost::hash<vector<int> > VectorHash;
 typedef unordered_map<vector<int>, vector<int>, VectorHash> Index;
 
@@ -61,5 +63,7 @@ class FastIntersector {
   int min_gap_size;
   Index collocations;
 };
+
+} // namespace extractor
 
 #endif

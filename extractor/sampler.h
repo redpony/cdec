@@ -5,6 +5,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 class PhraseLocation;
 class SuffixArray;
 
@@ -25,5 +27,7 @@ class Sampler {
   shared_ptr<SuffixArray> suffix_array;
   int max_samples;
 };
+
+} // namespace extractor
 
 #endif

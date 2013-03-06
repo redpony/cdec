@@ -3,6 +3,8 @@
 #include "phrase.h"
 #include "vocabulary.h"
 
+namespace extractor {
+
 PhraseBuilder::PhraseBuilder(shared_ptr<Vocabulary> vocabulary) :
     vocabulary(vocabulary) {}
 
@@ -42,3 +44,5 @@ Phrase PhraseBuilder::Extend(const Phrase& phrase, bool start_x, bool end_x) {
 
   return Build(symbols);
 }
+
+} // namespace extractor

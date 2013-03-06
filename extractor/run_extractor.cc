@@ -1,6 +1,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -30,6 +31,8 @@
 namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 using namespace std;
+using namespace extractor;
+using namespace features;
 
 int main(int argc, char** argv) {
   // TODO(pauldb): Also take arguments from config file.
@@ -146,13 +149,13 @@ int main(int argc, char** argv) {
 
   Clock::time_point extraction_start_time = Clock::now();
   vector<shared_ptr<Feature> > features = {
-      make_shared<TargetGivenSourceCoherent>(),
-      make_shared<SampleSourceCount>(),
-      make_shared<CountSourceTarget>(),
-      make_shared<MaxLexSourceGivenTarget>(table),
-      make_shared<MaxLexTargetGivenSource>(table),
-      make_shared<IsSourceSingleton>(),
-      make_shared<IsSourceTargetSingleton>()
+//      make_shared<TargetGivenSourceCoherent>(),
+//      make_shared<SampleSourceCount>(),
+//      make_shared<CountSourceTarget>(),
+//      make_shared<MaxLexSourceGivenTarget>(table),
+//      make_shared<MaxLexTargetGivenSource>(table),
+//      make_shared<IsSourceSingleton>(),
+//      make_shared<IsSourceTargetSingleton>()
   };
   shared_ptr<Scorer> scorer = make_shared<Scorer>(features);
 

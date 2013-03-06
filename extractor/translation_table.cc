@@ -10,6 +10,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 TranslationTable::TranslationTable(shared_ptr<DataArray> source_data_array,
                                    shared_ptr<DataArray> target_data_array,
                                    shared_ptr<Alignment> alignment) :
@@ -115,3 +117,5 @@ void TranslationTable::WriteBinary(const fs::path& filepath) const {
     fwrite(&entry.second, sizeof(entry.second), 1, file);
   }
 }
+
+} // namespace extractor

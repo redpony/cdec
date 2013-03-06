@@ -9,6 +9,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 class SamplerTest : public Test {
@@ -69,4 +70,5 @@ TEST_F(SamplerTest, TestSubstringsSample) {
   EXPECT_EQ(PhraseLocation(expected_locations, 2), sampler->Sample(location));
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor

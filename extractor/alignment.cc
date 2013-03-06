@@ -13,6 +13,8 @@
 namespace fs = boost::filesystem;
 using namespace std;
 
+namespace extractor {
+
 Alignment::Alignment(const string& filename) {
   ifstream infile(filename.c_str());
   string line;
@@ -49,3 +51,5 @@ void Alignment::WriteBinary(const fs::path& filepath) {
     fwrite(alignment.data(), sizeof(pair<int, int>), size, file);
   }
 }
+
+} // namespace extractor

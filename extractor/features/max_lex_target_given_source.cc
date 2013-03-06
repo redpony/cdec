@@ -5,6 +5,9 @@
 #include "../data_array.h"
 #include "../translation_table.h"
 
+namespace extractor {
+namespace features {
+
 MaxLexTargetGivenSource::MaxLexTargetGivenSource(
     shared_ptr<TranslationTable> table) :
     table(table) {}
@@ -29,3 +32,6 @@ double MaxLexTargetGivenSource::Score(const FeatureContext& context) const {
 string MaxLexTargetGivenSource::GetName() const {
   return "MaxLexEgivenF";
 }
+
+} // namespace features
+} // namespace extractor

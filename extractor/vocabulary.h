@@ -7,6 +7,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 class Vocabulary {
  public:
   virtual ~Vocabulary();
@@ -25,5 +27,7 @@ class Vocabulary {
   unordered_map<string, int> dictionary;
   vector<string> words;
 };
+
+} // namespace extractor
 
 #endif

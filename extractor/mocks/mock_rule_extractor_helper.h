@@ -6,6 +6,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 typedef unordered_map<int, int> Indexes;
 
 class MockRuleExtractorHelper : public RuleExtractorHelper {
@@ -76,3 +78,5 @@ class MockRuleExtractorHelper : public RuleExtractorHelper {
   bool met_constraints;
   bool get_gaps;
 };
+
+} // namespace extractor

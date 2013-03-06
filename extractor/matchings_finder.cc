@@ -3,6 +3,8 @@
 #include "suffix_array.h"
 #include "phrase_location.h"
 
+namespace extractor {
+
 MatchingsFinder::MatchingsFinder(shared_ptr<SuffixArray> suffix_array) :
     suffix_array(suffix_array) {}
 
@@ -19,3 +21,5 @@ PhraseLocation MatchingsFinder::Find(PhraseLocation& location,
 
   return suffix_array->Lookup(location.sa_low, location.sa_high, word, offset);
 }
+
+} // namespace extractor

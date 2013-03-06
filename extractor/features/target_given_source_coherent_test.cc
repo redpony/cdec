@@ -8,6 +8,8 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
+namespace features {
 namespace {
 
 class TargetGivenSourceCoherentTest : public Test {
@@ -32,4 +34,6 @@ TEST_F(TargetGivenSourceCoherentTest, TestScore) {
   EXPECT_EQ(99.0, feature->Score(context));
 }
 
-}  // namespace
+} // namespace
+} // namespace features
+} // namespace extractor

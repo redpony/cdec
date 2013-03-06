@@ -1,5 +1,7 @@
 #include "matchings_trie.h"
 
+namespace extractor {
+
 void MatchingsTrie::Reset() {
   ResetTree(root);
   root = make_shared<TrieNode>();
@@ -20,3 +22,5 @@ void MatchingsTrie::ResetTree(shared_ptr<TrieNode> root) {
     root.reset();
   }
 }
+
+} // namespace extractor

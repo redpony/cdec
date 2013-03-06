@@ -13,6 +13,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 TEST(GrammarExtractorTest, TestAnnotatingWords) {
@@ -46,4 +47,5 @@ TEST(GrammarExtractorTest, TestAnnotatingWords) {
   extractor.GetGrammar(sentence);
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor

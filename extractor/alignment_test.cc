@@ -8,6 +8,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 class AlignmentTest : public Test {
@@ -28,4 +29,5 @@ TEST_F(AlignmentTest, TestGetLinks) {
   EXPECT_EQ(expected_links, alignment->GetLinks(1));
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor

@@ -7,6 +7,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 class Alignment;
 class DataArray;
 
@@ -78,5 +80,7 @@ class RuleExtractorHelper {
   bool require_aligned_chunks;
   bool require_tight_phrases;
 };
+
+} // namespace extractor
 
 #endif

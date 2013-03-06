@@ -13,10 +13,12 @@
 namespace fs = boost::filesystem;
 using namespace std;
 
-class SuffixArray;
+namespace extractor {
 
 typedef boost::hash<vector<int> > VectorHash;
 typedef unordered_map<vector<int>, vector<int>, VectorHash> Index;
+
+class SuffixArray;
 
 class Precomputation {
  public:
@@ -50,5 +52,7 @@ class Precomputation {
 
   Index collocations;
 };
+
+} // namespace extractor
 
 #endif

@@ -6,6 +6,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 Grammar::Grammar(const vector<Rule>& rules,
                  const vector<string>& feature_names) :
   rules(rules), feature_names(feature_names) {}
@@ -37,3 +39,5 @@ ostream& operator<<(ostream& os, const Grammar& grammar) {
 
   return os;
 }
+
+} // namespace extractor

@@ -7,14 +7,16 @@
 
 using namespace std;
 
+namespace extractor {
+
+typedef vector<pair<int, int> > PhraseAlignment;
+
 class Alignment;
 class DataArray;
 class Phrase;
 class PhraseBuilder;
 class RuleExtractorHelper;
 class Vocabulary;
-
-typedef vector<pair<int, int> > PhraseAlignment;
 
 class TargetPhraseExtractor {
  public:
@@ -52,5 +54,7 @@ class TargetPhraseExtractor {
   int max_rule_span;
   bool require_tight_phrases;
 };
+
+} // namespace extractor
 
 #endif

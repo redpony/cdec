@@ -11,6 +11,7 @@ using namespace std;
 using namespace ::testing;
 namespace fs = boost::filesystem;
 
+namespace extractor {
 namespace {
 
 class DataArrayTest : public Test {
@@ -93,4 +94,5 @@ TEST_F(DataArrayTest, TestSentenceData) {
   }
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor

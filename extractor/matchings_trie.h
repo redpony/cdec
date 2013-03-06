@@ -9,6 +9,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 struct TrieNode {
   TrieNode(shared_ptr<TrieNode> suffix_link = shared_ptr<TrieNode>(),
            Phrase phrase = Phrase(),
@@ -43,5 +45,7 @@ class MatchingsTrie {
 
   shared_ptr<TrieNode> root;
 };
+
+} // namespace extractor
 
 #endif

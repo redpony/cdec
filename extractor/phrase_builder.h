@@ -6,6 +6,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 class Phrase;
 class Vocabulary;
 
@@ -20,5 +22,7 @@ class PhraseBuilder {
  private:
   shared_ptr<Vocabulary> vocabulary;
 };
+
+} // namespace extractor
 
 #endif

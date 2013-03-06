@@ -9,6 +9,8 @@
 namespace fs = boost::filesystem;
 using namespace std;
 
+namespace extractor {
+
 class Alignment {
  public:
   Alignment(const string& filename);
@@ -25,5 +27,7 @@ class Alignment {
  private:
   vector<vector<pair<int, int> > > alignments;
 };
+
+} // namespace extractor
 
 #endif

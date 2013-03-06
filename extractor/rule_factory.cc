@@ -9,6 +9,7 @@
 #include "fast_intersector.h"
 #include "matchings_finder.h"
 #include "phrase.h"
+#include "phrase_builder.h"
 #include "rule.h"
 #include "rule_extractor.h"
 #include "sampler.h"
@@ -19,6 +20,8 @@
 
 using namespace std;
 using namespace chrono;
+
+namespace extractor {
 
 typedef high_resolution_clock Clock;
 
@@ -282,3 +285,5 @@ vector<State> HieroCachingRuleFactory::ExtendState(
 
   return new_states;
 }
+
+} // namespace extractor

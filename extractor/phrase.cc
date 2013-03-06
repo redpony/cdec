@@ -1,5 +1,7 @@
 #include "phrase.h"
 
+namespace extractor {
+
 int Phrase::Arity() const {
   return var_pos.size();
 }
@@ -52,3 +54,5 @@ ostream& operator<<(ostream& os, const Phrase& phrase) {
   }
   return os;
 }
+
+} // namspace extractor

@@ -14,6 +14,7 @@
 namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 using namespace std;
+using namespace extractor;
 
 int main(int argc, char** argv) {
   po::options_description desc("Command line options");

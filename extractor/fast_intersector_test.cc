@@ -4,8 +4,8 @@
 
 #include "fast_intersector.h"
 #include "mocks/mock_data_array.h"
-#include "mocks/mock_suffix_array.h"
 #include "mocks/mock_precomputation.h"
+#include "mocks/mock_suffix_array.h"
 #include "mocks/mock_vocabulary.h"
 #include "phrase.h"
 #include "phrase_location.h"
@@ -14,6 +14,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 class FastIntersectorTest : public Test {
@@ -112,7 +113,6 @@ TEST_F(FastIntersectorTest, TestIntersectaXbXcExtendSuffix) {
   EXPECT_EQ(PhraseLocation(expected_locs, 3), result);
 }
 
-/*
 TEST_F(FastIntersectorTest, TestIntersectaXbExtendPrefix) {
   vector<int> symbols = {1, -1, 3};
   Phrase phrase = phrase_builder->Build(symbols);
@@ -141,6 +141,6 @@ TEST_F(FastIntersectorTest, TestIntersectCheckEstimates) {
   EXPECT_EQ(PhraseLocation(expected_locs, 2), result);
   EXPECT_EQ(PhraseLocation(10, 12), suffix_location);
 }
-*/
 
-}  // namespace
+} // namespace
+} // namespace extractor

@@ -1,18 +1,21 @@
 #ifndef _GRAMMAR_EXTRACTOR_H_
 #define _GRAMMAR_EXTRACTOR_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
-#include "rule_factory.h"
-
 using namespace std;
+
+namespace extractor {
 
 class Alignment;
 class DataArray;
 class Grammar;
+class HieroCachingRuleFactory;
 class Precomputation;
 class Rule;
+class Scorer;
 class SuffixArray;
 class Vocabulary;
 
@@ -45,5 +48,7 @@ class GrammarExtractor {
   shared_ptr<Vocabulary> vocabulary;
   shared_ptr<HieroCachingRuleFactory> rule_factory;
 };
+
+} // namespace extractor
 
 #endif
