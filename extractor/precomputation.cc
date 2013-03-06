@@ -69,8 +69,6 @@ vector<vector<int> > Precomputation::FindMostFrequentPatterns(
   for (size_t i = 1; i < lcp.size(); ++i) {
     for (int len = lcp[i]; len < max_frequent_phrase_len; ++len) {
       int frequency = i - run_start[len];
-      // TODO(pauldb): Only add patterns that don't span across multiple
-      // sentences.
       if (frequency >= min_frequency) {
         heap.push(make_pair(frequency,
             make_pair(suffix_array->GetSuffix(run_start[len]), len + 1)));
