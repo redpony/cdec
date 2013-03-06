@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 
-#include "../scorer.h"
-#include "../features/feature.h"
+#include "scorer.h"
+#include "features/feature.h"
 
 namespace extractor {
 

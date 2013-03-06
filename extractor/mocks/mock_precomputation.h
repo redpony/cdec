@@ -1,6 +1,6 @@
 #include <gmock/gmock.h>
 
-#include "../precomputation.h"
+#include "precomputation.h"
 
 namespace extractor {
 

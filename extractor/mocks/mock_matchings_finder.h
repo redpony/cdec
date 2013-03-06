@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 
-#include "../matchings_finder.h"
-#include "../phrase_location.h"
+#include "matchings_finder.h"
+#include "phrase_location.h"
 
 namespace extractor {
 

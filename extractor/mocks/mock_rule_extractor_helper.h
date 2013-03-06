@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "../rule_extractor_helper.h"
+#include "rule_extractor_helper.h"
 
 using namespace std;
 

@@ -1,6 +1,6 @@
 #include <gmock/gmock.h>
 
-#include "../features/feature.h"
+#include "features/feature.h"
 
 namespace extractor {
 namespace features {

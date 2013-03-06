@@ -1,9 +1,9 @@
 #include <gmock/gmock.h>
 
-#include "../phrase.h"
-#include "../phrase_builder.h"
-#include "../rule.h"
-#include "../rule_extractor.h"
+#include "phrase.h"
+#include "phrase_builder.h"
+#include "rule.h"
+#include "rule_extractor.h"
 
 namespace extractor {
 

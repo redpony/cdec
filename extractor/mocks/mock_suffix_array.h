@@ -3,9 +3,9 @@
 #include <memory>
 #include <string>
 
-#include "../data_array.h"
-#include "../phrase_location.h"
-#include "../suffix_array.h"
+#include "data_array.h"
+#include "phrase_location.h"
+#include "suffix_array.h"
 
 using namespace std;
 
