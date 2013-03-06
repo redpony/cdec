@@ -14,6 +14,9 @@ void MatchingsTrie::ResetTree(shared_ptr<TrieNode> root) {
     for (auto child: root->children) {
       ResetTree(child.second);
     }
+    if (root->suffix_link != NULL) {
+      root->suffix_link.reset();
+    }
     root.reset();
   }
 }

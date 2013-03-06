@@ -41,7 +41,6 @@ Precomputation::Precomputation(
     for (int j = 1; j <= max_frequent_phrase_len && i + j <= data.size(); ++j) {
       pattern.push_back(data[i + j - 1]);
       if (frequent_patterns_set.count(pattern)) {
-        inverted_index[pattern].push_back(i);
         int is_super_frequent = super_frequent_patterns_set.count(pattern);
         matchings.push_back(make_tuple(i, j, is_super_frequent));
       } else {
@@ -158,19 +157,7 @@ void Precomputation::WriteBinary(const fs::path& filepath) const {
   FILE* file = fopen(filepath.string().c_str(), "w");
 
   // TODO(pauldb): Refactor this code.
-  int size = inverted_index.size();
-  fwrite(&size, sizeof(int), 1, file);
-  for (auto entry: inverted_index) {
-    size = entry.first.size();
-    fwrite(&size, sizeof(int), 1, file);
-    fwrite(entry.first.data(), sizeof(int), size, file);
-
-    size = entry.second.size();
-    fwrite(&size, sizeof(int), 1, file);
-    fwrite(entry.second.data(), sizeof(int), size, file);
-  }
-
-  size = collocations.size();
+  int size = collocations.size();
   fwrite(&size, sizeof(int), 1, file);
   for (auto entry: collocations) {
     size = entry.first.size();
@@ -181,10 +168,6 @@ void Precomputation::WriteBinary(const fs::path& filepath) const {
     fwrite(&size, sizeof(int), 1, file);
     fwrite(entry.second.data(), sizeof(int), size, file);
   }
-}
-
-const Index& Precomputation::GetInvertedIndex() const {
-  return inverted_index;
 }
 
 const Index& Precomputation::GetCollocations() const {

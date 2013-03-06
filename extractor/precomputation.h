@@ -30,7 +30,6 @@ class Precomputation {
 
   void WriteBinary(const fs::path& filepath) const;
 
-  virtual const Index& GetInvertedIndex() const;
   virtual const Index& GetCollocations() const;
 
   static int NON_TERMINAL;
@@ -49,7 +48,6 @@ class Precomputation {
   void AddStartPositions(vector<int>& positions, int pos1, int pos2);
   void AddStartPositions(vector<int>& positions, int pos1, int pos2, int pos3);
 
-  Index inverted_index;
   Index collocations;
 };
 
