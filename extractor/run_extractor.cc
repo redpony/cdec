@@ -31,14 +31,6 @@ namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 using namespace std;
 
-void my_pause() {
-  cerr << "pausing..." << endl;
-  for (int i = 0; i < 10000000; ++i) {
-    cerr << endl;
-  }
-  cerr << "end pause" << endl;
-}
-
 int main(int argc, char** argv) {
   // TODO(pauldb): Also take arguments from config file.
   po::options_description desc("Command line options");
@@ -122,7 +114,7 @@ int main(int argc, char** argv) {
   cerr << "Reading alignment took "
        << GetDuration(start_time, stop_time) << " seconds" << endl;
 
-  cerr << "Precomputating collocations..." << endl;
+  cerr << "Precomputing collocations..." << endl;
   start_time = Clock::now();
   shared_ptr<Precomputation> precomputation = make_shared<Precomputation>(
       source_suffix_array,
@@ -150,6 +142,8 @@ int main(int argc, char** argv) {
        << GetDuration(preprocess_start_time, preprocess_stop_time)
        << " seconds" << endl;
 
+  cerr << "creating grammar extractor" << endl;
+
   Clock::time_point extraction_start_time = Clock::now();
   vector<shared_ptr<Feature> > features = {
       make_shared<TargetGivenSourceCoherent>(),
@@ -175,6 +169,9 @@ int main(int argc, char** argv) {
       vm["max_rule_symbols"].as<int>(),
       vm["max_samples"].as<int>(),
       vm["tight_phrases"].as<bool>());
+
+  // Release extra memory used by the initial precomputation.
+  precomputation.reset();
 
   int grammar_id = 0;
   fs::path grammar_path = vm["grammars"].as<string>();

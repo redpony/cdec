@@ -35,40 +35,6 @@ class PrecomputationTest : public Test {
   shared_ptr<MockSuffixArray> suffix_array;
 };
 
-TEST_F(PrecomputationTest, TestInvertedIndex) {
-  Precomputation precomputation(suffix_array, 100, 3, 10, 5, 1, 4, 2);
-  Index inverted_index = precomputation.GetInvertedIndex();
-
-  EXPECT_EQ(8, inverted_index.size());
-  vector<int> key = {2};
-  vector<int> expected_value = {1, 5, 8, 11};
-  EXPECT_EQ(expected_value, inverted_index[key]);
-  key = {3};
-  expected_value = {2, 6, 9};
-  EXPECT_EQ(expected_value, inverted_index[key]);
-  key = {4};
-  expected_value = {0, 10};
-  EXPECT_EQ(expected_value, inverted_index[key]);
-  key = {5};
-  expected_value = {3, 7};
-  EXPECT_EQ(expected_value, inverted_index[key]);
-  key = {4, 2};
-  expected_value = {0, 10};
-  EXPECT_EQ(expected_value, inverted_index[key]);
-  key = {2, 3};
-  expected_value = {1, 5, 8};
-  EXPECT_EQ(expected_value, inverted_index[key]);
-  key = {3, 5};
-  expected_value = {2, 6};
-  EXPECT_EQ(expected_value, inverted_index[key]);
-  key = {2, 3, 5};
-  expected_value = {1, 5};
-  EXPECT_EQ(expected_value, inverted_index[key]);
-
-  key = {2, 4};
-  EXPECT_EQ(0, inverted_index.count(key));
-}
-
 TEST_F(PrecomputationTest, TestCollocations) {
   Precomputation precomputation(suffix_array, 3, 3, 10, 5, 1, 4, 2);
   Index collocations = precomputation.GetCollocations();
