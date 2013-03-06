@@ -11,10 +11,12 @@
 using namespace std;
 namespace fs = boost::filesystem;
 
-class Alignment;
-class DataArray;
+namespace extractor {
 
 typedef boost::hash<pair<int, int> > PairHash;
+
+class Alignment;
+class DataArray;
 
 class TranslationTable {
  public:
@@ -49,5 +51,7 @@ class TranslationTable {
   unordered_map<pair<int, int>, pair<double, double>, PairHash>
       translation_probabilities;
 };
+
+} // namespace extractor
 
 #endif

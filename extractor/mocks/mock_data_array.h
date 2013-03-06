@@ -2,6 +2,8 @@
 
 #include "../data_array.h"
 
+namespace extractor {
+
 class MockDataArray : public DataArray {
  public:
   MOCK_CONST_METHOD0(GetData, const vector<int>&());
@@ -17,3 +19,5 @@ class MockDataArray : public DataArray {
   MOCK_CONST_METHOD1(GetSentenceStart, int(int sentence_id));
   MOCK_CONST_METHOD1(GetSentenceId, int(int position));
 };
+
+} // namespace extractor

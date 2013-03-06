@@ -9,6 +9,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 class SuffixArrayTest : public Test {
@@ -73,4 +74,5 @@ TEST_F(SuffixArrayTest, TestLookup) {
   EXPECT_EQ(PhraseLocation(11, 11), suffix_array->Lookup(11, 13, "word5", 1));
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor

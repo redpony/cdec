@@ -5,15 +5,17 @@
 #include <vector>
 
 #include "matchings_trie.h"
-#include "phrase_builder.h"
 
 using namespace std;
 
+namespace extractor {
+
 class Alignment;
 class DataArray;
+class FastIntersector;
 class Grammar;
 class MatchingsFinder;
-class FastIntersector;
+class PhraseBuilder;
 class Precomputation;
 class Rule;
 class RuleExtractor;
@@ -91,5 +93,7 @@ class HieroCachingRuleFactory {
   int max_chunks;
   int max_rule_symbols;
 };
+
+} // namespace extractor
 
 #endif

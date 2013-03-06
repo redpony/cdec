@@ -14,6 +14,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 class TargetPhraseExtractorTest : public Test {
@@ -113,4 +114,5 @@ TEST_F(TargetPhraseExtractorTest, TestExtractPhrasesTightPhrasesFalse) {
   // look like.
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor

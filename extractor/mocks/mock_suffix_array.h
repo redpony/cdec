@@ -9,6 +9,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 class MockSuffixArray : public SuffixArray {
  public:
   MOCK_CONST_METHOD0(GetSize, int());
@@ -17,3 +19,5 @@ class MockSuffixArray : public SuffixArray {
   MOCK_CONST_METHOD1(GetSuffix, int(int));
   MOCK_CONST_METHOD4(Lookup, PhraseLocation(int, int, const string& word, int));
 };
+
+} // namespace extractor

@@ -9,6 +9,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 class RuleExtractorHelperTest : public Test {
@@ -619,4 +620,5 @@ TEST_F(RuleExtractorHelperTest, TestGetGapIntegrityChecksFailed) {
                                met_constraints));
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor

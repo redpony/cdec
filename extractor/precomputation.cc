@@ -8,6 +8,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 int Precomputation::NON_TERMINAL = -1;
 
 Precomputation::Precomputation(
@@ -173,3 +175,5 @@ void Precomputation::WriteBinary(const fs::path& filepath) const {
 const Index& Precomputation::GetCollocations() const {
   return collocations;
 }
+
+} // namespace extractor

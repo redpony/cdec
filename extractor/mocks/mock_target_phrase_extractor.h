@@ -2,6 +2,8 @@
 
 #include "../target_phrase_extractor.h"
 
+namespace extractor {
+
 typedef pair<Phrase, PhraseAlignment> PhraseExtract;
 
 class MockTargetPhraseExtractor : public TargetPhraseExtractor {
@@ -10,3 +12,5 @@ class MockTargetPhraseExtractor : public TargetPhraseExtractor {
       const vector<pair<int, int> > &, const vector<int>&, int, int,
       const unordered_map<int, int>&, int));
 };
+
+} // namespace extractor

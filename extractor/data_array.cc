@@ -10,6 +10,8 @@
 namespace fs = boost::filesystem;
 using namespace std;
 
+namespace extractor {
+
 int DataArray::NULL_WORD = 0;
 int DataArray::END_OF_LINE = 1;
 string DataArray::NULL_WORD_STR = "__NULL__";
@@ -154,3 +156,5 @@ int DataArray::GetWordId(const string& word) const {
 string DataArray::GetWord(int word_id) const {
   return id2word[word_id];
 }
+
+} // namespace extractor

@@ -9,6 +9,10 @@
 
 using namespace std;
 
+namespace extractor {
+
+typedef vector<pair<int, int> > PhraseAlignment;
+
 class Alignment;
 class DataArray;
 class PhraseBuilder;
@@ -17,8 +21,6 @@ class Rule;
 class RuleExtractorHelper;
 class Scorer;
 class TargetPhraseExtractor;
-
-typedef vector<pair<int, int> > PhraseAlignment;
 
 struct Extract {
   Extract(const Phrase& source_phrase, const Phrase& target_phrase,
@@ -100,5 +102,7 @@ class RuleExtractor {
   int max_rule_symbols;
   bool require_tight_phrases;
 };
+
+} // namespace extractor
 
 #endif

@@ -6,9 +6,12 @@
 
 #include "grammar.h"
 #include "rule.h"
+#include "rule_factory.h"
 #include "vocabulary.h"
 
 using namespace std;
+
+namespace extractor {
 
 GrammarExtractor::GrammarExtractor(
     shared_ptr<SuffixArray> source_suffix_array,
@@ -55,3 +58,5 @@ vector<int> GrammarExtractor::AnnotateWords(const vector<string>& words) {
   }
   return result;
 }
+
+} // namespace extractor

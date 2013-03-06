@@ -14,6 +14,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 RuleExtractor::RuleExtractor(
     shared_ptr<DataArray> source_data_array,
     shared_ptr<DataArray> target_data_array,
@@ -106,7 +108,7 @@ vector<Rule> RuleExtractor::ExtractRules(const Phrase& phrase,
         }
       }
 
-      FeatureContext context(source_phrase, target_phrase,
+      features::FeatureContext context(source_phrase, target_phrase,
           source_phrase_counter[source_phrase], num_locations, num_samples);
       vector<double> scores = scorer->Score(context);
       rules.push_back(Rule(source_phrase, target_phrase, scores,
@@ -313,3 +315,5 @@ void RuleExtractor::AddNonterminalExtremities(
   AddExtracts(extracts, new_source_phrase, source_indexes, target_gaps,
               target_low, target_x_low, target_x_high, sentence_id);
 }
+
+} // namespace extractor

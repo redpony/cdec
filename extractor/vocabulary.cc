@@ -1,5 +1,7 @@
 #include "vocabulary.h"
 
+namespace extractor {
+
 Vocabulary::~Vocabulary() {}
 
 int Vocabulary::GetTerminalIndex(const string& word) {
@@ -29,3 +31,4 @@ int Vocabulary::Size() {
   return words.size();
 }
 
+} // namespace extractor

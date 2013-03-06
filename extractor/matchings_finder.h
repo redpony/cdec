@@ -6,6 +6,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 class PhraseLocation;
 class SuffixArray;
 
@@ -24,5 +26,7 @@ class MatchingsFinder {
  private:
   shared_ptr<SuffixArray> suffix_array;
 };
+
+} // namespace extractor
 
 #endif

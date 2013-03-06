@@ -7,6 +7,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 class Rule;
 
 class Grammar {
@@ -23,5 +25,7 @@ class Grammar {
   vector<Rule> rules;
   vector<string> feature_names;
 };
+
+} // namespace extractor
 
 #endif

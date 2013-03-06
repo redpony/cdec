@@ -2,6 +2,9 @@
 
 #include <cmath>
 
+namespace extractor {
+namespace features {
+
 double IsSourceSingleton::Score(const FeatureContext& context) const {
   return context.source_phrase_count == 1;
 }
@@ -9,3 +12,6 @@ double IsSourceSingleton::Score(const FeatureContext& context) const {
 string IsSourceSingleton::GetName() const {
   return "IsSingletonF";
 }
+
+} // namespace features
+} // namespace extractor

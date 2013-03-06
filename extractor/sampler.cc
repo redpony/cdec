@@ -3,6 +3,8 @@
 #include "phrase_location.h"
 #include "suffix_array.h"
 
+namespace extractor {
+
 Sampler::Sampler(shared_ptr<SuffixArray> suffix_array, int max_samples) :
     suffix_array(suffix_array), max_samples(max_samples) {}
 
@@ -39,3 +41,5 @@ int Sampler::Round(double x) const {
   // TODO(pauldb): Remove EPS.
   return x + 0.5 + 1e-8;
 }
+
+} // namespace extractor

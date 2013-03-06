@@ -10,6 +10,8 @@
 namespace fs = boost::filesystem;
 using namespace std;
 
+namespace extractor {
+
 enum Side {
   SOURCE,
   TARGET
@@ -72,5 +74,7 @@ class DataArray {
   vector<int> sentence_id;
   vector<int> sentence_start;
 };
+
+} // namespace extractor
 
 #endif

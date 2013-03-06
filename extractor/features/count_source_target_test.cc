@@ -8,6 +8,8 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
+namespace features {
 namespace {
 
 class CountSourceTargetTest : public Test {
@@ -29,4 +31,6 @@ TEST_F(CountSourceTargetTest, TestScore) {
   EXPECT_EQ(1.0, feature->Score(context));
 }
 
-}  // namespace
+} // namespace
+} // namespace features
+} // namespace extractor

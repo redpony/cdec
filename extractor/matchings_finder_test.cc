@@ -9,6 +9,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 class MatchingsFinderTest : public Test {
@@ -39,4 +40,5 @@ TEST_F(MatchingsFinderTest, ResizeUnsetRange) {
   EXPECT_EQ(PhraseLocation(0, 10), phrase_location);
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor

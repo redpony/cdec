@@ -13,6 +13,8 @@ namespace fs = boost::filesystem;
 using namespace std;
 using namespace chrono;
 
+namespace extractor {
+
 SuffixArray::SuffixArray(shared_ptr<DataArray> data_array) :
     data_array(data_array) {
   BuildSuffixArray();
@@ -227,3 +229,5 @@ int SuffixArray::LookupRangeStart(int low, int high, int word_id,
   }
   return result;
 }
+
+} // namespace extractor

@@ -10,6 +10,8 @@
 namespace fs = boost::filesystem;
 using namespace std;
 
+namespace extractor {
+
 class DataArray;
 class PhraseLocation;
 
@@ -50,5 +52,7 @@ class SuffixArray {
   vector<int> suffix_array;
   vector<int> word_start;
 };
+
+} // namespace extractor
 
 #endif

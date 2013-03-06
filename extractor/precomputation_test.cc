@@ -10,6 +10,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 class PrecomputationTest : public Test {
@@ -101,4 +102,6 @@ TEST_F(PrecomputationTest, TestCollocations) {
   EXPECT_EQ(0, collocations.count(key));
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor
+

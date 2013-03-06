@@ -11,6 +11,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 TEST(TranslationTableTest, TestScores) {
@@ -79,4 +80,5 @@ TEST(TranslationTableTest, TestScores) {
   EXPECT_EQ(-1, table->GetSourceGivenTargetScore("c", "d"));
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor

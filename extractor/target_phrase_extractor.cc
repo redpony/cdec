@@ -11,6 +11,8 @@
 
 using namespace std;
 
+namespace extractor {
+
 TargetPhraseExtractor::TargetPhraseExtractor(
     shared_ptr<DataArray> target_data_array,
     shared_ptr<Alignment> alignment,
@@ -142,3 +144,5 @@ void TargetPhraseExtractor::GeneratePhrases(
     ++subpatterns[index];
   }
 }
+
+} // namespace extractor

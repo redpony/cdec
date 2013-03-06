@@ -10,6 +10,7 @@
 using namespace std;
 using namespace ::testing;
 
+namespace extractor {
 namespace {
 
 class PhraseTest : public Test {
@@ -58,4 +59,5 @@ TEST_F(PhraseTest, TestGetSymbol) {
   }
 }
 
-}  // namespace
+} // namespace
+} // namespace extractor

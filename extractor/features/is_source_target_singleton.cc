@@ -2,6 +2,9 @@
 
 #include <cmath>
 
+namespace extractor {
+namespace features {
+
 double IsSourceTargetSingleton::Score(const FeatureContext& context) const {
   return context.pair_count == 1;
 }
@@ -9,3 +12,6 @@ double IsSourceTargetSingleton::Score(const FeatureContext& context) const {
 string IsSourceTargetSingleton::GetName() const {
   return "IsSingletonFE";
 }
+
+} // namespace features
+} // namespace extractor

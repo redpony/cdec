@@ -2,14 +2,16 @@
 
 #include "features/feature.h"
 
-Scorer::Scorer(const vector<shared_ptr<Feature> >& features) :
+namespace extractor {
+
+Scorer::Scorer(const vector<shared_ptr<features::Feature> >& features) :
     features(features) {}
 
 Scorer::Scorer() {}
 
 Scorer::~Scorer() {}
 
-vector<double> Scorer::Score(const FeatureContext& context) const {
+vector<double> Scorer::Score(const features::FeatureContext& context) const {
   vector<double> scores;
   for (auto feature: features) {
     scores.push_back(feature->Score(context));
@@ -24,3 +26,5 @@ vector<string> Scorer::GetFeatureNames() const {
   }
   return feature_names;
 }
+
+} // namespace extractor
