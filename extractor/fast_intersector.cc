@@ -35,12 +35,9 @@ vector<int> FastIntersector::ConvertPhrase(const vector<int>& old_phrase) {
   vector<int> new_phrase;
   new_phrase.reserve(old_phrase.size());
   shared_ptr<DataArray> data_array = suffix_array->GetData();
-  int num_nonterminals = 0;
   for (int word_id: old_phrase) {
-    // TODO(pauldb): Remove overhead for relabelling the nonterminals here.
-    if (word_id == Precomputation::NON_TERMINAL) {
-      ++num_nonterminals;
-      new_phrase.push_back(vocabulary->GetNonterminalIndex(num_nonterminals));
+    if (word_id < 0) {
+      new_phrase.push_back(word_id);
     } else {
       new_phrase.push_back(
           vocabulary->GetTerminalIndex(data_array->GetWord(word_id)));

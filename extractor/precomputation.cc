@@ -10,7 +10,8 @@ using namespace std;
 
 namespace extractor {
 
-int Precomputation::NON_TERMINAL = -1;
+int Precomputation::FIRST_NONTERMINAL = -1;
+int Precomputation::SECOND_NONTERMINAL = -2;
 
 Precomputation::Precomputation(
     shared_ptr<SuffixArray> suffix_array, int num_frequent_patterns,
@@ -112,13 +113,13 @@ void Precomputation::AddCollocations(
           && size1 + size2 + 1 <= max_rule_symbols) {
         vector<int> pattern(data.begin() + start1,
             data.begin() + start1 + size1);
-        pattern.push_back(Precomputation::NON_TERMINAL);
+        pattern.push_back(Precomputation::FIRST_NONTERMINAL);
         pattern.insert(pattern.end(), data.begin() + start2,
             data.begin() + start2 + size2);
         AddStartPositions(collocations[pattern], start1, start2);
 
         if (is_super2) {
-          pattern.push_back(Precomputation::NON_TERMINAL);
+          pattern.push_back(Precomputation::SECOND_NONTERMINAL);
           for (size_t k = j + 1; k < matchings.size(); ++k) {
             int start3, size3, is_super3;
             tie(start3, size3, is_super3) = matchings[k];
