@@ -23,14 +23,11 @@ class Phrase {
 
   int GetSymbol(int position) const;
 
-  //TODO(pauldb): Unit test this method.
   int GetNumSymbols() const;
 
-  //TODO(pauldb): Add unit tests.
   vector<string> GetWords() const;
 
-  //TODO(pauldb): Add unit tests.
-  int operator<(const Phrase& other) const;
+  bool operator<(const Phrase& other) const;
 
   friend ostream& operator<<(ostream& os, const Phrase& phrase);
 

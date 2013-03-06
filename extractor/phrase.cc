@@ -34,7 +34,7 @@ vector<string> Phrase::GetWords() const {
   return words;
 }
 
-int Phrase::operator<(const Phrase& other) const {
+bool Phrase::operator<(const Phrase& other) const {
   return symbols < other.symbols;
 }
 
