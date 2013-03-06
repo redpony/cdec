@@ -57,7 +57,6 @@ class RuleExtractorHelper {
 
   virtual vector<int> GetGapOrder(const vector<pair<int, int> >& gaps) const;
 
-  // TODO(pauldb): Add unit tests.
   virtual unordered_map<int, int> GetSourceIndexes(
       const vector<int>& matching, const vector<int>& chunklen,
       int starts_with_x) const;

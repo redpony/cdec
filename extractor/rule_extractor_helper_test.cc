@@ -620,5 +620,22 @@ TEST_F(RuleExtractorHelperTest, TestGetGapIntegrityChecksFailed) {
                                met_constraints));
 }
 
+TEST_F(RuleExtractorHelperTest, TestGetSourceIndexes) {
+  helper = make_shared<RuleExtractorHelper>(source_data_array,
+      target_data_array, alignment, 10, 5, true, true, true);
+
+  vector<int> matching = {13, 18, 21};
+  vector<int> chunklen = {3, 2, 1};
+  unordered_map<int, int> expected_indexes = {
+      {3, 1}, {4, 2}, {5, 3}, {8, 5}, {9, 6}, {11, 8}
+  };
+  EXPECT_EQ(expected_indexes, helper->GetSourceIndexes(matching, chunklen, 1));
+
+  matching = {12, 17};
+  chunklen = {2, 4};
+  expected_indexes = {{2, 0}, {3, 1}, {7, 3}, {8, 4}, {9, 5}, {10, 6}};
+  EXPECT_EQ(expected_indexes, helper->GetSourceIndexes(matching, chunklen, 0));
+}
+
 } // namespace
 } // namespace extractor
