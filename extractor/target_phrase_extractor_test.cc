@@ -80,8 +80,8 @@ TEST_F(TargetPhraseExtractorTest, TestExtractTightPhrasesTrue) {
 }
 
 TEST_F(TargetPhraseExtractorTest, TestExtractPhrasesTightPhrasesFalse) {
-  vector<string> target_words = {"a", "b", "c", "d", "e", "f"};
-  vector<int> target_symbols = {20, 21, 22, 23, 24, 25, 26};
+  vector<string> target_words = {"a", "b", "c", "d", "e", "f", "END_OF_LINE"};
+  vector<int> target_symbols = {20, 21, 22, 23, 24, 25, 1};
   EXPECT_CALL(*data_array, GetSentenceLength(0)).WillRepeatedly(Return(6));
   EXPECT_CALL(*data_array, GetSentenceStart(0)).WillRepeatedly(Return(0));
 
@@ -110,6 +110,7 @@ TEST_F(TargetPhraseExtractorTest, TestExtractPhrasesTightPhrasesFalse) {
   vector<pair<Phrase, PhraseAlignment> > results = extractor->ExtractPhrases(
       target_gaps, target_low, 1, 5, source_indexes, 0);
   EXPECT_EQ(10, results.size());
+
   // TODO(pauldb): Finish unit test once it's clear how these alignments should
   // look like.
 }
