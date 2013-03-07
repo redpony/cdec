@@ -37,11 +37,14 @@ struct TrieNode {
 
 class MatchingsTrie {
  public:
-  void Reset();
+  MatchingsTrie();
+
+  virtual ~MatchingsTrie();
+
   shared_ptr<TrieNode> GetRoot() const;
 
  private:
-  void ResetTree(shared_ptr<TrieNode> root);
+  void DeleteTree(shared_ptr<TrieNode> root);
 
   shared_ptr<TrieNode> root;
 };

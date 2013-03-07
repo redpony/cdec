@@ -5,14 +5,18 @@ namespace extractor {
 Vocabulary::~Vocabulary() {}
 
 int Vocabulary::GetTerminalIndex(const string& word) {
-  if (!dictionary.count(word)) {
-    int word_id = words.size();
-    dictionary[word] = word_id;
-    words.push_back(word);
-    return word_id;
+  int word_id = -1;
+  #pragma omp critical (vocabulary)
+  {
+    if (!dictionary.count(word)) {
+      word_id = words.size();
+      dictionary[word] = word_id;
+      words.push_back(word);
+    } else {
+      word_id = dictionary[word];
+    }
   }
-
-  return dictionary[word];
+  return word_id;
 }
 
 int Vocabulary::GetNonterminalIndex(int position) {
@@ -24,11 +28,10 @@ bool Vocabulary::IsTerminal(int symbol) {
 }
 
 string Vocabulary::GetTerminalValue(int symbol) {
-  return words[symbol];
-}
-
-int Vocabulary::Size() {
-  return words.size();
+  string word;
+  #pragma omp critical (vocabulary)
+  word = words[symbol];
+  return word;
 }
 
 } // namespace extractor

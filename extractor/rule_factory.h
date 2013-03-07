@@ -81,7 +81,6 @@ class HieroCachingRuleFactory {
 
   shared_ptr<MatchingsFinder> matchings_finder;
   shared_ptr<FastIntersector> fast_intersector;
-  MatchingsTrie trie;
   shared_ptr<PhraseBuilder> phrase_builder;
   shared_ptr<RuleExtractor> rule_extractor;
   shared_ptr<Vocabulary> vocabulary;
