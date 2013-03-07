@@ -1695,12 +1695,12 @@ cdef class HieroCachingRuleFactory:
                                 met_constraints = 0
 
                             if (met_constraints and
-                                self.find_fixpoint(f_x_low, f_back_high,
+                                (self.find_fixpoint(f_x_low, f_back_high,
                                             f_links_low, f_links_high, e_links_low, e_links_high, 
                                             e_low, e_high, &e_x_low, &e_x_high, &f_x_low, &f_x_high, 
                                             f_sent_len, e_sent_len, 
                                             self.train_max_initial_size, self.train_max_initial_size, 
-                                            1, 1, 1, 1, 0, 1, 0) and
+                                            1, 1, 1, 1, 0, 1, 0) == 1) and
                                 ((not self.tight_phrases) or f_links_low[f_x_low] != -1) and
                                 self.find_fixpoint(f_x_low, f_low,    # check integrity of new subphrase
                                             f_links_low, f_links_high, e_links_low, e_links_high,

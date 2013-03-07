@@ -111,8 +111,32 @@ TEST_F(TargetPhraseExtractorTest, TestExtractPhrasesTightPhrasesFalse) {
       target_gaps, target_low, 1, 5, source_indexes, 0);
   EXPECT_EQ(10, results.size());
 
-  // TODO(pauldb): Finish unit test once it's clear how these alignments should
-  // look like.
+  for (int i = 0; i < 2; ++i) {
+    for (int j = 4; j <= 6; ++j) {
+      for (int k = 4; k <= j; ++k) {
+        vector<string> expected_words;
+        for (int l = i; l < 2; ++l) {
+          expected_words.push_back(target_words[l]);
+        }
+        for (int l = k; l < j; ++l) {
+          expected_words.push_back(target_words[l]);
+        }
+
+        PhraseAlignment expected_alignment;
+        expected_alignment.push_back(make_pair(1, 1 - i));
+
+        bool found_expected_pair = false;
+        for (auto result: results) {
+          if (result.first.GetWords() == expected_words &&
+              result.second == expected_alignment) {
+            found_expected_pair = true;
+          }
+        }
+
+        EXPECT_TRUE(found_expected_pair);
+      }
+    }
+  }
 }
 
 } // namespace

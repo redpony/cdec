@@ -17,7 +17,7 @@ enum Side {
   TARGET
 };
 
-// TODO: This class has features for both the source and target data arrays.
+// Note: This class has features for both the source and target data arrays.
 // Maybe we can save some memory by having more specific implementations (e.g.
 // sentence_id is only needed for the source data array).
 class DataArray {

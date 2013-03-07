@@ -60,7 +60,6 @@ int main(int argc, char** argv) {
         "Minimum number of occurences for a pharse to be considered frequent")
     ("max_samples", po::value<int>()->default_value(300),
         "Maximum number of samples")
-    // TODO(pauldb): Check if this works when set to false.
     ("tight_phrases", po::value<bool>()->default_value(true),
         "False if phrases may be loose (better, but slower)");
 
@@ -144,17 +143,15 @@ int main(int argc, char** argv) {
        << GetDuration(preprocess_start_time, preprocess_stop_time)
        << " seconds" << endl;
 
-  cerr << "creating grammar extractor" << endl;
-
   Clock::time_point extraction_start_time = Clock::now();
   vector<shared_ptr<Feature> > features = {
-//      make_shared<TargetGivenSourceCoherent>(),
-//      make_shared<SampleSourceCount>(),
-//      make_shared<CountSourceTarget>(),
-//      make_shared<MaxLexSourceGivenTarget>(table),
-//      make_shared<MaxLexTargetGivenSource>(table),
-//      make_shared<IsSourceSingleton>(),
-//      make_shared<IsSourceTargetSingleton>()
+      make_shared<TargetGivenSourceCoherent>(),
+      make_shared<SampleSourceCount>(),
+      make_shared<CountSourceTarget>(),
+      make_shared<MaxLexSourceGivenTarget>(table),
+      make_shared<MaxLexTargetGivenSource>(table),
+      make_shared<IsSourceSingleton>(),
+      make_shared<IsSourceTargetSingleton>()
   };
   shared_ptr<Scorer> scorer = make_shared<Scorer>(features);
 
