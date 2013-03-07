@@ -6,7 +6,7 @@ namespace extractor {
 namespace features {
 
 double IsSourceSingleton::Score(const FeatureContext& context) const {
-  return context.source_phrase_count == 1;
+  return fabs(context.source_phrase_count - 1) < 1e-6;
 }
 
 string IsSourceSingleton::GetName() const {

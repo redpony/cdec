@@ -105,7 +105,7 @@ def IsSingletonF(ctx):
         count = ctx.fcount
     else:
         count = ctx.fcount + ctx.online.fcount  
-    return (count == 1)
+    return math.fabs(count - 1) < 1e-6
 
 def IsSingletonFE(ctx):
     if not ctx.online:
