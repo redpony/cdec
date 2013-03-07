@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include <omp.h>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -35,6 +36,10 @@ using namespace extractor;
 using namespace features;
 
 int main(int argc, char** argv) {
+  int num_threads_default = 1;
+  #pragma omp parallel
+  num_threads_default = omp_get_num_threads();
+
   po::options_description desc("Command line options");
   desc.add_options()
     ("help,h", "Show available options")
@@ -43,13 +48,15 @@ int main(int argc, char** argv) {
     ("bitext,b", po::value<string>(), "Parallel text (source ||| target)")
     ("alignment,a", po::value<string>()->required(), "Bitext word alignment")
     ("grammars,g", po::value<string>()->required(), "Grammars output path")
+    ("threads,t", po::value<int>()->default_value(num_threads_default),
+        "Number of parallel extractors")
     ("frequent", po::value<int>()->default_value(100),
         "Number of precomputed frequent patterns")
     ("super_frequent", po::value<int>()->default_value(10),
         "Number of precomputed super frequent patterns")
     ("max_rule_span", po::value<int>()->default_value(15),
         "Maximum rule span")
-    ("max_rule_symbols,l", po::value<int>()->default_value(5),
+    ("max_rule_symbols", po::value<int>()->default_value(5),
         "Maximum number of symbols (terminals + nontermals) in a rule")
     ("min_gap_size", po::value<int>()->default_value(1), "Minimum gap size")
     ("max_phrase_len", po::value<int>()->default_value(4),
@@ -155,7 +162,6 @@ int main(int argc, char** argv) {
   };
   shared_ptr<Scorer> scorer = make_shared<Scorer>(features);
 
-  // TODO(pauldb): Add parallelization.
   GrammarExtractor extractor(
       source_suffix_array,
       target_data_array,
@@ -172,30 +178,39 @@ int main(int argc, char** argv) {
   // Release extra memory used by the initial precomputation.
   precomputation.reset();
 
-  int grammar_id = 0;
   fs::path grammar_path = vm["grammars"].as<string>();
   if (!fs::is_directory(grammar_path)) {
     fs::create_directory(grammar_path);
   }
 
-  string sentence, delimiter = "|||";
+  string sentence;
+  vector<string> sentences;
   while (getline(cin, sentence)) {
+    sentences.push_back(sentence);
+  }
+
+  #pragma omp parallel for schedule(dynamic) \
+      num_threads(vm["threads"].as<int>()) ordered
+  for (size_t i = 0; i < sentences.size(); ++i) {
+    string delimiter = "|||";
     string suffix = "";
-    int position = sentence.find(delimiter);
-    if (position != sentence.npos) {
-      suffix = sentence.substr(position);
-      sentence = sentence.substr(0, position);
+    int position = sentences[i].find(delimiter);
+    if (position != sentences[i].npos) {
+      suffix = sentences[i].substr(position);
+      sentences[i] = sentences[i].substr(0, position);
     }
 
-    Grammar grammar = extractor.GetGrammar(sentence);
-    string file_name = "grammar." + to_string(grammar_id);
+    Grammar grammar = extractor.GetGrammar(sentences[i]);
+    string file_name = "grammar." + to_string(i);
     fs::path grammar_file = grammar_path / file_name;
     ofstream output(grammar_file.c_str());
     output << grammar;
 
-    cout << "<seg grammar=\"" << grammar_file << "\" id=\"" << grammar_id
-         << "\"> " << sentence << " </seg> " << suffix << endl;
-    ++grammar_id;
+    #pragma omp critical (stdout_write)
+    {
+      cout << "<seg grammar=\"" << grammar_file << "\" id=\"" << i << "\"> "
+           << sentences[i] << " </seg> " << suffix << endl;
+    }
   }
   Clock::time_point extraction_stop_time = Clock::now();
   cerr << "Overall extraction step took "

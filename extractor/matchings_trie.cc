@@ -2,19 +2,22 @@
 
 namespace extractor {
 
-void MatchingsTrie::Reset() {
-  ResetTree(root);
+MatchingsTrie::MatchingsTrie() {
   root = make_shared<TrieNode>();
+}
+
+MatchingsTrie::~MatchingsTrie() {
+  DeleteTree(root);
 }
 
 shared_ptr<TrieNode> MatchingsTrie::GetRoot() const {
   return root;
 }
 
-void MatchingsTrie::ResetTree(shared_ptr<TrieNode> root) {
+void MatchingsTrie::DeleteTree(shared_ptr<TrieNode> root) {
   if (root != NULL) {
     for (auto child: root->children) {
-      ResetTree(child.second);
+      DeleteTree(child.second);
     }
     if (root->suffix_link != NULL) {
       root->suffix_link.reset();

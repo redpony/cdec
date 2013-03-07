@@ -105,8 +105,8 @@ Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids) {
   double total_extract_time = 0;
   double total_intersect_time = 0;
   double total_lookup_time = 0;
-  // Clear cache for every new sentence.
-  trie.Reset();
+
+  MatchingsTrie trie;
   shared_ptr<TrieNode> root = trie.GetRoot();
 
   int first_x = vocabulary->GetNonterminalIndex(1);
@@ -199,8 +199,6 @@ Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids) {
       states.push(new_state);
     }
   }
-
-  cerr << "Vocabulary size = " << vocabulary->Size() << endl;
 
   Clock::time_point stop_time = Clock::now();
   cerr << "Total time for rule lookup, extraction, and scoring = "

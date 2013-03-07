@@ -117,7 +117,7 @@ bool RuleExtractorHelper::FindFixPoint(
                  source_high, target_phrase_low, target_phrase_high);
 
   if (target_phrase_low == -1) {
-    // TODO(pauldb): Low priority corner case inherited from Adam's code:
+    // Note: Low priority corner case inherited from Adam's code:
     // If w is unaligned, but we don't require aligned terminals, returning an
     // error here prevents the extraction of the allowed rule
     // X -> X_1 w X_2 / X_1 X_2
