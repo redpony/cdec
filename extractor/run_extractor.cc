@@ -35,6 +35,11 @@ using namespace std;
 using namespace extractor;
 using namespace features;
 
+fs::path GetGrammarFilePath(const fs::path& grammar_path, int file_number) {
+  string file_name = "grammar." + to_string(file_number);
+  return grammar_path / file_name;
+}
+
 int main(int argc, char** argv) {
   int num_threads_default = 1;
   #pragma omp parallel
@@ -184,34 +189,32 @@ int main(int argc, char** argv) {
   }
 
   string sentence;
-  vector<string> sentences;
+  vector<string> sentences, suffixes;
   while (getline(cin, sentence)) {
     sentences.push_back(sentence);
   }
 
   #pragma omp parallel for schedule(dynamic) \
-      num_threads(vm["threads"].as<int>()) ordered
+      num_threads(vm["threads"].as<int>())
   for (size_t i = 0; i < sentences.size(); ++i) {
-    string delimiter = "|||";
-    string suffix = "";
+    string delimiter = "|||", suffix;
     int position = sentences[i].find(delimiter);
     if (position != sentences[i].npos) {
       suffix = sentences[i].substr(position);
       sentences[i] = sentences[i].substr(0, position);
     }
+    suffixes.push_back(suffix);
 
     Grammar grammar = extractor.GetGrammar(sentences[i]);
-    string file_name = "grammar." + to_string(i);
-    fs::path grammar_file = grammar_path / file_name;
-    ofstream output(grammar_file.c_str());
+    ofstream output(GetGrammarFilePath(grammar_path, i).c_str());
     output << grammar;
-
-    #pragma omp critical (stdout_write)
-    {
-      cout << "<seg grammar=\"" << grammar_file << "\" id=\"" << i << "\"> "
-           << sentences[i] << " </seg> " << suffix << endl;
-    }
   }
+
+  for (size_t i = 0; i < sentences.size(); ++i) {
+    cout << "<seg grammar=\"" << GetGrammarFilePath(grammar_path, i) << "\" id=\""
+         << i << "\"> " << sentences[i] << " </seg> " << suffixes[i] << endl;
+  }
+
   Clock::time_point extraction_stop_time = Clock::now();
   cerr << "Overall extraction step took "
        << GetDuration(extraction_start_time, extraction_stop_time)
