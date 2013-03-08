@@ -201,11 +201,14 @@ Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids) {
   }
 
   Clock::time_point stop_time = Clock::now();
-  cerr << "Total time for rule lookup, extraction, and scoring = "
-       << GetDuration(start_time, stop_time) << " seconds" << endl;
-  cerr << "Extract time = " << total_extract_time << " seconds" << endl;
-  cerr << "Intersect time = " << total_intersect_time << " seconds" << endl;
-  cerr << "Lookup time = " << total_lookup_time << " seconds" << endl;
+  #pragma omp critical (stderr_write)
+  {
+    cerr << "Total time for rule lookup, extraction, and scoring = "
+         << GetDuration(start_time, stop_time) << " seconds" << endl;
+    cerr << "Extract time = " << total_extract_time << " seconds" << endl;
+    cerr << "Intersect time = " << total_intersect_time << " seconds" << endl;
+    cerr << "Lookup time = " << total_lookup_time << " seconds" << endl;
+  }
   return Grammar(rules, scorer->GetFeatureNames());
 }
 
