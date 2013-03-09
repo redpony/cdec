@@ -11,6 +11,8 @@ while(<STDIN>) {
   s/&\s*squot\s*;/'/gi;
   s/&\s*quot\s*;/"/gi;
   s/&\s*amp\s*;/&/gi;
+  s/&\s*nbsp\s*;/&/gi;
+  s/&\s*#\s*160\s*;/ /gi;
   s/ (\d\d): (\d\d)/ $1:$2/g;
   s/[\x{20a0}]\x{20ac}]/ EUR /g;
   s/[\x{00A3}]/ GBP /g;
