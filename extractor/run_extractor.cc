@@ -189,11 +189,12 @@ int main(int argc, char** argv) {
   }
 
   string sentence;
-  vector<string> sentences, suffixes;
+  vector<string> sentences;
   while (getline(cin, sentence)) {
     sentences.push_back(sentence);
   }
 
+  vector<string> suffixes(sentences.size());
   #pragma omp parallel for schedule(dynamic) \
       num_threads(vm["threads"].as<int>())
   for (size_t i = 0; i < sentences.size(); ++i) {
@@ -203,7 +204,7 @@ int main(int argc, char** argv) {
       suffix = sentences[i].substr(position);
       sentences[i] = sentences[i].substr(0, position);
     }
-    suffixes.push_back(suffix);
+    suffixes[i] = suffix;
 
     Grammar grammar = extractor.GetGrammar(sentences[i]);
     ofstream output(GetGrammarFilePath(grammar_path, i).c_str());
