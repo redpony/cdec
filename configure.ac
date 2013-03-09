@@ -1,4 +1,4 @@
-AC_INIT([cdec],[2013-01-20])
+AC_INIT([cdec],[2013-03-08])
 AC_CONFIG_SRCDIR([decoder/cdec.cc])
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(config.h)
