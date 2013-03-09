@@ -19,6 +19,7 @@ In addition to the standard `cdec` third party requirements, you will additional
 
 - [Autoconf / Automake / Libtool](http://www.gnu.org/software/autoconf/)
     - Older versions of GNU autotools may not work properly.
+
 	autoreconf -ifv
 	./configure
 	make
