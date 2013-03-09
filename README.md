@@ -2,6 +2,8 @@
 
 ## Building from a downloaded archive
 
+Instructions:
+
 	./configure
 	make
 	./tests/run-system-tests.pl
@@ -19,6 +21,8 @@ In addition to the standard `cdec` third party requirements, you will additional
 
 - [Autoconf / Automake / Libtool](http://www.gnu.org/software/autoconf/)
     - Older versions of GNU autotools may not work properly.
+
+Instructions:
 
 	autoreconf -ifv
 	./configure
