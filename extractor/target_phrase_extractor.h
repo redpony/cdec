@@ -30,6 +30,8 @@ class TargetPhraseExtractor {
 
   virtual ~TargetPhraseExtractor();
 
+  // Finds all the target phrases that can extracted from a span in the
+  // target sentence (matching the given set of target phrase gaps).
   virtual vector<pair<Phrase, PhraseAlignment> > ExtractPhrases(
       const vector<pair<int, int> >& target_gaps, const vector<int>& target_low,
       int target_phrase_low, int target_phrase_high,
@@ -39,6 +41,8 @@ class TargetPhraseExtractor {
   TargetPhraseExtractor();
 
  private:
+  // Computes the cartesian product over the sets of possible target phrase
+  // chunks.
   void GeneratePhrases(
       vector<pair<Phrase, PhraseAlignment> >& target_phrases,
       const vector<pair<int, int> >& ranges, int index,

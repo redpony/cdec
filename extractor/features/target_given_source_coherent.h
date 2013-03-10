@@ -6,6 +6,10 @@
 namespace extractor {
 namespace features {
 
+/**
+ * Feature computing the ratio of the phrase pair count over all source phrase
+ * occurrences (sampled).
+ */
 class TargetGivenSourceCoherent : public Feature {
  public:
   double Score(const FeatureContext& context) const;

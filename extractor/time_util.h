@@ -10,6 +10,7 @@ namespace extractor {
 
 typedef high_resolution_clock Clock;
 
+// Computes the duration in seconds of the specified time interval.
 double GetDuration(const Clock::time_point& start_time,
                    const Clock::time_point& stop_time);
 

@@ -10,6 +10,9 @@ using namespace std;
 namespace extractor {
 namespace features {
 
+/**
+ * Structure providing context for computing feature scores.
+ */
 struct FeatureContext {
   FeatureContext(const Phrase& source_phrase, const Phrase& target_phrase,
                  double source_phrase_count, int pair_count, int num_samples) :
@@ -24,6 +27,9 @@ struct FeatureContext {
   int num_samples;
 };
 
+/**
+ * Base class for features.
+ */
 class Feature {
  public:
   virtual double Score(const FeatureContext& context) const = 0;

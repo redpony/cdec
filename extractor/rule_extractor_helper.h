@@ -12,6 +12,9 @@ namespace extractor {
 class Alignment;
 class DataArray;
 
+/**
+ * Helper class for extracting SCFG rules.
+ */
 class RuleExtractorHelper {
  public:
   RuleExtractorHelper(shared_ptr<DataArray> source_data_array,
@@ -25,18 +28,23 @@ class RuleExtractorHelper {
 
   virtual ~RuleExtractorHelper();
 
+  // Find the alignment span for each word in the source target sentence pair.
   virtual void GetLinksSpans(vector<int>& source_low, vector<int>& source_high,
                              vector<int>& target_low, vector<int>& target_high,
                              int sentence_id) const;
 
+  // Check if one chunk (all chunks) is aligned at least in one point.
   virtual bool CheckAlignedTerminals(const vector<int>& matching,
                                      const vector<int>& chunklen,
                                      const vector<int>& source_low) const;
 
+  // Check if the chunks are tight.
   virtual bool CheckTightPhrases(const vector<int>& matching,
                                  const vector<int>& chunklen,
                                  const vector<int>& source_low) const;
 
+  // Find the target span and the reflected source span for a source phrase
+  // occurrence.
   virtual bool FindFixPoint(
       int source_phrase_low, int source_phrase_high,
       const vector<int>& source_low, const vector<int>& source_high,
@@ -47,6 +55,7 @@ class RuleExtractorHelper {
       int max_new_x, bool allow_low_x, bool allow_high_x,
       bool allow_arbitrary_expansion) const;
 
+  // Find the gap spans for each nonterminal in the source phrase.
   virtual bool GetGaps(
       vector<pair<int, int> >& source_gaps, vector<pair<int, int> >& target_gaps,
       const vector<int>& matching, const vector<int>& chunklen,
@@ -55,8 +64,10 @@ class RuleExtractorHelper {
       int source_phrase_low, int source_phrase_high, int source_back_low,
       int source_back_high, int& num_symbols, bool& met_constraints) const;
 
+  // Get the order of the nonterminals in the target phrase.
   virtual vector<int> GetGapOrder(const vector<pair<int, int> >& gaps) const;
 
+  // Map each terminal symbol with its position in the source phrase.
   virtual unordered_map<int, int> GetSourceIndexes(
       const vector<int>& matching, const vector<int>& chunklen,
       int starts_with_x) const;
@@ -65,6 +76,8 @@ class RuleExtractorHelper {
   RuleExtractorHelper();
 
  private:
+  // Find the projection of a source phrase in the target sentence. May also be
+  // used to find the projection of a target phrase in the source sentence.
   void FindProjection(
       int source_phrase_low, int source_phrase_high,
       const vector<int>& source_low, const vector<int>& source_high,

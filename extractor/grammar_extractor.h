@@ -19,6 +19,10 @@ class Scorer;
 class SuffixArray;
 class Vocabulary;
 
+/**
+ * Class wrapping all the logic for extracting the synchronous context free
+ * grammars.
+ */
 class GrammarExtractor {
  public:
   GrammarExtractor(
@@ -38,11 +42,15 @@ class GrammarExtractor {
   GrammarExtractor(shared_ptr<Vocabulary> vocabulary,
                    shared_ptr<HieroCachingRuleFactory> rule_factory);
 
+  // Converts the sentence to a vector of word ids and uses the RuleFactory to
+  // extract the SCFG rules which may be used to decode the sentence.
   Grammar GetGrammar(const string& sentence);
 
  private:
+  // Splits the sentence in a vector of words.
   vector<string> TokenizeSentence(const string& sentence);
 
+  // Maps the words to word ids.
   vector<int> AnnotateWords(const vector<string>& words);
 
   shared_ptr<Vocabulary> vocabulary;

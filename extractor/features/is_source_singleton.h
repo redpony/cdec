@@ -6,6 +6,9 @@
 namespace extractor {
 namespace features {
 
+/**
+ * Boolean feature checking if the source phrase occurs only once in the data.
+ */
 class IsSourceSingleton : public Feature {
  public:
   double Score(const FeatureContext& context) const;

@@ -11,6 +11,9 @@ namespace extractor {
 
 class Rule;
 
+/**
+ * Grammar class wrapping the set of rules to be extracted.
+ */
 class Grammar {
  public:
   Grammar(const vector<Rule>& rules, const vector<string>& feature_names);

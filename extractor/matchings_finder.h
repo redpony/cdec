@@ -11,12 +11,17 @@ namespace extractor {
 class PhraseLocation;
 class SuffixArray;
 
+/**
+ * Class wrapping the suffix array lookup for a contiguous phrase.
+ */
 class MatchingsFinder {
  public:
   MatchingsFinder(shared_ptr<SuffixArray> suffix_array);
 
   virtual ~MatchingsFinder();
 
+  // Uses the suffix array to search only for the last word of the phrase
+  // starting from the range in which the prefix of the phrase occurs.
   virtual PhraseLocation Find(PhraseLocation& location, const string& word,
                               int offset);
 

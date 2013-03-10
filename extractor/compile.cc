@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     ("max_phrase_len,p", po::value<int>()->default_value(4),
         "Maximum frequent phrase length")
     ("min_frequency", po::value<int>()->default_value(1000),
-        "Minimum number of occurences for a pharse to be considered frequent");
+        "Minimum number of occurrences for a pharse to be considered frequent");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
