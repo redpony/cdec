@@ -88,6 +88,7 @@ bool RuleExtractorHelper::CheckTightPhrases(
     return true;
   }
 
+  // Check if the chunk extremities are aligned.
   int sentence_id = source_data_array->GetSentenceId(matching[0]);
   int source_sent_start = source_data_array->GetSentenceStart(sentence_id);
   for (size_t i = 0; i + 1 < chunklen.size(); ++i) {
@@ -126,6 +127,7 @@ bool RuleExtractorHelper::FindFixPoint(
 
   int source_sent_len = source_data_array->GetSentenceLength(sentence_id);
   int target_sent_len = target_data_array->GetSentenceLength(sentence_id);
+  // Extend the target span to the left.
   if (prev_target_low != -1 && target_phrase_low != prev_target_low) {
     if (prev_target_low - target_phrase_low < min_target_gap_size) {
       target_phrase_low = prev_target_low - min_target_gap_size;
@@ -135,6 +137,7 @@ bool RuleExtractorHelper::FindFixPoint(
     }
   }
 
+  // Extend the target span to the right.
   if (prev_target_high != -1 && target_phrase_high != prev_target_high) {
     if (target_phrase_high - prev_target_high < min_target_gap_size) {
       target_phrase_high = prev_target_high + min_target_gap_size;
@@ -144,10 +147,12 @@ bool RuleExtractorHelper::FindFixPoint(
     }
   }
 
+  // Check target span length.
   if (target_phrase_high - target_phrase_low > max_rule_span) {
     return false;
   }
 
+  // Find the initial reflected source span.
   source_back_low = source_back_high = -1;
   FindProjection(target_phrase_low, target_phrase_high, target_low, target_high,
                  source_back_low, source_back_high);
@@ -157,6 +162,7 @@ bool RuleExtractorHelper::FindFixPoint(
     source_back_low = min(source_back_low, source_phrase_low);
     source_back_high = max(source_back_high, source_phrase_high);
 
+    // Stop if the reflected source span matches the previous source span.
     if (source_back_low == source_phrase_low &&
         source_back_high == source_phrase_high) {
       return true;
@@ -212,10 +218,14 @@ bool RuleExtractorHelper::FindFixPoint(
 
     prev_target_low = target_phrase_low;
     prev_target_high = target_phrase_high;
+    // Find the reflection including the left gap (if one was added).
     FindProjection(source_back_low, source_phrase_low, source_low, source_high,
                    target_phrase_low, target_phrase_high);
+    // Find the reflection including the right gap (if one was added).
     FindProjection(source_phrase_high, source_back_high, source_low,
                    source_high, target_phrase_low, target_phrase_high);
+    // Stop if the new re-reflected target span matches the previous target
+    // span.
     if (prev_target_low == target_phrase_low &&
         prev_target_high == target_phrase_high) {
       return true;
@@ -232,6 +242,7 @@ bool RuleExtractorHelper::FindFixPoint(
 
     source_phrase_low = source_back_low;
     source_phrase_high = source_back_high;
+    // Re-reflect the target span.
     FindProjection(target_phrase_low, prev_target_low, target_low, target_high,
                    source_back_low, source_back_high);
     FindProjection(prev_target_high, target_phrase_high, target_low,

@@ -43,11 +43,13 @@ vector<pair<Phrase, PhraseAlignment> > TargetPhraseExtractor::ExtractPhrases(
 
   int target_x_low = target_phrase_low, target_x_high = target_phrase_high;
   if (!require_tight_phrases) {
+    // Extend loose target phrase to the left.
     while (target_x_low > 0 &&
            target_phrase_high - target_x_low < max_rule_span &&
            target_low[target_x_low - 1] == -1) {
       --target_x_low;
     }
+    // Extend loose target phrase to the right.
     while (target_x_high < target_sent_len &&
            target_x_high - target_phrase_low < max_rule_span &&
            target_low[target_x_high] == -1) {
@@ -59,10 +61,12 @@ vector<pair<Phrase, PhraseAlignment> > TargetPhraseExtractor::ExtractPhrases(
   for (size_t i = 0; i < gaps.size(); ++i) {
     gaps[i] = target_gaps[target_gap_order[i]];
     if (!require_tight_phrases) {
+      // Extend gap to the left.
       while (gaps[i].first > target_x_low &&
              target_low[gaps[i].first - 1] == -1) {
         --gaps[i].first;
       }
+      // Extend gap to the right.
       while (gaps[i].second < target_x_high &&
              target_low[gaps[i].second] == -1) {
         ++gaps[i].second;
@@ -70,6 +74,9 @@ vector<pair<Phrase, PhraseAlignment> > TargetPhraseExtractor::ExtractPhrases(
     }
   }
 
+  // Compute the range in which each chunk may start or end. (Even indexes
+  // represent the range in which the chunk may start, odd indexes represent the
+  // range in which the chunk may end.)
   vector<pair<int, int> > ranges(2 * gaps.size() + 2);
   ranges.front() = make_pair(target_x_low, target_phrase_low);
   ranges.back() = make_pair(target_phrase_high, target_x_high);
@@ -101,6 +108,7 @@ void TargetPhraseExtractor::GeneratePhrases(
     vector<int> symbols;
     unordered_map<int, int> target_indexes;
 
+    // Construct target phrase chunk by chunk.
     int target_sent_start = target_data_array->GetSentenceStart(sentence_id);
     for (size_t i = 0; i * 2 < subpatterns.size(); ++i) {
       for (size_t j = subpatterns[i * 2]; j < subpatterns[i * 2 + 1]; ++j) {
@@ -115,6 +123,7 @@ void TargetPhraseExtractor::GeneratePhrases(
       }
     }
 
+    // Construct the alignment between the source and the target phrase.
     vector<pair<int, int> > links = alignment->GetLinks(sentence_id);
     vector<pair<int, int> > alignment;
     for (pair<int, int> link: links) {
@@ -133,6 +142,7 @@ void TargetPhraseExtractor::GeneratePhrases(
   if (index > 0) {
     subpatterns[index] = max(subpatterns[index], subpatterns[index - 1]);
   }
+  // Choose every possible combination of [start, end) for the current chunk.
   while (subpatterns[index] <= ranges[index].second) {
     subpatterns[index + 1] = max(subpatterns[index], ranges[index + 1].first);
     while (subpatterns[index + 1] <= ranges[index + 1].second) {

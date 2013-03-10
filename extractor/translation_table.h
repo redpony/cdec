@@ -18,6 +18,9 @@ typedef boost::hash<pair<int, int> > PairHash;
 class Alignment;
 class DataArray;
 
+/**
+ * Bilexical table with conditional probabilities.
+ */
 class TranslationTable {
  public:
   TranslationTable(
@@ -27,9 +30,11 @@ class TranslationTable {
 
   virtual ~TranslationTable();
 
+  // Returns p(e | f).
   virtual double GetTargetGivenSourceScore(const string& source_word,
                                            const string& target_word);
 
+  // Returns p(f | e).
   virtual double GetSourceGivenTargetScore(const string& source_word,
                                            const string& target_word);
 
@@ -39,7 +44,8 @@ class TranslationTable {
   TranslationTable();
 
  private:
-  void IncreaseLinksCount(
+  // Increment links count for the given (f, e) word pair.
+  void IncrementLinksCount(
       unordered_map<int, int>& source_links_count,
       unordered_map<int, int>& target_links_count,
       unordered_map<pair<int, int>, int, PairHash>& links_count,

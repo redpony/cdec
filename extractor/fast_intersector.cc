@@ -107,6 +107,7 @@ PhraseLocation FastIntersector::ExtendPrefixPhraseLocation(
     } else {
       pattern_end += phrase.GetChunkLen(phrase.Arity()) - 2;
     }
+    // Searches for the last symbol in the phrase after each prefix occurrence.
     for (int j = range.first; j < range.second; ++j) {
       if (pattern_end >= sent_end ||
           pattern_end - positions[i] >= max_rule_span) {
@@ -149,6 +150,8 @@ PhraseLocation FastIntersector::ExtendSuffixPhraseLocation(
     int pattern_start = positions[i] - range.first;
     int pattern_end = positions[i + num_subpatterns - 1] +
         phrase.GetChunkLen(phrase.Arity()) - 1;
+    // Searches for the first symbol in the phrase before each suffix
+    // occurrence.
     for (int j = range.first; j < range.second; ++j) {
       if (pattern_start < sent_start ||
           pattern_end - pattern_start >= max_rule_span) {

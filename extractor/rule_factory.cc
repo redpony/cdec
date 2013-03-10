@@ -152,12 +152,18 @@ Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids) {
       } else {
         PhraseLocation phrase_location;
         if (next_phrase.Arity() > 0) {
+          // For phrases containing a nonterminal, we use either the occurrences
+          // of the prefix or the suffix to determine the occurrences of the
+          // phrase.
           Clock::time_point intersect_start = Clock::now();
           phrase_location = fast_intersector->Intersect(
               node->matchings, next_suffix_link->matchings, next_phrase);
           Clock::time_point intersect_stop = Clock::now();
           total_intersect_time += GetDuration(intersect_start, intersect_stop);
         } else {
+          // For phrases not containing any nonterminals, we simply query the
+          // suffix array using the suffix array range of the prefix as a
+          // starting point.
           Clock::time_point lookup_start = Clock::now();
           phrase_location = matchings_finder->Find(
               node->matchings,
@@ -170,9 +176,12 @@ Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids) {
         if (phrase_location.IsEmpty()) {
           continue;
         }
+
+        // Create new trie node to store data about the current phrase.
         next_node = make_shared<TrieNode>(
             next_suffix_link, next_phrase, phrase_location);
       }
+      // Add the new trie node to the trie cache.
       node->AddChild(word_id, next_node);
 
       // Automatically adds a trailing non terminal if allowed. Simply copy the
@@ -182,6 +191,7 @@ Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids) {
 
       Clock::time_point extract_start = Clock::now();
       if (!state.starts_with_x) {
+        // Extract rules for the sampled set of occurrences.
         PhraseLocation sample = sampler->Sample(next_node->matchings);
         vector<Rule> new_rules =
             rule_extractor->ExtractRules(next_phrase, sample);
@@ -193,6 +203,7 @@ Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids) {
       next_node = node->GetChild(word_id);
     }
 
+    // Create more states (phrases) to be analyzed.
     vector<State> new_states = ExtendState(word_ids, state, phrase, next_phrase,
                                            next_node);
     for (State new_state: new_states) {
@@ -262,6 +273,7 @@ vector<State> HieroCachingRuleFactory::ExtendState(
     return new_states;
   }
 
+  // New state for adding the next symbol.
   new_states.push_back(State(state.start, state.end + 1, symbols,
       state.subpatterns_start, node, state.starts_with_x));
 
@@ -272,6 +284,7 @@ vector<State> HieroCachingRuleFactory::ExtendState(
     return new_states;
   }
 
+  // New states for adding a nonterminal followed by a new symbol.
   int var_id = vocabulary->GetNonterminalIndex(phrase.Arity() + 1);
   symbols.push_back(var_id);
   vector<int> subpatterns_start = state.subpatterns_start;

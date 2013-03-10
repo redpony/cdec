@@ -79,6 +79,7 @@ vector<Rule> RuleExtractor::ExtractRules(const Phrase& phrase,
   int num_subpatterns = location.num_subpatterns;
   vector<int> matchings = *location.matchings;
 
+  // Calculate statistics for the (sampled) occurrences of the source phrase.
   map<Phrase, double> source_phrase_counter;
   map<Phrase, map<Phrase, map<PhraseAlignment, int> > > alignments_counter;
   for (auto i = matchings.begin(); i != matchings.end(); i += num_subpatterns) {
@@ -91,6 +92,8 @@ vector<Rule> RuleExtractor::ExtractRules(const Phrase& phrase,
     }
   }
 
+  // Compute the feature scores and find the most likely (frequent) alignment
+  // for each pair of source-target phrases.
   int num_samples = matchings.size() / num_subpatterns;
   vector<Rule> rules;
   for (auto source_phrase_entry: alignments_counter) {
@@ -124,6 +127,8 @@ vector<Extract> RuleExtractor::ExtractAlignments(
   int sentence_id = source_data_array->GetSentenceId(matching[0]);
   int source_sent_start = source_data_array->GetSentenceStart(sentence_id);
 
+  // Get the span in the opposite sentence for each word in the source-target
+  // sentece pair.
   vector<int> source_low, source_high, target_low, target_high;
   helper->GetLinksSpans(source_low, source_high, target_low, target_high,
                         sentence_id);
@@ -134,6 +139,7 @@ vector<Extract> RuleExtractor::ExtractAlignments(
     chunklen[i] = phrase.GetChunkLen(i);
   }
 
+  // Basic checks to see if we can extract phrase pairs for this occurrence.
   if (!helper->CheckAlignedTerminals(matching, chunklen, source_low) ||
       !helper->CheckTightPhrases(matching, chunklen, source_low)) {
     return extracts;
@@ -144,6 +150,7 @@ vector<Extract> RuleExtractor::ExtractAlignments(
   int source_phrase_high = matching.back() + chunklen.back() -
                            source_sent_start;
   int target_phrase_low = -1, target_phrase_high = -1;
+  // Find target span and reflected source span for the source phrase.
   if (!helper->FindFixPoint(source_phrase_low, source_phrase_high, source_low,
                             source_high, target_phrase_low, target_phrase_high,
                             target_low, target_high, source_back_low,
@@ -153,6 +160,7 @@ vector<Extract> RuleExtractor::ExtractAlignments(
     return extracts;
   }
 
+  // Get spans for nonterminal gaps.
   bool met_constraints = true;
   int num_symbols = phrase.GetNumSymbols();
   vector<pair<int, int> > source_gaps, target_gaps;
@@ -163,6 +171,7 @@ vector<Extract> RuleExtractor::ExtractAlignments(
     return extracts;
   }
 
+  // Find target phrases aligned with the initial source phrase.
   bool starts_with_x = source_back_low != source_phrase_low;
   bool ends_with_x = source_back_high != source_phrase_high;
   Phrase source_phrase = phrase_builder->Extend(
@@ -181,6 +190,8 @@ vector<Extract> RuleExtractor::ExtractAlignments(
     return extracts;
   }
 
+  // Extend the source phrase by adding a leading and/or trailing nonterminal
+  // and find target phrases aligned with the extended source phrase.
   for (int i = 0; i < 2; ++i) {
     for (int j = 1 - i; j < 2; ++j) {
       AddNonterminalExtremities(extracts, matching, chunklen, source_phrase,
@@ -203,6 +214,8 @@ void RuleExtractor::AddExtracts(
       source_indexes, sentence_id);
 
   if (target_phrases.size() > 0) {
+    // Split the probability equally across all target phrases that can be
+    // aligned with a single occurrence of the source phrase.
     double pairs_count = 1.0 / target_phrases.size();
     for (auto target_phrase: target_phrases) {
       extracts.push_back(Extract(source_phrase, target_phrase.first,
@@ -221,6 +234,7 @@ void RuleExtractor::AddNonterminalExtremities(
     int extend_right) const {
   int source_x_low = source_back_low, source_x_high = source_back_high;
 
+  // Check if the extended source phrase will remain tight.
   if (require_tight_phrases) {
     if (source_low[source_back_low - extend_left] == -1 ||
         source_low[source_back_high + extend_right - 1] == -1) {
@@ -228,6 +242,7 @@ void RuleExtractor::AddNonterminalExtremities(
     }
   }
 
+  // Check if we can add a nonterminal to the left.
   if (extend_left) {
     if (starts_with_x || source_back_low < min_gap_size) {
       return;
@@ -244,6 +259,7 @@ void RuleExtractor::AddNonterminalExtremities(
     }
   }
 
+  // Check if we can add a nonterminal to the right.
   if (extend_right) {
     int source_sent_len = source_data_array->GetSentenceLength(sentence_id);
     if (ends_with_x || source_back_high + min_gap_size > source_sent_len) {
@@ -262,6 +278,7 @@ void RuleExtractor::AddNonterminalExtremities(
     }
   }
 
+  // More length checks.
   int new_nonterminals = extend_left + extend_right;
   if (source_x_high - source_x_low > max_rule_span ||
       target_gaps.size() + new_nonterminals > max_nonterminals ||
@@ -269,6 +286,7 @@ void RuleExtractor::AddNonterminalExtremities(
     return;
   }
 
+  // Find the target span for the extended phrase and the reflected source span.
   int target_x_low = -1, target_x_high = -1;
   if (!helper->FindFixPoint(source_x_low, source_x_high, source_low,
                             source_high, target_x_low, target_x_high,
@@ -279,6 +297,7 @@ void RuleExtractor::AddNonterminalExtremities(
     return;
   }
 
+  // Check gap integrity for the leading nonterminal.
   if (extend_left) {
     int source_gap_low = -1, source_gap_high = -1;
     int target_gap_low = -1, target_gap_high = -1;
@@ -294,6 +313,7 @@ void RuleExtractor::AddNonterminalExtremities(
                        make_pair(target_gap_low, target_gap_high));
   }
 
+  // Check gap integrity for the trailing nonterminal.
   if (extend_right) {
     int target_gap_low = -1, target_gap_high = -1;
     int source_gap_low = -1, source_gap_high = -1;
@@ -308,6 +328,7 @@ void RuleExtractor::AddNonterminalExtremities(
     target_gaps.push_back(make_pair(target_gap_low, target_gap_high));
   }
 
+  // Find target phrases aligned with the extended source phrase.
   Phrase new_source_phrase = phrase_builder->Extend(source_phrase, extend_left,
                                                     extend_right);
   unordered_map<int, int> source_indexes = helper->GetSourceIndexes(

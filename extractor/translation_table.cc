@@ -23,6 +23,8 @@ TranslationTable::TranslationTable(shared_ptr<DataArray> source_data_array,
   unordered_map<int, int> target_links_count;
   unordered_map<pair<int, int>, int, PairHash> links_count;
 
+  // For each pair of aligned source target words increment their link count by
+  // 1. Unaligned words are paired with the NULL token.
   for (size_t i = 0; i < source_data_array->GetNumSentences(); ++i) {
     vector<pair<int, int> > links = alignment->GetLinks(i);
     int source_start = source_data_array->GetSentenceStart(i);
@@ -40,25 +42,28 @@ TranslationTable::TranslationTable(shared_ptr<DataArray> source_data_array,
     for (pair<int, int> link: links) {
       source_linked_words[link.first] = 1;
       target_linked_words[link.second] = 1;
-      IncreaseLinksCount(source_links_count, target_links_count, links_count,
+      IncrementLinksCount(source_links_count, target_links_count, links_count,
           source_sentence[link.first], target_sentence[link.second]);
     }
 
     for (size_t i = 0; i < source_sentence.size(); ++i) {
       if (!source_linked_words[i]) {
-        IncreaseLinksCount(source_links_count, target_links_count, links_count,
-                           source_sentence[i], DataArray::NULL_WORD);
+        IncrementLinksCount(source_links_count, target_links_count, links_count,
+                            source_sentence[i], DataArray::NULL_WORD);
       }
     }
 
     for (size_t i = 0; i < target_sentence.size(); ++i) {
       if (!target_linked_words[i]) {
-        IncreaseLinksCount(source_links_count, target_links_count, links_count,
-                           DataArray::NULL_WORD, target_sentence[i]);
+        IncrementLinksCount(source_links_count, target_links_count, links_count,
+                            DataArray::NULL_WORD, target_sentence[i]);
       }
     }
   }
 
+  // Calculating:
+  //   p(e | f) = count(e, f) / count(f)
+  //   p(f | e) = count(e, f) / count(e)
   for (pair<pair<int, int>, int> link_count: links_count) {
     int source_word = link_count.first.first;
     int target_word = link_count.first.second;
@@ -72,7 +77,7 @@ TranslationTable::TranslationTable() {}
 
 TranslationTable::~TranslationTable() {}
 
-void TranslationTable::IncreaseLinksCount(
+void TranslationTable::IncrementLinksCount(
     unordered_map<int, int>& source_links_count,
     unordered_map<int, int>& target_links_count,
     unordered_map<pair<int, int>, int, PairHash>& links_count,

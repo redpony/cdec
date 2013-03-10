@@ -6,6 +6,9 @@
 namespace extractor {
 namespace features {
 
+/**
+ * Feature for the number of times a word pair was found in the bitext.
+ */
 class CountSourceTarget : public Feature {
  public:
   double Score(const FeatureContext& context) const;

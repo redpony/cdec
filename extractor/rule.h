@@ -9,6 +9,9 @@ using namespace std;
 
 namespace extractor {
 
+/**
+ * Structure containing the data for a SCFG rule.
+ */
 struct Rule {
   Rule(const Phrase& source_phrase, const Phrase& target_phrase,
        const vector<double>& scores, const vector<pair<int, int> >& alignment);

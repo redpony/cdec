@@ -13,6 +13,9 @@ class TranslationTable;
 
 namespace features {
 
+/**
+ * Feature computing max(p(f | e)) across all pairs of words in the phrase pair.
+ */
 class MaxLexSourceGivenTarget : public Feature {
  public:
   MaxLexSourceGivenTarget(shared_ptr<TranslationTable> table);

@@ -35,6 +35,7 @@ using namespace std;
 using namespace extractor;
 using namespace features;
 
+// Returns the file path in which a given grammar should be written.
 fs::path GetGrammarFilePath(const fs::path& grammar_path, int file_number) {
   string file_name = "grammar." + to_string(file_number);
   return grammar_path / file_name;
@@ -45,6 +46,7 @@ int main(int argc, char** argv) {
   #pragma omp parallel
   num_threads_default = omp_get_num_threads();
 
+  // Sets up the command line arguments map.
   po::options_description desc("Command line options");
   desc.add_options()
     ("help,h", "Show available options")
@@ -69,7 +71,7 @@ int main(int argc, char** argv) {
     ("max_nonterminals", po::value<int>()->default_value(2),
         "Maximum number of nonterminals in a rule")
     ("min_frequency", po::value<int>()->default_value(1000),
-        "Minimum number of occurences for a pharse to be considered frequent")
+        "Minimum number of occurrences for a pharse to be considered frequent")
     ("max_samples", po::value<int>()->default_value(300),
         "Maximum number of samples")
     ("tight_phrases", po::value<bool>()->default_value(true),
@@ -78,8 +80,8 @@ int main(int argc, char** argv) {
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
 
-  // Check for help argument before notify, so we don't need to pass in the
-  // required parameters.
+  // Checks for the help option before calling notify, so the we don't get an
+  // exception for missing required arguments.
   if (vm.count("help")) {
     cout << desc << endl;
     return 0;
@@ -94,6 +96,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
+  // Reads the parallel corpus.
   Clock::time_point preprocess_start_time = Clock::now();
   cerr << "Reading source and target data..." << endl;
   Clock::time_point start_time = Clock::now();
@@ -111,6 +114,7 @@ int main(int argc, char** argv) {
   cerr << "Reading data took " << GetDuration(start_time, stop_time)
        << " seconds" << endl;
 
+  // Constructs the suffix array for the source data.
   cerr << "Creating source suffix array..." << endl;
   start_time = Clock::now();
   shared_ptr<SuffixArray> source_suffix_array =
@@ -119,6 +123,7 @@ int main(int argc, char** argv) {
   cerr << "Creating suffix array took "
        << GetDuration(start_time, stop_time) << " seconds" << endl;
 
+  // Reads the alignment.
   cerr << "Reading alignment..." << endl;
   start_time = Clock::now();
   shared_ptr<Alignment> alignment =
@@ -127,6 +132,8 @@ int main(int argc, char** argv) {
   cerr << "Reading alignment took "
        << GetDuration(start_time, stop_time) << " seconds" << endl;
 
+  // Constructs an index storing the occurrences in the source data for each
+  // frequent collocation.
   cerr << "Precomputing collocations..." << endl;
   start_time = Clock::now();
   shared_ptr<Precomputation> precomputation = make_shared<Precomputation>(
@@ -142,6 +149,8 @@ int main(int argc, char** argv) {
   cerr << "Precomputing collocations took "
        << GetDuration(start_time, stop_time) << " seconds" << endl;
 
+  // Constructs a table storing p(e | f) and p(f | e) for every pair of source
+  // and target words.
   cerr << "Precomputing conditional probabilities..." << endl;
   start_time = Clock::now();
   shared_ptr<TranslationTable> table = make_shared<TranslationTable>(
@@ -155,6 +164,7 @@ int main(int argc, char** argv) {
        << GetDuration(preprocess_start_time, preprocess_stop_time)
        << " seconds" << endl;
 
+  // Features used to score each grammar rule.
   Clock::time_point extraction_start_time = Clock::now();
   vector<shared_ptr<Feature> > features = {
       make_shared<TargetGivenSourceCoherent>(),
@@ -167,6 +177,7 @@ int main(int argc, char** argv) {
   };
   shared_ptr<Scorer> scorer = make_shared<Scorer>(features);
 
+  // Sets up the grammar extractor.
   GrammarExtractor extractor(
       source_suffix_array,
       target_data_array,
@@ -180,26 +191,30 @@ int main(int argc, char** argv) {
       vm["max_samples"].as<int>(),
       vm["tight_phrases"].as<bool>());
 
-  // Release extra memory used by the initial precomputation.
+  // Releases extra memory used by the initial precomputation.
   precomputation.reset();
 
+  // Creates the grammars directory if it doesn't exist.
   fs::path grammar_path = vm["grammars"].as<string>();
   if (!fs::is_directory(grammar_path)) {
     fs::create_directory(grammar_path);
   }
 
+  // Reads all sentences for which we extract grammar rules (the paralellization
+  // is simplified if we read all sentences upfront).
   string sentence;
   vector<string> sentences;
   while (getline(cin, sentence)) {
     sentences.push_back(sentence);
   }
 
+  // Extracts the grammar for each sentence and saves it to a file.
   vector<string> suffixes(sentences.size());
   #pragma omp parallel for schedule(dynamic) \
       num_threads(vm["threads"].as<int>())
   for (size_t i = 0; i < sentences.size(); ++i) {
-    string delimiter = "|||", suffix;
-    int position = sentences[i].find(delimiter);
+    string suffix;
+    int position = sentences[i].find("|||");
     if (position != sentences[i].npos) {
       suffix = sentences[i].substr(position);
       sentences[i] = sentences[i].substr(0, position);

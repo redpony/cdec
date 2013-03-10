@@ -16,6 +16,7 @@ PhraseLocation Sampler::Sample(const PhraseLocation& location) const {
   vector<int> sample;
   int num_subpatterns;
   if (location.matchings == NULL) {
+    // Sample suffix array range.
     num_subpatterns = 1;
     int low = location.sa_low, high = location.sa_high;
     double step = max(1.0, (double) (high - low) / max_samples);
@@ -23,6 +24,7 @@ PhraseLocation Sampler::Sample(const PhraseLocation& location) const {
       sample.push_back(suffix_array->GetSuffix(Round(i)));
     }
   } else {
+    // Sample vector of occurrences.
     num_subpatterns = location.num_subpatterns;
     int num_matchings = location.matchings->size() / num_subpatterns;
     double step = max(1.0, (double) num_matchings / max_samples);

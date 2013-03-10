@@ -23,6 +23,8 @@ Precomputation::Precomputation(
       suffix_array, data, num_frequent_patterns, max_frequent_phrase_len,
       min_frequency);
 
+  // Construct sets containing the frequent and superfrequent contiguous
+  // collocations.
   unordered_set<vector<int>, VectorHash> frequent_patterns_set;
   unordered_set<vector<int>, VectorHash> super_frequent_patterns_set;
   for (size_t i = 0; i < frequent_patterns.size(); ++i) {
@@ -34,6 +36,8 @@ Precomputation::Precomputation(
 
   vector<tuple<int, int, int> > matchings;
   for (size_t i = 0; i < data.size(); ++i) {
+    // If the sentence is over, add all the discontiguous frequent patterns to
+    // the index.
     if (data[i] == DataArray::END_OF_LINE) {
       AddCollocations(matchings, data, max_rule_span, min_gap_size,
           max_rule_symbols);
@@ -41,6 +45,7 @@ Precomputation::Precomputation(
       continue;
     }
     vector<int> pattern;
+    // Find all the contiguous frequent patterns starting at position i.
     for (int j = 1; j <= max_frequent_phrase_len && i + j <= data.size(); ++j) {
       pattern.push_back(data[i + j - 1]);
       if (frequent_patterns_set.count(pattern)) {
@@ -65,6 +70,7 @@ vector<vector<int> > Precomputation::FindMostFrequentPatterns(
   vector<int> lcp = suffix_array->BuildLCPArray();
   vector<int> run_start(max_frequent_phrase_len);
 
+  // Find all the patterns occurring at least min_frequency times.
   priority_queue<pair<int, pair<int, int> > > heap;
   for (size_t i = 1; i < lcp.size(); ++i) {
     for (int len = lcp[i]; len < max_frequent_phrase_len; ++len) {
@@ -77,6 +83,7 @@ vector<vector<int> > Precomputation::FindMostFrequentPatterns(
     }
   }
 
+  // Extract the most frequent patterns.
   vector<vector<int> > frequent_patterns;
   while (frequent_patterns.size() < num_frequent_patterns && !heap.empty()) {
     int start = heap.top().second.first;
@@ -95,10 +102,12 @@ vector<vector<int> > Precomputation::FindMostFrequentPatterns(
 void Precomputation::AddCollocations(
     const vector<tuple<int, int, int> >& matchings, const vector<int>& data,
     int max_rule_span, int min_gap_size, int max_rule_symbols) {
+  // Select the leftmost subpattern.
   for (size_t i = 0; i < matchings.size(); ++i) {
     int start1, size1, is_super1;
     tie(start1, size1, is_super1) = matchings[i];
 
+    // Select the second (middle) subpattern
     for (size_t j = i + 1; j < matchings.size(); ++j) {
       int start2, size2, is_super2;
       tie(start2, size2, is_super2) = matchings[j];
@@ -116,8 +125,10 @@ void Precomputation::AddCollocations(
             data.begin() + start2 + size2);
         AddStartPositions(collocations[pattern], start1, start2);
 
+        // Try extending the binary collocation to a ternary collocation.
         if (is_super2) {
           pattern.push_back(Precomputation::SECOND_NONTERMINAL);
+          // Select the rightmost subpattern.
           for (size_t k = j + 1; k < matchings.size(); ++k) {
             int start3, size3, is_super3;
             tie(start3, size3, is_super3) = matchings[k];

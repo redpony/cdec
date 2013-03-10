@@ -28,8 +28,6 @@ Alignment::Alignment(const string& filename) {
     }
     alignments.push_back(alignment);
   }
-  // Note: shrink_to_fit does nothing for vector<vector<string> > on g++ 4.6.3,
-  // but let's hope that the bug will be fixed in a newer version.
   alignments.shrink_to_fit();
 }
 
