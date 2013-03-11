@@ -9,7 +9,7 @@ def usage
     exit 1
   end
 end
-usage if not [12, 13, 14].include? ARGV.size
+usage if not [11, 12, 13, 14].include? ARGV.size
 
 opts = Trollop::options do
   opt :config, "dtrain config file", :type => :string
@@ -23,8 +23,6 @@ opts = Trollop::options do
   opt :dtrain_binary, "path to dtrain binary", :type => :string
   opt :lplp_args, "arguments for lplp arguments", :type => :string, :default => "l2 select_k 100000"
 end
-
-puts opts.to_s
 
 
 dtrain_dir = File.expand_path File.dirname(__FILE__)
