@@ -5,7 +5,7 @@ require 'trollop'
 def usage
   if ARGV.size != 8
     STDERR.write "Usage: "
-    STDERR.write "ruby parallelize.rb -c <dtrain.ini> -e <epochs> [--randomize/-z] -s <#shards|0> -p <at once> -i <input> -r <refs> [--qsub/-q]\n"
+    STDERR.write "ruby parallelize.rb -c <dtrain.ini> -e <epochs> [--randomize/-z] -s <#shards|0> -p <at once> -i <input> -r <refs> [--qsub/-q] --dtrain_binary <path to dtrain binary>\n"
     exit 1
   end
 end
@@ -20,13 +20,18 @@ opts = Trollop::options do
   opt :input, "input", :type => :string
   opt :references, "references", :type => :string
   opt :qsub, "use qsub", :type => :bool, :default => false
+  opt :dtrain_binary, "path to dtrain binary", :type => :string
 end
 
 puts opts.to_s
 
 
 dtrain_dir = File.expand_path File.dirname(__FILE__)
-dtrain_bin = "#{dtrain_dir}/dtrain"
+if not opts[:dtrain_binary]
+  dtrain_bin = "#{dtrain_dir}/dtrain"
+else
+  dtrain_bin = opts[:dtrain_binary]
+end
 ruby       = '/usr/bin/ruby'
 lplp_rb    = "#{dtrain_dir}/hstreaming/lplp.rb"
 lplp_args  = 'l2 select_k 100000'
