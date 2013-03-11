@@ -1,11 +1,29 @@
 #!/usr/bin/env ruby
 
+require 'trollop'
 
-if ARGV.size != 8
-  STDERR.write "Usage: "
-  STDERR.write "ruby parallelize.rb <dtrain.ini> <epochs> <rand=true|false> <#shards|predef> <at once> <input> <refs> <qsub>\n"
-  exit
+def usage
+  if ARGV.size != 8
+    STDERR.write "Usage: "
+    STDERR.write "ruby parallelize.rb -c <dtrain.ini> -e <epochs> [--randomize/-z] -s <#shards|0> -p <at once> -i <input> -r <refs> [--qsub/-q]\n"
+    exit 1
+  end
 end
+usage if not [12, 13, 14].include? ARGV.size
+
+opts = Trollop::options do
+  opt :config, "dtrain config file", :type => :string
+  opt :epochs, "number of epochs", :type => :int
+  opt :randomize, "randomize shards before each epoch", :type => :bool, :short => '-z', :default => false
+  opt :shards, "number of shards", :type => :int
+  opt :processes_at_once, "have this number (max) running at the same time", :type => :int, :default => 9999
+  opt :input, "input", :type => :string
+  opt :references, "references", :type => :string
+  opt :qsub, "use qsub", :type => :bool, :default => false
+end
+
+puts opts.to_s
+
 
 dtrain_dir = File.expand_path File.dirname(__FILE__)
 dtrain_bin = "#{dtrain_dir}/dtrain"
@@ -14,22 +32,22 @@ lplp_rb    = "#{dtrain_dir}/hstreaming/lplp.rb"
 lplp_args  = 'l2 select_k 100000'
 cat        = '/bin/cat'
 
-ini        = ARGV[0]
-epochs     = ARGV[1].to_i
+ini        = opts[:config]
+epochs     = opts[:epochs]
 rand = false
-rand = true if ARGV[2]=='true'
+rand = true if opts[:randomize]
 predefined_shards = false
-if ARGV[3] == 'predef'
+if opts[:shards] == 0
   predefined_shards = true
-  num_shards = -1
+  num_shards = 0
 else
-  num_shards = ARGV[3].to_i
+  num_shards = opts[:shards]
 end
-shards_at_once = ARGV[4].to_i
-input = ARGV[5]
-refs  = ARGV[6]
+shards_at_once = opts[:processes_at_once]
+input = opts[:input]
+refs  = opts[:references]
 use_qsub   = false
-use_qsub = true if ARGV[7]
+use_qsub = true if opts[:qsub]
 
 `mkdir work`
 
