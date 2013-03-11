@@ -21,6 +21,7 @@ opts = Trollop::options do
   opt :references, "references", :type => :string
   opt :qsub, "use qsub", :type => :bool, :default => false
   opt :dtrain_binary, "path to dtrain binary", :type => :string
+  opt :lplp_args, "arguments for lplp arguments", :type => :string, :default => "l2 select_k 100000"
 end
 
 puts opts.to_s
@@ -34,7 +35,7 @@ else
 end
 ruby       = '/usr/bin/ruby'
 lplp_rb    = "#{dtrain_dir}/hstreaming/lplp.rb"
-lplp_args  = 'l2 select_k 100000'
+lplp_args  = opts[:lplp_args]
 cat        = '/bin/cat'
 
 ini        = opts[:config]
