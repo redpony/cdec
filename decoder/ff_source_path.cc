@@ -4,7 +4,7 @@
 
 using namespace std;
 
-SourcePathFeatures::SourcePathFeatures(const string& param) : FeatureFunction(4) {}
+SourcePathFeatures::SourcePathFeatures(const string& param) : FeatureFunction(sizeof(int)) {}
 
 void SourcePathFeatures::FireBigramFeature(WordID prev, WordID cur, SparseVector<double>* features) const {
   int& fid = bigram_fids[prev][cur];
@@ -27,10 +27,11 @@ void SourcePathFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   WordID* res = reinterpret_cast<WordID*>(context);
   const vector<int>& f = edge.rule_->f();
   int prev = 0;
+  unsigned ntc = 0;
   for (unsigned i = 0; i < f.size(); ++i) {
     int cur = f[i];
-    if (cur <= 0)
-      cur = *reinterpret_cast<const WordID*>(ant_contexts[-cur]);
+    if (cur < 0)
+      cur = *reinterpret_cast<const WordID*>(ant_contexts[ntc++]);
     else
       FireUnigramFeature(cur, features);
     if (prev) FireBigramFeature(prev, cur, features);
@@ -38,3 +39,4 @@ void SourcePathFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   }
   *res = prev;
 }
+
