@@ -5,16 +5,16 @@ require 'trollop'
 def usage
   if ARGV.size != 8
     STDERR.write "Usage: "
-    STDERR.write "ruby parallelize.rb -c <dtrain.ini> -e <epochs> [--randomize/-z] -s <#shards|0> -p <at once> -i <input> -r <refs> [--qsub/-q] --dtrain_binary <path to dtrain binary>\n"
+    STDERR.write "ruby parallelize.rb -c <dtrain.ini> -e <epochs> [--randomize/-z] [--reshard/-y] -s <#shards|0> -p <at once> -i <input> -r <refs> [--qsub/-q] --dtrain_binary <path to dtrain binary> -l \"l2 select_k 100000\"\n"
     exit 1
   end
 end
-usage if not [11, 12, 13, 14].include? ARGV.size
 
 opts = Trollop::options do
   opt :config, "dtrain config file", :type => :string
   opt :epochs, "number of epochs", :type => :int
   opt :randomize, "randomize shards before each epoch", :type => :bool, :short => '-z', :default => false
+  opt :reshard, "reshard after each epoch", :type => :bool, :short => '-y', :default => false
   opt :shards, "number of shards", :type => :int
   opt :processes_at_once, "have this number (max) running at the same time", :type => :int, :default => 9999
   opt :input, "input", :type => :string
@@ -40,6 +40,8 @@ ini        = opts[:config]
 epochs     = opts[:epochs]
 rand = false
 rand = true if opts[:randomize]
+reshard = false
+reshard = true if opts[:reshard]
 predefined_shards = false
 if opts[:shards] == 0
   predefined_shards = true
@@ -142,7 +144,7 @@ end
   end
   `#{cat} work/weights.*.#{epoch} > work/weights_cat`
   `#{ruby} #{lplp_rb} #{lplp_args} #{num_shards} < work/weights_cat > work/weights.#{epoch}`
-  if rand and epoch+1!=epochs
+  if rand and reshard and epoch+1!=epochs
     input_files, refs_files = make_shards input, refs, num_shards, epoch+1, rand
   end
 }
