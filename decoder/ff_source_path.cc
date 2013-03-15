@@ -30,7 +30,7 @@ void SourcePathFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   for (unsigned i = 0; i < f.size(); ++i) {
     int cur = f[i];
     if (cur <= 0)
-      cur = *reinterpret_cast<const WordID*>(ant_contexts[cur]);
+      cur = *reinterpret_cast<const WordID*>(ant_contexts[-cur]);
     else
       FireUnigramFeature(cur, features);
     if (prev) FireBigramFeature(prev, cur, features);
