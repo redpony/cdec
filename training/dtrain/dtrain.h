@@ -1,9 +1,6 @@
 #ifndef _DTRAIN_H_
 #define _DTRAIN_H_
 
-#undef DTRAIN_FASTER_PERCEPTRON // only consider actually misranked pairs
-                                // DO NOT ENABLE  WITH SVM (gamma > 0) OR loss_margin!
-
 #define DTRAIN_DOTS 10 // after how many inputs to display a '.'
 #define DTRAIN_SCALE 100000
 
