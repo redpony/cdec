@@ -1,13 +1,11 @@
 #ifndef _DTRAIN_H_
 #define _DTRAIN_H_
 
-#undef DTRAIN_FASTER_PERCEPTRON // only look at misranked pairs
-                                 // DO NOT USE WITH SVM!
-#define DTRAIN_LOCAL
-#define DTRAIN_DOTS 10 // after how many inputs to display a '.'
-#define DTRAIN_GRAMMAR_DELIM "########EOS########"
-#define DTRAIN_SCALE 100000
+#undef DTRAIN_FASTER_PERCEPTRON // only consider actually misranked pairs
+                                // DO NOT ENABLE  WITH SVM (gamma > 0) OR loss_margin!
 
+#define DTRAIN_DOTS 10 // after how many inputs to display a '.'
+#define DTRAIN_SCALE 100000
 
 #include <iomanip>
 #include <climits>

@@ -12,9 +12,7 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     ("decoder_config",    po::value<string>(),                                                      "configuration file for cdec")
     ("print_weights",     po::value<string>(),                                               "weights to print on each iteration")
     ("stop_after",        po::value<unsigned>()->default_value(0),                                 "stop after X input sentences")
-    ("tmp",               po::value<string>()->default_value("/tmp"),                                           "temp dir to use")
     ("keep",              po::value<bool>()->zero_tokens(),                               "keep weights files for each iteration")
-    ("hstreaming",        po::value<string>(),                                   "run in hadoop streaming mode, arg is a task id")
     ("epochs",            po::value<unsigned>()->default_value(10),                               "# of iterations T (per shard)")
     ("k",                 po::value<unsigned>()->default_value(100),                            "how many translations to sample")
     ("sample_from",       po::value<string>()->default_value("kbest"),     "where to sample translations from: 'kbest', 'forest'")
@@ -28,16 +26,14 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     ("gamma",             po::value<weight_t>()->default_value(0.),                            "gamma for SVM (0 for perceptron)")
     ("select_weights",    po::value<string>()->default_value("last"),     "output best, last, avg weights ('VOID' to throw away)")
     ("rescale",           po::value<bool>()->zero_tokens(),                              "rescale weight vector after each input")
-    ("l1_reg",            po::value<string>()->default_value("none"),      "apply l1 regularization as in 'Tsuroka et al' (2010)")
+    ("l1_reg",            po::value<string>()->default_value("none"), "apply l1 regularization as in 'Tsuroka et al' (2010) UNTESTED")
     ("l1_reg_strength",   po::value<weight_t>(),                                                     "l1 regularization strength")
     ("fselect",           po::value<weight_t>()->default_value(-1), "select top x percent (or by threshold) of features after each epoch NOT IMPLEMENTED") // TODO
     ("approx_bleu_d",     po::value<score_t>()->default_value(0.9),                                   "discount for approx. BLEU")
     ("scale_bleu_diff",   po::value<bool>()->zero_tokens(),                      "learning rate <- bleu diff of a misranked pair")
     ("loss_margin",       po::value<weight_t>()->default_value(0.),  "update if no error in pref pair but model scores this near")
     ("max_pairs",         po::value<unsigned>()->default_value(std::numeric_limits<unsigned>::max()), "max. # of pairs per Sent.")
-#ifdef DTRAIN_LOCAL
     ("refs,r",            po::value<string>(),                                                         "references in local mode")
-#endif
     ("noup",              po::value<bool>()->zero_tokens(),                                               "do not update weights");
   po::options_description cl("Command Line Options");
   cl.add_options()
@@ -55,16 +51,6 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     cerr << cl << endl;
     return false;
   }
-  if (cfg->count("hstreaming") && (*cfg)["output"].as<string>() != "-") {
-    cerr << "When using 'hstreaming' the 'output' param should be '-'." << endl;
-    return false;
-  }
-#ifdef DTRAIN_LOCAL
-  if ((*cfg)["input"].as<string>() == "-") {
-    cerr << "Can't use stdin as input with this binary. Recompile without DTRAIN_LOCAL" << endl;
-    return false;
-  }
-#endif
   if ((*cfg)["sample_from"].as<string>() != "kbest"
        && (*cfg)["sample_from"].as<string>() != "forest") {
     cerr << "Wrong 'sample_from' param: '" << (*cfg)["sample_from"].as<string>() << "', use 'kbest' or 'forest'." << endl;
@@ -111,17 +97,8 @@ main(int argc, char** argv)
   if (cfg.count("verbose")) verbose = true;
   bool noup = false;
   if (cfg.count("noup")) noup = true;
-  bool hstreaming = false;
-  string task_id;
-  if (cfg.count("hstreaming")) {
-    hstreaming = true;
-    quiet = true;
-    task_id = cfg["hstreaming"].as<string>();
-    cerr.precision(17);
-  }
   bool rescale = false;
   if (cfg.count("rescale")) rescale = true;
-  HSReporter rep(task_id);
   bool keep = false;
   if (cfg.count("keep")) keep = true;
 
@@ -224,16 +201,8 @@ main(int argc, char** argv)
   // buffer input for t > 0
   vector<string> src_str_buf;          // source strings (decoder takes only strings)
   vector<vector<WordID> > ref_ids_buf; // references as WordID vecs
-  // where temp files go
-  string tmp_path = cfg["tmp"].as<string>();
-#ifdef DTRAIN_LOCAL
   string refs_fn = cfg["refs"].as<string>();
   ReadFile refs(refs_fn);
-#else
-  string grammar_buf_fn = gettmpf(tmp_path, "dtrain-grammars");
-  ogzstream grammar_buf_out;
-  grammar_buf_out.open(grammar_buf_fn.c_str());
-#endif
 
   unsigned in_sz = std::numeric_limits<unsigned>::max(); // input index, input size
   vector<pair<score_t, score_t> > all_scores;
@@ -270,9 +239,7 @@ main(int argc, char** argv)
     cerr << setw(25) << "max pairs " << max_pairs << endl;
     cerr << setw(25) << "cdec cfg " << "'" << cfg["decoder_config"].as<string>() << "'" << endl;
     cerr << setw(25) << "input " << "'" << input_fn << "'" << endl;
-#ifdef DTRAIN_LOCAL
     cerr << setw(25) << "refs " << "'" << refs_fn << "'" << endl;
-#endif
     cerr << setw(25) << "output " << "'" << output_fn << "'" << endl;
     if (cfg.count("input_weights"))
       cerr << setw(25) << "weights in " << "'" << cfg["input_weights"].as<string>() << "'" << endl;
@@ -285,14 +252,10 @@ main(int argc, char** argv)
   for (unsigned t = 0; t < T; t++) // T epochs
   {
 
-  if (hstreaming) cerr << "reporter:status:Iteration #" << t+1 << " of " << T << endl;
-
   time_t start, end;
   time(&start);
-#ifndef DTRAIN_LOCAL
   igzstream grammar_buf_in;
   if (t > 0) grammar_buf_in.open(grammar_buf_fn.c_str());
-#endif
   score_t score_sum = 0.;
   score_t model_sum(0);
   unsigned ii = 0, rank_errors = 0, margin_violations = 0, npairs = 0, f_count = 0, list_sz = 0;
@@ -340,52 +303,6 @@ main(int argc, char** argv)
 
     // getting input
     vector<WordID> ref_ids; // reference as vector<WordID>
-#ifndef DTRAIN_LOCAL
-    vector<string> in_split; // input: sid\tsrc\tref\tpsg
-    if (t == 0) {
-      // handling input
-      split_in(in, in_split);
-      if (hstreaming && ii == 0) cerr << "reporter:counter:" << task_id << ",First ID," << in_split[0] << endl;
-      // getting reference
-      vector<string> ref_tok;
-      boost::split(ref_tok, in_split[2], boost::is_any_of(" "));
-      register_and_convert(ref_tok, ref_ids);
-      ref_ids_buf.push_back(ref_ids);
-      // process and set grammar
-      bool broken_grammar = true; // ignore broken grammars
-      for (string::iterator it = in.begin(); it != in.end(); it++) {
-        if (!isspace(*it)) {
-          broken_grammar = false;
-          break;
-        }
-      }
-      if (broken_grammar) {
-        cerr << "Broken grammar for " << ii+1 << "! Ignoring this input." << endl;
-        continue;
-      }
-      boost::replace_all(in, "\t", "\n");
-      in += "\n";
-      grammar_buf_out << in << DTRAIN_GRAMMAR_DELIM << " " << in_split[0] << endl;
-      decoder.AddSupplementalGrammarFromString(in);
-      src_str_buf.push_back(in_split[1]);
-      // decode
-      observer->SetRef(ref_ids);
-      decoder.Decode(in_split[1], observer);
-    } else {
-      // get buffered grammar
-      string grammar_str;
-      while (true) {
-        string rule;
-        getline(grammar_buf_in, rule);
-        if (boost::starts_with(rule, DTRAIN_GRAMMAR_DELIM)) break;
-        grammar_str += rule + "\n";
-      }
-      decoder.AddSupplementalGrammarFromString(grammar_str);
-      // decode
-      observer->SetRef(ref_ids_buf[ii]);
-      decoder.Decode(src_str_buf[ii], observer);
-    }
-#else
     if (t == 0) {
       string r_;
       getline(*refs, r_);
@@ -402,7 +319,6 @@ main(int argc, char** argv)
       decoder.Decode(in, observer);
     else
       decoder.Decode(src_str_buf[ii], observer);
-#endif
 
     // get (scored) samples
     vector<ScoredHyp>* samples = observer->GetSamples();
@@ -505,11 +421,6 @@ main(int argc, char** argv)
 
     ++ii;
 
-    if (hstreaming) {
-      rep.update_counter("Seen #"+boost::lexical_cast<string>(t+1), 1u);
-      rep.update_counter("Seen", 1u);
-    }
-
   } // input loop
 
   if (average) w_average += lambdas;
@@ -518,20 +429,7 @@ main(int argc, char** argv)
 
   if (t == 0) {
     in_sz = ii; // remember size of input (# lines)
-    if (hstreaming) {
-      rep.update_counter("|Input|", ii);
-      rep.update_gcounter("|Input|", ii);
-      rep.update_gcounter("Shards", 1u);
-    }
   }
-
-#ifndef DTRAIN_LOCAL
-  if (t == 0) {
-    grammar_buf_out.close();
-  } else {
-    grammar_buf_in.close();
-  }
-#endif
 
   // print some stats
   score_t score_avg = score_sum/(score_t)in_sz;
@@ -546,7 +444,7 @@ main(int argc, char** argv)
   }
 
   unsigned nonz = 0;
-  if (!quiet || hstreaming) nonz = (unsigned)lambdas.num_nonzero();
+  if (!quiet) nonz = (unsigned)lambdas.num_nonzero();
 
   if (!quiet) {
     cerr << _p5 << _p << "WEIGHTS" << endl;
@@ -569,16 +467,6 @@ main(int argc, char** argv)
     cerr << "    non0 feature count: " <<  nonz << endl;
     cerr << "           avg list sz: " << list_sz/(float)in_sz << endl;
     cerr << "           avg f count: " << f_count/(float)list_sz << endl;
-  }
-
-  if (hstreaming) {
-    rep.update_counter("Score 1best avg #"+boost::lexical_cast<string>(t+1), (unsigned)(score_avg*DTRAIN_SCALE));
-    rep.update_counter("Model 1best avg #"+boost::lexical_cast<string>(t+1), (unsigned)(model_avg*DTRAIN_SCALE));
-    rep.update_counter("Pairs avg #"+boost::lexical_cast<string>(t+1), (unsigned)((npairs/(weight_t)in_sz)*DTRAIN_SCALE));
-    rep.update_counter("Rank errors avg #"+boost::lexical_cast<string>(t+1), (unsigned)((rank_errors/(weight_t)in_sz)*DTRAIN_SCALE));
-    rep.update_counter("Margin violations avg #"+boost::lexical_cast<string>(t+1), (unsigned)((margin_violations/(weight_t)in_sz)*DTRAIN_SCALE));
-    rep.update_counter("Non zero feature count #"+boost::lexical_cast<string>(t+1), nonz);
-    rep.update_gcounter("Non zero feature count #"+boost::lexical_cast<string>(t+1), nonz);
   }
 
   pair<score_t,score_t> remember;
@@ -610,10 +498,6 @@ main(int argc, char** argv)
   } // outer loop
 
   if (average) w_average /= (weight_t)T;
-
-#ifndef DTRAIN_LOCAL
-  unlink(grammar_buf_fn.c_str());
-#endif
 
   if (!noup) {
     if (!quiet) cerr << endl << "Writing weights file to '" << output_fn << "' ..." << endl;
@@ -651,7 +535,6 @@ main(int argc, char** argv)
         }
       }
     }
-    if (output_fn == "-" && hstreaming) cout << "__SHARD_COUNT__\t1" << endl;
     if (!quiet) cerr << "done" << endl;
   }
 

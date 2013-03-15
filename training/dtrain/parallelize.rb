@@ -80,7 +80,7 @@ def make_shards(input, refs, num_shards, epoch, rand)
     shard_refs = File.new refs_fn, 'w+'
     refs_fns << refs_fn
     0.upto(shard_sz-1) { |i|
-      j = index.pop 
+      j = index.pop
       shard_in.write in_lines[j]
       shard_refs.write refs_lines[j]
     }
@@ -125,7 +125,7 @@ end
       if use_qsub
         qsub_str_start = "qsub -cwd -sync y -b y -j y -o work/out.#{shard}.#{epoch} -N dtrain.#{shard}.#{epoch} \""
         qsub_str_end = "\""
-        local_end = '' 
+        local_end = ''
       else
         local_end = "&>work/out.#{shard}.#{epoch}"
       end
