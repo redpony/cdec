@@ -1,1 +1,1 @@
-from _cdec import BLEU, TER, CER, Metric
+from _cdec import BLEU, TER, CER, SSK, QCRI, Metric
