@@ -254,8 +254,6 @@ main(int argc, char** argv)
 
   time_t start, end;
   time(&start);
-  igzstream grammar_buf_in;
-  if (t > 0) grammar_buf_in.open(grammar_buf_fn.c_str());
   score_t score_sum = 0.;
   score_t model_sum(0);
   unsigned ii = 0, rank_errors = 0, margin_violations = 0, npairs = 0, f_count = 0, list_sz = 0;

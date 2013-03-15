@@ -3,16 +3,15 @@
 require 'trollop'
 
 def usage
-  if ARGV.size != 8
-    STDERR.write "Usage: "
-    STDERR.write "ruby parallelize.rb -c <dtrain.ini> -e <epochs> [--randomize/-z] [--reshard/-y] -s <#shards|0> -p <at once> -i <input> -r <refs> [--qsub/-q] --dtrain_binary <path to dtrain binary> -l \"l2 select_k 100000\"\n"
-    exit 1
-  end
+  STDERR.write "Usage: "
+  STDERR.write "ruby parallelize.rb -c <dtrain.ini> [-e <epochs=10>] [--randomize/-z] [--reshard/-y] -s <#shards|0> [-p <at once=9999>] -i <input> -r <refs> [--qsub/-q] [--dtrain_binary <path to dtrain binary>] [-l \"l2 select_k 100000\"]\n"
+  exit 1
 end
 
 opts = Trollop::options do
   opt :config, "dtrain config file", :type => :string
-  opt :epochs, "number of epochs", :type => :int
+  opt :epochs, "number of epochs", :type => :int, :default => 10
+  opt :lplp_args, "arguments for lplp.rb", :type => :string, :default => "l2 select_k 100000"
   opt :randomize, "randomize shards before each epoch", :type => :bool, :short => '-z', :default => false
   opt :reshard, "reshard after each epoch", :type => :bool, :short => '-y', :default => false
   opt :shards, "number of shards", :type => :int
@@ -21,8 +20,8 @@ opts = Trollop::options do
   opt :references, "references", :type => :string
   opt :qsub, "use qsub", :type => :bool, :default => false
   opt :dtrain_binary, "path to dtrain binary", :type => :string
-  opt :lplp_args, "arguments for lplp arguments", :type => :string, :default => "l2 select_k 100000"
 end
+usage if not opts[:config]&&opts[:shards]&&opts[:input]&&opts[:references]
 
 
 dtrain_dir = File.expand_path File.dirname(__FILE__)
@@ -32,16 +31,14 @@ else
   dtrain_bin = opts[:dtrain_binary]
 end
 ruby       = '/usr/bin/ruby'
-lplp_rb    = "#{dtrain_dir}/hstreaming/lplp.rb"
+lplp_rb    = "#{dtrain_dir}/lplp.rb"
 lplp_args  = opts[:lplp_args]
 cat        = '/bin/cat'
 
 ini        = opts[:config]
 epochs     = opts[:epochs]
-rand = false
-rand = true if opts[:randomize]
-reshard = false
-reshard = true if opts[:reshard]
+rand       = opts[:randomize]
+reshard    = opts[:reshard]
 predefined_shards = false
 if opts[:shards] == 0
   predefined_shards = true
@@ -49,11 +46,10 @@ if opts[:shards] == 0
 else
   num_shards = opts[:shards]
 end
-shards_at_once = opts[:processes_at_once]
 input = opts[:input]
 refs  = opts[:references]
-use_qsub   = false
-use_qsub = true if opts[:qsub]
+use_qsub       = opts[:qsub]
+shards_at_once = opts[:processes_at_once]
 
 `mkdir work`
 

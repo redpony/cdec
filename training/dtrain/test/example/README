@@ -1,8 +1,0 @@
-Small example of input format for distributed training.
-Call dtrain from this folder with ../../dtrain -c test/example/dtrain.ini .
-
-For this to work, undef 'DTRAIN_LOCAL' in dtrain.h
-and recompile.
-
-data can be found here: http://simianer.de/#dtrain
-
