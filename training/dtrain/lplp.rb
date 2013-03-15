@@ -84,42 +84,34 @@ def _test()
 end
 #_test()
 
-# actually do something
+
 def usage()
-  puts "lplp.rb <l0,l1,l2,linfty,mean,median> <cut|select_k> <k|threshold> [n] < <input>"
+  puts "lplp.rb <l0,l1,l2,linfty,mean,median> <cut|select_k> <k|threshold> <#shards> < <input>"
   puts "   l0...: norms for selection"
   puts "select_k: only output top k (according to the norm of their column vector) features"
   puts "     cut: output features with weight >= threshold"
   puts "       n: if we do not have a shard count use this number for averaging"
-  exit
+  exit 1
 end
 
-if ARGV.size < 3 then usage end
+if ARGV.size < 4 then usage end
 norm_fun = method(ARGV[0].to_sym)
 type = ARGV[1]
 x = ARGV[2].to_f
-
-shard_count_key = "__SHARD_COUNT__"
+shard_count = ARGV[3].to_f
 
 STDIN.set_encoding 'utf-8'
 STDOUT.set_encoding 'utf-8'
 
 w = {}
-shard_count = 0
 while line = STDIN.gets
   key, val = line.split /\s+/
-  if key == shard_count_key
-    shard_count += 1
-    next
-  end
   if w.has_key? key
     w[key].push val.to_f
   else
     w[key] = [val.to_f]
   end
 end
-
-if ARGV.size == 4 then shard_count = ARGV[3].to_f end
 
 if type == 'cut'
   cut(w, norm_fun, shard_count, x)
