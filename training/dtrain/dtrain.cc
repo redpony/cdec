@@ -163,6 +163,8 @@ main(int argc, char** argv)
     scorer = dynamic_cast<BleuScorer*>(new BleuScorer);
   } else if (scorer_str == "stupid_bleu") {
     scorer = dynamic_cast<StupidBleuScorer*>(new StupidBleuScorer);
+  } else if (scorer_str == "fixed_stupid_bleu") {
+    scorer = dynamic_cast<FixedStupidBleuScorer*>(new FixedStupidBleuScorer);
   } else if (scorer_str == "smooth_bleu") {
     scorer = dynamic_cast<SmoothBleuScorer*>(new SmoothBleuScorer);
   } else if (scorer_str == "sum_bleu") {

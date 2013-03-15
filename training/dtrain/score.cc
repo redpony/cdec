@@ -49,7 +49,7 @@ BleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  *        for Machine Translation"
  * (Lin & Och '04)
  *
- * NOTE: 0 iff no 1gram match
+ * NOTE: 0 iff no 1gram match ('grounded')
  */
 score_t
 StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
@@ -71,6 +71,35 @@ StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
     sum += v[i] * log(((score_t)counts.clipped_[i] + add)/((counts.sum_[i] + add)));
   }
   return  brevity_penalty(hyp_len, ref_len) * exp(sum);
+}
+
+/*
+ * fixed 'stupid' bleu
+ *
+ * as in "Optimizing for Sentence-Level BLEU+1
+ *        Yields Short Translations"
+ * (Nakov et al. '12)
+ */
+score_t
+FixedStupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+                        const unsigned /*rank*/, const unsigned /*src_len*/)
+{
+  unsigned hyp_len = hyp.size(), ref_len = ref.size();
+  if (hyp_len == 0 || ref_len == 0) return 0.;
+  NgramCounts counts = make_ngram_counts(hyp, ref, N_);
+  unsigned M = N_;
+  vector<score_t> v = w_;
+  if (ref_len < N_) {
+    M = ref_len;
+    for (unsigned i = 0; i < M; i++) v[i] = 1/((score_t)M);
+  }
+  score_t sum = 0, add = 0;
+  for (unsigned i = 0; i < M; i++) {
+    if (i == 0 && (counts.sum_[i] == 0 || counts.clipped_[i] == 0)) return 0.;
+    if (i == 1) add = 1;
+    sum += v[i] * log(((score_t)counts.clipped_[i] + add)/((counts.sum_[i] + add)));
+  }
+  return  brevity_penalty(hyp_len, ref_len+1) * exp(sum); // <- fix
 }
 
 /*
