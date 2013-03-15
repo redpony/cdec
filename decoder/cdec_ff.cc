@@ -14,6 +14,7 @@
 #include "ff_rules.h"
 #include "ff_ruleshape.h"
 #include "ff_bleu.h"
+#include "ff_source_path.h"
 #include "ff_source_syntax.h"
 #include "ff_register.h"
 #include "ff_charset.h"
@@ -70,6 +71,7 @@ void register_feature_functions() {
   ff_registry.Register("InputIndicator", new FFFactory<InputIndicator>);
   ff_registry.Register("LexicalTranslationTrigger", new FFFactory<LexicalTranslationTrigger>);
   ff_registry.Register("WordPairFeatures", new FFFactory<WordPairFeatures>);
+  ff_registry.Register("SourcePathFeatures", new FFFactory<SourcePathFeatures>);
   ff_registry.Register("WordSet", new FFFactory<WordSet>);
   ff_registry.Register("Dwarf", new FFFactory<Dwarf>);
   ff_registry.Register("External", new FFFactory<ExternalFeature>);

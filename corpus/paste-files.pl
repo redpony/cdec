@@ -34,6 +34,7 @@ while(1) {
       $done = 1;
       last;
     }
+    $r =~ s/\r//g;
     chomp $r;
     if ($r =~ /\|\|\|/) {
       $r = '';
