@@ -2,7 +2,7 @@
 use strict;
 binmode(STDIN,":utf8");
 binmode(STDOUT,":utf8");
-while(<>) {
+while(<STDIN>) {
   $_ = lc $_;
   print;
 }
