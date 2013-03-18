@@ -148,6 +148,11 @@ struct StupidBleuScorer : public LocalScorer
   score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
 };
 
+struct FixedStupidBleuScorer : public LocalScorer
+{
+  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
+};
+
 struct SmoothBleuScorer : public LocalScorer
 {
   score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
