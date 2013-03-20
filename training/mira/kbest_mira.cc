@@ -201,7 +201,7 @@ int main(int argc, char** argv) {
   vector<string> corpus;
   ReadTrainingCorpus(conf["source"].as<string>(), &corpus);
 
-  string metric_name = UppercaseString(conf["evaluation_metric"].as<string>());
+  string metric_name = UppercaseString(conf["mt_metric"].as<string>());
   if (metric_name == "COMBI") {
     cerr << "WARNING: 'combi' metric is no longer supported, switching to 'COMB:TER=-0.5;IBM_BLEU=0.5'\n";
     metric_name = "COMB:TER=-0.5;IBM_BLEU=0.5";
