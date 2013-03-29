@@ -12,7 +12,7 @@ class BasicCSplitFeatures : public FeatureFunction {
   BasicCSplitFeatures(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
@@ -27,7 +27,7 @@ class ReverseCharLMCSplitFeature : public FeatureFunction {
   ReverseCharLMCSplitFeature(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,

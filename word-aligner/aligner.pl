@@ -51,6 +51,8 @@ while(<IN>) {
   chomp;
   my ($f, $e) = split / \|\|\| /;
   die "Bad format, excepted ||| separated line" unless defined $f && defined $e;
+  $f =~ s/\[/(/g;
+  $e =~ s/\]/)/g;
   print F "$f\n";
   print E "$e\n";
 }
@@ -80,6 +82,11 @@ NCLASSES = $num_classes
 TARGETS = @targets
 PTRAIN = \$(TRAINING_DIR)/cluster-ptrain.pl --restart_if_necessary
 PTRAIN_PARAMS = --gaussian_prior --sigma_squared 1.0 --max_iteration 15
+#MPIJOBS = 4
+#MPIRUN = mpirun -np $(MPIJOBS)
+MPIRUN=
+
+WALLTIME=90
 
 export
 
@@ -99,7 +106,15 @@ clean:
 EOT
 close TOPLEVEL;
 
-print STDERR "Created alignment task. chdir to talign/ then type make.\n\n";
+print STDERR <<EOT;
+Created alignment task. To start, run:
+cd talign/
+make
+
+To specify the walltime *in minutes* used by the optimizer, use
+make WALLTIME=120
+
+EOT
 exit 0;
 
 sub make_stage {
@@ -142,6 +157,8 @@ EOT
   open AGENDA, ">$stage_dir/agenda.txt" or die "Can't write $stage_dir/agenda.txt: $!";
   print AGENDA "cdec.ini $TRAINING_ITERATIONS\n";
   close AGENDA;
+  `cp $SCRIPT_DIR/makefiles/makefile.model.$direction $stage_dir/Makefile`;
+  die unless $? == 0;
 }
 
 sub usage {

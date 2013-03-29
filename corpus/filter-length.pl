@@ -3,19 +3,29 @@ use strict;
 use utf8;
 
 ##### EDIT THESE SETTINGS ####################################################
-my $MAX_LENGTH = 99;  # discard a sentence if it is longer than this
-my $AUTOMATIC_INCLUDE_IF_SHORTER_THAN = 6; # if both are shorter, include
+my $AUTOMATIC_INCLUDE_IF_SHORTER_THAN = 7; # if both are shorter, include
 my $MAX_ZSCORE = 1.8; # how far from the mean can the (log)ratio be?
 ##############################################################################
 
-die "Usage: $0 corpus.fr-en\n\n  Filter sentence pairs containing sentences longer than $MAX_LENGTH words\n  or whose log length ratios are $MAX_ZSCORE stddevs away from the mean log ratio.\n\n" unless scalar @ARGV == 1;
+die "Usage: $0 [-NNN] corpus.fr-en\n\n  Filter sentence pairs containing sentences longer than NNN words (where NNN\n  is 150 by default) or whose log length ratios are $MAX_ZSCORE stddevs away from the\n  mean log ratio.\n\n" unless scalar @ARGV == 1 || scalar @ARGV == 2;
 binmode(STDOUT,":utf8");
 binmode(STDERR,":utf8");
 
+my $MAX_LENGTH = 150;  # discard a sentence if it is longer than this
+if (scalar @ARGV == 2) {
+  my $fp = shift @ARGV;
+  die "Expected -NNN for first parameter, but got $fp\n" unless $fp =~ /^-(\d+)$/;
+  $MAX_LENGTH=$1;
+}
+
 my $corpus = shift @ARGV;
+
 die "Cannot read from STDIN\n" if $corpus eq '-';
 my $ff = "<$corpus";
 $ff = "gunzip -c $corpus|" if $ff =~ /\.gz$/;
+
+print STDERR "Max line length (monolingual): $MAX_LENGTH\n";
+print STDERR "              Parallel corpus: $corpus\n";
 
 open F,$ff or die "Can't read $corpus: $!";
 binmode(F,":utf8");
@@ -24,6 +34,7 @@ my $rat_max = log(9);
 my $lrm = 0;
 my $zerof = 0;
 my $zeroe = 0;
+my $bad_format = 0;
 my $absbadrat = 0;
 my $overlene = 0;
 my $overlenf = 0;
@@ -33,8 +44,14 @@ while(<F>) {
   $lines++;
   if ($lines % 100000 == 0) { print STDERR " [$lines]\n"; }
   elsif ($lines % 2500 == 0) { print STDERR "."; }
-  my ($sf, $se, @d) = split / \|\|\| /;
-  die "Bad format: $_" if scalar @d != 0 or !defined $se;
+  my ($sf, $se, @d) = split /\s*\|\|\|\s*/;
+  if (scalar @d != 0 or !defined $se) {
+    $bad_format++;
+    if ($bad_format > 100 && ($bad_format / $lines) > 0.02) {
+      die "$bad_format / $lines : Corpus appears to be incorretly formatted, example: $_";
+    }
+    next;
+  }
   my @fs = split /\s+/, $sf;
   my @es = split /\s+/, $se;
   my $flen = scalar @fs;
@@ -78,7 +95,7 @@ for my $lr (@lograts) {
 $lsd = sqrt($lsd / scalar @lograts);
 @lograts = ();
 
-my $pass1_discard = $zerof + $zeroe + $absbadrat + $overlene + $overlenf;
+my $pass1_discard = $zerof + $zeroe + $absbadrat + $overlene + $overlenf + $bad_format;
 my $discard_rate = int(10000 * $pass1_discard / $lines) / 100;
 print STDERR "      Total lines: $lines\n";
 print STDERR " Already discared: $pass1_discard\t(discard rate = $discard_rate%)\n";
@@ -96,7 +113,8 @@ while(<F>) {
   $lines++;
   if ($lines % 100000 == 0) { print STDERR " [$lines]\n"; }
   elsif ($lines % 2500 == 0) { print STDERR "."; }
-  my ($sf, $se) = split / \|\|\| /;
+  my ($sf, $se, @d) = split / \|\|\| /;
+  if (scalar @d != 0 or !defined $se) { next; }
   my @fs = split /\s+/, $sf;
   my @es = split /\s+/, $se;
   my $flen = scalar @fs;
@@ -119,6 +137,8 @@ while(<F>) {
       $zviol++;
       next;
     }
+    print;
+  } else {
     print;
   }
   $to++;

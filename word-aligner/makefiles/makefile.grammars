@@ -4,7 +4,7 @@ clean:
 	$(RM) orthonorm-dict.* voc2class* corpus.class.* corpus.e-f corpus.f-e corpus.f-e.lex-grammar* *.model1 *voc corpus.e-f.lex-grammar* *stem* freq* wordpairs*
 
 SUPPORT_DIR = $(SCRIPT_DIR)/support
-GZIP = /usr/bin/gzip
+GZIP = gzip
 ZCAT = zcat
 EXTRACT_GRAMMAR = $(SUPPORT_DIR)/extract_grammar.pl
 EXTRACT_VOCAB = $(SUPPORT_DIR)/extract_vocab.pl
@@ -16,7 +16,7 @@ STEM_E = $(SCRIPT_DIR)/stemmers/$(E_LANG).pl
 
 CLASSIFY = $(SUPPORT_DIR)/classify.pl
 MAKE_LEX_GRAMMAR = $(SUPPORT_DIR)/make_lex_grammar.pl
-MODEL1 = $(TRAINING_DIR)/fast_align
+MODEL1 = $(SCRIPT_DIR)/fast_align
 MERGE_CORPUS = $(SUPPORT_DIR)/merge_corpus.pl
 
 e.voc: corpus.e

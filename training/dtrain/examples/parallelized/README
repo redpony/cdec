@@ -1,0 +1,5 @@
+run for example
+  ../../parallelize.rb ./dtrain.ini 4 false 2 2 ./in ./refs
+
+final weights will be in the file work/weights.3
+

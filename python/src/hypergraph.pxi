@@ -16,24 +16,38 @@ cdef class Hypergraph:
         return self.rng
 
     def viterbi(self):
+        """hg.viterbi() -> String for the best hypothesis in the hypergraph."""
         cdef vector[WordID] trans
         hypergraph.ViterbiESentence(self.hg[0], &trans)
         return unicode(GetString(trans).c_str(), 'utf8')
 
     def viterbi_trees(self):
+        """hg.viterbi_trees() -> (f_tree, e_tree)
+        f_tree: Source tree for the best hypothesis in the hypergraph.
+        e_tree: Target tree for the best hypothesis in the hypergraph.
+        """
         f_tree = unicode(hypergraph.ViterbiFTree(self.hg[0]).c_str(), 'utf8')
         e_tree = unicode(hypergraph.ViterbiETree(self.hg[0]).c_str(), 'utf8')
         return (f_tree, e_tree)
     
     def viterbi_features(self):
+        """hg.viterbi_features() -> SparseVector with the features corresponding
+        to the best derivation in the hypergraph."""
         cdef SparseVector fmap = SparseVector.__new__(SparseVector)
         fmap.vector = new FastSparseVector[weight_t](hypergraph.ViterbiFeatures(self.hg[0]))
         return fmap
 
+    def viterbi_forest(self):
+        cdef Hypergraph hg = Hypergraph()
+        hg.hg = new hypergraph.Hypergraph(self.hg[0].CreateViterbiHypergraph(NULL).get()[0])
+        return hg
+
     def viterbi_joshua(self):
+        """hg.viterbi_joshua() -> Joshua representation of the best derivation."""
         return unicode(hypergraph.JoshuaVisualizationString(self.hg[0]).c_str(), 'utf8')
 
     def kbest(self, size):
+        """hg.kbest(size) -> List of k-best hypotheses in the hypergraph."""
         cdef kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal]* derivations = new kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal](self.hg[0], size)
         cdef kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal].Derivation* derivation
         cdef unsigned k
@@ -46,6 +60,7 @@ cdef class Hypergraph:
             del derivations
 
     def kbest_trees(self, size):
+        """hg.kbest_trees(size) -> List of k-best trees in the hypergraph."""
         cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal]* f_derivations = new kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal](self.hg[0], size)
         cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal].Derivation* f_derivation
         cdef kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal]* e_derivations = new kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal](self.hg[0], size)
@@ -64,6 +79,7 @@ cdef class Hypergraph:
             del e_derivations
 
     def kbest_features(self, size):
+        """hg.kbest_trees(size) -> List of k-best feature vectors in the hypergraph."""
         cdef kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal]* derivations = new kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal](self.hg[0], size)
         cdef kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal].Derivation* derivation
         cdef SparseVector fmap
@@ -79,6 +95,7 @@ cdef class Hypergraph:
             del derivations
 
     def sample(self, unsigned n):
+        """hg.sample(n) -> Sample of n hypotheses from the hypergraph."""
         cdef vector[hypergraph.Hypothesis]* hypos = new vector[hypergraph.Hypothesis]()
         hypergraph.sample_hypotheses(self.hg[0], n, self._rng(), hypos)
         cdef unsigned k
@@ -89,6 +106,7 @@ cdef class Hypergraph:
             del hypos
 
     def sample_trees(self, unsigned n):
+       """hg.sample_trees(n) -> Sample of n trees from the hypergraph."""
        cdef vector[string]* trees = new vector[string]()
        hypergraph.sample_trees(self.hg[0], n, self._rng(), trees)
        cdef unsigned k
@@ -99,6 +117,7 @@ cdef class Hypergraph:
            del trees
 
     def intersect(self, inp):
+        """hg.intersect(Lattice/string): Intersect the hypergraph with the provided reference."""
         cdef Lattice lat
         if isinstance(inp, Lattice):
             lat = <Lattice> inp
@@ -109,6 +128,9 @@ cdef class Hypergraph:
         return hypergraph.Intersect(lat.lattice[0], self.hg)
 
     def prune(self, beam_alpha=0, density=0, **kwargs):
+        """hg.prune(beam_alpha=0, density=0): Prune the hypergraph.
+        beam_alpha: use beam pruning
+        density: use density pruning"""
         cdef hypergraph.EdgeMask* preserve_mask = NULL
         if 'csplit_preserve_full_word' in kwargs:
              preserve_mask = new hypergraph.EdgeMask(self.hg.edges_.size())
@@ -118,13 +140,16 @@ cdef class Hypergraph:
             del preserve_mask
 
     def lattice(self): # TODO direct hg -> lattice conversion in cdec
+        """hg.lattice() -> Lattice corresponding to the hypergraph."""
         cdef bytes plf = hypergraph.AsPLF(self.hg[0], True).c_str()
         return Lattice(eval(plf))
 
     def plf(self):
+        """hg.plf() -> Lattice PLF representation corresponding to the hypergraph."""
         return bytes(hypergraph.AsPLF(self.hg[0], True).c_str())
 
     def reweight(self, weights):
+        """hg.reweight(SparseVector/DenseVector): Reweight the hypergraph with a new vector."""
         if isinstance(weights, SparseVector):
             self.hg.Reweight((<SparseVector> weights).vector[0])
         elif isinstance(weights, DenseVector):
@@ -153,6 +178,7 @@ cdef class Hypergraph:
             return self.hg.NumberOfPaths()
 
     def inside_outside(self):
+        """hg.inside_outside() -> SparseVector with inside-outside scores for each feature."""
         cdef FastSparseVector[prob_t]* result = new FastSparseVector[prob_t]()
         cdef prob_t z = hypergraph.InsideOutside(self.hg[0], result)
         result[0] /= z
@@ -195,6 +221,10 @@ cdef class HypergraphEdge:
     property span:
         def __get__(self):
             return (self.edge.i_, self.edge.j_)
+
+    property src_span:
+        def __get__(self):
+            return (self.edge.prev_i_, self.edge.prev_j_)
 
     property feature_values:
         def __get__(self):

@@ -93,6 +93,8 @@ cdef class CandidateSet:
             yield self[i]
 
     def add_kbest(self, Hypergraph hypergraph, unsigned k):
+        """cs.add_kbest(Hypergraph hypergraph, int k) -> Extract K-best hypotheses 
+        from the hypergraph and add them to the candidate set."""
         self.cs.AddKBestCandidates(hypergraph.hg[0], k, self.scorer.get())
 
 cdef class SegmentEvaluator:
@@ -103,15 +105,17 @@ cdef class SegmentEvaluator:
         del self.scorer
 
     def evaluate(self, sentence):
+        """se.evaluate(sentence) -> SufficientStats for the given hypothesis."""
         cdef vector[WordID] hyp
         cdef SufficientStats sf = SufficientStats()
         sf.metric = self.metric
         sf.stats = new mteval.SufficientStats()
-        ConvertSentence(string(as_str(sentence.strip())), &hyp)
+        ConvertSentence(as_str(sentence.strip()), &hyp)
         self.scorer.get().Evaluate(hyp, sf.stats)
         return sf
 
     def candidate_set(self):
+        """se.candidate_set() -> Candidate set using this segment evaluator for scoring."""
         return CandidateSet(self)
 
 cdef class Scorer:
@@ -133,7 +137,7 @@ cdef class Scorer:
         cdef vector[WordID]* refv
         for ref in refs:
             refv = new vector[WordID]()
-            ConvertSentence(string(as_str(ref.strip())), refv)
+            ConvertSentence(as_str(ref.strip()), refv)
             refsv.push_back(refv[0])
             del refv
         cdef unsigned i
@@ -173,7 +177,8 @@ cdef class Metric:
     cdef Scorer scorer
     def __cinit__(self):
         self.scorer = Scorer()
-        self.scorer.name = new string(as_str(self.__class__.__name__))
+        cdef bytes class_name = self.__class__.__name__
+        self.scorer.name = new string(class_name)
         self.scorer.metric = mteval.PyMetricInstance(self.scorer.name[0],
                 <void*> self, _compute_sufficient_stats, _compute_score)
 
@@ -187,5 +192,7 @@ cdef class Metric:
         return []
 
 BLEU = Scorer('IBM_BLEU')
+QCRI = Scorer('QCRI_BLEU')
 TER = Scorer('TER')
 CER = Scorer('CER')
+SSK = Scorer('SSK')

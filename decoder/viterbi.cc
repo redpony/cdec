@@ -139,8 +139,8 @@ inline bool close_enough(double a,double b,double epsilon)
     return diff<=epsilon*fabs(a) || diff<=epsilon*fabs(b);
 }
 
-FeatureVector ViterbiFeatures(Hypergraph const& hg,WeightVector const* weights,bool fatal_dotprod_disagreement) {
-  FeatureVector r;
+SparseVector<double> ViterbiFeatures(Hypergraph const& hg,WeightVector const* weights,bool fatal_dotprod_disagreement) {
+  SparseVector<double> r;
   const prob_t p = Viterbi<FeatureVectorTraversal>(hg, &r);
   if (weights) {
     double logp=log(p);

@@ -8,6 +8,7 @@
 #include <functional>
 
 #include <assert.h>
+#include <stdint.h>
 
 namespace util {
 
@@ -42,8 +43,8 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
     typedef EqualT Equal;
 
   public:
-    static std::size_t Size(std::size_t entries, float multiplier) {
-      std::size_t buckets = std::max(entries + 1, static_cast<std::size_t>(multiplier * static_cast<float>(entries)));
+    static uint64_t Size(uint64_t entries, float multiplier) {
+      uint64_t buckets = std::max(entries + 1, static_cast<uint64_t>(multiplier * static_cast<float>(entries)));
       return buckets * sizeof(Entry);
     }
 
@@ -123,6 +124,11 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
         if (equal_(got, invalid_)) return false;
         if (++i == end_) i = begin_;
       }    
+    }
+
+    void Clear(Entry invalid) {
+      std::fill(begin_, end_, invalid);
+      entries_ = 0;
     }
 
   private:

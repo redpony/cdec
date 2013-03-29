@@ -56,7 +56,7 @@ class Dwarf : public FeatureFunction {
         function word alignments set by 3.
   */ 
   void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,

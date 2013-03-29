@@ -42,7 +42,7 @@ WeightType Inside(const Hypergraph& hg,
     Hypergraph::EdgesVector const& in=hg.nodes_[i].in_edges_;
     const unsigned num_in_edges = in.size();
     for (unsigned j = 0; j < num_in_edges; ++j) {
-      const Hypergraph::Edge& edge = hg.edges_[in[j]];
+      const HG::Edge& edge = hg.edges_[in[j]];
       WeightType score = weight(edge);
       for (unsigned k = 0; k < edge.tail_nodes_.size(); ++k) {
         const int tail_node_index = edge.tail_nodes_[k];
@@ -74,7 +74,7 @@ void Outside(const Hypergraph& hg,
     Hypergraph::EdgesVector const& in=hg.nodes_[i].in_edges_;
     const int num_in_edges = in.size();
     for (int j = 0; j < num_in_edges; ++j) {
-      const Hypergraph::Edge& edge = hg.edges_[in[j]];
+      const HG::Edge& edge = hg.edges_[in[j]];
       WeightType head_and_edge_weight = weight(edge);
       head_and_edge_weight *= head_node_outside_score;
       const int num_tail_nodes = edge.tail_nodes_.size();
@@ -138,7 +138,7 @@ struct InsideOutsides {
       Hypergraph::EdgesVector const& in=hg.nodes_[i].in_edges_;
       const int num_in_edges = in.size();
       for (int j = 0; j < num_in_edges; ++j) {
-        const Hypergraph::Edge& edge = hg.edges_[in[j]];
+        const HG::Edge& edge = hg.edges_[in[j]];
         KType kbar_e = outside[i];
         const int num_tail_nodes = edge.tail_nodes_.size();
         for (int k = 0; k < num_tail_nodes; ++k)
@@ -156,7 +156,7 @@ struct InsideOutsides {
       const int num_in_edges = in.size();
       for (int j = 0; j < num_in_edges; ++j) {
         int edgei=in[j];
-        const Hypergraph::Edge& edge = hg.edges_[edgei];
+        const HG::Edge& edge = hg.edges_[edgei];
         V x=weight(edge)*outside[i];
         const int num_tail_nodes = edge.tail_nodes_.size();
         for (int k = 0; k < num_tail_nodes; ++k)

@@ -1,16 +1,17 @@
 from itertools import chain
-import os
+import os, sys
 import cdec.configobj
 from cdec.sa.features import EgivenFCoherent, SampleCountF, CountEF,\
-        MaxLexEgivenF, MaxLexFgivenE, IsSingletonF, IsSingletonFE
+        MaxLexEgivenF, MaxLexFgivenE, IsSingletonF, IsSingletonFE,\
+        IsSupportedOnline
 import cdec.sa
 
 # maximum span of a grammar rule in TEST DATA
 MAX_INITIAL_SIZE = 15
 
 class GrammarExtractor:
-    def __init__(self, config, features=None):
-        if isinstance(config, str) or isinstance(config, unicode):
+    def __init__(self, config, online=False, features=None):
+        if isinstance(config, basestring):
             if not os.path.exists(config):
                 raise IOError('cannot read configuration from {0}'.format(config))
             config = cdec.configobj.ConfigObj(config, unrepr=True)
@@ -50,18 +51,26 @@ class GrammarExtractor:
                 train_max_initial_size=config['max_size'],
                 # minimum span of an RHS nonterminal in a rule extracted from TRAINING DATA
                 train_min_gap_size=config['min_gap'],
-                # True if phrases should be tight, False otherwise (better but slower)
-                tight_phrases=True,
+                # False if phrases should be loose (better but slower), True otherwise
+                tight_phrases=config.get('tight_phrases', True),
                 )
 
         # lexical weighting tables
         tt = cdec.sa.BiLex(from_binary=config['lex_file'])
 
+        # TODO: clean this up
+        extended_features = []
+        if online:
+            extended_features.append(IsSupportedOnline)
+            
         # TODO: use @cdec.sa.features decorator for standard features too
         # + add a mask to disable features
+        for f in cdec.sa._SA_FEATURES:
+            extended_features.append(f)
+            
         scorer = cdec.sa.Scorer(EgivenFCoherent, SampleCountF, CountEF, 
             MaxLexFgivenE(tt), MaxLexEgivenF(tt), IsSingletonF, IsSingletonFE,
-            *cdec.sa._SA_FEATURES)
+            *extended_features)
 
         fsarray = cdec.sa.SuffixArray(from_binary=config['f_sa_file'])
         edarray = cdec.sa.DataArray(from_binary=config['e_file'])
@@ -82,3 +91,16 @@ class GrammarExtractor:
         meta = cdec.sa.annotate(words)
         cnet = cdec.sa.make_lattice(words)
         return self.factory.input(cnet, meta)
+
+    # Add training instance to data
+    def add_instance(self, sentence, reference, alignment):
+        f_words = cdec.sa.encode_words(sentence.split())
+        e_words = cdec.sa.encode_words(reference.split())
+        al = sorted(tuple(int(i) for i in pair.split('-')) for pair in alignment.split())
+        self.factory.add_instance(f_words, e_words, al)
+    
+    # Debugging
+    def dump_online_stats(self):
+        self.factory.dump_online_stats()
+    def dump_online_rules(self):
+        self.factory.dump_online_rules()

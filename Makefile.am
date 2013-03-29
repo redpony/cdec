@@ -4,26 +4,22 @@
 SUBDIRS = \
   utils \
   mteval \
+  klm/util/double-conversion \
   klm/util \
+  klm/util/stream \
   klm/lm \
+  klm/lm/builder \
+  klm/search \
   decoder \
-  phrasinator \
   training \
   training/liblbfgs \
-  mira \
-  latent_svm \
-  dtrain \
-  dpmert \
-  pro-train \
-  rampion \
-  minrisk \
-  gi/pf \
-  gi/markov_al \
-  rst_parser 
+  word-aligner \
+  example_extff
 
 #gi/pyp-topics/src gi/clda/src gi/posterior-regularisation/prjava
 
+EXTRA_DIST = corpus tests python/pkg python/src python/tests python/examples compound-split environment
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS =  -D_GLIBCXX_PARALLEL
+AM_CPPFLAGS = -D_GLIBCXX_PARALLEL -march=native -mtune=native -O2 -pipe -fomit-frame-pointer -Wall
 

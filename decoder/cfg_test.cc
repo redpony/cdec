@@ -25,15 +25,15 @@ struct CFGTest : public TestWithParam<HgW> {
   Hypergraph hg;
   CFG cfg;
   CFGFormat form;
-  FeatureVector weights;
+  SparseVector<double> weights;
 
-  static void JsonFN(Hypergraph &hg,CFG &cfg,FeatureVector &featw,std::string file
+  static void JsonFN(Hypergraph &hg,CFG &cfg,SparseVector<double> &featw,std::string file
                      ,std::string const& wts="Model_0 1 EgivenF 1 f1 1")
   {
     istringstream ws(wts);
     EXPECT_TRUE(ws>>featw);
     CSHOW(featw)
-    std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : "test_data");
+    std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
     HGSetup::JsonTestFile(&hg,path,file);
     hg.Reweight(featw);
     cfg.Init(hg,true,true,false);

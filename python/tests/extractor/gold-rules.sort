@@ -1,0 +1,140 @@
+[X] ||| A B C D [X,1] ||| B C D [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 3-1
+[X] ||| A B C D ||| B C ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 3-1
+[X] ||| A B C [X,1] K ||| B [X,1] J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 4-3 4-4
+[X] ||| A B C [X,1] ||| B [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| A ||| B ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| AA BB CC DD ||| AA BB CC DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-3 1-2 2-1 3-0
+[X] ||| AA BB CC [X,1] ||| [X,1] BB CC DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-3 1-2 2-1
+[X] ||| AA BB CC ||| BB CC DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-2 1-1 2-0
+[X] ||| AA BB [X,1] DD ||| AA [X,1] CC DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-3 1-2 3-0
+[X] ||| AA BB [X,1] ||| [X,1] CC DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-2 1-1
+[X] ||| AA BB ||| CC DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1 1-0
+[X] ||| AA [X,1] CC DD ||| AA BB [X,1] DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-3 2-1 3-0
+[X] ||| AA [X,1] CC [X,2] ||| [X,2] BB [X,1] DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-3 2-1
+[X] ||| AA [X,1] CC ||| BB [X,1] DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-2 2-0
+[X] ||| AA [X,1] DD ||| AA [X,1] DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-2 2-0
+[X] ||| AA [X,1] ||| [X,1] DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1
+[X] ||| AA ||| DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| BB CC DD ||| AA BB CC ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-2 1-1 2-0
+[X] ||| BB CC [X,1] ||| [X,1] BB CC ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-2 1-1
+[X] ||| BB CC ||| BB CC ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1 1-0
+[X] ||| BB [X,1] DD ||| AA [X,1] CC ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-2 2-0
+[X] ||| BB [X,1] ||| [X,1] CC ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1
+[X] ||| BB ||| CC ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| CC DD ||| AA BB ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1 1-0
+[X] ||| CC [X,1] ||| [X,1] BB ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1
+[X] ||| CC ||| BB ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| D E F G H ||| C D E F G H ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-3 2-2 3-5 4-5
+[X] ||| D E F [X,1] K ||| C D E F G [X,1] J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-3 2-2 4-7 4-8
+[X] ||| D E F [X,1] ||| C D E F G [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-3 2-2
+[X] ||| D E F ||| C D E F ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-3 2-2
+[X] ||| D E [X,1] G H ||| C D [X,1] F G H ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-3 3-5 4-5
+[X] ||| D E [X,1] ||| C D [X,1] F ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-3
+[X] ||| D [X,1] F G H ||| C D E [X,1] G H ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 2-2 3-5 4-5
+[X] ||| D [X,1] F [X,2] K ||| C D E [X,1] G [X,2] J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 2-2 4-7 4-8
+[X] ||| D [X,1] F [X,2] ||| C D E [X,1] G [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 2-2
+[X] ||| D [X,1] F ||| C D E [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 2-2
+[X] ||| D [X,1] G H [X,2] ||| C D [X,1] G H [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 2-4 3-4
+[X] ||| D [X,1] G H ||| C D [X,1] G H ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 2-4 3-4
+[X] ||| D [X,1] I J K ||| C D [X,1] I J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 2-3 3-3 4-5 4-6
+[X] ||| D [X,1] I J [X,2] ||| C D [X,1] I J [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 2-3 3-3
+[X] ||| D [X,1] I J ||| C D [X,1] I ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 2-3 3-3
+[X] ||| D [X,1] K ||| C D [X,1] J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 2-4 2-5
+[X] ||| D [X,1] L M N ||| C D [X,1] M N ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 4-3 4-4
+[X] ||| D [X,1] L M [X,2] ||| C D [X,1] [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| D [X,1] ||| C D [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| D ||| C ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| DD ||| AA ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| E F G H [X,1] ||| E F G H [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1 1-0 2-3 3-3
+[X] ||| E F G H ||| E F G H ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1 1-0 2-3 3-3
+[X] ||| E F [X,1] I J ||| E F G [X,1] I ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1 1-0 3-4 4-4
+[X] ||| E F [X,1] K ||| E F G [X,1] J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1 1-0 3-5 3-6
+[X] ||| E F [X,1] ||| E F G [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1 1-0
+[X] ||| E F ||| E F ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1 1-0
+[X] ||| E [X,1] G H [X,2] ||| [X,1] F G H [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1 2-3 3-3
+[X] ||| E [X,1] G H ||| [X,1] F G H ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1 2-3 3-3
+[X] ||| E [X,1] ||| [X,1] F ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-1
+[X] ||| E ||| F ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| F ||| E ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| G H I J K ||| H I J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-0 2-1 3-1 4-3 4-4
+[X] ||| G H I J [X,1] ||| H I J [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-0 2-1 3-1
+[X] ||| G H I J ||| H I ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-0 2-1 3-1
+[X] ||| G H [X,1] K ||| H [X,1] J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-0 3-3 3-4
+[X] ||| G H [X,1] ||| H [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-0
+[X] ||| G H ||| H ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-0
+[X] ||| I J K ||| I J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-0 2-2 2-3
+[X] ||| I J [X,1] ||| I J [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-0
+[X] ||| I J ||| I ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-0
+[X] ||| K L M N [X,1] ||| K L M N [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 0-1 3-2 3-3
+[X] ||| K L M N ||| K L M N ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 0-1 3-2 3-3
+[X] ||| K L M [X,1] ||| K L [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 0-1
+[X] ||| K ||| K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 0-1
+[X] ||| N O P Q R ||| M N O P ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 0-1 1-2 2-3 4-2
+[X] ||| N O [X,1] Q R ||| M N O [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 0-1 1-2 4-2
+[X] ||| N [X,1] ||| M N [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 0-1
+[X] ||| N ||| M N ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 0-1
+[X] ||| O P Q R [X,1] ||| O P Q R S [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-1 3-0
+[X] ||| O P Q R ||| O P ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 1-1 3-0
+[X] ||| O [X,1] Q R [X,2] ||| O [X,1] Q R S [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 3-0
+[X] ||| O [X,1] Q R ||| O [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 3-0
+[X] ||| P ||| P ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| S T U V [X,1] ||| T U V [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-2 1-0 3-2
+[X] ||| S T U V ||| T U V ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-2 1-0 3-2
+[X] ||| S [X,1] U V [X,2] ||| [X,1] U V [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-2 3-2
+[X] ||| S [X,1] U V ||| [X,1] U V ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-2 3-2
+[X] ||| T ||| T ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| W X Y Z [X,1] ||| W X Y Z [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 2-2 3-0
+[X] ||| W X Y Z ||| W X Y ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 2-2 3-0
+[X] ||| W X [X,1] Z [X,2] ||| W X [X,1] Z [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 3-0
+[X] ||| W X [X,1] Z ||| W X [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0 3-0
+[X] ||| Y ||| Y ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 0-0
+[X] ||| [X,1] AA BB CC DD ||| [X,1] Z AA BB CC DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-5 2-4 3-3 4-2
+[X] ||| [X,1] AA BB CC [X,2] ||| [X,1] Z [X,2] BB CC DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-5 2-4 3-3
+[X] ||| [X,1] AA BB [X,2] DD ||| [X,1] Z AA [X,2] CC DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-5 2-4 4-2
+[X] ||| [X,1] AA BB [X,2] ||| [X,1] Z [X,2] CC DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-4 2-3
+[X] ||| [X,1] AA [X,2] CC DD ||| [X,1] Z AA BB [X,2] DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-5 3-3 4-2
+[X] ||| [X,1] AA [X,2] DD ||| [X,1] Z AA [X,2] DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-4 3-2
+[X] ||| [X,1] AA [X,2] ||| [X,1] Z [X,2] DD ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-3
+[X] ||| [X,1] B C D [X,2] ||| [X,1] C D [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 3-1
+[X] ||| [X,1] B C D ||| [X,1] C ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 3-1
+[X] ||| [X,1] B C [X,2] K ||| [X,1] [X,2] J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 4-3 4-4
+[X] ||| [X,1] BB CC DD ||| AA BB CC [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-2 2-1 3-0
+[X] ||| [X,1] BB CC [X,2] ||| [X,2] BB CC [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-2 2-1
+[X] ||| [X,1] BB CC ||| BB CC [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-1 2-0
+[X] ||| [X,1] BB [X,2] DD ||| AA [X,2] CC [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-2 3-0
+[X] ||| [X,1] BB [X,2] ||| [X,2] CC [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-1
+[X] ||| [X,1] BB ||| CC [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-0
+[X] ||| [X,1] CC DD ||| AA BB [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-1 2-0
+[X] ||| [X,1] CC [X,2] ||| [X,2] BB [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-1
+[X] ||| [X,1] CC ||| BB [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-0
+[X] ||| [X,1] DD ||| AA [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-0
+[X] ||| [X,1] E F G H ||| [X,1] D E F G H ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-3 2-2 3-5 4-5
+[X] ||| [X,1] E F [X,2] K ||| [X,1] D E F G [X,2] J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-3 2-2 4-7 4-8
+[X] ||| [X,1] E F [X,2] ||| [X,1] D E F G [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-3 2-2
+[X] ||| [X,1] E F ||| [X,1] D E F ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-3 2-2
+[X] ||| [X,1] E [X,2] G H ||| [X,1] D [X,2] F G H ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-3 3-5 4-5
+[X] ||| [X,1] E [X,2] ||| [X,1] D [X,2] F ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-3
+[X] ||| [X,1] F G H [X,2] ||| E [X,1] G H [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-0 2-3 3-3
+[X] ||| [X,1] F G H ||| E [X,1] G H ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-0 2-3 3-3
+[X] ||| [X,1] F [X,2] I J ||| E [X,1] G [X,2] I ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-0 3-4 4-4
+[X] ||| [X,1] F [X,2] K ||| E [X,1] G [X,2] J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-0 3-5 3-6
+[X] ||| [X,1] F [X,2] ||| E [X,1] G [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-0
+[X] ||| [X,1] F ||| E [X,1] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-0
+[X] ||| [X,1] G H I J ||| [X,1] G H I ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-2 2-2 3-3 4-3
+[X] ||| [X,1] G H [X,2] K ||| [X,1] G H [X,2] J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-2 2-2 4-5 4-6
+[X] ||| [X,1] G H [X,2] ||| [X,1] G H [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-2 2-2
+[X] ||| [X,1] G H ||| [X,1] G H ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-2 2-2
+[X] ||| [X,1] I J K ||| [X,1] I J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-1 2-1 3-3 3-4
+[X] ||| [X,1] I J [X,2] ||| [X,1] I J [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-1 2-1
+[X] ||| [X,1] I J ||| [X,1] I ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-1 2-1
+[X] ||| [X,1] K L M N ||| [X,1] J K L M N ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-2 1-3 4-4 4-5
+[X] ||| [X,1] K L M [X,2] ||| [X,1] J K L [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-2 1-3
+[X] ||| [X,1] K ||| [X,1] J K L ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-2 1-3
+[X] ||| [X,1] L M N [X,2] ||| [X,1] M N [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 3-1 3-2
+[X] ||| [X,1] L M N ||| [X,1] M N ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 3-1 3-2
+[X] ||| [X,1] O P Q R ||| [X,1] O P ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-1 2-2 4-1
+[X] ||| [X,1] O [X,2] Q R ||| [X,1] O [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-1 4-1
+[X] ||| [X,1] S T U V ||| [X,1] Q R S T U V ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-6 2-4 4-6
+[X] ||| [X,1] S [X,2] U V ||| [X,1] Q R S [X,2] U V ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-6 4-6
+[X] ||| [X,1] W X Y Z ||| [X,1] W X Y ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-1 3-3 4-1
+[X] ||| [X,1] W X [X,2] Z ||| [X,1] W X [X,2] ||| IsSingletonF=1.0 IsSingletonFE=1.0 ||| 1-1 4-1
