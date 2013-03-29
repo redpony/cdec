@@ -1,6 +1,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ff.h"
+#include "ff_basic.h"
 #include "ff_context.h"
 #include "ff_spans.h"
 #include "ff_lm.h"
@@ -13,11 +14,13 @@
 #include "ff_rules.h"
 #include "ff_ruleshape.h"
 #include "ff_bleu.h"
+#include "ff_source_path.h"
 #include "ff_source_syntax.h"
 #include "ff_register.h"
 #include "ff_charset.h"
 #include "ff_wordset.h"
 #include "ff_dwarf.h"
+#include "ff_external.h"
 
 #ifdef HAVE_GLC
 #include <cdec/ff_glc.h>
@@ -47,8 +50,9 @@ void register_feature_functions() {
   ff_registry.Register("RuleIdentityFeatures", new FFFactory<RuleIdentityFeatures>());
   ff_registry.Register("SourceSyntaxFeatures", new FFFactory<SourceSyntaxFeatures>);
   ff_registry.Register("SourceSpanSizeFeatures", new FFFactory<SourceSpanSizeFeatures>);
-  ff_registry.Register("RuleNgramFeatures", new FFFactory<RuleNgramFeatures>());
   ff_registry.Register("CMR2008ReorderingFeatures", new FFFactory<CMR2008ReorderingFeatures>());
+  ff_registry.Register("RuleSourceBigramFeatures", new FFFactory<RuleSourceBigramFeatures>());
+  ff_registry.Register("RuleTargetBigramFeatures", new FFFactory<RuleTargetBigramFeatures>());
   ff_registry.Register("KLanguageModel", new KLanguageModelFactory());
   ff_registry.Register("NonLatinCount", new FFFactory<NonLatinCount>);
   ff_registry.Register("RuleShape", new FFFactory<RuleShapeFeatures>);
@@ -67,8 +71,10 @@ void register_feature_functions() {
   ff_registry.Register("InputIndicator", new FFFactory<InputIndicator>);
   ff_registry.Register("LexicalTranslationTrigger", new FFFactory<LexicalTranslationTrigger>);
   ff_registry.Register("WordPairFeatures", new FFFactory<WordPairFeatures>);
+  ff_registry.Register("SourcePathFeatures", new FFFactory<SourcePathFeatures>);
   ff_registry.Register("WordSet", new FFFactory<WordSet>);
   ff_registry.Register("Dwarf", new FFFactory<Dwarf>);
+  ff_registry.Register("External", new FFFactory<ExternalFeature>);
 #ifdef HAVE_GLC
   ff_registry.Register("ContextCRF", new FFFactory<Model1Features>);
 #endif

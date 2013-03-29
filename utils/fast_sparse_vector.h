@@ -522,7 +522,7 @@ const FastSparseVector<T> operator-(const FastSparseVector<T>& x, const FastSpar
 }
 
 template <class T>
-std::size_t hash_value(FastSparseVector<T> const& x) {
+std::size_t hash_value(FastSparseVector<T> const&) {
   assert(!"not implemented");
   return 0;
 }

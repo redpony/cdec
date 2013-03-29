@@ -2,6 +2,7 @@
 
 #include <sstream>
 
+#include "hg.h"
 #include "tdict.h"
 #include "sentence_metadata.h"
 #include "stringlib.h"

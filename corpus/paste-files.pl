@@ -17,6 +17,7 @@ for my $file (@ARGV) {
 binmode(STDOUT,":utf8");
 binmode(STDERR,":utf8");
 
+my $bad = 0;
 my $lc = 0;
 my $done = 0;
 my $fl = 0;
@@ -33,8 +34,17 @@ while(1) {
       $done = 1;
       last;
     }
+    $r =~ s/\r//g;
     chomp $r;
-    die "$ARGV[$anum]:$lc contains a ||| symbol - please remove.\n" if $r =~ /\|\|\|/;
+    if ($r =~ /\|\|\|/) {
+      $r = '';
+      $bad++;
+    }
+    warn "$ARGV[$anum]:$lc contains a ||| symbol - please remove.\n" if $r =~ /\|\|\|/;
+    $r =~ s/\|\|\|/ /g;
+    $r =~ s/\s+/ /g;
+    $r =~ s/^ +//;
+    $r =~ s/ +$//;
     $anum++;
     push @line, $r;
   }
@@ -47,4 +57,5 @@ for (my $i = 1; $i < scalar @fhs; $i++) {
   my $r = <$fh>;
   die "Mismatched number of lines.\n" if defined $r;
 }
+print STDERR "Number of lines containing ||| was: $bad\n" if $bad > 0;
 

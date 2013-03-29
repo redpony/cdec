@@ -16,6 +16,7 @@
 #include "verbose.h"
 #include "hg.h"
 #include "ff.h"
+#include "ffset.h"
 
 #define NORMAL_CP 1
 #define FAST_CP 2

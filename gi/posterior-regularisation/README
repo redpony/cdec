@@ -1,3 +1,0 @@
-  557  ./cdec_extools/extractor -i btec/split.zh-en.al -c 500000 -L 12 -C  | sort -t $'\t' -k 1 | ./cdec_extools/mr_stripe_rule_reduce > btec.concordance
-  559  wc -l btec.concordance 
-  588  cat btec.concordance  | sed  's/.*	//' | awk '{ for (i=1; i < NF; i++) { x=substr($i, 1, 2); if (x == "C=") printf "\n"; else if (x != "||") printf "%s ", $i; }; printf "\n"; }' | sort | uniq | wc -l

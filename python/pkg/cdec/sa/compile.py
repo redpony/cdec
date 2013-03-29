@@ -4,9 +4,10 @@ import os
 import logging
 import cdec.configobj
 import cdec.sa
+import sys
 
 MAX_PHRASE_LENGTH = 4
-def precompute(f_sa, max_len, max_nt, max_size, min_gap, rank1, rank2):
+def precompute(f_sa, max_len, max_nt, max_size, min_gap, rank1, rank2, tight_phrases):
     lcp = cdec.sa.LCP(f_sa)
     stats = sorted(lcp.compute_stats(MAX_PHRASE_LENGTH), reverse=True)
     precomp = cdec.sa.Precomputation(from_stats=stats,
@@ -20,6 +21,8 @@ def precompute(f_sa, max_len, max_nt, max_size, min_gap, rank1, rank2):
     return precomp
 
 def main():
+    sys.setrecursionlimit(sys.getrecursionlimit() * 100)
+
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger('cdec.sa.compile')
     parser = argparse.ArgumentParser(description='Compile a corpus into a suffix array.')
@@ -35,6 +38,8 @@ def main():
                         help='Number of pre-computed frequent patterns')
     parser.add_argument('--rank2', '-r2', type=int, default=10,
                         help='Number of pre-computed super-frequent patterns)')
+    parser.add_argument('--loose', action='store_true',
+                        help='Enable loose phrase extraction (default: tight)')
     parser.add_argument('-c', '--config', default='/dev/stdout',
                         help='Output configuration')
     parser.add_argument('-f', '--source',
@@ -53,8 +58,10 @@ def main():
         parser.error('a parallel corpus is required\n'
         '\tuse -f (source) with -e (target) or -b (bitext)')
 
-    param_names = ("max_len", "max_nt", "max_size", "min_gap", "rank1", "rank2")
-    params = (args.maxlen, args.maxnt, args.maxsize, args.mingap, args.rank1, args.rank2)
+    param_names = ('max_len', 'max_nt', 'max_size', 'min_gap',
+            'rank1', 'rank2', 'tight_phrases')
+    params = (args.maxlen, args.maxnt, args.maxsize, args.mingap,
+            args.rank1, args.rank2, not args.loose)
 
     if not os.path.exists(args.output):
         os.mkdir(args.output)

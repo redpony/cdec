@@ -10,14 +10,16 @@
 #include "tdict.h"
 #include "grammar.h"
 #include "bottom_up_parser.h"
+#include "hg.h"
 #include "ff.h"
+#include "ffset.h"
 #include "weights.h"
 
 using namespace std;
 
 struct GrammarTest {
   GrammarTest() {
-    std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : "test_data");
+    std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
     Weights::InitFromFile(path + "/weights.gt", &wts);
   }
   vector<weight_t> wts;
@@ -41,7 +43,7 @@ BOOST_AUTO_TEST_CASE(TestTextGrammar) {
 }
 
 BOOST_AUTO_TEST_CASE(TestTextGrammarFile) {
-  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : "test_data");
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   GrammarPtr g(new TextGrammar(path + "/grammar.prune"));
   vector<GrammarPtr> grammars(1, g);
 

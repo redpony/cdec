@@ -13,7 +13,7 @@ class RelativeSentencePosition : public FeatureFunction {
   RelativeSentencePosition(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
@@ -36,7 +36,7 @@ class SourceBigram : public FeatureFunction {
   void PrepareForInput(const SentenceMetadata& smeta);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
@@ -55,7 +55,7 @@ class LexNullJump : public FeatureFunction {
   LexNullJump(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
@@ -72,7 +72,7 @@ class NewJump : public FeatureFunction {
   NewJump(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
@@ -109,7 +109,7 @@ class LexicalTranslationTrigger : public FeatureFunction {
   LexicalTranslationTrigger(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
@@ -132,14 +132,14 @@ class BlunsomSynchronousParseHack : public FeatureFunction {
   BlunsomSynchronousParseHack(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
                                      void* out_context) const;
  private:
   inline bool DoesNotBelong(const void* state) const {
-    for (int i = 0; i < NumBytesContext(); ++i) {
+    for (int i = 0; i < StateSize(); ++i) {
       if (*(static_cast<const unsigned char*>(state) + i)) return false;
     }
     return true;
@@ -148,9 +148,9 @@ class BlunsomSynchronousParseHack : public FeatureFunction {
   inline void AppendAntecedentString(const void* state, std::vector<WordID>* yield) const {
     int i = 0;
     int ind = 0;
-    while (i < NumBytesContext() && !(*(static_cast<const unsigned char*>(state) + i))) { ++i; ind += 8; }
-    // std::cerr << i << " " << NumBytesContext() << std::endl;
-    assert(i != NumBytesContext());
+    while (i < StateSize() && !(*(static_cast<const unsigned char*>(state) + i))) { ++i; ind += 8; }
+    // std::cerr << i << " " << StateSize() << std::endl;
+    assert(i != StateSize());
     assert(ind < cur_ref_->size());
     int cur = *(static_cast<const unsigned char*>(state) + i);
     int comp = 1;
@@ -171,7 +171,7 @@ class BlunsomSynchronousParseHack : public FeatureFunction {
   }
 
   inline void SetStateMask(int start, int end, void* state) const {
-    assert((end / 8) < NumBytesContext());
+    assert((end / 8) < StateSize());
     int i = 0;
     int comp = 1;
     for (int j = 0; j < start; ++j) {
@@ -209,7 +209,7 @@ class WordPairFeatures : public FeatureFunction {
   WordPairFeatures(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
@@ -226,7 +226,7 @@ class IdentityCycleDetector : public FeatureFunction {
   IdentityCycleDetector(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
@@ -242,7 +242,7 @@ class InputIndicator : public FeatureFunction {
   InputIndicator(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,
@@ -258,7 +258,7 @@ class Fertility : public FeatureFunction {
   Fertility(const std::string& param);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const Hypergraph::Edge& edge,
+                                     const HG::Edge& edge,
                                      const std::vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
                                      SparseVector<double>* estimated_features,

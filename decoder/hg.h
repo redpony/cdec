@@ -33,47 +33,20 @@
 // slow
 #undef HG_EDGES_TOPO_SORTED
 
-class Hypergraph;
-typedef boost::shared_ptr<Hypergraph> HypergraphP;
+// SmallVector is a fast, small vector<int> implementation for sizes <= 2
+typedef SmallVectorUnsigned TailNodeVector; // indices in nodes_
+typedef std::vector<int> EdgesVector; // indices in edges_
 
-// class representing an acyclic hypergraph
-//  - edges have 1 head, 0..n tails
-class Hypergraph {
-public:
-  Hypergraph() : is_linear_chain_(false) {}
+enum {
+  NONE=0,CATEGORY=1,SPAN=2,PROB=4,FEATURES=8,RULE=16,RULE_LHS=32,PREV_SPAN=64,ALL=0xFFFFFFFF
+};
 
-  // SmallVector is a fast, small vector<int> implementation for sizes <= 2
-  typedef SmallVectorUnsigned TailNodeVector; // indices in nodes_
-  typedef std::vector<int> EdgesVector; // indices in edges_
+namespace HG {
 
-  // TODO get rid of cat_?
-  // TODO keep cat_ and add span and/or state? :)
-  struct Node {
-    Node() : id_(), cat_() {}
-    int id_; // equal to this object's position in the nodes_ vector
-    WordID cat_;  // non-terminal category if <0, 0 if not set
-    WordID NT() const { return -cat_; }
-    EdgesVector in_edges_;   // an in edge is an edge with this node as its head.  (in edges come from the bottom up to us)  indices in edges_
-    EdgesVector out_edges_;  // an out edge is an edge with this node as its tail.  (out edges leave us up toward the top/goal). indices in edges_
-    void copy_fixed(Node const& o) { // nonstructural fields only - structural ones are managed by sorting/pruning/subsetting
-      cat_=o.cat_;
-    }
-    void copy_reindex(Node const& o,indices_after const& n2,indices_after const& e2) {
-      copy_fixed(o);
-      id_=n2[id_];
-      e2.reindex_push_back(o.in_edges_,in_edges_);
-      e2.reindex_push_back(o.out_edges_,out_edges_);
-    }
-  };
-
-
-  // TODO get rid of edge_prob_? (can be computed on the fly as the dot
-  // product of the weight vector and the feature values)
   struct Edge {
-//    int poplimit; //TODO: cube pruning per edge limit?  per node didn't work well at all.  also, inside cost + outside(node) is the same information i'd use to set a per-edge limit anyway - and nonmonotonicity in cube pruning may mean it's good to favor edge (in same node) w/ relatively worse score
     Edge() : i_(-1), j_(-1), prev_i_(-1), prev_j_(-1) {}
     Edge(int id,Edge const& copy_pod_from) : id_(id) { copy_pod(copy_pod_from); } // call copy_features yourself later.
-    Edge(int id,Edge const& copy_from,TailNodeVector const& tail) // fully inits - probably more expensive when push_back(Edge(...)) than setting after
+    Edge(int id,Edge const& copy_from,TailNodeVector const& tail) // fully inits - probably more expensive when push_back(Edge(...)) than sett
       : tail_nodes_(tail),id_(id) { copy_pod(copy_from);copy_features(copy_from); }
     inline int Arity() const { return tail_nodes_.size(); }
     int head_node_;               // refers to a position in nodes_
@@ -82,8 +55,6 @@ public:
     SparseVector<weight_t> feature_values_;
     prob_t edge_prob_;             // dot product of weights and feat_values
     int id_;   // equal to this object's position in the edges_ vector
-
-    //FIXME: these span ids belong in Node, not Edge, right?  every node should have the same spans.
 
     // span info. typically, i_ and j_ refer to indices in the source sentence.
     // In synchronous parsing, i_ and j_ will refer to target sentence/lattice indices
@@ -97,54 +68,6 @@ public:
     short int j_;
     short int prev_i_;
     short int prev_j_;
-
-    void copy_info(Edge const& o) {
-#if USE_INFO_EDGE
-      set_info(o.info_.str()); // by convention, each person putting info here starts with a separator (e.g. space).  it's empty if nobody put any info there.
-#else
-      (void) o;
-#endif
-    }
-    void copy_pod(Edge const& o) {
-      rule_=o.rule_;
-      i_ = o.i_; j_ = o.j_; prev_i_ = o.prev_i_; prev_j_ = o.prev_j_;
-    }
-    void copy_features(Edge const& o) {
-      feature_values_=o.feature_values_;
-      copy_info(o);
-    }
-    void copy_fixed(Edge const& o) {
-      copy_pod(o);
-      copy_features(o);
-      edge_prob_ = o.edge_prob_;
-    }
-    void copy_reindex(Edge const& o,indices_after const& n2,indices_after const& e2) {
-      copy_fixed(o);
-      head_node_=n2[o.head_node_];
-      id_=e2[o.id_];
-      n2.reindex_push_back(o.tail_nodes_,tail_nodes_);
-    }
-
-#if USE_INFO_EDGE
-    std::ostringstream info_;
-    void set_info(std::string const& s) {
-      info_.str(s);
-      info_.seekp(0,std::ios_base::end);
-    }
-    Edge(Edge const& o) : head_node_(o.head_node_),tail_nodes_(o.tail_nodes_),rule_(o.rule_),feature_values_(o.feature_values_),edge_prob_(o.edge_prob_),id_(o.id_),i_(o.i_),j_(o.j_),prev_i_(o.prev_i_),prev_j_(o.prev_j_), info_(o.info_.str(),std::ios_base::ate) {
-//      info_.seekp(0,std::ios_base::end);
- }
-    void operator=(Edge const& o) {
-      head_node_ = o.head_node_; tail_nodes_ = o.tail_nodes_; rule_ = o.rule_; feature_values_ = o.feature_values_; edge_prob_ = o.edge_prob_; id_ = o.id_; i_ = o.i_; j_ = o.j_; prev_i_ = o.prev_i_; prev_j_ = o.prev_j_;
-      set_info(o.info_.str());
-    }
-    std::string info() const { return info_.str(); }
-    void reset_info() { info_.str(""); info_.clear(); }
-#else
-    std::string info() const { return std::string(); }
-    void reset_info() {  }
-    void set_info(std::string const& ) {  }
-#endif
     void show(std::ostream &o,unsigned mask=SPAN|RULE) const {
       o<<'{';
       if (mask&CATEGORY)
@@ -159,10 +82,6 @@ public:
         o<<' '<<feature_values_;
       if (mask&RULE)
         o<<' '<<rule_->AsString(mask&RULE_LHS);
-      if (USE_INFO_EDGE) {
-        std::string const& i=info();
-        if (mask&&!i.empty()) o << " |||"<<i; // remember, the initial space is expected as part of i
-      }
       o<<'}';
     }
     std::string show(unsigned mask=SPAN|RULE) const {
@@ -170,12 +89,28 @@ public:
       show(o,mask);
       return o.str();
     }
-    /* generic recursion re: child_handle=re(tail_nodes_[i],i,parent_handle)
-
-       FIXME: make kbest create a simple derivation-tree structure (could be a
-       hg), and replace the list-of-edges viterbi.h with a tree-structured one.
-       CreateViterbiHypergraph can do for 1best, though.
-    */
+    void copy_pod(Edge const& o) {
+      rule_=o.rule_;
+      i_ = o.i_; j_ = o.j_; prev_i_ = o.prev_i_; prev_j_ = o.prev_j_;
+    }
+    void copy_features(Edge const& o) {
+      feature_values_=o.feature_values_;
+    }
+    void copy_fixed(Edge const& o) {
+      copy_pod(o);
+      copy_features(o);
+      edge_prob_ = o.edge_prob_;
+    }
+    void copy_reindex(Edge const& o,indices_after const& n2,indices_after const& e2) {
+      copy_fixed(o);
+      head_node_=n2[o.head_node_];
+      id_=e2[o.id_];
+      n2.reindex_push_back(o.tail_nodes_,tail_nodes_);
+    }
+    // generic recursion re: child_handle=re(tail_nodes_[i],i,parent_handle)
+    //   FIXME: make kbest create a simple derivation-tree structure (could be a
+    //   hg), and replace the list-of-edges viterbi.h with a tree-structured one.
+    //   CreateViterbiHypergraph can do for 1best, though.
     template <class EdgeRecurse,class TEdgeHandle>
     std::string derivation_tree(EdgeRecurse const& re,TEdgeHandle const& eh,bool indent=true,int show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const {
       std::ostringstream o;
@@ -203,7 +138,43 @@ public:
     }
   };
 
-  // all this info ought to live in Node, but for some reason it's on Edges.
+  // TODO get rid of cat_?
+  // TODO keep cat_ and add span and/or state? :)
+  struct Node {
+    Node() : id_(), cat_() {}
+    int id_; // equal to this object's position in the nodes_ vector
+    WordID cat_;  // non-terminal category if <0, 0 if not set
+    WordID NT() const { return -cat_; }
+    EdgesVector in_edges_;   // an in edge is an edge with this node as its head.  (in edges come from the bottom up to us)  indices in edges_
+    EdgesVector out_edges_;  // an out edge is an edge with this node as its tail.  (out edges leave us up toward the top/goal). indices in edges_
+    void copy_fixed(Node const& o) { // nonstructural fields only - structural ones are managed by sorting/pruning/subsetting
+      cat_=o.cat_;
+    }
+    void copy_reindex(Node const& o,indices_after const& n2,indices_after const& e2) {
+      copy_fixed(o);
+      id_=n2[id_];
+      e2.reindex_push_back(o.in_edges_,in_edges_);
+      e2.reindex_push_back(o.out_edges_,out_edges_);
+    }
+  };
+
+} // namespace HG
+
+class Hypergraph;
+typedef boost::shared_ptr<Hypergraph> HypergraphP;
+// class representing an acyclic hypergraph
+//  - edges have 1 head, 0..n tails
+class Hypergraph {
+public:
+  Hypergraph() : is_linear_chain_(false) {}
+  typedef HG::Node Node;
+  typedef HG::Edge Edge;
+  typedef SmallVectorUnsigned TailNodeVector; // indices in nodes_
+  typedef std::vector<int> EdgesVector; // indices in edges_
+  enum {
+    NONE=0,CATEGORY=1,SPAN=2,PROB=4,FEATURES=8,RULE=16,RULE_LHS=32,PREV_SPAN=64,ALL=0xFFFFFFFF
+  };
+
   // except for stateful models that have split nt,span, this should identify the node
   void SetNodeOrigin(int nodeid,NTSpan &r) const {
     Node const &n=nodes_[nodeid];
@@ -230,18 +201,9 @@ public:
     }
     return s;
   }
-  // 0 if none, -TD index otherwise (just like in rule)
   WordID NodeLHS(int nodeid) const {
     Node const &n=nodes_[nodeid];
     return n.NT();
-    /*
-    if (!n.in_edges_.empty()) {
-      Edge const& e=edges_[n.in_edges_.front()];
-      if (e.rule_)
-        return -e.rule_->lhs_;
-    }
-    return 0;
-    */
   }
 
   typedef std::vector<prob_t> EdgeProbs;
@@ -250,14 +212,8 @@ public:
   typedef std::vector<bool> NodeMask;
 
   std::string show_viterbi_tree(bool indent=true,int show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const;
-// builds viterbi hg and returns it formatted as a pretty string
-
-  enum {
-    NONE=0,CATEGORY=1,SPAN=2,PROB=4,FEATURES=8,RULE=16,RULE_LHS=32,PREV_SPAN=64,ALL=0xFFFFFFFF
-  };
 
   std::string show_first_tree(bool indent=true,int show_mask=SPAN|RULE,int maxdepth=0x7FFFFFFF,int depth=0) const;
-  // same as above, but takes in_edges_[0] all the way down - to make it viterbi cost (1-best), call ViterbiSortInEdges() first
 
   typedef Edge const* EdgeHandle;
   EdgeHandle operator()(int tailn,int /*taili*/,EdgeHandle /*parent*/) const {
@@ -334,7 +290,7 @@ public:
   Edge* AddEdge(Edge const& in_edge, const TailNodeVector& tail) {
     edges_.push_back(Edge(edges_.size(),in_edge));
     Edge* edge = &edges_.back();
-    edge->copy_features(in_edge);
+    edge->feature_values_ = in_edge.feature_values_;
     edge->tail_nodes_ = tail; // possibly faster than copying to Edge() constructed above then copying via push_back.  perhaps optimized it's the same.
     index_tails(*edge);
     return edge;
@@ -503,9 +459,9 @@ public:
 
   template <class V>
   void visit_edges_topo(V &v) {
-    for (int i = 0; i < nodes_.size(); ++i) {
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
       EdgesVector const& in=nodes_[i].in_edges_;
-      for (int j=0;j<in.size();++j) {
+      for (unsigned j=0;j<in.size();++j) {
         int e=in[j];
         v(i,e,edges_[e]);
       }
@@ -534,14 +490,14 @@ private:
 // for generic Viterbi/Inside algorithms
 struct EdgeProb {
   typedef prob_t Weight;
-  inline const prob_t& operator()(const Hypergraph::Edge& e) const { return e.edge_prob_; }
+  inline const prob_t& operator()(const HG::Edge& e) const { return e.edge_prob_; }
 };
 
 struct EdgeSelectEdgeWeightFunction {
   typedef prob_t Weight;
   typedef std::vector<bool> EdgeMask;
   EdgeSelectEdgeWeightFunction(const EdgeMask& v) : v_(v) {}
-  inline prob_t operator()(const Hypergraph::Edge& e) const {
+  inline prob_t operator()(const HG::Edge& e) const {
     if (v_[e.id_]) return prob_t::One();
     else return prob_t::Zero();
   }
@@ -551,7 +507,7 @@ private:
 
 struct ScaledEdgeProb {
   ScaledEdgeProb(const double& alpha) : alpha_(alpha) {}
-  inline prob_t operator()(const Hypergraph::Edge& e) const { return e.edge_prob_.pow(alpha_); }
+  inline prob_t operator()(const HG::Edge& e) const { return e.edge_prob_.pow(alpha_); }
   const double alpha_;
   typedef prob_t Weight;
 };
@@ -560,7 +516,7 @@ struct ScaledEdgeProb {
 struct EdgeFeaturesAndProbWeightFunction {
   typedef SparseVector<prob_t> Weight;
   typedef Weight Result; //TODO: change Result->Weight everywhere?
-  inline const Weight operator()(const Hypergraph::Edge& e) const {
+  inline const Weight operator()(const HG::Edge& e) const {
     SparseVector<prob_t> res;
     for (SparseVector<double>::const_iterator it = e.feature_values_.begin();
          it != e.feature_values_.end(); ++it)
@@ -571,7 +527,7 @@ struct EdgeFeaturesAndProbWeightFunction {
 
 struct TransitionCountWeightFunction {
   typedef double Weight;
-  inline double operator()(const Hypergraph::Edge& e) const { (void)e; return 1.0; }
+  inline double operator()(const HG::Edge& e) const { (void)e; return 1.0; }
 };
 
 #endif

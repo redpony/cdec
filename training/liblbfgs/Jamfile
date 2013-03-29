@@ -1,5 +1,0 @@
-import testing ;
-
-lib liblbfgs : lbfgs.c : <include>.. ;
-
-unit-test ll_test : ll_test.cc liblbfgs : <include>.. ;

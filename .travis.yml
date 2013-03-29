@@ -1,11 +1,22 @@
+language: python
+python:
+ - "2.7"
 before_script:
- - sudo apt-get install libboost-program-options-dev
- - sudo apt-get install libboost-regex-dev
- - sudo apt-get install libboost-test-dev
+ - sudo apt-get install libboost-program-options1.48-dev
+ - sudo apt-get install libboost-serialization1.48-dev
+ - sudo apt-get install libboost-regex1.48-dev
+ - sudo apt-get install libboost-test1.48-dev
+ - sudo apt-get install libboost-system1.48-dev
+ - sudo apt-get install libboost-thread1.48-dev
  - sudo apt-get install flex
  - autoreconf -ifv
  - ./configure
-script: make
+script:
+ - make
+ - cd python
+ - python setup.py install
+ - cd ..
 after_script:
  - make check
  - ./tests/run-system-tests.pl
+ - nosetests python/tests
