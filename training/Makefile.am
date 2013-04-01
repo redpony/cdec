@@ -6,6 +6,7 @@ SUBDIRS = \
   dpmert \
   pro \
   dtrain \
+  latent_svm \
   mira \
   rampion
 
