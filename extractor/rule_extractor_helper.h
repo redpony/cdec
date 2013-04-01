@@ -36,12 +36,14 @@ class RuleExtractorHelper {
   // Check if one chunk (all chunks) is aligned at least in one point.
   virtual bool CheckAlignedTerminals(const vector<int>& matching,
                                      const vector<int>& chunklen,
-                                     const vector<int>& source_low) const;
+                                     const vector<int>& source_low,
+                                     int source_sent_start) const;
 
   // Check if the chunks are tight.
   virtual bool CheckTightPhrases(const vector<int>& matching,
                                  const vector<int>& chunklen,
-                                 const vector<int>& source_low) const;
+                                 const vector<int>& source_low,
+                                 int source_sent_start) const;
 
   // Find the target span and the reflected source span for a source phrase
   // occurrence.
@@ -62,7 +64,8 @@ class RuleExtractorHelper {
       const vector<int>& source_low, const vector<int>& source_high,
       const vector<int>& target_low, const vector<int>& target_high,
       int source_phrase_low, int source_phrase_high, int source_back_low,
-      int source_back_high, int& num_symbols, bool& met_constraints) const;
+      int source_back_high, int sentence_id, int source_sent_start,
+      int& num_symbols, bool& met_constraints) const;
 
   // Get the order of the nonterminals in the target phrase.
   virtual vector<int> GetGapOrder(const vector<pair<int, int> >& gaps) const;
@@ -70,7 +73,7 @@ class RuleExtractorHelper {
   // Map each terminal symbol with its position in the source phrase.
   virtual unordered_map<int, int> GetSourceIndexes(
       const vector<int>& matching, const vector<int>& chunklen,
-      int starts_with_x) const;
+      int starts_with_x, int source_sent_start) const;
 
  protected:
   RuleExtractorHelper();

@@ -18,10 +18,6 @@ class RuleExtractorHelperTest : public Test {
     source_data_array = make_shared<MockDataArray>();
     EXPECT_CALL(*source_data_array, GetSentenceLength(_))
         .WillRepeatedly(Return(12));
-    EXPECT_CALL(*source_data_array, GetSentenceId(_))
-        .WillRepeatedly(Return(5));
-    EXPECT_CALL(*source_data_array, GetSentenceStart(_))
-        .WillRepeatedly(Return(10));
 
     target_data_array = make_shared<MockDataArray>();
     EXPECT_CALL(*target_data_array, GetSentenceLength(_))
@@ -68,7 +64,8 @@ TEST_F(RuleExtractorHelperTest, TestCheckAlignedFalse) {
   EXPECT_CALL(*source_data_array, GetSentenceStart(_)).Times(0);
 
   vector<int> matching, chunklen, source_low;
-  EXPECT_TRUE(helper->CheckAlignedTerminals(matching, chunklen, source_low));
+  EXPECT_TRUE(helper->CheckAlignedTerminals(matching, chunklen,
+                                            source_low, 10));
 }
 
 TEST_F(RuleExtractorHelperTest, TestCheckAlignedTerminal) {
@@ -78,9 +75,11 @@ TEST_F(RuleExtractorHelperTest, TestCheckAlignedTerminal) {
   vector<int> matching = {10, 12};
   vector<int> chunklen = {1, 3};
   vector<int> source_low = {-1, 1, -1, 3, -1};
-  EXPECT_TRUE(helper->CheckAlignedTerminals(matching, chunklen, source_low));
+  EXPECT_TRUE(helper->CheckAlignedTerminals(matching, chunklen,
+                                            source_low, 10));
   source_low = {-1, 1, -1, -1, -1};
-  EXPECT_FALSE(helper->CheckAlignedTerminals(matching, chunklen, source_low));
+  EXPECT_FALSE(helper->CheckAlignedTerminals(matching, chunklen,
+                                             source_low, 10));
 }
 
 TEST_F(RuleExtractorHelperTest, TestCheckAlignedChunks) {
@@ -90,11 +89,14 @@ TEST_F(RuleExtractorHelperTest, TestCheckAlignedChunks) {
   vector<int> matching = {10, 12};
   vector<int> chunklen = {1, 3};
   vector<int> source_low = {2, 1, -1, 3, -1};
-  EXPECT_TRUE(helper->CheckAlignedTerminals(matching, chunklen, source_low));
+  EXPECT_TRUE(helper->CheckAlignedTerminals(matching, chunklen,
+                                            source_low, 10));
   source_low = {-1, 1, -1, 3, -1};
-  EXPECT_FALSE(helper->CheckAlignedTerminals(matching, chunklen, source_low));
+  EXPECT_FALSE(helper->CheckAlignedTerminals(matching, chunklen,
+                                             source_low, 10));
   source_low = {2, 1, -1, -1, -1};
-  EXPECT_FALSE(helper->CheckAlignedTerminals(matching, chunklen, source_low));
+  EXPECT_FALSE(helper->CheckAlignedTerminals(matching, chunklen,
+                                             source_low, 10));
 }
 
 
@@ -105,7 +107,7 @@ TEST_F(RuleExtractorHelperTest, TestCheckTightPhrasesFalse) {
   EXPECT_CALL(*source_data_array, GetSentenceStart(_)).Times(0);
 
   vector<int> matching, chunklen, source_low;
-  EXPECT_TRUE(helper->CheckTightPhrases(matching, chunklen, source_low));
+  EXPECT_TRUE(helper->CheckTightPhrases(matching, chunklen, source_low, 10));
 }
 
 TEST_F(RuleExtractorHelperTest, TestCheckTightPhrases) {
@@ -116,20 +118,20 @@ TEST_F(RuleExtractorHelperTest, TestCheckTightPhrases) {
   vector<int> chunklen = {2, 3, 1};
   // No missing links.
   vector<int> source_low = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-  EXPECT_TRUE(helper->CheckTightPhrases(matching, chunklen, source_low));
+  EXPECT_TRUE(helper->CheckTightPhrases(matching, chunklen, source_low, 10));
 
   // Missing link at the beginning or ending of a gap.
   source_low = {0, 1, -1, 3, 4, 5, 6, 7, 8};
-  EXPECT_FALSE(helper->CheckTightPhrases(matching, chunklen, source_low));
+  EXPECT_FALSE(helper->CheckTightPhrases(matching, chunklen, source_low, 10));
   source_low = {0, 1, 2, -1, 4, 5, 6, 7, 8};
-  EXPECT_FALSE(helper->CheckTightPhrases(matching, chunklen, source_low));
+  EXPECT_FALSE(helper->CheckTightPhrases(matching, chunklen, source_low, 10));
   source_low = {0, 1, 2, 3, 4, 5, 6, -1, 8};
-  EXPECT_FALSE(helper->CheckTightPhrases(matching, chunklen, source_low));
+  EXPECT_FALSE(helper->CheckTightPhrases(matching, chunklen, source_low, 10));
 
   // Missing link inside the gap.
   chunklen = {1, 3, 1};
   source_low = {0, 1, -1, 3, 4, 5, 6, 7, 8};
-  EXPECT_TRUE(helper->CheckTightPhrases(matching, chunklen, source_low));
+  EXPECT_TRUE(helper->CheckTightPhrases(matching, chunklen, source_low, 10));
 }
 
 TEST_F(RuleExtractorHelperTest, TestFindFixPointBadEdgeCase) {
@@ -428,8 +430,8 @@ TEST_F(RuleExtractorHelperTest, TestGetGapsExceedNumSymbols) {
   EXPECT_FALSE(helper->GetGaps(source_gaps, target_gaps, matching, chunklen,
                                source_low, source_high, target_low, target_high,
                                source_phrase_low, source_phrase_high,
-                               source_back_low, source_back_high, num_symbols,
-                               met_constraints));
+                               source_back_low, source_back_high, 5, 10,
+                               num_symbols, met_constraints));
 
   source_low = {0, 1, 2, 3, 4, 5, 5};
   source_high = {1, 2, 3, 4, 5, 6, 6};
@@ -441,8 +443,8 @@ TEST_F(RuleExtractorHelperTest, TestGetGapsExceedNumSymbols) {
   EXPECT_FALSE(helper->GetGaps(source_gaps, target_gaps, matching, chunklen,
                                source_low, source_high, target_low, target_high,
                                source_phrase_low, source_phrase_high,
-                               source_back_low, source_back_high, num_symbols,
-                               met_constraints));
+                               source_back_low, source_back_high, 5, 10,
+                               num_symbols, met_constraints));
 }
 
 TEST_F(RuleExtractorHelperTest, TestGetGapsExtensionsNotTight) {
@@ -467,8 +469,8 @@ TEST_F(RuleExtractorHelperTest, TestGetGapsExtensionsNotTight) {
   EXPECT_FALSE(helper->GetGaps(source_gaps, target_gaps, matching, chunklen,
                                source_low, source_high, target_low, target_high,
                                source_phrase_low, source_phrase_high,
-                               source_back_low, source_back_high, num_symbols,
-                               met_constraints));
+                               source_back_low, source_back_high, 5, 10,
+                               num_symbols, met_constraints));
 
   source_phrase_low = 1, source_phrase_high = 6;
   source_back_low = 1, source_back_high = 7;
@@ -476,8 +478,8 @@ TEST_F(RuleExtractorHelperTest, TestGetGapsExtensionsNotTight) {
   EXPECT_FALSE(helper->GetGaps(source_gaps, target_gaps, matching, chunklen,
                                source_low, source_high, target_low, target_high,
                                source_phrase_low, source_phrase_high,
-                               source_back_low, source_back_high, num_symbols,
-                               met_constraints));
+                               source_back_low, source_back_high, 5, 10,
+                               num_symbols, met_constraints));
 }
 
 TEST_F(RuleExtractorHelperTest, TestGetGapsNotTightExtremities) {
@@ -502,8 +504,8 @@ TEST_F(RuleExtractorHelperTest, TestGetGapsNotTightExtremities) {
   EXPECT_TRUE(helper->GetGaps(source_gaps, target_gaps, matching, chunklen,
                               source_low, source_high, target_low, target_high,
                               source_phrase_low, source_phrase_high,
-                              source_back_low, source_back_high, num_symbols,
-                              met_constraints));
+                              source_back_low, source_back_high, 5, 10,
+                              num_symbols, met_constraints));
   EXPECT_FALSE(met_constraints);
   vector<pair<int, int> > expected_gaps = {make_pair(2, 3), make_pair(4, 5)};
   EXPECT_EQ(expected_gaps, source_gaps);
@@ -519,8 +521,8 @@ TEST_F(RuleExtractorHelperTest, TestGetGapsNotTightExtremities) {
   EXPECT_TRUE(helper->GetGaps(source_gaps, target_gaps, matching, chunklen,
                               source_low, source_high, target_low, target_high,
                               source_phrase_low, source_phrase_high,
-                              source_back_low, source_back_high, num_symbols,
-                              met_constraints));
+                              source_back_low, source_back_high, 5, 10,
+                              num_symbols, met_constraints));
   EXPECT_FALSE(met_constraints);
   EXPECT_EQ(expected_gaps, source_gaps);
   EXPECT_EQ(expected_gaps, target_gaps);
@@ -548,8 +550,8 @@ TEST_F(RuleExtractorHelperTest, TestGetGapsWithExtensions) {
   EXPECT_TRUE(helper->GetGaps(source_gaps, target_gaps, matching, chunklen,
                               source_low, source_high, target_low, target_high,
                               source_phrase_low, source_phrase_high,
-                              source_back_low, source_back_high, num_symbols,
-                              met_constraints));
+                              source_back_low, source_back_high, 5, 10,
+                              num_symbols, met_constraints));
   vector<pair<int, int> > expected_source_gaps = {
     make_pair(1, 2), make_pair(3, 4), make_pair(5, 6)
   };
@@ -582,8 +584,8 @@ TEST_F(RuleExtractorHelperTest, TestGetGaps) {
   EXPECT_TRUE(helper->GetGaps(source_gaps, target_gaps, matching, chunklen,
                               source_low, source_high, target_low, target_high,
                               source_phrase_low, source_phrase_high,
-                              source_back_low, source_back_high, num_symbols,
-                              met_constraints));
+                              source_back_low, source_back_high, 5, 10,
+                              num_symbols, met_constraints));
   vector<pair<int, int> > expected_source_gaps = {
     make_pair(2, 3), make_pair(4, 5)
   };
@@ -616,8 +618,8 @@ TEST_F(RuleExtractorHelperTest, TestGetGapIntegrityChecksFailed) {
   EXPECT_FALSE(helper->GetGaps(source_gaps, target_gaps, matching, chunklen,
                                source_low, source_high, target_low, target_high,
                                source_phrase_low, source_phrase_high,
-                               source_back_low, source_back_high, num_symbols,
-                               met_constraints));
+                               source_back_low, source_back_high, 5, 10,
+                               num_symbols, met_constraints));
 }
 
 TEST_F(RuleExtractorHelperTest, TestGetSourceIndexes) {
@@ -629,12 +631,14 @@ TEST_F(RuleExtractorHelperTest, TestGetSourceIndexes) {
   unordered_map<int, int> expected_indexes = {
       {3, 1}, {4, 2}, {5, 3}, {8, 5}, {9, 6}, {11, 8}
   };
-  EXPECT_EQ(expected_indexes, helper->GetSourceIndexes(matching, chunklen, 1));
+  EXPECT_EQ(expected_indexes, helper->GetSourceIndexes(matching, chunklen,
+                                                       1, 10));
 
   matching = {12, 17};
   chunklen = {2, 4};
   expected_indexes = {{2, 0}, {3, 1}, {7, 3}, {8, 4}, {9, 5}, {10, 6}};
-  EXPECT_EQ(expected_indexes, helper->GetSourceIndexes(matching, chunklen, 0));
+  EXPECT_EQ(expected_indexes, helper->GetSourceIndexes(matching, chunklen,
+                                                       0, 10));
 }
 
 } // namespace

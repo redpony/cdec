@@ -140,8 +140,10 @@ vector<Extract> RuleExtractor::ExtractAlignments(
   }
 
   // Basic checks to see if we can extract phrase pairs for this occurrence.
-  if (!helper->CheckAlignedTerminals(matching, chunklen, source_low) ||
-      !helper->CheckTightPhrases(matching, chunklen, source_low)) {
+  if (!helper->CheckAlignedTerminals(matching, chunklen, source_low,
+                                     source_sent_start) ||
+      !helper->CheckTightPhrases(matching, chunklen, source_low,
+                                 source_sent_start)) {
     return extracts;
   }
 
@@ -167,7 +169,8 @@ vector<Extract> RuleExtractor::ExtractAlignments(
   if (!helper->GetGaps(source_gaps, target_gaps, matching, chunklen, source_low,
                        source_high, target_low, target_high, source_phrase_low,
                        source_phrase_high, source_back_low, source_back_high,
-                       num_symbols, met_constraints)) {
+                       sentence_id, source_sent_start, num_symbols,
+                       met_constraints)) {
     return extracts;
   }
 
@@ -177,7 +180,7 @@ vector<Extract> RuleExtractor::ExtractAlignments(
   Phrase source_phrase = phrase_builder->Extend(
       phrase, starts_with_x, ends_with_x);
   unordered_map<int, int> source_indexes = helper->GetSourceIndexes(
-      matching, chunklen, starts_with_x);
+      matching, chunklen, starts_with_x, source_sent_start);
   if (met_constraints) {
     AddExtracts(extracts, source_phrase, source_indexes, target_gaps,
                 target_low, target_phrase_low, target_phrase_high, sentence_id);
@@ -196,8 +199,8 @@ vector<Extract> RuleExtractor::ExtractAlignments(
     for (int j = 1 - i; j < 2; ++j) {
       AddNonterminalExtremities(extracts, matching, chunklen, source_phrase,
           source_back_low, source_back_high, source_low, source_high,
-          target_low, target_high, target_gaps, sentence_id, starts_with_x,
-          ends_with_x, i, j);
+          target_low, target_high, target_gaps, sentence_id, source_sent_start,
+          starts_with_x, ends_with_x, i, j);
     }
   }
 
@@ -230,8 +233,8 @@ void RuleExtractor::AddNonterminalExtremities(
     int source_back_low, int source_back_high, const vector<int>& source_low,
     const vector<int>& source_high, const vector<int>& target_low,
     const vector<int>& target_high, vector<pair<int, int> > target_gaps,
-    int sentence_id, int starts_with_x, int ends_with_x, int extend_left,
-    int extend_right) const {
+    int sentence_id, int source_sent_start, int starts_with_x, int ends_with_x,
+    int extend_left, int extend_right) const {
   int source_x_low = source_back_low, source_x_high = source_back_high;
 
   // Check if the extended source phrase will remain tight.
@@ -332,7 +335,7 @@ void RuleExtractor::AddNonterminalExtremities(
   Phrase new_source_phrase = phrase_builder->Extend(source_phrase, extend_left,
                                                     extend_right);
   unordered_map<int, int> source_indexes = helper->GetSourceIndexes(
-      matching, chunklen, extend_left || starts_with_x);
+      matching, chunklen, extend_left || starts_with_x, source_sent_start);
   AddExtracts(extracts, new_source_phrase, source_indexes, target_gaps,
               target_low, target_x_low, target_x_high, sentence_id);
 }

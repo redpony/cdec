@@ -102,8 +102,8 @@ class RuleExtractor {
       int source_back_low, int source_back_high, const vector<int>& source_low,
       const vector<int>& source_high, const vector<int>& target_low,
       const vector<int>& target_high, vector<pair<int, int> > target_gaps,
-      int sentence_id, int starts_with_x, int ends_with_x, int extend_left,
-      int extend_right) const;
+      int sentence_id, int source_sent_start, int starts_with_x,
+      int ends_with_x, int extend_left, int extend_right) const;
 
  private:
   shared_ptr<DataArray> target_data_array;

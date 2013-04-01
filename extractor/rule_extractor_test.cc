@@ -32,12 +32,12 @@ class RuleExtractorTest : public Test {
         .WillRepeatedly(Return(10));
 
     helper = make_shared<MockRuleExtractorHelper>();
-    EXPECT_CALL(*helper, CheckAlignedTerminals(_, _, _))
+    EXPECT_CALL(*helper, CheckAlignedTerminals(_, _, _, _))
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(*helper, CheckTightPhrases(_, _, _))
+    EXPECT_CALL(*helper, CheckTightPhrases(_, _, _, _))
         .WillRepeatedly(Return(true));
     unordered_map<int, int> source_indexes;
-    EXPECT_CALL(*helper, GetSourceIndexes(_, _, _))
+    EXPECT_CALL(*helper, GetSourceIndexes(_, _, _, _))
         .WillRepeatedly(Return(source_indexes));
 
     vocabulary = make_shared<MockVocabulary>();
@@ -78,7 +78,7 @@ TEST_F(RuleExtractorTest, TestExtractRulesAlignedTerminalsFail) {
   vector<int> matching = {2};
   PhraseLocation phrase_location(matching, 1);
   EXPECT_CALL(*helper, GetLinksSpans(_, _, _, _, _)).Times(1);
-  EXPECT_CALL(*helper, CheckAlignedTerminals(_, _, _))
+  EXPECT_CALL(*helper, CheckAlignedTerminals(_, _, _, _))
       .WillRepeatedly(Return(false));
   vector<Rule> rules = extractor->ExtractRules(phrase, phrase_location);
   EXPECT_EQ(0, rules.size());
@@ -90,7 +90,7 @@ TEST_F(RuleExtractorTest, TestExtractRulesTightPhrasesFail) {
   vector<int> matching = {2};
   PhraseLocation phrase_location(matching, 1);
   EXPECT_CALL(*helper, GetLinksSpans(_, _, _, _, _)).Times(1);
-  EXPECT_CALL(*helper, CheckTightPhrases(_, _, _))
+  EXPECT_CALL(*helper, CheckTightPhrases(_, _, _, _))
       .WillRepeatedly(Return(false));
   vector<Rule> rules = extractor->ExtractRules(phrase, phrase_location);
   EXPECT_EQ(0, rules.size());
