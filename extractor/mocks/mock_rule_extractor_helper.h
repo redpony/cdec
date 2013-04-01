@@ -14,13 +14,13 @@ class MockRuleExtractorHelper : public RuleExtractorHelper {
  public:
   MOCK_CONST_METHOD5(GetLinksSpans, void(vector<int>&, vector<int>&,
       vector<int>&, vector<int>&, int));
-  MOCK_CONST_METHOD3(CheckAlignedTerminals, bool(const vector<int>&,
-      const vector<int>&, const vector<int>&));
-  MOCK_CONST_METHOD3(CheckTightPhrases, bool(const vector<int>&,
-      const vector<int>&, const vector<int>&));
+  MOCK_CONST_METHOD4(CheckAlignedTerminals, bool(const vector<int>&,
+      const vector<int>&, const vector<int>&, int));
+  MOCK_CONST_METHOD4(CheckTightPhrases, bool(const vector<int>&,
+      const vector<int>&, const vector<int>&, int));
   MOCK_CONST_METHOD1(GetGapOrder, vector<int>(const vector<pair<int, int> >&));
-  MOCK_CONST_METHOD3(GetSourceIndexes, Indexes(const vector<int>&,
-      const vector<int>&, int));
+  MOCK_CONST_METHOD4(GetSourceIndexes, Indexes(const vector<int>&,
+      const vector<int>&, int, int));
 
   // We need to implement these methods, because Google Mock doesn't support
   // methods with more than 10 arguments.
@@ -40,7 +40,7 @@ class MockRuleExtractorHelper : public RuleExtractorHelper {
                vector<pair<int, int> >& target_gaps,
                const vector<int>&, const vector<int>&, const vector<int>&,
                const vector<int>&, const vector<int>&, const vector<int>&,
-               int, int, int, int, int& num_symbols,
+               int, int, int, int, int, int, int& num_symbols,
                bool& met_constraints) const {
     source_gaps = this->source_gaps;
     target_gaps = this->target_gaps;

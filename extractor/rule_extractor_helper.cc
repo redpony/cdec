@@ -54,13 +54,11 @@ void RuleExtractorHelper::GetLinksSpans(
 bool RuleExtractorHelper::CheckAlignedTerminals(
     const vector<int>& matching,
     const vector<int>& chunklen,
-    const vector<int>& source_low) const {
+    const vector<int>& source_low,
+    int source_sent_start) const {
   if (!require_aligned_terminal) {
     return true;
   }
-
-  int sentence_id = source_data_array->GetSentenceId(matching[0]);
-  int source_sent_start = source_data_array->GetSentenceStart(sentence_id);
 
   int num_aligned_chunks = 0;
   for (size_t i = 0; i < chunklen.size(); ++i) {
@@ -83,14 +81,13 @@ bool RuleExtractorHelper::CheckAlignedTerminals(
 bool RuleExtractorHelper::CheckTightPhrases(
     const vector<int>& matching,
     const vector<int>& chunklen,
-    const vector<int>& source_low) const {
+    const vector<int>& source_low,
+    int source_sent_start) const {
   if (!require_tight_phrases) {
     return true;
   }
 
   // Check if the chunk extremities are aligned.
-  int sentence_id = source_data_array->GetSentenceId(matching[0]);
-  int source_sent_start = source_data_array->GetSentenceStart(sentence_id);
   for (size_t i = 0; i + 1 < chunklen.size(); ++i) {
     int gap_start = matching[i] + chunklen[i] - source_sent_start;
     int gap_end = matching[i + 1] - 1 - source_sent_start;
@@ -272,10 +269,8 @@ bool RuleExtractorHelper::GetGaps(
      const vector<int>& source_low, const vector<int>& source_high,
      const vector<int>& target_low, const vector<int>& target_high,
      int source_phrase_low, int source_phrase_high, int source_back_low,
-     int source_back_high, int& num_symbols, bool& met_constraints) const {
-  int sentence_id = source_data_array->GetSentenceId(matching[0]);
-  int source_sent_start = source_data_array->GetSentenceStart(sentence_id);
-
+     int source_back_high, int sentence_id, int source_sent_start,
+     int& num_symbols, bool& met_constraints) const {
   if (source_back_low < source_phrase_low) {
     source_gaps.push_back(make_pair(source_back_low, source_phrase_low));
     if (num_symbols >= max_rule_symbols) {
@@ -351,10 +346,8 @@ vector<int> RuleExtractorHelper::GetGapOrder(
 
 unordered_map<int, int> RuleExtractorHelper::GetSourceIndexes(
     const vector<int>& matching, const vector<int>& chunklen,
-    int starts_with_x) const {
+    int starts_with_x, int source_sent_start) const {
  unordered_map<int, int> source_indexes;
- int sentence_id = source_data_array->GetSentenceId(matching[0]);
- int source_sent_start = source_data_array->GetSentenceStart(sentence_id);
  int num_symbols = starts_with_x;
  for (size_t i = 0; i < matching.size(); ++i) {
    for (size_t j = 0; j < chunklen[i]; ++j) {
