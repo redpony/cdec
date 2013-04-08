@@ -62,6 +62,7 @@ def extract(inp):
     return '<seg grammar="{}" id="{}">{}</seg>{}'.format(grammar_file, i, sentence, suffix)
 
 def main():
+    global online
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(description='Extract grammars from a compiled corpus.')
     parser.add_argument('-c', '--config', required=True,
@@ -88,6 +89,8 @@ def main():
                     ' should be a python module\n'.format(featdef))
             sys.exit(1)
     
+    online = args.online
+
     if args.jobs > 1:
         logging.info('Starting %d workers; chunk size: %d', args.jobs, args.chunksize)
         pool = mp.Pool(args.jobs, make_extractor, (args,))
