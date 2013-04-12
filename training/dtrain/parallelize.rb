@@ -123,7 +123,7 @@ end
         qsub_str_end = "\""
         local_end = ''
       else
-        local_end = "&>work/out.#{shard}.#{epoch}"
+        local_end = "2>work/out.#{shard}.#{epoch}"
       end
       pids << Kernel.fork {
         `#{qsub_str_start}#{dtrain_bin} -c #{ini}\
