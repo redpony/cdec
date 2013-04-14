@@ -593,7 +593,7 @@ sub average_weights {
 	    else
 	    {
 		(my $msg,my $ran,$mult) = split(/ \|\|\| /);
-		print "RAN $ran $mult\n";
+		print "Processing $ran $mult\n";
 	    }
 	}
 	$total_mult += $mult;
