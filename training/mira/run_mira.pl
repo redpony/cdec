@@ -455,9 +455,24 @@ sub print_help {
         print << "Help";
 
 Usage: $executable [options] <ini file>
-
-        $executable [options] <ini file>
-                Runs a complete MIRA optimization using the ini file specified.
+        Runs a complete MIRA optimization using the ini file specified.
+	Example invocation:
+	run_mira.pl \
+        --pmem 3g \
+        --max-iterations 20 \
+        --optimizer 2 \
+        --unique-kbest \
+        --jobs 15 \
+        --kbest-size 500 \
+        --hope-select 1 \
+        --fear-select 1  \
+        --ref-files "ref.0.soseos ref.1.soseos" \
+        --source-file src.soseos \
+        --weights weights.init \
+        --workdir workdir \
+        --grammar-prefix grammars/grammar \
+        --step-size 0.01 \
+        --metric-scale 10000 \
 
 Required:
 
