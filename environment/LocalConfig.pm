@@ -34,7 +34,7 @@ my $CCONFIG = {
     #'QSubQueue' => '-q long',
   },
   'UMIACS' => {
-    'HOST_REGEXP' => qr/^d.*\.umiacs\.umd\.edu$/,
+    'HOST_REGEXP' => qr/^(n|s|d).*\.umiacs\.umd\.edu$/,
     'JobControl'  => 'qsub',
     'QSubMemFlag' => '-l pmem=',
     'QSubQueue' => '-q batch',
