@@ -40,7 +40,7 @@ bool no_reweight;
 bool no_select;
 bool unique_kbest;
 int update_list_size;
-vector<weight_t> dense_weights_g;
+vector<weight_t> dense_w_local;
 double mt_metric_scale;
 int optimizer;
 int fear_select;
@@ -170,7 +170,7 @@ bool FearCompareB(const HI& h1, const HI& h2 )
 
 bool FearComparePred(const HI& h1, const HI& h2 ) 
 {
-  return h1->features.dot(dense_weights_g) > h2->features.dot(dense_weights_g);
+  return h1->features.dot(dense_w_local) > h2->features.dot(dense_w_local);
 };
 
 bool HypothesisCompareG(const HI& h1, const HI& h2 ) 
@@ -203,12 +203,7 @@ void CuttingPlane(vector<shared_ptr<HypothesisInfo> >* cur_c, bool* again, vecto
       for(int u=0;u!=all_hyp.size();u++)	
 	{ 
 	  double t_score = all_hyp[u]->features.dot(dense_weights);
-	  //all_hyp[u]->fear = -1*all_hyp[u]->mt_metric - hope_score + t_score;
-	  
 	  all_hyp[u]->fear = -1*all_hyp[u]->mt_metric + 1*all_hyp[0]->mt_metric - hope_score + t_score; //relative loss
-	  //      all_hyp[u]->oracle_loss = -1*all_hyp[u]->mt_metric - -1*all_hyp[0]->mt_metric;
-	  //all_hyp[u]->oracle_feat_diff = all_hyp[0]->features - all_hyp[u]->features;
-	  //	all_hyp[u]->fear = -1 * all_hyp[u]->mt_metric + t_score;
 	}
     
       sort(all_hyp.begin(),all_hyp.end(),FearCompareB);
@@ -238,24 +233,14 @@ double ComputeDelta(vector<shared_ptr<HypothesisInfo> >* cur_p, double max_step_
 {
   vector<shared_ptr<HypothesisInfo> >& cur_pair = *cur_p;
    double loss = cur_pair[0]->oracle_loss - cur_pair[1]->oracle_loss;
-   //double margin = -cur_pair[0]->oracle_feat_diff.dot(dense_weights) + cur_pair[1]->oracle_feat_diff.dot(dense_weights); //TODO: is it a problem that new oracle is used in diff?
-   //double num = loss - margin;
-  
 
    double margin = -(cur_pair[0]->oracleN->features.dot(dense_weights)- cur_pair[0]->features.dot(dense_weights)) + (cur_pair[1]->oracleN->features.dot(dense_weights) - cur_pair[1]->features.dot(dense_weights));
    const double num = margin +  loss;
    cerr << "LOSS: " << num << " Margin:" << margin << " BLEUL:" << loss << " " << cur_pair[1]->features.dot(dense_weights) << " " << cur_pair[0]->features.dot(dense_weights) <<endl;
    
 
-/*  double num = 
-    (cur_pair[0]->oracle_loss - cur_pair[0]->oracle_feat_diff.dot(dense_weights))
-    - (cur_pair[1]->oracle_loss - cur_pair[1]->oracle_feat_diff.dot(dense_weights));
-  */
-
   SparseVector<double> diff = cur_pair[0]->features;
   diff -= cur_pair[1]->features;
-  /*  SparseVector<double> diff = cur_pair[0]->oracle_feat_diff;
-  diff -= cur_pair[1]->oracle_feat_diff;*/
   double diffsqnorm = diff.l2norm_sq();
   double delta;
   if (diffsqnorm > 0)
@@ -264,7 +249,6 @@ double ComputeDelta(vector<shared_ptr<HypothesisInfo> >* cur_p, double max_step_
     delta = 0;
   cerr << " D1:" << delta;
   //clip delta (enforce margin constraints)
-
   delta = max(-cur_pair[0]->alpha, min(delta, cur_pair[1]->alpha));
   cerr << " D2:" << delta;
   return delta;
@@ -278,12 +262,12 @@ vector<shared_ptr<HypothesisInfo> > SelectPair(vector<shared_ptr<HypothesisInfo>
   
   vector<shared_ptr<HypothesisInfo> > pair;
 
-  if (no_select || optimizer == 2){ //skip heuristic search and return oracle and fear for 1-mira
-  //    if(optimizer == 2)      {
+  if (no_select || optimizer == 2){ //skip heuristic search and return oracle and fear for pa-mira
+
       pair.push_back(cur_constraint[0]);
       pair.push_back(cur_constraint[1]);
       return pair;
-      //   }
+
     }
   
   for(int u=0;u != cur_constraint.size();u++)	
@@ -299,8 +283,6 @@ vector<shared_ptr<HypothesisInfo> > SelectPair(vector<shared_ptr<HypothesisInfo>
 	}
       if(!max_fear) return pair; //
       
-      if(DEBUG_SELECT) cerr << " F" << max_fear->fear << endl;
-
       
       if ((cur_constraint[u]->alpha == 0) && (cur_constraint[u]->fear > max_fear->fear + SMO_EPSILON))
 	{
@@ -310,8 +292,7 @@ vector<shared_ptr<HypothesisInfo> > SelectPair(vector<shared_ptr<HypothesisInfo>
 		if (cur_constraint[i]->alpha > 0)
 		  {
 		    pair.push_back(cur_constraint[u]);
-		    pair.push_back(cur_constraint[i]);
-		    cerr << "RETJURN from 1" << endl;
+		    pair.push_back(cur_constraint[i]);		    
 		    return pair;
 		  }
 	    }
@@ -342,11 +323,10 @@ struct GoodBadOracle {
 
 struct TrainingObserver : public DecoderObserver {
   TrainingObserver(const int k, const DocScorer& d, vector<GoodBadOracle>* o, vector<ScoreP>* cbs) : ds(d), oracles(*o), corpus_bleu_sent_stats(*cbs), kbest_size(k) {
-  // TrainingObserver(const int k, const DocScorer& d, vector<GoodBadOracle>* o) : ds(d), oracles(*o), kbest_size(k) {
     
-    //calculate corpus bleu score from previous iterations 1-best for BLEU gain
+
     if(!pseudo_doc && !sent_approx)
-    if(cur_pass > 0)
+    if(cur_pass > 0)     //calculate corpus bleu score from previous iterations 1-best for BLEU gain
       {
 	ScoreP acc;
 	for (int ii = 0; ii < corpus_bleu_sent_stats.size(); ii++) {
@@ -357,7 +337,7 @@ struct TrainingObserver : public DecoderObserver {
 	corpus_bleu_stats = acc;
 	corpus_bleu_score = acc->ComputeScore();
       }
-    //corpus_src_length = 0;
+
 }
   const DocScorer& ds;
   vector<ScoreP>& corpus_bleu_sent_stats;
@@ -396,9 +376,8 @@ struct TrainingObserver : public DecoderObserver {
 
   virtual void NotifyTranslationForest(const SentenceMetadata& smeta, Hypergraph* hg) {
     cur_sent = smeta.GetSentenceID();
-    //cerr << "SOURCE " << smeta.GetSourceLength() << endl;
     curr_src_length = (float) smeta.GetSourceLength();
-    //UpdateOracles(smeta.GetSentenceID(), *hg);
+
     if(unique_kbest)
       UpdateOracles<KBest::FilterUnique>(smeta.GetSentenceID(), *hg);
     else
@@ -431,9 +410,8 @@ struct TrainingObserver : public DecoderObserver {
     typedef KBest::KBestDerivations<vector<WordID>, ESentenceTraversal,Filter> K;
     K kbest(forest,kbest_size);
     
-    //KBest::KBestDerivations<vector<WordID>, ESentenceTraversal> kbest(forest, kbest_size);
     for (int i = 0; i < kbest_size; ++i) {
-      //const KBest::KBestDerivations<vector<WordID>, ESentenceTraversal>::Derivation* d =
+
       typename K::Derivation *d =
         kbest.LazyKthBest(forest.nodes_.size() - 1, i);
       if (!d) break;
@@ -489,9 +467,8 @@ struct TrainingObserver : public DecoderObserver {
       corpus_bleu_stats->PlusEquals(*sent_stats, PSEUDO_SCALE);
             
       corpus_src_length = PSEUDO_SCALE * (corpus_src_length + curr_src_length);
-      cerr << "CORP S " << corpus_src_length << " " << curr_src_length << "\n" << details << "\n" << details2 << endl;
+      cerr << "ps corpus size: " << corpus_src_length << " " << curr_src_length << "\n" << details << "\n" << details2 << endl;
     }
-
 
     //figure out how many hyps we can keep maximum
     int temp_update_size = update_list_size;
@@ -500,7 +477,8 @@ struct TrainingObserver : public DecoderObserver {
     //sort all hyps by sentscore (eg. bleu)
     sort(all_hyp.begin(),all_hyp.end(),HypothesisCompareB);
     
-    if(PRINT_LIST){  cerr << "Sorting " << endl; for(int u=0;u!=all_hyp.size();u++)	cerr << all_hyp[u]->mt_metric << " " << all_hyp[u]->features.dot(dense_weights_g) << endl; }
+    if(PRINT_LIST){  cerr << "Sorting " << endl; for(int u=0;u!=all_hyp.size();u++)  
+						   cerr << all_hyp[u]->mt_metric << " " << all_hyp[u]->features.dot(dense_w_local) << endl; }
     
     if(hope_select == 1)
       {
@@ -508,7 +486,7 @@ struct TrainingObserver : public DecoderObserver {
 	if (PRINT_LIST) cerr << "HOPE " << endl;
 	for(int u=0;u!=all_hyp.size();u++)	
 	  { 
-	    double t_score = all_hyp[u]->features.dot(dense_weights_g);
+	    double t_score = all_hyp[u]->features.dot(dense_w_local);
 	    all_hyp[u]->hope = all_hyp[u]->mt_metric + t_score;
 	    if (PRINT_LIST) cerr << all_hyp[u]->mt_metric << " H:" << all_hyp[u]->hope << " S:" << t_score << endl; 
 	    
@@ -522,47 +500,38 @@ struct TrainingObserver : public DecoderObserver {
     cur_good.insert(cur_good.begin(), all_hyp.begin(), all_hyp.begin()+temp_update_size);    
     if(PRINT_LIST) { cerr << "GOOD" << endl;  for(int u=0;u!=cur_good.size();u++) cerr << cur_good[u]->mt_metric << " " << cur_good[u]->hope << endl;}     
 
+    //use hope for fear selection
     shared_ptr<HypothesisInfo>& oracleN = cur_good[0];
-
 
     if(fear_select == 1){   //compute fear hyps with model - bleu
       if (PRINT_LIST) cerr << "FEAR " << endl;
-      double hope_score = oracleN->features.dot(dense_weights_g);
+      double hope_score = oracleN->features.dot(dense_w_local);
 
       if (PRINT_LIST) cerr << "hope score " << hope_score << endl;
       for(int u=0;u!=all_hyp.size();u++)	
 	{ 
-	  double t_score = all_hyp[u]->features.dot(dense_weights_g);
-	  //all_hyp[u]->fear = -1*all_hyp[u]->mt_metric - hope_score + t_score;
-	  
-	  /*	  all_hyp[u]->fear = -1*all_hyp[u]->mt_metric - -1*cur_oracle->mt_metric - hope_score + t_score; //relative loss
-	  all_hyp[u]->oracle_loss = -1*all_hyp[u]->mt_metric - -1*cur_oracle->mt_metric;
-	  all_hyp[u]->oracle_feat_diff = cur_oracle->features - all_hyp[u]->features;*/
+	  double t_score = all_hyp[u]->features.dot(dense_w_local);
 
 	  all_hyp[u]->fear = -1*all_hyp[u]->mt_metric + 1*oracleN->mt_metric - hope_score + t_score; //relative loss
 	  all_hyp[u]->oracle_loss = -1*all_hyp[u]->mt_metric + 1*oracleN->mt_metric;
 	  all_hyp[u]->oracle_feat_diff = oracleN->features - all_hyp[u]->features;
 	  all_hyp[u]->oracleN=oracleN;
-	  //	all_hyp[u]->fear = -1 * all_hyp[u]->mt_metric + t_score;
 	  if (PRINT_LIST) cerr << all_hyp[u]->mt_metric << " H:" << all_hyp[u]->hope << " F:" << all_hyp[u]->fear << endl; 
 	  
 	}
       
       sort(all_hyp.begin(),all_hyp.end(),FearCompareB);
       
-      cur_bad.insert(cur_bad.begin(), all_hyp.begin(), all_hyp.begin()+temp_update_size);    
     }
     else if(fear_select == 2) //select fear based on cost
       {
-	cur_bad.insert(cur_bad.begin(), all_hyp.end()-temp_update_size, all_hyp.end()); 
-	reverse(cur_bad.begin(),cur_bad.end());
+	sort(all_hyp.begin(),all_hyp.end(),HypothesisCompareG);
       }
-    else //pred-based, fear_select = 3
+    else //max model score, also known as prediction-based
       {
 	sort(all_hyp.begin(),all_hyp.end(),FearComparePred);
-	cur_bad.insert(cur_bad.begin(), all_hyp.begin(), all_hyp.begin()+temp_update_size); 
       }
-
+    cur_bad.insert(cur_bad.begin(), all_hyp.begin(), all_hyp.begin()+temp_update_size); 
 
     if(PRINT_LIST){ cerr<< "BAD"<<endl; for(int u=0;u!=cur_bad.size();u++) cerr << cur_bad[u]->mt_metric << " H:" << cur_bad[u]->hope << " F:" << cur_bad[u]->fear << endl;}
     
@@ -616,13 +585,12 @@ void ReadPastTranslationForScore(const int cur_pass, vector<ScoreP>* c, DocScore
     ++lc;
  
   }
-
   
   assert(lc > 0);
   float score = acc->ComputeScore();
   string details;
   acc->ScoreDetails(&details);
-  cerr << "INIT RUN " << details << score << endl;
+  cerr << "Previous run: " << details << score << endl;
 
 }
 
@@ -640,7 +608,6 @@ int main(int argc, char** argv) {
     rng.reset(new MT19937);
   
   vector<string> corpus;
-  //ReadTrainingCorpus(conf["source"].as<string>(), &corpus);
 
   const string metric_name = conf["mt_metric"].as<string>();
   optimizer = conf["optimizer"].as<int>();
@@ -654,7 +621,7 @@ int main(int argc, char** argv) {
   unique_kbest = conf.count("unique_k_best");
   pseudo_doc = conf.count("pseudo_doc");
   sent_approx = conf.count("sent_approx");
-  cerr << "PSEUDO " << pseudo_doc << " SENT " << sent_approx << endl;
+  cerr << "Using pseudo-doc:" << pseudo_doc << " Sent:" << sent_approx << endl;
   if(pseudo_doc)
     mt_metric_scale=1;
 
@@ -665,7 +632,6 @@ int main(int argc, char** argv) {
   //establish metric used for tuning
   if (type == TER) {
     invert_score = true;
-    // approx_score = false;
   } else {
     invert_score = false;
   }
@@ -681,20 +647,9 @@ int main(int argc, char** argv) {
     {
       ReadPastTranslationForScore(cur_pass, &corpus_bleu_sent_stats, ds, output_dir);
     }
-  /*  if (ds.size() != corpus.size()) {
-    cerr << "Mismatched number of references (" << ds.size() << ") and sources (" << corpus.size() << ")\n";
-    return 1;
-    }*/
-  cerr << "Optimizing with " << optimizer << endl;
-  // load initial weights
-  /*Weights weights;
-  weights.InitFromFile(conf["input_weights"].as<string>());
-  SparseVector<double> lambdas;
-  weights.InitSparseVector(&lambdas);
-  */
-
   
-  
+  cerr << "Using optimizer:" << optimizer << endl;
+    
   ReadFile ini_rf(conf["decoder_config"].as<string>());
   Decoder decoder(ini_rf.stream());
 
@@ -705,7 +660,6 @@ int main(int argc, char** argv) {
   Weights::InitSparseVector(dense_weights, &lambdas);
 
   const string input = decoder.GetConf()["input"].as<string>();
-  //const bool show_feature_dictionary = decoder.GetConf().count("show_feature_dictionary");
   if (!SILENT) cerr << "Reading input from " << ((input == "-") ? "STDIN" : input.c_str()) << endl;
   ReadFile in_read(input);
   istream *in = in_read.stream();
@@ -714,8 +668,6 @@ int main(int argc, char** argv) {
   
   const double max_step_size = conf["max_step_size"].as<double>();
 
-
-  //  assert(corpus.size() > 0);
   vector<GoodBadOracle> oracles(ds.size());
 
   TrainingObserver observer(conf["k_best_size"].as<int>(), ds, &oracles, &corpus_bleu_sent_stats);
@@ -725,27 +677,21 @@ int main(int argc, char** argv) {
   double objective=0;
   double tot_loss = 0;
   int dots = 0;
-  //  int cur_pass = 1;
-  //  vector<double> dense_weights;
   SparseVector<double> tot;
   SparseVector<double> final_tot;
-  //  tot += lambdas;          // initial weights
-  //  lcount++;                // count for initial weights
 
-  //string msg = "# MIRA tuned weights";
-  // while (cur_pass <= max_iteration) {
-    SparseVector<double> old_lambdas = lambdas;
-    tot.clear();
-    tot += lambdas;
-    cerr << "PASS " << cur_pass << " " << endl << lambdas << endl; 
-    ScoreP acc, acc_h, acc_f;
-    
-    while(*in) {
+  SparseVector<double> old_lambdas = lambdas;
+  tot.clear();
+  tot += lambdas;
+  cerr << "PASS " << cur_pass << " " << endl << lambdas << endl; 
+  ScoreP acc, acc_h, acc_f;
+  
+  while(*in) {
       getline(*in, buf);
       if (buf.empty()) continue;
       //TODO: allow batch updating
       lambdas.init_vector(&dense_weights);
-      dense_weights_g = dense_weights;
+      dense_w_local = dense_weights;
       decoder.SetId(cur_sent);
       decoder.Decode(buf, &observer);  // decode the sentence, calling Notify to get the hope,fear, and model best hyps. 
       
@@ -922,7 +868,7 @@ int main(int argc, char** argv) {
 
 			dense_weights.clear();
 			lambdas.init_vector(&dense_weights);
-			dense_weights_g = dense_weights;
+			dense_w_local = dense_weights;
 			iter++;
 					
 			if(DEBUG_SMO) cerr << "SMO opt " << iter << " " << delta << " " << cur_pair[0]->alpha << " " << cur_pair[1]->alpha <<  endl;		
@@ -991,18 +937,16 @@ int main(int argc, char** argv) {
     ostringstream os;
     os << weights_dir << "/weights.mira-pass" << (cur_pass < 10 ? "0" : "") << cur_pass << "." << node_id << ".gz";
     string msg = "# MIRA tuned weights ||| " + boost::lexical_cast<std::string>(node_id) + " ||| " + boost::lexical_cast<std::string>(lcount);
-    //Weights.InitFromVector(lambdas);
     lambdas.init_vector(&dense_weights);
     Weights::WriteToFile(os.str(), dense_weights, true, &msg);
 
     SparseVector<double> x = tot;
-    x /= lcount;
+    x /= lcount+1;
     ostringstream sa;
     string msga = "# MIRA tuned weights AVERAGED ||| " + boost::lexical_cast<std::string>(node_id) + " ||| " + boost::lexical_cast<std::string>(lcount);
     sa << weights_dir << "/weights.mira-pass" << (cur_pass < 10 ? "0" : "") << cur_pass << "." << node_id << "-avg.gz";
     x.init_vector(&dense_weights);
     Weights::WriteToFile(sa.str(), dense_weights, true, &msga);
-    
     
     cerr << "Optimization complete.\n";
     return 0;
