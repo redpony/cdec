@@ -3,7 +3,7 @@ use strict;
 my @ORIG_ARGV=@ARGV;
 use Cwd qw(getcwd);
 my $SCRIPT_DIR; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $SCRIPT_DIR = dirname(abs_path($0));
-push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../environment"; }
+push @INC, $SCRIPT_DIR, "$SCRIPT_DIR/../../environment"; }
 
 # Skip local config (used for distributing jobs) if we're running in local-only mode
 use LocalConfig;
@@ -11,51 +11,50 @@ use Getopt::Long;
 use IPC::Open2;
 use POSIX ":sys_wait_h";
 my $QSUB_CMD = qsub_args(mert_memory());
-
-require "libcall.pl";
-
+my $default_jobs = env_default_jobs();
 
 my $srcFile;
 my $refFiles;
 my $bin_dir = $SCRIPT_DIR;
 die "Bin directory $bin_dir missing/inaccessible" unless -d $bin_dir;
-my $FAST_SCORE="$bin_dir/../mteval/fast_score";
+my $FAST_SCORE="$bin_dir/../../mteval/fast_score";
 die "Can't execute $FAST_SCORE" unless -x $FAST_SCORE;
 
 my $iteration = 0.0;
-my $max_iterations = 6;
+my $max_iterations = 10;
 my $metric = "ibm_bleu";
 my $iniFile;
 my $weights;
 my $initialWeights;
-my $decode_nodes = 1;   # number of decode nodes
+my $jobs = $default_jobs;   # number of decode nodes
 my $pmem = "1g";
 my $dir;
 
 my $SCORER = $FAST_SCORE;
-my $local_server = "$bin_dir/local_parallelize.pl";
-my $parallelize = "$bin_dir/../dpmert/parallelize.pl";
-my $libcall = "$bin_dir/../dpmert/libcall.pl";
-my $sentserver = "$bin_dir/../dpmert/sentserver";
-my $sentclient = "$bin_dir/../dpmert/sentclient";
-my $run_local_server = 0;
+
+my $UTILS_DIR="$SCRIPT_DIR/../utils";
+require "$UTILS_DIR/libcall.pl";
+
+my $parallelize = "$UTILS_DIR/parallelize.pl";
+my $libcall = "$UTILS_DIR/libcall.pl";
+my $sentserver = "$UTILS_DIR/sentserver";
+my $sentclient = "$UTILS_DIR/sentclient";
+
 my $run_local = 0;
-my $usefork;
 my $pass_suffix = '';
 
-my $cdec ="$bin_dir/kbest_mirav5"; #"$bin_dir/kbest_mira_rmmv2"; #"$bin_dir/kbest_mira_lv";
+my $cdec ="$bin_dir/kbest_cut_mira"; 
 
-#my $cdec ="$bin_dir/kbest_mira_rmmv2"; #"$bin_dir/kbest_mirav5"; #"$bin_dir/kbest_mira_rmmv2"; #"$bin_dir/kbest_mira_lv";
 die "Can't find decoder in $cdec" unless -x $cdec;
 my $decoder = $cdec;
 my $decoderOpt;
-my $update_size=250;
+my $update_size;
 my $approx_score;
 my $kbest_size=250;
 my $metric_scale=1;
 my $optimizer=2;
 my $disable_clean = 0;
-my $use_make;  # use make to parallelize line search
+my $use_make=0;  
 my $density_prune;
 my $cpbin=1;
 my $help = 0;
@@ -64,10 +63,10 @@ my $step_size = 0.01;
 my $gpref;
 my $unique_kbest;
 my $freeze;
-my $latent;
-my $sample_max;
 my $hopes=1;
 my $fears=1;
+my $sent_approx=0;
+my $pseudo_doc=0;
 
 my $range = 35000;
 my $minimum = 15000;
@@ -78,15 +77,13 @@ my $portn = int(rand($range)) + $minimum;
 Getopt::Long::Configure("no_auto_abbrev");
 if (GetOptions(
         "decoder=s" => \$decoderOpt,
-        "decode-nodes=i" => \$decode_nodes,
+        "jobs=i" => \$jobs,
         "density-prune=f" => \$density_prune,
         "dont-clean" => \$disable_clean,
         "pass-suffix=s" => \$pass_suffix,
-        "use-fork" => \$usefork,
         "epsilon=s" => \$epsilon,
         "help" => \$help,
         "local" => \$run_local,
-	"local_server" => \$run_local_server,
         "use-make=i" => \$use_make,
         "max-iterations=i" => \$max_iterations,
         "pmem=s" => \$pmem,
@@ -102,10 +99,9 @@ if (GetOptions(
 	"step-size=f" => \$step_size,
 	"hope-select=i" => \$hopes,
 	"fear-select=i" => \$fears,
-	"approx-score" => \$approx_score,
+	"sent-approx" => \$sent_approx,
+        "pseudo-doc" => \$pseudo_doc,
 	"unique-kbest" => \$unique_kbest,
-	"latent" => \$latent,
-	"sample-max=i" => \$sample_max,
         "grammar-prefix=s" => \$gpref,
 	"freeze" => \$freeze,
         "workdir=s" => \$dir,
@@ -235,7 +231,9 @@ close F;
 
 my $lastPScore = 0;
 my $lastWeightsFile;
-
+my $bestScoreIter=-1;
+my $bestScore=-1;
+unless ($update_size){$update_size = $kbest_size;}
 # main optimization loop
 #while (1){
 for (my $opt_iter=0; $opt_iter<$max_iterations; $opt_iter++) {
@@ -260,16 +258,16 @@ for (my $opt_iter=0; $opt_iter<$max_iterations; $opt_iter++) {
 	my $weightsFile="$dir/weights.$opt_iter";
 	print "ITER $iteration " ;
 	my $cur_pass = "-p 0$opt_iter";
-	my $decoder_cmd = "$decoder -c $iniFile -w $weightsFile $refs_comma_sep -m $metric -s $metric_scale -a -b $update_size -k $kbest_size -o $optimizer $cur_pass -O $weightdir -D $dir  -h $hopes -f $fears -C $step_size";
+	my $decoder_cmd = "$decoder -c $iniFile -w $weightsFile $refs_comma_sep -m $metric -s $metric_scale -b $update_size -k $kbest_size -o $optimizer $cur_pass -O $weightdir -D $dir  -h $hopes -f $fears -C $step_size";
 	if($unique_kbest){
 		$decoder_cmd .= " -u";
 	}
-	if($latent){
-		$decoder_cmd .= " -l";
+	if($sent_approx){
+		$decoder_cmd .= " -a";
 	}
-	if($sample_max){
-		$decoder_cmd .= " -t $sample_max";
-	}
+	if($pseudo_doc){
+                $decoder_cmd .= " -e";
+        }
 	if ($density_prune) {
 		$decoder_cmd .= " --density_prune $density_prune";
 	}
@@ -277,13 +275,11 @@ for (my $opt_iter=0; $opt_iter<$max_iterations; $opt_iter++) {
 	if ($run_local) {
 		$pcmd = "cat $srcFile |";
 	} elsif ($use_make) {
-	    # TODO: Throw error when decode_nodes is specified along with use_make
+	    # TODO: Throw error when jobs is speong with use_make
 		$pcmd = "cat $srcFile | $parallelize --use-fork -p $pmem -e $logdir -j $use_make --";
-	} elsif ($run_local_server){
-	    $pcmd = "cat $srcFile | $local_server $usefork -p $pmem -e $logdir -n $decode_nodes --";
-	}
+	} 
 	else {
-	    $pcmd = "cat $srcFile | $parallelize $usefork -p $pmem -e $logdir -j $decode_nodes --baseport $portn --";
+	    $pcmd = "cat $srcFile | $parallelize -p $pmem -e $logdir -j $jobs --baseport $portn --";
 	}
 	my $cmd = "$pcmd $decoder_cmd 2> $decoderLog 1> $runFile";
 	print STDERR "COMMAND:\n$cmd\n";
@@ -291,14 +287,14 @@ for (my $opt_iter=0; $opt_iter<$max_iterations; $opt_iter++) {
 
 	my $retries = 0;
         my $num_topbest;
-        while($retries < 5) {
+        while($retries < 6) {
             $num_topbest = check_output("wc -l < $runFile");
             print STDERR "NUMBER OF TOP-BEST HYPs: $num_topbest\n";
             if($devSize == $num_topbest) {
                 last;
             } else {
                 print STDERR "Incorrect number of topbest. Waiting for distributed filesystem and retrying...\n";
-                sleep(3);
+                sleep(10);
             }
             $retries++;
         }
@@ -320,12 +316,15 @@ for (my $opt_iter=0; $opt_iter<$max_iterations; $opt_iter++) {
 	close RUN;
 	close F; close B; close H;
 	
-	my $dec_score = check_output("cat $runFile.B | $SCORER $refs_comma_sep -l $metric");
-	my $dec_score_h = check_output("cat $runFile.H | $SCORER $refs_comma_sep -l $metric");
-	my $dec_score_f = check_output("cat $runFile.F | $SCORER $refs_comma_sep -l $metric");
+	my $dec_score = check_output("cat $runFile.B | $SCORER $refs_comma_sep -m $metric");
+	my $dec_score_h = check_output("cat $runFile.H | $SCORER $refs_comma_sep -m $metric");
+	my $dec_score_f = check_output("cat $runFile.F | $SCORER $refs_comma_sep -m $metric");
 	chomp $dec_score; chomp $dec_score_h; chomp $dec_score_f;
 	print STDERR "DECODER SCORE: $dec_score HOPE: $dec_score_h FEAR: $dec_score_f\n";
-
+	if ($dec_score> $bestScore){
+		$bestScoreIter=$opt_iter; 
+		$bestScore=$dec_score;
+	}
 	# save space
 	check_call("gzip -f $runFile");
 	check_call("gzip -f $decoderLog");
@@ -338,21 +337,11 @@ for (my $opt_iter=0; $opt_iter<$max_iterations; $opt_iter++) {
 	$lastWeightsFile = "$dir/weights.$opt_iter";
 
 	average_weights("$weightdir/weights.mira-pass*.*[0-9].gz", $newWeightsFile, $logdir);
-#	check_call("cp $lastW $newWeightsFile");
-#	if ($icc < 2) {
-#		print STDERR "\nREACHED STOPPING CRITERION: score change too little\n";
-#		last;
-#	}
 	system("gzip -f $logdir/kbes*");
 	print STDERR "\n==========\n";
 	$iteration++;
 }
-#find 
-#my $cmd = `grep SCORE /fs/clip-galep5/lexical_tm/log.runmira.nist.20 | cat -n | sort -k +2 | tail -1`;
-#$cmd =~ m/([0-9]+)/;
-#$lastWeightsFile = "$dir/weights.$1";
-#check_call("ln -s $lastWeightsFile $dir/weights.tuned");
-print STDERR "\nFINAL WEIGHTS: $lastWeightsFile\n(Use -w <this file> with the decoder)\n\n";
+print STDERR "\nBEST ITER: $bestScoreIter :: $bestScore\n\n\n";
 
 print STDOUT "$lastWeightsFile\n";
 
@@ -409,7 +398,7 @@ sub write_config {
 	print $fh "EVAL METRIC:      $metric\n";
 	print $fh "START ITERATION:  $iteration\n";
 	print $fh "MAX ITERATIONS:   $max_iterations\n";
-	print $fh "DECODE NODES:     $decode_nodes\n";
+	print $fh "DECODE NODES:     $jobs\n";
 	print $fh "HEAD NODE:        $host\n";
 	print $fh "PMEM (DECODING):  $pmem\n";
 	print $fh "CLEANUP:          $cleanup\n";
@@ -462,8 +451,86 @@ sub enseg {
 }
 
 sub print_help {
-	print "Something wrong\n";
+ my $executable = check_output("basename $0"); chomp $executable;
+        print << "Help";
+
+Usage: $executable [options] <ini file>
+
+        $executable [options] <ini file>
+                Runs a complete MIRA optimization using the ini file specified.
+
+Required:
+
+        --ref-files <files>
+                Dev set ref files.  This option takes only a single string argument.
+                To use multiple files (including file globbing), this argument should
+                be quoted.
+        --source-file <file>
+                Dev set source file.
+        --weights <file>
+                Initial weights file
+
+General options:
+
+        --help
+                Print this message and exit.
+
+       --max-iterations <M>
+                Maximum number of iterations to run.  If not specified, defaults
+                to $max_iterations.
+
+        --metric <method>
+                Metric to optimize.
+                Example values: IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, Combi
+
+        --workdir <dir>
+                Directory for intermediate and output files.  If not specified, the
+                name is derived from the ini filename.  Assuming that the ini
+                filename begins with the decoder name and ends with ini, the default
+                name of the working directory is inferred from the middle part of
+                the filename.  E.g. an ini file named decoder.foo.ini would have
+                a default working directory name foo.
+	--optimizer <I>
+		Learning method to use for weight update. Choice are 1) SGD, 2) PA MIRA with Selection from Cutting Plane, 3) Cutting Plane MIRA, 4) PA MIRA,5) nbest MIRA with hope, fear, and model constraints
+	--metric-scale <I>
+		Scale MT loss by this amount when computing hope/fear candidates
+	--kbest-size <I>
+		Size of k-best list to extract from forest
+	--update-size <I>
+		Size of k-best list to use for update (applies to optimizer 5)
+	--step-size <F>
+		Controls aggresiveness of update (C) 
+	--hope-select<I>
+		How to select hope candidate. Choices are 1) model score - cost, 2) min cost
+	--fear-select <I>
+		How to select fear candodate. Choices are 1) model score + cost, 2) max cost, 3) max score
+	--sent-approx
+		Use smoothed sentence-level MT metric
+	--pseudo-doc
+		Use pseudo document to approximate MT metric
+	--unique-kbest
+		Extract unique k-best from forest
+	--grammar-prefix <path>
+		Path to sentence-specific grammar files
+
+Job control options:
+
+        --jobs <I>
+                Number of decoder processes to run in parallel. [default=$default_jobs]
+
+        --pmem <N>
+                Amount of physical memory requested for parallel decoding jobs
+                (used with qsub requests only)
+
+	--local 
+		Run single learner
+	--use-make <I>
+		Run parallel learners on a single machine through fork.
+
+
+Help
 }
+
 
 sub cmdline {
     return join ' ',($0,@ORIG_ARGV);
