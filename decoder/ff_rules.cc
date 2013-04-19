@@ -107,7 +107,12 @@ void RuleSourceBigramFeatures::TraversalFeaturesImpl(const SentenceMetadata& sme
   (*features) += it->second;
 }
 
-RuleTargetBigramFeatures::RuleTargetBigramFeatures(const std::string& param) {
+RuleTargetBigramFeatures::RuleTargetBigramFeatures(const std::string& param) : inds(1000) {
+  for (unsigned i = 0; i < inds.size(); ++i) {
+    ostringstream os;
+    os << (i + 1);
+    inds[i] = os.str();
+  }
 }
 
 void RuleTargetBigramFeatures::PrepareForInput(const SentenceMetadata& smeta) {
@@ -126,11 +131,18 @@ void RuleTargetBigramFeatures::TraversalFeaturesImpl(const SentenceMetadata& sme
     it = rule2_feats_.insert(make_pair(&rule, SparseVector<double>())).first;
     SparseVector<double>& f = it->second;
     string prev = "<r>";
+    vector<WordID> nt_types(rule.Arity());
+    unsigned ntc = 0;
+    for (int i = 0; i < rule.f_.size(); ++i)
+      if (rule.f_[i] < 0) nt_types[ntc++] = -rule.f_[i];
     for (int i = 0; i < rule.e_.size(); ++i) {
       WordID w = rule.e_[i];
-      if (w < 0) w = -w;
-      if (w == 0) return;
-      const string& cur = TD::Convert(w);
+      string cur;
+      if (w > 0) {
+        cur = TD::Convert(w);
+      } else {
+        cur = TD::Convert(nt_types[-w]) + inds[-w];
+      }
       ostringstream os;
       os << "RBT:" << prev << '_' << cur;
       const int fid = FD::Convert(Escape(os.str()));
