@@ -96,6 +96,9 @@ int main(int argc, char** argv) {
     return 1;
   }
 
+  int num_threads = vm["threads"].as<int>();
+  cout << "Grammar extraction will use " << num_threads << " threads." << endl;
+
   // Reads the parallel corpus.
   Clock::time_point preprocess_start_time = Clock::now();
   cerr << "Reading source and target data..." << endl;
@@ -210,8 +213,7 @@ int main(int argc, char** argv) {
 
   // Extracts the grammar for each sentence and saves it to a file.
   vector<string> suffixes(sentences.size());
-  #pragma omp parallel for schedule(dynamic) \
-      num_threads(vm["threads"].as<int>())
+  #pragma omp parallel for schedule(dynamic) num_threads(num_threads)
   for (size_t i = 0; i < sentences.size(); ++i) {
     string suffix;
     int position = sentences[i].find("|||");
