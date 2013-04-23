@@ -34,7 +34,7 @@ ostream& operator<<(ostream& os, const Grammar& grammar) {
     for (auto link: rule.alignment) {
       os << " " << link.first << "-" << link.second;
     }
-    os << endl;
+    os << '\n';
   }
 
   return os;
