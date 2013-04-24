@@ -1,5 +1,6 @@
 #include "suffix_array.h"
 
+#include <cassert>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -186,7 +187,8 @@ shared_ptr<DataArray> SuffixArray::GetData() const {
 }
 
 void SuffixArray::WriteBinary(const fs::path& filepath) const {
-  FILE* file = fopen(filepath.string().c_str(), "r");
+  FILE* file = fopen(filepath.string().c_str(), "w");
+  assert(file);
   data_array->WriteBinary(file);
 
   int size = suffix_array.size();

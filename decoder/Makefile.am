@@ -60,6 +60,7 @@ libcdec_a_SOURCES = \
   ff_rules.h \
   ff_ruleshape.h \
   ff_sample_fsa.h \
+  ff_source_path.h \
   ff_source_syntax.h \
   ff_spans.h \
   ff_tagger.h \
@@ -140,6 +141,7 @@ libcdec_a_SOURCES = \
   ff_wordalign.cc \
   ff_csplit.cc \
   ff_tagger.cc \
+  ff_source_path.cc \
   ff_source_syntax.cc \
   ff_bleu.cc \
   ff_factory.cc \

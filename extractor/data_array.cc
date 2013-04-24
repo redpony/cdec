@@ -119,6 +119,7 @@ int DataArray::GetSentenceId(int position) const {
 }
 
 void DataArray::WriteBinary(const fs::path& filepath) const {
+  std::cerr << "File: " << filepath.string() << std::endl;
   WriteBinary(fopen(filepath.string().c_str(), "w"));
 }
 

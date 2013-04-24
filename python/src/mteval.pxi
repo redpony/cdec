@@ -192,5 +192,7 @@ cdef class Metric:
         return []
 
 BLEU = Scorer('IBM_BLEU')
+QCRI = Scorer('QCRI_BLEU')
 TER = Scorer('TER')
 CER = Scorer('CER')
+SSK = Scorer('SSK')

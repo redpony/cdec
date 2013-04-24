@@ -9,5 +9,5 @@ $SUPPORT/utf8-normalize.sh |
   sed -e 's/ al - / al-/g' |
   $SUPPORT/fix-contract.pl |
   sed -e 's/^ //' | sed -e 's/ $//' |
-  perl -e 'while(<>){s/(\d+)(\.+)$/$1 ./;print;}'
+  perl -e 'while(<>){s/(\d+)(\.+)$/$1 ./; s/(\d+)(\.+) \|\|\|/$1 . |||/;  print;}'
 
