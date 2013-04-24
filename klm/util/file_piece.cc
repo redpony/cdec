@@ -51,7 +51,7 @@ FilePiece::FilePiece(int fd, const char *name, std::ostream *show_progress, std:
 
 FilePiece::FilePiece(std::istream &stream, const char *name, std::size_t min_buffer) :
   total_size_(kBadSize), page_(SizePage()) {
-  InitializeNoRead(name ? name : "istream", min_buffer);
+  InitializeNoRead("istream", min_buffer);
 
   fallback_to_read_ = true;
   data_.reset(MallocOrThrow(default_map_size_), default_map_size_, scoped_memory::MALLOC_ALLOCATED);
@@ -95,32 +95,6 @@ unsigned long int FilePiece::ReadULong() {
   return ReadNumber<unsigned long int>();
 }
 
-std::size_t FilePiece::Raw(void *to, std::size_t limit) {
-  if (!limit) return 0;
-  std::size_t in_buf = static_cast<std::size_t>(position_end_ - position_);
-  if (in_buf) {
-    std::size_t amount = std::min(in_buf, limit);
-    memcpy(to, position_, amount);
-    position_ += amount;
-    return amount;
-  }
-
-  std::size_t read_return;
-  if (fallback_to_read_) {
-    read_return = fell_back_.Read(to, limit);
-    progress_.Set(fell_back_.RawAmount());
-  } else {
-    uint64_t desired_begin = mapped_offset_ + static_cast<uint64_t>(position_ - data_.begin());
-    SeekOrThrow(file_.get(), desired_begin);
-    read_return = ReadOrEOF(file_.get(), to, limit);
-    // Good thing we never rewind.  This makes desired_begin calculate the right way the next time.
-    mapped_offset_ += static_cast<uint64_t>(read_return);
-    progress_ += read_return;
-  }
-  at_end_ |= (read_return == 0);
-  return read_return;
-}
-
 // Factored out so that istream can call this.
 void FilePiece::InitializeNoRead(const char *name, std::size_t min_buffer) {
   file_name_ = name;
@@ -146,7 +120,7 @@ void FilePiece::Initialize(const char *name, std::ostream *show_progress, std::s
   }
   Shift();
   // gzip detect.
-  if ((position_end_ - position_) >= ReadCompressed::kMagicSize && ReadCompressed::DetectCompressedMagic(position_)) {
+  if ((position_end_ >= position_ + ReadCompressed::kMagicSize) && ReadCompressed::DetectCompressedMagic(position_)) {
     if (!fallback_to_read_) {
       at_end_ = false;
       TransitionToRead();
@@ -244,7 +218,7 @@ void FilePiece::MMapShift(uint64_t desired_begin) {
   // Use mmap.  
   uint64_t ignore = desired_begin % page_;
   // Duplicate request for Shift means give more data.  
-  if (position_ == data_.begin() + ignore) {
+  if (position_ == data_.begin() + ignore && position_) {
     default_map_size_ *= 2;
   }
   // Local version so that in case of failure it doesn't overwrite the class variable.  

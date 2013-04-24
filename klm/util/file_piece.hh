@@ -64,10 +64,7 @@ class FilePiece {
     long int ReadLong();
     unsigned long int ReadULong();
 
-    // Fake read() function.  Reads up to limit bytes, returning the amount read.  Returns 0 on EOF || limit == 0. 
-    std::size_t Raw(void *to, std::size_t limit);
-
-    // Skip spaces defined by being in delim.
+    // Skip spaces defined by isspace.
     void SkipSpaces(const bool *delim = kSpaces) {
       for (; ; ++position_) {
         if (position_ == position_end_) Shift();
