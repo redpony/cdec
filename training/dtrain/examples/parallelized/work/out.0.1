@@ -1,0 +1,62 @@
+                cdec cfg 'cdec.ini'
+Loading the LM will be faster if you build a binary file.
+Reading ../example/nc-wmt11.en.srilm.gz
+----5---10---15---20---25---30---35---40---45---50---55---60---65---70---75---80---85---90---95--100
+****************************************************************************************************
+Seeding random number sequence to 2767202922
+
+dtrain
+Parameters:
+                       k 100
+                       N 4
+                       T 1
+                  scorer 'stupid_bleu'
+             sample from 'kbest'
+                  filter 'uniq'
+           learning rate 0.0001
+                   gamma 0
+             loss margin 1
+                   pairs 'XYX'
+                   hi lo 0.1
+          pair threshold 0
+          select weights 'last'
+                  l1 reg 0 'none'
+               max pairs 4294967295
+                cdec cfg 'cdec.ini'
+                   input 'work/shard.0.0.in'
+                    refs 'work/shard.0.0.refs'
+                  output 'work/weights.0.1'
+              weights in 'work/weights.0'
+(a dot represents 10 inputs)
+Iteration #1 of 1.
+  5
+WEIGHTS
+              Glue = -0.2699
+       WordPenalty = +0.080605
+     LanguageModel = -0.026572
+ LanguageModel_OOV = -0.30025
+     PhraseModel_0 = -0.32076
+     PhraseModel_1 = +0.67451
+     PhraseModel_2 = +0.92
+     PhraseModel_3 = -0.36402
+     PhraseModel_4 = -0.592
+     PhraseModel_5 = -0.0269
+     PhraseModel_6 = -0.28755
+       PassThrough = -0.33285
+        ---
+       1best avg score: 0.26638 (+0.26638)
+ 1best avg model score: 53.197 (+53.197)
+           avg # pairs: 2028.6
+        avg # rank err: 998.2
+     avg # margin viol: 918.8
+    non0 feature count: 12
+           avg list sz: 100
+           avg f count: 10.496
+(time 0.32 min, 3.8 s/S)
+
+Writing weights file to 'work/weights.0.1' ...
+done
+
+---
+Best iteration: 1 [SCORE 'stupid_bleu'=0.26638].
+This took 0.31667 min.

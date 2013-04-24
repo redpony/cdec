@@ -12,6 +12,7 @@ my $host = domainname;
 
 # keys are: HOST_REGEXP, MERTMem, QSubQueue, QSubMemFlag, QSubExtraFlags
 my $CCONFIG = {
+
   'StarCluster' => {
     'HOST_REGEXP' => qr/compute-\d+\.internal$/,
     'JobControl'  => 'qsub',
@@ -33,7 +34,7 @@ my $CCONFIG = {
     #'QSubQueue' => '-q long',
   },
   'UMIACS' => {
-    'HOST_REGEXP' => qr/^d.*\.umiacs\.umd\.edu$/,
+    'HOST_REGEXP' => qr/^(n|s|d).*\.umiacs\.umd\.edu$/,
     'JobControl'  => 'qsub',
     'QSubMemFlag' => '-l pmem=',
     'QSubQueue' => '-q batch',
@@ -66,6 +67,12 @@ my $CCONFIG = {
     'HOST_REGEXP' => qr/^(taipan|tiger).cs.ox.ac.uk$/,
     'JobControl'  => 'fork',
     'DefaultJobs' => 12,
+  },
+  'cluster.cl.uni-heidelberg.de' => {
+    'HOST_REGEXP' => qr/node25/,
+    'JobControl'  => 'qsub',
+    'QSubMemFlag' => '-l h_vmem=',
+    'DefaultJobs' => 13,
   },
   'LOCAL' => {  # LOCAL must be last in the list!!!
     'HOST_REGEXP' => qr//,

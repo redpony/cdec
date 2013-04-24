@@ -28,8 +28,9 @@ class KLanguageModel : public FeatureFunction {
                                      SparseVector<double>* estimated_features,
                                      void* out_context) const;
  private:
-  int fid_; // conceptually const; mutable only to simplify constructor
-  int oov_fid_; // will be zero if extra OOV feature is not configured by decoder
+  int fid_;        // LanguageModel
+  int oov_fid_;    // LanguageModel_OOV
+  int emit_fid_;   // LanguageModel_Emit [only used for class-based LMs]
   KLanguageModelImpl<Model>* pimpl_;
 };
 
