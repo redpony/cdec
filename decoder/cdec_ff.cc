@@ -16,6 +16,7 @@
 #include "ff_bleu.h"
 #include "ff_source_path.h"
 #include "ff_source_syntax.h"
+#include "ff_parse_match.h"
 #include "ff_register.h"
 #include "ff_charset.h"
 #include "ff_wordset.h"
@@ -49,6 +50,7 @@ void register_feature_functions() {
   ff_registry.Register("RuleContextFeatures", new FFFactory<RuleContextFeatures>());
   ff_registry.Register("RuleIdentityFeatures", new FFFactory<RuleIdentityFeatures>());
   ff_registry.Register("SourceSyntaxFeatures", new FFFactory<SourceSyntaxFeatures>);
+  ff_registry.Register("ParseMatchFeatures", new FFFactory<ParseMatchFeatures>);
   ff_registry.Register("SourceSpanSizeFeatures", new FFFactory<SourceSpanSizeFeatures>);
   ff_registry.Register("CMR2008ReorderingFeatures", new FFFactory<CMR2008ReorderingFeatures>());
   ff_registry.Register("RuleSourceBigramFeatures", new FFFactory<RuleSourceBigramFeatures>());
