@@ -145,6 +145,10 @@ libcdec_a_SOURCES = \
   ff_source_syntax.cc \
 	ff_parse_match.cc \
 	ff_parse_match.h \
+	ff_soft_syntax.cc \
+	ff_soft_syntax.h \
+	ff_soft_syntax2.cc \
+	ff_soft_syntax2.h \
   ff_bleu.cc \
   ff_factory.cc \
   incremental.cc \
