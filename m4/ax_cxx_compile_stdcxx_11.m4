@@ -74,6 +74,7 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX_11], [dnl
     ac_success=yes
   fi
 
+  restore_it="$CXXFLAGS"
   m4_if([$1], [noext], [], [dnl
   if test x$ac_success = xno; then
     for switch in -std=gnu++11 -std=gnu++0x; do
@@ -87,7 +88,8 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX_11], [dnl
           [eval $cachevar=no])
          CXXFLAGS="$ac_save_CXXFLAGS"])
       if eval test x\$$cachevar = xyes; then
-        CXXFLAGS="$CXXFLAGS $switch"
+        CXXFLAGS="$CXXFLAGS"
+        c11switch="$switch"
         ac_success=yes
         break
       fi
@@ -107,12 +109,15 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX_11], [dnl
           [eval $cachevar=no])
          CXXFLAGS="$ac_save_CXXFLAGS"])
       if eval test x\$$cachevar = xyes; then
-        CXXFLAGS="$CXXFLAGS $switch"
+        CXXFLAGS="$CXXFLAGS"
+        c11switch="$switch"
         ac_success=yes
         break
       fi
     done
   fi])
+  CXXFLAGS="$restore_it"
+  AC_SUBST([CXX11_SWITCH], ["$c11switch"])
   AC_LANG_POP([C++])
   if test x$ax_cxx_compile_cxx11_required = xtrue; then
     if test x$ac_success = xno; then
