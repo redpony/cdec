@@ -19,6 +19,8 @@
 #include "ff_source_path.h"
 #include "ff_source_syntax.h"
 #include "ff_source_syntax_p.h"
+#include "ff_source_syntax2.h"
+#include "ff_source_syntax2_p.h"
 #include "ff_parse_match.h"
 #include "ff_register.h"
 #include "ff_charset.h"
@@ -56,6 +58,7 @@ void register_feature_functions() {
   ff_registry.Register("SoftSyntcticFeatures2", new FFFactory<SoftSyntacticFeatures2>);
   ff_registry.Register("SourceSyntaxFeatures", new FFFactory<SourceSyntaxFeatures>);
   //ff_registry.Register("PSourceSyntaxFeatures", new FFFactory<PSourceSyntaxFeatures>);
+  ff_registry.Register("SourceSyntaxFeatures2", new FFFactory<SourceSyntaxFeatures2>);
   ff_registry.Register("ParseMatchFeatures", new FFFactory<ParseMatchFeatures>);
   ff_registry.Register("SourceSpanSizeFeatures", new FFFactory<SourceSpanSizeFeatures>);
   //ff_registry.Register("PSourceSpanSizeFeatures", new FFFactory<PSourceSpanSizeFeatures>);
