@@ -4,12 +4,12 @@
 #include "ff.h"
 #include "hg.h"
 
-struct SourceSyntaxFeatures2Impl;
+struct PSourceSyntaxFeatures2Impl;
 
-class SourceSyntaxFeatures2 : public FeatureFunction {
+class PSourceSyntaxFeatures2 : public FeatureFunction {
  public:
-  SourceSyntaxFeatures2(const std::string& param);
-  ~SourceSyntaxFeatures2();
+  PSourceSyntaxFeatures2(const std::string& param);
+  ~PSourceSyntaxFeatures2();
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
@@ -19,7 +19,7 @@ class SourceSyntaxFeatures2 : public FeatureFunction {
                                      void* context) const;
   virtual void PrepareForInput(const SentenceMetadata& smeta);
  private:
-  SourceSyntaxFeatures2Impl* impl;
+  PSourceSyntaxFeatures2Impl* impl;
 };
 
 #endif
