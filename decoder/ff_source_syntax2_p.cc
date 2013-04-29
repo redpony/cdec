@@ -15,8 +15,8 @@ using namespace std;
 // source trees must be represented in Penn Treebank format, e.g.
 //     (S (NP John) (VP (V left)))
 
-struct SourceSyntaxFeatures2Impl {
-  SourceSyntaxFeatures2Impl(const string& param) {
+struct PSourceSyntaxFeatures2Impl {
+  PSourceSyntaxFeatures2Impl(const string& param) {
     if (param.compare("") != 0) {
       string triggered_features_fn = param;
       ReadFile triggered_features(triggered_features_fn);
@@ -137,17 +137,17 @@ struct SourceSyntaxFeatures2Impl {
 
 };
 
-SourceSyntaxFeatures2::SourceSyntaxFeatures2(const string& param) :
+PSourceSyntaxFeatures2::PSourceSyntaxFeatures2(const string& param) :
     FeatureFunction(sizeof(WordID)) {
-  impl = new SourceSyntaxFeatures2Impl(param);
+  impl = new PSourceSyntaxFeatures2Impl(param);
 }
 
-SourceSyntaxFeatures2::~SourceSyntaxFeatures2() {
+PSourceSyntaxFeatures2::~PSourceSyntaxFeatures2() {
   delete impl;
   impl = NULL;
 }
 
-void SourceSyntaxFeatures2::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+void PSourceSyntaxFeatures2::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
@@ -161,6 +161,6 @@ void SourceSyntaxFeatures2::TraversalFeaturesImpl(const SentenceMetadata& smeta,
      impl->FireFeatures(*edge.rule_, edge.i_, edge.j_, ants, features);
 }
 
-void SourceSyntaxFeatures2::PrepareForInput(const SentenceMetadata& smeta) {
+void PSourceSyntaxFeatures2::PrepareForInput(const SentenceMetadata& smeta) {
   impl->InitializeGrids(smeta.GetSGMLValue("src_tree"), smeta.GetSourceLength());
 }
