@@ -4,7 +4,7 @@ Reading ./nc-wmt11.en.srilm.gz
 ----5---10---15---20---25---30---35---40---45---50---55---60---65---70---75---80---85---90---95--100
 ****************************************************************************************************
   Example feature: Shape_S00000_T00000
-Seeding random number sequence to 1677737427
+Seeding random number sequence to 970626287
 
 dtrain
 Parameters:
@@ -34,58 +34,58 @@ Iteration #1 of 2.
  . 10
 Stopping after 10 input sentences.
 WEIGHTS
-              Glue = -1155
-       WordPenalty = -329.63
-     LanguageModel = +3903
- LanguageModel_OOV = -1630
-     PhraseModel_0 = +2746.9
-     PhraseModel_1 = +1200.3
-     PhraseModel_2 = -1004.1
-     PhraseModel_3 = +2223.1
-     PhraseModel_4 = +551.58
-     PhraseModel_5 = +217
-     PhraseModel_6 = +1816
-       PassThrough = -1603
+              Glue = -614
+       WordPenalty = +1256.8
+     LanguageModel = +5610.5
+ LanguageModel_OOV = -1449
+     PhraseModel_0 = -2107
+     PhraseModel_1 = -4666.1
+     PhraseModel_2 = -2713.5
+     PhraseModel_3 = +4204.3
+     PhraseModel_4 = -1435.8
+     PhraseModel_5 = +916
+     PhraseModel_6 = +190
+       PassThrough = -2527
         ---
-       1best avg score: 0.19344 (+0.19344)
- 1best avg model score: 81387 (+81387)
-           avg # pairs: 616.3 (meaningless)
-        avg # rank err: 616.3
+       1best avg score: 0.17874 (+0.17874)
+ 1best avg model score: 88399 (+88399)
+           avg # pairs: 798.2 (meaningless)
+        avg # rank err: 798.2
      avg # margin viol: 0
-    non0 feature count: 673
-           avg list sz: 90.9
-           avg f count: 104.26
-(time 0.38 min, 2.3 s/S)
+    non0 feature count: 887
+           avg list sz: 91.3
+           avg f count: 126.85
+(time 0.33 min, 2 s/S)
 
 Iteration #2 of 2.
  . 10
 WEIGHTS
-              Glue = -994
-       WordPenalty = -778.69
-     LanguageModel = +2348.9
- LanguageModel_OOV = -1967
-     PhraseModel_0 = -412.72
-     PhraseModel_1 = +1428.9
-     PhraseModel_2 = +1967.4
-     PhraseModel_3 = -944.99
-     PhraseModel_4 = -239.7
-     PhraseModel_5 = +708
-     PhraseModel_6 = +645
-       PassThrough = -1866
+              Glue = -1025
+       WordPenalty = +1751.5
+     LanguageModel = +10059
+ LanguageModel_OOV = -4490
+     PhraseModel_0 = -2640.7
+     PhraseModel_1 = -3757.4
+     PhraseModel_2 = -1133.1
+     PhraseModel_3 = +1837.3
+     PhraseModel_4 = -3534.3
+     PhraseModel_5 = +2308
+     PhraseModel_6 = +1677
+       PassThrough = -6222
         ---
-       1best avg score: 0.22395 (+0.03051)
- 1best avg model score: -31388 (-1.1278e+05)
-           avg # pairs: 702.3 (meaningless)
-        avg # rank err: 702.3
+       1best avg score: 0.30764 (+0.12891)
+ 1best avg model score: -2.5042e+05 (-3.3882e+05)
+           avg # pairs: 725.9 (meaningless)
+        avg # rank err: 725.9
      avg # margin viol: 0
-    non0 feature count: 955
+    non0 feature count: 1499
            avg list sz: 91.3
-           avg f count: 103.45
+           avg f count: 114.34
 (time 0.32 min, 1.9 s/S)
 
 Writing weights file to '-' ...
 done
 
 ---
-Best iteration: 2 [SCORE 'fixed_stupid_bleu'=0.22395].
-This took 0.7 min.
+Best iteration: 2 [SCORE 'fixed_stupid_bleu'=0.30764].
+This took 0.65 min.
