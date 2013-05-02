@@ -51,6 +51,7 @@ class RuleTargetBigramFeatures : public FeatureFunction {
                                      void* context) const;
   virtual void PrepareForInput(const SentenceMetadata& smeta);
  private:
+  std::vector<std::string> inds;
   mutable std::map<const TRule*, SparseVector<double> > rule2_feats_;
 };
 

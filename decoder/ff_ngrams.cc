@@ -60,7 +60,7 @@ namespace {
   }
 }
 
-static bool ParseArgs(string const& in, bool* explicit_markers, unsigned* order, vector<string>& prefixes, string& target_separator) {
+static bool ParseArgs(string const& in, bool* explicit_markers, unsigned* order, vector<string>& prefixes, string& target_separator, string* cluster_file) {
   vector<string> const& argv=SplitOnWhitespace(in);
   *explicit_markers = false;
   *order = 3;
@@ -103,6 +103,10 @@ static bool ParseArgs(string const& in, bool* explicit_markers, unsigned* order,
 	LMSPEC_NEXTARG;
 	prefixes[5] = *i;
 	break;
+      case 'c':
+        LMSPEC_NEXTARG;
+        *cluster_file = *i;
+        break;
       case 'S':
 	LMSPEC_NEXTARG;
 	target_separator = *i;
@@ -124,6 +128,7 @@ usage:
 
        << "NgramFeatures Usage: \n"			     
        << " feature_function=NgramFeatures filename.lm [-x] [-o <order>] \n"
+       << " [-c <cluster-file>]\n"
        << " [-U <unigram-prefix>] [-B <bigram-prefix>][-T <trigram-prefix>]\n"
        << " [-4 <4-gram-prefix>] [-5 <5-gram-prefix>] [-S <separator>]\n\n" 
     
@@ -201,6 +206,12 @@ class NgramDetectorImpl {
 
   inline void SetHasFullContext(bool flag, void *state) const {
     SetFlag(flag, HAS_FULL_CONTEXT, state);
+  }
+
+  WordID MapToClusterIfNecessary(WordID w) const {
+    if (cluster_map.size() == 0) return w;
+    if (w >= cluster_map.size()) return kCDEC_UNK;
+    return cluster_map[w];
   }
 
   void FireFeatures(const State<5>& state, WordID cur, SparseVector<double>* feats) {
@@ -285,7 +296,7 @@ class NgramDetectorImpl {
           context_complete = true;
         }
       } else {   // handle terminal
-        const WordID cur_word = e[j];
+        const WordID cur_word = MapToClusterIfNecessary(e[j]);
         SparseVector<double> p;
         if (cur_word == kSOS_) {
           state = BeginSentenceState();
@@ -348,9 +359,52 @@ class NgramDetectorImpl {
     }
   }
 
+  void ReadClusterFile(const string& clusters) {
+    ReadFile rf(clusters);
+    istream& in = *rf.stream();
+    string line;
+    int lc = 0;
+    string cluster;
+    string word;
+    while(getline(in, line)) {
+      ++lc;
+      if (line.size() == 0) continue;
+      if (line[0] == '#') continue;
+      unsigned cend = 1;
+      while((line[cend] != ' ' && line[cend] != '\t') && cend < line.size()) {
+        ++cend;
+      }
+      if (cend == line.size()) {
+        cerr << "Line " << lc << " in " << clusters << " malformed: " << line << endl;
+        abort();
+      }
+      unsigned wbeg = cend + 1;
+      while((line[wbeg] == ' ' || line[wbeg] == '\t') && wbeg < line.size()) {
+        ++wbeg;
+      }
+      if (wbeg == line.size()) {
+        cerr << "Line " << lc << " in " << clusters << " malformed: " << line << endl;
+        abort();
+      }
+      unsigned wend = wbeg + 1;
+      while((line[wend] != ' ' && line[wend] != '\t') && wend < line.size()) {
+        ++wend;
+      }
+      const WordID clusterid = TD::Convert(line.substr(0, cend));
+      const WordID wordid = TD::Convert(line.substr(wbeg, wend - wbeg));
+      if (wordid >= cluster_map.size())
+        cluster_map.resize(wordid + 10, kCDEC_UNK);
+      cluster_map[wordid] = clusterid;
+    }
+    cluster_map[kSOS_] = kSOS_;
+    cluster_map[kEOS_] = kEOS_;
+  }
+
+  vector<WordID> cluster_map;
+
  public:
   explicit NgramDetectorImpl(bool explicit_markers, unsigned order,
-			     vector<string>& prefixes, string& target_separator) :
+			     vector<string>& prefixes, string& target_separator, const string& clusters) :
       kCDEC_UNK(TD::Convert("<unk>")) ,
       add_sos_eos_(!explicit_markers) {
     order_ = order;
@@ -369,6 +423,9 @@ class NgramDetectorImpl {
     dummy_rule_.reset(new TRule("[DUMMY] ||| [BOS] [DUMMY] ||| [1] [2] </s> ||| X=0"));
     kSOS_ = TD::Convert("<s>");
     kEOS_ = TD::Convert("</s>");
+
+    if (clusters.size())
+      ReadClusterFile(clusters);
   }
 
   ~NgramDetectorImpl() {
@@ -409,9 +466,10 @@ NgramDetector::NgramDetector(const string& param) {
   vector<string> prefixes;
   bool explicit_markers = false;
   unsigned order = 3;
-  ParseArgs(param, &explicit_markers, &order, prefixes, target_separator);
+  string clusters;
+  ParseArgs(param, &explicit_markers, &order, prefixes, target_separator, &clusters);
   pimpl_ = new NgramDetectorImpl(explicit_markers, order, prefixes, 
-				 target_separator);
+				 target_separator, clusters);
   SetStateSize(pimpl_->ReserveStateSize());
 }
 

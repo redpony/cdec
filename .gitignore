@@ -69,6 +69,9 @@ extools/filter_score_grammar
 extools/mr_stripe_rule_reduce
 extools/score_grammar
 extools/sg_lexer.cc
+extractor/*_test
+extractor/compile
+extractor/run_extractor
 gi/clda/src/clda
 gi/markov_al/ml
 gi/pf/align-lexonly
@@ -100,7 +103,9 @@ jam-files/bjam
 jam-files/engine/bin.*
 jam-files/engine/bootstrap/
 klm/lm/bin/
+klm/lm/builder/builder
 klm/lm/build_binary
+klm/lm/ngram_query
 klm/lm/query
 klm/util/bin/
 libtool
@@ -122,6 +127,7 @@ phrasinator/gibbs_train_plm_notables
 previous.sh
 pro-train/mr_pro_map
 pro-train/mr_pro_reduce
+python/build
 python/setup.py
 rampion/rampion_cccp
 rst_parser/mst_train
@@ -182,6 +188,7 @@ utils/small_vector_test
 utils/ts
 utils/weights_test
 training/crf/mpi_batch_optimize
+training/crf/mpi_baum_welch
 training/crf/mpi_compute_cllh
 training/crf/mpi_extract_features
 training/crf/mpi_extract_reachable
