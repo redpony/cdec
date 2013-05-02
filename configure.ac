@@ -10,8 +10,11 @@ esac
 # CPPFLAGS="$CPPFLAGS -std=c++0x"
 AC_PROG_CC
 AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX_11
 AC_LANG_CPLUSPLUS
+AC_OPENMP
 BOOST_REQUIRE([1.44])
+BOOST_FILESYSTEM
 BOOST_PROGRAM_OPTIONS
 BOOST_SYSTEM
 BOOST_SERIALIZATION
@@ -87,11 +90,94 @@ then
   AM_CONDITIONAL([HAVE_CMPH], true)
 fi
 
+AM_CONDITIONAL([HAVE_GTEST], false)
+AC_ARG_WITH(gtest,
+            [AC_HELP_STRING([--with-gtest=DIR], [(optional) path to Google Test library])],
+            [with_gtest=$withval],
+            [with_gtest=no]
+           )
+
+AM_CONDITIONAL([HAVE_GMOCK], false)
+AC_ARG_WITH(gmock,
+            [AC_HELP_STRING([--with-gmock=DIR], [(optional) path to Google Mock library])],
+            [with_gmock=$withval],
+            [with_gmock=no]
+           )
+
+if test "x$with_gtest" != 'xno'
+then
+  gtest_CPPFLAGS="-I${with_gtest}/include"
+  gtest_LDFLAGS="-L${with_gtest} -L${with_gtest}/lib"
+  gtest_LIBS="-lgtest_main -lgtest -lpthread"
+
+  SAVECPP_FLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS $gtest_CPPFLAGS"
+  AC_CHECK_HEADER(${with_gtest}/include/gtest/gtest.h,
+                  [AC_DEFINE([HAVE_GTEST], [1], [flag for Google Test header])],
+                  [AC_MSG_ERROR([Cannot find Google Test headers!])]
+                 )
+
+  SAVE_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$LDFLAGS $gtest_LDFLAGS"
+  SAVE_LIBS="$LIBS"
+  # Google Test needs pthreads.
+  AC_CHECK_LIB([pthread],
+               [pthread_mutex_init],
+               [],
+               [AC_MSG_ERROR([Cannot find pthread library])]
+              )
+  AX_CXX_CHECK_LIB([gtest],
+                   [testing::TestInfo::name() const],
+                   [],
+                   [AC_MSG_ERROR([Cannot find Google Test library libgtest])]
+                  )
+  AC_CHECK_LIB([gtest_main],
+               [main],
+               [],
+               [AC_MSG_ERROR([Cannot find Google Test library libgtest_main])]
+              )
+
+  AC_SUBST(AS_TR_CPP([GTEST_CPPFLAGS]), ["$gtest_CPPFLAGS"])
+  AC_SUBST(AS_TR_CPP([GTEST_LDFLAGS]), ["$gtest_LDFLAGS"])
+  AC_SUBST(AS_TR_CPP([GTEST_LIBS]), ["$gtest_LIBS"])
+
+
+  if test "x$with_gmock" != 'xno'
+  then
+    gmock_CPPFLAGS="-I${with_gmock}/include"
+    gmock_LDFLAGS="-L${with_gmock} -L${with_gmock}/lib"
+    gmock_LIBS="-lgmock"
+
+    CPPFLAGS="$CPPFLAGS $gmock_CPPFLAGS"
+    AC_CHECK_HEADER(${with_gmock}/include/gmock/gmock.h,
+                    [AC_DEFINE([HAVE_GMOCK], [1], [flag for Google Mock header])],
+                    [AC_MSG_ERROR([Cannot find Google Mock headers!])]
+                   )
+
+    LDFLAGS="$LDFLAGS $gmock_LDFLAGS"
+    AX_CXX_CHECK_LIB([gmock],
+                     [testing::Expectation],
+                     [],
+                     [AC_MSG_ERROR([Cannot find Google Mock library libgmock])]
+                    )
+
+    AC_SUBST(AS_TR_CPP([GMOCK_CPPFLAGS]), ["$gmock_CPPFLAGS"])
+    AC_SUBST(AS_TR_CPP([GMOCK_LDFLAGS]), ["$gmock_LDFLAGS"])
+    AC_SUBST(AS_TR_CPP([GMOCK_LIBS]), ["$gmock_LIBS"])
+    AM_CONDITIONAL([HAVE_GMOCK], true)
+  fi
+
+  CPPFLAGS="$SAVE_CPPFLAGS"
+  LDFLAGS="$SAVE_LDFLAGS"
+  LIBS="$SAVE_LIBS"
+  AM_CONDITIONAL([HAVE_GTEST], true)
+fi
+
 #BOOST_THREADS
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-LDFLAGS="$LDFLAGS $BOOST_PROGRAM_OPTIONS_LDFLAGS $BOOST_SERIALIZATION_LDFLAGS $BOOST_SYSTEM_LDFLAGS"
+LDFLAGS="$LDFLAGS $BOOST_PROGRAM_OPTIONS_LDFLAGS $BOOST_SERIALIZATION_LDFLAGS $BOOST_SYSTEM_LDFLAGS $BOOST_FILESYSTEM_LDFLAGS"
 # $BOOST_THREAD_LDFLAGS"
-LIBS="$LIBS $BOOST_PROGRAM_OPTIONS_LIBS $BOOST_SERIALIZATION_LIBS $BOOST_SYSTEM_LIBS $ZLIBS"
+LIBS="$LIBS $BOOST_PROGRAM_OPTIONS_LIBS $BOOST_SERIALIZATION_LIBS $BOOST_SYSTEM_LIBS $BOOST_FILESYSTEM_LIBS $ZLIBS"
 # $BOOST_THREAD_LIBS"
 
 AC_CHECK_HEADER(google/dense_hash_map,
@@ -108,6 +194,7 @@ AC_CONFIG_FILES([mteval/Makefile])
 AC_CONFIG_FILES([mteval/meteor_jar.cc])
 AC_CONFIG_FILES([decoder/Makefile])
 AC_CONFIG_FILES([python/setup.py])
+AC_CONFIG_FILES([extractor/Makefile])
 AC_CONFIG_FILES([word-aligner/Makefile])
 
 # KenLM stuff
@@ -128,6 +215,7 @@ AC_CONFIG_FILES([training/pro/Makefile])
 AC_CONFIG_FILES([training/rampion/Makefile])
 AC_CONFIG_FILES([training/minrisk/Makefile])
 AC_CONFIG_FILES([training/mira/Makefile])
+AC_CONFIG_FILES([training/latent_svm/Makefile])
 AC_CONFIG_FILES([training/dtrain/Makefile])
 
 # external feature function example code

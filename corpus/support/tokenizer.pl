@@ -226,7 +226,7 @@ sub proc_token {
     }
 
     ## step 1: check the most common case
-    if($token =~ /^[a-z0-9\p{Cyrillic}\p{Greek}\p{Hebrew}\p{Han}\p{Arabic}]+$/i){
+    if($token =~ /^[a-z0-9\p{Cyrillic}\p{Greek}\p{Hebrew}\p{Han}\p{Arabic}\p{Devanagari}]+$/i){
 	### most common cases
 	return $token;
     }
@@ -246,7 +246,7 @@ sub proc_token {
 	## number
 	return $token;
     }
-    if($token =~ /^(@|#)[A-Za-z0-9_\p{Cyrillic}\p{Greek}\p{Hebrew}\p{Han}\p{Arabic}]+.*$/){
+    if($token =~ /^(@|#)[A-Za-z0-9_\p{Cyrillic}\p{Greek}\p{Hebrew}\p{Han}\p{Arabic}\p{Devanagari}]+.*$/){
         ## twitter hashtag or address
         return proc_rightpunc($token);
     }
@@ -277,7 +277,7 @@ sub proc_token {
     }
 
     #my $t1 = '[\x{0600}-\x{06ff}a-z\d\_\.\-]';
-    my $t1 = '[a-z\d\_\-\.\p{Cyrillic}\p{Greek}\p{Hebrew}\p{Han}\p{Arabic}]';
+    my $t1 = '[a-z\d\_\-\.\p{Cyrillic}\p{Greek}\p{Hebrew}\p{Han}\p{Arabic}\p{Devanagari}]';
     if($token =~ /^\/(($t1)+\/)+($t1)+\/?$/i){
 	### /nls/p/....
 	return $token;
@@ -361,7 +361,7 @@ sub deep_proc_token {
     }
 
     ##### step 0: if it mades up of all puncts, remove one punct at a time.
-    if($line !~ /[\p{Cyrillic}\p{Greek}\p{Hebrew}\p{Han}\p{Arabic}a-zA-Z\d]/){
+    if($line !~ /[\p{Cyrillic}\p{Greek}\p{Hebrew}\p{Han}\p{Arabic}\p{Devanagari}a-zA-Z\d]/){
 	if($line =~ /^(\!+|\@+|\++|\=+|\*+|\<+|\>+|\|+|\?+|\.+|\-+|\_+|\&+)$/){
 	    ## ++ @@@@ !!! ....
 	    return $line;

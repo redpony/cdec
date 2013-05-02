@@ -260,6 +260,7 @@ cdef class HieroCachingRuleFactory:
 
     cdef prev_norm_prefix
     cdef float extract_time
+    cdef float intersect_time
     cdef SuffixArray fsa
     cdef DataArray fda
     cdef DataArray eda
@@ -979,10 +980,11 @@ cdef class HieroCachingRuleFactory:
         cdef IntList sample, chunklen
         cdef Matching matching
         cdef Phrase hiero_phrase
-        
+
         flen = len(fwords)
         start_time = monitor_cpu()
         self.extract_time = 0.0
+        self.intersect_time = 0.0
         nodes_isteps_away_buffer = {}
         hit = 0
         reachable_buffer = {}
@@ -1072,7 +1074,10 @@ cdef class HieroCachingRuleFactory:
                     else:
                         if arity > 0:
                             # Intersecting because of arity > 0
+                            intersect_start_time = monitor_cpu()
                             phrase_location = self.intersect(node, node.suffix_link.children[word_id], hiero_phrase)
+                            intersect_stop_time = monitor_cpu()
+                            self.intersect_time += intersect_stop_time - intersect_start_time
                         else:
                             # Suffix array search
                             phrase_location = node.phrase_location
@@ -1203,6 +1208,7 @@ cdef class HieroCachingRuleFactory:
         logger.info("Total time for rule lookup, extraction, and scoring = %f seconds", (stop_time - start_time))
         gc.collect()
         logger.info("    Extract time = %f seconds", self.extract_time)
+        logger.info("    Intersect time = %f seconds", self.intersect_time)
 
 
     cdef int find_fixpoint(self, 
@@ -1674,7 +1680,6 @@ cdef class HieroCachingRuleFactory:
                         for (phrase2,eindexes) in phrase_list:
                             als1 = self.create_alignments(sent_links,num_links,self.findexes,eindexes)        
                             extracts.append((fphr, phrase2, pair_count, tuple(als1)))
-
                     if (num_gaps < self.max_nonterminals and
                         phrase_len < self.max_length and
                         f_back_high - f_back_low + self.train_min_gap_size <= self.train_max_initial_size):
@@ -1690,12 +1695,12 @@ cdef class HieroCachingRuleFactory:
                                 met_constraints = 0
 
                             if (met_constraints and
-                                self.find_fixpoint(f_x_low, f_back_high,
+                                (self.find_fixpoint(f_x_low, f_back_high,
                                             f_links_low, f_links_high, e_links_low, e_links_high, 
                                             e_low, e_high, &e_x_low, &e_x_high, &f_x_low, &f_x_high, 
                                             f_sent_len, e_sent_len, 
                                             self.train_max_initial_size, self.train_max_initial_size, 
-                                            1, 1, 1, 1, 0, 1, 0) and
+                                            1, 1, 1, 1, 0, 1, 0) == 1) and
                                 ((not self.tight_phrases) or f_links_low[f_x_low] != -1) and
                                 self.find_fixpoint(f_x_low, f_low,    # check integrity of new subphrase
                                             f_links_low, f_links_high, e_links_low, e_links_high,
@@ -1809,12 +1814,12 @@ cdef class HieroCachingRuleFactory:
                                 met_constraints = 0
 
                             if (met_constraints and
-                                self.find_fixpoint(f_x_low, f_x_high,
+                                (self.find_fixpoint(f_x_low, f_x_high,
                                                 f_links_low, f_links_high, e_links_low, e_links_high,
                                                 e_low, e_high, &e_x_low, &e_x_high, &f_x_low, &f_x_high, 
                                                 f_sent_len, e_sent_len,
                                                 self.train_max_initial_size, self.train_max_initial_size, 
-                                                1, 1, 2, 1, 1, 1, 1) and
+                                                1, 1, 2, 1, 1, 1, 1) == 1) and
                                 ((not self.tight_phrases) or (f_links_low[f_x_low] != -1 and f_links_low[f_x_high-1] != -1)) and
                                 self.find_fixpoint(f_x_low, f_low,
                                                 f_links_low, f_links_high, e_links_low, e_links_high,

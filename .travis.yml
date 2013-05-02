@@ -2,6 +2,7 @@ language: python
 python:
  - "2.7"
 before_script:
+ - sudo apt-get install libboost-filesystem1.48-dev
  - sudo apt-get install libboost-program-options1.48-dev
  - sudo apt-get install libboost-serialization1.48-dev
  - sudo apt-get install libboost-regex1.48-dev
