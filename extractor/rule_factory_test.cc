@@ -45,7 +45,7 @@ class RuleFactoryTest : public Test {
 
     Phrase phrase;
     vector<double> scores = {0.5};
-    vector<pair<int, int> > phrase_alignment = {make_pair(0, 0)};
+    vector<pair<int, int>> phrase_alignment = {make_pair(0, 0)};
     vector<Rule> rules = {Rule(phrase, phrase, scores, phrase_alignment)};
     extractor = make_shared<MockRuleExtractor>();
     EXPECT_CALL(*extractor, ExtractRules(_, _))

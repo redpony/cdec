@@ -49,7 +49,7 @@ class RuleExtractorTest : public Test {
     PhraseAlignment phrase_alignment = {make_pair(0, 0)};
 
     target_phrase_extractor = make_shared<MockTargetPhraseExtractor>();
-    vector<pair<Phrase, PhraseAlignment> > target_phrases = {
+    vector<pair<Phrase, PhraseAlignment>> target_phrases = {
       make_pair(target_phrase, phrase_alignment)
     };
     EXPECT_CALL(*target_phrase_extractor, ExtractPhrases(_, _, _, _, _, _))
@@ -104,7 +104,7 @@ TEST_F(RuleExtractorTest, TestExtractRulesNoFixPoint) {
 
   EXPECT_CALL(*helper, GetLinksSpans(_, _, _, _, _)).Times(1);
   // Set FindFixPoint to return false.
-  vector<pair<int, int> > gaps;
+  vector<pair<int, int>> gaps;
   helper->SetUp(0, 0, 0, 0, false, gaps, gaps, 0, true, true);
 
   vector<Rule> rules = extractor->ExtractRules(phrase, phrase_location);
@@ -119,7 +119,7 @@ TEST_F(RuleExtractorTest, TestExtractRulesGapsFail) {
 
   EXPECT_CALL(*helper, GetLinksSpans(_, _, _, _, _)).Times(1);
   // Set CheckGaps to return false.
-  vector<pair<int, int> > gaps;
+  vector<pair<int, int>> gaps;
   helper->SetUp(0, 0, 0, 0, true, gaps, gaps, 0, true, false);
 
   vector<Rule> rules = extractor->ExtractRules(phrase, phrase_location);
@@ -133,7 +133,7 @@ TEST_F(RuleExtractorTest, TestExtractRulesNoExtremities) {
   PhraseLocation phrase_location(matching, 1);
 
   EXPECT_CALL(*helper, GetLinksSpans(_, _, _, _, _)).Times(1);
-  vector<pair<int, int> > gaps(3);
+  vector<pair<int, int>> gaps(3);
   // Set FindFixPoint to return true. The number of gaps equals the number of
   // nonterminals, so we won't add any extremities.
   helper->SetUp(0, 0, 0, 0, true, gaps, gaps, 0, true, true);
@@ -155,7 +155,7 @@ TEST_F(RuleExtractorTest, TestExtractRulesAddExtremities) {
       SetArgReferee<2>(links),
       SetArgReferee<3>(links)));
 
-  vector<pair<int, int> > gaps;
+  vector<pair<int, int>> gaps;
   // Set FindFixPoint to return true. The number of gaps equals the number of
   // nonterminals, so we won't add any extremities.
   helper->SetUp(0, 0, 2, 3, true, gaps, gaps, 0, true, true);

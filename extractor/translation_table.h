@@ -13,7 +13,7 @@ namespace fs = boost::filesystem;
 
 namespace extractor {
 
-typedef boost::hash<pair<int, int> > PairHash;
+typedef boost::hash<pair<int, int>> PairHash;
 
 class Alignment;
 class DataArray;

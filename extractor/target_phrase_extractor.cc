@@ -33,8 +33,8 @@ TargetPhraseExtractor::TargetPhraseExtractor() {}
 
 TargetPhraseExtractor::~TargetPhraseExtractor() {}
 
-vector<pair<Phrase, PhraseAlignment> > TargetPhraseExtractor::ExtractPhrases(
-    const vector<pair<int, int> >& target_gaps, const vector<int>& target_low,
+vector<pair<Phrase, PhraseAlignment>> TargetPhraseExtractor::ExtractPhrases(
+    const vector<pair<int, int>>& target_gaps, const vector<int>& target_low,
     int target_phrase_low, int target_phrase_high,
     const unordered_map<int, int>& source_indexes, int sentence_id) const {
   int target_sent_len = target_data_array->GetSentenceLength(sentence_id);
@@ -57,7 +57,7 @@ vector<pair<Phrase, PhraseAlignment> > TargetPhraseExtractor::ExtractPhrases(
     }
   }
 
-  vector<pair<int, int> > gaps(target_gaps.size());
+  vector<pair<int, int>> gaps(target_gaps.size());
   for (size_t i = 0; i < gaps.size(); ++i) {
     gaps[i] = target_gaps[target_gap_order[i]];
     if (!require_tight_phrases) {
@@ -77,7 +77,7 @@ vector<pair<Phrase, PhraseAlignment> > TargetPhraseExtractor::ExtractPhrases(
   // Compute the range in which each chunk may start or end. (Even indexes
   // represent the range in which the chunk may start, odd indexes represent the
   // range in which the chunk may end.)
-  vector<pair<int, int> > ranges(2 * gaps.size() + 2);
+  vector<pair<int, int>> ranges(2 * gaps.size() + 2);
   ranges.front() = make_pair(target_x_low, target_phrase_low);
   ranges.back() = make_pair(target_phrase_high, target_x_high);
   for (size_t i = 0; i < gaps.size(); ++i) {
@@ -86,7 +86,7 @@ vector<pair<Phrase, PhraseAlignment> > TargetPhraseExtractor::ExtractPhrases(
     ranges[i * 2 + 2] = make_pair(target_gaps[j].second, gaps[i].second);
   }
 
-  vector<pair<Phrase, PhraseAlignment> > target_phrases;
+  vector<pair<Phrase, PhraseAlignment>> target_phrases;
   vector<int> subpatterns(ranges.size());
   GeneratePhrases(target_phrases, ranges, 0, subpatterns, target_gap_order,
                   target_phrase_low, target_phrase_high, source_indexes,
@@ -95,8 +95,8 @@ vector<pair<Phrase, PhraseAlignment> > TargetPhraseExtractor::ExtractPhrases(
 }
 
 void TargetPhraseExtractor::GeneratePhrases(
-    vector<pair<Phrase, PhraseAlignment> >& target_phrases,
-    const vector<pair<int, int> >& ranges, int index, vector<int>& subpatterns,
+    vector<pair<Phrase, PhraseAlignment>>& target_phrases,
+    const vector<pair<int, int>>& ranges, int index, vector<int>& subpatterns,
     const vector<int>& target_gap_order, int target_phrase_low,
     int target_phrase_high, const unordered_map<int, int>& source_indexes,
     int sentence_id) const {
@@ -124,8 +124,8 @@ void TargetPhraseExtractor::GeneratePhrases(
     }
 
     // Construct the alignment between the source and the target phrase.
-    vector<pair<int, int> > links = alignment->GetLinks(sentence_id);
-    vector<pair<int, int> > alignment;
+    vector<pair<int, int>> links = alignment->GetLinks(sentence_id);
+    vector<pair<int, int>> alignment;
     for (pair<int, int> link: links) {
       if (target_indexes.count(link.second)) {
         alignment.push_back(make_pair(source_indexes.find(link.first)->second,

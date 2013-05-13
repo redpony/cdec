@@ -19,7 +19,7 @@ namespace features {
  */
 class Scorer {
  public:
-  Scorer(const vector<shared_ptr<features::Feature> >& features);
+  Scorer(const vector<shared_ptr<features::Feature>>& features);
 
   virtual ~Scorer();
 
@@ -33,7 +33,7 @@ class Scorer {
   Scorer();
 
  private:
-  vector<shared_ptr<features::Feature> > features;
+  vector<shared_ptr<features::Feature>> features;
 };
 
 } // namespace extractor

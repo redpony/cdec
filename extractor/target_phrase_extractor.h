@@ -9,7 +9,7 @@ using namespace std;
 
 namespace extractor {
 
-typedef vector<pair<int, int> > PhraseAlignment;
+typedef vector<pair<int, int>> PhraseAlignment;
 
 class Alignment;
 class DataArray;
@@ -32,8 +32,8 @@ class TargetPhraseExtractor {
 
   // Finds all the target phrases that can extracted from a span in the
   // target sentence (matching the given set of target phrase gaps).
-  virtual vector<pair<Phrase, PhraseAlignment> > ExtractPhrases(
-      const vector<pair<int, int> >& target_gaps, const vector<int>& target_low,
+  virtual vector<pair<Phrase, PhraseAlignment>> ExtractPhrases(
+      const vector<pair<int, int>>& target_gaps, const vector<int>& target_low,
       int target_phrase_low, int target_phrase_high,
       const unordered_map<int, int>& source_indexes, int sentence_id) const;
 
@@ -44,8 +44,8 @@ class TargetPhraseExtractor {
   // Computes the cartesian product over the sets of possible target phrase
   // chunks.
   void GeneratePhrases(
-      vector<pair<Phrase, PhraseAlignment> >& target_phrases,
-      const vector<pair<int, int> >& ranges, int index,
+      vector<pair<Phrase, PhraseAlignment>>& target_phrases,
+      const vector<pair<int, int>>& ranges, int index,
       vector<int>& subpatterns, const vector<int>& target_gap_order,
       int target_phrase_low, int target_phrase_high,
       const unordered_map<int, int>& source_indexes, int sentence_id) const;

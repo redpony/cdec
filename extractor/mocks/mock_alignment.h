@@ -4,7 +4,7 @@
 
 namespace extractor {
 
-typedef vector<pair<int, int> > SentenceLinks;
+typedef vector<pair<int, int>> SentenceLinks;
 
 class MockAlignment : public Alignment {
  public:
