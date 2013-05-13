@@ -15,7 +15,7 @@ using namespace std;
 
 namespace extractor {
 
-typedef boost::hash<vector<int> > VectorHash;
+typedef boost::hash<vector<int>> VectorHash;
 typedef unordered_map<vector<int>, vector<int>, VectorHash> Index;
 
 class SuffixArray;
@@ -54,7 +54,7 @@ class Precomputation {
 
  private:
   // Finds the most frequent contiguous collocations.
-  vector<vector<int> > FindMostFrequentPatterns(
+  vector<vector<int>> FindMostFrequentPatterns(
       shared_ptr<SuffixArray> suffix_array, const vector<int>& data,
       int num_frequent_patterns, int max_frequent_phrase_len,
       int min_frequency);
@@ -63,7 +63,7 @@ class Precomputation {
   // it adds new entries to the index for each discontiguous collocation
   // matching the criteria specified in the class description.
   void AddCollocations(
-      const vector<std::tuple<int, int, int> >& matchings, const vector<int>& data,
+      const vector<std::tuple<int, int, int>>& matchings, const vector<int>& data,
       int max_rule_span, int min_gap_size, int max_rule_symbols);
 
   // Adds an occurrence of a binary collocation.
