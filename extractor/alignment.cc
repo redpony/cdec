@@ -23,8 +23,8 @@ Alignment::Alignment(const string& filename) {
     boost::split(items, line, boost::is_any_of(" -"));
     vector<pair<int, int> > alignment;
     alignment.reserve(items.size() / 2);
-    for (size_t i = 0; i < items.size(); i += 2) {
-      alignment.push_back(make_pair(stoi(items[i]), stoi(items[i + 1])));
+    for (size_t i = 1; i < items.size(); i += 2) {
+      alignment.push_back(make_pair(stoi(items[i - 1]), stoi(items[i])));
     }
     alignments.push_back(alignment);
   }
