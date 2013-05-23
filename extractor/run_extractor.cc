@@ -42,11 +42,12 @@ fs::path GetGrammarFilePath(const fs::path& grammar_path, int file_number) {
 }
 
 int main(int argc, char** argv) {
-  int num_threads_default = 1;
-  #pragma omp parallel
-  num_threads_default = omp_get_num_threads();
-
   // Sets up the command line arguments map.
+  int max_threads = 1;
+  #pragma omp parallel
+  max_threads = omp_get_num_threads();
+  string threads_option = "Number of parallel threads for extraction "
+                          "(max=" + to_string(max_threads) + ")";
   po::options_description desc("Command line options");
   desc.add_options()
     ("help,h", "Show available options")
@@ -55,8 +56,7 @@ int main(int argc, char** argv) {
     ("bitext,b", po::value<string>(), "Parallel text (source ||| target)")
     ("alignment,a", po::value<string>()->required(), "Bitext word alignment")
     ("grammars,g", po::value<string>()->required(), "Grammars output path")
-    ("threads,t", po::value<int>()->default_value(num_threads_default),
-        "Number of parallel extractors")
+    ("threads,t", po::value<int>()->default_value(1), threads_option.c_str())
     ("frequent", po::value<int>()->default_value(100),
         "Number of precomputed frequent patterns")
     ("super_frequent", po::value<int>()->default_value(10),
@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
   }
 
   int num_threads = vm["threads"].as<int>();
-  cout << "Grammar extraction will use " << num_threads << " threads." << endl;
+  cerr << "Grammar extraction will use " << num_threads << " threads." << endl;
 
   // Reads the parallel corpus.
   Clock::time_point preprocess_start_time = Clock::now();
@@ -229,7 +229,7 @@ int main(int argc, char** argv) {
   }
 
   for (size_t i = 0; i < sentences.size(); ++i) {
-    cout << "<seg grammar=\"" << GetGrammarFilePath(grammar_path, i) << "\" id=\""
+    cout << "<seg grammar=" << GetGrammarFilePath(grammar_path, i) << " id=\""
          << i << "\"> " << sentences[i] << " </seg> " << suffixes[i] << endl;
   }
 
