@@ -24,7 +24,7 @@ class ScorerTest : public Test {
     EXPECT_CALL(*feature2, Score(_)).WillRepeatedly(Return(-1.3));
     EXPECT_CALL(*feature2, GetName()).WillRepeatedly(Return("f2"));
 
-    vector<shared_ptr<features::Feature> > features = {feature1, feature2};
+    vector<shared_ptr<features::Feature>> features = {feature1, feature2};
     scorer = make_shared<Scorer>(features);
   }
 

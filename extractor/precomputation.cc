@@ -19,7 +19,7 @@ Precomputation::Precomputation(
     int max_rule_symbols, int min_gap_size,
     int max_frequent_phrase_len, int min_frequency) {
   vector<int> data = suffix_array->GetData()->GetData();
-  vector<vector<int> > frequent_patterns = FindMostFrequentPatterns(
+  vector<vector<int>> frequent_patterns = FindMostFrequentPatterns(
       suffix_array, data, num_frequent_patterns, max_frequent_phrase_len,
       min_frequency);
 
@@ -34,7 +34,7 @@ Precomputation::Precomputation(
     }
   }
 
-  vector<tuple<int, int, int> > matchings;
+  vector<tuple<int, int, int>> matchings;
   for (size_t i = 0; i < data.size(); ++i) {
     // If the sentence is over, add all the discontiguous frequent patterns to
     // the index.
@@ -64,14 +64,14 @@ Precomputation::Precomputation() {}
 
 Precomputation::~Precomputation() {}
 
-vector<vector<int> > Precomputation::FindMostFrequentPatterns(
+vector<vector<int>> Precomputation::FindMostFrequentPatterns(
     shared_ptr<SuffixArray> suffix_array, const vector<int>& data,
     int num_frequent_patterns, int max_frequent_phrase_len, int min_frequency) {
   vector<int> lcp = suffix_array->BuildLCPArray();
   vector<int> run_start(max_frequent_phrase_len);
 
   // Find all the patterns occurring at least min_frequency times.
-  priority_queue<pair<int, pair<int, int> > > heap;
+  priority_queue<pair<int, pair<int, int>>> heap;
   for (size_t i = 1; i < lcp.size(); ++i) {
     for (int len = lcp[i]; len < max_frequent_phrase_len; ++len) {
       int frequency = i - run_start[len];
@@ -84,7 +84,7 @@ vector<vector<int> > Precomputation::FindMostFrequentPatterns(
   }
 
   // Extract the most frequent patterns.
-  vector<vector<int> > frequent_patterns;
+  vector<vector<int>> frequent_patterns;
   while (frequent_patterns.size() < num_frequent_patterns && !heap.empty()) {
     int start = heap.top().second.first;
     int len = heap.top().second.second;
@@ -100,7 +100,7 @@ vector<vector<int> > Precomputation::FindMostFrequentPatterns(
 }
 
 void Precomputation::AddCollocations(
-    const vector<tuple<int, int, int> >& matchings, const vector<int>& data,
+    const vector<tuple<int, int, int>>& matchings, const vector<int>& data,
     int max_rule_span, int min_gap_size, int max_rule_symbols) {
   // Select the leftmost subpattern.
   for (size_t i = 0; i < matchings.size(); ++i) {

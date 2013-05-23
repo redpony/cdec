@@ -21,7 +21,7 @@ class AlignmentTest : public Test {
 };
 
 TEST_F(AlignmentTest, TestGetLinks) {
-  vector<pair<int, int> > expected_links = {
+  vector<pair<int, int>> expected_links = {
     make_pair(0, 0), make_pair(1, 1), make_pair(2, 2)
   };
   EXPECT_EQ(expected_links, alignment->GetLinks(0));

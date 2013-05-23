@@ -8,7 +8,7 @@ PhraseLocation::PhraseLocation(int sa_low, int sa_high) :
 PhraseLocation::PhraseLocation(const vector<int>& matchings,
                                int num_subpatterns) :
     sa_low(0), sa_high(0),
-    matchings(make_shared<vector<int> >(matchings)),
+    matchings(make_shared<vector<int>>(matchings)),
     num_subpatterns(num_subpatterns) {}
 
 bool PhraseLocation::IsEmpty() const {

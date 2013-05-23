@@ -81,7 +81,7 @@ vector<Rule> RuleExtractor::ExtractRules(const Phrase& phrase,
 
   // Calculate statistics for the (sampled) occurrences of the source phrase.
   map<Phrase, double> source_phrase_counter;
-  map<Phrase, map<Phrase, map<PhraseAlignment, int> > > alignments_counter;
+  map<Phrase, map<Phrase, map<PhraseAlignment, int>>> alignments_counter;
   for (auto i = matchings.begin(); i != matchings.end(); i += num_subpatterns) {
     vector<int> matching(i, i + num_subpatterns);
     vector<Extract> extracts = ExtractAlignments(phrase, matching);
@@ -165,7 +165,7 @@ vector<Extract> RuleExtractor::ExtractAlignments(
   // Get spans for nonterminal gaps.
   bool met_constraints = true;
   int num_symbols = phrase.GetNumSymbols();
-  vector<pair<int, int> > source_gaps, target_gaps;
+  vector<pair<int, int>> source_gaps, target_gaps;
   if (!helper->GetGaps(source_gaps, target_gaps, matching, chunklen, source_low,
                        source_high, target_low, target_high, source_phrase_low,
                        source_phrase_high, source_back_low, source_back_high,
@@ -210,7 +210,7 @@ vector<Extract> RuleExtractor::ExtractAlignments(
 void RuleExtractor::AddExtracts(
     vector<Extract>& extracts, const Phrase& source_phrase,
     const unordered_map<int, int>& source_indexes,
-    const vector<pair<int, int> >& target_gaps, const vector<int>& target_low,
+    const vector<pair<int, int>>& target_gaps, const vector<int>& target_low,
     int target_phrase_low, int target_phrase_high, int sentence_id) const {
   auto target_phrases = target_phrase_extractor->ExtractPhrases(
       target_gaps, target_low, target_phrase_low, target_phrase_high,
@@ -232,7 +232,7 @@ void RuleExtractor::AddNonterminalExtremities(
     const vector<int>& chunklen, const Phrase& source_phrase,
     int source_back_low, int source_back_high, const vector<int>& source_low,
     const vector<int>& source_high, const vector<int>& target_low,
-    const vector<int>& target_high, vector<pair<int, int> > target_gaps,
+    const vector<int>& target_high, vector<pair<int, int>> target_gaps,
     int sentence_id, int source_sent_start, int starts_with_x, int ends_with_x,
     int extend_left, int extend_right) const {
   int source_x_low = source_back_low, source_x_high = source_back_high;

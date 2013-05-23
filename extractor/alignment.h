@@ -20,7 +20,7 @@ class Alignment {
   Alignment(const string& filename);
 
   // Returns the alignment for a given sentence.
-  virtual vector<pair<int, int> > GetLinks(int sentence_index) const;
+  virtual vector<pair<int, int>> GetLinks(int sentence_index) const;
 
   // Writes alignment to file in binary format.
   void WriteBinary(const fs::path& filepath);
@@ -31,7 +31,7 @@ class Alignment {
   Alignment();
 
  private:
-  vector<vector<pair<int, int> > > alignments;
+  vector<vector<pair<int, int>>> alignments;
 };
 
 } // namespace extractor

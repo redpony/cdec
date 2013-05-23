@@ -21,7 +21,7 @@ FastIntersector::FastIntersector(shared_ptr<SuffixArray> suffix_array,
     max_rule_span(max_rule_span),
     min_gap_size(min_gap_size) {
   Index precomputed_collocations = precomputation->GetCollocations();
-  for (pair<vector<int>, vector<int> > entry: precomputed_collocations) {
+  for (pair<vector<int>, vector<int>> entry: precomputed_collocations) {
     vector<int> phrase = ConvertPhrase(entry.first);
     collocations[phrase] = entry.second;
   }
@@ -177,7 +177,7 @@ void FastIntersector::ExtendPhraseLocation(PhraseLocation& location) const {
   }
 
   location.num_subpatterns = 1;
-  location.matchings = make_shared<vector<int> >();
+  location.matchings = make_shared<vector<int>>();
   for (int i = location.sa_low; i < location.sa_high; ++i) {
     location.matchings->push_back(suffix_array->GetSuffix(i));
   }

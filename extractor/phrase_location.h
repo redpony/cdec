@@ -32,7 +32,7 @@ struct PhraseLocation {
   friend bool operator==(const PhraseLocation& a, const PhraseLocation& b);
 
   int sa_low, sa_high;
-  shared_ptr<vector<int> > matchings;
+  shared_ptr<vector<int>> matchings;
   int num_subpatterns;
 };
 

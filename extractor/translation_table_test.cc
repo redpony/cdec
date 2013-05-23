@@ -55,12 +55,12 @@ TEST(TranslationTableTest, TestScores) {
   EXPECT_CALL(*target_data_array, HasWord("d"))
       .WillRepeatedly(Return(false));
 
-  vector<pair<int, int> > links1 = {
+  vector<pair<int, int>> links1 = {
     make_pair(0, 0), make_pair(1, 1), make_pair(2, 2), make_pair(3, 3),
     make_pair(4, 4), make_pair(4, 5)
   };
-  vector<pair<int, int> > links2 = {make_pair(1, 0), make_pair(2, 1)};
-  vector<pair<int, int> > links3 = {make_pair(0, 0), make_pair(2, 1)};
+  vector<pair<int, int>> links2 = {make_pair(1, 0), make_pair(2, 1)};
+  vector<pair<int, int>> links3 = {make_pair(0, 0), make_pair(2, 1)};
   shared_ptr<MockAlignment> alignment = make_shared<MockAlignment>();
   EXPECT_CALL(*alignment, GetLinks(0)).WillRepeatedly(Return(links1));
   EXPECT_CALL(*alignment, GetLinks(1)).WillRepeatedly(Return(links2));
