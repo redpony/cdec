@@ -27,7 +27,7 @@ struct BaseFile {
   }
   bool is_null() const { return !ps_; }
   operator bool() const {
-    return ps_;
+    return ps_.get();
   }
   S* stream() { return ps_.get(); }
   S* operator->() { return ps_.get(); } // compat with old ReadFile * -> new Readfile. remove?

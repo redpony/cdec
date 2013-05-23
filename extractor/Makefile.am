@@ -1,3 +1,5 @@
+if HAVE_CXX11
+
 bin_PROGRAMS = compile run_extractor
 
 EXTRA_PROGRAMS = alignment_test \
@@ -145,5 +147,6 @@ libextractor_a_SOURCES = \
   translation_table.cc \
   vocabulary.cc
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare -std=c++0x -fopenmp $(GTEST_CPPFLAGS) $(GMOCK_CPPFLAGS)
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(CXX11_SWITCH) -fopenmp $(GTEST_CPPFLAGS) $(GMOCK_CPPFLAGS)
 AM_LDFLAGS = -fopenmp
+endif

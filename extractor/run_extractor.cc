@@ -169,7 +169,7 @@ int main(int argc, char** argv) {
 
   // Features used to score each grammar rule.
   Clock::time_point extraction_start_time = Clock::now();
-  vector<shared_ptr<Feature> > features = {
+  vector<shared_ptr<Feature>> features = {
       make_shared<TargetGivenSourceCoherent>(),
       make_shared<SampleSourceCount>(),
       make_shared<CountSourceTarget>(),

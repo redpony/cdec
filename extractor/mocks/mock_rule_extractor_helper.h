@@ -18,7 +18,7 @@ class MockRuleExtractorHelper : public RuleExtractorHelper {
       const vector<int>&, const vector<int>&, int));
   MOCK_CONST_METHOD4(CheckTightPhrases, bool(const vector<int>&,
       const vector<int>&, const vector<int>&, int));
-  MOCK_CONST_METHOD1(GetGapOrder, vector<int>(const vector<pair<int, int> >&));
+  MOCK_CONST_METHOD1(GetGapOrder, vector<int>(const vector<pair<int, int>>&));
   MOCK_CONST_METHOD4(GetSourceIndexes, Indexes(const vector<int>&,
       const vector<int>&, int, int));
 
@@ -36,8 +36,8 @@ class MockRuleExtractorHelper : public RuleExtractorHelper {
     return find_fix_point;
   }
 
-  bool GetGaps(vector<pair<int, int> >& source_gaps,
-               vector<pair<int, int> >& target_gaps,
+  bool GetGaps(vector<pair<int, int>>& source_gaps,
+               vector<pair<int, int>>& target_gaps,
                const vector<int>&, const vector<int>&, const vector<int>&,
                const vector<int>&, const vector<int>&, const vector<int>&,
                int, int, int, int, int, int, int& num_symbols,
@@ -52,7 +52,7 @@ class MockRuleExtractorHelper : public RuleExtractorHelper {
   void SetUp(
       int target_phrase_low, int target_phrase_high, int source_back_low,
       int source_back_high, bool find_fix_point,
-      vector<pair<int, int> > source_gaps, vector<pair<int, int> > target_gaps,
+      vector<pair<int, int>> source_gaps, vector<pair<int, int>> target_gaps,
       int num_symbols, bool met_constraints, bool get_gaps) {
     this->target_phrase_low = target_phrase_low;
     this->target_phrase_high = target_phrase_high;
@@ -72,8 +72,8 @@ class MockRuleExtractorHelper : public RuleExtractorHelper {
   int source_back_low;
   int source_back_high;
   bool find_fix_point;
-  vector<pair<int, int> > source_gaps;
-  vector<pair<int, int> > target_gaps;
+  vector<pair<int, int>> source_gaps;
+  vector<pair<int, int>> target_gaps;
   int num_symbols;
   bool met_constraints;
   bool get_gaps;

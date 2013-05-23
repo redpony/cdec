@@ -6,6 +6,7 @@
 #include <tr1/unordered_set>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/type_traits.hpp>
 
 #include "wordid.h"
 #include "hg.h"
@@ -134,7 +135,7 @@ namespace KBest {
         }
         add_next = false;
 
-        if (cand.size() > 0) {
+        while (!add_next && cand.size() > 0) {
           std::pop_heap(cand.begin(), cand.end(), HeapCompare());
           Derivation* d = cand.back();
           cand.pop_back();
@@ -145,10 +146,15 @@ namespace KBest {
           if (!filter(d->yield)) {
             D.push_back(d);
             add_next = true;
+          } else {
+            // just because a node already derived a string (or whatever
+            // equivalent derivation class), you need to add its successors
+            // to the node's candidate pool
+            LazyNext(d, &cand, &s.ds);
           }
-        } else {
-          break;
         }
+        if (!add_next)
+          break;
       }
       if (k < D.size()) return D[k]; else return NULL;
     }
@@ -184,7 +190,11 @@ namespace KBest {
         s.cand.push_back(d);
       }
 
-      const unsigned effective_k = std::min(k_prime, s.cand.size());
+      unsigned effective_k = s.cand.size();
+      if (boost::is_same<DerivationFilter,NoFilter<T> >::value) {
+        // if there's no filter you can use this optimization
+        effective_k = std::min(k_prime, s.cand.size());
+      }
       const typename CandidateHeap::iterator kth = s.cand.begin() + effective_k;
       std::nth_element(s.cand.begin(), kth, s.cand.end(), DerivationCompare());
       s.cand.resize(effective_k);

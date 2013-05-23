@@ -14,12 +14,12 @@ namespace extractor {
  */
 struct Rule {
   Rule(const Phrase& source_phrase, const Phrase& target_phrase,
-       const vector<double>& scores, const vector<pair<int, int> >& alignment);
+       const vector<double>& scores, const vector<pair<int, int>>& alignment);
 
   Phrase source_phrase;
   Phrase target_phrase;
   vector<double> scores;
-  vector<pair<int, int> > alignment;
+  vector<pair<int, int>> alignment;
 };
 
 } // namespace extractor

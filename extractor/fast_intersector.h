@@ -11,7 +11,7 @@ using namespace std;
 
 namespace extractor {
 
-typedef boost::hash<vector<int> > VectorHash;
+typedef boost::hash<vector<int>> VectorHash;
 typedef unordered_map<vector<int>, vector<int>, VectorHash> Index;
 
 class Phrase;
