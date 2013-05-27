@@ -378,7 +378,7 @@ main(int argc, char** argv)
           margin = std::numeric_limits<float>::max();
         } else {
           rank_error = it->first.model <= it->second.model;
-          margin = fabs(fabs(it->first.model) - fabs(it->second.model));
+          margin = fabs(it->first.model - it->second.model);
           if (!rank_error && margin < loss_margin) margin_violations++;
         }
         if (rank_error) rank_errors++;
