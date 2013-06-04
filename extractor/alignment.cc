@@ -39,15 +39,8 @@ vector<pair<int, int>> Alignment::GetLinks(int sentence_index) const {
   return alignments[sentence_index];
 }
 
-void Alignment::WriteBinary(const fs::path& filepath) {
-  FILE* file = fopen(filepath.string().c_str(), "w");
-  int size = alignments.size();
-  fwrite(&size, sizeof(int), 1, file);
-  for (vector<pair<int, int>> alignment: alignments) {
-    size = alignment.size();
-    fwrite(&size, sizeof(int), 1, file);
-    fwrite(alignment.data(), sizeof(pair<int, int>), size, file);
-  }
+bool Alignment::operator==(const Alignment& other) const {
+  return alignments == other.alignments;
 }
 
 } // namespace extractor

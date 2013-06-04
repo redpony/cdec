@@ -118,17 +118,17 @@ int main(int argc, char** argv) {
        << " seconds" << endl;
 
   // Constructs the suffix array for the source data.
-  cerr << "Creating source suffix array..." << endl;
   start_time = Clock::now();
+  cerr << "Constructing source suffix array..." << endl;
   shared_ptr<SuffixArray> source_suffix_array =
       make_shared<SuffixArray>(source_data_array);
   stop_time = Clock::now();
-  cerr << "Creating suffix array took "
+  cerr << "Constructing suffix array took "
        << GetDuration(start_time, stop_time) << " seconds" << endl;
 
   // Reads the alignment.
-  cerr << "Reading alignment..." << endl;
   start_time = Clock::now();
+  cerr << "Reading alignment..." << endl;
   shared_ptr<Alignment> alignment =
       make_shared<Alignment>(vm["alignment"].as<string>());
   stop_time = Clock::now();
@@ -137,8 +137,8 @@ int main(int argc, char** argv) {
 
   // Constructs an index storing the occurrences in the source data for each
   // frequent collocation.
-  cerr << "Precomputing collocations..." << endl;
   start_time = Clock::now();
+  cerr << "Precomputing collocations..." << endl;
   shared_ptr<Precomputation> precomputation = make_shared<Precomputation>(
       source_suffix_array,
       vm["frequent"].as<int>(),
@@ -154,8 +154,8 @@ int main(int argc, char** argv) {
 
   // Constructs a table storing p(e | f) and p(f | e) for every pair of source
   // and target words.
-  cerr << "Precomputing conditional probabilities..." << endl;
   start_time = Clock::now();
+  cerr << "Precomputing conditional probabilities..." << endl;
   shared_ptr<TranslationTable> table = make_shared<TranslationTable>(
       source_data_array, target_data_array, alignment);
   stop_time = Clock::now();
