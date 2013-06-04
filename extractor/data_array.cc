@@ -118,33 +118,6 @@ int DataArray::GetSentenceId(int position) const {
   return sentence_id[position];
 }
 
-void DataArray::WriteBinary(const fs::path& filepath) const {
-  std::cerr << "File: " << filepath.string() << std::endl;
-  WriteBinary(fopen(filepath.string().c_str(), "w"));
-}
-
-void DataArray::WriteBinary(FILE* file) const {
-  int size = id2word.size();
-  fwrite(&size, sizeof(int), 1, file);
-  for (string word: id2word) {
-    size = word.size();
-    fwrite(&size, sizeof(int), 1, file);
-    fwrite(word.data(), sizeof(char), size, file);
-  }
-
-  size = data.size();
-  fwrite(&size, sizeof(int), 1, file);
-  fwrite(data.data(), sizeof(int), size, file);
-
-  size = sentence_id.size();
-  fwrite(&size, sizeof(int), 1, file);
-  fwrite(sentence_id.data(), sizeof(int), size, file);
-
-  size = sentence_start.size();
-  fwrite(&size, sizeof(int), 1, file);
-  fwrite(sentence_start.data(), sizeof(int), 1, file);
-}
-
 bool DataArray::HasWord(const string& word) const {
   return word2id.count(word);
 }
@@ -156,6 +129,12 @@ int DataArray::GetWordId(const string& word) const {
 
 string DataArray::GetWord(int word_id) const {
   return id2word[word_id];
+}
+
+bool DataArray::operator==(const DataArray& other) const {
+  return word2id == other.word2id && id2word == other.id2word &&
+         data == other.data && sentence_start == other.sentence_start &&
+         sentence_id == other.sentence_id;
 }
 
 } // namespace extractor

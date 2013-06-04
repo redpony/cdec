@@ -1,7 +1,11 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <sstream>
 #include <vector>
+
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 
 #include "mocks/mock_data_array.h"
 #include "mocks/mock_suffix_array.h"
@@ -9,6 +13,7 @@
 
 using namespace std;
 using namespace ::testing;
+namespace ar = boost::archive;
 
 namespace extractor {
 namespace {
@@ -29,15 +34,17 @@ class PrecomputationTest : public Test {
                   GetSuffix(i)).WillRepeatedly(Return(suffixes[i]));
     }
     EXPECT_CALL(*suffix_array, BuildLCPArray()).WillRepeatedly(Return(lcp));
+
+    precomputation = Precomputation(suffix_array, 3, 3, 10, 5, 1, 4, 2);
   }
 
   vector<int> data;
   shared_ptr<MockDataArray> data_array;
   shared_ptr<MockSuffixArray> suffix_array;
+  Precomputation precomputation;
 };
 
 TEST_F(PrecomputationTest, TestCollocations) {
-  Precomputation precomputation(suffix_array, 3, 3, 10, 5, 1, 4, 2);
   Index collocations = precomputation.GetCollocations();
 
   vector<int> key = {2, 3, -1, 2};
@@ -99,6 +106,18 @@ TEST_F(PrecomputationTest, TestCollocations) {
   // Contains non frequent pattern.
   key = {2, -1, 5};
   EXPECT_EQ(0, collocations.count(key));
+}
+
+TEST_F(PrecomputationTest, TestSerialization) {
+  stringstream stream(ios_base::out | ios_base::in);
+  ar::text_oarchive output_stream(stream, ar::no_header);
+  output_stream << precomputation;
+
+  Precomputation precomputation_copy;
+  ar::text_iarchive input_stream(stream, ar::no_header);
+  input_stream >> precomputation_copy;
+
+  EXPECT_EQ(precomputation, precomputation_copy);
 }
 
 } // namespace
