@@ -29,12 +29,12 @@ cdef class IntList:
         ret += str(self.len)
         return ret
 
-    def index(self, val):
+    def index(self, int val):
         cdef unsigned i
         for i in range(self.len):
             if self.arr[i] == val:
                 return i
-        return IndexError
+        raise ValueError('%s not in IntList' % val)
 
     def partition(self,start,end):
         pivot = self.arr[end]

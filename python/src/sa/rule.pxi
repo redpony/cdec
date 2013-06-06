@@ -189,4 +189,4 @@ cdef class Rule:
 
     def alignments(self):
         for point in self.word_alignments:
-            yield point/65536, point%65536
+            yield point / ALIGNMENT_CODE, point % ALIGNMENT_CODE
