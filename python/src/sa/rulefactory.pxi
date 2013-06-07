@@ -879,15 +879,15 @@ cdef class HieroCachingRuleFactory:
     def advance(self, frontier, res, fwords):
         cdef unsigned na
         nf = []
-        for (toskip, (i, alt, pathlen)) in frontier:
+        for toskip, (i, alt, pathlen) in frontier:
             spanlen = fwords[i][alt][2]
-            if (toskip == 0):
+            if toskip == 0:
                 res.append((i, alt, pathlen))
             ni = i + spanlen
-            if (ni < len(fwords) and (pathlen + 1) < self.max_initial_size):
+            if ni < len(fwords) and pathlen + 1 < self.max_initial_size:
                 for na in range(len(fwords[ni])):
                     nf.append((toskip - 1, (ni, na, pathlen + 1)))
-        if (len(nf) > 0):
+        if len(nf) > 0:
             return self.advance(nf, res, fwords)
         else:
             return res
@@ -895,11 +895,11 @@ cdef class HieroCachingRuleFactory:
     def get_all_nodes_isteps_away(self, skip, i, spanlen, pathlen, fwords, next_states, reachable_buffer):
         cdef unsigned alt_it
         frontier = []
-        if (i+spanlen+skip >= len(next_states)):
+        if i+spanlen+skip >= len(next_states):
             return frontier
         key = tuple([i,spanlen])
         reachable = []
-        if (key in reachable_buffer):
+        if key in reachable_buffer:
             reachable = reachable_buffer[key]
         else:
             reachable = self.reachable(fwords, i, spanlen)
@@ -911,7 +911,7 @@ cdef class HieroCachingRuleFactory:
                     continue
                 if pathlen+jump <= self.max_initial_size:
                     for alt_id in range(len(fwords[next_id])):
-                        if (fwords[next_id][alt_id][0] != EPSILON):
+                        if fwords[next_id][alt_id][0] != EPSILON:
                             newel = (next_id,alt_id,pathlen+jump)
                             if newel not in frontier:
                                 frontier.append((next_id,alt_id,pathlen+jump))
@@ -919,18 +919,18 @@ cdef class HieroCachingRuleFactory:
 
     def reachable(self, fwords, ifrom, dist):
         ret = []
-        if (ifrom >= len(fwords)):
+        if ifrom >= len(fwords):
             return ret
         for alt_id in range(len(fwords[ifrom])):
-            if (fwords[ifrom][alt_id][0] == EPSILON):
+            if fwords[ifrom][alt_id][0] == EPSILON:
                 ret.extend(self.reachable(fwords,ifrom+fwords[ifrom][alt_id][2],dist))
             else:
-                if (dist==0):
-                    if (ifrom not in ret):
+                if dist == 0:
+                    if ifrom not in ret:
                         ret.append(ifrom)
                 else:
                     for ifromchild in self.reachable(fwords,ifrom+fwords[ifrom][alt_id][2],dist-1):
-                        if (ifromchild not in ret):
+                        if ifromchild not in ret:
                             ret.append(ifromchild)
                     
         return ret
@@ -938,15 +938,15 @@ cdef class HieroCachingRuleFactory:
     def shortest(self, fwords, ifrom, ito):
         cdef unsigned alt_id
         min = 1000
-        if (ifrom > ito):
+        if ifrom > ito:
             return min
-        if (ifrom == ito):
+        if ifrom == ito:
             return 0
         for alt_id in range(len(fwords[ifrom])):
             currmin = self.shortest(fwords,ifrom+fwords[ifrom][alt_id][2],ito)
-            if (fwords[ifrom][alt_id][0] != EPSILON):
+            if fwords[ifrom][alt_id][0] != EPSILON:
                 currmin += 1
-            if (currmin<min):
+            if currmin < min:
                 min = currmin
         return min
 
@@ -964,7 +964,7 @@ cdef class HieroCachingRuleFactory:
             for alt in curr_col:
                 next_id = curr[0]+alt[2]
                 jump = 1
-                if (alt[0] == EPSILON):
+                if alt[0] == EPSILON:
                     jump = 0
                 if next_id not in result and min_dist <= curr[1]+jump <= self.max_initial_size+1:
                     candidate.append([next_id,curr[1]+jump])
@@ -1172,20 +1172,20 @@ cdef class HieroCachingRuleFactory:
                         # I put spanlen=1 below
                         key = tuple([self.min_gap_size, i, 1, pathlen])
                         frontier_nodes = []
-                        if (key in nodes_isteps_away_buffer):
+                        if key in nodes_isteps_away_buffer:
                             frontier_nodes = nodes_isteps_away_buffer[key]
                         else:
                             frontier_nodes = self.get_all_nodes_isteps_away(self.min_gap_size, i, 1, pathlen, fwords, next_states, reachable_buffer)
                             nodes_isteps_away_buffer[key] = frontier_nodes
                         
-                        for (i, alt, pathlen) in frontier_nodes:
+                        for i, alt, pathlen in frontier_nodes:
                             new_frontier.append((k, i, input_match + (i,), alt, pathlen, xnode, phrase +(xcat,), is_shadow_path))
             frontier = new_frontier
         
         # Online rule extraction and scoring
         if self.online:
             f_syms = tuple(word[0][0] for word in fwords)
-            for (f, lex_i, lex_j) in self.get_f_phrases(f_syms):
+            for f, lex_i, lex_j in self.get_f_phrases(f_syms):
                 spanlen = (lex_j - lex_i) + 1
                 if not sym_isvar(f[0]):
                     spanlen += 1
@@ -1440,10 +1440,11 @@ cdef class HieroCachingRuleFactory:
         step = (num_gaps+1)*2
         i = 0
         
+        cdef IntList indexes
         while i < len1:
             ephr_arr._clear()
             num_chunks = 0
-            indexes = []
+            indexes = IntList()
             for j from 0 <= j < num_gaps+1:
                 if e_gaps1[i+2*j] < e_gaps1[i+(2*j)+1]:
                     num_chunks = num_chunks + 1
@@ -1461,18 +1462,18 @@ cdef class HieroCachingRuleFactory:
         free(e_gap_order)
         return result
 
-    cdef IntList create_alignments(self, int* sent_links, int num_links, findexes, eindexes):
+    cdef IntList create_alignments(self, int* sent_links, int num_links,
+            IntList findexes, IntList eindexes):
         cdef unsigned i
         cdef IntList ret = IntList()
-        for i in range(len(findexes)):
-            s = findexes[i]
-            if (s<0):
-                continue
+        for i in range(findexes.len):
+            s = findexes.arr[i]
+            if s < 0: continue
             idx = 0
-            while (idx < num_links*2):
-                if (sent_links[idx] == s):
+            while idx < num_links * 2:
+                if sent_links[idx] == s:
                     j = eindexes.index(sent_links[idx+1])
-                    ret.append(i*65536+j)
+                    ret.append(i * ALIGNMENT_CODE + j)
                 idx += 2
         return ret
                 
@@ -1507,7 +1508,7 @@ cdef class HieroCachingRuleFactory:
             for j in range(chunklen[i]):
                 self.findexes1.append(matching.arr[matching.start+i]+j-f_sent_start);
                 sofar += 1
-            if (i+1<num_chunks):
+            if i+1 < num_chunks:
                 self.findexes1.append(phrase[sofar])
                 sofar += 1
             
@@ -1677,7 +1678,7 @@ cdef class HieroCachingRuleFactory:
                         else:
                             pair_count = 0
                             reason_for_failure = "Didn't extract anything from [%d, %d] -> [%d, %d]" % (f_back_low, f_back_high, e_low, e_high)
-                        for (phrase2,eindexes) in phrase_list:
+                        for phrase2, eindexes in phrase_list:
                             als1 = self.create_alignments(sent_links,num_links,self.findexes,eindexes)        
                             extracts.append((fphr, phrase2, pair_count, tuple(als1)))
                     if (num_gaps < self.max_nonterminals and
@@ -1732,7 +1733,7 @@ cdef class HieroCachingRuleFactory:
                                     pair_count = 1.0 / len(phrase_list)
                                 else:
                                     pair_count = 0
-                                for phrase2,eindexes in phrase_list:
+                                for phrase2, eindexes in phrase_list:
                                     als2 = self.create_alignments(sent_links,num_links,self.findexes,eindexes)        
                                     extracts.append((fphr, phrase2, pair_count, tuple(als2)))
 
@@ -1899,7 +1900,7 @@ cdef class HieroCachingRuleFactory:
         al = [[] for i in range(f_len)]
         fe_span = [[e_len + 1, -1] for i in range(f_len)]
         ef_span = [[f_len + 1, -1] for i in range(e_len)]
-        for (f, e) in alignment:
+        for f, e in alignment:
             al[f].append(e)
             fe_span[f][0] = min(fe_span[f][0], e)
             fe_span[f][1] = max(fe_span[f][1], e)
@@ -2030,7 +2031,7 @@ cdef class HieroCachingRuleFactory:
         # Update possible phrases (samples)
         # This could be more efficiently integrated with extraction
         # at the cost of readability
-        for (f, lex_i, lex_j) in self.get_f_phrases(f_words):
+        for f, lex_i, lex_j in self.get_f_phrases(f_words):
             self.samples_f[f] += 1
             
         # Update phrase counts
@@ -2112,7 +2113,7 @@ cdef class HieroCachingRuleFactory:
         # Create rule (f_phrase, e_phrase, links, f_link_min, f_link_max)
         f = Phrase(f_sym)
         e = Phrase(e_sym)
-        a = tuple(self.alignment.link(i, j) for (i, j) in links)
+        a = tuple(self.alignment.link(i, j) for i, j in links)
         return (f, e, a, lex_f_i, lex_f_j)
 
     # Rule string from rule
