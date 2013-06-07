@@ -271,8 +271,10 @@ def write_report(graph_file, dev_results, dev_bleu,
   out.close()
  
   if args.email:
-    email_process = subprocess.Popen(['mail', '-s', subject, '-a', 
-                        graph_file, args.email], stdin = subprocess.PIPE)
+    cmd = ['mail', '-s', subject]
+    if graph_file:
+      cmd += ['-a', graph_file]
+    email_process = subprocess.Popen(cmd+[args.email], stdin = subprocess.PIPE)
     email_process.communicate(message)
 
 #feature weights stats for report
