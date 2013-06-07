@@ -203,8 +203,9 @@ def main():
 
   write_report(graph_file, dev_results, dev_bleu, test_results, test_bleu, args)
 
-  logging.info('A graph of the best/hope/fear scores over the iterations '
-               'has been saved to {}\n'.format(graph_file))
+  if graph_file:
+    logging.info('A graph of the best/hope/fear scores over the iterations '
+                 'has been saved to {}\n'.format(graph_file))
 
   print 'final weights:\n{}\n'.format(args.weights)
 
