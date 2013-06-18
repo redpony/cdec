@@ -119,7 +119,7 @@ template <class Model> void Incremental<Model>::ConvertEdge(const search::Contex
   float score = 0.0;
   for (std::vector<WordID>::const_iterator word = e.begin(); word != e.end(); ++word) {
     if (*word <= 0) {
-      nts.push_back(vertices[in.tail_nodes_[-*word]].RootPartial());
+      nts.push_back(vertices[in.tail_nodes_[-*word]].RootAlternate());
       if (nts.back().Empty()) return;
       score += nts.back().Bound();
       words.push_back(lm::kMaxWordIndex);
