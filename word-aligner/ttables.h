@@ -86,6 +86,7 @@ class TTable {
     }
   }
   void DeserializeProbsFromText(std::istream* in);
+  void DeserializeLogProbsFromText(std::istream* in);
   void SerializeCounts(std::string* out) const { SerializeHelper(out, counts); }
   void DeserializeCounts(const std::string& in) { DeserializeHelper(in, &counts); }
   void SerializeProbs(std::string* out) const { SerializeHelper(out, ttable); }
