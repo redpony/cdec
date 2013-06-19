@@ -5,21 +5,23 @@ from libc.stdlib cimport malloc, realloc, free
 # We have the space for our corpus, so this is not a problem;
 # May need to revisit if things get really tight, though.
 
+cdef int ALIGNMENT_CODE = 1 << 16
+
 cdef class Alignment:
     cdef IntList links
     cdef IntList sent_index
 
     cdef int link(self, int i, int j):
         """Integerizes an alignment link pair"""
-        return i*65536 + j
+        return i * ALIGNMENT_CODE + j
 
     def unlink(self, link):
         """De-integerizes an alignment link pair"""
-        return (link/65536, link%65536)
+        return (link / ALIGNMENT_CODE, link % ALIGNMENT_CODE)
 
     cdef _unlink(self, int link, int* f, int* e):
-        f[0] = link/65536
-        e[0] = link%65536
+        f[0] = link / ALIGNMENT_CODE
+        e[0] = link % ALIGNMENT_CODE
 
     def get_sent_links(self, int sent_id):
         cdef IntList sent_links
