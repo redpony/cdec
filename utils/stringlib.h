@@ -268,6 +268,16 @@ inline unsigned int UTF8Len(unsigned char x) {
   else return 0;
 }
 
+inline unsigned int UTF8StringLen(const std::string& x) {
+  unsigned pos = 0;
+  int len = 0;
+  while(pos < x.size()) {
+    ++len;
+    pos += UTF8Len(x[pos]);
+  }
+  return len;
+}
+
 std::string md5(const std::string& in);
 
 #endif

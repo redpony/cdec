@@ -50,7 +50,7 @@ TEST_F(TargetPhraseExtractorTest, TestExtractTightPhrasesTrue) {
         .WillRepeatedly(Return(target_words[i]));
   }
 
-  vector<pair<int, int> > links = {
+  vector<pair<int, int>> links = {
     make_pair(0, 0), make_pair(1, 3), make_pair(2, 2), make_pair(3, 1),
     make_pair(4, 4)
   };
@@ -62,18 +62,18 @@ TEST_F(TargetPhraseExtractorTest, TestExtractTightPhrasesTrue) {
   extractor = make_shared<TargetPhraseExtractor>(
       data_array, alignment, phrase_builder, helper, vocabulary, 10, true);
 
-  vector<pair<int, int> > target_gaps = {make_pair(3, 4), make_pair(1, 2)};
+  vector<pair<int, int>> target_gaps = {make_pair(3, 4), make_pair(1, 2)};
   vector<int> target_low = {0, 3, 2, 1, 4};
   unordered_map<int, int> source_indexes = {{0, 0}, {2, 2}, {4, 4}};
 
-  vector<pair<Phrase, PhraseAlignment> > results =  extractor->ExtractPhrases(
+  vector<pair<Phrase, PhraseAlignment>> results =  extractor->ExtractPhrases(
       target_gaps, target_low, 0, 5, source_indexes, 1);
   EXPECT_EQ(1, results.size());
   vector<int> expected_symbols = {20, -2, 22, -1, 24};
   EXPECT_EQ(expected_symbols, results[0].first.Get());
   vector<string> expected_words = {"a", "c", "e"};
   EXPECT_EQ(expected_words, results[0].first.GetWords());
-  vector<pair<int, int> > expected_alignment = {
+  vector<pair<int, int>> expected_alignment = {
     make_pair(0, 0), make_pair(2, 2), make_pair(4, 4)
   };
   EXPECT_EQ(expected_alignment, results[0].second);
@@ -94,7 +94,7 @@ TEST_F(TargetPhraseExtractorTest, TestExtractPhrasesTightPhrasesFalse) {
         .WillRepeatedly(Return(target_words[i]));
   }
 
-  vector<pair<int, int> > links = {make_pair(1, 1)};
+  vector<pair<int, int>> links = {make_pair(1, 1)};
   EXPECT_CALL(*alignment, GetLinks(0)).WillRepeatedly(Return(links));
 
   vector<int> gap_order = {0};
@@ -103,11 +103,11 @@ TEST_F(TargetPhraseExtractorTest, TestExtractPhrasesTightPhrasesFalse) {
   extractor = make_shared<TargetPhraseExtractor>(
       data_array, alignment, phrase_builder, helper, vocabulary, 10, false);
 
-  vector<pair<int, int> > target_gaps = {make_pair(2, 4)};
+  vector<pair<int, int>> target_gaps = {make_pair(2, 4)};
   vector<int> target_low = {-1, 1, -1, -1, -1, -1};
   unordered_map<int, int> source_indexes = {{1, 1}};
 
-  vector<pair<Phrase, PhraseAlignment> > results = extractor->ExtractPhrases(
+  vector<pair<Phrase, PhraseAlignment>> results = extractor->ExtractPhrases(
       target_gaps, target_low, 1, 5, source_indexes, 0);
   EXPECT_EQ(10, results.size());
 

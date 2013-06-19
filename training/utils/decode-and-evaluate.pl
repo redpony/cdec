@@ -39,6 +39,7 @@ my $weights;
 my $use_make = 1;
 my $useqsub;
 my $cpbin=1;
+my $base_dir;
 # Process command-line options
 if (GetOptions(
 	"jobs=i" => \$jobs,
@@ -47,6 +48,7 @@ if (GetOptions(
 	"input=s" => \$test_set,
         "config=s" => \$config,
 	"weights=s" => \$weights,
+        "dir=s" => \$base_dir,
 ) == 0 || @ARGV!=0 || $help) {
 	print_help();
 	exit;
@@ -68,7 +70,9 @@ my @tf = localtime(time);
 my $tname = basename($test_set);
 $tname =~ s/\.(sgm|sgml|xml)$//i;
 my $dir = "eval.$tname." . sprintf('%d%02d%02d-%02d%02d%02d', 1900+$tf[5], $tf[4], $tf[3], $tf[2], $tf[1], $tf[0]);
-
+if ($base_dir) {
+  $dir = $base_dir.'/'.$dir
+}
 my $time = unchecked_output("date");
 
 check_call("mkdir -p $dir");
@@ -103,11 +107,12 @@ print STDERR "\nOUTPUT: $test_trans\n\n";
 my $bleu = check_output("cat $test_trans | $SCORER $refs -m ibm_bleu");
 chomp $bleu;
 print STDERR "BLEU: $bleu\n";
+print STDOUT "BLEU: $bleu\n";
 my $ter = check_output("cat $test_trans | $SCORER $refs -m ter");
 chomp $ter;
 print STDERR " TER: $ter\n";
 open TR, ">$dir/test.scores" or die "Can't write $dir/test.scores: $!";
-print TR <<EOT;
+my $score_report = <<EOT;
 ### SCORE REPORT #############################################################
         OUTPUT=$test_trans
   SCRIPT INPUT=$test_set
@@ -118,6 +123,9 @@ print TR <<EOT;
            TER=$ter
 ##############################################################################
 EOT
+
+print TR $score_report;
+print STDOUT $score_report;
 close TR;
 my $sr = unchecked_output("cat $dir/test.scores");
 print STDERR "\n\n$sr\n(A copy of this report can be found in $dir/test.scores)\n\n";
@@ -166,7 +174,8 @@ Options:
 		A file specifying feature weights.
 
 	--dir <dir>
-		Directory for intermediate and output files.
+		Base directory where directory with evaluation results
+                will be located.
 
 Job control options:
 

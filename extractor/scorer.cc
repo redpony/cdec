@@ -4,7 +4,7 @@
 
 namespace extractor {
 
-Scorer::Scorer(const vector<shared_ptr<features::Feature> >& features) :
+Scorer::Scorer(const vector<shared_ptr<features::Feature>>& features) :
     features(features) {}
 
 Scorer::Scorer() {}

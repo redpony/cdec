@@ -37,7 +37,7 @@ void RuleExtractorHelper::GetLinksSpans(
 
   target_low = vector<int>(target_sent_len, -1);
   target_high = vector<int>(target_sent_len, -1);
-  vector<pair<int, int> > links = alignment->GetLinks(sentence_id);
+  vector<pair<int, int>> links = alignment->GetLinks(sentence_id);
   for (auto link: links) {
     if (source_low[link.first] == -1 || source_low[link.first] > link.second) {
       source_low[link.first] = link.second;
@@ -264,7 +264,7 @@ void RuleExtractorHelper::FindProjection(
 }
 
 bool RuleExtractorHelper::GetGaps(
-     vector<pair<int, int> >& source_gaps, vector<pair<int, int> >& target_gaps,
+     vector<pair<int, int>>& source_gaps, vector<pair<int, int>>& target_gaps,
      const vector<int>& matching, const vector<int>& chunklen,
      const vector<int>& source_low, const vector<int>& source_high,
      const vector<int>& target_low, const vector<int>& target_high,
@@ -330,7 +330,7 @@ bool RuleExtractorHelper::GetGaps(
 }
 
 vector<int> RuleExtractorHelper::GetGapOrder(
-    const vector<pair<int, int> >& gaps) const {
+    const vector<pair<int, int>>& gaps) const {
   vector<int> gap_order(gaps.size());
   for (size_t i = 0; i < gap_order.size(); ++i) {
     for (size_t j = 0; j < i; ++j) {

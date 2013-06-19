@@ -39,7 +39,7 @@ struct TrieNode {
   shared_ptr<TrieNode> suffix_link;
   Phrase phrase;
   PhraseLocation matchings;
-  unordered_map<int, shared_ptr<TrieNode> > children;
+  unordered_map<int, shared_ptr<TrieNode>> children;
 };
 
 /**

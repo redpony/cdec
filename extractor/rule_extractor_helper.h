@@ -59,7 +59,7 @@ class RuleExtractorHelper {
 
   // Find the gap spans for each nonterminal in the source phrase.
   virtual bool GetGaps(
-      vector<pair<int, int> >& source_gaps, vector<pair<int, int> >& target_gaps,
+      vector<pair<int, int>>& source_gaps, vector<pair<int, int>>& target_gaps,
       const vector<int>& matching, const vector<int>& chunklen,
       const vector<int>& source_low, const vector<int>& source_high,
       const vector<int>& target_low, const vector<int>& target_high,
@@ -68,7 +68,7 @@ class RuleExtractorHelper {
       int& num_symbols, bool& met_constraints) const;
 
   // Get the order of the nonterminals in the target phrase.
-  virtual vector<int> GetGapOrder(const vector<pair<int, int> >& gaps) const;
+  virtual vector<int> GetGapOrder(const vector<pair<int, int>>& gaps) const;
 
   // Map each terminal symbol with its position in the source phrase.
   virtual unordered_map<int, int> GetSourceIndexes(
