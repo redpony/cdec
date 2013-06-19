@@ -72,7 +72,6 @@ cdef class Decoder:
             if isinstance(weights, DenseVector):
                 self.weights.vector[0] = (<DenseVector> weights).vector[0]
             elif isinstance(weights, SparseVector):
-                self.weights.vector.clear()
                 ((<SparseVector> weights).vector[0]).init_vector(self.weights.vector)
             elif isinstance(weights, dict):
                 self.weights.vector.clear()
