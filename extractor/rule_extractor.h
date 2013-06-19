@@ -11,7 +11,7 @@ using namespace std;
 
 namespace extractor {
 
-typedef vector<pair<int, int> > PhraseAlignment;
+typedef vector<pair<int, int>> PhraseAlignment;
 
 class Alignment;
 class DataArray;
@@ -90,7 +90,7 @@ class RuleExtractor {
   void AddExtracts(
       vector<Extract>& extracts, const Phrase& source_phrase,
       const unordered_map<int, int>& source_indexes,
-      const vector<pair<int, int> >& target_gaps, const vector<int>& target_low,
+      const vector<pair<int, int>>& target_gaps, const vector<int>& target_low,
       int target_phrase_low, int target_phrase_high, int sentence_id) const;
 
   // Adds a leading and/or trailing nonterminal to the source phrase and
@@ -101,7 +101,7 @@ class RuleExtractor {
       const vector<int>& chunklen, const Phrase& source_phrase,
       int source_back_low, int source_back_high, const vector<int>& source_low,
       const vector<int>& source_high, const vector<int>& target_low,
-      const vector<int>& target_high, vector<pair<int, int> > target_gaps,
+      const vector<int>& target_high, vector<pair<int, int>> target_gaps,
       int sentence_id, int source_sent_start, int starts_with_x,
       int ends_with_x, int extend_left, int extend_right) const;
 

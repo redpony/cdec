@@ -26,7 +26,7 @@ TranslationTable::TranslationTable(shared_ptr<DataArray> source_data_array,
   // For each pair of aligned source target words increment their link count by
   // 1. Unaligned words are paired with the NULL token.
   for (size_t i = 0; i < source_data_array->GetNumSentences(); ++i) {
-    vector<pair<int, int> > links = alignment->GetLinks(i);
+    vector<pair<int, int>> links = alignment->GetLinks(i);
     int source_start = source_data_array->GetSentenceStart(i);
     int target_start = target_data_array->GetSentenceStart(i);
     // Ignore END_OF_LINE markers.

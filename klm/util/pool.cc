@@ -25,7 +25,9 @@ void Pool::FreeAll() {
 }
 
 void *Pool::More(std::size_t size) {
-  std::size_t amount = std::max(static_cast<size_t>(32) << free_list_.size(), size);
+  // Double until we hit 2^21 (2 MB).  Then grow in 2 MB blocks. 
+  std::size_t desired_size = static_cast<size_t>(32) << std::min(static_cast<std::size_t>(16), free_list_.size());
+  std::size_t amount = std::max(desired_size, size);
   uint8_t *ret = static_cast<uint8_t*>(MallocOrThrow(amount));
   free_list_.push_back(ret);
   current_ = ret + size;
