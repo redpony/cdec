@@ -12,16 +12,6 @@ class ContextBase {
   public:
     explicit ContextBase(const Config &config) : config_(config) {}
 
-    VertexNode *NewVertexNode() {
-      VertexNode *ret = vertex_node_pool_.construct();
-      assert(ret);
-      return ret;
-    }
-
-    void DeleteVertexNode(VertexNode *node) {
-      vertex_node_pool_.destroy(node);
-    }
-
     unsigned int PopLimit() const { return config_.PopLimit(); }
 
     Score LMWeight() const { return config_.LMWeight(); }
@@ -29,8 +19,6 @@ class ContextBase {
     const Config &GetConfig() const { return config_; }
 
   private:
-    boost::object_pool<VertexNode> vertex_node_pool_;
-
     Config config_;
 };
 
