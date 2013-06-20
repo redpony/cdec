@@ -97,7 +97,12 @@ double TranslationTable::GetTargetGivenSourceScore(
 
   int source_id = source_data_array->GetWordId(source_word);
   int target_id = target_data_array->GetWordId(target_word);
-  return translation_probabilities[make_pair(source_id, target_id)].first;
+  auto entry = make_pair(source_id, target_id);
+  auto it = translation_probabilities.find(entry);
+  if (it == translation_probabilities.end()) {
+    return 0;
+  }
+  return it->second.first;
 }
 
 double TranslationTable::GetSourceGivenTargetScore(
@@ -109,7 +114,12 @@ double TranslationTable::GetSourceGivenTargetScore(
 
   int source_id = source_data_array->GetWordId(source_word);
   int target_id = target_data_array->GetWordId(target_word);
-  return translation_probabilities[make_pair(source_id, target_id)].second;
+  auto entry = make_pair(source_id, target_id);
+  auto it = translation_probabilities.find(entry);
+  if (it == translation_probabilities.end()) {
+    return 0;
+  }
+  return it->second.second;
 }
 
 bool TranslationTable::operator==(const TranslationTable& other) const {
