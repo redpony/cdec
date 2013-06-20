@@ -20,6 +20,7 @@ opts = Trollop::options do
   opt :references, "references", :type => :string
   opt :qsub, "use qsub", :type => :bool, :default => false
   opt :dtrain_binary, "path to dtrain binary", :type => :string
+  opt :extra_qsub, "extra qsub args", :type => :string, :default => "" # e.g. "-l virtual_free=32000M"
 end
 usage if not opts[:config]&&opts[:shards]&&opts[:input]&&opts[:references]
 
@@ -119,7 +120,7 @@ end
       qsub_str_start = qsub_str_end = ''
       local_end = ''
       if use_qsub
-        qsub_str_start = "qsub -cwd -sync y -b y -j y -o work/out.#{shard}.#{epoch} -N dtrain.#{shard}.#{epoch} \""
+        qsub_str_start = "qsub #{opts[:extra_qsub]} -cwd -sync y -b y -j y -o work/out.#{shard}.#{epoch} -N dtrain.#{shard}.#{epoch} \""
         qsub_str_end = "\""
         local_end = ''
       else
