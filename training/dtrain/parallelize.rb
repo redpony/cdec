@@ -4,7 +4,7 @@ require 'trollop'
 
 def usage
   STDERR.write "Usage: "
-  STDERR.write "ruby parallelize.rb -c <dtrain.ini> [-e <epochs=10>] [--randomize/-z] [--reshard/-y] -s <#shards|0> [-p <at once=9999>] -i <input> -r <refs> [--qsub/-q] [--dtrain_binary <path to dtrain binary>] [-l \"l2 select_k 100000\"]\n"
+  STDERR.write "ruby parallelize.rb -c <dtrain.ini> [-e <epochs=10>] [--randomize/-z] [--reshard/-y] -s <#shards|0> [-p <at once=9999>] -i <input> -r <refs> [--qsub/-q] [--dtrain_binary <path to dtrain binary>] [-l \"l2 select_k 100000\"] [--extra_qsub \"-l virtual_free=24G\"]\n"
   exit 1
 end
 
@@ -20,7 +20,7 @@ opts = Trollop::options do
   opt :references, "references", :type => :string
   opt :qsub, "use qsub", :type => :bool, :default => false
   opt :dtrain_binary, "path to dtrain binary", :type => :string
-  opt :extra_qsub, "extra qsub args", :type => :string, :default => "" # e.g. "-l virtual_free=32000M"
+  opt :extra_qsub, "extra qsub args", :type => :string, :default => ""
 end
 usage if not opts[:config]&&opts[:shards]&&opts[:input]&&opts[:references]
 
