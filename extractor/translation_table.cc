@@ -97,7 +97,12 @@ double TranslationTable::GetTargetGivenSourceScore(
 
   int source_id = source_data_array->GetWordId(source_word);
   int target_id = target_data_array->GetWordId(target_word);
-  return translation_probabilities[make_pair(source_id, target_id)].first;
+  auto entry = make_pair(source_id, target_id);
+  auto it = translation_probabilities.find(entry);
+  if (it == translation_probabilities.end()) {
+    return 0;
+  }
+  return it->second.first;
 }
 
 double TranslationTable::GetSourceGivenTargetScore(
@@ -109,18 +114,18 @@ double TranslationTable::GetSourceGivenTargetScore(
 
   int source_id = source_data_array->GetWordId(source_word);
   int target_id = target_data_array->GetWordId(target_word);
-  return translation_probabilities[make_pair(source_id, target_id)].second;
+  auto entry = make_pair(source_id, target_id);
+  auto it = translation_probabilities.find(entry);
+  if (it == translation_probabilities.end()) {
+    return 0;
+  }
+  return it->second.second;
 }
 
-void TranslationTable::WriteBinary(const fs::path& filepath) const {
-  FILE* file = fopen(filepath.string().c_str(), "w");
-
-  int size = translation_probabilities.size();
-  fwrite(&size, sizeof(int), 1, file);
-  for (auto entry: translation_probabilities) {
-    fwrite(&entry.first, sizeof(entry.first), 1, file);
-    fwrite(&entry.second, sizeof(entry.second), 1, file);
-  }
+bool TranslationTable::operator==(const TranslationTable& other) const {
+  return *source_data_array == *other.source_data_array &&
+         *target_data_array == *other.target_data_array &&
+         translation_probabilities == other.translation_probabilities;
 }
 
 } // namespace extractor

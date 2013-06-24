@@ -9,6 +9,9 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/utility.hpp>
+#include <boost/serialization/vector.hpp>
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -39,18 +42,18 @@ class Precomputation {
       int max_rule_symbols, int min_gap_size,
       int max_frequent_phrase_len, int min_frequency);
 
-  virtual ~Precomputation();
+  // Creates empty precomputation data structure.
+  Precomputation();
 
-  void WriteBinary(const fs::path& filepath) const;
+  virtual ~Precomputation();
 
   // Returns a reference to the index.
   virtual const Index& GetCollocations() const;
 
+  bool operator==(const Precomputation& other) const;
+
   static int FIRST_NONTERMINAL;
   static int SECOND_NONTERMINAL;
-
- protected:
-  Precomputation();
 
  private:
   // Finds the most frequent contiguous collocations.
@@ -71,6 +74,28 @@ class Precomputation {
 
   // Adds an occurrence of a ternary collocation.
   void AddStartPositions(vector<int>& positions, int pos1, int pos2, int pos3);
+
+  friend class boost::serialization::access;
+
+  template<class Archive> void save(Archive& ar, unsigned int) const {
+    int num_entries = collocations.size();
+    ar << num_entries;
+    for (pair<vector<int>, vector<int>> entry: collocations) {
+      ar << entry;
+    }
+  }
+
+  template<class Archive> void load(Archive& ar, unsigned int) {
+    int num_entries;
+    ar >> num_entries;
+    for (size_t i = 0; i < num_entries; ++i) {
+      pair<vector<int>, vector<int>> entry;
+      ar >> entry;
+      collocations.insert(entry);
+    }
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER();
 
   Index collocations;
 };

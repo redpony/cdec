@@ -42,11 +42,12 @@ fs::path GetGrammarFilePath(const fs::path& grammar_path, int file_number) {
 }
 
 int main(int argc, char** argv) {
-  int num_threads_default = 1;
-  #pragma omp parallel
-  num_threads_default = omp_get_num_threads();
-
   // Sets up the command line arguments map.
+  int max_threads = 1;
+  #pragma omp parallel
+  max_threads = omp_get_num_threads();
+  string threads_option = "Number of parallel threads for extraction "
+                          "(max=" + to_string(max_threads) + ")";
   po::options_description desc("Command line options");
   desc.add_options()
     ("help,h", "Show available options")
@@ -55,8 +56,7 @@ int main(int argc, char** argv) {
     ("bitext,b", po::value<string>(), "Parallel text (source ||| target)")
     ("alignment,a", po::value<string>()->required(), "Bitext word alignment")
     ("grammars,g", po::value<string>()->required(), "Grammars output path")
-    ("threads,t", po::value<int>()->default_value(num_threads_default),
-        "Number of parallel extractors")
+    ("threads,t", po::value<int>()->default_value(1), threads_option.c_str())
     ("frequent", po::value<int>()->default_value(100),
         "Number of precomputed frequent patterns")
     ("super_frequent", po::value<int>()->default_value(10),
@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
   }
 
   int num_threads = vm["threads"].as<int>();
-  cout << "Grammar extraction will use " << num_threads << " threads." << endl;
+  cerr << "Grammar extraction will use " << num_threads << " threads." << endl;
 
   // Reads the parallel corpus.
   Clock::time_point preprocess_start_time = Clock::now();
@@ -118,17 +118,17 @@ int main(int argc, char** argv) {
        << " seconds" << endl;
 
   // Constructs the suffix array for the source data.
-  cerr << "Creating source suffix array..." << endl;
   start_time = Clock::now();
+  cerr << "Constructing source suffix array..." << endl;
   shared_ptr<SuffixArray> source_suffix_array =
       make_shared<SuffixArray>(source_data_array);
   stop_time = Clock::now();
-  cerr << "Creating suffix array took "
+  cerr << "Constructing suffix array took "
        << GetDuration(start_time, stop_time) << " seconds" << endl;
 
   // Reads the alignment.
-  cerr << "Reading alignment..." << endl;
   start_time = Clock::now();
+  cerr << "Reading alignment..." << endl;
   shared_ptr<Alignment> alignment =
       make_shared<Alignment>(vm["alignment"].as<string>());
   stop_time = Clock::now();
@@ -137,8 +137,8 @@ int main(int argc, char** argv) {
 
   // Constructs an index storing the occurrences in the source data for each
   // frequent collocation.
-  cerr << "Precomputing collocations..." << endl;
   start_time = Clock::now();
+  cerr << "Precomputing collocations..." << endl;
   shared_ptr<Precomputation> precomputation = make_shared<Precomputation>(
       source_suffix_array,
       vm["frequent"].as<int>(),
@@ -154,8 +154,8 @@ int main(int argc, char** argv) {
 
   // Constructs a table storing p(e | f) and p(f | e) for every pair of source
   // and target words.
-  cerr << "Precomputing conditional probabilities..." << endl;
   start_time = Clock::now();
+  cerr << "Precomputing conditional probabilities..." << endl;
   shared_ptr<TranslationTable> table = make_shared<TranslationTable>(
       source_data_array, target_data_array, alignment);
   stop_time = Clock::now();
@@ -229,7 +229,7 @@ int main(int argc, char** argv) {
   }
 
   for (size_t i = 0; i < sentences.size(); ++i) {
-    cout << "<seg grammar=\"" << GetGrammarFilePath(grammar_path, i) << "\" id=\""
+    cout << "<seg grammar=" << GetGrammarFilePath(grammar_path, i) << " id=\""
          << i << "\"> " << sentences[i] << " </seg> " << suffixes[i] << endl;
   }
 

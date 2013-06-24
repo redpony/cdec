@@ -186,20 +186,6 @@ shared_ptr<DataArray> SuffixArray::GetData() const {
   return data_array;
 }
 
-void SuffixArray::WriteBinary(const fs::path& filepath) const {
-  FILE* file = fopen(filepath.string().c_str(), "w");
-  assert(file);
-  data_array->WriteBinary(file);
-
-  int size = suffix_array.size();
-  fwrite(&size, sizeof(int), 1, file);
-  fwrite(suffix_array.data(), sizeof(int), size, file);
-
-  size = word_start.size();
-  fwrite(&size, sizeof(int), 1, file);
-  fwrite(word_start.data(), sizeof(int), size, file);
-}
-
 PhraseLocation SuffixArray::Lookup(int low, int high, const string& word,
                                    int offset) const {
   if (!data_array->HasWord(word)) {
@@ -230,6 +216,12 @@ int SuffixArray::LookupRangeStart(int low, int high, int word_id,
     }
   }
   return result;
+}
+
+bool SuffixArray::operator==(const SuffixArray& other) const {
+  return *data_array == *other.data_array &&
+         suffix_array == other.suffix_array &&
+         word_start == other.word_start;
 }
 
 } // namespace extractor
