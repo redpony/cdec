@@ -17,6 +17,17 @@ To build only parts needed for dtrain do
   cd training/dtrain/; make
 ```
 
+Ideas
+-----
+ * get approx_bleu to work?
+ * implement minibatches (Minibatch and Parallelization for Online Large Margin Structured Learning)
+ * learning rate 1/T?
+ * use an oracle? mira-like (model vs. BLEU), feature repr. of reference!? 
+ * implement lc_bleu properly
+ * merge kbest lists of previous epochs (as MERT does)
+ * ``walk entire regularization path''
+ * rerank after each update?
+
 Running
 -------
 See directories under test/ .
