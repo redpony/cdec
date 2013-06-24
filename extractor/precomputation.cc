@@ -165,25 +165,12 @@ void Precomputation::AddStartPositions(
   positions.push_back(pos3);
 }
 
-void Precomputation::WriteBinary(const fs::path& filepath) const {
-  FILE* file = fopen(filepath.string().c_str(), "w");
-
-  // TODO(pauldb): Refactor this code.
-  int size = collocations.size();
-  fwrite(&size, sizeof(int), 1, file);
-  for (auto entry: collocations) {
-    size = entry.first.size();
-    fwrite(&size, sizeof(int), 1, file);
-    fwrite(entry.first.data(), sizeof(int), size, file);
-
-    size = entry.second.size();
-    fwrite(&size, sizeof(int), 1, file);
-    fwrite(entry.second.data(), sizeof(int), size, file);
-  }
-}
-
 const Index& Precomputation::GetCollocations() const {
   return collocations;
+}
+
+bool Precomputation::operator==(const Precomputation& other) const {
+  return collocations == other.collocations;
 }
 
 } // namespace extractor

@@ -6,6 +6,10 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/split_member.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/vector.hpp>
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -42,6 +46,9 @@ class DataArray {
 
   // Reads data array from bitext file where the sentences are separated by |||.
   DataArray(const string& filename, const Side& side);
+
+  // Creates empty data array.
+  DataArray();
 
   virtual ~DataArray();
 
@@ -82,14 +89,7 @@ class DataArray {
   // Returns the number of the sentence containing the given position.
   virtual int GetSentenceId(int position) const;
 
-  // Writes data array to file in binary format.
-  void WriteBinary(const fs::path& filepath) const;
-
-  // Writes data array to file in binary format.
-  void WriteBinary(FILE* file) const;
-
- protected:
-  DataArray();
+  bool operator==(const DataArray& other) const;
 
  private:
   // Sets up specific constants.
@@ -97,6 +97,28 @@ class DataArray {
 
   // Constructs the data array.
   void CreateDataArray(const vector<string>& lines);
+
+  friend class boost::serialization::access;
+
+  template<class Archive> void save(Archive& ar, unsigned int) const {
+    ar << id2word;
+    ar << data;
+    ar << sentence_id;
+    ar << sentence_start;
+  }
+
+  template<class Archive> void load(Archive& ar, unsigned int) {
+    ar >> id2word;
+    for (size_t i = 0; i < id2word.size(); ++i) {
+      word2id[id2word[i]] = i;
+    }
+
+    ar >> data;
+    ar >> sentence_id;
+    ar >> sentence_start;
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER();
 
   unordered_map<string, int> word2id;
   vector<string> id2word;

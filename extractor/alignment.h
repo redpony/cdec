@@ -5,6 +5,10 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/split_member.hpp>
+#include <boost/serialization/utility.hpp>
+#include <boost/serialization/vector.hpp>
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -19,18 +23,23 @@ class Alignment {
   // Reads alignment from text file.
   Alignment(const string& filename);
 
+  // Creates empty alignment.
+  Alignment();
+
   // Returns the alignment for a given sentence.
   virtual vector<pair<int, int>> GetLinks(int sentence_index) const;
 
-  // Writes alignment to file in binary format.
-  void WriteBinary(const fs::path& filepath);
-
   virtual ~Alignment();
 
- protected:
-  Alignment();
+  bool operator==(const Alignment& alignment) const;
 
  private:
+  friend class boost::serialization::access;
+
+  template<class Archive> void serialize(Archive& ar, unsigned int) {
+    ar & alignments;
+  }
+
   vector<vector<pair<int, int>>> alignments;
 };
 
