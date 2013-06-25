@@ -38,23 +38,6 @@ class PrecomputationTest : public Test {
     precomputation = Precomputation(suffix_array, 3, 3, 10, 5, 1, 4, 2);
   }
 
-  void CheckCollocation(const Collocations& collocations,
-                        const vector<int>& collocation,
-                        const vector<vector<int>>& locations) {
-    for (auto location: locations) {
-      auto item = make_pair(collocation, location);
-      EXPECT_FALSE(find(collocations.begin(), collocations.end(), item) ==
-                   collocations.end());
-    }
-  }
-
-  void CheckIllegalCollocation(const Collocations& collocations,
-                               const vector<int>& collocation) {
-    for (auto item: collocations) {
-      EXPECT_FALSE(collocation == item.first);
-    }
-  }
-
   vector<int> data;
   shared_ptr<MockDataArray> data_array;
   shared_ptr<MockSuffixArray> suffix_array;
@@ -62,71 +45,67 @@ class PrecomputationTest : public Test {
 };
 
 TEST_F(PrecomputationTest, TestCollocations) {
-  Collocations collocations = precomputation.GetCollocations();
+  Index collocations = precomputation.GetCollocations();
 
-  EXPECT_EQ(50, collocations.size());
+  vector<int> key = {2, 3, -1, 2};
+  vector<int> expected_value = {1, 5, 1, 8, 5, 8, 5, 11, 8, 11};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {2, 3, -1, 2, 3};
+  expected_value = {1, 5, 1, 8, 5, 8};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {2, 3, -1, 3};
+  expected_value = {1, 6, 1, 9, 5, 9};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {3, -1, 2};
+  expected_value = {2, 5, 2, 8, 2, 11, 6, 8, 6, 11, 9, 11};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {3, -1, 3};
+  expected_value = {2, 6, 2, 9, 6, 9};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {3, -1, 2, 3};
+  expected_value = {2, 5, 2, 8, 6, 8};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {2, -1, 2};
+  expected_value = {1, 5, 1, 8, 5, 8, 5, 11, 8, 11};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {2, -1, 2, 3};
+  expected_value = {1, 5, 1, 8, 5, 8};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {2, -1, 3};
+  expected_value = {1, 6, 1, 9, 5, 9};
+  EXPECT_EQ(expected_value, collocations[key]);
 
-  vector<int> collocation = {2, 3, -1, 2};
-  vector<vector<int>> locations = {{1, 5}, {1, 8}, {5, 8}, {5, 11}, {8, 11}};
-  CheckCollocation(collocations, collocation, locations);
+  key = {2, -1, 2, -2, 2};
+  expected_value = {1, 5, 8, 5, 8, 11};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {2, -1, 2, -2, 3};
+  expected_value = {1, 5, 9};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {2, -1, 3, -2, 2};
+  expected_value = {1, 6, 8, 5, 9, 11};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {2, -1, 3, -2, 3};
+  expected_value = {1, 6, 9};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {3, -1, 2, -2, 2};
+  expected_value = {2, 5, 8, 2, 5, 11, 2, 8, 11, 6, 8, 11};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {3, -1, 2, -2, 3};
+  expected_value = {2, 5, 9};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {3, -1, 3, -2, 2};
+  expected_value = {2, 6, 8, 2, 6, 11, 2, 9, 11, 6, 9, 11};
+  EXPECT_EQ(expected_value, collocations[key]);
+  key = {3, -1, 3, -2, 3};
+  expected_value = {2, 6, 9};
+  EXPECT_EQ(expected_value, collocations[key]);
 
-  collocation = {2, 3, -1, 2, 3};
-  locations = {{1, 5}, {1, 8}, {5, 8}};
-  CheckCollocation(collocations, collocation, locations);
-
-  collocation = {2, 3, -1, 3};
-  locations = {{1, 6}, {1, 9}, {5, 9}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {3, -1, 2};
-  locations = {{2, 5}, {2, 8}, {2, 11}, {6, 8}, {6, 11}, {9, 11}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {3, -1, 3};
-  locations = {{2, 6}, {2, 9}, {6, 9}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {3, -1, 2, 3};
-  locations = {{2, 5}, {2, 8}, {6, 8}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {2, -1, 2};
-  locations = {{1, 5}, {1, 8}, {5, 8}, {5, 11}, {8, 11}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {2, -1, 2, 3};
-  locations = {{1, 5}, {1, 8}, {5, 8}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {2, -1, 3};
-  locations = {{1, 6}, {1, 9}, {5, 9}};
-  CheckCollocation(collocations, collocation, locations);
-
-  collocation = {2, -1, 2, -2, 2};
-  locations = {{1, 5, 8}, {5, 8, 11}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {2, -1, 2, -2, 3};
-  locations = {{1, 5, 9}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {2, -1, 3, -2, 2};
-  locations = {{1, 6, 8}, {5, 9, 11}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {2, -1, 3, -2, 3};
-  locations = {{1, 6, 9}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {3, -1, 2, -2, 2};
-  locations = {{2, 5, 8}, {2, 5, 11}, {2, 8, 11}, {6, 8, 11}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {3, -1, 2, -2, 3};
-  locations = {{2, 5, 9}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {3, -1, 3, -2, 2};
-  locations = {{2, 6, 8}, {2, 6, 11}, {2, 9, 11}, {6, 9, 11}};
-  CheckCollocation(collocations, collocation, locations);
-  collocation = {3, -1, 3, -2, 3};
-  locations = {{2, 6, 9}};
-  CheckCollocation(collocations, collocation, locations);
-
-  // Collocation exceeds max_rule_symbols.
-  collocation = {2, -1, 2, -2, 2, 3};
-  CheckIllegalCollocation(collocations, collocation);
-  // Collocation contains non frequent pattern.
-  collocation = {2, -1, 5};
-  CheckIllegalCollocation(collocations, collocation);
+  // Exceeds max_rule_symbols.
+  key = {2, -1, 2, -2, 2, 3};
+  EXPECT_EQ(0, collocations.count(key));
+  // Contains non frequent pattern.
+  key = {2, -1, 5};
+  EXPECT_EQ(0, collocations.count(key));
 }
 
 TEST_F(PrecomputationTest, TestSerialization) {

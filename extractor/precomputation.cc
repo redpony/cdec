@@ -14,65 +14,63 @@ int Precomputation::FIRST_NONTERMINAL = -1;
 int Precomputation::SECOND_NONTERMINAL = -2;
 
 Precomputation::Precomputation(
-    shared_ptr<SuffixArray> suffix_array, int num_frequent_phrases,
-    int num_super_frequent_phrases, int max_rule_span,
+    shared_ptr<SuffixArray> suffix_array, int num_frequent_patterns,
+    int num_super_frequent_patterns, int max_rule_span,
     int max_rule_symbols, int min_gap_size,
     int max_frequent_phrase_len, int min_frequency) {
   vector<int> data = suffix_array->GetData()->GetData();
-  vector<vector<int>> frequent_phrases = FindMostFrequentPhrases(
-      suffix_array, data, num_frequent_phrases, max_frequent_phrase_len,
+  vector<vector<int>> frequent_patterns = FindMostFrequentPatterns(
+      suffix_array, data, num_frequent_patterns, max_frequent_phrase_len,
       min_frequency);
 
   // Construct sets containing the frequent and superfrequent contiguous
   // collocations.
-  unordered_set<vector<int>, VectorHash> frequent_phrases_set;
-  unordered_set<vector<int>, VectorHash> super_frequent_phrases_set;
-  for (size_t i = 0; i < frequent_phrases.size(); ++i) {
-    frequent_phrases_set.insert(frequent_phrases[i]);
-    if (i < num_super_frequent_phrases) {
-      super_frequent_phrases_set.insert(frequent_phrases[i]);
+  unordered_set<vector<int>, VectorHash> frequent_patterns_set;
+  unordered_set<vector<int>, VectorHash> super_frequent_patterns_set;
+  for (size_t i = 0; i < frequent_patterns.size(); ++i) {
+    frequent_patterns_set.insert(frequent_patterns[i]);
+    if (i < num_super_frequent_patterns) {
+      super_frequent_patterns_set.insert(frequent_patterns[i]);
     }
   }
 
-  vector<tuple<int, int, int>> locations;
+  vector<tuple<int, int, int>> matchings;
   for (size_t i = 0; i < data.size(); ++i) {
-    // If the sentence is over, add all the discontiguous frequent phrases to
-    // the list.
+    // If the sentence is over, add all the discontiguous frequent patterns to
+    // the index.
     if (data[i] == DataArray::END_OF_LINE) {
-      AddCollocations(locations, data, max_rule_span, min_gap_size,
+      AddCollocations(matchings, data, max_rule_span, min_gap_size,
           max_rule_symbols);
-      locations.clear();
+      matchings.clear();
       continue;
     }
-    vector<int> phrase;
-    // Find all the contiguous frequent phrases starting at position i.
+    vector<int> pattern;
+    // Find all the contiguous frequent patterns starting at position i.
     for (int j = 1; j <= max_frequent_phrase_len && i + j <= data.size(); ++j) {
-      phrase.push_back(data[i + j - 1]);
-      if (frequent_phrases_set.count(phrase)) {
-        int is_super_frequent = super_frequent_phrases_set.count(phrase);
-        locations.push_back(make_tuple(i, j, is_super_frequent));
+      pattern.push_back(data[i + j - 1]);
+      if (frequent_patterns_set.count(pattern)) {
+        int is_super_frequent = super_frequent_patterns_set.count(pattern);
+        matchings.push_back(make_tuple(i, j, is_super_frequent));
       } else {
-        // If the current phrase is not frequent, any longer phrase having the
-        // current phrase as prefix will not be frequent.
+        // If the current pattern is not frequent, any longer pattern having the
+        // current pattern as prefix will not be frequent.
         break;
       }
     }
   }
-
-  collocations.shrink_to_fit();
 }
 
 Precomputation::Precomputation() {}
 
 Precomputation::~Precomputation() {}
 
-vector<vector<int>> Precomputation::FindMostFrequentPhrases(
+vector<vector<int>> Precomputation::FindMostFrequentPatterns(
     shared_ptr<SuffixArray> suffix_array, const vector<int>& data,
-    int num_frequent_phrases, int max_frequent_phrase_len, int min_frequency) {
+    int num_frequent_patterns, int max_frequent_phrase_len, int min_frequency) {
   vector<int> lcp = suffix_array->BuildLCPArray();
   vector<int> run_start(max_frequent_phrase_len);
 
-  // Find all the phrases occurring at least min_frequency times.
+  // Find all the patterns occurring at least min_frequency times.
   priority_queue<pair<int, pair<int, int>>> heap;
   for (size_t i = 1; i < lcp.size(); ++i) {
     for (int len = lcp[i]; len < max_frequent_phrase_len; ++len) {
@@ -85,34 +83,34 @@ vector<vector<int>> Precomputation::FindMostFrequentPhrases(
     }
   }
 
-  // Extract the most frequent phrases.
-  vector<vector<int>> frequent_phrases;
-  while (frequent_phrases.size() < num_frequent_phrases && !heap.empty()) {
+  // Extract the most frequent patterns.
+  vector<vector<int>> frequent_patterns;
+  while (frequent_patterns.size() < num_frequent_patterns && !heap.empty()) {
     int start = heap.top().second.first;
     int len = heap.top().second.second;
     heap.pop();
 
-    vector<int> phrase(data.begin() + start, data.begin() + start + len);
-    if (find(phrase.begin(), phrase.end(), DataArray::END_OF_LINE) ==
-        phrase.end()) {
-      frequent_phrases.push_back(phrase);
+    vector<int> pattern(data.begin() + start, data.begin() + start + len);
+    if (find(pattern.begin(), pattern.end(), DataArray::END_OF_LINE) ==
+        pattern.end()) {
+      frequent_patterns.push_back(pattern);
     }
   }
-  return frequent_phrases;
+  return frequent_patterns;
 }
 
 void Precomputation::AddCollocations(
-    const vector<tuple<int, int, int>>& locations, const vector<int>& data,
+    const vector<tuple<int, int, int>>& matchings, const vector<int>& data,
     int max_rule_span, int min_gap_size, int max_rule_symbols) {
-  // Select the leftmost subphrase.
-  for (size_t i = 0; i < locations.size(); ++i) {
+  // Select the leftmost subpattern.
+  for (size_t i = 0; i < matchings.size(); ++i) {
     int start1, size1, is_super1;
-    tie(start1, size1, is_super1) = locations[i];
+    tie(start1, size1, is_super1) = matchings[i];
 
-    // Select the second (middle) subphrase
-    for (size_t j = i + 1; j < locations.size(); ++j) {
+    // Select the second (middle) subpattern
+    for (size_t j = i + 1; j < matchings.size(); ++j) {
       int start2, size2, is_super2;
-      tie(start2, size2, is_super2) = locations[j];
+      tie(start2, size2, is_super2) = matchings[j];
       if (start2 - start1 >= max_rule_span) {
         break;
       }
@@ -120,21 +118,20 @@ void Precomputation::AddCollocations(
       if (start2 - start1 - size1 >= min_gap_size
           && start2 + size2 - start1 <= max_rule_span
           && size1 + size2 + 1 <= max_rule_symbols) {
-        vector<int> collocation(data.begin() + start1,
+        vector<int> pattern(data.begin() + start1,
             data.begin() + start1 + size1);
-        collocation.push_back(Precomputation::FIRST_NONTERMINAL);
-        collocation.insert(collocation.end(), data.begin() + start2,
+        pattern.push_back(Precomputation::FIRST_NONTERMINAL);
+        pattern.insert(pattern.end(), data.begin() + start2,
             data.begin() + start2 + size2);
-
-        AddCollocation(collocation, GetLocation(start1, start2));
+        AddStartPositions(collocations[pattern], start1, start2);
 
         // Try extending the binary collocation to a ternary collocation.
         if (is_super2) {
-          collocation.push_back(Precomputation::SECOND_NONTERMINAL);
-          // Select the rightmost subphrase.
-          for (size_t k = j + 1; k < locations.size(); ++k) {
+          pattern.push_back(Precomputation::SECOND_NONTERMINAL);
+          // Select the rightmost subpattern.
+          for (size_t k = j + 1; k < matchings.size(); ++k) {
             int start3, size3, is_super3;
-            tie(start3, size3, is_super3) = locations[k];
+            tie(start3, size3, is_super3) = matchings[k];
             if (start3 - start1 >= max_rule_span) {
               break;
             }
@@ -143,12 +140,10 @@ void Precomputation::AddCollocations(
                 && start3 + size3 - start1 <= max_rule_span
                 && size1 + size2 + size3 + 2 <= max_rule_symbols
                 && (is_super1 || is_super3)) {
-              collocation.insert(collocation.end(), data.begin() + start3,
+              pattern.insert(pattern.end(), data.begin() + start3,
                   data.begin() + start3 + size3);
-
-              AddCollocation(collocation, GetLocation(start1, start2, start3));
-
-              collocation.erase(collocation.end() - size3);
+              AddStartPositions(collocations[pattern], start1, start2, start3);
+              pattern.erase(pattern.end() - size3);
             }
           }
         }
@@ -157,29 +152,20 @@ void Precomputation::AddCollocations(
   }
 }
 
-vector<int> Precomputation::GetLocation(int pos1, int pos2) {
-  vector<int> location;
-  location.push_back(pos1);
-  location.push_back(pos2);
-  return location;
+void Precomputation::AddStartPositions(
+    vector<int>& positions, int pos1, int pos2) {
+  positions.push_back(pos1);
+  positions.push_back(pos2);
 }
 
-vector<int> Precomputation::GetLocation(int pos1, int pos2, int pos3) {
-  vector<int> location;
-  location.push_back(pos1);
-  location.push_back(pos2);
-  location.push_back(pos3);
-  return location;
+void Precomputation::AddStartPositions(
+    vector<int>& positions, int pos1, int pos2, int pos3) {
+  positions.push_back(pos1);
+  positions.push_back(pos2);
+  positions.push_back(pos3);
 }
 
-void Precomputation::AddCollocation(vector<int> collocation,
-                                    vector<int> location) {
-  collocation.shrink_to_fit();
-  location.shrink_to_fit();
-  collocations.push_back(make_pair(collocation, location));
-}
-
-Collocations Precomputation::GetCollocations() const {
+const Index& Precomputation::GetCollocations() const {
   return collocations;
 }
 
