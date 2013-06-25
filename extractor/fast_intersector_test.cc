@@ -60,14 +60,14 @@ class FastIntersectorTest : public Test {
 
     precomputation = make_shared<MockPrecomputation>();
     EXPECT_CALL(*precomputation, GetCollocations())
-        .WillRepeatedly(Return(collocations));
+        .WillRepeatedly(ReturnRef(collocations));
 
     phrase_builder = make_shared<PhraseBuilder>(vocabulary);
     intersector = make_shared<FastIntersector>(suffix_array, precomputation,
                                                vocabulary, 15, 1);
   }
 
-  Collocations collocations;
+  Index collocations;
   shared_ptr<MockDataArray> data_array;
   shared_ptr<MockSuffixArray> suffix_array;
   shared_ptr<MockPrecomputation> precomputation;
@@ -82,9 +82,9 @@ TEST_F(FastIntersectorTest, TestCachedCollocation) {
   Phrase phrase = phrase_builder->Build(symbols);
   PhraseLocation prefix_location(15, 16), suffix_location(16, 17);
 
-  collocations.push_back(make_pair(symbols, expected_location));
+  collocations[symbols] = expected_location;
   EXPECT_CALL(*precomputation, GetCollocations())
-      .WillRepeatedly(Return(collocations));
+      .WillRepeatedly(ReturnRef(collocations));
   intersector = make_shared<FastIntersector>(suffix_array, precomputation,
                                              vocabulary, 15, 1);
 
