@@ -96,7 +96,7 @@ def main():
   parser.add_argument('-m', '--metric', default='ibm_bleu',
                       help='metric to optimize. Example values: '
                            'ibm_bleu, nist_bleu, Koehn_bleu, TER, Combi')
-  parser.add_argument('--max-iterations', type=int, default=10, metavar='N',
+  parser.add_argument('--max-iterations', type=int, default=20, metavar='N',
                       help='maximum number of iterations to run')
   parser.add_argument('--optimizer', type=int, default=2, choices=range(1,6),
                       help='learning method to use for weight update.'
