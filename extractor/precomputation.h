@@ -19,16 +19,18 @@ using namespace std;
 namespace extractor {
 
 typedef boost::hash<vector<int>> VectorHash;
-typedef unordered_map<vector<int>, vector<int>, VectorHash> Index;
+typedef vector<pair<vector<int>, vector<int>>> Collocations;
 
 class SuffixArray;
 
 /**
- * Data structure wrapping an index with all the occurrences of the most
- * frequent discontiguous collocations in the source data.
+ * Data structure containing all the data needed for constructing an index with
+ * all the occurrences of the most frequent discontiguous collocations in the
+ * source data.
  *
- * Let a, b, c be contiguous collocations. The index will contain an entry for
- * every collocation of the form:
+ * Let a, b, c be contiguous phrases. The data structure will contain the
+ * locations in the source data where every collocation of the following forms
+ * occurs:
  * - aXb, where a and b are frequent
  * - aXbXc, where a and b are super-frequent and c is frequent or
  *                b and c are super-frequent and a is frequent.
@@ -37,8 +39,8 @@ class Precomputation {
  public:
   // Constructs the index using the suffix array.
   Precomputation(
-      shared_ptr<SuffixArray> suffix_array, int num_frequent_patterns,
-      int num_super_frequent_patterns, int max_rule_span,
+      shared_ptr<SuffixArray> suffix_array, int num_frequent_phrases,
+      int num_super_frequent_phrases, int max_rule_span,
       int max_rule_symbols, int min_gap_size,
       int max_frequent_phrase_len, int min_frequency);
 
@@ -47,8 +49,9 @@ class Precomputation {
 
   virtual ~Precomputation();
 
-  // Returns a reference to the index.
-  virtual const Index& GetCollocations() const;
+  // Returns the list of the locations of the most frequent collocations in the
+  // source data.
+  virtual Collocations GetCollocations() const;
 
   bool operator==(const Precomputation& other) const;
 
@@ -57,23 +60,29 @@ class Precomputation {
 
  private:
   // Finds the most frequent contiguous collocations.
-  vector<vector<int>> FindMostFrequentPatterns(
+  vector<vector<int>> FindMostFrequentPhrases(
       shared_ptr<SuffixArray> suffix_array, const vector<int>& data,
-      int num_frequent_patterns, int max_frequent_phrase_len,
+      int num_frequent_phrases, int max_frequent_phrase_len,
       int min_frequency);
 
   // Given the locations of the frequent contiguous collocations in a sentence,
   // it adds new entries to the index for each discontiguous collocation
   // matching the criteria specified in the class description.
-  void AddCollocations(
-      const vector<std::tuple<int, int, int>>& matchings, const vector<int>& data,
-      int max_rule_span, int min_gap_size, int max_rule_symbols);
+  void AddCollocations(const vector<std::tuple<int, int, int>>& locations,
+                       const vector<int>& data, int max_rule_span,
+                       int min_gap_size, int max_rule_symbols);
 
-  // Adds an occurrence of a binary collocation.
-  void AddStartPositions(vector<int>& positions, int pos1, int pos2);
+  // Creates a vector representation for the location of a binary collocation
+  // containing the starting points of each subpattern.
+  vector<int> GetLocation(int pos1, int pos2);
 
-  // Adds an occurrence of a ternary collocation.
-  void AddStartPositions(vector<int>& positions, int pos1, int pos2, int pos3);
+  // Creates a vector representation for the location of a ternary collocation
+  // containing the starting points of each subpattern.
+  vector<int> GetLocation(int pos1, int pos2, int pos3);
+
+  // Appends a collocation to the list of collocations after shrinking the
+  // vectors to avoid unnecessary memory usage.
+  void AddCollocation(vector<int> collocation, vector<int> location);
 
   friend class boost::serialization::access;
 
@@ -91,13 +100,13 @@ class Precomputation {
     for (size_t i = 0; i < num_entries; ++i) {
       pair<vector<int>, vector<int>> entry;
       ar >> entry;
-      collocations.insert(entry);
+      collocations.push_back(entry);
     }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER();
 
-  Index collocations;
+  Collocations collocations;
 };
 
 } // namespace extractor
