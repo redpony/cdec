@@ -20,10 +20,13 @@ FastIntersector::FastIntersector(shared_ptr<SuffixArray> suffix_array,
     vocabulary(vocabulary),
     max_rule_span(max_rule_span),
     min_gap_size(min_gap_size) {
-  Index precomputed_collocations = precomputation->GetCollocations();
-  for (pair<vector<int>, vector<int>> entry: precomputed_collocations) {
-    vector<int> phrase = ConvertPhrase(entry.first);
-    collocations[phrase] = entry.second;
+  auto precomputed_collocations = precomputation->GetCollocations();
+  for (auto item: precomputed_collocations) {
+    vector<int> phrase = ConvertPhrase(item.first);
+    vector<int> location = item.second;
+    vector<int>& phrase_collocations = collocations[phrase];
+    phrase_collocations.insert(phrase_collocations.end(), location.begin(),
+                               location.end());
   }
 }
 
