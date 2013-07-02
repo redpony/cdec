@@ -2,7 +2,7 @@ C++ implementation of the online grammar extractor originally developed by [Adam
 
 To run the extractor you need to:
 
-    cdec/extractor/run_extractor -a <alignment> -b <parallel_corpus> -g <grammar_output_path> < <input_sentences> > <sgm_file>
+    cdec/extractor/run_extractor -t <num_threads> -a <alignment> -b <parallel_corpus> -g <grammar_output_path> < <input_sentences> > <sgm_file>
 
 To run unit tests you need first to configure `cdec` with the [Google Test](https://code.google.com/p/googletest/) and [Google Mock](https://code.google.com/p/googlemock/) libraries:
 
