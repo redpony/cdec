@@ -39,8 +39,8 @@ def main():
         f_a.stdin.write(line)
         r_a.stdin.write(line)
         # f words ||| e words ||| links ||| score
-        f_line = f_a.stdout.readline().split(' ||| ')[2]
-        r_line = r_a.stdout.readline().split(' ||| ')[2]
+        f_line = f_a.stdout.readline().split('|||')[2].strip()
+        r_line = r_a.stdout.readline().split('|||')[2].strip()
         tools.stdin.write('{}\n'.format(f_line))
         tools.stdin.write('{}\n'.format(r_line))
         sys.stdout.write(tools.stdout.readline())
