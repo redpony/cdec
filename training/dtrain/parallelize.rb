@@ -4,7 +4,7 @@ require 'trollop'
 
 def usage
   STDERR.write "Usage: "
-  STDERR.write "ruby parallelize.rb -c <dtrain.ini> [-e <epochs=10>] [--randomize/-z] [--reshard/-y] -s <#shards|0> [-p <at once=9999>] -i <input> -r <refs> [--qsub/-q] [--dtrain_binary <path to dtrain binary>] [-l \"l2 select_k 100000\"]\n"
+  STDERR.write "ruby parallelize.rb -c <dtrain.ini> [-e <epochs=10>] [--randomize/-z] [--reshard/-y] -s <#shards|0> [-p <at once=9999>] -i <input> -r <refs> [--qsub/-q] [--dtrain_binary <path to dtrain binary>] [-l \"l2 select_k 100000\"] [--extra_qsub \"-l virtual_free=24G\"]\n"
   exit 1
 end
 
@@ -20,6 +20,7 @@ opts = Trollop::options do
   opt :references, "references", :type => :string
   opt :qsub, "use qsub", :type => :bool, :default => false
   opt :dtrain_binary, "path to dtrain binary", :type => :string
+  opt :extra_qsub, "extra qsub args", :type => :string, :default => ""
 end
 usage if not opts[:config]&&opts[:shards]&&opts[:input]&&opts[:references]
 
@@ -119,11 +120,11 @@ end
       qsub_str_start = qsub_str_end = ''
       local_end = ''
       if use_qsub
-        qsub_str_start = "qsub -cwd -sync y -b y -j y -o work/out.#{shard}.#{epoch} -N dtrain.#{shard}.#{epoch} \""
+        qsub_str_start = "qsub #{opts[:extra_qsub]} -cwd -sync y -b y -j y -o work/out.#{shard}.#{epoch} -N dtrain.#{shard}.#{epoch} \""
         qsub_str_end = "\""
         local_end = ''
       else
-        local_end = "&>work/out.#{shard}.#{epoch}"
+        local_end = "2>work/out.#{shard}.#{epoch}"
       end
       pids << Kernel.fork {
         `#{qsub_str_start}#{dtrain_bin} -c #{ini}\
