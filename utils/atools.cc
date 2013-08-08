@@ -299,8 +299,7 @@ void InitCommandLine(unsigned argc, char** argv, po::variables_map* conf) {
       exit(1);
     }
     if ((*conf)["input_1"].as<string>() == "-" && (*conf)["input_2"].as<string>() == "-") {
-      cerr << "Both inputs cannot be STDIN\n";
-      exit(1);
+      cerr << "Both inputs STDIN, reading PAIRS of lines\n";
     }
   } else {
     if (conf->count("input_2") != 0) {
