@@ -143,7 +143,13 @@ libcdec_a_SOURCES = \
   ff_csplit.cc \
   ff_tagger.cc \
   ff_source_path.cc \
+  ff_parse_match.cc \
+	ff_soft_syntax.cc \
+	ff_soft_syntax2.cc \
   ff_source_syntax.cc \
+	ff_source_syntax_p.cc \
+  ff_source_syntax2.cc \
+  ff_source_syntax2_p.cc \
   ff_bleu.cc \
   ff_factory.cc \
   incremental.cc \
