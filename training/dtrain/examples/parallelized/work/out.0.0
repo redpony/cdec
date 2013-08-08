@@ -1,9 +1,9 @@
                 cdec cfg 'cdec.ini'
 Loading the LM will be faster if you build a binary file.
-Reading ../example/nc-wmt11.en.srilm.gz
+Reading ../standard//nc-wmt11.en.srilm.gz
 ----5---10---15---20---25---30---35---40---45---50---55---60---65---70---75---80---85---90---95--100
 ****************************************************************************************************
-Seeding random number sequence to 3121929377
+Seeding random number sequence to 405292278
 
 dtrain
 Parameters:
@@ -16,6 +16,7 @@ Parameters:
            learning rate 0.0001
                    gamma 0
              loss margin 1
+       faster perceptron 0
                    pairs 'XYX'
                    hi lo 0.1
           pair threshold 0
@@ -51,11 +52,11 @@ WEIGHTS
     non0 feature count: 12
            avg list sz: 100
            avg f count: 11.32
-(time 0.37 min, 4.4 s/S)
+(time 0.35 min, 4.2 s/S)
 
 Writing weights file to 'work/weights.0.0' ...
 done
 
 ---
 Best iteration: 1 [SCORE 'stupid_bleu'=0.17521].
-This took 0.36667 min.
+This took 0.35 min.
