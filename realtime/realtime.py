@@ -30,11 +30,12 @@ class RealtimeDecoder:
 
         # Grammar extractor
         sa_config = os.path.join(configdir, 'sa.ini')
-        self.extractor = cdec.sa.GrammarExtractor(sa_config)
+        self.extractor = cdec.sa.GrammarExtractor(sa_config, online=True)
 
         # Decoder
         decoder_config = os.path.join(configdir, 'cdec.ini')
         decoder_weights = os.path.join(configdir, 'weights.final')
+        #TODO: run MIRA instead
         self.decoder = CdecDecoder(decoder_config, decoder_weights)
 
     def close(self):
@@ -61,7 +62,11 @@ class RealtimeDecoder:
         return hyp
 
     def learn(self, source, target):
-        pass
+        alignment = self.aligner.align('{} ||| {}'.format(source, target))
+        logging.info('Adding instance: {} ||| {} ||| {}'.format(source, target, alignment))
+        self.extractor.add_instance(source, target, alignment)
+        # TODO: Add to LM
+        # TODO: MIRA update
 
 def main():
 
