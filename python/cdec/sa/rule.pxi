@@ -49,7 +49,6 @@ cdef class Phrase:
         return tuple(norm)
 
     def strhandle(self):
-        strs = []
         norm = []
         cdef int i, j, s
         i = 1

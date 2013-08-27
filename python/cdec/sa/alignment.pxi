@@ -88,7 +88,6 @@ cdef class Alignment:
 
     def write_enhanced(self, char* filename):
         with open(filename, "w") as f:
-            sent_num = 1
             for link in self.links:
                 f.write("%d " % link)
             f.write("\n")
