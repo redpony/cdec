@@ -1,10 +1,12 @@
-pycdec is a Python interface to cdec
+pycdec is a Python interface to cdec 
 
 ## Installation
 
 Build and install pycdec:
 
 	python setup.py install
+
+Alternatively, run `python setup.py build_ext --inplace` and add the `python/` directory to your `PYTHONPATH`.
 
 ## Grammar extractor
 
@@ -18,13 +20,14 @@ Or, if your parallel corpus is in a single-file format (with source and target s
 
 Extract grammar rules from the compiled corpus:
 	
-	cat input.txt | python -m cdec.sa.extract -c extract.ini -g grammars/
+	cat input.txt | python -m cdec.sa.extract -c extract.ini -g grammars/ -z
 
 This will create per-sentence grammar files in the `grammars` directory and output annotated input suitable for translation with cdec.
 	
 ## Library usage
 
-A basic demo of pycdec's features is available in `test.py`
+A basic demo of pycdec's features is available in `examples/test.py`.
+Other examples are given in [the paper](http://victor.chahuneau.fr/pub/pycdec/) describing pycdec.
 
 More documentation will come as the API becomes stable.
 

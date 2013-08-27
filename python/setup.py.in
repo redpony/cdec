@@ -2,7 +2,7 @@ from distutils.core import setup
 from distutils.extension import Extension
 import re
 
-INC = ['..', 'src/', '../decoder', '../utils', '../mteval']
+INC = ['..', 'cdec/', '../decoder', '../utils', '../mteval']
 LIB = ['../decoder', '../utils', '../mteval', '../training/utils', '../klm/lm', '../klm/util', '../klm/util/double-conversion', '../klm/search']
 
 # Set automatically by configure
@@ -14,20 +14,18 @@ LDFLAGS = [opt.replace('-R', '-Wl,-rpath,') for opt in LDFLAGS]
 
 ext_modules = [
     Extension(name='cdec._cdec',
-        sources=['src/_cdec.cpp'],
+        sources=['cdec/_cdec.cpp'],
         include_dirs=INC,
         library_dirs=LIB,
         libraries=['cdec', 'utils', 'mteval', 'training_utils', 'klm', 'klm_util', 'klm_util_double', 'ksearch'] + LIBS,
         extra_compile_args=CPPFLAGS,
         extra_link_args=LDFLAGS),
     Extension(name='cdec.sa._sa',
-        sources=['src/sa/_sa.c', 'src/sa/strmap.cc'])
+        sources=['cdec/sa/_sa.c', 'cdec/sa/strmap.cc'])
 ]
 
 setup(
     name='cdec',
     ext_modules=ext_modules,
-    requires=['configobj'],
-    packages=['cdec', 'cdec.sa'],
-    package_dir={'': 'pkg'}
+    packages=['cdec', 'cdec.sa']
 )
