@@ -83,10 +83,11 @@ class SentenceScorer {
 
 //TODO: should be able to GetOne GetZero without supplying sentence (just type)
 class DocScorer {
+ friend class DocStreamScorer;
  public:
-  ~DocScorer();
+  virtual ~DocScorer();
   DocScorer() {  }
-  void Init(const ScoreType type,
+  virtual void Init(const ScoreType type,
             const std::vector<std::string>& ref_files,
             const std::string& src_file = "",
             bool verbose=false
@@ -102,9 +103,30 @@ class DocScorer {
 
   int size() const { return scorers_.size(); }
   ScorerP operator[](size_t i) const { return scorers_[i]; }
+  virtual void update(const std::string& ref) {}
  private:
+  ScoreType type;
   std::vector<ScorerP> scorers_;
 };
 
+class DocStreamScorer : public DocScorer {
+	public:
+		void Init(const ScoreType type,
+					const std::vector<std::string>& ref_files,
+					const std::string& src_file = "",
+					bool verbose=false
+			);
+		DocStreamScorer(const ScoreType type,
+					const std::vector<std::string>& ref_files,
+					const std::string& src_file = "",
+					bool verbose=false
+					)
+		{
+			Init(type,ref_files,src_file,verbose);
+		}
+		ScorerP operator[](size_t i);
+		int size();
+		void update(const std::string& ref);
+};
 
 #endif
