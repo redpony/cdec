@@ -101,16 +101,16 @@ class DocScorer {
     Init(type,ref_files,src_file,verbose);
   }
 
-  int size() const { return scorers_.size(); }
-  ScorerP operator[](size_t i) const { return scorers_[i]; }
+  virtual int size() const { return scorers_.size(); }
+  virtual ScorerP operator[](size_t i) const { return scorers_[i]; }
   virtual void update(const std::string& ref) {}
  private:
-  ScoreType type;
   std::vector<ScorerP> scorers_;
 };
 
 class DocStreamScorer : public DocScorer {
 	public:
+		~DocStreamScorer();
 		void Init(const ScoreType type,
 					const std::vector<std::string>& ref_files,
 					const std::string& src_file = "",
@@ -124,9 +124,12 @@ class DocStreamScorer : public DocScorer {
 		{
 			Init(type,ref_files,src_file,verbose);
 		}
-		ScorerP operator[](size_t i);
-		int size();
+		ScorerP operator[](size_t i) const { return scorer; }
+		int size() const { return 1; }
 		void update(const std::string& ref);
+	private:
+		ScoreType type;
+		ScorerP scorer;
 };
 
 #endif
