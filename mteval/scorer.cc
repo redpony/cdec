@@ -595,7 +595,6 @@ void DocScorer::Init(
       const vector<string>& ref_files,
       const string& src_file, bool verbose) {
   scorers_.clear();
-  this->type = type;
   // TODO stop using valarray, start using ReadFile
   cerr << "Loading references (" << ref_files.size() << " files)\n";
   ReadFile srcrf;
@@ -645,6 +644,9 @@ void DocScorer::Init(
   cerr << "Loaded reference translations for " << scorers_.size() << " sentences.\n";
 }
 
+DocStreamScorer::~DocStreamScorer() {
+}
+
 void DocStreamScorer::Init(
       const ScoreType type,
       const vector<string>& ref_files,
@@ -655,17 +657,14 @@ void DocStreamScorer::Init(
   this->type = type;
   vector<vector<WordID> > refs(1);
   string src_line;
-  // Empty reference 0
+  // Initialize empty reference
   TD::ConvertSentence("", &refs[0]);
-  scorers_.push_back(ScorerP(SentenceScorer::CreateSentenceScorer(type, refs, src_line)));
-  // Reference 1 starts empty, updated as needed
-  scorers_.push_back(ScorerP(SentenceScorer::CreateSentenceScorer(type, refs, src_line)));
+  scorer = ScorerP(SentenceScorer::CreateSentenceScorer(type, refs, src_line));
 }
 
 void DocStreamScorer::update(const std::string& ref) {
-	scorers_.pop_back();
 	vector<vector<WordID> > refs(1);
 	string src_line;
 	TD::ConvertSentence(ref, &refs[0]);
-	scorers_.push_back(ScorerP(SentenceScorer::CreateSentenceScorer(this->type, refs, src_line)));
+	scorer = ScorerP(SentenceScorer::CreateSentenceScorer(type, refs, src_line));
 }
