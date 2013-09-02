@@ -11,7 +11,7 @@ import tempfile
 import time
 
 from rt import ForceAligner
-from rt import CdecDecoder
+from rt import MIRADecoder
 
 class RealtimeDecoder:
 
@@ -35,8 +35,7 @@ class RealtimeDecoder:
         # Decoder
         decoder_config = os.path.join(configdir, 'cdec.ini')
         decoder_weights = os.path.join(configdir, 'weights.final')
-        #TODO: run MIRA instead
-        self.decoder = CdecDecoder(decoder_config, decoder_weights)
+        self.decoder = MIRADecoder(decoder_config, decoder_weights)
 
     def close(self):
         logging.info('Closing processes')
@@ -90,6 +89,7 @@ def main():
             if len(input) == 1:
                 hyp = rtd.decode(input[0])
                 sys.stdout.write('{}\n'.format(hyp))
+                sys.stdout.flush()
             elif len(input) == 2:
                 rtd.learn(*input)
 
