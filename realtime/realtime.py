@@ -6,17 +6,21 @@ import sys
 
 import rt
 
+class Parser(argparse.ArgumentParser):
+
+    def error(self, message):
+        self.print_help()
+        sys.stderr.write('\n{}\n'.format(message))
+        sys.exit(2)
+
 def main():
 
-    parser = argparse.ArgumentParser(description='Real-time adaptive translation with cdec.')
+    parser = Parser(description='Real-time adaptive translation with cdec.')
     parser.add_argument('-c', '--config', required=True, help='Config directory (see README.md)')
     parser.add_argument('-T', '--temp', help='Temp directory (default /tmp)', default='/tmp')
     parser.add_argument('-a', '--cache', help='Grammar cache size (default 5)', default='5')
     parser.add_argument('-v', '--verbose', help='Info to stderr', action='store_true')
     args = parser.parse_args()
-
-    if not args.config:
-        parser.error('specify a configuration directory')
 
     if args.verbose:
         logging.basicConfig(level=logging.INFO)
