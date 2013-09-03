@@ -23,7 +23,10 @@ class ForceAligner:
         self.rev_align = util.popen_io(rev_cmd)
         self.tools = util.popen_io(tools_cmd)
 
-    def align(self, line):
+    def align(self, source, target):
+        return self.align_formatted('{} ||| {}'.format(source, target))
+
+    def align_formatted(self, line):
         self.fwd_align.stdin.write('{}\n'.format(line))
         self.rev_align.stdin.write('{}\n'.format(line))
         # f words ||| e words ||| links ||| score

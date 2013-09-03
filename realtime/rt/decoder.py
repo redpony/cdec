@@ -9,7 +9,7 @@ class Decoder:
         self.decoder.stdin.close()
 
     def decode(self, sentence, grammar):
-        input = '<seg grammar="{g}">{s}</seg>\n'.format(i=id, s=sentence, g=grammar)
+        input = '<seg grammar="{g}">{s}</seg>\n'.format(s=sentence, g=grammar)
         self.decoder.stdin.write(input)
         return self.decoder.stdout.readline().strip()
 
@@ -29,3 +29,8 @@ class MIRADecoder(Decoder):
         #                                              optimizer=2 step=0.001    best=500,    k=500,       uniq, stream
         mira_cmd = [mira, '-c', config, '-w', weights, '-o', '2', '-C', '0.001', '-b', '500', '-k', '500', '-u', '-t']
         self.decoder = util.popen_io(mira_cmd)
+
+    def update(self, sentence, grammar, reference):
+        input = '<seg grammar="{g}">{s}</seg> ||| {r}\n'.format(s=sentence, g=grammar, r=reference)
+        self.decoder.stdin.write(input)
+        return self.decoder.stdout.readline().strip()
