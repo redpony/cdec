@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 
@@ -19,6 +20,7 @@ class CdecDecoder(Decoder):
         cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
         decoder = os.path.join(cdec_root, 'decoder', 'cdec')
         decoder_cmd = [decoder, '-c', config, '-w', weights]
+        logging.info('Executing: {}'.format(' '.join(decoder_cmd)))
         self.decoder = util.popen_io(decoder_cmd)
 
 class MIRADecoder(Decoder):
@@ -28,6 +30,7 @@ class MIRADecoder(Decoder):
         mira = os.path.join(cdec_root, 'training', 'mira', 'kbest_cut_mira')
         #                                              optimizer=2 step=0.001    best=500,    k=500,       uniq, stream
         mira_cmd = [mira, '-c', config, '-w', weights, '-o', '2', '-C', '0.001', '-b', '500', '-k', '500', '-u', '-t']
+        logging.info('Executing: {}'.format(' '.join(mira_cmd)))
         self.decoder = util.popen_io(mira_cmd)
 
     def update(self, sentence, grammar, reference):

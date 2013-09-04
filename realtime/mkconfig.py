@@ -31,9 +31,9 @@ def main():
 
     # grammar extractor
     shutil.copytree(sa, os.path.join(output_d, 'sa'))
-    config = ConfigObj(sa_ini)
+    config = ConfigObj(sa_ini, unrepr=True)
     config.filename = os.path.join(output_d, 'sa.ini')
-    rt.util.sa_ini_basename(config)
+    rt.util.sa_ini_for_config(config)
     config.write()
 
     # language models
@@ -43,7 +43,7 @@ def main():
 
     # decoder config
     config = [[f.strip() for f in line.split('=')] for line in open(cdec_ini)]
-    rt.util.cdec_ini_basename(config)
+    rt.util.cdec_ini_for_config(config)
     with open(os.path.join(output_d, 'cdec.ini'), 'w') as output:
         for (k, v) in config:
             output.write('{}={}\n'.format(k, v))

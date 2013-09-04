@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 import subprocess
@@ -19,8 +20,13 @@ class ForceAligner:
         rev_cmd = [fast_align, '-i', '-', '-d', '-T', rev_T, '-m', rev_m, '-f', rev_params, '-r']
         tools_cmd = [atools, '-i', '-', '-j', '-', '-c', 'grow-diag-final-and']
 
+        logging.info('Executing: {}'.format(' '.join(fwd_cmd)))
         self.fwd_align = util.popen_io(fwd_cmd)
+
+        logging.info('Executing: {}'.format(' '.join(rev_cmd)))
         self.rev_align = util.popen_io(rev_cmd)
+
+        logging.info('Executing: {}'.format(' '.join(tools_cmd)))
         self.tools = util.popen_io(tools_cmd)
 
     def align(self, source, target):
