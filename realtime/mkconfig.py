@@ -6,13 +6,7 @@ import sys
 
 from cdec.configobj import ConfigObj
 
-SA_INI_FILES = set((
-    'f_sa_file',
-    'e_file',
-    'a_file',
-    'lex_file',
-    'precompute_file',
-    ))
+import rt
 
 def main():
 
@@ -39,9 +33,7 @@ def main():
     shutil.copytree(sa, os.path.join(output_d, 'sa'))
     config = ConfigObj(sa_ini)
     config.filename = os.path.join(output_d, 'sa.ini')
-    for key in config:
-        if key in SA_INI_FILES:
-            config[key] = os.path.join('sa', os.path.basename(config[key]))
+    rt.util.sa_ini_basename(config)
     config.write()
 
     # language models
@@ -50,21 +42,10 @@ def main():
     shutil.copy(corpus_hpyplm, os.path.join(output_d, 'corpus.hpyplm'))
 
     # decoder config
-    config = [(f.strip() for f in line.split('=')) for line in open(cdec_ini)]
+    config = [[f.strip() for f in line.split('=')] for line in open(cdec_ini)]
+    rt.util.cdec_ini_basename(config)
     with open(os.path.join(output_d, 'cdec.ini'), 'w') as output:
         for (k, v) in config:
-            if k == 'feature_function':
-                if v.startswith('KLanguageModel'):
-                    f = v.split()
-                    f[-1] = os.path.basename(f[-1])
-                    v = ' '.join(f)
-                elif v.startswith('External'):
-                    f = v.split()
-                    if f[1].endswith('libcdec_ff_hpyplm.so'):
-                        for i in range(1, len(f)):
-                            if not f[i].startswith('-'):
-                                f[i] = os.path.basename(f[i])
-                    v = ' '.join(f)
             output.write('{}={}\n'.format(k, v))
 
     # weights
