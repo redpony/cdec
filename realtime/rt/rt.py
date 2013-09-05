@@ -19,11 +19,19 @@ import util
 
 class RealtimeDecoder:
 
-    def __init__(self, configdir, tmpdir='/tmp', cache_size=5):
+    def __init__(self, configdir, tmpdir='/tmp', cache_size=5, norm=False):
+
+        cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
         # Temporary work dir
         self.tmp = tempfile.mkdtemp(dir=tmpdir, prefix='realtime.')
         logging.info('Using temp dir {}'.format(self.tmp))
+
+        # Normalization
+        self.norm = norm
+        if self.norm:
+            self.tokenizer = util.popen_io([os.path.join(cdec_root, 'corpus', 'tokenize-anything.sh'), '-u'])
+            self.detokenizer = util.popen_io([os.path.join(cdec_root, 'corpus', 'untok.pl')])
 
         # Word aligner
         fwd_params = os.path.join(configdir, 'a.fwd_params')
@@ -65,6 +73,9 @@ class RealtimeDecoder:
         self.aligner.close()
         self.decoder.close()
         self.ref_fifo.close()
+        if self.norm:
+            self.tokenizer.stdin.close()
+            self.detokenizer.stdin.close()
         logging.info('Deleting {}'.format(self.tmp))
         shutil.rmtree(self.tmp)
 
@@ -78,7 +89,7 @@ class RealtimeDecoder:
         grammar_file = tempfile.mkstemp(dir=self.tmp, prefix='grammar.')[1]
         with open(grammar_file, 'w') as output:
             for rule in self.extractor.grammar(sentence):
-                output.write(str(rule) + '\n')
+                output.write('{}\n'.format(str(rule)))
         if len(self.grammar_files) == self.cache_size:
             rm_sent = self.grammar_files.popleft()
             # If not already removed by learn method
@@ -90,17 +101,39 @@ class RealtimeDecoder:
         return grammar_file
         
     def decode(self, sentence):
+        # Empty in, empty out
+        if sentence.strip() == '':
+            return ''
+        if self.norm:
+            sentence = self.tokenize(sentence)
+            logging.info('Normalized input: {}'.format(sentence))
         grammar_file = self.grammar(sentence)
         start_time = time.time()
         hyp = self.decoder.decode(sentence, grammar_file)
+        stop_time = time.time()
+        logging.info('Translation time: {} seconds'.format(stop_time - start_time))
         # Empty reference: HPYPLM does not learn prior to next translation
         self.ref_fifo.write('\n')
         self.ref_fifo.flush()
-        stop_time = time.time()
-        logging.info('Translation time: {} seconds'.format(stop_time - start_time))
+        if self.norm:
+            hyp = self.detokenize(hyp)
         return hyp
 
+    def tokenize(self, line):
+        self.tokenizer.stdin.write('{}\n'.format(line))
+        return self.tokenizer.stdout.readline().strip()
+
+    def detokenize(self, line):
+        self.detokenizer.stdin.write('{}\n'.format(line))
+        return self.detokenizer.stdout.readline().strip()
+
     def learn(self, source, target):
+        if '' in (source.strip(), target.strip()):
+            logging.info('Error empty source or target: {} ||| {}'.format(source, target))
+            return
+        if self.norm:
+            source = self.tokenize(source)
+            target = self.tokenize(target)
         # MIRA update before adding data to grammar extractor
         grammar_file = self.grammar(source)
         mira_log = self.decoder.update(source, grammar_file, target)
