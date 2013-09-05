@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+$|++;
 use strict;
 use utf8;
 binmode(STDIN,"utf8");

@@ -1,4 +1,6 @@
 #!/usr/bin/perl -w
+$|++;
+
 use strict;
 while(<>) {
   #s/ (pre|anti|re|pro|inter|intra|multi|e|x|neo) - / $1- /ig;
