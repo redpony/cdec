@@ -4,12 +4,12 @@ ROOTDIR=`dirname $0`
 SUPPORT=$ROOTDIR/support
 
 if [[ $# == 1 && $1 == '-u' ]] ; then
-    NORMCMD=cat
+    NORMARGS="--batchline"
 else
-    NORMCMD=$SUPPORT/utf8-normalize.sh
+    NORMARGS=""
 fi
 
-$NORMCMD |
+$SUPPORT/utf8-normalize.sh $NORMARGS |
   $SUPPORT/quote-norm.pl |
   $SUPPORT/tokenizer.pl |
   sed -u -e 's/ al - / al-/g' |
