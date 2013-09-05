@@ -25,13 +25,19 @@ else
   fi
 fi
 
-perl -e '$|++; while(<>){s/\r\n*/\n/g; print;}' | $CMD | /usr/bin/perl -w -e '
- $|++;
- while (<>) {
-     chomp;
-      s/[\x00-\x1F]+/ /g;
-      s/  +/ /g;
-      s/^ //;
-      s/ $//;
-      print "$_\n";
-    }'
+if [[ $# == 1 && $1 == "--batchline" ]]; then
+    perl $(dirname $0)/utf8-normalize-batch.pl "$CMD"
+else
+    perl -e '$|++; while(<>){s/\r\n*/\n/g; print;}' \
+    |$CMD \
+    |/usr/bin/perl -w -e '
+        $|++;
+        while (<>) {
+            chomp;
+            s/[\x00-\x1F]+/ /g;
+            s/  +/ /g;
+            s/^ //;
+            s/ $//;
+            print "$_\n";
+        }'
+fi
