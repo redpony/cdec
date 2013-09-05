@@ -25,7 +25,8 @@ else
   fi
 fi
 
-perl -e 'while(<>){s/\r\n*/\n/g; print;}' | $CMD | /usr/bin/perl -w -e '
+perl -e '$|++; while(<>){s/\r\n*/\n/g; print;}' | $CMD | /usr/bin/perl -w -e '
+ $|++;
  while (<>) {
      chomp;
       s/[\x00-\x1F]+/ /g;
