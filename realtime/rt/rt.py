@@ -116,6 +116,7 @@ class RealtimeDecoder:
         self.ref_fifo.write('\n')
         self.ref_fifo.flush()
         if self.norm:
+            logging.info('Normalized translation: {}'.format(hyp))
             hyp = self.detokenize(hyp)
         return hyp
 
