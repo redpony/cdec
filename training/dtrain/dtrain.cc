@@ -372,7 +372,8 @@ main(int argc, char** argv)
         PROsampling(samples, pairs, pair_threshold, max_pairs);
       npairs += pairs.size();
 
-      SparseVector<weight_t> lambdas_copy;
+      SparseVector<weight_t> lambdas_copy; // for l1 regularization
+      SparseVector<weight_t> sum_up; // for pclr
       if (l1naive||l1clip||l1cumul) lambdas_copy = lambdas;
 
       for (vector<pair<ScoredHyp,ScoredHyp> >::iterator it = pairs.begin();
@@ -392,17 +393,21 @@ main(int argc, char** argv)
         if (rank_error || margin < loss_margin) {
           SparseVector<weight_t> diff_vec = it->first.f - it->second.f;
           if (pclr) {
-            SparseVector<weight_t>::iterator jt = diff_vec.begin();
-            for (; jt != diff_vec.end(); ++it) {
-              jt->second *= max(0.0000001, eta/(eta+learning_rates[jt->first])); // FIXME
-              learning_rates[jt->first]++;
-            }
-            lambdas += diff_vec;
-            } else {
-              lambdas.plus_eq_v_times_s(diff_vec, eta);
-            }
+            sum_up += diff_vec;
+          } else {
+            lambdas.plus_eq_v_times_s(diff_vec, eta);
+          }
           if (gamma)
             lambdas.plus_eq_v_times_s(lambdas, -2*gamma*eta*(1./npairs));
+        }
+      }
+
+      // per-coordinate learning rate
+      if (pclr) {
+        SparseVector<weight_t>::iterator it = sum_up.begin();
+        for (; it != lambdas.end(); ++it) {
+          lambdas[it->first] += it->second * max(0.00000001, eta/(eta+learning_rates[it->first]));
+          learning_rates[it->first]++;
         }
       }
 
@@ -413,6 +418,8 @@ main(int argc, char** argv)
         SparseVector<weight_t>::iterator it = lambdas.begin();
         for (; it != lambdas.end(); ++it) {
           if (!lambdas_copy.get(it->first) || lambdas_copy.get(it->first)!=it->second) {
+              it->second *= max(0.0000001, eta/(eta+learning_rates[it->first])); // FIXME
+              learning_rates[it->first]++;
             it->second -= sign(it->second) * l1_reg;
           }
         }
@@ -529,6 +536,15 @@ main(int argc, char** argv)
     string w_fn = "weights." + boost::lexical_cast<string>(t) + ".gz";
     Weights::WriteToFile(w_fn, dense_weights, true);
   }
+
+  WriteFile of("-");
+  ostream& o = *of.stream();
+  o << "<<<<<<<<<<<<<<<<<<<<<<<<\n";
+  for (SparseVector<weight_t>::iterator it = learning_rates.begin(); it != learning_rates.end(); ++it) {
+	  if (it->second == 0) continue;
+      o << FD::Convert(it->first) << '\t' << it->second << endl;
+  }
+  o << ">>>>>>>>>>>>>>>>>>>>>>>>>\n";
 
   } // outer loop
 
