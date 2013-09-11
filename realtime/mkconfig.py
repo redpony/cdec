@@ -4,9 +4,11 @@ import os
 import shutil
 import sys
 
+# Import first to make sure pycdec is on path
+import rt
+
 from cdec.configobj import ConfigObj
 
-import rt
 
 def main():
 
