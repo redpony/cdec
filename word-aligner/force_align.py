@@ -16,7 +16,7 @@ def main():
 
     # Hook into realtime
     sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'realtime'))
-    from rt import ForceAligner
+    from rt.aligner import ForceAligner
 
     aligner = ForceAligner(*sys.argv[1:])
     
