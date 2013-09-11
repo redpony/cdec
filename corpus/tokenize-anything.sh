@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 ROOTDIR=`dirname $0`
 SUPPORT=$ROOTDIR/support
