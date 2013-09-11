@@ -17,7 +17,7 @@ class Decoder:
 class CdecDecoder(Decoder):
     
     def __init__(self, config, weights):
-        cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         decoder = os.path.join(cdec_root, 'decoder', 'cdec')
         decoder_cmd = [decoder, '-c', config, '-w', weights]
         logging.info('Executing: {}'.format(' '.join(decoder_cmd)))
@@ -26,7 +26,7 @@ class CdecDecoder(Decoder):
 class MIRADecoder(Decoder):
 
     def __init__(self, config, weights):
-        cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         mira = os.path.join(cdec_root, 'training', 'mira', 'kbest_cut_mira')
         #                                              optimizer=2 step=0.001    best=500,    k=500,       uniq, stream
         mira_cmd = [mira, '-c', config, '-w', weights, '-o', '2', '-C', '0.001', '-b', '500', '-k', '500', '-u', '-t']

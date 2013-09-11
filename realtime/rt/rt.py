@@ -10,9 +10,7 @@ import subprocess
 import tempfile
 import time
 
-from cdec.configobj import ConfigObj
-import cdec.sa
-
+import cdec
 import aligner
 import decoder
 import util
@@ -21,7 +19,7 @@ class RealtimeDecoder:
 
     def __init__(self, configdir, tmpdir='/tmp', cache_size=5, norm=False):
 
-        cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
         # Temporary work dir
         self.tmp = tempfile.mkdtemp(dir=tmpdir, prefix='realtime.')
@@ -41,7 +39,7 @@ class RealtimeDecoder:
         self.aligner = aligner.ForceAligner(fwd_params, fwd_err, rev_params, rev_err)
 
         # Grammar extractor
-        sa_config = ConfigObj(os.path.join(configdir, 'sa.ini'), unrepr=True)
+        sa_config = cdec.ConfigObj(os.path.join(configdir, 'sa.ini'), unrepr=True)
         sa_config.filename = os.path.join(self.tmp, 'sa.ini')
         util.sa_ini_for_realtime(sa_config, os.path.abspath(configdir))
         sa_config.write()
