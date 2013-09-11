@@ -9,7 +9,7 @@ class ForceAligner:
 
     def __init__(self, fwd_params, fwd_err, rev_params, rev_err):
 
-        cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         fast_align = os.path.join(cdec_root, 'word-aligner', 'fast_align')
         atools = os.path.join(cdec_root, 'utils', 'atools')
 
