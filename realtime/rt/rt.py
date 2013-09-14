@@ -39,7 +39,7 @@ class RealtimeDecoder:
         self.aligner = aligner.ForceAligner(fwd_params, fwd_err, rev_params, rev_err)
 
         # Grammar extractor
-        sa_config = cdec.ConfigObj(os.path.join(configdir, 'sa.ini'), unrepr=True)
+        sa_config = cdec.configobj.ConfigObj(os.path.join(configdir, 'sa.ini'), unrepr=True)
         sa_config.filename = os.path.join(self.tmp, 'sa.ini')
         util.sa_ini_for_realtime(sa_config, os.path.abspath(configdir))
         sa_config.write()
