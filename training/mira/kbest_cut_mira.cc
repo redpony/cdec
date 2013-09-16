@@ -734,10 +734,19 @@ int main(int argc, char** argv) {
     		  ViterbiESentence(bobs.hypergraph[0], &trans);
     		  cout << TD::GetString(trans) << endl;
     		  continue;
-    	  // Translate and update (normal MIRA)
+          // Special command:
+          // CMD ||| arg1 ||| arg2 ...
     	  } else {
-    		  ds->update(buf.substr(delim + 5));
-    		  buf = buf.substr(0, delim);
+              string cmd = buf.substr(0, delim);
+              buf = buf.substr(delim + 5);
+        	  // Translate and update (normal MIRA)
+              // LEARN ||| source ||| reference
+              if (cmd == "LEARN") {
+                  delim = buf.find(" ||| ");
+        		  ds->update(buf.substr(delim + 5));
+        		  buf = buf.substr(0, delim);
+              }
+              // TODO: additional commands
     	  }
       }
       //TODO: allow batch updating

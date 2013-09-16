@@ -38,8 +38,8 @@ def main():
                 hyp = rtd.decode(input[0])
                 sys.stdout.write('{}\n'.format(hyp))
                 sys.stdout.flush()
-            elif len(input) == 2:
-                rtd.learn(*input)
+            else:
+                rtd.command(input)
 
     # Clean exit on ctrl+c
     except KeyboardInterrupt:
