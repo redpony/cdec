@@ -34,6 +34,6 @@ class MIRADecoder(Decoder):
         self.decoder = util.popen_io(mira_cmd)
 
     def update(self, sentence, grammar, reference):
-        input = '<seg grammar="{g}">{s}</seg> ||| {r}\n'.format(s=sentence, g=grammar, r=reference)
+        input = 'LEARN ||| <seg grammar="{g}">{s}</seg> ||| {r}\n'.format(s=sentence, g=grammar, r=reference)
         self.decoder.stdin.write(input)
         return self.decoder.stdout.readline().strip()

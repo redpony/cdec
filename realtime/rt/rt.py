@@ -19,6 +19,8 @@ class RealtimeDecoder:
 
     def __init__(self, configdir, tmpdir='/tmp', cache_size=5, norm=False):
 
+        self.commands = {'LEARN': self.learn}
+
         cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
         # Temporary work dir
@@ -126,6 +128,12 @@ class RealtimeDecoder:
         self.detokenizer.stdin.write('{}\n'.format(line))
         return self.detokenizer.stdout.readline().strip()
 
+    def command(self, args):
+        try:
+            self.commands[args[0]](*args[1:])
+        except:
+            logging.info('Command error: {}'.format(' ||| '.join(args)))
+        
     def learn(self, source, target):
         if '' in (source.strip(), target.strip()):
             logging.info('Error empty source or target: {} ||| {}'.format(source, target))
