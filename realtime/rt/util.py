@@ -37,7 +37,7 @@ def cdec_ini_for_realtime(config, path, ref_fifo):
                 f[1] =  os.path.join(path, f[1])
                 f[2] =  os.path.join(path, f[2])
                 f.append('-r')
-                f.append(ref)
+                f.append(ref_fifo)
                 f.append('-t')
                 config[i][1] = ' '.join(f)
 
