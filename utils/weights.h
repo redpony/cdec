@@ -23,6 +23,11 @@ class Weights {
   static void SanityCheck(const std::vector<weight_t>& w);
   // write weights with largest magnitude to cerr
   static void ShowLargestFeatures(const std::vector<weight_t>& w);
+  static std::string GetString(const std::vector<weight_t>& w,
+                               bool hide_zero_value_features = true);
+  // Assumes weights are already initialized for now
+  static void UpdateFromString(std::string& w_string,
+                               std::vector<weight_t>& w);
  private:
   Weights();
 };
