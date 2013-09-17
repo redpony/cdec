@@ -537,15 +537,6 @@ main(int argc, char** argv)
     Weights::WriteToFile(w_fn, dense_weights, true);
   }
 
-  WriteFile of("-");
-  ostream& o = *of.stream();
-  o << "<<<<<<<<<<<<<<<<<<<<<<<<\n";
-  for (SparseVector<weight_t>::iterator it = learning_rates.begin(); it != learning_rates.end(); ++it) {
-	  if (it->second == 0) continue;
-      o << FD::Convert(it->first) << '\t' << it->second << endl;
-  }
-  o << ">>>>>>>>>>>>>>>>>>>>>>>>>\n";
-
   } // outer loop
 
   if (average) w_average /= (weight_t)T;
