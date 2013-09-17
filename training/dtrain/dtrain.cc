@@ -406,8 +406,8 @@ main(int argc, char** argv)
       if (pclr) {
         SparseVector<weight_t>::iterator it = sum_up.begin();
         for (; it != lambdas.end(); ++it) {
-          lambdas[it->first] += it->second * max(0.00000001, eta/(eta+learning_rates[it->first]));
           learning_rates[it->first]++;
+          lambdas[it->first] += it->second / learning_rates[it->first]; //* max(0.00000001, eta/(eta+learning_rates[it->first]));
         }
       }
 
