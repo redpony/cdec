@@ -4,6 +4,7 @@
 
 #include "fdict.h"
 #include "filelib.h"
+#include "stringlib.h"
 #include "verbose.h"
 
 using namespace std;
@@ -156,4 +157,29 @@ void Weights::ShowLargestFeatures(const vector<weight_t>& w) {
   cerr << endl;
 }
 
+string Weights::GetString(const vector<weight_t>& w,
+                          bool hide_zero_value_features) {
+    ostringstream os;
+    os.precision(17);
+    int nf = FD::NumFeats();
+    for (unsigned i = 1; i < nf; i++) {
+        if (hide_zero_value_features && w[i] == 0.0) {
+            continue;
+        }
+        os << FD::Convert(i) << '=' << w[i];
+        if (i < nf - 1) {
+            os << ' ';
+        }
+    }
+    return os.str();
+}
 
+void Weights::UpdateFromString(string& w_string,
+                               vector<weight_t>& w) {
+    vector<string> tok = SplitOnWhitespace(w_string);
+    for (vector<string>::iterator i = tok.begin(); i != tok.end(); i++) {
+        int delim = i->find('=');
+        int fid = FD::Convert(i->substr(0, delim));
+        w[fid] = strtod(i->substr(delim + 1).c_str(), NULL);
+    }
+}

@@ -745,10 +745,23 @@ int main(int argc, char** argv) {
                   delim = buf.find(" ||| ");
         		  ds->update(buf.substr(delim + 5));
         		  buf = buf.substr(0, delim);
+              } else if (cmd == "WEIGHTS") {
+                  // WEIGHTS ||| WRITE
+                  if (buf == "WRITE") {
+                      cout << Weights::GetString(dense_weights) << endl;
+                  // WEIGHTS ||| f1=w1 f2=w2 ...
+                  } else {
+                      Weights::UpdateFromString(buf, dense_weights);
+                  }
+                  continue;
+              } else {
+                  cerr << "Error: cannot parse command, skipping line:" << endl;
+                  cerr << cmd << " ||| " << buf << endl;
+                  continue;
               }
-              // TODO: additional commands
     	  }
       }
+      // Regular mode or LEARN line from stream mode
       //TODO: allow batch updating
       lambdas.init_vector(&dense_weights);
       dense_w_local = dense_weights;
