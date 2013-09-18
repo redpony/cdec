@@ -179,12 +179,15 @@ class RealtimeDecoder:
         self.ref_fifo.write('{}\n'.format(target))
         self.ref_fifo.flush()
 
-    def save_state(self):
+    def save_state(self, filename=None):
+        out = open(filename, 'w') if filename else sys.stdout
         logging.info('Saving state with {} sentences'.format(len(self.inc_data)))
-        sys.stdout.write('{}\n'.format(self.decoder.get_weights()))
+        out.write('{}\n'.format(self.decoder.get_weights()))
         for (source, target, alignment) in self.inc_data:
-            sys.stdout.write('{} ||| {} ||| {}\n'.format(source, target, alignment))
-        sys.stdout.write('EOF\n')
+            out.write('{} ||| {} ||| {}\n'.format(source, target, alignment))
+        out.write('EOF\n')
+        if filename:
+            out.close()
 
     def load_state(self, input=sys.stdin):
         # Non-initial load error
