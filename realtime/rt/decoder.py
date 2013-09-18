@@ -9,8 +9,8 @@ class Decoder:
     def close(self):
         self.decoder.stdin.close()
 
-    def decode(self, sentence, grammar):
-        input = '<seg grammar="{g}">{s}</seg>\n'.format(s=sentence, g=grammar)
+    def decode(self, sentence, grammar=None):
+        input = '<seg grammar="{g}">{s}</seg>\n'.format(s=sentence, g=grammar) if grammar else '{}\n'.format(sentence)
         self.decoder.stdin.write(input)
         return self.decoder.stdout.readline().strip()
 
@@ -32,6 +32,13 @@ class MIRADecoder(Decoder):
         mira_cmd = [mira, '-c', config, '-w', weights, '-o', '2', '-C', '0.001', '-b', '500', '-k', '500', '-u', '-t']
         logging.info('Executing: {}'.format(' '.join(mira_cmd)))
         self.decoder = util.popen_io(mira_cmd)
+
+    def get_weights(self):
+        self.decoder.stdin.write('WEIGHTS ||| WRITE\n')
+        return self.decoder.stdout.readline().strip()
+
+    def set_weights(self, w_line):
+        self.decoder.stdin.write('WEIGHTS ||| {}\n'.format(w_line))
 
     def update(self, sentence, grammar, reference):
         input = 'LEARN ||| <seg grammar="{g}">{s}</seg> ||| {r}\n'.format(s=sentence, g=grammar, r=reference)

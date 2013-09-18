@@ -15,8 +15,9 @@ class Parser(argparse.ArgumentParser):
 
 def main():
 
-    parser = Parser(description='Real-time adaptive translation with cdec.')
-    parser.add_argument('-c', '--config', required=True, help='Config directory (see README.md)')
+    parser = Parser(description='Real-time adaptive translation with cdec.  (See README.md)')
+    parser.add_argument('-c', '--config', required=True, help='Config directory')
+    parser.add_argument('-s', '--state', help='Load state file (saved incremental data)')
     parser.add_argument('-n', '--normalize', help='Normalize text (tokenize, translate, detokenize)', action='store_true')
     parser.add_argument('-T', '--temp', help='Temp directory (default /tmp)', default='/tmp')
     parser.add_argument('-a', '--cache', help='Grammar cache size (default 5)', default='5')
@@ -26,27 +27,28 @@ def main():
     if args.verbose:
         logging.basicConfig(level=logging.INFO)
 
-    rtd = rt.RealtimeDecoder(args.config, tmpdir=args.temp, cache_size=int(args.cache), norm=args.normalize)
+    with rt.RealtimeDecoder(args.config, tmpdir=args.temp, cache_size=int(args.cache), norm=args.normalize) as rtd:
 
-    try:
-        while True:
-            line = sys.stdin.readline()
-            if not line:
-                break
-            input = [f.strip() for f in line.split('|||')]
-            if len(input) == 1:
-                hyp = rtd.decode(input[0])
-                sys.stdout.write('{}\n'.format(hyp))
-                sys.stdout.flush()
-            else:
-                rtd.command(input)
-
-    # Clean exit on ctrl+c
-    except KeyboardInterrupt:
-        logging.info('Caught KeyboardInterrupt, exiting')
-
-    # Cleanup
-    rtd.close()
+        try:
+            # Load state if given
+            if args.state:
+                rtd.load_state(args.state)
+            # Read lines and commands
+            while True:
+                line = sys.stdin.readline()
+                if not line:
+                    break
+                line = line.strip()
+                if '|||' in line:
+                    rtd.command_line(line)
+                else:
+                    hyp = rtd.decode(line)
+                    sys.stdout.write('{}\n'.format(hyp))
+                    sys.stdout.flush()
+    
+        # Clean exit on ctrl+c
+        except KeyboardInterrupt:
+            logging.info('Caught KeyboardInterrupt, exiting')
 
 if __name__ == '__main__':
     main()

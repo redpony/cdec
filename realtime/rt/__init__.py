@@ -9,7 +9,7 @@ except ImportError as ie:
         sys.path.append(pycdec)
         import cdec
     except:
-        sys.stderr.write('Error: cannot import pycdec.  Please check the cdec/python is built.\n')
+        sys.stderr.write('Error: cannot import pycdec.  Please check that cdec/python is built.\n')
         raise ie
 
 # Regular init imports

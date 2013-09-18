@@ -163,15 +163,13 @@ string Weights::GetString(const vector<weight_t>& w,
     os.precision(17);
     int nf = FD::NumFeats();
     for (unsigned i = 1; i < nf; i++) {
-        if (hide_zero_value_features && w[i] == 0.0) {
+        weight_t val = (i < w.size() ? w[i] : 0.0);
+        if (hide_zero_value_features && val == 0.0) {
             continue;
         }
-        os << FD::Convert(i) << '=' << w[i];
-        if (i < nf - 1) {
-            os << ' ';
-        }
+        os << ' ' << FD::Convert(i) << '=' << val;
     }
-    return os.str();
+    return os.str().substr(1);
 }
 
 void Weights::UpdateFromString(string& w_string,
