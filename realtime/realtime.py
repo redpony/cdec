@@ -32,7 +32,8 @@ def main():
         try:
             # Load state if given
             if args.state:
-                rtd.load_state(args.state)
+                with open(args.state) as input:
+                    rtd.load_state(input)
             # Read lines and commands
             while True:
                 line = sys.stdin.readline()
