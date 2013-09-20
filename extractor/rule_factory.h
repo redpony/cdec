@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <unordered_set>
 
 #include "matchings_trie.h"
 
@@ -71,7 +72,7 @@ class HieroCachingRuleFactory {
 
   // Constructs SCFG rules for a given sentence.
   // (See class description for more details.)
-  virtual Grammar GetGrammar(const vector<int>& word_ids);
+  virtual Grammar GetGrammar(const vector<int>& word_ids, const unordered_set<int> blacklisted_sentence_ids, const shared_ptr<DataArray> source_data_array);
 
  protected:
   HieroCachingRuleFactory();

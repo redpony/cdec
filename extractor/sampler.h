@@ -2,6 +2,9 @@
 #define _SAMPLER_H_
 
 #include <memory>
+#include <unordered_set>
+
+#include "data_array.h"
 
 using namespace std;
 
@@ -20,7 +23,7 @@ class Sampler {
   virtual ~Sampler();
 
   // Samples uniformly at most max_samples phrase occurrences.
-  virtual PhraseLocation Sample(const PhraseLocation& location) const;
+  virtual PhraseLocation Sample(const PhraseLocation& location, const unordered_set<int> blacklisted_sentence_ids, const shared_ptr<DataArray> source_data_array) const;
 
  protected:
   Sampler();
