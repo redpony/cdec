@@ -101,7 +101,8 @@ class RealtimeDecoder:
             logging.info('Grammar cache hit')
             return grammar_file
         # Extract and cache
-        grammar_file = tempfile.mkstemp(dir=self.tmp, prefix='grammar.')[1]
+        (fid, grammar_file) = tempfile.mkstemp(dir=self.tmp, prefix='grammar.')
+        os.close(fid)
         with open(grammar_file, 'w') as output:
             for rule in self.extractor.grammar(sentence):
                 output.write('{}\n'.format(str(rule)))
