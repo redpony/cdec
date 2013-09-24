@@ -20,35 +20,39 @@ PhraseLocation Sampler::Sample(const PhraseLocation& location, unordered_set<int
     num_subpatterns = 1;
     int low = location.sa_low, high = location.sa_high;
     double step = Round(max(1.0, (double) (high - low) / max_samples));
-    int i = location.sa_low;
-    bool found = false;
-    while (sample.size() < max_samples && i <= location.sa_high) {
+    int i = low, last = i;
+    bool found;
+    while (sample.size() < max_samples && i < high) {
       int x = suffix_array->GetSuffix(i);
       int id = source_data_array->GetSentenceId(x);
       if (find(blacklisted_sentence_ids.begin(), blacklisted_sentence_ids.end(), id) != blacklisted_sentence_ids.end()) {
+        found = false;
         int backoff_step = 1;
         while (true) {
+          if ((double)backoff_step >= step) break;
           int j = i - backoff_step;
           x = suffix_array->GetSuffix(j);
           id = source_data_array->GetSentenceId(x);
-          if ((j >= location.sa_low) && (find(blacklisted_sentence_ids.begin(), blacklisted_sentence_ids.end(), id) == blacklisted_sentence_ids.end())
-              && (find(sample.begin(), sample.end(), x) == sample.end())) { found = true; break; }
+          if (j > last && find(blacklisted_sentence_ids.begin(), blacklisted_sentence_ids.end(), id) == blacklisted_sentence_ids.end()) {
+            found = true; last = i; break;
+          }
           int k = i + backoff_step;
           x = suffix_array->GetSuffix(k);
           id = source_data_array->GetSentenceId(x);
-          if ((k <= location.sa_high) && (find(blacklisted_sentence_ids.begin(), blacklisted_sentence_ids.end(), id) == blacklisted_sentence_ids.end())
-              && (find(sample.begin(), sample.end(), x) == sample.end())) { found = true; break; }
-          if (j <= location.sa_low && k >= location.sa_high) break;
+          if (k < min(i+step, (double)high) && find(blacklisted_sentence_ids.begin(), blacklisted_sentence_ids.end(), id) == blacklisted_sentence_ids.end()) {
+            found = true; last = k; break;
+          }
+          if (j <= last && k >= high) break;
           backoff_step++;
         }
       } else {
         found = true;
+        last = i;
       }
-      if (found && (find(sample.begin(), sample.end(), x) == sample.end())) sample.push_back(x);
+      if (found) sample.push_back(x);
       i += step;
-      found = false;
     }
-  } else { // when do we get here?
+  } else {
     // Sample vector of occurrences.
     num_subpatterns = location.num_subpatterns;
     int num_matchings = location.matchings->size() / num_subpatterns;
