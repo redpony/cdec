@@ -2181,6 +2181,10 @@ cdef class HieroCachingRuleFactory:
             extract(f_i, f_i, f_len, -1, 0, 0, [])
 
         return phrases
+
+    # Drop online stats for a context
+    def drop_ctx(self, ctx_name=None):
+        self.online_stats.pop(ctx_name, None)
     
 # Spans are _inclusive_ on both ends [i, j]
 def span_check(vec, i, j):

@@ -98,3 +98,7 @@ class GrammarExtractor:
         e_words = cdec.sa.encode_words(reference.split())
         al = sorted(tuple(int(i) for i in pair.split('-')) for pair in alignment.split())
         self.factory.add_instance(f_words, e_words, al, ctx_name)
+
+    # Remove all incremental data for a context
+    def drop_ctx(self, ctx_name=None):
+        self.factory.drop_ctx(ctx_name)
