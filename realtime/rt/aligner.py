@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import subprocess
+import threading
 
 import util
 
@@ -29,10 +30,16 @@ class ForceAligner:
         logging.info('Executing: {}'.format(' '.join(tools_cmd)))
         self.tools = util.popen_io(tools_cmd)
 
+        # Used to guarantee thread safety
+        self.semaphore = threading.Semaphore()
+
     def align(self, source, target):
+        '''Threadsafe'''
         return self.align_formatted('{} ||| {}'.format(source, target))
 
     def align_formatted(self, line):
+        '''Threadsafe'''
+        self.semaphore.acquire()
         self.fwd_align.stdin.write('{}\n'.format(line))
         self.rev_align.stdin.write('{}\n'.format(line))
         # f words ||| e words ||| links ||| score
@@ -40,7 +47,9 @@ class ForceAligner:
         rev_line = self.rev_align.stdout.readline().split('|||')[2].strip()
         self.tools.stdin.write('{}\n'.format(fwd_line))
         self.tools.stdin.write('{}\n'.format(rev_line))
-        return self.tools.stdout.readline().strip()
+        al_line = self.tools.stdout.readline().strip()
+        self.semaphore.release()
+        return al_line
  
     def close(self):
         self.fwd_align.stdin.close()
