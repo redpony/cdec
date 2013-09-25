@@ -21,7 +21,7 @@ opts = Trollop::options do
   opt :qsub, "use qsub", :type => :bool, :default => false
   opt :dtrain_binary, "path to dtrain binary", :type => :string
   opt :extra_qsub, "extra qsub args", :type => :string, :default => ""
-  opt :per_shard_decoder_configs, "give special decoder config per shard", :type => string
+  opt :per_shard_decoder_configs, "give special decoder config per shard", :type => :string, :short => :o
 end
 usage if not opts[:config]&&opts[:shards]&&opts[:input]&&opts[:references]
 
