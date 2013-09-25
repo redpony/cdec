@@ -2,7 +2,9 @@
 
 import argparse
 import logging
+import signal
 import sys
+import threading
 
 import rt
 
@@ -22,34 +24,37 @@ def main():
     parser.add_argument('-T', '--temp', help='Temp directory (default /tmp)', default='/tmp')
     parser.add_argument('-a', '--cache', help='Grammar cache size (default 5)', default='5')
     parser.add_argument('-v', '--verbose', help='Info to stderr', action='store_true')
+    parser.add_argument('-D', '--debug-test', help='Test thread safety (debug use only)', action='store_true')
     args = parser.parse_args()
 
     if args.verbose:
         logging.basicConfig(level=logging.INFO)
 
-    with rt.RealtimeDecoder(args.config, tmpdir=args.temp, cache_size=int(args.cache), norm=args.normalize) as rtd:
+    with rt.RealtimeTranslator(args.config, tmpdir=args.temp, cache_size=int(args.cache), norm=args.normalize) as translator:
 
-        try:
             # Load state if given
             if args.state:
                 with open(args.state) as input:
                     rtd.load_state(input)
-            # Read lines and commands
-            while True:
-                line = sys.stdin.readline()
-                if not line:
-                    break
-                line = line.strip()
-                if '|||' in line:
-                    rtd.command_line(line)
-                else:
-                    hyp = rtd.decode(line)
-                    sys.stdout.write('{}\n'.format(hyp))
-                    sys.stdout.flush()
-    
-        # Clean exit on ctrl+c
-        except KeyboardInterrupt:
-            logging.info('Caught KeyboardInterrupt, exiting')
+            if not args.debug_test:
+                run(translator)
+            else:
+                # TODO: write test
+                run(translator)
 
+def run(translator, input=sys.stdin, output=sys.stdout, ctx_name=None):
+    # Read lines and commands
+    while True:
+        line = input.readline()
+        if not line:
+            break
+        line = line.strip()
+        if '|||' in line:
+            translator.command_line(line, ctx_name)
+        else:
+            hyp = translator.decode(line, ctx_name)
+            output.write('{}\n'.format(hyp))
+            output.flush()
+ 
 if __name__ == '__main__':
     main()
