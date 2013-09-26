@@ -101,6 +101,8 @@ class RealtimeTranslator:
         # ctx -> list of (source, target, alignment)
         self.ctx_data = {}
 
+        # Grammar extractor is not threadsafe
+        self.extractor_sem = threading.Semaphore()
         # ctx -> deque of file
         self.grammar_files = {}
         # ctx -> dict of {sentence: file}
@@ -181,8 +183,10 @@ class RealtimeTranslator:
         (fid, grammar_file) = tempfile.mkstemp(dir=self.decoders[ctx_name].tmp, prefix='grammar.')
         os.close(fid)
         with open(grammar_file, 'w') as output:
+            self.extractor_sem.acquire()
             for rule in self.extractor.grammar(sentence, ctx_name):
                 output.write('{}\n'.format(str(rule)))
+            self.extractor_sem.release()
         grammar_files = self.grammar_files[ctx_name]
         if len(grammar_files) == self.cache_size:
             rm_sent = grammar_files.popleft()
