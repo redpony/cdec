@@ -1,4 +1,5 @@
 import os
+import Queue
 import subprocess
 import sys
 import threading
@@ -12,6 +13,24 @@ SA_INI_FILES = set((
     'lex_file',
     'precompute_file',
     ))
+
+class FIFOLock:
+
+    def __init__(self):
+        self.q = Queue.Queue()
+        self.i = 0
+
+    def acquire(self):
+        self.i += 1
+        if self.i > 1:
+            event = threading.Event()
+            self.q.put(event)
+            event.wait()
+
+    def release(self):
+        self.i -= 1
+        if self.i > 0:
+            self.q.get().set()
 
 def cdec_ini_for_config(config):
     # This is a list of (k, v), not a ConfigObj or dict
