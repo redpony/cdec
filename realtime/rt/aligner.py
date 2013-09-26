@@ -31,7 +31,7 @@ class ForceAligner:
         self.tools = util.popen_io(tools_cmd)
 
         # Used to guarantee thread safety
-        self.semaphore = threading.Semaphore()
+        self.lock = util.FIFOLock()
 
     def align(self, source, target):
         '''Threadsafe'''
@@ -39,7 +39,7 @@ class ForceAligner:
 
     def align_formatted(self, line):
         '''Threadsafe'''
-        self.semaphore.acquire()
+        self.lock.acquire()
         self.fwd_align.stdin.write('{}\n'.format(line))
         self.rev_align.stdin.write('{}\n'.format(line))
         # f words ||| e words ||| links ||| score
@@ -48,7 +48,7 @@ class ForceAligner:
         self.tools.stdin.write('{}\n'.format(fwd_line))
         self.tools.stdin.write('{}\n'.format(rev_line))
         al_line = self.tools.stdout.readline().strip()
-        self.semaphore.release()
+        self.lock.release()
         return al_line
  
     def close(self):
