@@ -31,22 +31,27 @@ def test1(translator, input, output, ctx_name):
     out.close()
 
 def debug(translator, input):
-    # Test 1: identical output
+    # Test 1: multiple contexts
     threads = []
     for i in range(4):
         t = threading.Thread(target=test1, args=(translator, input, '{}.out.{}'.format(input, i), str(i)))
         threads.append(t)
         t.start()
         time.sleep(30)
-    for t in threads:
-        t.join()
-    # Test 2: flood (same number of lines)
-    threads = []
+    # Test 2: flood
     out = open('{}.out.flood'.format(input), 'w')
-    for line in open(input):
+    inp = open(input)
+    while True:
+        line = inp.readline()
+        if not line:
+            break
+        line = line.strip()
         t = threading.Thread(target=handle_line, args=(translator, line.strip(), out, None))
         threads.append(t)
         t.start()
+        time.sleep(1) 
+    translator.drop_ctx(None)
+    # Join test threads
     for t in threads:
         t.join()
 

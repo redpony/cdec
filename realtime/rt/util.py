@@ -15,22 +15,30 @@ SA_INI_FILES = set((
     ))
 
 class FIFOLock:
+    '''Lock that preserves FIFO order of blocking threads'''
 
     def __init__(self):
         self.q = Queue.Queue()
         self.i = 0
+        self.lock = threading.Lock()
 
     def acquire(self):
+        self.lock.acquire()
         self.i += 1
         if self.i > 1:
             event = threading.Event()
             self.q.put(event)
+            self.lock.release()
             event.wait()
+            return
+        self.lock.release()
 
     def release(self):
+        self.lock.acquire()
         self.i -= 1
         if self.i > 0:
             self.q.get().set()
+        self.lock.release()
 
 def cdec_ini_for_config(config):
     # This is a list of (k, v), not a ConfigObj or dict

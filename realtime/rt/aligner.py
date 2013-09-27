@@ -34,11 +34,11 @@ class ForceAligner:
         self.lock = util.FIFOLock()
 
     def align(self, source, target):
-        '''Threadsafe'''
+        '''Threadsafe, FIFO'''
         return self.align_formatted('{} ||| {}'.format(source, target))
 
     def align_formatted(self, line):
-        '''Threadsafe'''
+        '''Threadsafe, FIFO'''
         self.lock.acquire()
         self.fwd_align.stdin.write('{}\n'.format(line))
         self.rev_align.stdin.write('{}\n'.format(line))
@@ -51,10 +51,14 @@ class ForceAligner:
         self.lock.release()
         return al_line
  
-    def close(self):
+    def close(self, force=False):
+        if not force:
+            self.lock.acquire()
         self.fwd_align.stdin.close()
         self.rev_align.stdin.close()
         self.tools.stdin.close()
+        if not force:
+            self.lock.release()
 
     def read_err(self, err):
         (T, m) = ('', '')

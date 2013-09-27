@@ -15,7 +15,7 @@ class Decoder:
             self.lock.release()
 
     def decode(self, sentence, grammar=None):
-        '''Threadsafe'''
+        '''Threadsafe, FIFO'''
         input = '<seg grammar="{g}">{s}</seg>\n'.format(s=sentence, g=grammar) if grammar else '{}\n'.format(sentence)
         self.lock.acquire()
         self.decoder.stdin.write(input)
@@ -45,7 +45,7 @@ class MIRADecoder(Decoder):
         self.lock = util.FIFOLock()
 
     def get_weights(self):
-        '''Threadsafe'''
+        '''Threadsafe, FIFO'''
         self.lock.acquire()
         self.decoder.stdin.write('WEIGHTS ||| WRITE\n')
         weights = self.decoder.stdout.readline().strip()
@@ -53,13 +53,13 @@ class MIRADecoder(Decoder):
         return weights
 
     def set_weights(self, w_line):
-        '''Threadsafe'''
+        '''Threadsafe, FIFO'''
         self.lock.acquire()
         self.decoder.stdin.write('WEIGHTS ||| {}\n'.format(w_line))
         self.lock.release()
 
     def update(self, sentence, grammar, reference):
-        '''Threadsafe'''
+        '''Threadsafe, FIFO'''
         input = 'LEARN ||| <seg grammar="{g}">{s}</seg> ||| {r}\n'.format(s=sentence, g=grammar, r=reference)
         self.lock.acquire()
         self.decoder.stdin.write(input)
