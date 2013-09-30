@@ -16,11 +16,9 @@ class Parser(argparse.ArgumentParser):
         sys.exit(2)
 
 def handle_line(translator, line, output, ctx_name):
-    if '|||' in line:
-        translator.command_line(line, ctx_name)
-    else:
-        hyp = translator.decode(line, ctx_name)
-        output.write('{}\n'.format(hyp))
+    res = translator.command_line(line, ctx_name)
+    if res:
+        output.write('{}\n'.format(res))
         output.flush()
 
 def test1(translator, input, output, ctx_name):
@@ -83,11 +81,9 @@ def main():
             if not line:
                 break
             line = line.strip()
-            if '|||' in line:
-                translator.command_line(line)
-            else:
-                hyp = translator.decode(line)
-                sys.stdout.write('{}\n'.format(hyp))
+            res = translator.command_line(line)
+            if res:
+                sys.stdout.write('{}\n'.format(res))
                 sys.stdout.flush()
      
 if __name__ == '__main__':

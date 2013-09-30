@@ -58,9 +58,14 @@ class RealtimeTranslator:
 
     def __init__(self, configdir, tmpdir='/tmp', cache_size=5, norm=False, state=None):
 
-        # TODO: save/load
-        self.commands = {'LEARN': self.learn, 'SAVE': self.save_state, 'LOAD': self.load_state}
-
+        # name -> (method, set of possible nargs)
+        self.COMMANDS = {
+                'TR': (self.translate, set((1,))),
+                'LEARN': (self.learn, set((2,))),
+                'SAVE': (self.save_state, set((0, 1))),
+                'LOAD': (self.load_state, set((0, 1))),
+                }
+        
         cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
         ### Single instance for all contexts
@@ -203,13 +208,12 @@ class RealtimeTranslator:
         self.extractor_lock.release()
         return grammar_file
         
-    def decode(self, sentence, ctx_name=None):
+    def translate(self, sentence, ctx_name=None):
         '''Decode a sentence (inc extracting a grammar if needed)
         Threadsafe, FIFO'''
         lock = self.ctx_locks[ctx_name]
         lock.acquire()
         self.lazy_ctx(ctx_name)
-        logging.info('DECODE: {}'.format(sentence))
         # Empty in, empty out
         if sentence.strip() == '':
             lock.release()
@@ -246,16 +250,20 @@ class RealtimeTranslator:
         self.detokenizer_lock.release()
         return detok_line
 
-    # TODO
     def command_line(self, line, ctx_name=None):
-            args = [f.strip() for f in line.split('|||')]
-        #try:
-            if len(args) == 2 and not args[1]:
-                self.commands[args[0]](ctx_name)
-            else:
-                self.commands[args[0]](*args[1:], ctx_name=ctx_name)
-        #except:
-        #    logging.info('Command error: {}'.format(' ||| '.join(args)))
+        args = [f.strip() for f in line.split('|||')]
+        (command, nargs) = self.COMMANDS[args[0]]
+        # ctx_name provided
+        if len(args[1:]) +  1 in nargs:
+            logging.info('Context {}: {} ||| {}'.format(args[1], args[0], ' ||| '.join(args[2:])))
+            return command(*args[2:], ctx_name=args[1])
+        # No ctx_name, use default or passed
+        elif len(args[1:]) in nargs:
+            logging.info('Context {}: {} ||| {}'.format(ctx_name, args[0], ' ||| '.join(args[1:])))
+            return command(*args[1:], ctx_name=ctx_name)
+        # nargs doesn't match
+        else:
+            logging.info('Command error: {}'.format(' ||| '.join(args)))
         
     def learn(self, source, target, ctx_name=None):
         '''Learn from training instance (inc extracting grammar if needed)
@@ -263,7 +271,6 @@ class RealtimeTranslator:
         lock = self.ctx_locks[ctx_name]
         lock.acquire()
         self.lazy_ctx(ctx_name)
-        logging.info('LEARN: {}'.format(source))
         if '' in (source.strip(), target.strip()):
             logging.info('Error empty source or target: {} ||| {}'.format(source, target))
             lock.release()
