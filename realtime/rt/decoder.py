@@ -55,8 +55,16 @@ class MIRADecoder(Decoder):
     def set_weights(self, w_line):
         '''Threadsafe, FIFO'''
         self.lock.acquire()
-        self.decoder.stdin.write('WEIGHTS ||| {}\n'.format(w_line))
-        self.lock.release()
+        try:
+            # Check validity
+            for w_str in w_line.split():
+                (k, v) = w_str.split('=')
+                float(v)
+            self.decoder.stdin.write('WEIGHTS ||| {}\n'.format(w_line))
+            self.lock.release()
+        except:
+            raise Exception('Invalid weights line: {}'.format(w_line))
+
 
     def update(self, sentence, grammar, reference):
         '''Threadsafe, FIFO'''
