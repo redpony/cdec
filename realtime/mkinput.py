@@ -10,7 +10,7 @@ def main():
         sys.exit(2)
 
     for (src, ref) in itertools.izip(open(sys.argv[1]), open(sys.argv[2])):
-        sys.stdout.write('{}'.format(src))
+        sys.stdout.write('TR ||| {}'.format(src))
         sys.stdout.write('LEARN ||| {} ||| {}'.format(src.strip(), ref))
 
 if __name__ == '__main__':
