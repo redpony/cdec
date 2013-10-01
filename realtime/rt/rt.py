@@ -56,7 +56,7 @@ class RealtimeDecoder:
 class RealtimeTranslator:
     '''Main entry point into API: serves translations to any number of concurrent users'''
 
-    def __init__(self, configdir, tmpdir='/tmp', cache_size=5, norm=False, state=None):
+    def __init__(self, configdir, tmpdir='/tmp', cache_size=5, norm=False):
 
         # name -> (method, set of possible nargs)
         self.COMMANDS = {
@@ -116,11 +116,6 @@ class RealtimeTranslator:
         self.grammar_dict = {}
 
         self.decoders = {}
-
-        # Load state if given
-        if state:
-            with open(state) as input:
-                self.load_state(input)
 
     def __enter__(self):
         return self
