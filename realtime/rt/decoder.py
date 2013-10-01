@@ -63,6 +63,7 @@ class MIRADecoder(Decoder):
             self.decoder.stdin.write('WEIGHTS ||| {}\n'.format(w_line))
             self.lock.release()
         except:
+            self.lock.release()
             raise Exception('Invalid weights line: {}'.format(w_line))
 
 
