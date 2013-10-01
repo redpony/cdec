@@ -6,6 +6,8 @@ import threading
 
 import util
 
+logger = logging.getLogger('rt.aligner')
+
 class ForceAligner:
 
     def __init__(self, fwd_params, fwd_err, rev_params, rev_err):
@@ -21,13 +23,13 @@ class ForceAligner:
         rev_cmd = [fast_align, '-i', '-', '-d', '-T', rev_T, '-m', rev_m, '-f', rev_params, '-r']
         tools_cmd = [atools, '-i', '-', '-j', '-', '-c', 'grow-diag-final-and']
 
-        logging.info('Executing: {}'.format(' '.join(fwd_cmd)))
+        logger.info('Executing: {}'.format(' '.join(fwd_cmd)))
         self.fwd_align = util.popen_io(fwd_cmd)
 
-        logging.info('Executing: {}'.format(' '.join(rev_cmd)))
+        logger.info('Executing: {}'.format(' '.join(rev_cmd)))
         self.rev_align = util.popen_io(rev_cmd)
 
-        logging.info('Executing: {}'.format(' '.join(tools_cmd)))
+        logger.info('Executing: {}'.format(' '.join(tools_cmd)))
         self.tools = util.popen_io(tools_cmd)
 
         # Used to guarantee thread safety
