@@ -57,6 +57,7 @@ def main():
 
     parser = Parser(description='Real-time adaptive translation with cdec.  (See README.md)')
     parser.add_argument('-c', '--config', required=True, help='Config directory')
+    parser.add_argument('-s', '--state', help='Load state file to default context (saved incremental data)')
     parser.add_argument('-n', '--normalize', help='Normalize text (tokenize, translate, detokenize)', action='store_true')
     parser.add_argument('-T', '--temp', help='Temp directory (default /tmp)', default='/tmp')
     parser.add_argument('-a', '--cache', help='Grammar cache size (default 5)', default='5')
@@ -73,6 +74,10 @@ def main():
         if args.debug_test:
             debug(translator, args.debug_test)
             return
+
+        # Load state if given
+        if args.state:
+            rtd.load_state(state)
 
         # Read lines and commands
         while True:

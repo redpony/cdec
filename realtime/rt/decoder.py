@@ -5,6 +5,8 @@ import threading
 
 import util
 
+logger = logging.getLogger('rt.decoder')
+
 class Decoder:
 
     def close(self, force=False):
@@ -29,7 +31,7 @@ class CdecDecoder(Decoder):
         cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         decoder = os.path.join(cdec_root, 'decoder', 'cdec')
         decoder_cmd = [decoder, '-c', config, '-w', weights]
-        logging.info('Executing: {}'.format(' '.join(decoder_cmd)))
+        logger.info('Executing: {}'.format(' '.join(decoder_cmd)))
         self.decoder = util.popen_io(decoder_cmd)
         self.lock = util.FIFOLock()
 
@@ -40,7 +42,7 @@ class MIRADecoder(Decoder):
         mira = os.path.join(cdec_root, 'training', 'mira', 'kbest_cut_mira')
         #                                              optimizer=2 step=0.001    best=500,    k=500,       uniq, stream
         mira_cmd = [mira, '-c', config, '-w', weights, '-o', '2', '-C', '0.001', '-b', '500', '-k', '500', '-u', '-t']
-        logging.info('Executing: {}'.format(' '.join(mira_cmd)))
+        logger.info('Executing: {}'.format(' '.join(mira_cmd)))
         self.decoder = util.popen_io(mira_cmd)
         self.lock = util.FIFOLock()
 
