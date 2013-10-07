@@ -8,9 +8,26 @@ import time
 
 import rt
 
+ABOUT = '''Realtime adaptive translation with cdec (See README.md)
+
+Code by Michael Denkowski
+
+Citation:
+@misc{denkowski-proposal2013,
+    author       = {Michael Denkowski},
+    title        = {Machine Translation for Human Translators},
+    year         = {2013},
+    month        = {May},
+    day          = {30},
+    howpublished = {{Ph.D.} Thesis Proposal, Carnegie Mellon University}
+}
+
+'''
+
 class Parser(argparse.ArgumentParser):
 
     def error(self, message):
+        sys.stderr.write(ABOUT)
         self.print_help()
         sys.stderr.write('\n{}\n'.format(message))
         sys.exit(2)
@@ -55,7 +72,7 @@ def debug(translator, input):
 
 def main():
 
-    parser = Parser(description='Real-time adaptive translation with cdec.  (See README.md)')
+    parser = Parser()
     parser.add_argument('-c', '--config', required=True, help='Config directory')
     parser.add_argument('-s', '--state', help='Load state file to default context (saved incremental data)')
     parser.add_argument('-n', '--normalize', help='Normalize text (tokenize, translate, detokenize)', action='store_true')
