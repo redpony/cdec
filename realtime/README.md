@@ -1,4 +1,4 @@
-cdec-realtime
+cdec Realtime
 -------------
 
 Code by Michael Denkowski (http://www.cs.cmu.edu/~mdenkows/, mdenkows@cs.cmu.edu)
