@@ -21,7 +21,8 @@ opts = Trollop::options do
   opt :qsub, "use qsub", :type => :bool, :default => false
   opt :dtrain_binary, "path to dtrain binary", :type => :string
   opt :extra_qsub, "extra qsub args", :type => :string, :default => ""
-  opt :per_shard_decoder_configs, "give special decoder config per shard", :type => :string, :short => :o
+  opt :per_shard_decoder_configs, "give special decoder config per shard", :type => :string, :short => '-o'
+  opt :first_input_weights, "input weights for first iter", :type => :string, :default => '', :short => '-w'
 end
 usage if not opts[:config]&&opts[:shards]&&opts[:input]&&opts[:references]
 
@@ -54,6 +55,7 @@ input = opts[:input]
 refs  = opts[:references]
 use_qsub       = opts[:qsub]
 shards_at_once = opts[:processes_at_once]
+first_input_weights  = opts[:first_input_weights]
 
 `mkdir work`
 
@@ -137,10 +139,13 @@ end
       else
         cdec_cfg = ""
       end
+      if first_input_weights!='' && epoch == 0
+        input_weights = "--input_weights #{first_input_weights}"
+      end
       pids << Kernel.fork {
-        `#{qsub_str_start}#{dtrain_bin} -c #{ini} #{cdec_cfg}\
+        `#{qsub_str_start}#{dtrain_bin} -c #{ini} #{cdec_cfg} #{input_weights}\
           --input #{input_files[shard]}\
-          --refs #{refs_files[shard]} #{input_weights}\
+          --refs #{refs_files[shard]}\
           --output work/weights.#{shard}.#{epoch}#{qsub_str_end} #{local_end}`
       }
       weights_files << "work/weights.#{shard}.#{epoch}"
