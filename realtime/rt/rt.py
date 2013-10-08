@@ -151,7 +151,7 @@ class RealtimeTranslator:
         NOT threadsafe, acquire ctx_name lock before calling.'''
         if ctx_name in self.ctx_names:
             return
-        logger.info('New context: {}'.format(ctx_name))
+        logger.info('({}) New context'.format(ctx_name))
         self.ctx_names.add(ctx_name)
         self.ctx_data[ctx_name] = []
         self.grammar_files[ctx_name] = collections.deque()
@@ -166,11 +166,11 @@ class RealtimeTranslator:
         if not force:
             lock.acquire()
         if ctx_name not in self.ctx_names:
-            logger.info('No context found, no action: {}'.format(ctx_name))
+            logger.info('({}) No context found, no action taken'.format(ctx_name))
             if not force:
                 lock.release()
             return
-        logger.info('Dropping context: {}'.format(ctx_name))
+        logger.info('({}) Dropping context'.format(ctx_name))
         self.ctx_names.remove(ctx_name)
         self.ctx_data.pop(ctx_name)
         self.extractor.drop_ctx(ctx_name)
@@ -195,7 +195,7 @@ class RealtimeTranslator:
         grammar_file = grammar_dict.get(sentence, None)
         # Cache hit
         if grammar_file:
-            logger.info('Grammar cache hit: {}'.format(grammar_file))
+            logger.info('({}) Grammar cache hit: {}'.format(ctx_name, grammar_file))
             self.extractor_lock.release()
             return grammar_file
         # Extract and cache
@@ -228,18 +228,18 @@ class RealtimeTranslator:
             return ''
         if self.norm:
             sentence = self.tokenize(sentence)
-            logger.info('Normalized input: {}'.format(sentence))
+            logger.info('({}) Normalized input: {}'.format(ctx_name, sentence))
         grammar_file = self.grammar(sentence, ctx_name)
         decoder = self.decoders[ctx_name]
         start_time = time.time()
         hyp = decoder.decoder.decode(sentence, grammar_file)
         stop_time = time.time()
-        logger.info('Translation time: {} seconds'.format(stop_time - start_time))
+        logger.info('({}) Translation time: {} seconds'.format(ctx_name, stop_time - start_time))
         # Empty reference: HPYPLM does not learn prior to next translation
         decoder.ref_fifo.write('\n')
         decoder.ref_fifo.flush()
         if self.norm:
-            logger.info('Normalized translation: {}'.format(hyp))
+            logger.info('({}) Normalized translation: {}'.format(ctx_name, hyp))
             hyp = self.detokenize(hyp)
         lock.release()
         return hyp
@@ -273,7 +273,7 @@ class RealtimeTranslator:
                 cmd_name = cmd_name[0]
             (command, nargs) = self.COMMANDS.get(cmd_name, (None, None))
             if command and len(args[1:]) in nargs:
-                logger.info('{} ({}) ||| {}'.format(cmd_name, ctx_name, ' ||| '.join(args[1:])))
+                logger.info('({}) {} ||| {}'.format(ctx_name, cmd_name, ' ||| '.join(args[1:])))
                 return command(*args[1:], ctx_name=ctx_name)
         logger.info('ERROR: command: {}'.format(' ||| '.join(args)))
         
@@ -284,7 +284,7 @@ class RealtimeTranslator:
         lock.acquire()
         self.lazy_ctx(ctx_name)
         if '' in (source.strip(), target.strip()):
-            logger.info('ERROR: empty source or target: {} ||| {}'.format(source, target))
+            logger.info('({}) ERROR: empty source or target: {} ||| {}'.format(ctx_name, source, target))
             lock.release()
             return
         if self.norm:
@@ -296,15 +296,15 @@ class RealtimeTranslator:
         # MIRA update before adding data to grammar extractor
         decoder = self.decoders[ctx_name]
         mira_log = decoder.decoder.update(source, grammar_file, target)
-        logger.info('MIRA: {}'.format(mira_log))
+        logger.info('({}) MIRA HBF: {}'.format(ctx_name, mira_log))
         # Add to HPYPLM by writing to fifo (read on next translation)
-        logger.info('Adding to HPYPLM: {}'.format(target))
+        logger.info('({}) Adding to HPYPLM: {}'.format(ctx_name, target))
         decoder.ref_fifo.write('{}\n'.format(target))
         decoder.ref_fifo.flush()
         # Store incremental data for save/load
         self.ctx_data[ctx_name].append((source, target, alignment))
         # Add aligned sentence pair to grammar extractor
-        logger.info('Adding to bitext: {} ||| {} ||| {}'.format(source, target, alignment))
+        logger.info('({}) Adding to bitext: {} ||| {} ||| {}'.format(ctx_name, source, target, alignment))
         self.extractor.add_instance(source, target, alignment, ctx_name)
         # Clear (old) cached grammar
         rm_grammar = self.grammar_dict[ctx_name].pop(source)
@@ -317,7 +317,7 @@ class RealtimeTranslator:
         self.lazy_ctx(ctx_name)
         ctx_data = self.ctx_data[ctx_name]
         out = open(filename, 'w') if filename else sys.stdout
-        logger.info('Saving state for context ({}) with {} sentences'.format(ctx_name, len(ctx_data)))
+        logger.info('({}) Saving state with {} sentences'.format(ctx_name, len(ctx_data)))
         out.write('{}\n'.format(self.decoders[ctx_name].decoder.get_weights()))
         for (source, target, alignment) in ctx_data:
             out.write('{} ||| {} ||| {}\n'.format(source, target, alignment))
@@ -335,8 +335,8 @@ class RealtimeTranslator:
         input = open(filename) if filename else sys.stdin
         # Non-initial load error
         if ctx_data:
-            logger.info('ERROR: Incremental data has already been added to context ({})'.format(ctx_name))
-            logger.info('       State can only be loaded to a new context.')
+            logger.info('({}) ERROR: Incremental data has already been added to context'.format(ctx_name))
+            logger.info('  State can only be loaded to a new context.')
             lock.release()
             return
         # Many things can go wrong if bad state data is given
@@ -345,7 +345,7 @@ class RealtimeTranslator:
             line = input.readline().strip()
             # Throws exception if bad line
             decoder.decoder.set_weights(line)
-            logger.info('Loading state...')
+            logger.info('({}) Loading state...'.format(ctx_name))
             start_time = time.time()
             # Lines source ||| target ||| alignment
             while True:
@@ -364,12 +364,12 @@ class RealtimeTranslator:
                 decoder.ref_fifo.write('{}\n'.format(target))
                 decoder.ref_fifo.flush()
             stop_time = time.time()
-            logger.info('Loaded state for context ({}) with {} sentences in {} seconds'.format(ctx_name, len(ctx_data), stop_time - start_time))
+            logger.info('({}) Loaded state with {} sentences in {} seconds'.format(ctx_name, len(ctx_data), stop_time - start_time))
             lock.release()
         # Recover from bad load attempt by restarting context.
         # Guaranteed not to cause data loss since only a new context can load state.
         except:
-            logger.info('ERROR: could not load state, restarting context ({})'.format(ctx_name))
+            logger.info('({}) ERROR: could not load state, restarting context'.format(ctx_name))
             # ctx_name is already owned and needs to be restarted before other blocking threads use
             self.drop_ctx(ctx_name, force=True)
             self.lazy_ctx(ctx_name)
