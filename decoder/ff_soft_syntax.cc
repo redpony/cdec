@@ -21,7 +21,7 @@ using namespace std;
 struct SoftSyntacticFeaturesImpl {
   SoftSyntacticFeaturesImpl(const string& param) {
     vector<string> labels = SplitOnWhitespace(param);
-	for (unsigned int i = 0; i < labels.size(); i++) 
+	//for (unsigned int i = 0; i < labels.size(); i++) 
       //cerr << "Labels: " << labels.at(i) << endl;
     for (unsigned int i = 0; i < labels.size(); i++) {
       string label = labels.at(i);
