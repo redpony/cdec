@@ -13,13 +13,14 @@ class Decoder:
         if not force:
             self.lock.acquire()
         self.decoder.stdin.close()
+        self.decoder.wait()
         if not force:
             self.lock.release()
 
     def decode(self, sentence, grammar=None):
         '''Threadsafe, FIFO'''
-        input = '<seg grammar="{g}">{s}</seg>\n'.format(s=sentence, g=grammar) if grammar else '{}\n'.format(sentence)
         self.lock.acquire()
+        input = '<seg grammar="{g}">{s}</seg>\n'.format(s=sentence, g=grammar) if grammar else '{}\n'.format(sentence)
         self.decoder.stdin.write(input)
         hyp = self.decoder.stdout.readline().strip()
         self.lock.release()
@@ -71,8 +72,8 @@ class MIRADecoder(Decoder):
 
     def update(self, sentence, grammar, reference):
         '''Threadsafe, FIFO'''
-        input = 'LEARN ||| <seg grammar="{g}">{s}</seg> ||| {r}\n'.format(s=sentence, g=grammar, r=reference)
         self.lock.acquire()
+        input = 'LEARN ||| <seg grammar="{g}">{s}</seg> ||| {r}\n'.format(s=sentence, g=grammar, r=reference)
         self.decoder.stdin.write(input)
         log = self.decoder.stdout.readline().strip()
         self.lock.release()

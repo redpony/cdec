@@ -57,8 +57,11 @@ class ForceAligner:
         if not force:
             self.lock.acquire()
         self.fwd_align.stdin.close()
+        self.fwd_align.wait()
         self.rev_align.stdin.close()
+        self.rev_align.wait()
         self.tools.stdin.close()
+        self.tools.wait()
         if not force:
             self.lock.release()
 
