@@ -140,7 +140,9 @@ class RealtimeTranslator:
                 self.tokenizer_lock.acquire()
                 self.detokenizer_lock.acquire()
             self.tokenizer.stdin.close()
+            self.tokenizer.wait()
             self.detokenizer.stdin.close()
+            self.detokenizer.wait()
             if not force:
                 self.tokenizer_lock.release()
                 self.detokenizer_lock.release()
