@@ -349,7 +349,7 @@ class RealtimeTranslator:
         # Filename, StringIO, or None (stdin)
         if file_or_stringio:
             if isinstance(file_or_stringio, StringIO.StringIO):
-                input = file_or_stringio.getvalue()
+                input = file_or_stringio
             else:
                 input = open(file_or_stringio)
         else:
