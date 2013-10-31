@@ -10,7 +10,7 @@ logger = logging.getLogger('rt.aligner')
 
 class ForceAligner:
 
-    def __init__(self, fwd_params, fwd_err, rev_params, rev_err):
+    def __init__(self, fwd_params, fwd_err, rev_params, rev_err, heuristic='grow-diag-final-and'):
 
         cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         fast_align = os.path.join(cdec_root, 'word-aligner', 'fast_align')
@@ -21,7 +21,7 @@ class ForceAligner:
 
         fwd_cmd = [fast_align, '-i', '-', '-d', '-T', fwd_T, '-m', fwd_m, '-f', fwd_params]
         rev_cmd = [fast_align, '-i', '-', '-d', '-T', rev_T, '-m', rev_m, '-f', rev_params, '-r']
-        tools_cmd = [atools, '-i', '-', '-j', '-', '-c', 'grow-diag-final-and']
+        tools_cmd = [atools, '-i', '-', '-j', '-', '-c', heuristic]
 
         logger.info('Executing: {}'.format(' '.join(fwd_cmd)))
         self.fwd_align = util.popen_io(fwd_cmd)
