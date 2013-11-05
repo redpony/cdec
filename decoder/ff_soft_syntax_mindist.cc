@@ -146,10 +146,10 @@ struct SoftSyntaxFeaturesMindistImpl {
         case '2':
           if (min_dist_label.compare(label) == 0) {
             if (min_dist == 0) {
-              os << "SYN:" << label << "_conform";
+              os << "SOFTM:" << label << "_conform";
             }
             else {
-              os << "SYN:" << label << "_cross";
+              os << "SOFTM:" << label << "_cross";
             }
             fid_ef = FD::Convert(os.str());
             //cerr << "Feature :" << os.str() << endl;
@@ -157,7 +157,7 @@ struct SoftSyntaxFeaturesMindistImpl {
           }
           break;
         case '_':
-          os << "SYN:" << label;
+          os << "SOFTM:" << label;
           fid_ef = FD::Convert(os.str());
           if (min_dist_label.compare(label) == 0) {
             //cerr << "Feature: " << os.str() << endl;
@@ -172,7 +172,7 @@ struct SoftSyntaxFeaturesMindistImpl {
           break;
         case '+':
           if (min_dist_label.compare(label) == 0) {
-            os << "SYN:" << label << "_conform";
+            os << "SOFTM:" << label << "_conform";
             fid_ef = FD::Convert(os.str());
             if (min_dist == 0) {
               //cerr << "Feature: " << os.str() << endl;
@@ -183,7 +183,7 @@ struct SoftSyntaxFeaturesMindistImpl {
         case '-':
           //cerr << "-" << endl;
           if (min_dist_label.compare(label) != 0) {
-            os << "SYN:" << label << "_cross";
+            os << "SOFTM:" << label << "_cross";
             fid_ef = FD::Convert(os.str());
             if (min_dist > 0) {
               //cerr << "Feature :" << os.str() << endl;
@@ -230,6 +230,9 @@ void SoftSyntaxFeaturesMindist::TraversalFeaturesImpl(const SentenceMetadata& sm
 }
 
 void SoftSyntaxFeaturesMindist::PrepareForInput(const SentenceMetadata& smeta) {
-  impl->InitializeGrids(smeta.GetSGMLValue("src_tree"), smeta.GetSourceLength());
+  ReadFile f = ReadFile(smeta.GetSGMLValue("src_tree"));
+  string tree;
+  f.ReadAll(tree);
+  impl->InitializeGrids(tree, smeta.GetSourceLength());
 }
 
