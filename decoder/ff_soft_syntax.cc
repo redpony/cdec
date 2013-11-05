@@ -107,10 +107,10 @@ struct SoftSyntaxFeaturesImpl {
       switch(feat_type) {
         case '2':
           if (lhs_str.compare(label) == 0) {
-            os << "SYN:" << label << "_conform";
+            os << "SOFT:" << label << "_conform";
           }
           else {
-            os << "SYN:" << label << "_cross";
+            os << "SOFT:" << label << "_cross";
           }
           fid_ef = FD::Convert(os.str());
           if (fid_ef > 0) {
@@ -119,7 +119,7 @@ struct SoftSyntaxFeaturesImpl {
           }
           break;
         case '_':
-          os << "SYN:" << label;
+          os << "SOFT:" << label;
           fid_ef = FD::Convert(os.str());
           if (lhs_str.compare(label) == 0) {
             if (fid_ef > 0) {
@@ -136,7 +136,7 @@ struct SoftSyntaxFeaturesImpl {
           break;
         case '+':
           if (lhs_str.compare(label) == 0) {
-            os << "SYN:" << label << "_conform";
+            os << "SOFT:" << label << "_conform";
             fid_ef = FD::Convert(os.str());
             if (fid_ef > 0) {
               //cerr << "Feature: " << os.str() << endl;
@@ -147,7 +147,7 @@ struct SoftSyntaxFeaturesImpl {
         case '-':
           //cerr << "-" << endl;
           if (lhs_str.compare(label) != 0) {
-            os << "SYN:" << label << "_cross";
+            os << "SOFT:" << label << "_cross";
             fid_ef = FD::Convert(os.str());
             if (fid_ef > 0) {
               //cerr << "Feature :" << os.str() << endl;
@@ -194,6 +194,9 @@ void SoftSyntaxFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
 }
 
 void SoftSyntaxFeatures::PrepareForInput(const SentenceMetadata& smeta) {
-  impl->InitializeGrids(smeta.GetSGMLValue("src_tree"), smeta.GetSourceLength());
+  ReadFile f = ReadFile(smeta.GetSGMLValue("src_tree"));
+  string tree;
+  f.ReadAll(tree);
+  impl->InitializeGrids(tree, smeta.GetSourceLength());
 }
 

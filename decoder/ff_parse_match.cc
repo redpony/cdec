@@ -212,6 +212,9 @@ void ParseMatchFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
 }
 
 void ParseMatchFeatures::PrepareForInput(const SentenceMetadata& smeta) {
-  impl->InitializeGrids(smeta.GetSGMLValue("src_tree"), smeta.GetSourceLength());
+  ReadFile f = ReadFile(smeta.GetSGMLValue("src_tree"));
+  string tree;
+  f.ReadAll(tree);
+  impl->InitializeGrids(tree, smeta.GetSourceLength());
 }
 

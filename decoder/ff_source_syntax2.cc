@@ -90,7 +90,7 @@ struct SourceSyntaxFeatures2Impl {
     const WordID lhs = src_tree(i,j);
     int& fid_ef = fids_ef(i,j)[&rule];
     ostringstream os;
-    os << "SYN:" << TD::Convert(lhs);
+    os << "SSYN2:" << TD::Convert(lhs);
     os << ':';
     unsigned ntc = 0;
     for (unsigned k = 0; k < rule.f_.size(); ++k) {
@@ -159,6 +159,9 @@ void SourceSyntaxFeatures2::TraversalFeaturesImpl(const SentenceMetadata& smeta,
 }
 
 void SourceSyntaxFeatures2::PrepareForInput(const SentenceMetadata& smeta) {
-  impl->InitializeGrids(smeta.GetSGMLValue("src_tree"), smeta.GetSourceLength());
+  ReadFile f = ReadFile(smeta.GetSGMLValue("src_tree"));
+  string tree;
+  f.ReadAll(tree);
+  impl->InitializeGrids(tree, smeta.GetSourceLength());
 }
 

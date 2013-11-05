@@ -104,7 +104,7 @@ struct SourceSyntaxFeaturesImpl {
     if (fid_ef <= 0) {
       ostringstream os;
       //ostringstream os2;
-      os << "SYN:" << TD::Convert(lhs);
+      os << "SSYN:" << TD::Convert(lhs);
       //os2 << "SYN:" << TD::Convert(lhs) << '_' << SpanSizeTransform(j - i);
       //fid_cat = FD::Convert(os2.str());
       os << ':';
@@ -173,7 +173,10 @@ void SourceSyntaxFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
 }
 
 void SourceSyntaxFeatures::PrepareForInput(const SentenceMetadata& smeta) {
-  impl->InitializeGrids(smeta.GetSGMLValue("src_tree"), smeta.GetSourceLength());
+  ReadFile f = ReadFile(smeta.GetSGMLValue("src_tree"));
+  string tree;
+  f.ReadAll(tree);
+  impl->InitializeGrids(tree, smeta.GetSourceLength());
 }
 
 struct SourceSpanSizeFeaturesImpl {
