@@ -13,10 +13,6 @@ using namespace std;
 // implements the parse match features as described in Vilar et al. (2008)
 // source trees must be represented in Penn Treebank format, e.g.
 //     (S (NP John) (VP (V left)))
-//
-// Annotate source sentences with <seg id="..." grammar="..." src_tree="(S ...)">...</seg>"
-// Note: You need to escape quite a lot of stuff in all your models!
-//
 
 struct ParseMatchFeaturesImpl {
   ParseMatchFeaturesImpl(const string& param) {

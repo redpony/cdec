@@ -62,7 +62,6 @@ libcdec_a_SOURCES = \
   ff_ruleshape.h \
   ff_sample_fsa.h \
   ff_source_path.h \
-  ff_source_syntax.h \
   ff_spans.h \
   ff_tagger.h \
   ff_wordalign.h \
@@ -145,11 +144,9 @@ libcdec_a_SOURCES = \
   ff_source_path.cc \
   ff_parse_match.cc \
 	ff_soft_syntax.cc \
-	ff_soft_syntax2.cc \
+	ff_soft_syntax_mindist.cc \
   ff_source_syntax.cc \
-	ff_source_syntax_p.cc \
   ff_source_syntax2.cc \
-  ff_source_syntax2_p.cc \
   ff_bleu.cc \
   ff_factory.cc \
   incremental.cc \

@@ -13,16 +13,15 @@
 
 using namespace std;
 
-// Implements the soft syntactic features described in 
+// Implements the soft syntactic features described in
 // Marton and Resnik (2008): "Soft Syntacitc Constraints for Hierarchical Phrase-Based Translation".
 // Source trees must be represented in Penn Treebank format,
 // e.g. (S (NP John) (VP (V left))).
 
-struct SoftSyntacticFeaturesImpl {
-  SoftSyntacticFeaturesImpl(const string& param) {
+struct SoftSyntaxFeaturesImpl {
+  SoftSyntaxFeaturesImpl(const string& param) {
     vector<string> labels = SplitOnWhitespace(param);
-	//for (unsigned int i = 0; i < labels.size(); i++) 
-      //cerr << "Labels: " << labels.at(i) << endl;
+  	//for (unsigned int i = 0; i < labels.size(); i++) { cerr << "Labels: " << labels.at(i) << endl; }
     for (unsigned int i = 0; i < labels.size(); i++) {
       string label = labels.at(i);
       pair<string, string> feat_label;
@@ -34,10 +33,8 @@ struct SoftSyntacticFeaturesImpl {
 
   void InitializeGrids(const string& tree, unsigned src_len) {
     assert(tree.size() > 0);
-    //fids_cat.clear();
     fids_ef.clear();
     src_tree.clear();
-    //fids_cat.resize(src_len, src_len + 1);
     fids_ef.resize(src_len, src_len + 1);
     src_tree.resize(src_len, src_len + 1, TD::Convert("XX"));
     ParseTreeString(tree, src_len);
@@ -99,7 +96,7 @@ struct SoftSyntacticFeaturesImpl {
     const WordID lhs = src_tree(i,j);
 	string lhs_str = TD::Convert(lhs);
     //cerr << "LHS: " << lhs_str << " from " << i << " to " << j << endl;
-	//cerr << "RULE :"<< rule << endl;
+	  //cerr << "RULE :"<< rule << endl;
     int& fid_ef = fids_ef(i,j)[&rule];
     for (unsigned int i = 0; i < feat_labels.size(); i++) {
       ostringstream os;
@@ -126,7 +123,7 @@ struct SoftSyntacticFeaturesImpl {
           fid_ef = FD::Convert(os.str());
           if (lhs_str.compare(label) == 0) {
             if (fid_ef > 0) {
-            //cerr << "Feature: " << os.str() << endl;
+              //cerr << "Feature: " << os.str() << endl;
               feats->set_value(fid_ef, 1.0);
             }
           }
@@ -147,8 +144,8 @@ struct SoftSyntacticFeaturesImpl {
             }
           }
           break;
-        case '-': 
-          //cerr << "-" << endl;           
+        case '-':
+          //cerr << "-" << endl;
           if (lhs_str.compare(label) != 0) {
             os << "SYN:" << label << "_cross";
             fid_ef = FD::Convert(os.str());
@@ -167,22 +164,22 @@ struct SoftSyntacticFeaturesImpl {
     return lhs;
   }
 
-  Array2D<WordID> src_tree;  // src_tree(i,j) NT = type
-  mutable Array2D<map<const TRule*, int> > fids_ef;    // fires for fully lexicalized
+  Array2D<WordID> src_tree; // src_tree(i,j) NT = type
+  mutable Array2D<map<const TRule*, int> > fids_ef; // fires for fully lexicalized
   vector<pair<string, string> > feat_labels;
 };
 
-SoftSyntacticFeatures::SoftSyntacticFeatures(const string& param) :
+SoftSyntaxFeatures::SoftSyntaxFeatures(const string& param) :
     FeatureFunction(sizeof(WordID)) {
-  impl = new SoftSyntacticFeaturesImpl(param);
+  impl = new SoftSyntaxFeaturesImpl(param);
 }
 
-SoftSyntacticFeatures::~SoftSyntacticFeatures() {
+SoftSyntaxFeatures::~SoftSyntaxFeatures() {
   delete impl;
   impl = NULL;
 }
 
-void SoftSyntacticFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+void SoftSyntaxFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
@@ -196,6 +193,7 @@ void SoftSyntacticFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
      impl->FireFeatures(*edge.rule_, edge.i_, edge.j_, ants, features);
 }
 
-void SoftSyntacticFeatures::PrepareForInput(const SentenceMetadata& smeta) {
+void SoftSyntaxFeatures::PrepareForInput(const SentenceMetadata& smeta) {
   impl->InitializeGrids(smeta.GetSGMLValue("src_tree"), smeta.GetSourceLength());
 }
+
