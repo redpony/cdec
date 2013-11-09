@@ -8,9 +8,7 @@
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
 
-namespace fs = boost::filesystem;
 using namespace std;
 
 namespace extractor {

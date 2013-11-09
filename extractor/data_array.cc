@@ -5,9 +5,6 @@
 #include <sstream>
 #include <string>
 
-#include <boost/filesystem.hpp>
-
-namespace fs = boost::filesystem;
 using namespace std;
 
 namespace extractor {

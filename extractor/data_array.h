@@ -5,13 +5,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
 
-namespace fs = boost::filesystem;
 using namespace std;
 
 namespace extractor {
