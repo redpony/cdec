@@ -10,7 +10,6 @@
 #include "phrase_location.h"
 #include "time_util.h"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace chrono;
 
