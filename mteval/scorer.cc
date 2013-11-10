@@ -198,7 +198,7 @@ class BLEUScorerBase : public SentenceScorer {
   virtual float ComputeRefLength(const vector<WordID>& hyp) const = 0;
  private:
   struct NGramCompare {
-    int operator() (const vector<WordID>& a, const vector<WordID>& b) {
+    int operator() (const vector<WordID>& a, const vector<WordID>& b) const {
       size_t as = a.size();
       size_t bs = b.size();
       const size_t s = (as < bs ? as : bs);
