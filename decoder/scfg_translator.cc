@@ -1,13 +1,9 @@
-//TODO: bottom-up pruning, with actual final models' (appropriately weighted) heuristics and local scores.
-
-//TODO: grammar heuristic (min cost of reachable rule set) for binarizations (active edges) if we wish to prune those also
-
-#include "hash.h"
-#include "translator.h"
 #include <algorithm>
 #include <vector>
 #include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
+#include "hash.h"
+#include "translator.h"
 #include "hg.h"
 #include "grammar.h"
 #include "bottom_up_parser.h"
@@ -16,13 +12,11 @@
 #include "tdict.h"
 #include "viterbi.h"
 #include "verbose.h"
-#include <tr1/unordered_map>
 
 #define foreach         BOOST_FOREACH
 #define reverse_foreach BOOST_REVERSE_FOREACH
 
 using namespace std;
-using namespace std::tr1;
 static bool printGrammarsUsed = false;
 
 struct GlueGrammar : public TextGrammar {

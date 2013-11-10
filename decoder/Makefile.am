@@ -41,7 +41,6 @@ libcdec_a_SOURCES = \
   cfg_options.h \
   csplit.h \
   decoder.h \
-  dwarf.h \
   earley_composer.h \
   exp_semiring.h \
   factored_lexicon_helper.h \
@@ -51,7 +50,6 @@ libcdec_a_SOURCES = \
   ff_charset.h \
   ff_context.h \
   ff_csplit.h \
-  ff_dwarf.h \
   ff_external.h \
   ff_factory.h \
   ff_klm.h \
@@ -103,8 +101,6 @@ libcdec_a_SOURCES = \
   maxtrans_blunsom.cc \
   cdec_ff.cc \
   cfg.cc \
-  dwarf.cc \
-  ff_dwarf.cc \
   ff_external.cc \
   rule_lexer.cc \
   fst_translator.cc \

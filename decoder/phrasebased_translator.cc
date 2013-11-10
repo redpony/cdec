@@ -2,8 +2,14 @@
 
 #include <queue>
 #include <iostream>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#ifdef HAVE_CXX11
+# include <unordered_map>
+# include <unordered_set>
+#else
+# include <tr1/unordered_map>
+# include <tr1/unordered_set>
+namespace std { using std::tr1::unordered_map; using std::tr1::unordered_set; }
+#endif
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/functional/hash.hpp>
@@ -17,7 +23,6 @@
 #include "array2d.h"
 
 using namespace std;
-using namespace std::tr1;
 using namespace boost::tuples;
 
 struct Coverage : public vector<bool> {

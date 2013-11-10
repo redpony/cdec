@@ -1,10 +1,10 @@
 #ifndef _ONL_OPTIMIZE_H_
 #define _ONL_OPTIMIZE_H_
 
-#include <tr1/memory>
 #include <set>
 #include <string>
 #include <cmath>
+#include <boost/shared_ptr.hpp>
 #include "sparse_vector.h"
 
 struct LearningRateSchedule {
@@ -56,7 +56,7 @@ struct ExponentialDecayLearningRate : public LearningRateSchedule {
 class OnlineOptimizer {
  public:
   virtual ~OnlineOptimizer();
-  OnlineOptimizer(const std::tr1::shared_ptr<LearningRateSchedule>& s,
+  OnlineOptimizer(const boost::shared_ptr<LearningRateSchedule>& s,
                   size_t batch_size,
                   const std::vector<int>& frozen_feats = std::vector<int>())
       : N_(batch_size),schedule_(s),k_() {
@@ -77,13 +77,13 @@ class OnlineOptimizer {
   std::set<int> frozen_;  // frozen (non-optimizing) features
 
  private:
-  std::tr1::shared_ptr<LearningRateSchedule> schedule_;
+  boost::shared_ptr<LearningRateSchedule> schedule_;
   int k_;  // iteration count
 };
 
 class CumulativeL1OnlineOptimizer : public OnlineOptimizer {
  public:
-  CumulativeL1OnlineOptimizer(const std::tr1::shared_ptr<LearningRateSchedule>& s,
+  CumulativeL1OnlineOptimizer(const boost::shared_ptr<LearningRateSchedule>& s,
                               size_t training_instances, double C,
                               const std::vector<int>& frozen) :
     OnlineOptimizer(s, training_instances, frozen), C_(C), u_() {}

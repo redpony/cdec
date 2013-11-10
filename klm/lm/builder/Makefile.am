@@ -1,6 +1,6 @@
-bin_PROGRAMS = builder
+bin_PROGRAMS = lmplz
 
-builder_SOURCES = \
+lmplz_SOURCES = \
   lmplz_main.cc \
   adjust_counts.cc \
   adjust_counts.hh \
@@ -22,7 +22,7 @@ builder_SOURCES = \
   print.hh \
   sort.hh
 
-builder_LDADD = ../libklm.a ../../util/double-conversion/libklm_util_double.a ../../util/stream/libklm_util_stream.a ../../util/libklm_util.a $(BOOST_THREAD_LIBS)
+lmplz_LDADD = ../libklm.a ../../util/double-conversion/libklm_util_double.a ../../util/stream/libklm_util_stream.a ../../util/libklm_util.a $(BOOST_THREAD_LIBS)
 
 AM_CPPFLAGS = -W -Wall -I$(top_srcdir)/klm
 

@@ -3,7 +3,12 @@
 #include <sstream>
 #include <stack>
 #include <string>
-#include <tr1/unordered_set>
+#ifdef HAVE_CXX11
+# include <unordered_set>
+#else
+# include <tr1/unordered_set>
+namespace std { using std::tr1::unordered_set; }
+#endif
 
 #include "sentence_metadata.h"
 #include "array2d.h"
@@ -133,8 +138,7 @@ struct PSourceSyntaxFeatures2Impl {
 
   Array2D<WordID> src_tree;  // src_tree(i,j) NT = type
   mutable Array2D<map<const TRule*, int> > fids_ef;    // fires for fully lexicalized
-  tr1::unordered_set<int> feature_filter;
-
+  unordered_set<int> feature_filter;
 };
 
 PSourceSyntaxFeatures2::PSourceSyntaxFeatures2(const string& param) :
