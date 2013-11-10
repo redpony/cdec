@@ -75,6 +75,13 @@ def main():
     a_bin = os.path.join(args.output, 'a.bin')
     lex_bin = os.path.join(args.output, 'lex.bin')
 
+    config = cdec.configobj.ConfigObj(args.config, unrepr=True)
+    config['f_sa_file'] = os.path.abspath(f_sa_bin)
+    config['e_file'] = os.path.abspath(e_bin)
+    config['a_file'] = os.path.abspath(a_bin)
+    config['lex_file'] = os.path.abspath(lex_bin)
+    config['precompute_file'] = os.path.abspath(precomp_bin)
+
     start_time = monitor_cpu()
     logger.info('Compiling source suffix array')
     if args.bitext:
@@ -116,12 +123,6 @@ def main():
     logger.info('Compiling bilexical dictionary took %f seconds', stop_time - start_time)
 
     # Write configuration
-    config = cdec.configobj.ConfigObj(args.config, unrepr=True)
-    config['f_sa_file'] = os.path.abspath(f_sa_bin)
-    config['e_file'] = os.path.abspath(e_bin)
-    config['a_file'] = os.path.abspath(a_bin)
-    config['lex_file'] = os.path.abspath(lex_bin)
-    config['precompute_file'] = os.path.abspath(precomp_bin)
     for name, value in zip(param_names, params):
         config[name] = value
     config.write()
