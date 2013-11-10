@@ -54,10 +54,13 @@ struct Coverage : public vector<bool> {
 };
 struct CoverageHash {
   size_t operator()(const Coverage& cov) const {
-    return hasher_(static_cast<const vector<bool>&>(cov));
+    int seed = 131;
+    size_t res = 0;
+    for (vector<bool>::const_iterator it = cov.begin(); it != cov.end(); ++it) {
+      res = (res * seed) + (*it + 1);
+    }
+    return res;
   }
- private:
-  boost::hash<vector<bool> > hasher_;
 };
 ostream& operator<<(ostream& os, const Coverage& cov) {
   os << '[';

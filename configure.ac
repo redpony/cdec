@@ -185,12 +185,12 @@ AC_CHECK_HEADER(google/dense_hash_map,
 
 AC_PROG_INSTALL
 
-CPPFLAGS="-DPIC -fPIC $CXX11_SWITCH $CPPFLAGS -DHAVE_CONFIG_H -DKENLM_MAX_ORDER=6"
+CPPFLAGS="-DPIC -fPIC $CPPFLAGS -DHAVE_CONFIG_H -DKENLM_MAX_ORDER=6"
+CXXFLAGS="$CXX11_SWITCH $CXXFLAGS"
 
 if test "x$HAVE_CXX11" = "x0"; then
   CPPFLAGS="$CPPFLAGS -DHAVE_OLD_CPP"
 fi
-
 
 # core cdec stuff
 AC_CONFIG_FILES([Makefile])
@@ -199,7 +199,7 @@ AC_CONFIG_FILES([mteval/Makefile])
 AC_CONFIG_FILES([mteval/meteor_jar.cc])
 AC_CONFIG_FILES([decoder/Makefile])
 AC_CONFIG_FILES([python/setup.py])
-AC_CONFIG_FILES([extractor/Makefile])
+# AC_CONFIG_FILES([extractor/Makefile])
 AC_CONFIG_FILES([word-aligner/Makefile])
 
 # KenLM stuff
