@@ -1,4 +1,4 @@
-AC_INIT([cdec],[2013-03-08])
+AC_INIT([cdec],[2013-11-10])
 AC_CONFIG_SRCDIR([decoder/cdec.cc])
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(config.h)
@@ -7,7 +7,6 @@ AC_PROG_LEX
 case $LEX in 
 :) AC_MSG_ERROR([No lex (Flex, lex, etc.) program found]);; 
 esac 
-# CPPFLAGS="$CPPFLAGS -std=c++0x"
 AC_PROG_CC
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX_11

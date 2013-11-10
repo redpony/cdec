@@ -4,8 +4,17 @@ import subprocess, shlex, glob
 import argparse
 import logging
 import random, time
-import cdec.score
 import gzip, itertools
+try:
+  import cdec.score
+except ImportError:
+  sys.stderr.write('Could not import pycdec, see cdec/python/README.md for details\n')
+  sys.exit(1)
+have_mpl = True
+try: 
+  import matplotlib.pyplot as plt
+except ImportError:
+  have_mpl = False
 
 #mira run script
 #requires pycdec to be built, since it is used for scoring hypothesis
@@ -16,17 +25,17 @@ import gzip, itertools
 #scoring function using pycdec scoring
 def fast_score(hyps, refs, metric):
   scorer = cdec.score.Scorer(metric)
-  logging.info('loaded {0} references for scoring with {1}\n'.format(
+  logging.info('loaded {0} references for scoring with {1}'.format(
                 len(refs), metric))
   if metric=='BLEU':
     logging.warning('BLEU is ambiguous, assuming IBM_BLEU\n')
     metric = 'IBM_BLEU'
   elif metric=='COMBI':
     logging.warning('COMBI metric is no longer supported, switching to '
-                    'COMB:TER=-0.5;BLEU=0.5\n')
+                    'COMB:TER=-0.5;BLEU=0.5')
     metric = 'COMB:TER=-0.5;BLEU=0.5'
   stats = sum(scorer(r).evaluate(h) for h,r in itertools.izip(hyps,refs))
-  logging.info(stats.detail+'\n')
+  logging.info('Score={} ({})'.format(stats.score, stats.detail))
   return stats.score
 
 #create new parallel input file in output directory in sgml format
@@ -71,6 +80,8 @@ def main():
   #set logging to write all info messages to stderr
   logging.basicConfig(level=logging.INFO)
   script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+  if not have_mpl:
+    logging.warning('Failed to import matplotlib, graphs will not be generated.')
 
   parser= argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -181,10 +192,11 @@ def main():
   dev_size = enseg(args.devset, newdev, args.grammar_prefix)
   args.devset = newdev
   
-  write_config(args)
+  log_config(args)
   args.weights, hope_best_fear = optimize(args, script_dir, dev_size)
   
-  graph_file = graph(args.output_dir, hope_best_fear, args.metric)
+  graph_file = ''
+  if have_mpl: graph_file = graph(args.output_dir, hope_best_fear, args.metric)
 
   dev_results, dev_bleu = evaluate(args.devset, args.weights, args.config, 
                          script_dir, args.output_dir)
@@ -205,17 +217,12 @@ def main():
 
   if graph_file:
     logging.info('A graph of the best/hope/fear scores over the iterations '
-                 'has been saved to {}\n'.format(graph_file))
+                 'has been saved to {}'.format(graph_file))
 
   print 'final weights:\n{}\n'.format(args.weights)
 
 #graph of hope/best/fear metric values across all iterations
 def graph(output_dir, hope_best_fear, metric):
-  try: 
-    import matplotlib.pyplot as plt
-  except ImportError:
-    logging.error('Error importing matplotlib. Graphing disabled.\n')
-    return ''
   max_y = float(max(hope_best_fear['best']))*1.5
   plt.plot(hope_best_fear['best'], label='best')
   plt.plot(hope_best_fear['hope'], label='hope')
@@ -308,6 +315,7 @@ def optimize(args, script_dir, dev_size):
   decoder = script_dir+'/kbest_cut_mira'
   (source, refs) = split_devset(args.devset, args.output_dir)
   port = random.randint(15000,50000)
+  logging.info('using port {}'.format(port))
   num_features = 0
   last_p_score = 0
   best_score_iter = -1
@@ -316,8 +324,8 @@ def optimize(args, script_dir, dev_size):
   hope_best_fear = {'hope':[],'best':[],'fear':[]}
   #main optimization loop
   while i<args.max_iterations:
-    logging.info('\n\nITERATION {}\n========\n'.format(i))
-    logging.info('using port {}\n'.format(port))
+    logging.info('======= STARTING ITERATION {} ======='.format(i))
+    logging.info('Starting at {}'.format(time.asctime()))
 
     #iteration specific files
     runfile = args.output_dir+'/run.raw.'+str(i)
@@ -327,10 +335,8 @@ def optimize(args, script_dir, dev_size):
     weightdir = args.output_dir+'/weights.pass'+str(i)
     os.mkdir(logdir)
     os.mkdir(weightdir)
-    
-    logging.info('RUNNING DECODER AT {}'.format(time.asctime()))
     weightsfile = args.output_dir+'/weights.'+str(i)
-    logging.info('ITER {}\n'.format(i))
+    logging.info('  log directory={}'.format(logdir))
     curr_pass = '0{}'.format(i)
     decoder_cmd = ('{0} -c {1} -w {2} -r{3} -m {4} -s {5} -b {6} -k {7} -o {8}'
                    ' -p {9} -O {10} -D {11} -h {12} -f {13} -C {14}').format(
@@ -350,7 +356,7 @@ def optimize(args, script_dir, dev_size):
                     parallelize, logdir, args.jobs)
     
     cmd = parallel_cmd + ' ' + decoder_cmd
-    logging.info('COMMAND: \n{}\n'.format(cmd))
+    logging.info('OPTIMIZATION COMMAND: {}'.format(cmd))
    
     dlog = open(decoderlog,'w')
     runf = open(runfile,'w')
@@ -365,27 +371,26 @@ def optimize(args, script_dir, dev_size):
       p1.stdout.close()
       
       if exit_code:
-        logging.error('Failed with exit code {}\n'.format(exit_code))
+        logging.error('Failed with exit code {}'.format(exit_code))
         sys.exit(exit_code)
 
       try:
         f = open(runfile)
       except IOError, msg:
-        logging.error('Unable to open {}\n'.format(runfile))
+        logging.error('Unable to open {}'.format(runfile))
         sys.exit()
       
       num_topbest = sum(1 for line in f)
       f.close()
       if num_topbest == dev_size: break
-      logging.warning('Incorrect number of top best. '
-                      'Waiting for distributed filesystem and retrying.')
+      logging.warning('Incorrect number of top best. Sleeping for 10 seconds and retrying...')
       time.sleep(10)
       retries += 1
     
     if dev_size != num_topbest:
       logging.error("Dev set contains "+dev_size+" sentences, but we don't "
                     "have topbest for all of these. Decoder failure? "
-                    " Check "+decoderlog+'\n')
+                    " Check "+decoderlog)
       sys.exit()
     dlog.close()
     runf.close()
@@ -427,7 +432,7 @@ def optimize(args, script_dir, dev_size):
     hope_best_fear['hope'].append(dec_score)
     hope_best_fear['best'].append(dec_score_h)
     hope_best_fear['fear'].append(dec_score_f)
-    logging.info('DECODER SCORE: {0} HOPE: {1} FEAR: {2}\n'.format(
+    logging.info('DECODER SCORE: {0} HOPE: {1} FEAR: {2}'.format(
                   dec_score, dec_score_h, dec_score_f))
     if dec_score > best_score:
       best_score_iter = i
@@ -436,12 +441,13 @@ def optimize(args, script_dir, dev_size):
     new_weights_file = '{}/weights.{}'.format(args.output_dir, i+1)
     last_weights_file = '{}/weights.{}'.format(args.output_dir, i)
     i += 1
-    weight_files = weightdir+'/weights.mira-pass*.*[0-9].gz'
+    weight_files = args.output_dir+'/weights.pass*/weights.mira-pass*[0-9].gz'
     average_weights(new_weights_file, weight_files)
 
-  logging.info('\nBEST ITER: {} :: {}\n\n'.format(
+  logging.info('BEST ITERATION: {} (SCORE={})'.format(
                best_score_iter, best_score))
   weights_final = args.output_dir+'/weights.final'
+  logging.info('WEIGHTS FILE: {}'.format(weights_final))
   shutil.copy(last_weights_file, weights_final)
   average_final_weights(args.output_dir)
   
@@ -481,15 +487,15 @@ def gzip_file(filename):
 
 #average the weights for a given pass
 def average_weights(new_weights, weight_files):
-  logging.info('AVERAGE {} {}\n'.format(new_weights, weight_files))
+  logging.info('AVERAGE {} {}'.format(new_weights, weight_files))
   feature_weights = {}
   total_mult = 0.0
   for path in glob.glob(weight_files):
     score = gzip.open(path)
     mult = 0
-    logging.info('FILE {}\n'.format(path))
+    logging.info('  FILE {}'.format(path))
     msg, ran, mult = score.readline().strip().split(' ||| ')
-    logging.info('Processing {} {}'.format(ran, mult))
+    logging.info('  Processing {} {}'.format(ran, mult))
     for line in score:
       f,w = line.split(' ',1)
       if f in feature_weights:
@@ -500,34 +506,30 @@ def average_weights(new_weights, weight_files):
     score.close()
   
   #write new weights to outfile
+  logging.info('Writing averaged weights to {}'.format(new_weights))
   out = open(new_weights, 'w')
   for f in iter(feature_weights):
     avg = feature_weights[f]/total_mult
-    logging.info('{} {} {} ||| Printing {} {}\n'.format(f,feature_weights[f], 
-                 total_mult, f, avg))
     out.write('{} {}\n'.format(f,avg))
 
-def write_config(args):
-  config = ('\n'
-            'DECODER: '
-            '/usr0/home/eschling/cdec/training/mira/kbest_cut_mira\n'
-            'INI FILE: '+args.config+'\n'
-            'WORKING DIRECTORY: '+args.output_dir+'\n'
-            'DEVSET: '+args.devset+'\n'
-            'EVAL METRIC: '+args.metric+'\n'
-            'MAX ITERATIONS: '+str(args.max_iterations)+'\n'
-            'DECODE NODES: '+str(args.jobs)+'\n'
-            'INITIAL WEIGHTS: '+args.weights+'\n')
+def log_config(args):
+  logging.info('WORKING DIRECTORY={}'.format(args.output_dir))
+  logging.info('INI FILE={}'.format(args.config))
+  logging.info('DEVSET={}'.format(args.devset))
+  logging.info('EVAL METRIC={}'.format(args.metric))
+  logging.info('MAX ITERATIONS={}'.format(args.max_iterations))
+  logging.info('PARALLEL JOBS={}'.format(args.jobs))
+  logging.info('INITIAL WEIGHTS={}'.format(args.weights))
   if args.grammar_prefix:
-    config += 'GRAMMAR PREFIX: '+str(args.grammar_prefix)+'\n'
+    logging.info('GRAMMAR PREFIX={}'.format(args.grammar_prefix))
   if args.test:
-    config += 'TEST SET: '+args.test+'\n'
+    logging.info('TEST SET={}'.format(args.test))
+  else:
+    logging.info('TEST SET=none specified')
   if args.test_config:
-    config += 'TEST CONFIG: '+args.test_config+'\n'
+    logging.info('TEST CONFIG={}'.format(args.test_config))
   if args.email:
-    config += 'EMAIL: '+args.email+'\n'
-           
-  logging.info(config)
+    logging.info('EMAIL={}'.format(args.email))
 
 if __name__=='__main__':
   main()

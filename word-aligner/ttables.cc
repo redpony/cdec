@@ -5,7 +5,6 @@
 #include "dict.h"
 
 using namespace std;
-using namespace std::tr1;
 
 void TTable::DeserializeProbsFromText(std::istream* in) {
   int c = 0;

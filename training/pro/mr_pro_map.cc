@@ -2,7 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <tr1/unordered_map>
 
 #include <boost/functional/hash.hpp>
 #include <boost/shared_ptr.hpp>

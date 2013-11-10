@@ -1,6 +1,7 @@
-if HAVE_CXX11
 
 bin_PROGRAMS = compile run_extractor
+
+if HAVE_CXX11
 
 EXTRA_PROGRAMS = alignment_test \
     data_array_test \
@@ -113,7 +114,29 @@ libcompile_a_SOURCES = \
   precomputation.cc \
   suffix_array.cc \
   time_util.cc \
-  translation_table.cc
+  translation_table.cc \
+  alignment.h \
+  data_array.h \
+  fast_intersector.h \
+  grammar.h \
+  grammar_extractor.h \
+  matchings_finder.h \
+  matchings_trie.h \
+  phrase.h \
+  phrase_builder.h \
+  phrase_location.h \
+  precomputation.h \
+  rule.h \
+  rule_extractor.h \
+  rule_extractor_helper.h \
+  rule_factory.h \
+  sampler.h \
+  scorer.h \
+  suffix_array.h \
+  target_phrase_extractor.h \
+  time_util.h \
+  translation_table.h \
+  vocabulary.h
 
 libextractor_a_SOURCES = \
   alignment.cc \

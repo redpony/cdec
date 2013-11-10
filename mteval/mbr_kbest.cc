@@ -1,9 +1,14 @@
 #include <iostream>
 #include <vector>
-#include <tr1/unordered_map>
 
 #include <boost/program_options.hpp>
 #include <boost/functional/hash.hpp>
+#ifdef HAVE_CXX11
+# include <unordered_map>
+#else
+# include <tr1/unordered_map>
+namespace std { using std::tr1::unordered_map; }
+#endif
 
 #include "prob.h"
 #include "tdict.h"
@@ -12,7 +17,6 @@
 #include "stringlib.h"
 
 using namespace std;
-using namespace std::tr1;
 
 namespace po = boost::program_options;
 

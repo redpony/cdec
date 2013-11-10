@@ -3,7 +3,6 @@
 #include <sstream>
 #include <stack>
 #include <string>
-#include <tr1/unordered_set>
 
 #include "sentence_metadata.h"
 #include "array2d.h"
@@ -126,8 +125,7 @@ struct SourceSyntaxFeatures2Impl {
 
   Array2D<WordID> src_tree;  // src_tree(i,j) NT = type
   mutable Array2D<map<const TRule*, int> > fids_ef;    // fires for fully lexicalized
-  tr1::unordered_set<int> feature_filter;
-
+  unordered_set<int> feature_filter;
 };
 
 SourceSyntaxFeatures2::SourceSyntaxFeatures2(const string& param) :

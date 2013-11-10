@@ -2,6 +2,12 @@
 
 #include <sstream>
 #include <stack>
+#ifdef HAVE_CXX11
+# include <unordered_set>
+#else
+# include <tr1/unordered_set>
+namespace std { using std::tr1::unordered_set; }
+#endif
 
 #include "hg.h"
 #include "sentence_metadata.h"
