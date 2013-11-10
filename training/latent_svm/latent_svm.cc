@@ -32,7 +32,6 @@ total_loss and prev_loss actually refer not to loss, but the metric (usually BLE
 #include "sampler.h"
 
 using namespace std;
-using boost::shared_ptr;
 namespace po = boost::program_options;
 
 bool invert_score; 
@@ -128,7 +127,7 @@ struct HypothesisInfo {
 };
 
 struct GoodOracle {
-  shared_ptr<HypothesisInfo> good;
+  boost::shared_ptr<HypothesisInfo> good;
 };
 
 struct TrainingObserver : public DecoderObserver {
@@ -143,9 +142,9 @@ struct TrainingObserver : public DecoderObserver {
   const DocScorer& ds;
   const vector<weight_t>& feature_weights;
   vector<GoodOracle>& oracles;
-  shared_ptr<HypothesisInfo> cur_best;
-  shared_ptr<HypothesisInfo> cur_costaug_best;
-  shared_ptr<HypothesisInfo> cur_ref; 
+  boost::shared_ptr<HypothesisInfo> cur_best;
+  boost::shared_ptr<HypothesisInfo> cur_costaug_best;
+  boost::shared_ptr<HypothesisInfo> cur_ref; 
   const int kbest_size;
   const double mt_metric_scale;
   const double mu;
@@ -168,8 +167,8 @@ struct TrainingObserver : public DecoderObserver {
     UpdateOracles(smeta.GetSentenceID(), *hg);
   }
 
-  shared_ptr<HypothesisInfo> MakeHypothesisInfo(const SparseVector<double>& feats, const double metric) {
-    shared_ptr<HypothesisInfo> h(new HypothesisInfo);
+  boost::shared_ptr<HypothesisInfo> MakeHypothesisInfo(const SparseVector<double>& feats, const double metric) {
+    boost::shared_ptr<HypothesisInfo> h(new HypothesisInfo);
     h->features = feats;
     h->mt_metric_score = metric;
     return h;

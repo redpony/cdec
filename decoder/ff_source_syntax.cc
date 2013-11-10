@@ -2,7 +2,7 @@
 
 #include <sstream>
 #include <stack>
-#ifdef HAVE_CXX11
+#ifndef HAVE_OLD_CPP
 # include <unordered_set>
 #else
 # include <tr1/unordered_set>

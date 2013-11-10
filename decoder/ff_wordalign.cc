@@ -7,7 +7,7 @@
 #include <string>
 #include <cmath>
 #include <bitset>
-#ifdef HAVE_CXX11
+#ifndef HAVE_OLD_CPP
 # include <unordered_map>
 #else
 # include <tr1/unordered_map>
