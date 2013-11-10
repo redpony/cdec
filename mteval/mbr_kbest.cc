@@ -3,7 +3,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/functional/hash.hpp>
-#ifdef HAVE_CXX11
+#ifndef HAVE_OLD_CPP
 # include <unordered_map>
 #else
 # include <tr1/unordered_map>

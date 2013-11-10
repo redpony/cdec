@@ -20,7 +20,7 @@
 # define HASH_MAP_RESERVED(h,empty,deleted) do { (h).set_empty_key(empty); (h).set_deleted_key(deleted); } while(0)
 # define HASH_MAP_EMPTY(h,empty) do { (h).set_empty_key(empty); } while(0)
 #else
-#ifdef HAVE_CXX11
+#ifndef HAVE_OLD_CPP
 # include <unordered_map>
 # include <unordered_set>
 #else
