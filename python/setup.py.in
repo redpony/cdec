@@ -21,7 +21,7 @@ ext_modules = [
         extra_compile_args=CPPFLAGS,
         extra_link_args=LDFLAGS),
     Extension(name='cdec.sa._sa',
-        sources=['cdec/sa/_sa.c', 'cdec/sa/strmap.cc'],
+        sources=['cdec/sa/_sa.cpp', 'cdec/sa/strmap.cc'],
         extra_compile_args=CPPFLAGS)
 ]
 
