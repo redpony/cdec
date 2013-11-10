@@ -49,13 +49,6 @@ bool sent_approx;
 bool checkloss;
 bool stream;
 
-void SanityCheck(const vector<double>& w) {
-  for (int i = 0; i < w.size(); ++i) {
-    assert(!isnan(w[i]));
-    assert(!isinf(w[i]));
-  }
-}
-
 struct FComp {
   const vector<double>& w_;
   FComp(const vector<double>& w) : w_(w) {}
