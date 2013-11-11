@@ -203,14 +203,16 @@ struct RefineCommand : public Command {
     bool keep_going = !p.empty();
     while (keep_going) {
       keep_going = false;
-      for (set<pair<int, int> >::iterator pi = p.begin();
-           pi != p.end(); ++pi) {
+      set<pair<int, int> > added;
+      for (set<pair<int, int> >::iterator pi = p.begin(); pi != p.end(); ++pi) {
         if ((this->*pred)(pi->first, pi->second)) {
           Align(pi->first, pi->second);
-          p.erase(pi);
+          added.insert(make_pair(pi->first, pi->second));
           keep_going = true;
         }
       }
+      for (set<pair<int, int> >::iterator ai = added.begin(); ai != added.end(); ++ai)
+        p.erase(*ai);
     }
   }
   Array2D<bool> res_;  // refined alignment
