@@ -12,6 +12,8 @@ except ImportError:
   sys.exit(1)
 have_mpl = True
 try: 
+  import matplotlib
+  matplotlib.use('Agg')
   import matplotlib.pyplot as plt
 except ImportError:
   have_mpl = False
