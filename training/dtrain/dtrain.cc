@@ -43,7 +43,7 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     ("max_pairs",         po::value<unsigned>()->default_value(std::numeric_limits<unsigned>::max()), "max. # of pairs per Sent.")
     ("pclr",              po::value<string>()->default_value("no"),         "use a (simple|adagrad) per-coordinate learning rate")
     ("batch",             po::value<bool>()->zero_tokens(),                                               "do batch optimization")
-    //("repeat",            po::value<int>()->default_value(1),          "repeat optimization over kbest list this number of times")
+    ("repeat",            po::value<unsigned>()->default_value(1),          "repeat optimization over kbest list this number of times")
     //("test-k-best",       po::value<bool>()->zero_tokens(),                       "check if optimization works (use repeat >= 2)")
     ("noup",              po::value<bool>()->zero_tokens(),                                               "do not update weights");
   po::options_description cl("Command Line Options");
@@ -129,7 +129,7 @@ main(int argc, char** argv)
   const float hi_lo = cfg["hi_lo"].as<float>();
   const score_t approx_bleu_d = cfg["approx_bleu_d"].as<score_t>();
   const unsigned max_pairs = cfg["max_pairs"].as<unsigned>();
-  //int repeat = cfg["repeat"].as<int>();
+  int repeat = cfg["repeat"].as<unsigned>();
   //bool test_k_best = false;
   //if (cfg.count("test-k-best")) test_k_best = true;
   weight_t loss_margin = cfg["loss_margin"].as<weight_t>();
@@ -276,7 +276,7 @@ main(int argc, char** argv)
       cerr << setw(25) << "rescale " << rescale << endl;
     cerr << setw(25) << "pclr " << pclr << endl;
     cerr << setw(25) << "max pairs " << max_pairs << endl;
-    //cerr << setw(25) << "repeat " << repeat << endl;
+    cerr << setw(25) << "repeat " << repeat << endl;
     //cerr << setw(25) << "test k-best " << test_k_best << endl;
     cerr << setw(25) << "cdec cfg " << "'" << cfg["decoder_config"].as<string>() << "'" << endl;
     cerr << setw(25) << "input " << "'" << input_fn << "'" << endl;
@@ -294,22 +294,18 @@ main(int argc, char** argv)
   SparseVector<weight_t> learning_rates;
   // batch
   SparseVector<weight_t> batch_updates;
-  weight_t batch_loss;
-
-  //int did_improve; // FIXME for test-k-best
+  score_t batch_loss;
 
   for (unsigned t = 0; t < T; t++) // T epochs
   {
-  
+
   time_t start, end;
   time(&start);
   score_t score_sum = 0.;
   score_t model_sum(0);
-  unsigned ii = 0, rank_errors = 0, margin_violations = 0, npairs = 0, f_count = 0, list_sz = 0;
+  unsigned ii = 0, rank_errors = 0, margin_violations = 0, npairs = 0, f_count = 0, list_sz = 0, kbest_loss_improve = 0;
   batch_loss = 0.;
   if (!quiet) cerr << "Iteration #" << t+1 << " of " << T << "." << endl;
-
-  //did_improve = 0;
 
   while(true)
   {
@@ -395,8 +391,10 @@ main(int argc, char** argv)
       }
     }
 
-    score_sum += (*samples)[0].score; // stats for 1best
-    model_sum += (*samples)[0].model;
+    if (repeat == 1) {
+      score_sum += (*samples)[0].score; // stats for 1best
+      model_sum += (*samples)[0].model;
+    }
 
     f_count += observer->get_f_count();
     list_sz += observer->get_sz();
@@ -414,24 +412,22 @@ main(int argc, char** argv)
       int cur_npairs = pairs.size();
       npairs += cur_npairs;
 
-      weight_t kbest_loss_first, kbest_loss_last = 0.0;
+      score_t kbest_loss_first, kbest_loss_last = 0.0;
 
-//for (int q=0; q < repeat; q++) { // repeat
+      for (int ki=0; ki < repeat; ki++) {
 
-      weight_t kbest_loss = 0.0; // test-k-best
+      score_t kbest_loss = 0.0; // test-k-best
       SparseVector<weight_t> lambdas_copy; // for l1 regularization
       SparseVector<weight_t> sum_up; // for pclr
       if (l1naive||l1clip||l1cumul) lambdas_copy = lambdas;
 
       for (vector<pair<ScoredHyp,ScoredHyp> >::iterator it = pairs.begin();
            it != pairs.end(); it++) {
-
-        /*if (repeat > 1) {
-          double x = max(0.0, -1.0 * (lambdas.dot(it->first.f) - lambdas.dot(it->second.f))); 
-          kbest_loss += x;
-        }*/
-
         score_t model_diff = it->first.model - it->second.model;
+        if (repeat > 1) {
+          model_diff = lambdas.dot(it->first.f) - lambdas.dot(it->second.f);
+          kbest_loss += max(0.0, -1.0 * model_diff);
+        }
         bool rank_error = false;
         score_t margin;
         if (faster_perceptron) { // we only have considering misranked pairs
@@ -442,7 +438,7 @@ main(int argc, char** argv)
           margin = fabs(model_diff);
           if (!rank_error && margin < loss_margin) margin_violations++;
         }
-        if (rank_error) rank_errors++;
+        if (rank_error && ki==1) rank_errors++;
         if (scale_bleu_diff) eta = it->first.score - it->second.score;
         if (rank_error || margin < loss_margin) {
           SparseVector<weight_t> diff_vec = it->first.f - it->second.f;
@@ -524,12 +520,27 @@ main(int argc, char** argv)
         }
       }
 
-      //if (q==0)  {  kbest_loss_first = kbest_loss; }
-      //if (q==repeat-1) {  kbest_loss_last = kbest_loss; }
-//}//repeat
-//if((kbest_loss_first - kbest_loss_last) > 0) did_improve++;
+      if (ki==0) kbest_loss_first = kbest_loss;
+      if (ki==repeat-1) { // done
+        kbest_loss_last = kbest_loss;
+        score_t best_score = -1.;
+        score_t best_model = -std::numeric_limits<score_t>::max();
+        unsigned best_idx;
+        for (unsigned i=0; i < samples->size(); i++) {
+          score_t s = lambdas.dot((*samples)[i].f);
+          if (s > best_model) {
+            best_idx = i;
+            best_model = s;
+          }
+        }
+        score_sum += (*samples)[best_idx].score;
+        model_sum += best_model;
+      }
+    } // repeat
 
-    }
+    if ((kbest_loss_first - kbest_loss_last) >= 0) kbest_loss_improve++;
+
+    } // noup
 
     if (rescale) lambdas /= lambdas.l2norm();
 
@@ -539,7 +550,6 @@ main(int argc, char** argv)
 
   if (t == 0) in_sz = ii; // remember size of input (# lines)
 
-  //if (repeat > 1) cout << "did improve? " << did_improve << " out of " << in_sz << endl; 
 
   if (batch) {
     lambdas.plus_eq_v_times_s(batch_updates, eta);
@@ -577,14 +587,16 @@ main(int argc, char** argv)
     cerr << _np << " 1best avg model score: " << model_avg;
     cerr << _p << " (" << model_diff << ")" << endl;
     cerr << "           avg # pairs: ";
-    cerr << _np << npairs/(float)in_sz;
-    if (faster_perceptron) cerr << " (meaningless)";
-    cerr << endl;
-    cerr << "        avg # rank err: ";
-    cerr << rank_errors/(float)in_sz << endl;
-    if (batch) cerr << "            batch loss: " << batch_loss << endl;
+    cerr << _np << npairs/(float)in_sz << endl;
     cerr << "     avg # margin viol: ";
     cerr << margin_violations/(float)in_sz << endl;
+    cerr << "        avg # rank err: ";
+    cerr << rank_errors/(float)in_sz;
+    if (faster_perceptron) cerr << " (meaningless)";
+    cerr << endl;
+    if (batch) cerr << "            batch loss: " << batch_loss << endl;
+    if (repeat > 1) cerr << "       k-best loss imp: " << ((float)kbest_loss_improve/in_sz)*100 << "%" << endl;
+
     cerr << "    non0 feature count: " <<  nonz << endl;
     cerr << "           avg list sz: " << list_sz/(float)in_sz << endl;
     cerr << "           avg f count: " << f_count/(float)list_sz << endl;
