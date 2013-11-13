@@ -1,4 +1,5 @@
 import os
+import Queue
 import subprocess
 import sys
 import threading
@@ -13,29 +14,58 @@ SA_INI_FILES = set((
     'precompute_file',
     ))
 
+class FIFOLock:
+    '''Lock that preserves FIFO order of blocking threads'''
+
+    def __init__(self):
+        self.q = Queue.Queue()
+        self.i = 0
+        self.lock = threading.Lock()
+
+    def acquire(self):
+        self.lock.acquire()
+        self.i += 1
+        if self.i > 1:
+            event = threading.Event()
+            self.q.put(event)
+            self.lock.release()
+            event.wait()
+            return
+        self.lock.release()
+
+    def release(self):
+        self.lock.acquire()
+        self.i -= 1
+        if self.i > 0:
+            self.q.get().set()
+        self.lock.release()
+
 def cdec_ini_for_config(config):
-    cdec_ini_handle(config, os.path.basename, hpyplm_rm_ref)
-
-def cdec_ini_for_realtime(config, path, ref_fifo):
-    cdec_ini_handle(config, lambda x: os.path.join(path, x), lambda x: hpyplm_add_ref(x, ref_fifo))
-
-def cdec_ini_handle(config, path_fn, hpyplm_fn):
     # This is a list of (k, v), not a ConfigObj or dict
     for i in range(len(config)):
         if config[i][0] == 'feature_function':
             if config[i][1].startswith('KLanguageModel'):
                 f = config[i][1].split()
-                f[-1] = path_fn(f[-1])
+                f[-1] = 'mono.klm'
+                config[i][1] = ' '.join(f)
+            elif config[i][1].startswith('External'):
+                config[i][1] = 'External libcdec_ff_hpyplm.so corpus.hpyplm'
+
+def cdec_ini_for_realtime(config, path, ref_fifo):
+    # This is a list of (k, v), not a ConfigObj or dict
+    for i in range(len(config)):
+        if config[i][0] == 'feature_function':
+            if config[i][1].startswith('KLanguageModel'):
+                f = config[i][1].split()
+                f[-1] = os.path.join(path, f[-1])
                 config[i][1] = ' '.join(f)
             elif config[i][1].startswith('External'):
                 f = config[i][1].split()
-                if f[1].endswith('libcdec_ff_hpyplm.so'):
-                    # Modify paths
-                    for j in range(1, len(f)):
-                        if not f[j].startswith('-'):
-                            f[j] = path_fn(f[j])
-                    # Modify hpyplm args
-                    hpyplm_fn(f)
+                f[1] =  os.path.join(path, f[1])
+                f[2] =  os.path.join(path, f[2])
+                f.append('-r')
+                f.append(ref_fifo)
+                f.append('-t')
                 config[i][1] = ' '.join(f)
 
 def consume_stream(stream):
@@ -43,18 +73,6 @@ def consume_stream(stream):
         for _ in s:
             pass
     threading.Thread(target=consume, args=(stream,)).start()
-
-def hpyplm_add_ref(f, ref):
-    f.append('-r')
-    f.append(ref)
-    f.append('-t')
-
-def hpyplm_rm_ref(f):
-    for i in range(1, len(f)):
-        if f[i] == '-r':
-            f.pop(i)
-            f.pop(i)
-            return
 
 def popen_io(cmd):
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

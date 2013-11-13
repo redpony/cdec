@@ -61,11 +61,6 @@ char const* usage_verbose="-n determines the name of the feature (and its weight
 #include "hg.h"
 #include "stringlib.h"
 
-#ifdef HAVE_RANDLM
-// http://randlm.sourceforge.net/
-#include "RandLM.h"
-#endif
-
 using namespace std;
 
 string LanguageModel::usage(bool param,bool verbose) {
@@ -541,100 +536,4 @@ void LanguageModel::FinalTraversalFeatures(const void* ant_state,
                                            SparseVector<double>* features) const {
   features->set_value(fid_, imp().FinalTraversalCost(ant_state));
 }
-
-#ifdef HAVE_RANDLM
-struct RandLMImpl : public LanguageModelImpl {
-  RandLMImpl(int order, randlm::RandLM* rlm) :
-      LanguageModelImpl(order),
-      rlm_(rlm),
-      oov_(rlm->getWordID(rlm->getOOV())),
-      rb_(1000, oov_) {
-    map<int, randlm::WordID> map_cdec2randlm;
-    int max_wordid = 0;
-    for(map<randlm::Word, randlm::WordID>::const_iterator it = rlm->vocabStart();
-        it != rlm->vocabEnd(); ++it) {
-      const int cur = TD::Convert(it->first);
-      map_cdec2randlm[TD::Convert(it->first)] = it->second;
-      if (cur > max_wordid) max_wordid = cur;
-    }
-    cdec2randlm_.resize(max_wordid + 1, oov_);
-    for (map<int, randlm::WordID>::iterator it = map_cdec2randlm.begin();
-         it != map_cdec2randlm.end(); ++it)
-      cdec2randlm_[it->first] = it->second;
-    map_cdec2randlm.clear();
-  }
-
-  inline randlm::WordID Convert2RandLM(int w) {
-    return (w < cdec2randlm_.size() ? cdec2randlm_[w] : oov_);
-  }
-
-  virtual double WordProb(int word, int* context) {
-    int i = order_;
-    int c = 1;
-    rb_[i] = Convert2RandLM(word);
-    while (i > 1 && *context > 0) {
-      --i;
-      rb_[i] = Convert2RandLM(*context);
-      ++context;
-      ++c;
-    }
-    const void* finalState = 0;
-    int found;
-    //cerr << "I = " << i << endl;
-    return rlm_->getProb(&rb_[i], c, &found, &finalState);
-  }
- private:
-  boost::shared_ptr<randlm::RandLM> rlm_;
-  randlm::WordID oov_;
-  vector<randlm::WordID> cdec2randlm_;
-  vector<randlm::WordID> rb_;
-};
-
-LanguageModelRandLM::LanguageModelRandLM(const string& param) :
-    fid_(FD::Convert("RandLM")) {
-  vector<string> argv;
-  int argc = SplitOnWhitespace(param, &argv);
-  int order = 3;
-  // TODO add support for -n FeatureName
-  string filename;
-  if (argc < 1) { cerr << "RandLM requires a filename, minimally!\n"; abort(); }
-  else if (argc == 1) { filename = argv[0]; }
-  else if (argc == 2 || argc > 3) { cerr << "Don't understand 'RandLM " << param << "'\n"; }
-  else if (argc == 3) {
-    if (argv[0] == "-o") {
-      order = atoi(argv[1].c_str());
-      filename = argv[2];
-    } else if (argv[1] == "-o") {
-      order = atoi(argv[2].c_str());
-      filename = argv[0];
-    }
-  }
-//  set_order(order);
-  int cache_MB = 200; // increase cache size
-  randlm::RandLM* rlm = randlm::RandLM::initRandLM(filename, order, cache_MB);
-  assert(rlm != NULL);
-  pimpl_ = new RandLMImpl(order, rlm);
-}
-
-LanguageModelRandLM::~LanguageModelRandLM() {
-  delete pimpl_;
-}
-
-void LanguageModelRandLM::TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                          const Hypergraph::Edge& edge,
-                                          const vector<const void*>& ant_states,
-                                          SparseVector<double>* features,
-                                          SparseVector<double>* estimated_features,
-                                          void* state) const {
-  (void) smeta;
-  features->set_value(fid_, imp().LookupWords(*edge.rule_, ant_states, state));
-  estimated_features->set_value(fid_, imp().EstimateProb(state));
-}
-
-void LanguageModelRandLM::FinalTraversalFeatures(const void* ant_state,
-                                           SparseVector<double>* features) const {
-  features->set_value(fid_, imp().FinalTraversalCost(ant_state));
-}
-
-#endif
 

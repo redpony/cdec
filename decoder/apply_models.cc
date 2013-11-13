@@ -8,8 +8,14 @@
 
 #include <vector>
 #include <algorithm>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+# include <unordered_set>
+#else
+# include <tr1/unordered_map>
+# include <tr1/unordered_set>
+namespace std { using std::tr1::unordered_map; using std::tr1::unordered_set; }
+#endif
 
 #include <boost/functional/hash.hpp>
 
@@ -23,7 +29,6 @@
 #define FAST_CP_2 3
 
 using namespace std;
-using namespace std::tr1;
 
 struct Candidate;
 typedef SmallVectorInt JVector;

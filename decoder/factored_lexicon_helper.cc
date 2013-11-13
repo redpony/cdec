@@ -2,6 +2,7 @@
 
 #include "filelib.h"
 #include "stringlib.h"
+#include "sentence_metadata.h"
 
 using namespace std;
 

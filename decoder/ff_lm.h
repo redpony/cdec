@@ -69,26 +69,4 @@ class LanguageModel : public FeatureFunction {
   /* mutable */ LanguageModelInterface* pimpl_;
 };
 
-#ifdef HAVE_RANDLM
-class LanguageModelRandLM : public FeatureFunction {
- public:
-  // param = "filename.lm [-o n]"
-  LanguageModelRandLM(const std::string& param);
-  ~LanguageModelRandLM();
-  virtual void FinalTraversalFeatures(const void* context,
-                                      SparseVector<double>* features) const;
-  std::string DebugStateToString(const void* state) const;
- protected:
-  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                     const HG::Edge& edge,
-                                     const std::vector<const void*>& ant_contexts,
-                                     SparseVector<double>* features,
-                                     SparseVector<double>* estimated_features,
-                                     void* out_context) const;
- private:
-  const int fid_;
-  mutable LanguageModelImpl* pimpl_;
-};
-#endif
-
 #endif

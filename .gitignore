@@ -103,7 +103,7 @@ jam-files/bjam
 jam-files/engine/bin.*
 jam-files/engine/bootstrap/
 klm/lm/bin/
-klm/lm/builder/builder
+klm/lm/builder/lmplz
 klm/lm/build_binary
 klm/lm/ngram_query
 klm/lm/query

@@ -84,23 +84,21 @@ class GrammarExtractor:
         for fn in cdec.sa._SA_CONFIGURE:
             fn(config)
 
-    def grammar(self, sentence):
+    def grammar(self, sentence, ctx_name=None):
         if isinstance(sentence, unicode):
             sentence = sentence.encode('utf8')
         words = tuple(chain(('<s>',), sentence.split(), ('</s>',)))
         meta = cdec.sa.annotate(words)
         cnet = cdec.sa.make_lattice(words)
-        return self.factory.input(cnet, meta)
+        return self.factory.input(cnet, meta, ctx_name)
 
     # Add training instance to data
-    def add_instance(self, sentence, reference, alignment):
+    def add_instance(self, sentence, reference, alignment, ctx_name=None):
         f_words = cdec.sa.encode_words(sentence.split())
         e_words = cdec.sa.encode_words(reference.split())
         al = sorted(tuple(int(i) for i in pair.split('-')) for pair in alignment.split())
-        self.factory.add_instance(f_words, e_words, al)
-    
-    # Debugging
-    def dump_online_stats(self):
-        self.factory.dump_online_stats()
-    def dump_online_rules(self):
-        self.factory.dump_online_rules()
+        self.factory.add_instance(f_words, e_words, al, ctx_name)
+
+    # Remove all incremental data for a context
+    def drop_ctx(self, ctx_name=None):
+        self.factory.drop_ctx(ctx_name)

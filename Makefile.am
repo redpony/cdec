@@ -14,12 +14,11 @@ SUBDIRS = \
   training \
   training/liblbfgs \
   word-aligner \
-  example_extff \
-  extractor
+  example_extff
 
-#gi/pyp-topics/src gi/clda/src gi/posterior-regularisation/prjava
+#  extractor
 
-EXTRA_DIST = corpus tests python/pkg python/src python/tests python/examples compound-split environment
+EXTRA_DIST = corpus tests python/cdec python/tests python/examples compound-split environment
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -D_GLIBCXX_PARALLEL -march=native -mtune=native -O2 -pipe -fomit-frame-pointer -Wall
