@@ -19,25 +19,25 @@ PhraseLocation Sampler::Sample(const PhraseLocation& location, unordered_set<int
     // Sample suffix array range.
     num_subpatterns = 1;
     int low = location.sa_low, high = location.sa_high;
-    double step = Round(max(1.0, (double) (high - low) / max_samples));
-    int i = low, last = i;
+    double step = max(1.0, (double) (high - low) / max_samples);
+    double i = low, last = i;
     bool found;
     while (sample.size() < max_samples && i < high) {
-      int x = suffix_array->GetSuffix(i);
+      int x = suffix_array->GetSuffix(Round(i));
       int id = source_data_array->GetSentenceId(x);
       if (find(blacklisted_sentence_ids.begin(), blacklisted_sentence_ids.end(), id) != blacklisted_sentence_ids.end()) {
         found = false;
-        int backoff_step = 1;
+        double backoff_step = 1;
         while (true) {
           if ((double)backoff_step >= step) break;
-          int j = i - backoff_step;
-          x = suffix_array->GetSuffix(j);
+          double j = i - backoff_step;
+          x = suffix_array->GetSuffix(Round(j));
           id = source_data_array->GetSentenceId(x);
-          if (j > last && find(blacklisted_sentence_ids.begin(), blacklisted_sentence_ids.end(), id) == blacklisted_sentence_ids.end()) {
+          if (x >= 0 && j > last && find(blacklisted_sentence_ids.begin(), blacklisted_sentence_ids.end(), id) == blacklisted_sentence_ids.end()) {
             found = true; last = i; break;
           }
-          int k = i + backoff_step;
-          x = suffix_array->GetSuffix(k);
+          double k = i + backoff_step;
+          x = suffix_array->GetSuffix(Round(k));
           id = source_data_array->GetSentenceId(x);
           if (k < min(i+step, (double)high) && find(blacklisted_sentence_ids.begin(), blacklisted_sentence_ids.end(), id) == blacklisted_sentence_ids.end()) {
             found = true; last = k; break;
