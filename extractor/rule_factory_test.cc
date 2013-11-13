@@ -76,7 +76,9 @@ TEST_F(RuleFactoryTest, TestGetGrammarDifferentWords) {
       .WillRepeatedly(Return(PhraseLocation(0, 1)));
 
   vector<int> word_ids = {2, 3, 4};
-  Grammar grammar = factory->GetGrammar(word_ids);
+  unordered_set<int> blacklisted_sentence_ids;
+  shared_ptr<DataArray> source_data_array;
+  Grammar grammar = factory->GetGrammar(word_ids, blacklisted_sentence_ids, source_data_array);
   EXPECT_EQ(feature_names, grammar.GetFeatureNames());
   EXPECT_EQ(7, grammar.GetRules().size());
 }
@@ -94,7 +96,9 @@ TEST_F(RuleFactoryTest, TestGetGrammarRepeatingWords) {
       .WillRepeatedly(Return(PhraseLocation(0, 1)));
 
   vector<int> word_ids = {2, 3, 4, 2, 3};
-  Grammar grammar = factory->GetGrammar(word_ids);
+  unordered_set<int> blacklisted_sentence_ids;
+  shared_ptr<DataArray> source_data_array;
+  Grammar grammar = factory->GetGrammar(word_ids, blacklisted_sentence_ids, source_data_array);
   EXPECT_EQ(feature_names, grammar.GetFeatureNames());
   EXPECT_EQ(28, grammar.GetRules().size());
 }
