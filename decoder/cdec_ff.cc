@@ -15,17 +15,11 @@
 #include "ff_ruleshape.h"
 #include "ff_bleu.h"
 #include "ff_soft_syntax.h"
-#include "ff_soft_syntax2.h"
+#include "ff_soft_syntax_mindist.h"
 #include "ff_source_path.h"
-
-
 #include "ff_parse_match.h"
 #include "ff_source_syntax.h"
-#include "ff_source_syntax_p.h"
 #include "ff_source_syntax2.h"
-#include "ff_source_syntax2_p.h"
-
-
 #include "ff_register.h"
 #include "ff_charset.h"
 #include "ff_wordset.h"
@@ -51,23 +45,12 @@ void register_feature_functions() {
   ff_registry.Register("NgramFeatures", new FFFactory<NgramDetector>());
   ff_registry.Register("RuleContextFeatures", new FFFactory<RuleContextFeatures>());
   ff_registry.Register("RuleIdentityFeatures", new FFFactory<RuleIdentityFeatures>());
-
-
   ff_registry.Register("ParseMatchFeatures", new FFFactory<ParseMatchFeatures>);
-
-  ff_registry.Register("SoftSyntacticFeatures", new FFFactory<SoftSyntacticFeatures>);
-  ff_registry.Register("SoftSyntacticFeatures2", new FFFactory<SoftSyntacticFeatures2>);
-
+  ff_registry.Register("SoftSyntaxFeatures", new FFFactory<SoftSyntaxFeatures>);
+  ff_registry.Register("SoftSyntaxFeaturesMindist", new FFFactory<SoftSyntaxFeaturesMindist>);
   ff_registry.Register("SourceSyntaxFeatures", new FFFactory<SourceSyntaxFeatures>);
-  ff_registry.Register("SourceSyntaxFeatures2", new FFFactory<SourceSyntaxFeatures2>);
-
   ff_registry.Register("SourceSpanSizeFeatures", new FFFactory<SourceSpanSizeFeatures>);
-
-  //ff_registry.Register("PSourceSyntaxFeatures", new FFFactory<PSourceSyntaxFeatures>);
-  //ff_registry.Register("PSourceSpanSizeFeatures", new FFFactory<PSourceSpanSizeFeatures>);
-  //ff_registry.Register("PSourceSyntaxFeatures2", new FFFactory<PSourceSyntaxFeatures2>);
-
-
+  ff_registry.Register("SourceSyntaxFeatures2", new FFFactory<SourceSyntaxFeatures2>);
   ff_registry.Register("CMR2008ReorderingFeatures", new FFFactory<CMR2008ReorderingFeatures>());
   ff_registry.Register("RuleSourceBigramFeatures", new FFFactory<RuleSourceBigramFeatures>());
   ff_registry.Register("RuleTargetBigramFeatures", new FFFactory<RuleTargetBigramFeatures>());

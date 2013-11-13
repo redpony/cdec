@@ -9,6 +9,8 @@
 #include <string.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
+#include <boost/algorithm/string/regex.hpp>
 #include <boost/program_options.hpp>
 
 #include "decoder.h"

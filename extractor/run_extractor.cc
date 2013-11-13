@@ -75,7 +75,9 @@ int main(int argc, char** argv) {
     ("max_samples", po::value<int>()->default_value(300),
         "Maximum number of samples")
     ("tight_phrases", po::value<bool>()->default_value(true),
-        "False if phrases may be loose (better, but slower)");
+        "False if phrases may be loose (better, but slower)")
+    ("leave_one_out", po::value<bool>()->zero_tokens(),
+        "do leave-one-out estimation of grammars (e.g. for extracting grammars for the training set");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -94,6 +96,11 @@ int main(int argc, char** argv) {
          << "Use -f (source) with -e (target) or -b (bitext)."
          << endl;
     return 1;
+  }
+
+  bool leave_one_out = false;
+  if (vm.count("leave_one_out")) {
+    leave_one_out = true;
   }
 
   int num_threads = vm["threads"].as<int>();
@@ -223,7 +230,9 @@ int main(int argc, char** argv) {
     }
     suffixes[i] = suffix;
 
-    Grammar grammar = extractor.GetGrammar(sentences[i]);
+    unordered_set<int> blacklisted_sentence_ids;
+    if (leave_one_out) blacklisted_sentence_ids.insert(i);
+    Grammar grammar = extractor.GetGrammar(sentences[i], blacklisted_sentence_ids, source_data_array);
     ofstream output(GetGrammarFilePath(grammar_path, i).c_str());
     output << grammar;
   }

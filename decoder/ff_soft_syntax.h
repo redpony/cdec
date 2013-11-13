@@ -1,15 +1,15 @@
-#ifndef _FF_SOFTSYNTAX_H_
-#define _FF_SOFTSYNTAX_H_
+#ifndef _FF_SOFT_SYNTAX_H_
+#define _FF_SOFT_SYNTAX_H_
 
 #include "ff.h"
 #include "hg.h"
 
-struct SoftSyntacticFeaturesImpl;
+struct SoftSyntaxFeaturesImpl;
 
-class SoftSyntacticFeatures : public FeatureFunction {
+class SoftSyntaxFeatures : public FeatureFunction {
  public:
-  SoftSyntacticFeatures(const std::string& param);
-  ~SoftSyntacticFeatures();
+  SoftSyntaxFeatures(const std::string& param);
+  ~SoftSyntaxFeatures();
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
@@ -19,9 +19,9 @@ class SoftSyntacticFeatures : public FeatureFunction {
                                      void* context) const;
   virtual void PrepareForInput(const SentenceMetadata& smeta);
  private:
-  SoftSyntacticFeaturesImpl* impl;
+  SoftSyntaxFeaturesImpl* impl;
 };
 
 
-
 #endif
+

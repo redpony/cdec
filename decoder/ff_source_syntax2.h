@@ -1,5 +1,5 @@
-#ifndef _FF_SOURCE_TOOLS2_H_
-#define _FF_SOURCE_TOOLS2_H_
+#ifndef _FF_SOURCE_SYNTAX2_H_
+#define _FF_SOURCE_SYNTAX2_H_
 
 #include "ff.h"
 #include "hg.h"
@@ -23,3 +23,4 @@ class SourceSyntaxFeatures2 : public FeatureFunction {
 };
 
 #endif
+
