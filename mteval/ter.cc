@@ -5,7 +5,12 @@
 #include <iostream>
 #include <limits>
 #include <sstream>
-#include <tr1/unordered_map>
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+#else
+# include <tr1/unordered_map>
+namespace std { using std::tr1::unordered_map; }
+#endif
 #include <set>
 #include <valarray>
 #include <boost/functional/hash.hpp>
@@ -16,7 +21,6 @@ const bool ter_use_average_ref_len = true;
 const int ter_short_circuit_long_sentences = -1;
 
 using namespace std;
-using namespace std::tr1;
 
 struct COSTS {
   static const float substitution;

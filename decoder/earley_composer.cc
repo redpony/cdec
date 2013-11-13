@@ -4,8 +4,14 @@
 #include <fstream>
 #include <map>
 #include <queue>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+# include <unordered_set>
+#else
+# include <tr1/unordered_map>
+# include <tr1/unordered_set>
+namespace std { using std::tr1::unordered_map; using std::tr1::unordered_multiset; using std::tr1::unordered_set; }
+#endif
 
 #include <boost/shared_ptr.hpp>
 #include <boost/program_options.hpp>
@@ -19,7 +25,6 @@
 #include "hg_remove_eps.h"
 
 using namespace std;
-using namespace std::tr1;
 
 // Define the following macro if you want to see lots of debugging output
 // when you run the chart parser

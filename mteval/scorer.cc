@@ -198,7 +198,7 @@ class BLEUScorerBase : public SentenceScorer {
   virtual float ComputeRefLength(const vector<WordID>& hyp) const = 0;
  private:
   struct NGramCompare {
-    int operator() (const vector<WordID>& a, const vector<WordID>& b) {
+    int operator() (const vector<WordID>& a, const vector<WordID>& b) const {
       size_t as = a.size();
       size_t bs = b.size();
       const size_t s = (as < bs ? as : bs);
@@ -594,26 +594,29 @@ void DocScorer::Init(
       const ScoreType type,
       const vector<string>& ref_files,
       const string& src_file, bool verbose) {
+  cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+          "!!! This code is using the deprecated DocScorer interface, please fix !!!\n"
+          "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
   scorers_.clear();
-  // TODO stop using valarray, start using ReadFile
+  static const WordID kDIV = TD::Convert("|||");
   cerr << "Loading references (" << ref_files.size() << " files)\n";
   ReadFile srcrf;
   if (type == AER && src_file.size() > 0) {
     cerr << "  (source=" << src_file << ")\n";
     srcrf.Init(src_file);
   }
+  std::vector<WordID> tmp;
   std::vector<ReadFile> ifs(ref_files.begin(),ref_files.end());
   for (int i=0; i < ref_files.size(); ++i) ifs[i].Init(ref_files[i]);
   char buf[64000];
   bool expect_eof = false;
   int line=0;
   while (ifs[0].get()) {
-    vector<vector<WordID> > refs(ref_files.size());
+    vector<vector<WordID> > refs;
     for (int i=0; i < ref_files.size(); ++i) {
       istream &in=ifs[i].get();
       if (in.eof()) break;
       in.getline(buf, 64000);
-      refs[i].clear();
       if (strlen(buf) == 0) {
         if (in.eof()) {
           if (!expect_eof) {
@@ -622,9 +625,17 @@ void DocScorer::Init(
           }
           break;
         }
-      } else {
-        TD::ConvertSentence(buf, &refs[i]);
-        assert(!refs[i].empty());
+      } else { // process reference
+        tmp.clear();
+        TD::ConvertSentence(buf, &tmp);
+        unsigned last = 0;
+        for (unsigned j = 0; j < tmp.size(); ++j) {
+          if (tmp[j] == kDIV) {
+            refs.push_back(vector<WordID>(tmp.begin() + last, tmp.begin() + j));
+            last = j + 1;
+          }
+        }
+        refs.push_back(vector<WordID>(tmp.begin() + last, tmp.end()));
       }
       assert(!expect_eof);
     }

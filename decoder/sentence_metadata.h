@@ -5,7 +5,9 @@
 #include <map>
 #include <cassert>
 #include "lattice.h"
-#include "scorer.h"
+
+struct DocScorer;  // deprecated, will be removed
+struct Score;     // deprecated, will be removed
 
 struct SentenceMetadata {
   friend class DecoderImpl;

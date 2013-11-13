@@ -3,7 +3,12 @@
 
 #include <vector>
 #include <utility>
-#include <tr1/unordered_set>
+#ifndef HAVE_OLD_CPP
+# include <unordered_set>
+#else
+# include <tr1/unordered_set>
+namespace std { using std::tr1::unordered_set; }
+#endif
 
 #include <boost/shared_ptr.hpp>
 #include <boost/type_traits.hpp>
@@ -22,7 +27,7 @@ namespace KBest {
 
   // optional, filter unique yield strings
   struct FilterUnique {
-    std::tr1::unordered_set<std::vector<WordID>, boost::hash<std::vector<WordID> > > unique;
+    std::unordered_set<std::vector<WordID>, boost::hash<std::vector<WordID> > > unique;
 
     bool operator()(const std::vector<WordID>& yield) {
       return !unique.insert(yield).second;
@@ -111,7 +116,7 @@ namespace KBest {
     };
     typedef std::vector<Derivation*> CandidateHeap;
     typedef std::vector<Derivation*> DerivationList;
-    typedef std::tr1::unordered_set<
+    typedef std::unordered_set<
        const Derivation*, DerivationUniquenessHash, DerivationUniquenessEquals> UniqueDerivationSet;
 
     struct NodeDerivationState {

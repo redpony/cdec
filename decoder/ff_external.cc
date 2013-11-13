@@ -19,7 +19,7 @@ ExternalFeature::ExternalFeature(const string& param) {
     cerr << "External requires a path to a dynamic library!\n";
     abort();
   }
-  lib_handle = dlopen(file.c_str(), RTLD_LAZY);
+  lib_handle = dlopen(file.c_str(), RTLD_LAZY | RTLD_GLOBAL);
   if (!lib_handle) {
     cerr << "dlopen reports: " << dlerror() << endl;
     cerr << "Did you provide a full path to the dynamic library?\n";
