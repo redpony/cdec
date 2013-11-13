@@ -12,7 +12,7 @@ Sampler::Sampler() {}
 
 Sampler::~Sampler() {}
 
-PhraseLocation Sampler::Sample(const PhraseLocation& location, unordered_set<int> blacklisted_sentence_ids, const shared_ptr<DataArray> source_data_array) const {
+PhraseLocation Sampler::Sample(const PhraseLocation& location, const unordered_set<int>& blacklisted_sentence_ids, const shared_ptr<DataArray> source_data_array) const {
   vector<int> sample;
   int num_subpatterns;
   if (location.matchings == NULL) {
