@@ -16,7 +16,7 @@ using namespace std;
 
 struct SourceSyntaxFeatures2Impl {
   SourceSyntaxFeatures2Impl(const string& param) {
-    if (!(param.compare("") == 0)) {
+    if (param.compare("") != 0) {
       string triggered_features_fn = param;
       ReadFile triggered_features(triggered_features_fn);
       string in;
@@ -28,10 +28,8 @@ struct SourceSyntaxFeatures2Impl {
 
   void InitializeGrids(const string& tree, unsigned src_len) {
     assert(tree.size() > 0);
-    //fids_cat.clear();
     fids_ef.clear();
     src_tree.clear();
-    //fids_cat.resize(src_len, src_len + 1);
     fids_ef.resize(src_len, src_len + 1);
     src_tree.resize(src_len, src_len + 1, TD::Convert("XX"));
     ParseTreeString(tree, src_len);
@@ -39,7 +37,7 @@ struct SourceSyntaxFeatures2Impl {
 
   void ParseTreeString(const string& tree, unsigned src_len) {
     //cerr << "TREE: " << tree << endl;
-    stack<pair<int, WordID> > stk;  // first = i, second = category
+    stack<pair<int, WordID> > stk; // first = i, second = category
     pair<int, WordID> cur_cat; cur_cat.first = -1;
     unsigned i = 0;
     unsigned p = 0;
@@ -91,7 +89,7 @@ struct SourceSyntaxFeatures2Impl {
     const WordID lhs = src_tree(i,j);
     int& fid_ef = fids_ef(i,j)[&rule];
     ostringstream os;
-    os << "SYN:" << TD::Convert(lhs);
+    os << "SSYN2:" << TD::Convert(lhs);
     os << ':';
     unsigned ntc = 0;
     for (unsigned k = 0; k < rule.f_.size(); ++k) {
@@ -99,7 +97,7 @@ struct SourceSyntaxFeatures2Impl {
       if (k > 0 && fj <= 0) os << '_';
       if (fj <= 0) {
         os << '[' << TD::Convert(ants[ntc++]) << ']';
-      } /*else {
+      }/*else {
         os << TD::Convert(fj);
       }*/
     }
@@ -115,16 +113,22 @@ struct SourceSyntaxFeatures2Impl {
     fid_ef = FD::Convert(os.str());
     //cerr << "FEATURE: " << os.str() << endl;
     //cerr << "FID_EF: " << fid_ef << endl;
-    if (feature_filter.find(fid_ef) != feature_filter.end()) {
-      cerr << "SYN-Feature was trigger more than once on training set." << endl;
+    if (feature_filter.size() > 0) {
+      if (feature_filter.find(fid_ef) != feature_filter.end()) {
+        //cerr << "SYN-Feature was trigger more than once on training set." << endl;
+        feats->set_value(fid_ef, 1.0);
+      }
+      //else cerr << "SYN-Feature was triggered less than once on training set." << endli;
+    }
+    else {
       feats->set_value(fid_ef, 1.0);
     }
-    else cerr << "SYN-Feature was triggered less than once on training set." << endl;
+    cerr << FD::Convert(fid_ef) << endl;
     return lhs;
   }
 
-  Array2D<WordID> src_tree;  // src_tree(i,j) NT = type
-  mutable Array2D<map<const TRule*, int> > fids_ef;    // fires for fully lexicalized
+  Array2D<WordID> src_tree; // src_tree(i,j) NT = type
+  mutable Array2D<map<const TRule*, int> > fids_ef; // fires for fully lexicalized
   unordered_set<int> feature_filter;
 };
 
@@ -153,5 +157,9 @@ void SourceSyntaxFeatures2::TraversalFeaturesImpl(const SentenceMetadata& smeta,
 }
 
 void SourceSyntaxFeatures2::PrepareForInput(const SentenceMetadata& smeta) {
-  impl->InitializeGrids(smeta.GetSGMLValue("src_tree"), smeta.GetSourceLength());
+  ReadFile f = ReadFile(smeta.GetSGMLValue("src_tree"));
+  string tree;
+  f.ReadAll(tree);
+  impl->InitializeGrids(tree, smeta.GetSourceLength());
 }
+

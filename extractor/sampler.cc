@@ -12,7 +12,7 @@ Sampler::Sampler() {}
 
 Sampler::~Sampler() {}
 
-PhraseLocation Sampler::Sample(const PhraseLocation& location) const {
+PhraseLocation Sampler::Sample(const PhraseLocation& location, unordered_set<int> blacklisted_sentence_ids, const shared_ptr<DataArray> source_data_array) const {
   vector<int> sample;
   int num_subpatterns;
   if (location.matchings == NULL) {
@@ -20,8 +20,37 @@ PhraseLocation Sampler::Sample(const PhraseLocation& location) const {
     num_subpatterns = 1;
     int low = location.sa_low, high = location.sa_high;
     double step = max(1.0, (double) (high - low) / max_samples);
-    for (double i = low; i < high && sample.size() < max_samples; i += step) {
-      sample.push_back(suffix_array->GetSuffix(Round(i)));
+    double i = low, last = i;
+    bool found;
+    while (sample.size() < max_samples && i < high) {
+      int x = suffix_array->GetSuffix(Round(i));
+      int id = source_data_array->GetSentenceId(x);
+      if (find(blacklisted_sentence_ids.begin(), blacklisted_sentence_ids.end(), id) != blacklisted_sentence_ids.end()) {
+        found = false;
+        double backoff_step = 1;
+        while (true) {
+          if ((double)backoff_step >= step) break;
+          double j = i - backoff_step;
+          x = suffix_array->GetSuffix(Round(j));
+          id = source_data_array->GetSentenceId(x);
+          if (x >= 0 && j > last && find(blacklisted_sentence_ids.begin(), blacklisted_sentence_ids.end(), id) == blacklisted_sentence_ids.end()) {
+            found = true; last = i; break;
+          }
+          double k = i + backoff_step;
+          x = suffix_array->GetSuffix(Round(k));
+          id = source_data_array->GetSentenceId(x);
+          if (k < min(i+step, (double)high) && find(blacklisted_sentence_ids.begin(), blacklisted_sentence_ids.end(), id) == blacklisted_sentence_ids.end()) {
+            found = true; last = k; break;
+          }
+          if (j <= last && k >= high) break;
+          backoff_step++;
+        }
+      } else {
+        found = true;
+        last = i;
+      }
+      if (found) sample.push_back(x);
+      i += step;
     }
   } else {
     // Sample vector of occurrences.

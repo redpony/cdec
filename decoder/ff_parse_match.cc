@@ -42,10 +42,8 @@ struct ParseMatchFeaturesImpl {
 
   void InitializeGrids(const string& tree, unsigned src_len) {
     assert(tree.size() > 0);
-    //fids_cat.clear();
     fids_ef.clear();
     src_tree.clear();
-    //fids_cat.resize(src_len, src_len + 1);
     fids_ef.resize(src_len, src_len + 1);
     src_tree.resize(src_len, src_len + 1, TD::Convert("XX"));
     ParseTreeString(tree, src_len);
@@ -112,7 +110,7 @@ struct ParseMatchFeaturesImpl {
     int fid_ef = FD::Convert("PM");
     int min_dist; // minimal distance to next syntactic constituent of this rule's LHS
     int summed_min_dists; // minimal distances of LHS and NTs summed up
-    if (TD::Convert(lhs).compare("XX") != 0) 
+    if (TD::Convert(lhs).compare("XX") != 0)
         min_dist= 0;
     // compute the distance to the next syntactical constituent
     else {
@@ -131,7 +129,7 @@ struct ParseMatchFeaturesImpl {
             ok = 1;
             break;
           }
-          // check if removing k words from the rule span will 
+          // check if removing k words from the rule span will
           // lead to a syntactical constituent
           else {
             //cerr << "Hilfe...!" << endl;
@@ -144,7 +142,7 @@ struct ParseMatchFeaturesImpl {
               ok = 1;
               break;
             }
-          }    
+          }
         }
         if (ok) break;
       }
@@ -183,9 +181,9 @@ struct ParseMatchFeaturesImpl {
     return min_dist;
   }
 
-  Array2D<WordID> src_tree;  // src_tree(i,j) NT = type
+  Array2D<WordID> src_tree; // src_tree(i,j) NT = type
   unsigned int src_sent_len;
-  mutable Array2D<map<const TRule*, int> > fids_ef;    // fires for fully lexicalized
+  mutable Array2D<map<const TRule*, int> > fids_ef; // fires for fully lexicalized
   int scoring_method;
 };
 
@@ -214,5 +212,9 @@ void ParseMatchFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
 }
 
 void ParseMatchFeatures::PrepareForInput(const SentenceMetadata& smeta) {
-  impl->InitializeGrids(smeta.GetSGMLValue("src_tree"), smeta.GetSourceLength());
+  ReadFile f = ReadFile(smeta.GetSGMLValue("src_tree"));
+  string tree;
+  f.ReadAll(tree);
+  impl->InitializeGrids(tree, smeta.GetSourceLength());
 }
+
