@@ -138,7 +138,7 @@ make_ngram_counts(const vector<WordID>& hyp, const vector<WordID>& ref, const un
 struct BleuScorer : public LocalScorer
 {
   score_t Bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref_len);
-  score_t Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
+  score_t Score(const vector<WordID>& hyp, const vector<WordID>& ref, const unsigned /*rank*/, const unsigned /*src_len*/);
   void Reset() {}
 };
 

@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
     ("tight_phrases", po::value<bool>()->default_value(true),
         "False if phrases may be loose (better, but slower)")
     ("leave_one_out", po::value<bool>()->zero_tokens(),
-        "do leave-one-out estimation of grammars (e.g. for extracting grammars for the training set");
+        "do leave-one-out estimation (e.g. for extracting grammars for the training set)");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
