@@ -7,7 +7,12 @@
 #include <string>
 #include <cmath>
 #include <bitset>
-#include <tr1/unordered_map>
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+#else
+# include <tr1/unordered_map>
+namespace std { using std::tr1::unordered_map; }
+#endif
 
 #include <boost/tuple/tuple.hpp>
 #include "boost/tuple/tuple_comparison.hpp"
@@ -249,7 +254,7 @@ void NewJump::FireFeature(const SentenceMetadata& smeta,
   if (fp1_)   get<6>(key) = GetSourceWord(id, cur_src_index + 1);
   if (fprev_) get<7>(key) = GetSourceWord(id, prev_src_index);
 
-  static std::tr1::unordered_map<NewJumpFeatureKey, int, KeyHash> fids;
+  static std::unordered_map<NewJumpFeatureKey, int, KeyHash> fids;
   int& fid = fids[key];
   if (!fid) {
     ostringstream os;

@@ -2,11 +2,16 @@
 
 #include <vector>
 #include <string>
-#include <tr1/unordered_map>
-#include <stdint.h>
+#include <cstdint>
+
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+#else
+# include <tr1/unordered_map>
+namespace std { using std::tr1::unordered_map; }
+#endif
 
 using namespace std;
-using namespace std::tr1;
 
 #undef HAVE_64_BITS
 

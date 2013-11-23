@@ -1,10 +1,15 @@
 This is a simple (and parallelizable) tuning method for cdec
-which is able to train the weights of very many (sparse) features.
-It was used here:
-  "Joint Feature Selection in Distributed Stochastic
-   Learning for Large-Scale Discriminative Training in
-   SMT"
-(Simianer, Riezler, Dyer; ACL 2012)
+which is able to train the weights of very many (sparse) features
+on the training set.
+
+It was used in these papers:
+>  "Joint Feature Selection in Distributed Stochastic
+>   Learning for Large-Scale Discriminative Training in
+>   SMT" (Simianer, Riezler, Dyer; ACL 2012)
+>
+>  "Multi-Task Learning for Improved Discriminative
+>   Training in SMT" (Simianer, Riezler; WMT 2013)
+>
 
 
 Building
@@ -17,20 +22,9 @@ To build only parts needed for dtrain do
   cd training/dtrain/; make
 ```
 
-Ideas
------
- * get approx_bleu to work?
- * implement minibatches (Minibatch and Parallelization for Online Large Margin Structured Learning)
- * learning rate 1/T?
- * use an oracle? mira-like (model vs. BLEU), feature repr. of reference!? 
- * implement lc_bleu properly
- * merge kbest lists of previous epochs (as MERT does)
- * ``walk entire regularization path''
- * rerank after each update?
-
 Running
 -------
-See directories under test/ .
+See directories under examples/ .
 
 Legal
 -----

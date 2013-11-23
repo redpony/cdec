@@ -1,6 +1,11 @@
 #include "candidate_set.h"
 
-#include <tr1/unordered_set>
+#ifndef HAVE_OLD_CPP
+# include <unordered_set>
+#else
+# include <tr1/unordered_set>
+namespace std { using std::tr1::unordered_set; }
+#endif
 
 #include <boost/functional/hash.hpp>
 
@@ -139,12 +144,12 @@ void CandidateSet::ReadFromFile(const string& file) {
 
 void CandidateSet::Dedup() {
   if(!SILENT) cerr << "Dedup in=" << cs.size();
-  tr1::unordered_set<Candidate, CandidateHasher, CandidateCompare> u;
+  unordered_set<Candidate, CandidateHasher, CandidateCompare> u;
   while(cs.size() > 0) {
     u.insert(cs.back());
     cs.pop_back();
   }
-  tr1::unordered_set<Candidate, CandidateHasher, CandidateCompare>::iterator it = u.begin();
+  unordered_set<Candidate, CandidateHasher, CandidateCompare>::iterator it = u.begin();
   while (it != u.end()) {
     cs.push_back(*it);
     it = u.erase(it);

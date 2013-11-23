@@ -2,7 +2,12 @@
 #define _TTABLES_H_
 
 #include <iostream>
-#include <tr1/unordered_map>
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+#else
+# include <tr1/unordered_map>
+namespace std { using std::tr1::unordered_map; }
+#endif
 
 #include "sparse_vector.h"
 #include "m.h"
@@ -12,8 +17,8 @@
 class TTable {
  public:
   TTable() {}
-  typedef std::tr1::unordered_map<WordID, double> Word2Double;
-  typedef std::tr1::unordered_map<WordID, Word2Double> Word2Word2Double;
+  typedef std::unordered_map<WordID, double> Word2Double;
+  typedef std::unordered_map<WordID, Word2Double> Word2Word2Double;
   inline double prob(const int& e, const int& f) const {
     const Word2Word2Double::const_iterator cit = ttable.find(e);
     if (cit != ttable.end()) {

@@ -41,7 +41,6 @@ libcdec_a_SOURCES = \
   cfg_options.h \
   csplit.h \
   decoder.h \
-  dwarf.h \
   earley_composer.h \
   exp_semiring.h \
   factored_lexicon_helper.h \
@@ -51,18 +50,21 @@ libcdec_a_SOURCES = \
   ff_charset.h \
   ff_context.h \
   ff_csplit.h \
-  ff_dwarf.h \
   ff_external.h \
   ff_factory.h \
   ff_klm.h \
   ff_lm.h \
   ff_ngrams.h \
+  ff_parse_match.h \
   ff_register.h \
   ff_rules.h \
   ff_ruleshape.h \
   ff_sample_fsa.h \
+  ff_soft_syntax.h \
+  ff_soft_syntax_mindist.h \
   ff_source_path.h \
   ff_source_syntax.h \
+  ff_source_syntax2.h \
   ff_spans.h \
   ff_tagger.h \
   ff_wordalign.h \
@@ -96,68 +98,64 @@ libcdec_a_SOURCES = \
   sentences.h \
   tagger.h \
   translator.h \
-  tromble_loss.h \
   trule.h \
   viterbi.h \
-  forest_writer.cc \
-  maxtrans_blunsom.cc \
-  cdec_ff.cc \
-  cfg.cc \
-  dwarf.cc \
-  ff_dwarf.cc \
-  ff_external.cc \
-  rule_lexer.cc \
-  fst_translator.cc \
-  csplit.cc \
-  translator.cc \
-  rescore_translator.cc \
-  scfg_translator.cc \
-  hg.cc \
-  hg_io.cc \
-  hg_remove_eps.cc \
-  decoder.cc \
-  hg_intersect.cc \
-  hg_union.cc \
-  hg_sampler.cc \
-  factored_lexicon_helper.cc \
-  viterbi.cc \
-  lattice.cc \
   aligner.cc \
   apply_models.cc \
+  bottom_up_parser.cc \
+  cdec.cc \
+  cdec_ff.cc \
+  cfg.cc \
+  csplit.cc \
+  decoder.cc \
   earley_composer.cc \
-  phrasetable_fst.cc \
-  trule.cc \
+  factored_lexicon_helper.cc \
   ff.cc \
-  ffset.cc \
   ff_basic.cc \
-  ff_rules.cc \
-  ff_wordset.cc \
-  ff_context.cc \
-  ff_charset.cc \
-  ff_lm.cc \
-  ff_klm.cc \
-  ff_ngrams.cc \
-  ff_spans.cc \
-  ff_ruleshape.cc \
-  ff_wordalign.cc \
-  ff_csplit.cc \
-  ff_tagger.cc \
-  ff_source_path.cc \
-  ff_parse_match.cc \
-	ff_soft_syntax.cc \
-	ff_soft_syntax2.cc \
-  ff_source_syntax.cc \
-	ff_source_syntax_p.cc \
-  ff_source_syntax2.cc \
-  ff_source_syntax2_p.cc \
   ff_bleu.cc \
+  ff_charset.cc \
+  ff_context.cc \
+  ff_csplit.cc \
+  ff_external.cc \
   ff_factory.cc \
+  ff_klm.cc \
+  ff_lm.cc \
+  ff_ngrams.cc \
+  ff_parse_match.cc \
+  ff_rules.cc \
+  ff_ruleshape.cc \
+  ff_soft_syntax.cc \
+  ff_soft_syntax_mindist.cc \
+  ff_source_path.cc \
+  ff_source_syntax.cc \
+  ff_source_syntax2.cc \
+  ff_spans.cc \
+  ff_tagger.cc \
+  ff_wordalign.cc \
+  ff_wordset.cc \
+  ffset.cc \
+  forest_writer.cc \
+  fst_translator.cc \
+  grammar.cc \
+  hg.cc \
+  hg_intersect.cc \
+  hg_io.cc \
+  hg_remove_eps.cc \
+  hg_sampler.cc \
+  hg_union.cc \
   incremental.cc \
+  json_parse.cc \
+  lattice.cc \
   lexalign.cc \
   lextrans.cc \
-  tagger.cc \
-  bottom_up_parser.cc \
+  maxtrans_blunsom.cc \
   phrasebased_translator.cc \
-  JSON_parser.c \
-  json_parse.cc \
-  grammar.cc
+  phrasetable_fst.cc \
+  rescore_translator.cc \
+  rule_lexer.cc \
+  scfg_translator.cc \
+  tagger.cc \
+  translator.cc \
+  trule.cc \
+  viterbi.cc \
+  JSON_parser.c

@@ -4,11 +4,11 @@
 #include <vector>
 #include <cassert>
 #include <cmath>
-#include <tr1/memory>
 #include <ctime>
 
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "stringlib.h"
 #include "verbose.h"
@@ -219,7 +219,7 @@ int main(int argc, char** argv) {
 #endif
   if (size > 1) SetSilent(true);  // turn off verbose decoder output
   register_feature_functions();
-  std::tr1::shared_ptr<MT19937> rng;
+  boost::shared_ptr<MT19937> rng;
 
   po::variables_map conf;
   if (!InitCommandLine(argc, argv, &conf))
@@ -264,8 +264,8 @@ int main(int argc, char** argv) {
   ReadTrainingCorpus(conf["training_data"].as<string>(), rank, size, &corpus, &ids);
   assert(corpus.size() > 0);
 
-  std::tr1::shared_ptr<OnlineOptimizer> o;
-  std::tr1::shared_ptr<LearningRateSchedule> lr;
+  boost::shared_ptr<OnlineOptimizer> o;
+  boost::shared_ptr<LearningRateSchedule> lr;
 
   const unsigned size_per_proc = conf["minibatch_size_per_proc"].as<unsigned>();
   if (size_per_proc > corpus.size()) {

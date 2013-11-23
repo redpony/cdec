@@ -4,7 +4,12 @@
 #include <cassert>
 #include <iostream>
 #include <limits>
-#include <tr1/unordered_map>
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+#else
+# include <tr1/unordered_map>
+namespace std { using std::tr1::unordered_map; }
+#endif
 #include <set>
 #include <boost/functional/hash.hpp>
 #include "tdict.h"
@@ -20,7 +25,6 @@ static const unsigned kREF_WORDCOUNT = 4;
 static const unsigned kDUMMY_LAST_ENTRY = 5;
 
 using namespace std;
-using namespace std::tr1;
 
 bool TERMetric::IsErrorMetric() const {
   return true;

@@ -46,7 +46,7 @@ void RuleContextFeatures::ReplaceMacroWithString(
   macro << relative_location << "]";
   int macro_index = feature_instance.find(macro.str());
   if (macro_index == string::npos) {
-    cerr << "Can't find macro " << macro << " in feature template " 
+    cerr << "Can't find macro " << macro.str() << " in feature template " 
 	 << feature_instance;
     abort();
   }

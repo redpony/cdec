@@ -1,7 +1,12 @@
 #include "hg_intersect.h"
 
 #include <vector>
-#include <tr1/unordered_map>
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+#else
+# include <tr1/unordered_map>
+namespace std { using std::tr1::unordered_map; }
+#endif
 #include "fast_lexical_cast.hpp"
 #include <boost/functional/hash.hpp>
 
@@ -13,7 +18,6 @@
 #include "bottom_up_parser.h"
 
 using boost::lexical_cast;
-using namespace std::tr1;
 using namespace std;
 
 struct RuleFilter {

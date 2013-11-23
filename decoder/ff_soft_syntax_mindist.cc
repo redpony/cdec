@@ -1,4 +1,4 @@
-#include "ff_soft_syntax2.h"
+#include "ff_soft_syntax_mindist.h"
 
 #include <cstdio>
 #include <sstream>
@@ -13,16 +13,18 @@
 
 using namespace std;
 
-// Implements the soft syntactic features described in 
+// Implements the soft syntactic features described in
 // Marton and Resnik (2008): "Soft Syntacitc Constraints for Hierarchical Phrase-Based Translation".
 // Source trees must be represented in Penn Treebank format,
 // e.g. (S (NP John) (VP (V left))).
+//
+// This variant accepts fuzzy matches, choosing the constituent with
+// minimum distance.
 
-struct SoftSyntacticFeatures2Impl {
-  SoftSyntacticFeatures2Impl(const string& param) {
+struct SoftSyntaxFeaturesMindistImpl {
+  SoftSyntaxFeaturesMindistImpl(const string& param) {
     vector<string> labels = SplitOnWhitespace(param);
-	//for (unsigned int i = 0; i < labels.size(); i++) 
-      //cerr << "Labels: " << labels.at(i) << endl;
+	  //for (unsigned int i = 0; i < labels.size(); i++) { cerr << "Labels: " << labels.at(i) << endl; }
     for (unsigned int i = 0; i < labels.size(); i++) {
       string label = labels.at(i);
       pair<string, string> feat_label;
@@ -30,14 +32,12 @@ struct SoftSyntacticFeatures2Impl {
       feat_label.second = label.at(label.size() - 1);
       feat_labels.push_back(feat_label);
     }
-  } 
+  }
 
   void InitializeGrids(const string& tree, unsigned src_len) {
     assert(tree.size() > 0);
-    //fids_cat.clear();
     fids_ef.clear();
     src_tree.clear();
-    //fids_cat.resize(src_len, src_len + 1);
     fids_ef.resize(src_len, src_len + 1);
     src_tree.resize(src_len, src_len + 1, TD::Convert("XX"));
     ParseTreeString(tree, src_len);
@@ -99,14 +99,14 @@ struct SoftSyntacticFeatures2Impl {
     const WordID lhs = src_tree(i,j);
 	string lhs_str = TD::Convert(lhs);
     //cerr << "LHS: " << lhs_str << " from " << i << " to " << j << endl;
-	//cerr << "RULE :"<< rule << endl;
+	  //cerr << "RULE :"<< rule << endl;
     int& fid_ef = fids_ef(i,j)[&rule];
     string lhs_to_str = TD::Convert(lhs);
     int min_dist;
     string min_dist_label;
     if (lhs_to_str.compare("XX") != 0) {
       min_dist = 0;
-      min_dist_label = lhs_to_str;      
+      min_dist_label = lhs_to_str;
     }
     else {
       int ok = 0;
@@ -128,7 +128,7 @@ struct SoftSyntacticFeatures2Impl {
               min_dist_label = (TD::Convert(src_tree(l_rem, r_rem)));
               break;
             }
-          }    
+          }
         }
         if (ok) break;
       }
@@ -146,10 +146,10 @@ struct SoftSyntacticFeatures2Impl {
         case '2':
           if (min_dist_label.compare(label) == 0) {
             if (min_dist == 0) {
-              os << "SYN:" << label << "_conform";
+              os << "SOFTM:" << label << "_conform";
             }
             else {
-              os << "SYN:" << label << "_cross";
+              os << "SOFTM:" << label << "_cross";
             }
             fid_ef = FD::Convert(os.str());
             //cerr << "Feature :" << os.str() << endl;
@@ -157,7 +157,7 @@ struct SoftSyntacticFeatures2Impl {
           }
           break;
         case '_':
-          os << "SYN:" << label;
+          os << "SOFTM:" << label;
           fid_ef = FD::Convert(os.str());
           if (min_dist_label.compare(label) == 0) {
             //cerr << "Feature: " << os.str() << endl;
@@ -172,7 +172,7 @@ struct SoftSyntacticFeatures2Impl {
           break;
         case '+':
           if (min_dist_label.compare(label) == 0) {
-            os << "SYN:" << label << "_conform";
+            os << "SOFTM:" << label << "_conform";
             fid_ef = FD::Convert(os.str());
             if (min_dist == 0) {
               //cerr << "Feature: " << os.str() << endl;
@@ -180,10 +180,10 @@ struct SoftSyntacticFeatures2Impl {
             }
           }
           break;
-        case '-': 
-          //cerr << "-" << endl;           
+        case '-':
+          //cerr << "-" << endl;
           if (min_dist_label.compare(label) != 0) {
-            os << "SYN:" << label << "_cross";
+            os << "SOFTM:" << label << "_cross";
             fid_ef = FD::Convert(os.str());
             if (min_dist > 0) {
               //cerr << "Feature :" << os.str() << endl;
@@ -200,22 +200,22 @@ struct SoftSyntacticFeatures2Impl {
     return lhs;
   }
 
-  Array2D<WordID> src_tree;  // src_tree(i,j) NT = type
-  mutable Array2D<map<const TRule*, int> > fids_ef;    // fires for fully lexicalized
+  Array2D<WordID> src_tree; // src_tree(i,j) NT = type
+  mutable Array2D<map<const TRule*, int> > fids_ef; // fires for fully lexicalized
   vector<pair<string, string> > feat_labels;
 };
 
-SoftSyntacticFeatures2::SoftSyntacticFeatures2(const string& param) :
+SoftSyntaxFeaturesMindist::SoftSyntaxFeaturesMindist(const string& param) :
     FeatureFunction(sizeof(WordID)) {
-  impl = new SoftSyntacticFeatures2Impl(param);
+  impl = new SoftSyntaxFeaturesMindistImpl(param);
 }
 
-SoftSyntacticFeatures2::~SoftSyntacticFeatures2() {
+SoftSyntaxFeaturesMindist::~SoftSyntaxFeaturesMindist() {
   delete impl;
   impl = NULL;
 }
 
-void SoftSyntacticFeatures2::TraversalFeaturesImpl(const SentenceMetadata& smeta,
+void SoftSyntaxFeaturesMindist::TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const Hypergraph::Edge& edge,
                                      const vector<const void*>& ant_contexts,
                                      SparseVector<double>* features,
@@ -229,6 +229,10 @@ void SoftSyntacticFeatures2::TraversalFeaturesImpl(const SentenceMetadata& smeta
      impl->FireFeatures(*edge.rule_, edge.i_, edge.j_, ants, features);
 }
 
-void SoftSyntacticFeatures2::PrepareForInput(const SentenceMetadata& smeta) {
-  impl->InitializeGrids(smeta.GetSGMLValue("src_tree"), smeta.GetSourceLength());
+void SoftSyntaxFeaturesMindist::PrepareForInput(const SentenceMetadata& smeta) {
+  ReadFile f = ReadFile(smeta.GetSGMLValue("src_tree"));
+  string tree;
+  f.ReadAll(tree);
+  impl->InitializeGrids(tree, smeta.GetSourceLength());
 }
+

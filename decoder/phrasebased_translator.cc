@@ -2,8 +2,14 @@
 
 #include <queue>
 #include <iostream>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+# include <unordered_set>
+#else
+# include <tr1/unordered_map>
+# include <tr1/unordered_set>
+namespace std { using std::tr1::unordered_map; using std::tr1::unordered_set; }
+#endif
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/functional/hash.hpp>
@@ -17,7 +23,6 @@
 #include "array2d.h"
 
 using namespace std;
-using namespace std::tr1;
 using namespace boost::tuples;
 
 struct Coverage : public vector<bool> {
@@ -49,10 +54,13 @@ struct Coverage : public vector<bool> {
 };
 struct CoverageHash {
   size_t operator()(const Coverage& cov) const {
-    return hasher_(static_cast<const vector<bool>&>(cov));
+    int seed = 131;
+    size_t res = 0;
+    for (vector<bool>::const_iterator it = cov.begin(); it != cov.end(); ++it) {
+      res = (res * seed) + (*it + 1);
+    }
+    return res;
   }
- private:
-  boost::hash<vector<bool> > hasher_;
 };
 ostream& operator<<(ostream& os, const Coverage& cov) {
   os << '[';
