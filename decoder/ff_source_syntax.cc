@@ -2,8 +2,13 @@
 
 #include <sstream>
 #include <stack>
+#ifndef HAVE_OLD_CPP
+# include <unordered_set>
+#else
+# include <tr1/unordered_set>
+namespace std { using std::tr1::unordered_set; }
+#endif
 
-#include "hg.h"
 #include "sentence_metadata.h"
 #include "array2d.h"
 #include "filelib.h"
@@ -23,6 +28,17 @@ inline int SpanSizeTransform(unsigned span_size) {
 
 struct SourceSyntaxFeaturesImpl {
   SourceSyntaxFeaturesImpl() {}
+
+  SourceSyntaxFeaturesImpl(const string& param) {
+    if (!(param.compare("") == 0)) {
+      string triggered_features_fn = param;
+      ReadFile triggered_features(triggered_features_fn);
+      string in;
+      while(getline(*triggered_features, in)) {
+        feature_filter.insert(FD::Convert(in));
+      }
+    }
+  }
 
   void InitializeGrids(const string& tree, unsigned src_len) {
     assert(tree.size() > 0);
@@ -93,7 +109,7 @@ struct SourceSyntaxFeaturesImpl {
     if (fid_ef <= 0) {
       ostringstream os;
       //ostringstream os2;
-      os << "SYN:" << TD::Convert(lhs);
+      os << "SSYN:" << TD::Convert(lhs);
       //os2 << "SYN:" << TD::Convert(lhs) << '_' << SpanSizeTransform(j - i);
       //fid_cat = FD::Convert(os2.str());
       os << ':';
@@ -118,21 +134,28 @@ struct SourceSyntaxFeaturesImpl {
       }
       fid_ef = FD::Convert(os.str());
     }
-    //if (fid_cat > 0)
-    //  feats->set_value(fid_cat, 1.0);
-    if (fid_ef > 0)
-      feats->set_value(fid_ef, 1.0);
+    if (fid_ef > 0) {
+      if (feature_filter.size()>0) {
+        if (feature_filter.find(fid_ef) != feature_filter.end()) {
+          feats->set_value(fid_ef, 1.0);
+        }
+      } else {
+        feats->set_value(fid_ef, 1.0);
+      }
+    }
+    cerr << FD::Convert(fid_ef) << endl;
     return lhs;
   }
 
-  Array2D<WordID> src_tree;  // src_tree(i,j) NT = type
-  // mutable Array2D<int> fids_cat;   // this tends to overfit baddly
-  mutable Array2D<map<const TRule*, int> > fids_ef;    // fires for fully lexicalized
+  Array2D<WordID> src_tree; // src_tree(i,j) NT = type
+  // mutable Array2D<int> fids_cat; // this tends to overfit baddly
+  mutable Array2D<map<const TRule*, int> > fids_ef; // fires for fully lexicalized
+  unordered_set<int> feature_filter;
 };
 
 SourceSyntaxFeatures::SourceSyntaxFeatures(const string& param) :
     FeatureFunction(sizeof(WordID)) {
-  impl = new SourceSyntaxFeaturesImpl;
+  impl = new SourceSyntaxFeaturesImpl(param);
 }
 
 SourceSyntaxFeatures::~SourceSyntaxFeatures() {
@@ -155,7 +178,10 @@ void SourceSyntaxFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
 }
 
 void SourceSyntaxFeatures::PrepareForInput(const SentenceMetadata& smeta) {
-  impl->InitializeGrids(smeta.GetSGMLValue("src_tree"), smeta.GetSourceLength());
+  ReadFile f = ReadFile(smeta.GetSGMLValue("src_tree"));
+  string tree;
+  f.ReadAll(tree);
+  impl->InitializeGrids(tree, smeta.GetSourceLength());
 }
 
 struct SourceSpanSizeFeaturesImpl {
@@ -229,5 +255,4 @@ void SourceSpanSizeFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta
 void SourceSpanSizeFeatures::PrepareForInput(const SentenceMetadata& smeta) {
   impl->InitializeGrids(smeta.GetSourceLength());
 }
-
 

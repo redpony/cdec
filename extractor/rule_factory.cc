@@ -17,6 +17,7 @@
 #include "suffix_array.h"
 #include "time_util.h"
 #include "vocabulary.h"
+#include "data_array.h"
 
 using namespace std;
 using namespace chrono;
@@ -100,7 +101,7 @@ HieroCachingRuleFactory::HieroCachingRuleFactory() {}
 
 HieroCachingRuleFactory::~HieroCachingRuleFactory() {}
 
-Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids) {
+Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids, const unordered_set<int>& blacklisted_sentence_ids, const shared_ptr<DataArray> source_data_array) {
   Clock::time_point start_time = Clock::now();
   double total_extract_time = 0;
   double total_intersect_time = 0;
@@ -192,7 +193,7 @@ Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids) {
       Clock::time_point extract_start = Clock::now();
       if (!state.starts_with_x) {
         // Extract rules for the sampled set of occurrences.
-        PhraseLocation sample = sampler->Sample(next_node->matchings);
+        PhraseLocation sample = sampler->Sample(next_node->matchings, blacklisted_sentence_ids, source_data_array);
         vector<Rule> new_rules =
             rule_extractor->ExtractRules(next_phrase, sample);
         rules.insert(rules.end(), new_rules.begin(), new_rules.end());

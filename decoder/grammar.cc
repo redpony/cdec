@@ -3,15 +3,20 @@
 #include <algorithm>
 #include <utility>
 #include <map>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+# include <unordered_set>
+#else
+# include <tr1/unordered_map>
+# include <tr1/unordered_set>
+namespace std { using std::tr1::unordered_map; using std::tr1::unordered_set; }
+#endif
 
 #include "rule_lexer.h"
 #include "filelib.h"
 #include "tdict.h"
 
 using namespace std;
-using namespace std::tr1;
 
 const vector<TRulePtr> Grammar::NO_RULES;
 

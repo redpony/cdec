@@ -1,7 +1,12 @@
 #include <iostream>
 #include <cmath>
 #include <utility>
-#include <tr1/unordered_map>
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+#else
+# include <tr1/unordered_map>
+namespace std { using std::tr1::unordered_map; }
+#endif
 
 #include <boost/functional/hash.hpp>
 #include <boost/program_options.hpp>
@@ -17,7 +22,6 @@
 
 namespace po = boost::program_options;
 using namespace std;
-using namespace std::tr1;
 
 bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");

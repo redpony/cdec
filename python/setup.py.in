@@ -7,7 +7,7 @@ LIB = ['../decoder', '../utils', '../mteval', '../training/utils', '../klm/lm', 
 
 # Set automatically by configure
 LIBS = re.findall('-l([^\s]+)', '@LIBS@')
-CPPFLAGS = re.findall('-[^\s]+', '@CPPFLAGS@')
+CPPFLAGS = re.findall('-[^\s]+', '@CPPFLAGS@ @CXXFLAGS@')
 LDFLAGS = re.findall('-[^\s]+', '@LDFLAGS@')
 # Make sure linker flags go only to the linker
 LDFLAGS = [opt.replace('-R', '-Wl,-rpath,') for opt in LDFLAGS]
@@ -21,7 +21,8 @@ ext_modules = [
         extra_compile_args=CPPFLAGS,
         extra_link_args=LDFLAGS),
     Extension(name='cdec.sa._sa',
-        sources=['cdec/sa/_sa.c', 'cdec/sa/strmap.cc'])
+        sources=['cdec/sa/_sa.cpp', 'cdec/sa/strmap.cc'],
+        extra_compile_args=CPPFLAGS)
 ]
 
 setup(

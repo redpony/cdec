@@ -106,7 +106,7 @@ struct BleuSegmentEvaluator : public SegmentEvaluator {
   }
 
   struct NGramCompare {
-    int operator() (const vector<WordID>& a, const vector<WordID>& b) {
+    int operator() (const vector<WordID>& a, const vector<WordID>& b) const {
       const size_t as = a.size();
       const size_t bs = b.size();
       const size_t s = (as < bs ? as : bs);

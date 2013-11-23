@@ -30,7 +30,6 @@
 #include "sparse_vector.h"
 
 using namespace std;
-using boost::shared_ptr;
 namespace po = boost::program_options;
 
 bool invert_score;
@@ -49,13 +48,6 @@ bool pseudo_doc;
 bool sent_approx;
 bool checkloss;
 bool stream;
-
-void SanityCheck(const vector<double>& w) {
-  for (int i = 0; i < w.size(); ++i) {
-    assert(!isnan(w[i]));
-    assert(!isinf(w[i]));
-  }
-}
 
 struct FComp {
   const vector<double>& w_;
@@ -149,7 +141,7 @@ struct HypothesisInfo {
   double alpha;
   double oracle_loss;
   SparseVector<double> oracle_feat_diff;
-  shared_ptr<HypothesisInfo> oracleN;
+  boost::shared_ptr<HypothesisInfo> oracleN;
 };
 
 bool ApproxEqual(double a, double b) {
@@ -157,7 +149,7 @@ bool ApproxEqual(double a, double b) {
   return (fabs(a-b)/fabs(b)) < EPSILON;
 }
 
-typedef shared_ptr<HypothesisInfo> HI;
+typedef boost::shared_ptr<HypothesisInfo> HI;
 bool HypothesisCompareB(const HI& h1, const HI& h2 ) 
 {
   return h1->mt_metric > h2->mt_metric;
@@ -185,11 +177,11 @@ bool HypothesisCompareG(const HI& h1, const HI& h2 )
 };
 
 
-void CuttingPlane(vector<shared_ptr<HypothesisInfo> >* cur_c, bool* again, vector<shared_ptr<HypothesisInfo> >& all_hyp, vector<weight_t> dense_weights)
+void CuttingPlane(vector<boost::shared_ptr<HypothesisInfo> >* cur_c, bool* again, vector<boost::shared_ptr<HypothesisInfo> >& all_hyp, vector<weight_t> dense_weights)
 {
   bool DEBUG_CUT = false;
-  shared_ptr<HypothesisInfo> max_fear, max_fear_in_set;
-  vector<shared_ptr<HypothesisInfo> >& cur_constraint = *cur_c;
+  boost::shared_ptr<HypothesisInfo> max_fear, max_fear_in_set;
+  vector<boost::shared_ptr<HypothesisInfo> >& cur_constraint = *cur_c;
 
   if(no_reweight)
     {
@@ -235,9 +227,9 @@ void CuttingPlane(vector<shared_ptr<HypothesisInfo> >* cur_c, bool* again, vecto
 }
 
 
-double ComputeDelta(vector<shared_ptr<HypothesisInfo> >* cur_p, double max_step_size,vector<weight_t> dense_weights )
+double ComputeDelta(vector<boost::shared_ptr<HypothesisInfo> >* cur_p, double max_step_size,vector<weight_t> dense_weights )
 {
-  vector<shared_ptr<HypothesisInfo> >& cur_pair = *cur_p;
+  vector<boost::shared_ptr<HypothesisInfo> >& cur_pair = *cur_p;
    double loss = cur_pair[0]->oracle_loss - cur_pair[1]->oracle_loss;
 
    double margin = -(cur_pair[0]->oracleN->features.dot(dense_weights)- cur_pair[0]->features.dot(dense_weights)) + (cur_pair[1]->oracleN->features.dot(dense_weights) - cur_pair[1]->features.dot(dense_weights));
@@ -261,12 +253,12 @@ double ComputeDelta(vector<shared_ptr<HypothesisInfo> >* cur_p, double max_step_
 }
 
 
-vector<shared_ptr<HypothesisInfo> > SelectPair(vector<shared_ptr<HypothesisInfo> >* cur_c)
+vector<boost::shared_ptr<HypothesisInfo> > SelectPair(vector<boost::shared_ptr<HypothesisInfo> >* cur_c)
 {
   bool DEBUG_SELECT= false;
-  vector<shared_ptr<HypothesisInfo> >& cur_constraint = *cur_c;
+  vector<boost::shared_ptr<HypothesisInfo> >& cur_constraint = *cur_c;
   
-  vector<shared_ptr<HypothesisInfo> > pair;
+  vector<boost::shared_ptr<HypothesisInfo> > pair;
 
   if (no_select || optimizer == 2){ //skip heuristic search and return oracle and fear for pa-mira
 
@@ -278,7 +270,7 @@ vector<shared_ptr<HypothesisInfo> > SelectPair(vector<shared_ptr<HypothesisInfo>
   
   for(int u=0;u != cur_constraint.size();u++)	
     {
-      shared_ptr<HypothesisInfo> max_fear;
+      boost::shared_ptr<HypothesisInfo> max_fear;
       
       if(DEBUG_SELECT) cerr<< "cur alpha " << u  << " " << cur_constraint[u]->alpha;
       for(int i=0; i < cur_constraint.size();i++) //select maximal violator
@@ -323,8 +315,8 @@ vector<shared_ptr<HypothesisInfo> > SelectPair(vector<shared_ptr<HypothesisInfo>
 }
 
 struct GoodBadOracle {
-  vector<shared_ptr<HypothesisInfo> > good;
-  vector<shared_ptr<HypothesisInfo> > bad;
+  vector<boost::shared_ptr<HypothesisInfo> > good;
+  vector<boost::shared_ptr<HypothesisInfo> > bad;
 };
 
 struct BasicObserver: public DecoderObserver {
@@ -367,8 +359,8 @@ struct TrainingObserver : public DecoderObserver {
   const DocScorer& ds;
   vector<ScoreP>& corpus_bleu_sent_stats;
   vector<GoodBadOracle>& oracles;
-  vector<shared_ptr<HypothesisInfo> > cur_best;
-  shared_ptr<HypothesisInfo> cur_oracle;
+  vector<boost::shared_ptr<HypothesisInfo> > cur_best;
+  boost::shared_ptr<HypothesisInfo> cur_oracle;
   const int kbest_size;
   Hypergraph forest;
   int cur_sent;
@@ -386,7 +378,7 @@ struct TrainingObserver : public DecoderObserver {
     return *cur_best[0];
   }
 
-  const vector<shared_ptr<HypothesisInfo> > GetCurrentBest() const {
+  const vector<boost::shared_ptr<HypothesisInfo> > GetCurrentBest() const {
     return cur_best;
   }
   
@@ -411,8 +403,8 @@ struct TrainingObserver : public DecoderObserver {
     
   }
 
-  shared_ptr<HypothesisInfo> MakeHypothesisInfo(const SparseVector<double>& feats, const double score, const vector<WordID>& hyp) {
-    shared_ptr<HypothesisInfo> h(new HypothesisInfo);
+  boost::shared_ptr<HypothesisInfo> MakeHypothesisInfo(const SparseVector<double>& feats, const double score, const vector<WordID>& hyp) {
+    boost::shared_ptr<HypothesisInfo> h(new HypothesisInfo);
     h->features = feats;
     h->mt_metric = score;
     h->hyp = hyp;
@@ -424,14 +416,14 @@ struct TrainingObserver : public DecoderObserver {
 
 	if (stream) sent_id = 0;
     bool PRINT_LIST= false;
-    vector<shared_ptr<HypothesisInfo> >& cur_good = oracles[sent_id].good;
-    vector<shared_ptr<HypothesisInfo> >& cur_bad = oracles[sent_id].bad;
+    vector<boost::shared_ptr<HypothesisInfo> >& cur_good = oracles[sent_id].good;
+    vector<boost::shared_ptr<HypothesisInfo> >& cur_bad = oracles[sent_id].bad;
     //TODO: look at keeping previous iterations hypothesis lists around
     cur_best.clear();
     cur_good.clear();
     cur_bad.clear();
 
-    vector<shared_ptr<HypothesisInfo> > all_hyp;
+    vector<boost::shared_ptr<HypothesisInfo> > all_hyp;
 
     typedef KBest::KBestDerivations<vector<WordID>, ESentenceTraversal,Filter> K;
     K kbest(forest,kbest_size);
@@ -527,7 +519,7 @@ struct TrainingObserver : public DecoderObserver {
     if(PRINT_LIST) { cerr << "GOOD" << endl;  for(int u=0;u!=cur_good.size();u++) cerr << cur_good[u]->mt_metric << " " << cur_good[u]->hope << endl;}     
 
     //use hope for fear selection
-    shared_ptr<HypothesisInfo>& oracleN = cur_good[0];
+    boost::shared_ptr<HypothesisInfo>& oracleN = cur_good[0];
 
     if(fear_select == 1){   //compute fear hyps with model - bleu
       if (PRINT_LIST) cerr << "FEAR " << endl;
@@ -663,13 +655,13 @@ int main(int argc, char** argv) {
     invert_score = false;
   }
 
-  shared_ptr<DocScorer> ds;
+  boost::shared_ptr<DocScorer> ds;
   //normal: load references, stream: start stream scorer
   if (stream) {
-	  ds = shared_ptr<DocScorer>(new DocStreamScorer(type, vector<string>(0), ""));
+	  ds = boost::shared_ptr<DocScorer>(new DocStreamScorer(type, vector<string>(0), ""));
 	  cerr << "Scoring doc stream with " << metric_name << endl;
   } else {
-      ds = shared_ptr<DocScorer>(new DocScorer(type, conf["reference"].as<vector<string> >(), ""));
+      ds = boost::shared_ptr<DocScorer>(new DocScorer(type, conf["reference"].as<vector<string> >(), ""));
       cerr << "Loaded " << ds->size() << " references for scoring with " << metric_name << endl;
   }
   vector<ScoreP> corpus_bleu_sent_stats;
@@ -774,9 +766,9 @@ int main(int argc, char** argv) {
       const HypothesisInfo& cur_good = *oracles[cur_sent].good[0];
       const HypothesisInfo& cur_bad = *oracles[cur_sent].bad[0];
 
-      vector<shared_ptr<HypothesisInfo> >& cur_good_v = oracles[cur_sent].good;
-      vector<shared_ptr<HypothesisInfo> >& cur_bad_v = oracles[cur_sent].bad;
-      vector<shared_ptr<HypothesisInfo> > cur_best_v = observer.GetCurrentBest();
+      vector<boost::shared_ptr<HypothesisInfo> >& cur_good_v = oracles[cur_sent].good;
+      vector<boost::shared_ptr<HypothesisInfo> >& cur_bad_v = oracles[cur_sent].bad;
+      vector<boost::shared_ptr<HypothesisInfo> > cur_best_v = observer.GetCurrentBest();
 
       tot_loss += cur_hyp.mt_metric;
       
@@ -824,13 +816,13 @@ int main(int argc, char** argv) {
 	}
       else if(optimizer == 5) //full mira with n-best list of constraints from hope, fear, model best
 	{
-	  vector<shared_ptr<HypothesisInfo> > cur_constraint;
+	  vector<boost::shared_ptr<HypothesisInfo> > cur_constraint;
 	  cur_constraint.insert(cur_constraint.begin(), cur_bad_v.begin(), cur_bad_v.end());
 	  cur_constraint.insert(cur_constraint.begin(), cur_best_v.begin(), cur_best_v.end());
 	  cur_constraint.insert(cur_constraint.begin(), cur_good_v.begin(), cur_good_v.end());
 
 	  bool optimize_again;
-	  vector<shared_ptr<HypothesisInfo> > cur_pair;
+	  vector<boost::shared_ptr<HypothesisInfo> > cur_pair;
 	  //SMO 
 	  for(int u=0;u!=cur_constraint.size();u++)	
 	    cur_constraint[u]->alpha =0;	      
@@ -879,7 +871,7 @@ int main(int argc, char** argv) {
       else if(optimizer == 2 || optimizer == 3) //PA and Cutting Plane MIRA update
 	  {
 	    bool DEBUG_SMO= true;
-	    vector<shared_ptr<HypothesisInfo> > cur_constraint;
+	    vector<boost::shared_ptr<HypothesisInfo> > cur_constraint;
 	    cur_constraint.push_back(cur_good_v[0]); //add oracle to constraint set
 	    bool optimize_again = true;
 	    int cut_plane_calls = 0;
@@ -919,7 +911,7 @@ int main(int argc, char** argv) {
 		    while (iter < smo_iter)
 		      {			
 			//select pair to optimize from constraint set
-			vector<shared_ptr<HypothesisInfo> > cur_pair = SelectPair(&cur_constraint);
+			vector<boost::shared_ptr<HypothesisInfo> > cur_pair = SelectPair(&cur_constraint);
 			
 			if(cur_pair.empty()){
 			  iter=MAX_SMO; 

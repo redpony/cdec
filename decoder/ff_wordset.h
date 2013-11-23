@@ -4,13 +4,17 @@
 #include "ff.h"
 #include "tdict.h"
 
-#include <tr1/unordered_set>
-#include <boost/algorithm/string.hpp>
-
 #include <vector>
 #include <string>
 #include <iostream>
 #include <fstream>
+
+#ifndef HAVE_OLD_CPP
+# include <unordered_set>
+#else
+# include <tr1/unordered_set>
+namespace std { using std::tr1::unordered_set; }
+#endif
 
 class WordSet : public FeatureFunction {
  public:
@@ -42,69 +46,12 @@ class WordSet : public FeatureFunction {
                                      void* context) const;
  private:
 
-  static void loadVocab(const std::string& vocabFile, std::tr1::unordered_set<WordID>* vocab) {
-
-      std::ifstream file;
-      std::string line;
-
-      file.open(vocabFile.c_str(), std::fstream::in);
-      if (file.is_open()) {
-	unsigned lineNum = 0;
-	while (!file.eof()) {
-	  ++lineNum;
-	  getline(file, line);
-	  boost::trim(line);
-	  if(line.empty()) {
-	    continue;
-	  }
-	  
-	  WordID vocabId = TD::Convert(line);
-	  vocab->insert(vocabId);
-	}
-	file.close();
-      } else {
-	std::cerr << "Unable to open file: " << vocabFile; 
-	exit(1);
-      }
-  }
-
-  static void parseArgs(const std::string& args, std::string* featName, std::string* vocabFile, bool* oovMode) {
-
-    std::vector<std::string> toks(10);
-    boost::split(toks, args, boost::is_any_of(" "));
-
-    *oovMode = false;
-
-    // skip initial feature name
-    for(std::vector<std::string>::const_iterator it = toks.begin(); it != toks.end(); ++it) {
-      if(*it == "-v") {
-	*vocabFile = *++it; // copy
-
-      } else if(*it == "-N") {
-	*featName = *++it;
-
-      } else if(*it == "--oov") {
-	*oovMode = true;
-
-      } else {
-	std::cerr << "Unrecognized argument: " << *it << std::endl;
-	exit(1);
-      }
-    }
-
-    if(*featName == "") {
-      std::cerr << "featName (-N) not specified for WordSet" << std::endl;
-      exit(1);
-    }
-    if(*vocabFile == "") {
-      std::cerr << "vocabFile (-v) not specified for WordSet" << std::endl;
-      exit(1);
-    }
-  }
+  static void parseArgs(const std::string& args, std::string* featName, std::string* vocabFile, bool* oovMode);
+  static void loadVocab(const std::string& vocabFile, std::unordered_set<WordID>* vocab);
 
   int fid_;
   bool oovMode_;
-  std::tr1::unordered_set<WordID> vocab_;
+  std::unordered_set<WordID> vocab_;
 };
 
 #endif

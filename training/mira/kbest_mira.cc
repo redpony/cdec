@@ -3,10 +3,10 @@
 #include <vector>
 #include <cassert>
 #include <cmath>
-#include <tr1/memory>
 
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "stringlib.h"
 #include "hg_sampler.h"
@@ -30,7 +30,7 @@ using namespace std;
 namespace po = boost::program_options;
 
 bool invert_score;
-std::tr1::shared_ptr<MT19937> rng;
+boost::shared_ptr<MT19937> rng;
 
 void RandomPermutation(int len, vector<int>* p_ids) {
   vector<int>& ids = *p_ids;
@@ -88,8 +88,8 @@ struct HypothesisInfo {
 };
 
 struct GoodBadOracle {
-  std::tr1::shared_ptr<HypothesisInfo> good;
-  std::tr1::shared_ptr<HypothesisInfo> bad;
+  boost::shared_ptr<HypothesisInfo> good;
+  boost::shared_ptr<HypothesisInfo> bad;
 };
 
 struct TrainingObserver : public DecoderObserver {
@@ -97,7 +97,7 @@ struct TrainingObserver : public DecoderObserver {
   const DocumentScorer& ds;
   const EvaluationMetric& metric;
   vector<GoodBadOracle>& oracles;
-  std::tr1::shared_ptr<HypothesisInfo> cur_best;
+  boost::shared_ptr<HypothesisInfo> cur_best;
   const int kbest_size;
   const bool sample_forest;
 
@@ -109,16 +109,16 @@ struct TrainingObserver : public DecoderObserver {
     UpdateOracles(smeta.GetSentenceID(), *hg);
   }
 
-  std::tr1::shared_ptr<HypothesisInfo> MakeHypothesisInfo(const SparseVector<double>& feats, const double score) {
-    std::tr1::shared_ptr<HypothesisInfo> h(new HypothesisInfo);
+  boost::shared_ptr<HypothesisInfo> MakeHypothesisInfo(const SparseVector<double>& feats, const double score) {
+    boost::shared_ptr<HypothesisInfo> h(new HypothesisInfo);
     h->features = feats;
     h->mt_metric = score;
     return h;
   }
 
   void UpdateOracles(int sent_id, const Hypergraph& forest) {
-    std::tr1::shared_ptr<HypothesisInfo>& cur_good = oracles[sent_id].good;
-    std::tr1::shared_ptr<HypothesisInfo>& cur_bad = oracles[sent_id].bad;
+    boost::shared_ptr<HypothesisInfo>& cur_good = oracles[sent_id].good;
+    boost::shared_ptr<HypothesisInfo>& cur_bad = oracles[sent_id].bad;
     cur_bad.reset();  // TODO get rid of??
 
     if (sample_forest) {

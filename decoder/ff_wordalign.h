@@ -5,8 +5,16 @@
 #include "array2d.h"
 #include "factored_lexicon_helper.h"
 
+#include <boost/functional/hash.hpp>
+#include <cassert>
 #include <boost/scoped_ptr.hpp>
 #include <boost/multi_array.hpp>
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+#else
+# include <tr1/unordered_map>
+namespace std { using std::tr1::unordered_map; }
+#endif
 
 class RelativeSentencePosition : public FeatureFunction {
  public:
@@ -124,9 +132,6 @@ class LexicalTranslationTrigger : public FeatureFunction {
   std::vector<std::vector<WordID> > triggers_;
 };
 
-#include <tr1/unordered_map>
-#include <boost/functional/hash.hpp>
-#include <cassert>
 class BlunsomSynchronousParseHack : public FeatureFunction {
  public:
   BlunsomSynchronousParseHack(const std::string& param);
@@ -196,7 +201,7 @@ class BlunsomSynchronousParseHack : public FeatureFunction {
 
   const int fid_;
   mutable int cur_sent_;
-  typedef std::tr1::unordered_map<std::vector<WordID>, int, boost::hash<std::vector<WordID> > > Vec2Int;
+  typedef std::unordered_map<std::vector<WordID>, int, boost::hash<std::vector<WordID> > > Vec2Int;
   mutable Vec2Int cur_map_;
   const std::vector<WordID> mutable * cur_ref_;
   mutable std::vector<std::vector<WordID> > refs_;

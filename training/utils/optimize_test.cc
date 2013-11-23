@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <boost/program_options/variables_map.hpp>
+#include <boost/shared_ptr.hpp>
 #include "optimize.h"
 #include "online_optimizer.h"
 #include "sparse_vector.h"
@@ -96,14 +97,11 @@ void TestOptimizerVariants(int num_vars) {
   cerr << oa.Name() << " SUCCESS\n";
 }
 
-using namespace std::tr1;
-
 void TestOnline() {
   size_t N = 20;
   double C = 1.0;
   double eta0 = 0.2;
-  std::tr1::shared_ptr<LearningRateSchedule> r(new ExponentialDecayLearningRate(N, eta0, 0.85));
-  //shared_ptr<LearningRateSchedule> r(new StandardLearningRate(N, eta0));
+  boost::shared_ptr<LearningRateSchedule> r(new ExponentialDecayLearningRate(N, eta0, 0.85));
   CumulativeL1OnlineOptimizer opt(r, N, C, std::vector<int>());
   assert(r->eta(10) < r->eta(1));
 }

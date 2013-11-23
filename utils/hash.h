@@ -20,11 +20,17 @@
 # define HASH_MAP_RESERVED(h,empty,deleted) do { (h).set_empty_key(empty); (h).set_deleted_key(deleted); } while(0)
 # define HASH_MAP_EMPTY(h,empty) do { (h).set_empty_key(empty); } while(0)
 #else
+#ifndef HAVE_OLD_CPP
+# include <unordered_map>
+# include <unordered_set>
+#else
 # include <tr1/unordered_map>
 # include <tr1/unordered_set>
-# define SPARSE_HASH_MAP std::tr1::unordered_map
-# define HASH_MAP std::tr1::unordered_map
-# define HASH_SET std::tr1::unordered_set
+namespace std { using std::tr1::unordered_map; using std::tr1::unordered_set; }
+#endif
+# define SPARSE_HASH_MAP std::unordered_map
+# define HASH_MAP std::unordered_map
+# define HASH_SET std::unordered_set
 # define HASH_MAP_DELETED(h,deleted)
 # define HASH_MAP_RESERVED(h,empty,deleted)
 # define HASH_MAP_EMPTY(h,empty)
