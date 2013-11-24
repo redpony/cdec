@@ -32,6 +32,7 @@ class GrammarExtractor {
       shared_ptr<Alignment> alignment,
       shared_ptr<Precomputation> precomputation,
       shared_ptr<Scorer> scorer,
+      shared_ptr<Vocabulary> vocabulary,
       int min_gap_size,
       int max_rule_span,
       int max_nonterminals,

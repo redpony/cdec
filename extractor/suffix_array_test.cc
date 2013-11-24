@@ -21,7 +21,7 @@ class SuffixArrayTest : public Test {
   virtual void SetUp() {
     data = {6, 4, 1, 2, 4, 5, 3, 4, 6, 6, 4, 1, 2};
     data_array = make_shared<MockDataArray>();
-    EXPECT_CALL(*data_array, GetData()).WillRepeatedly(ReturnRef(data));
+    EXPECT_CALL(*data_array, GetData()).WillRepeatedly(Return(data));
     EXPECT_CALL(*data_array, GetVocabularySize()).WillRepeatedly(Return(7));
     EXPECT_CALL(*data_array, GetSize()).WillRepeatedly(Return(13));
     suffix_array = SuffixArray(data_array);

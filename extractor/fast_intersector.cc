@@ -11,40 +11,21 @@
 
 namespace extractor {
 
-FastIntersector::FastIntersector(shared_ptr<SuffixArray> suffix_array,
-                                 shared_ptr<Precomputation> precomputation,
-                                 shared_ptr<Vocabulary> vocabulary,
-                                 int max_rule_span,
-                                 int min_gap_size) :
+FastIntersector::FastIntersector(
+    shared_ptr<SuffixArray> suffix_array,
+    shared_ptr<Precomputation> precomputation,
+    shared_ptr<Vocabulary> vocabulary,
+    int max_rule_span,
+    int min_gap_size) :
     suffix_array(suffix_array),
+    precomputation(precomputation),
     vocabulary(vocabulary),
     max_rule_span(max_rule_span),
-    min_gap_size(min_gap_size) {
-  Index precomputed_collocations = precomputation->GetCollocations();
-  for (pair<vector<int>, vector<int>> entry: precomputed_collocations) {
-    vector<int> phrase = ConvertPhrase(entry.first);
-    collocations[phrase] = entry.second;
-  }
-}
+    min_gap_size(min_gap_size) {}
 
 FastIntersector::FastIntersector() {}
 
 FastIntersector::~FastIntersector() {}
-
-vector<int> FastIntersector::ConvertPhrase(const vector<int>& old_phrase) {
-  vector<int> new_phrase;
-  new_phrase.reserve(old_phrase.size());
-  shared_ptr<DataArray> data_array = suffix_array->GetData();
-  for (int word_id: old_phrase) {
-    if (word_id < 0) {
-      new_phrase.push_back(word_id);
-    } else {
-      new_phrase.push_back(
-          vocabulary->GetTerminalIndex(data_array->GetWord(word_id)));
-    }
-  }
-  return new_phrase;
-}
 
 PhraseLocation FastIntersector::Intersect(
     PhraseLocation& prefix_location,
@@ -59,8 +40,9 @@ PhraseLocation FastIntersector::Intersect(
   assert(vocabulary->IsTerminal(symbols.front())
       && vocabulary->IsTerminal(symbols.back()));
 
-  if (collocations.count(symbols)) {
-    return PhraseLocation(collocations[symbols], phrase.Arity() + 1);
+  if (precomputation->Contains(symbols)) {
+    return PhraseLocation(precomputation->GetCollocations(symbols),
+                          phrase.Arity() + 1);
   }
 
   bool prefix_ends_with_x =
