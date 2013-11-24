@@ -6,7 +6,7 @@ namespace extractor {
 
 class MockDataArray : public DataArray {
  public:
-  MOCK_CONST_METHOD0(GetData, const vector<int>&());
+  MOCK_CONST_METHOD0(GetData, vector<int>());
   MOCK_CONST_METHOD1(AtIndex, int(int index));
   MOCK_CONST_METHOD1(GetWordAtIndex, string(int index));
   MOCK_CONST_METHOD0(GetSize, int());

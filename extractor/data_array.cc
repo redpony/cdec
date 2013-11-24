@@ -78,7 +78,7 @@ void DataArray::CreateDataArray(const vector<string>& lines) {
 
 DataArray::~DataArray() {}
 
-const vector<int>& DataArray::GetData() const {
+vector<int> DataArray::GetData() const {
   return data;
 }
 
