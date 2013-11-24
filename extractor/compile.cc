@@ -13,6 +13,7 @@
 #include "suffix_array.h"
 #include "time_util.h"
 #include "translation_table.h"
+#include "vocabulary.h"
 
 namespace ar = boost::archive;
 namespace fs = boost::filesystem;
@@ -125,9 +126,12 @@ int main(int argc, char** argv) {
   cerr << "Reading alignment took "
        << GetDuration(start_time, stop_time) << " seconds" << endl;
 
+  shared_ptr<Vocabulary> vocabulary;
+
   start_time = Clock::now();
   cerr << "Precomputing collocations..." << endl;
   Precomputation precomputation(
+      vocabulary,
       source_suffix_array,
       vm["frequent"].as<int>(),
       vm["super_frequent"].as<int>(),

@@ -51,7 +51,7 @@ class DataArray {
   virtual ~DataArray();
 
   // Returns a vector containing the word ids.
-  virtual const vector<int>& GetData() const;
+  virtual vector<int> GetData() const;
 
   // Returns the word id at the specified position.
   virtual int AtIndex(int index) const;

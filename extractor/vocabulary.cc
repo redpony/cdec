@@ -8,12 +8,13 @@ int Vocabulary::GetTerminalIndex(const string& word) {
   int word_id = -1;
   #pragma omp critical (vocabulary)
   {
-    if (!dictionary.count(word)) {
+    auto it = dictionary.find(word);
+    if (it != dictionary.end()) {
+      word_id = it->second;
+    } else {
       word_id = words.size();
       dictionary[word] = word_id;
       words.push_back(word);
-    } else {
-      word_id = dictionary[word];
     }
   }
   return word_id;
