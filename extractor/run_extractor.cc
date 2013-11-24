@@ -28,6 +28,7 @@
 #include "suffix_array.h"
 #include "time_util.h"
 #include "translation_table.h"
+#include "vocabulary.h"
 
 namespace fs = boost::filesystem;
 namespace po = boost::program_options;
@@ -142,11 +143,14 @@ int main(int argc, char** argv) {
   cerr << "Reading alignment took "
        << GetDuration(start_time, stop_time) << " seconds" << endl;
 
+  shared_ptr<Vocabulary> vocabulary = make_shared<Vocabulary>();
+
   // Constructs an index storing the occurrences in the source data for each
   // frequent collocation.
   start_time = Clock::now();
   cerr << "Precomputing collocations..." << endl;
   shared_ptr<Precomputation> precomputation = make_shared<Precomputation>(
+      vocabulary,
       source_suffix_array,
       vm["frequent"].as<int>(),
       vm["super_frequent"].as<int>(),
@@ -194,6 +198,7 @@ int main(int argc, char** argv) {
       alignment,
       precomputation,
       scorer,
+      vocabulary,
       vm["min_gap_size"].as<int>(),
       vm["max_rule_span"].as<int>(),
       vm["max_nonterminals"].as<int>(),

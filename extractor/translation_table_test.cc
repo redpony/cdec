@@ -28,7 +28,7 @@ class TranslationTableTest : public Test {
     vector<int> source_sentence_start = {0, 6, 10, 14};
     shared_ptr<MockDataArray> source_data_array = make_shared<MockDataArray>();
     EXPECT_CALL(*source_data_array, GetData())
-        .WillRepeatedly(ReturnRef(source_data));
+        .WillRepeatedly(Return(source_data));
     EXPECT_CALL(*source_data_array, GetNumSentences())
         .WillRepeatedly(Return(3));
     for (size_t i = 0; i < source_sentence_start.size(); ++i) {
@@ -48,7 +48,7 @@ class TranslationTableTest : public Test {
     vector<int> target_sentence_start = {0, 7, 10, 13};
     shared_ptr<MockDataArray> target_data_array = make_shared<MockDataArray>();
     EXPECT_CALL(*target_data_array, GetData())
-        .WillRepeatedly(ReturnRef(target_data));
+        .WillRepeatedly(Return(target_data));
     for (size_t i = 0; i < target_sentence_start.size(); ++i) {
       EXPECT_CALL(*target_data_array, GetSentenceStart(i))
           .WillRepeatedly(Return(target_sentence_start[i]));
