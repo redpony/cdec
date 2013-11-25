@@ -53,8 +53,7 @@ endif
 
 noinst_PROGRAMS = $(RUNNABLE_TESTS)
 
-# TESTS = $(RUNNABLE_TESTS)
-TESTS = precomputation_test
+TESTS = $(RUNNABLE_TESTS)
 
 alignment_test_SOURCES = alignment_test.cc
 alignment_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libextractor.a
