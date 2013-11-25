@@ -11,6 +11,7 @@ my $TEMP_DIR = tempdir( CLEANUP => 1 );
 my $DECODER = "$script_dir/../decoder/cdec";
 my $FILTER = "$script_dir/tools/filter-stderr.pl";
 my $COMPARE_STATS = "$script_dir/tools/compare-statistics.pl";
+my $XDIFF = "$script_dir/tools/flex-diff.pl";
 
 die "Can't find $DECODER" unless -f $DECODER;
 die "Can't execute $DECODER" unless -x $DECODER;
@@ -18,6 +19,7 @@ die "Can't find $FILTER" unless -f $FILTER;
 die "Can't execute $FILTER" unless -x $FILTER;
 die "Can't find $COMPARE_STATS" unless -f $COMPARE_STATS;
 die "Can't execute $COMPARE_STATS" unless -x $COMPARE_STATS;
+die "Can't execute $XDIFF" unless -x $XDIFF;
 
 my $TEST_DIR = "$script_dir/system_tests";
 opendir DIR, $TEST_DIR or die "Can't open $TEST_DIR: $!";
@@ -62,7 +64,7 @@ for my $test (@tests) {
   } else {
     die unless -f "$TEMP_DIR/stdout";
     my $failed = 0;
-    run3 "diff gold.stdout $TEMP_DIR/stdout";
+    run3 "$XDIFF gold.stdout $TEMP_DIR/stdout";
     if ($? != 0) {
       print STDERR "  FAILED differences in output!\n";
       $failed = 1;
