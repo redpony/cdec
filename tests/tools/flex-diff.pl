@@ -1,5 +1,8 @@
 #!/usr/bin/perl -w
 use strict;
+
+my $script_dir; BEGIN { use Cwd qw/ abs_path cwd /; use File::Basename; $script_dir = dirname(abs_path($0)); push @INC, "$script_dir/.."; }
+
 use IPC::Run3;
 
 # this file abstracts away from differences due to different hash
