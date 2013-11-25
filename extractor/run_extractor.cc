@@ -237,7 +237,8 @@ int main(int argc, char** argv) {
 
     unordered_set<int> blacklisted_sentence_ids;
     if (leave_one_out) blacklisted_sentence_ids.insert(i);
-    Grammar grammar = extractor.GetGrammar(sentences[i], blacklisted_sentence_ids, source_data_array);
+    Grammar grammar = extractor.GetGrammar(
+        sentences[i], blacklisted_sentence_ids);
     ofstream output(GetGrammarFilePath(grammar_path, i).c_str());
     output << grammar;
   }
