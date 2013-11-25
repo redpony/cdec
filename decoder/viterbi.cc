@@ -1,6 +1,8 @@
-#include "fast_lexical_cast.hpp"
 #include "viterbi.h"
 
+#include <cmath>
+#include <stdexcept>
+#include "fast_lexical_cast.hpp"
 #include <sstream>
 #include <vector>
 #include "hg.h"
@@ -110,30 +112,7 @@ string JoshuaVisualizationString(const Hypergraph& hg) {
   return TD::GetString(tmp);
 }
 
-
-//TODO: move to appropriate header if useful elsewhere
-/*
-  The simple solution like abs(f1-f2) <= e does not work for very small or very big values. This floating-point comparison algorithm is based on the more confident solution presented by Knuth in [1]. For a given floating point values u and v and a tolerance e:
-
-| u - v | <= e * |u| and | u - v | <= e * |v|
-defines a "very close with tolerance e" relationship between u and v
-        (1)
-
-| u - v | <= e * |u| or   | u - v | <= e * |v|
-defines a "close enough with tolerance e" relationship between u and v
-        (2)
-
-Both relationships are commutative but are not transitive. The relationship defined by inequations (1) is stronger that the relationship defined by inequations (2) (i.e. (1) => (2) ). Because of the multiplication in the right side of inequations, that could cause an unwanted underflow condition, the implementation is using modified version of the inequations (1) and (2) where all underflow, overflow conditions could be guarded safely:
-
-| u - v | / |u| <= e and | u - v | / |v| <= e
-| u - v | / |u| <= e or   | u - v | / |v| <= e
-        (1`)
-(2`)
-*/
-#include <cmath>
-#include <stdexcept>
-inline bool close_enough(double a,double b,double epsilon)
-{
+inline bool close_enough(double a,double b,double epsilon) {
     using std::fabs;
     double diff=fabs(a-b);
     return diff<=epsilon*fabs(a) || diff<=epsilon*fabs(b);

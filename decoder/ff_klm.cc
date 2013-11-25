@@ -187,6 +187,7 @@ class KLanguageModelImpl {
   // this assumes no target words on final unary -> goal rule.  is that ok?
   // for <s> (n-1 left words) and (n-1 right words) </s>
   double FinalTraversalCost(const void* state_void, double* oovs) {
+    *oovs = 0;
     const BoundaryAnnotatedState &annotated = *static_cast<const BoundaryAnnotatedState*>(state_void);
     if (add_sos_eos_) {  // rules do not produce <s> </s>, so do it here
       assert(!annotated.seen_bos);
@@ -344,7 +345,7 @@ void KLanguageModel<Model>::TraversalFeaturesImpl(const SentenceMetadata& /* sme
                                           const Hypergraph::Edge& edge,
                                           const vector<const void*>& ant_states,
                                           SparseVector<double>* features,
-                                          SparseVector<double>* estimated_features,
+                                          SparseVector<double>* /*estimated_features*/,
                                           void* state) const {
   double est = 0;
   double oovs = 0;

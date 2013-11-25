@@ -32,13 +32,8 @@ EXTRA_DIST = test_data rule_lexer.ll
 libcdec_a_SOURCES = \
   JSON_parser.h \
   aligner.h \
-  apply_fsa_models.h \
   apply_models.h \
   bottom_up_parser.h \
-  cfg.h \
-  cfg_binarize.h \
-  cfg_format.h \
-  cfg_options.h \
   csplit.h \
   decoder.h \
   earley_composer.h \
@@ -74,7 +69,6 @@ libcdec_a_SOURCES = \
   freqdict.h \
   grammar.h \
   hg.h \
-  hg_cfg.h \
   hg_intersect.h \
   hg_io.h \
   hg_remove_eps.h \
@@ -105,7 +99,6 @@ libcdec_a_SOURCES = \
   bottom_up_parser.cc \
   cdec.cc \
   cdec_ff.cc \
-  cfg.cc \
   csplit.cc \
   decoder.cc \
   earley_composer.cc \
