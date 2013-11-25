@@ -7,24 +7,13 @@
 using boost::shared_ptr;
 using namespace std;
 
-UntypedFactory::~UntypedFactory() {  }
+// global ff registry
+FFRegistry ff_registry;
 
-namespace {
-std::string const& debug_pre="debug";
-}
+UntypedFactory::~UntypedFactory() {  }
 
 void UntypedFactoryRegistry::clear() {
   reg_.clear();
-}
-
-bool UntypedFactoryRegistry::parse_debug(std::string & p) {
-  int pl=debug_pre.size();
-  bool space=false;
-  bool debug=match_begin(p,debug_pre)&&
-    (p.size()==pl || (space=(p[pl]==' ')));
-  if (debug)
-    p.erase(0,debug_pre.size()+space);
-  return debug;
 }
 
 bool UntypedFactoryRegistry::have(std::string const& ffname) {
@@ -54,34 +43,18 @@ void UntypedFactoryRegistry::Register(const string& ffname, UntypedFactory* fact
 }
 
 
-void UntypedFactoryRegistry::Register(UntypedFactory* factory)
-{
+void UntypedFactoryRegistry::Register(UntypedFactory* factory) {
   Register(factory->usage(false,false),factory);
 }
 
 
-/*FIXME: I want these to go in ff_factory.cc, but extern etc. isn't workign right:
-  ../decoder/libcdec.a(ff_factory.o): In function `~UntypedFactory':
-/nfs/topaz/graehl/ws10smt/decoder/ff_factory.cc:9: multiple definition of `global_ff_registry'
-mr_vest_generate_mapper_input.o:/nfs/topaz/graehl/ws10smt/vest/mr_vest_generate_mapper_input.cc:307: first defined here
-*/
-FsaFFRegistry fsa_ff_registry;
-FFRegistry ff_registry;
-
-/*
-#include "null_deleter.h"
-boost::shared_ptr<FsaFFRegistry> global_fsa_ff_registry(&fsa_ff_registry,null_deleter());
-boost::shared_ptr<FFRegistry> global_ff_registry(&ff_registry,null_deleter());
-*/
-
-void ff_usage(std::string const& n,std::ostream &out)
-{
+void ff_usage(std::string const& n,std::ostream &out) {
   bool have=ff_registry.have(n);
   if (have)
-    cout<<"FF "<<ff_registry.usage(n,true,true)<<endl;
-  if (fsa_ff_registry.have(n))
-    cout<<"Fsa FF "<<fsa_ff_registry.usage(n,true,true)<<endl;
-  else if (!have)
-    throw std::runtime_error("Unknown feature "+n);
+    out << "FF " << ff_registry.usage(n,true,true) << endl;
+  else {
+    cerr << "Unknown feature: " << n << endl;
+    abort();
+  }
 }
 

@@ -37,6 +37,7 @@ decoder/Makefile.in
 decoder/bin/
 decoder/cdec
 decoder/dict_test
+decoder/sv_test
 decoder/ff_test
 decoder/grammar_test
 decoder/hg_test
@@ -163,6 +164,7 @@ training/liblbfgs/bin/
 training/liblbfgs/ll_test
 training/model1
 training/mpi_batch_optimize
+training/mpi_adagrad_optimize
 training/mpi_compute_cllh
 training/mpi_em_optimize
 training/mpi_extract_features
