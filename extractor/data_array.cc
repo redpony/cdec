@@ -115,10 +115,6 @@ int DataArray::GetSentenceId(int position) const {
   return sentence_id[position];
 }
 
-bool DataArray::HasWord(const string& word) const {
-  return word2id.count(word);
-}
-
 int DataArray::GetWordId(const string& word) const {
   auto result = word2id.find(word);
   return result == word2id.end() ? -1 : result->second;

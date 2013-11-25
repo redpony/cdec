@@ -36,13 +36,10 @@ class TranslationTableTest : public Test {
           .WillRepeatedly(Return(source_sentence_start[i]));
     }
     for (size_t i = 0; i < words.size(); ++i) {
-      EXPECT_CALL(*source_data_array, HasWord(words[i]))
-          .WillRepeatedly(Return(true));
       EXPECT_CALL(*source_data_array, GetWordId(words[i]))
           .WillRepeatedly(Return(i + 2));
     }
-    EXPECT_CALL(*source_data_array, HasWord("d"))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(*source_data_array, GetWordId("d")).WillRepeatedly(Return(-1));
 
     vector<int> target_data = {2, 3, 2, 3, 4, 5, 0, 3, 6, 0, 2, 7, 0};
     vector<int> target_sentence_start = {0, 7, 10, 13};
@@ -54,13 +51,10 @@ class TranslationTableTest : public Test {
           .WillRepeatedly(Return(target_sentence_start[i]));
     }
     for (size_t i = 0; i < words.size(); ++i) {
-      EXPECT_CALL(*target_data_array, HasWord(words[i]))
-          .WillRepeatedly(Return(true));
       EXPECT_CALL(*target_data_array, GetWordId(words[i]))
           .WillRepeatedly(Return(i + 2));
     }
-    EXPECT_CALL(*target_data_array, HasWord("d"))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(*target_data_array, GetWordId("d")).WillRepeatedly(Return(-1));
 
     vector<pair<int, int>> links1 = {
       make_pair(0, 0), make_pair(1, 1), make_pair(2, 2), make_pair(3, 3),

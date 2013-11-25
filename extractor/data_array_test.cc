@@ -58,16 +58,12 @@ TEST_F(DataArrayTest, TestGetData) {
 
 TEST_F(DataArrayTest, TestVocabulary) {
   EXPECT_EQ(9, source_data.GetVocabularySize());
-  EXPECT_TRUE(source_data.HasWord("mere"));
   EXPECT_EQ(4, source_data.GetWordId("mere"));
   EXPECT_EQ("mere", source_data.GetWord(4));
-  EXPECT_FALSE(source_data.HasWord("banane"));
 
   EXPECT_EQ(11, target_data.GetVocabularySize());
-  EXPECT_TRUE(target_data.HasWord("apples"));
   EXPECT_EQ(4, target_data.GetWordId("apples"));
   EXPECT_EQ("apples", target_data.GetWord(4));
-  EXPECT_FALSE(target_data.HasWord("bananas"));
 }
 
 TEST_F(DataArrayTest, TestSentenceData) {

@@ -65,9 +65,6 @@ class DataArray {
   // Returns the number of distinct words in the data array.
   virtual int GetVocabularySize() const;
 
-  // Returns whether a word has ever been observed in the data array.
-  virtual bool HasWord(const string& word) const;
-
   // Returns the word id for a given word or -1 if it the word has never been
   // observed.
   virtual int GetWordId(const string& word) const;
