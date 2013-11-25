@@ -127,9 +127,11 @@ void Weights::InitSparseVector(const vector<weight_t>& dv,
 }
 
 void Weights::SanityCheck(const vector<weight_t>& w) {
-  for (unsigned i = 0; i < w.size(); ++i) {
-    assert(!std::isnan(w[i]));
-    assert(!std::isinf(w[i]));
+  for (unsigned i = 1; i < w.size(); ++i) {
+    if (std::isnan(w[i]) || std::isinf(w[i])) {
+      cerr << FD::Convert(i) << " has bad weight: " << w[i] << endl;
+      abort();
+    }
   }
 }
 
@@ -161,7 +163,7 @@ string Weights::GetString(const vector<weight_t>& w,
                           bool hide_zero_value_features) {
     ostringstream os;
     os.precision(17);
-    int nf = FD::NumFeats();
+    const unsigned nf = FD::NumFeats();
     for (unsigned i = 1; i < nf; i++) {
         weight_t val = (i < w.size() ? w[i] : 0.0);
         if (hide_zero_value_features && val == 0.0) {

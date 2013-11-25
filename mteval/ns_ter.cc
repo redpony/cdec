@@ -298,7 +298,7 @@ class TERScorerImpl {
   }
 
   bool CalculateBestShift(const vector<WordID>& cur,
-                          const vector<WordID>& hyp,
+                          const vector<WordID>& /*hyp*/,
                           float curerr,
                           const vector<TransType>& path,
                           vector<WordID>* new_hyp,
