@@ -23,7 +23,9 @@ class Sampler {
   virtual ~Sampler();
 
   // Samples uniformly at most max_samples phrase occurrences.
-  virtual PhraseLocation Sample(const PhraseLocation& location, const unordered_set<int>& blacklisted_sentence_ids, const shared_ptr<DataArray> source_data_array) const;
+  virtual PhraseLocation Sample(
+      const PhraseLocation& location,
+      const unordered_set<int>& blacklisted_sentence_ids) const;
 
  protected:
   Sampler();

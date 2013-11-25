@@ -35,10 +35,12 @@ GrammarExtractor::GrammarExtractor(
     vocabulary(vocabulary),
     rule_factory(rule_factory) {}
 
-Grammar GrammarExtractor::GetGrammar(const string& sentence, const unordered_set<int>& blacklisted_sentence_ids, const shared_ptr<DataArray> source_data_array) {
+Grammar GrammarExtractor::GetGrammar(
+    const string& sentence,
+    const unordered_set<int>& blacklisted_sentence_ids) {
   vector<string> words = TokenizeSentence(sentence);
   vector<int> word_ids = AnnotateWords(words);
-  return rule_factory->GetGrammar(word_ids, blacklisted_sentence_ids, source_data_array);
+  return rule_factory->GetGrammar(word_ids, blacklisted_sentence_ids);
 }
 
 vector<string> GrammarExtractor::TokenizeSentence(const string& sentence) {

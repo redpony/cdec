@@ -7,7 +7,9 @@ namespace extractor {
 
 class MockSampler : public Sampler {
  public:
-  MOCK_CONST_METHOD1(Sample, PhraseLocation(const PhraseLocation& location));
+  MOCK_CONST_METHOD2(Sample, PhraseLocation(
+      const PhraseLocation& location,
+      const unordered_set<int>& blacklisted_sentence_ids));
 };
 
 } // namespace extractor

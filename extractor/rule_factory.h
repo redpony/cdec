@@ -74,8 +74,7 @@ class HieroCachingRuleFactory {
   // (See class description for more details.)
   virtual Grammar GetGrammar(
       const vector<int>& word_ids,
-      const unordered_set<int>& blacklisted_sentence_ids,
-      const shared_ptr<DataArray> source_data_array);
+      const unordered_set<int>& blacklisted_sentence_ids);
 
  protected:
   HieroCachingRuleFactory();
