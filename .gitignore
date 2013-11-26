@@ -72,6 +72,7 @@ extools/score_grammar
 extools/sg_lexer.cc
 extractor/*_test
 extractor/compile
+extractor/extract
 extractor/run_extractor
 gi/clda/src/clda
 gi/markov_al/ml
