@@ -24,7 +24,8 @@ EXTRA_PROGRAMS = alignment_test \
     scorer_test \
     suffix_array_test \
     target_phrase_extractor_test \
-    translation_table_test
+    translation_table_test \
+    vocabulary_test
 
 if HAVE_GTEST
   RUNNABLE_TESTS = alignment_test \
@@ -48,12 +49,14 @@ if HAVE_GTEST
     scorer_test \
     suffix_array_test \
     target_phrase_extractor_test \
-    translation_table_test
+    translation_table_test \
+    vocabulary_test
 endif
 
 noinst_PROGRAMS = $(RUNNABLE_TESTS)
 
-TESTS = $(RUNNABLE_TESTS)
+# TESTS = $(RUNNABLE_TESTS)
+TESTS = vocabulary_test
 
 alignment_test_SOURCES = alignment_test.cc
 alignment_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libextractor.a
@@ -99,6 +102,8 @@ target_phrase_extractor_test_SOURCES = target_phrase_extractor_test.cc
 target_phrase_extractor_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) $(GMOCK_LDFLAGS) $(GMOCK_LIBS) libextractor.a
 translation_table_test_SOURCES = translation_table_test.cc
 translation_table_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) $(GMOCK_LDFLAGS) $(GMOCK_LIBS) libextractor.a
+vocabulary_test_SOURCES = vocabulary_test.cc
+vocabulary_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libextractor.a
 
 noinst_LIBRARIES = libextractor.a libcompile.a
 
@@ -115,6 +120,7 @@ libcompile_a_SOURCES = \
   suffix_array.cc \
   time_util.cc \
   translation_table.cc \
+  vocabulary.cc \
   alignment.h \
   data_array.h \
   fast_intersector.h \

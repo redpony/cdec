@@ -35,4 +35,8 @@ string Vocabulary::GetTerminalValue(int symbol) {
   return word;
 }
 
+bool Vocabulary::operator==(const Vocabulary& other) const {
+  return words == other.words && dictionary == other.dictionary;
+}
+
 } // namespace extractor
