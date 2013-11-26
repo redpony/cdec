@@ -56,6 +56,18 @@ TEST_F(DataArrayTest, TestGetData) {
   }
 }
 
+TEST_F(DataArrayTest, TestSubstrings) {
+  vector<int> expected_word_ids = {3, 4, 5};
+  vector<string> expected_words = {"are", "mere", "."};
+  EXPECT_EQ(expected_word_ids, source_data.GetWordIds(1, 3));
+  EXPECT_EQ(expected_words, source_data.GetWords(1, 3));
+
+  expected_word_ids = {7, 8};
+  expected_words = {"a", "lot"};
+  EXPECT_EQ(expected_word_ids, target_data.GetWordIds(7, 2));
+  EXPECT_EQ(expected_words, target_data.GetWords(7, 2));
+}
+
 TEST_F(DataArrayTest, TestVocabulary) {
   EXPECT_EQ(9, source_data.GetVocabularySize());
   EXPECT_EQ(4, source_data.GetWordId("mere"));
