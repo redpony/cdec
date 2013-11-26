@@ -145,6 +145,10 @@ int main(int argc, char** argv) {
   ofstream precomp_fstream((output_dir / fs::path("precomp.bin")).string());
   ar::binary_oarchive precomp_stream(precomp_fstream);
   precomp_stream << precomputation;
+
+  ofstream vocab_fstream((output_dir / fs::path("vocab.bin")).string());
+  ar::binary_oarchive vocab_stream(vocab_fstream);
+  vocab_stream << *vocabulary;
   stop_write = Clock::now();
   write_duration += GetDuration(start_write, stop_write);
 
