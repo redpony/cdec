@@ -59,6 +59,14 @@ class DataArray {
   // Returns the original word at the specified position.
   virtual string GetWordAtIndex(int index) const;
 
+  // Returns the substring of word ids starting at the specified position and
+  // having the specified length.
+  virtual vector<int> GetWordIds(int start_index, int size) const;
+
+  // Returns the substring of words starting at the specified position and
+  // having the specified length.
+  virtual vector<string> GetWords(int start_index, int size) const;
+
   // Returns the size of the data array.
   virtual int GetSize() const;
 
