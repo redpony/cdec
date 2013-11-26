@@ -2,7 +2,7 @@
 use utf8;
 use strict;
 
-my ($effile, $model1, $imodel1, $orthof, $orthoe, $class_e, $class_f, $sparse_m1) = @ARGV;
+my ($effile, $model1, $imodel1, $orthof, $orthoe, $class_e, $class_f, $sparse_m1, $use_prefixes, $use_suffixes) = @ARGV;
 die "Usage: $0 corpus.fr-en corpus.f-e.full-model1 corpus.e-f.full-model1 corpus.orthonorm-dict.f corpus.orthnorm-dict.e class.e class.f corpus.f-e.model1\n" unless $effile && -f $effile && $model1 && -f $model1 && $imodel1 && -f $imodel1 && $orthof && -f $orthof && $orthoe && -f $orthoe && -f $class_e && -f $class_f && $sparse_m1 && -f $sparse_m1;
 
 my %eclass = ();
@@ -253,10 +253,71 @@ for my $f (sort keys %fdict) {
         push @feats, "PuncMiss=1";
       }
     }
+    if ($use_prefixes) {
+      my $prefix1 = prefix_to_type($f, $e, 1);
+      if (length $prefix1 > 0 && !$is_null) { push @feats, $prefix1."=1";}
+      my $prefix2 = prefix_to_type($f, $e, 2);
+      if (length $prefix2 > 0 && !$is_null) { push @feats, $prefix2."=1";}
+      my $prefix3 = prefix_to_type($f, $e, 3);
+      if (length $prefix3 > 0 && !$is_null) { push @feats, $prefix3."=1";}
+      my $prefix1_reverse = prefix_to_type($e, $f, 1);
+      if (length $prefix1_reverse > 0 && !$is_null) { push @feats, $prefix1_reverse."=1";}
+      my $prefix2_reverse = prefix_to_type($e, $f, 2);
+      if (length $prefix2_reverse > 0 && !$is_null) { push @feats, $prefix2_reverse."=1";}
+      my $prefix3_reverse = prefix_to_type($e, $f, 3);
+      if (length $prefix3_reverse > 0 && !$is_null) { push @feats, $prefix3_reverse."=1";}
+    }
+    if ($use_suffixes) {
+      my $suffix1 = suffix_to_type($f, $e, 1);
+      if (length $suffix1 > 0 && !$is_null) { push @feats, $suffix1."=1";}
+      my $suffix2 = suffix_to_type($f, $e, 2);
+      if (length $suffix2 > 0 && !$is_null) { push @feats, $suffix2."=1";}
+      my $suffix3 = suffix_to_type($f, $e, 3);
+      if (length $suffix3 > 0 && !$is_null) { push @feats, $suffix3."=1";}
+      my $suffix1_reverse = suffix_to_type($e, $f, 1);
+      if (length $suffix1_reverse > 0 && !$is_null) { push @feats, $suffix1_reverse."=1";}
+      my $suffix2_reverse = suffix_to_type($e, $f, 2);
+      if (length $suffix2_reverse > 0 && !$is_null) { push @feats, $suffix2_reverse."=1";}
+      my $suffix3_reverse = suffix_to_type($e, $f, 3);
+      if (length $suffix3_reverse > 0 && !$is_null) { push @feats, $suffix3_reverse."=1";}
+    }
     print "$f ||| $e ||| @feats\n";
   }
 }
 
+# returns a feature string instantiating the pattern "(source_prefix,target)"
+sub prefix_to_type
+{
+    # $f => src token
+    # $e => tgt token
+    my ($f, $e, $len_prefix) = @_;
+    
+    if (length $f > $len_prefix && index($e.$f, '=') < 0)
+    {
+        return substr($f, 0, $len_prefix)."-".$e;
+    } 
+    else
+    {
+        return "";
+    }
+}
+
+# returns a feature string instantiating the pattern "(source_prefix,target)"
+sub suffix_to_type
+{
+    # $f => src token
+    # $e => tgt token
+    my ($f, $e, $len_prefix) = @_;
+
+    if ( (length $f) > $len_prefix && index($e.$f, '=') < 0) 
+    {
+        return substr($f, (length $f)-$len_prefix, $len_prefix)."_".$e;
+    } 
+    else 
+    {
+        return "";
+    }
+}
 
 sub levenshtein
 {

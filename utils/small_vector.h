@@ -14,7 +14,6 @@
 #include <stdint.h>
 #include <new>
 #include <stdint.h>
-#include "swap_pod.h"
 #include <boost/functional/hash.hpp>
 
 //sizeof(T)/sizeof(T*)>1?sizeof(T)/sizeof(T*):1
@@ -278,8 +277,15 @@ public:
     return !(a==b);
   }
 
-  void swap(Self& o) {
-    swap_pod(*this,o);
+  inline void swap(Self& o) {
+    const unsigned s=sizeof(SmallVector<T,SV_MAX>);
+    char tmp[s];
+    void *pt=static_cast<void*>(tmp);
+    void *pa=static_cast<void*>(this);
+    void *pb=static_cast<void*>(&o);
+    std::memcpy(pt,pa,s);
+    std::memcpy(pa,pb,s);
+    std::memcpy(pb,pt,s);
   }
 
   inline std::size_t hash_impl() const {

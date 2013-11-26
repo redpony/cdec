@@ -7,9 +7,10 @@ noinst_PROGRAMS = \
   m_test \
   weights_test \
   logval_test \
-  small_vector_test
+  small_vector_test \
+  sv_test
 
-TESTS = ts small_vector_test logval_test weights_test dict_test m_test
+TESTS = ts small_vector_test logval_test weights_test dict_test m_test sv_test
 
 noinst_LIBRARIES = libutils.a
 
@@ -50,7 +51,6 @@ libutils_a_SOURCES = \
   sparse_vector.h \
   static_utoa.h \
   stringlib.h \
-  swap_pod.h \
   tdict.h \
   timing_stats.h \
   utoa.h \
@@ -101,6 +101,8 @@ logval_test_SOURCES = logval_test.cc
 logval_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
 small_vector_test_SOURCES = small_vector_test.cc
 small_vector_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
+sv_test_SOURCES = sv_test.cc
+sv_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
 
 ################################################################
 # do NOT NOT NOT add any other -I includes NO NO NO NO NO ######

@@ -192,8 +192,6 @@ public:
     assert(num_nodes >= 2);
     int goal_id = num_nodes - 1;
     int pregoal = goal_id - 1;
-    int every = 1;
-    if (num_nodes > 100) every = 10;
     assert(in.nodes_[pregoal].out_edges_.size() == 1);
     if (!SILENT) cerr << "    ";
     int has = 0;
@@ -563,12 +561,14 @@ struct NoPruningRescorer {
     int num_nodes = in.nodes_.size();
     int goal_id = num_nodes - 1;
     int pregoal = goal_id - 1;
-    int every = 1;
-    if (num_nodes > 100) every = 10;
     assert(in.nodes_[pregoal].out_edges_.size() == 1);
     if (!SILENT) cerr << "    ";
+    int has = 0;
     for (int i = 0; i < in.nodes_.size(); ++i) {
-      if (!SILENT && i % every == 0) cerr << '.';
+      if (!SILENT) {
+        int needs = (50 * i / in.nodes_.size());
+        while (has < needs) { cerr << '.'; ++has; }
+      }
       ProcessOneNode(i, i == goal_id);
     }
     if (!SILENT) cerr << endl;
