@@ -86,9 +86,16 @@ PTRAIN_PARAMS = --gaussian_prior --sigma_squared 1.0 --max_iteration 15
 #MPIRUN = mpirun -np $(MPIJOBS)
 MPIRUN=
 
+USE_AFFIXES = 0
+
 WALLTIME=90
 
 export
+
+generate-wordpair-features:
+	\@failcom='exit 1'; \\
+	(cd grammars &&	make USE_AFFIXES=\$(USE_AFFIXES) ) || eval \$\$failcom;
+	cd ..
 
 all:
 	\@failcom='exit 1'; \\

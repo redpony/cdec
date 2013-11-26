@@ -118,7 +118,7 @@ void ExternalMetric::ComputeSufficientStatistics(const std::vector<WordID>& hyp,
 }
 
 float ExternalMetric::ComputeScore(const SufficientStats& stats) const {
-  eval_server->ComputeScore(stats.fields);
+  return eval_server->ComputeScore(stats.fields);
 }
 
 ExternalMetric::ExternalMetric(const string& metric_name, const std::string& command) :

@@ -82,6 +82,18 @@ BOOST_AUTO_TEST_CASE(LargerThan2) {
   BOOST_CHECK(cc.size() == 0);
 }
 
+BOOST_AUTO_TEST_CASE(SwapSV) {
+  SmallVectorInt v;
+  SmallVectorInt v2(2, 10);
+  SmallVectorInt v3(2, 10);
+  BOOST_CHECK(v2 == v3);
+  BOOST_CHECK(v != v3);
+  v.swap(v2);
+  BOOST_CHECK(v == v3);
+  SmallVectorInt v4;
+  BOOST_CHECK(v4 == v2);
+}
+
 BOOST_AUTO_TEST_CASE(Small) {
   SmallVectorInt v;
   SmallVectorInt v1(1,0);

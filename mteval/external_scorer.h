@@ -24,7 +24,8 @@ class ScoreServer {
   int c2p[2];
 };
 
-struct ScoreServerManager {
+class ScoreServerManager {
+ public:
   static ScoreServer* Instance(const std::string& score_type);
  private:
   static std::map<std::string, boost::shared_ptr<ScoreServer> > servers_;
