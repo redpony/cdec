@@ -15,7 +15,6 @@ class DataArray;
 class Grammar;
 class HieroCachingRuleFactory;
 class Precomputation;
-class Rule;
 class Scorer;
 class SuffixArray;
 class Vocabulary;

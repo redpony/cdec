@@ -1,5 +1,5 @@
 
-bin_PROGRAMS = compile run_extractor
+bin_PROGRAMS = compile run_extractor extract
 
 if HAVE_CXX11
 
@@ -105,44 +105,14 @@ translation_table_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) $(GMOCK_LDFLAGS) $
 vocabulary_test_SOURCES = vocabulary_test.cc
 vocabulary_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libextractor.a
 
-noinst_LIBRARIES = libextractor.a libcompile.a
+noinst_LIBRARIES = libextractor.a
 
 compile_SOURCES = compile.cc
-compile_LDADD = libcompile.a
+compile_LDADD = libextractor.a
 run_extractor_SOURCES = run_extractor.cc
 run_extractor_LDADD = libextractor.a
-
-libcompile_a_SOURCES = \
-  alignment.cc \
-  data_array.cc \
-  phrase_location.cc \
-  precomputation.cc \
-  suffix_array.cc \
-  time_util.cc \
-  translation_table.cc \
-  vocabulary.cc \
-  alignment.h \
-  data_array.h \
-  fast_intersector.h \
-  grammar.h \
-  grammar_extractor.h \
-  matchings_finder.h \
-  matchings_trie.h \
-  phrase.h \
-  phrase_builder.h \
-  phrase_location.h \
-  precomputation.h \
-  rule.h \
-  rule_extractor.h \
-  rule_extractor_helper.h \
-  rule_factory.h \
-  sampler.h \
-  scorer.h \
-  suffix_array.h \
-  target_phrase_extractor.h \
-  time_util.h \
-  translation_table.h \
-  vocabulary.h
+extract_SOURCES = extract.cc
+extract_LDADD = libextractor.a
 
 libextractor_a_SOURCES = \
   alignment.cc \
