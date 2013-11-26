@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
   po::options_description cmdline_options("Command line options");
   cmdline_options.add_options()
     ("help", "Show available options")
-    ("config", po::value<string>()->required(), "Path to config file");
+    ("config,c", po::value<string>()->required(), "Path to config file");
   cmdline_options.add(general_options);
 
   po::options_description config_options("Config file options");
@@ -236,7 +236,7 @@ int main(int argc, char** argv) {
     Grammar grammar = extractor.GetGrammar(
         sentences[i], blacklisted_sentence_ids);
     ofstream output(GetGrammarFilePath(grammar_path, i).c_str());
-    // output << grammar;
+    output << grammar;
   }
 
   for (size_t i = 0; i < sentences.size(); ++i) {
