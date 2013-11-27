@@ -91,7 +91,6 @@ vector<vector<int>> Precomputation::FindMostFrequentPatterns(
     }
   }
 
-  shared_ptr<DataArray> data_array = suffix_array->GetData();
   // Extract the most frequent patterns.
   vector<vector<int>> frequent_patterns;
   while (frequent_patterns.size() < num_frequent_patterns && !heap.empty()) {
@@ -99,7 +98,7 @@ vector<vector<int>> Precomputation::FindMostFrequentPatterns(
     int len = heap.top().second.second;
     heap.pop();
 
-    vector<int> pattern = data_array->GetWordIds(start, len);
+    vector<int> pattern(data.begin() + start, data.begin() + start + len);
     if (find(pattern.begin(), pattern.end(), DataArray::END_OF_LINE) ==
         pattern.end()) {
       frequent_patterns.push_back(pattern);

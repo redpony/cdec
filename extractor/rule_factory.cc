@@ -12,6 +12,7 @@
 #include "phrase_builder.h"
 #include "rule.h"
 #include "rule_extractor.h"
+#include "phrase_location_sampler.h"
 #include "sampler.h"
 #include "scorer.h"
 #include "suffix_array.h"
@@ -68,7 +69,8 @@ HieroCachingRuleFactory::HieroCachingRuleFactory(
       target_data_array, alignment, phrase_builder, scorer, vocabulary,
       max_rule_span, min_gap_size, max_nonterminals, max_rule_symbols, true,
       false, require_tight_phrases);
-  sampler = make_shared<Sampler>(source_suffix_array, max_samples);
+  sampler = make_shared<PhraseLocationSampler>(
+      source_suffix_array, max_samples);
 }
 
 HieroCachingRuleFactory::HieroCachingRuleFactory(
