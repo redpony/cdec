@@ -94,7 +94,7 @@ TEST_F(PrecomputationTest, TestCollocations) {
   EXPECT_TRUE(precomputation.Contains(key));
   EXPECT_EQ(expected_value, precomputation.GetCollocations(key));
 
-  key = {2, -1, 2, -1, 2};
+  key = {2, -1, 2, -2, 2};
   expected_value = {1, 5, 8, 5, 8, 11};
   EXPECT_TRUE(precomputation.Contains(key));
   EXPECT_EQ(expected_value, precomputation.GetCollocations(key));

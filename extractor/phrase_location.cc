@@ -1,5 +1,7 @@
 #include "phrase_location.h"
 
+#include <iostream>
+
 namespace extractor {
 
 PhraseLocation::PhraseLocation(int sa_low, int sa_high) :
