@@ -63,11 +63,11 @@ my $CCONFIG = {
     'JobControl'  => 'fork',
     'DefaultJobs' => 8,
   },
-  'OxfordDeathSnakes' => {
-    'HOST_REGEXP' => qr/^(taipan|tiger).cs.ox.ac.uk$/,
-    'JobControl'  => 'fork',
-    'DefaultJobs' => 12,
-  },
+#  'OxfordDeathSnakes' => {
+#    'HOST_REGEXP' => qr/^(taipan|tiger).cs.ox.ac.uk$/,
+#    'JobControl'  => 'fork',
+#    'DefaultJobs' => 12,
+#  },
   'cluster.cl.uni-heidelberg.de' => {
     'HOST_REGEXP' => qr/node25/,
     'JobControl'  => 'qsub',
