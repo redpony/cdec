@@ -30,8 +30,9 @@ int MatchingsSampler::GetPosition(const PhraseLocation& location,
 
 void MatchingsSampler::AppendMatching(vector<int>& samples, int index,
                                       const PhraseLocation& location) const {
-  copy(location.matchings->begin() + index,
-       location.matchings->begin() + index + location.num_subpatterns,
+  int start = index * location.num_subpatterns;
+  copy(location.matchings->begin() + start,
+       location.matchings->begin() + start + location.num_subpatterns,
        back_inserter(samples));
 }
 
