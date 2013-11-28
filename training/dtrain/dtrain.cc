@@ -44,7 +44,7 @@ dtrain_init(int argc, char** argv, po::variables_map* cfg)
     ("pclr",              po::value<string>()->default_value("no"),         "use a (simple|adagrad) per-coordinate learning rate")
     ("batch",             po::value<bool>()->zero_tokens(),                                               "do batch optimization")
     ("repeat",            po::value<unsigned>()->default_value(1),          "repeat optimization over kbest list this number of times")
-    //("test-k-best",       po::value<bool>()->zero_tokens(),                       "check if optimization works (use repeat >= 2)")
+    ("check",             po::value<bool>()->zero_tokens(),                                  "produce list of loss differentials")
     ("noup",              po::value<bool>()->zero_tokens(),                                               "do not update weights");
   po::options_description cl("Command Line Options");
   cl.add_options()
@@ -130,8 +130,8 @@ main(int argc, char** argv)
   const score_t approx_bleu_d = cfg["approx_bleu_d"].as<score_t>();
   const unsigned max_pairs = cfg["max_pairs"].as<unsigned>();
   int repeat = cfg["repeat"].as<unsigned>();
-  //bool test_k_best = false;
-  //if (cfg.count("test-k-best")) test_k_best = true;
+  bool check = false;
+  if (cfg.count("check")) check = true;
   weight_t loss_margin = cfg["loss_margin"].as<weight_t>();
   bool batch = false;
   if (cfg.count("batch")) batch = true;
@@ -412,27 +412,38 @@ main(int argc, char** argv)
       int cur_npairs = pairs.size();
       npairs += cur_npairs;
 
-      score_t kbest_loss_first, kbest_loss_last = 0.0;
+      score_t kbest_loss_first = 0.0, kbest_loss_last = 0.0;
+
+      if (check) repeat = 2;
+      vector<float> losses; // for check
 
       for (vector<pair<ScoredHyp,ScoredHyp> >::iterator it = pairs.begin();
            it != pairs.end(); it++) {
         score_t model_diff = it->first.model - it->second.model;
-        kbest_loss_first += max(0.0, -1.0 * model_diff);
+        score_t loss = max(0.0, -1.0 * model_diff);
+        losses.push_back(loss);
+        kbest_loss_first += loss;
       }
 
+      score_t kbest_loss = 0.0;
       for (int ki=0; ki < repeat; ki++) {
 
-      score_t kbest_loss = 0.0; // test-k-best
       SparseVector<weight_t> lambdas_copy; // for l1 regularization
       SparseVector<weight_t> sum_up; // for pclr
       if (l1naive||l1clip||l1cumul) lambdas_copy = lambdas;
 
+      unsigned pair_idx = 0; // for check
       for (vector<pair<ScoredHyp,ScoredHyp> >::iterator it = pairs.begin();
            it != pairs.end(); it++) {
         score_t model_diff = it->first.model - it->second.model;
+        score_t loss = max(0.0, -1.0 * model_diff);
+
+        if (check && ki == 1) cout << losses[pair_idx] - loss << endl;
+        pair_idx++;
+
         if (repeat > 1) {
           model_diff = lambdas.dot(it->first.f) - lambdas.dot(it->second.f);
-          kbest_loss += max(0.0, -1.0 * model_diff);
+          kbest_loss += loss;
         }
         bool rank_error = false;
         score_t margin;
@@ -449,7 +460,7 @@ main(int argc, char** argv)
         if (rank_error || margin < loss_margin) {
           SparseVector<weight_t> diff_vec = it->first.f - it->second.f;
           if (batch) {
-            batch_loss += max(0., -1.0*model_diff);
+            batch_loss += max(0., -1.0 * model_diff);
             batch_updates += diff_vec;
             continue;
           }
@@ -529,9 +540,8 @@ main(int argc, char** argv)
       if (ki==repeat-1) { // done
         kbest_loss_last = kbest_loss;
         if (repeat > 1) {
-          score_t best_score = -1.;
           score_t best_model = -std::numeric_limits<score_t>::max();
-          unsigned best_idx;
+          unsigned best_idx = 0;
           for (unsigned i=0; i < samples->size(); i++) {
             score_t s = lambdas.dot((*samples)[i].f);
             if (s > best_model) {
@@ -633,6 +643,8 @@ main(int argc, char** argv)
     string w_fn = "weights." + boost::lexical_cast<string>(t) + ".gz";
     Weights::WriteToFile(w_fn, decoder_weights, true);
   }
+
+  if (check) cout << "---" << endl;
 
   } // outer loop
 
