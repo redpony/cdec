@@ -1,8 +1,6 @@
 #ifndef VALUE_ARRAY_H
 #define VALUE_ARRAY_H
 
-//TODO: option for non-constructed version (type_traits pod?), option for small array optimization (if sz < N, store inline in union, see small_vector.h)
-
 #define DBVALUEARRAY(x) x
 
 #include <cstdlib>
@@ -30,8 +28,7 @@
 
 // valarray like in that size is fixed (so saves space compared to vector), but same interface as vector (less resize/push_back/insert, of course)
 template <class T, class A = std::allocator<T> >
-class ValueArray : A // private inheritance so stateless allocator adds no size.
-{
+class ValueArray : A { // private inheritance so stateless allocator adds no size.
   typedef ValueArray<T,A> Self;
 public:
 #if VALUE_ARRAY_OSTREAM
@@ -323,14 +320,14 @@ private:
   //friend class boost::serialization::access;
 public:
   template <class Archive>
-  void save(Archive& ar, unsigned int version) const
+  void save(Archive& ar, unsigned int /*version*/) const
   {
     ar << sz;
     for (size_type i = 0; i != sz; ++i) ar << at(i);
   }
 
   template <class Archive>
-  void load(Archive& ar, unsigned int version)
+  void load(Archive& ar, unsigned int /*version*/)
   {
     size_type s;
     ar >> s;
