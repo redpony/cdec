@@ -97,14 +97,14 @@ struct TrainingObserver : public DecoderObserver {
       (*g)[it->first] = it->second.as_float();
   }
 
-  virtual void NotifyDecodingStart(const SentenceMetadata& smeta) {
+  virtual void NotifyDecodingStart(const SentenceMetadata&) {
     cur_model_exp.clear();
     cur_obj = 0;
     state = 1;
   }
 
   // compute model expectations, denominator of objective
-  virtual void NotifyTranslationForest(const SentenceMetadata& smeta, Hypergraph* hg) {
+  virtual void NotifyTranslationForest(const SentenceMetadata&, Hypergraph* hg) {
     assert(state == 1);
     state = 2;
     const prob_t z = InsideOutside<prob_t,
@@ -149,7 +149,7 @@ struct TrainingObserver : public DecoderObserver {
     trg_words += smeta.GetReference().size();
   }
 
-  virtual void NotifyDecodingComplete(const SentenceMetadata& smeta) {
+  virtual void NotifyDecodingComplete(const SentenceMetadata&) {
     if (state == 3) {
       ++total_complete;
     } else {
