@@ -120,6 +120,7 @@ int main(int argc, char** argv) {
   reduce(world, observer.trg_words, total_words, std::plus<unsigned>(), 0);
 #else
   objective = observer.acc_obj;
+  total_words = observer.trg_words;
 #endif
 
   if (rank == 0) {
