@@ -189,8 +189,10 @@ utils/mfcr_test
 utils/phmt
 utils/reconstruct_weights
 utils/small_vector_test
+utils/sv_test
 utils/ts
 utils/weights_test
+training/crf/mpi_adagrad_optimize
 training/crf/mpi_batch_optimize
 training/crf/mpi_baum_welch
 training/crf/mpi_compute_cllh
