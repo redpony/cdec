@@ -387,7 +387,7 @@ int main(int argc, char** argv) {
         }
         ostringstream vv;
         double minutes = (cur_time - start_time) / 60.0;
-        vv << "total walltime=" << minutes << "min iter=" << iter << "  minibatch=" << size_per_proc << " sentences/proc x " << size << " procs.   num_feats=" << non_zeros(lambdas) << '/' << FD::NumFeats() << "   passes_thru_data=" << (iter * size_per_proc / static_cast<double>(corpus.size()));
+        vv << "total walltime=" << minutes << " min  iter=" << iter << "  minibatch=" << size_per_proc << " sentences/proc x " << size << " procs.   num_feats=" << non_zeros(lambdas) << '/' << FD::NumFeats() << "   passes_thru_data=" << (iter * size_per_proc / static_cast<double>(corpus.size()));
         const string svv = vv.str();
         cerr << svv << endl;
         Weights::WriteToFile(fname, lambdas, true, &svv);
