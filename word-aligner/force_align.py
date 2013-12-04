@@ -21,9 +21,13 @@ def main():
         sys.exit(2)
 
     aligner = ForceAligner(*sys.argv[1:])
-    
-    for line in sys.stdin:
+
+    while True:
+        line = sys.stdin.readline()
+        if not line:
+            break
         sys.stdout.write('{}\n'.format(aligner.align_formatted(line.strip())))
+        sys.stdout.flush()
 
     aligner.close()
     
