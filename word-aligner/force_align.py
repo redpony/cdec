@@ -3,6 +3,10 @@
 import os
 import sys
 
+# Hook into realtime
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'realtime', 'rt'))
+from aligner import ForceAligner
+
 def main():
 
     if len(sys.argv[1:]) < 4:
@@ -15,10 +19,6 @@ def main():
         sys.stderr.write('\n')
         sys.stderr.write('where heuristic is one of: (intersect union grow-diag grow-diag-final grow-diag-final-and) default=grow-diag-final-and\n')
         sys.exit(2)
-
-    # Hook into realtime
-    sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'realtime'))
-    from rt.aligner import ForceAligner
 
     aligner = ForceAligner(*sys.argv[1:])
     
