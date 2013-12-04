@@ -28,7 +28,7 @@ class TranslationTableTest : public Test {
     vector<int> source_sentence_start = {0, 6, 10, 14};
     shared_ptr<MockDataArray> source_data_array = make_shared<MockDataArray>();
     EXPECT_CALL(*source_data_array, GetData())
-        .WillRepeatedly(ReturnRef(source_data));
+        .WillRepeatedly(Return(source_data));
     EXPECT_CALL(*source_data_array, GetNumSentences())
         .WillRepeatedly(Return(3));
     for (size_t i = 0; i < source_sentence_start.size(); ++i) {
@@ -36,31 +36,25 @@ class TranslationTableTest : public Test {
           .WillRepeatedly(Return(source_sentence_start[i]));
     }
     for (size_t i = 0; i < words.size(); ++i) {
-      EXPECT_CALL(*source_data_array, HasWord(words[i]))
-          .WillRepeatedly(Return(true));
       EXPECT_CALL(*source_data_array, GetWordId(words[i]))
           .WillRepeatedly(Return(i + 2));
     }
-    EXPECT_CALL(*source_data_array, HasWord("d"))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(*source_data_array, GetWordId("d")).WillRepeatedly(Return(-1));
 
     vector<int> target_data = {2, 3, 2, 3, 4, 5, 0, 3, 6, 0, 2, 7, 0};
     vector<int> target_sentence_start = {0, 7, 10, 13};
     shared_ptr<MockDataArray> target_data_array = make_shared<MockDataArray>();
     EXPECT_CALL(*target_data_array, GetData())
-        .WillRepeatedly(ReturnRef(target_data));
+        .WillRepeatedly(Return(target_data));
     for (size_t i = 0; i < target_sentence_start.size(); ++i) {
       EXPECT_CALL(*target_data_array, GetSentenceStart(i))
           .WillRepeatedly(Return(target_sentence_start[i]));
     }
     for (size_t i = 0; i < words.size(); ++i) {
-      EXPECT_CALL(*target_data_array, HasWord(words[i]))
-          .WillRepeatedly(Return(true));
       EXPECT_CALL(*target_data_array, GetWordId(words[i]))
           .WillRepeatedly(Return(i + 2));
     }
-    EXPECT_CALL(*target_data_array, HasWord("d"))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(*target_data_array, GetWordId("d")).WillRepeatedly(Return(-1));
 
     vector<pair<int, int>> links1 = {
       make_pair(0, 0), make_pair(1, 1), make_pair(2, 2), make_pair(3, 3),

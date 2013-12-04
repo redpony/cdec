@@ -56,18 +56,26 @@ TEST_F(DataArrayTest, TestGetData) {
   }
 }
 
+TEST_F(DataArrayTest, TestSubstrings) {
+  vector<int> expected_word_ids = {3, 4, 5};
+  vector<string> expected_words = {"are", "mere", "."};
+  EXPECT_EQ(expected_word_ids, source_data.GetWordIds(1, 3));
+  EXPECT_EQ(expected_words, source_data.GetWords(1, 3));
+
+  expected_word_ids = {7, 8};
+  expected_words = {"a", "lot"};
+  EXPECT_EQ(expected_word_ids, target_data.GetWordIds(7, 2));
+  EXPECT_EQ(expected_words, target_data.GetWords(7, 2));
+}
+
 TEST_F(DataArrayTest, TestVocabulary) {
   EXPECT_EQ(9, source_data.GetVocabularySize());
-  EXPECT_TRUE(source_data.HasWord("mere"));
   EXPECT_EQ(4, source_data.GetWordId("mere"));
   EXPECT_EQ("mere", source_data.GetWord(4));
-  EXPECT_FALSE(source_data.HasWord("banane"));
 
   EXPECT_EQ(11, target_data.GetVocabularySize());
-  EXPECT_TRUE(target_data.HasWord("apples"));
   EXPECT_EQ(4, target_data.GetWordId("apples"));
   EXPECT_EQ("apples", target_data.GetWord(4));
-  EXPECT_FALSE(target_data.HasWord("bananas"));
 }
 
 TEST_F(DataArrayTest, TestSentenceData) {

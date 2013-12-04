@@ -1,11 +1,11 @@
 #include <gmock/gmock.h>
 
 #include "phrase_location.h"
-#include "sampler.h"
+#include "suffix_array_sampler.h"
 
 namespace extractor {
 
-class MockSampler : public Sampler {
+class MockSuffixArraySampler : public SuffixArrayRangeSampler {
  public:
   MOCK_CONST_METHOD2(Sample, PhraseLocation(
       const PhraseLocation& location,

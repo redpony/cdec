@@ -10,7 +10,6 @@
 #include "phrase_location.h"
 #include "time_util.h"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace chrono;
 
@@ -188,12 +187,12 @@ shared_ptr<DataArray> SuffixArray::GetData() const {
 
 PhraseLocation SuffixArray::Lookup(int low, int high, const string& word,
                                    int offset) const {
-  if (!data_array->HasWord(word)) {
+  int word_id = data_array->GetWordId(word);
+  if (word_id == -1) {
     // Return empty phrase location.
     return PhraseLocation(0, 0);
   }
 
-  int word_id = data_array->GetWordId(word);
   if (offset == 0) {
     return PhraseLocation(word_start[word_id], word_start[word_id + 1]);
   }

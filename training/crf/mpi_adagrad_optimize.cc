@@ -188,7 +188,7 @@ class AdaGradOptimizer {
   explicit AdaGradOptimizer(double e) :
       eta(e),
       G() {}
-  void update(const SparseVector<double>& g, vector<double>* x) {
+  void update(const SparseVector<double>& g, vector<double>* x, SparseVector<double>* sx) {
     if (x->size() > G.size()) G.resize(x->size(), 0.0);
 #if HAVE_CXX11
     for (auto& gi : g) {
@@ -199,6 +199,7 @@ class AdaGradOptimizer {
       if (gi.second) {
         G[gi.first] += gi.second * gi.second;
         (*x)[gi.first] -= eta / sqrt(G[gi.first]) * gi.second;
+        sx->add_value(gi.first, -eta / sqrt(G[gi.first]) * gi.second);
       }
     }
   }
@@ -213,7 +214,7 @@ class AdaGradL1Optimizer {
       eta(e),
       lambda(l),
       G() {}
-  void update(const SparseVector<double>& g, vector<double>* x) {
+  void update(const SparseVector<double>& g, vector<double>* x, SparseVector<double>* sx) {
     t += 1.0;
     if (x->size() > G.size()) {
       G.resize(x->size(), 0.0);
@@ -228,13 +229,37 @@ class AdaGradL1Optimizer {
       if (gi.second) {
         u[gi.first] += gi.second;
         G[gi.first] += gi.second * gi.second;
-        double z = fabs(u[gi.first] / t) - lambda;
-        double s = 1;
-        if (u[gi.first] > 0) s = -1;
-        if (z > 0 && G[gi.first])
-          (*x)[gi.first] = eta * s * z * t / sqrt(G[gi.first]);
-        else
-          (*x)[gi.first] = 0.0;
+        sx->set_value(gi.first, 1.0);  // this is a dummy value to trigger recomputation
+      }
+    }
+
+    // compute updates (avoid invalidating iterators by putting them all
+    // in the vector vupdate and applying them after this)
+    vector<pair<unsigned, double>> vupdate;
+#if HAVE_CXX11
+    for (auto& xi : *sx) {
+#else
+    for (SparseVector<double>::const_iterator it = sx->begin(); it != sx->end(); ++it) {
+      const pair<unsigned,double>& gi = *it;
+#endif
+      double z = fabs(u[xi.first] / t) - lambda;
+      double s = 1;
+      if (u[xi.first] > 0) s = -1;
+      if (z > 0 && G[xi.first]) {
+        vupdate.push_back(make_pair(xi.first, eta * s * z * t / sqrt(G[xi.first])));
+      } else {
+        vupdate.push_back(make_pair(xi.first, 0.0));
+      }
+    }
+
+    // apply updates
+    for (unsigned i = 0; i < vupdate.size(); ++i) {
+      if (vupdate[i].second) {
+        sx->set_value(vupdate[i].first, vupdate[i].second);
+        (*x)[vupdate[i].first] = vupdate[i].second;
+      } else {
+        (*x)[vupdate[i].first] = 0.0;
+        sx->erase(vupdate[i].first);
       }
     }
   }
@@ -323,6 +348,8 @@ int main(int argc, char** argv) {
     lambdas.swap(init_weights);
     init_weights.clear();
   }
+  SparseVector<double> lambdas_sparse;
+  Weights::InitSparseVector(lambdas, &lambdas_sparse);
 
   //AdaGradOptimizer adagrad(conf["eta"].as<double>());
   AdaGradL1Optimizer adagrad(conf["eta"].as<double>(), conf["regularization_strength"].as<double>());
@@ -338,6 +365,13 @@ int main(int argc, char** argv) {
       mpi::timer timer;
 #endif
       ++iter;
+      if (iter > 1) {
+        lambdas_sparse.init_vector(&lambdas);
+        if (rank == 0) {
+          Weights::SanityCheck(lambdas);
+          Weights::ShowLargestFeatures(lambdas);
+        }
+      }
       observer.Reset();
       if (rank == 0) {
         converged = (iter == max_iteration);
@@ -353,7 +387,7 @@ int main(int argc, char** argv) {
         }
         ostringstream vv;
         double minutes = (cur_time - start_time) / 60.0;
-        vv << "total walltime=" << minutes << "min iter=" << iter << "  minibatch=" << size_per_proc << " sentences/proc x " << size << " procs.   num_feats=" << non_zeros(lambdas) << '/' << FD::NumFeats() << "   passes_thru_data=" << (iter * size_per_proc / static_cast<double>(corpus.size()));
+        vv << "total walltime=" << minutes << " min  iter=" << iter << "  minibatch=" << size_per_proc << " sentences/proc x " << size << " procs.   num_feats=" << non_zeros(lambdas) << '/' << FD::NumFeats() << "   passes_thru_data=" << (iter * size_per_proc / static_cast<double>(corpus.size()));
         const string svv = vv.str();
         cerr << svv << endl;
         Weights::WriteToFile(fname, lambdas, true, &svv);
@@ -376,12 +410,10 @@ int main(int argc, char** argv) {
       if (rank == 0) {
         g /= minibatch_size;
         lambdas.resize(FD::NumFeats(), 0.0); // might have seen new features
-        adagrad.update(g, &lambdas);
-        Weights::SanityCheck(lambdas);
-        Weights::ShowLargestFeatures(lambdas);
+        adagrad.update(g, &lambdas, &lambdas_sparse);
       }
 #ifdef HAVE_MPI
-      broadcast(world, lambdas, 0);
+      broadcast(world, lambdas_sparse, 0);
       broadcast(world, converged, 0);
       world.barrier();
       if (rank == 0) { cerr << "  ELAPSED TIME THIS ITERATION=" << timer.elapsed() << endl; }

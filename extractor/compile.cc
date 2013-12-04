@@ -13,6 +13,7 @@
 #include "suffix_array.h"
 #include "time_util.h"
 #include "translation_table.h"
+#include "vocabulary.h"
 
 namespace ar = boost::archive;
 namespace fs = boost::filesystem;
@@ -29,6 +30,8 @@ int main(int argc, char** argv) {
     ("bitext,b", po::value<string>(), "Parallel text (source ||| target)")
     ("alignment,a", po::value<string>()->required(), "Bitext word alignment")
     ("output,o", po::value<string>()->required(), "Output path")
+    ("config,c", po::value<string>()->required(),
+        "Path where the config file will be generated")
     ("frequent", po::value<int>()->default_value(100),
         "Number of precomputed frequent patterns")
     ("super_frequent", po::value<int>()->default_value(10),
@@ -81,8 +84,12 @@ int main(int argc, char** argv) {
     target_data_array = make_shared<DataArray>(vm["target"].as<string>());
   }
 
+  ofstream config_stream(vm["config"].as<string>());
+
   Clock::time_point start_write = Clock::now();
-  ofstream target_fstream((output_dir / fs::path("target.bin")).string());
+  string target_path = (output_dir / fs::path("target.bin")).string();
+  config_stream << "target = " << target_path << endl;
+  ofstream target_fstream(target_path);
   ar::binary_oarchive target_stream(target_fstream);
   target_stream << *target_data_array;
   Clock::time_point stop_write = Clock::now();
@@ -99,7 +106,9 @@ int main(int argc, char** argv) {
       make_shared<SuffixArray>(source_data_array);
 
   start_write = Clock::now();
-  ofstream source_fstream((output_dir / fs::path("source.bin")).string());
+  string source_path = (output_dir / fs::path("source.bin")).string();
+  config_stream << "source = " << source_path << endl;
+  ofstream source_fstream(source_path);
   ar::binary_oarchive output_stream(source_fstream);
   output_stream << *source_suffix_array;
   stop_write = Clock::now();
@@ -115,7 +124,9 @@ int main(int argc, char** argv) {
       make_shared<Alignment>(vm["alignment"].as<string>());
 
   start_write = Clock::now();
-  ofstream alignment_fstream((output_dir / fs::path("alignment.bin")).string());
+  string alignment_path = (output_dir / fs::path("alignment.bin")).string();
+  config_stream << "alignment = " << alignment_path << endl;
+  ofstream alignment_fstream(alignment_path);
   ar::binary_oarchive alignment_stream(alignment_fstream);
   alignment_stream << *alignment;
   stop_write = Clock::now();
@@ -125,9 +136,12 @@ int main(int argc, char** argv) {
   cerr << "Reading alignment took "
        << GetDuration(start_time, stop_time) << " seconds" << endl;
 
+  shared_ptr<Vocabulary> vocabulary = make_shared<Vocabulary>();
+
   start_time = Clock::now();
   cerr << "Precomputing collocations..." << endl;
   Precomputation precomputation(
+      vocabulary,
       source_suffix_array,
       vm["frequent"].as<int>(),
       vm["super_frequent"].as<int>(),
@@ -138,9 +152,17 @@ int main(int argc, char** argv) {
       vm["min_frequency"].as<int>());
 
   start_write = Clock::now();
-  ofstream precomp_fstream((output_dir / fs::path("precomp.bin")).string());
+  string precomputation_path = (output_dir / fs::path("precomp.bin")).string();
+  config_stream << "precomputation = " << precomputation_path << endl;
+  ofstream precomp_fstream(precomputation_path);
   ar::binary_oarchive precomp_stream(precomp_fstream);
   precomp_stream << precomputation;
+
+  string vocabulary_path = (output_dir / fs::path("vocab.bin")).string();
+  config_stream << "vocabulary = " << vocabulary_path << endl;
+  ofstream vocab_fstream(vocabulary_path);
+  ar::binary_oarchive vocab_stream(vocab_fstream);
+  vocab_stream << *vocabulary;
   stop_write = Clock::now();
   write_duration += GetDuration(start_write, stop_write);
 
@@ -153,7 +175,9 @@ int main(int argc, char** argv) {
   TranslationTable table(source_data_array, target_data_array, alignment);
 
   start_write = Clock::now();
-  ofstream table_fstream((output_dir / fs::path("bilex.bin")).string());
+  string table_path = (output_dir / fs::path("bilex.bin")).string();
+  config_stream << "ttable = " << table_path << endl;
+  ofstream table_fstream(table_path);
   ar::binary_oarchive table_stream(table_fstream);
   table_stream << table;
   stop_write = Clock::now();

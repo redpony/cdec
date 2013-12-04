@@ -12,7 +12,6 @@ using namespace std;
 namespace extractor {
 
 typedef boost::hash<vector<int>> VectorHash;
-typedef unordered_map<vector<int>, vector<int>, VectorHash> Index;
 
 class Phrase;
 class PhraseLocation;
@@ -52,11 +51,6 @@ class FastIntersector {
   FastIntersector();
 
  private:
-  // Uses the vocabulary to convert the phrase from the numberized format
-  // specified by the source data array to the numberized format given by the
-  // vocabulary.
-  vector<int> ConvertPhrase(const vector<int>& old_phrase);
-
   // Estimates the number of computations needed if the prefix/suffix is
   // extended. If the last/first symbol is separated from the rest of the phrase
   // by a nonterminal, then for each occurrence of the prefix/suffix we need to
@@ -85,10 +79,10 @@ class FastIntersector {
   pair<int, int> GetSearchRange(bool has_marginal_x) const;
 
   shared_ptr<SuffixArray> suffix_array;
+  shared_ptr<Precomputation> precomputation;
   shared_ptr<Vocabulary> vocabulary;
   int max_rule_span;
   int min_gap_size;
-  Index collocations;
 };
 
 } // namespace extractor

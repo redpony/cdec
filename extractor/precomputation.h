@@ -7,13 +7,11 @@
 #include <tuple>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/vector.hpp>
 
-namespace fs = boost::filesystem;
 using namespace std;
 
 namespace extractor {
@@ -21,7 +19,9 @@ namespace extractor {
 typedef boost::hash<vector<int>> VectorHash;
 typedef unordered_map<vector<int>, vector<int>, VectorHash> Index;
 
+class DataArray;
 class SuffixArray;
+class Vocabulary;
 
 /**
  * Data structure wrapping an index with all the occurrences of the most
@@ -37,9 +37,9 @@ class Precomputation {
  public:
   // Constructs the index using the suffix array.
   Precomputation(
-      shared_ptr<SuffixArray> suffix_array, int num_frequent_patterns,
-      int num_super_frequent_patterns, int max_rule_span,
-      int max_rule_symbols, int min_gap_size,
+      shared_ptr<Vocabulary> vocabulary, shared_ptr<SuffixArray> suffix_array,
+      int num_frequent_patterns, int num_super_frequent_patterns,
+      int max_rule_span, int max_rule_symbols, int min_gap_size,
       int max_frequent_phrase_len, int min_frequency);
 
   // Creates empty precomputation data structure.
@@ -47,13 +47,13 @@ class Precomputation {
 
   virtual ~Precomputation();
 
-  // Returns a reference to the index.
-  virtual const Index& GetCollocations() const;
+  // Returns whether a pattern is contained in the index of collocations.
+  virtual bool Contains(const vector<int>& pattern) const;
+
+  // Returns the list of collocations for a given pattern.
+  virtual vector<int> GetCollocations(const vector<int>& pattern) const;
 
   bool operator==(const Precomputation& other) const;
-
-  static int FIRST_NONTERMINAL;
-  static int SECOND_NONTERMINAL;
 
  private:
   // Finds the most frequent contiguous collocations.
@@ -62,25 +62,32 @@ class Precomputation {
       int num_frequent_patterns, int max_frequent_phrase_len,
       int min_frequency);
 
+  vector<int> AnnotatePattern(shared_ptr<Vocabulary> vocabulary,
+                              shared_ptr<DataArray> data_array,
+                              const vector<int>& pattern) const;
+
   // Given the locations of the frequent contiguous collocations in a sentence,
   // it adds new entries to the index for each discontiguous collocation
   // matching the criteria specified in the class description.
-  void AddCollocations(
-      const vector<std::tuple<int, int, int>>& matchings, const vector<int>& data,
+  void UpdateIndex(
+      const vector<tuple<int, int, int>>& matchings,
+      const vector<vector<int>>& annotations,
       int max_rule_span, int min_gap_size, int max_rule_symbols);
 
+  void AppendSubpattern(vector<int>& pattern, const vector<int>& subpattern);
+
   // Adds an occurrence of a binary collocation.
-  void AddStartPositions(vector<int>& positions, int pos1, int pos2);
+  void AppendCollocation(vector<int>& collocations, int pos1, int pos2);
 
   // Adds an occurrence of a ternary collocation.
-  void AddStartPositions(vector<int>& positions, int pos1, int pos2, int pos3);
+  void AppendCollocation(vector<int>& collocations, int pos1, int pos2, int pos3);
 
   friend class boost::serialization::access;
 
   template<class Archive> void save(Archive& ar, unsigned int) const {
-    int num_entries = collocations.size();
+    int num_entries = index.size();
     ar << num_entries;
-    for (pair<vector<int>, vector<int>> entry: collocations) {
+    for (pair<vector<int>, vector<int>> entry: index) {
       ar << entry;
     }
   }
@@ -91,13 +98,13 @@ class Precomputation {
     for (size_t i = 0; i < num_entries; ++i) {
       pair<vector<int>, vector<int>> entry;
       ar >> entry;
-      collocations.insert(entry);
+      index.insert(entry);
     }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER();
 
-  Index collocations;
+  Index index;
 };
 
 } // namespace extractor

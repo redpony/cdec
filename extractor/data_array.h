@@ -5,13 +5,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
 
-namespace fs = boost::filesystem;
 using namespace std;
 
 namespace extractor {
@@ -53,7 +51,7 @@ class DataArray {
   virtual ~DataArray();
 
   // Returns a vector containing the word ids.
-  virtual const vector<int>& GetData() const;
+  virtual vector<int> GetData() const;
 
   // Returns the word id at the specified position.
   virtual int AtIndex(int index) const;
@@ -61,14 +59,19 @@ class DataArray {
   // Returns the original word at the specified position.
   virtual string GetWordAtIndex(int index) const;
 
+  // Returns the substring of word ids starting at the specified position and
+  // having the specified length.
+  virtual vector<int> GetWordIds(int start_index, int size) const;
+
+  // Returns the substring of words starting at the specified position and
+  // having the specified length.
+  virtual vector<string> GetWords(int start_index, int size) const;
+
   // Returns the size of the data array.
   virtual int GetSize() const;
 
   // Returns the number of distinct words in the data array.
   virtual int GetVocabularySize() const;
-
-  // Returns whether a word has ever been observed in the data array.
-  virtual bool HasWord(const string& word) const;
 
   // Returns the word id for a given word or -1 if it the word has never been
   // observed.

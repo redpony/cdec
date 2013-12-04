@@ -90,13 +90,12 @@ void TranslationTable::IncrementLinksCount(
 
 double TranslationTable::GetTargetGivenSourceScore(
     const string& source_word, const string& target_word) {
-  if (!source_data_array->HasWord(source_word) ||
-      !target_data_array->HasWord(target_word)) {
+  int source_id = source_data_array->GetWordId(source_word);
+  int target_id = target_data_array->GetWordId(target_word);
+  if (source_id == -1 || target_id == -1) {
     return -1;
   }
 
-  int source_id = source_data_array->GetWordId(source_word);
-  int target_id = target_data_array->GetWordId(target_word);
   auto entry = make_pair(source_id, target_id);
   auto it = translation_probabilities.find(entry);
   if (it == translation_probabilities.end()) {
@@ -107,13 +106,12 @@ double TranslationTable::GetTargetGivenSourceScore(
 
 double TranslationTable::GetSourceGivenTargetScore(
     const string& source_word, const string& target_word) {
-  if (!source_data_array->HasWord(source_word) ||
-      !target_data_array->HasWord(target_word)) {
+  int source_id = source_data_array->GetWordId(source_word);
+  int target_id = target_data_array->GetWordId(target_word);
+  if (source_id == -1 || target_id == -1) {
     return -1;
   }
 
-  int source_id = source_data_array->GetWordId(source_word);
-  int target_id = target_data_array->GetWordId(target_word);
   auto entry = make_pair(source_id, target_id);
   auto it = translation_probabilities.find(entry);
   if (it == translation_probabilities.end()) {

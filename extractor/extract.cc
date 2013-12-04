@@ -1,10 +1,10 @@
-#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include <boost/archive/binary_iarchive.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -30,11 +30,12 @@
 #include "translation_table.h"
 #include "vocabulary.h"
 
+namespace ar = boost::archive;
 namespace fs = boost::filesystem;
 namespace po = boost::program_options;
-using namespace std;
 using namespace extractor;
 using namespace features;
+using namespace std;
 
 // Returns the file path in which a given grammar should be written.
 fs::path GetGrammarFilePath(const fs::path& grammar_path, int file_number) {
@@ -43,36 +44,23 @@ fs::path GetGrammarFilePath(const fs::path& grammar_path, int file_number) {
 }
 
 int main(int argc, char** argv) {
-  // Sets up the command line arguments map.
+  po::options_description general_options("General options");
   int max_threads = 1;
   #pragma omp parallel
   max_threads = omp_get_num_threads();
-  string threads_option = "Number of parallel threads for extraction "
-                          "(max=" + to_string(max_threads) + ")";
-  po::options_description desc("Command line options");
-  desc.add_options()
-    ("help,h", "Show available options")
-    ("source,f", po::value<string>(), "Source language corpus")
-    ("target,e", po::value<string>(), "Target language corpus")
-    ("bitext,b", po::value<string>(), "Parallel text (source ||| target)")
-    ("alignment,a", po::value<string>()->required(), "Bitext word alignment")
+  string threads_option = "Number of threads used for grammar extraction "
+                          "max(" + to_string(max_threads) + ")";
+  general_options.add_options()
+    ("threads,t", po::value<int>()->required()->default_value(1),
+     threads_option.c_str())
     ("grammars,g", po::value<string>()->required(), "Grammars output path")
-    ("threads,t", po::value<int>()->default_value(1), threads_option.c_str())
-    ("frequent", po::value<int>()->default_value(100),
-        "Number of precomputed frequent patterns")
-    ("super_frequent", po::value<int>()->default_value(10),
-        "Number of precomputed super frequent patterns")
     ("max_rule_span", po::value<int>()->default_value(15),
         "Maximum rule span")
     ("max_rule_symbols", po::value<int>()->default_value(5),
         "Maximum number of symbols (terminals + nontermals) in a rule")
     ("min_gap_size", po::value<int>()->default_value(1), "Minimum gap size")
-    ("max_phrase_len", po::value<int>()->default_value(4),
-        "Maximum frequent phrase length")
     ("max_nonterminals", po::value<int>()->default_value(2),
         "Maximum number of nonterminals in a rule")
-    ("min_frequency", po::value<int>()->default_value(1000),
-        "Minimum number of occurrences for a pharse to be considered frequent")
     ("max_samples", po::value<int>()->default_value(300),
         "Maximum number of samples")
     ("tight_phrases", po::value<bool>()->default_value(true),
@@ -81,98 +69,111 @@ int main(int argc, char** argv) {
         "do leave-one-out estimation of grammars "
         "(e.g. for extracting grammars for the training set");
 
-  po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::options_description cmdline_options("Command line options");
+  cmdline_options.add_options()
+    ("help", "Show available options")
+    ("config,c", po::value<string>()->required(), "Path to config file");
+  cmdline_options.add(general_options);
 
-  // Checks for the help option before calling notify, so the we don't get an
-  // exception for missing required arguments.
+  po::options_description config_options("Config file options");
+  config_options.add_options()
+    ("target", po::value<string>()->required(),
+        "Path to target data file in binary format")
+    ("source", po::value<string>()->required(),
+        "Path to source suffix array file in binary format")
+    ("alignment", po::value<string>()->required(),
+        "Path to alignment file in binary format")
+    ("precomputation", po::value<string>()->required(),
+        "Path to precomputation file in binary format")
+    ("vocabulary", po::value<string>()->required(),
+        "Path to vocabulary file in binary format")
+    ("ttable", po::value<string>()->required(),
+        "Path to translation table in binary format");
+  config_options.add(general_options);
+
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, cmdline_options), vm);
   if (vm.count("help")) {
-    cout << desc << endl;
+    po::options_description all_options;
+    all_options.add(cmdline_options).add(config_options);
+    cout << all_options << endl;
     return 0;
   }
 
   po::notify(vm);
 
-  if (!((vm.count("source") && vm.count("target")) || vm.count("bitext"))) {
-    cerr << "A paralel corpus is required. "
-         << "Use -f (source) with -e (target) or -b (bitext)."
-         << endl;
-    return 1;
-  }
+  ifstream config_stream(vm["config"].as<string>());
+  po::store(po::parse_config_file(config_stream, config_options), vm);
+  po::notify(vm);
 
   int num_threads = vm["threads"].as<int>();
   cerr << "Grammar extraction will use " << num_threads << " threads." << endl;
 
-  // Reads the parallel corpus.
-  Clock::time_point preprocess_start_time = Clock::now();
-  cerr << "Reading source and target data..." << endl;
+  Clock::time_point read_start_time = Clock::now();
+
   Clock::time_point start_time = Clock::now();
-  shared_ptr<DataArray> source_data_array, target_data_array;
-  if (vm.count("bitext")) {
-    source_data_array = make_shared<DataArray>(
-        vm["bitext"].as<string>(), SOURCE);
-    target_data_array = make_shared<DataArray>(
-        vm["bitext"].as<string>(), TARGET);
-  } else {
-    source_data_array = make_shared<DataArray>(vm["source"].as<string>());
-    target_data_array = make_shared<DataArray>(vm["target"].as<string>());
-  }
-  Clock::time_point stop_time = Clock::now();
-  cerr << "Reading data took " << GetDuration(start_time, stop_time)
+  cerr << "Reading target data in binary format..." << endl;
+  shared_ptr<DataArray> target_data_array = make_shared<DataArray>();
+  ifstream target_fstream(vm["target"].as<string>());
+  ar::binary_iarchive target_stream(target_fstream);
+  target_stream >> *target_data_array;
+  Clock::time_point end_time = Clock::now();
+  cerr << "Reading target data took " << GetDuration(start_time, end_time)
        << " seconds" << endl;
 
-  // Constructs the suffix array for the source data.
   start_time = Clock::now();
-  cerr << "Constructing source suffix array..." << endl;
-  shared_ptr<SuffixArray> source_suffix_array =
-      make_shared<SuffixArray>(source_data_array);
-  stop_time = Clock::now();
-  cerr << "Constructing suffix array took "
-       << GetDuration(start_time, stop_time) << " seconds" << endl;
+  cerr << "Reading source suffix array in binary format..." << endl;
+  shared_ptr<SuffixArray> source_suffix_array = make_shared<SuffixArray>();
+  ifstream source_fstream(vm["source"].as<string>());
+  ar::binary_iarchive source_stream(source_fstream);
+  source_stream >> *source_suffix_array;
+  end_time = Clock::now();
+  cerr << "Reading source suffix array took "
+       << GetDuration(start_time, end_time) << " seconds" << endl;
 
-  // Reads the alignment.
   start_time = Clock::now();
-  cerr << "Reading alignment..." << endl;
-  shared_ptr<Alignment> alignment =
-      make_shared<Alignment>(vm["alignment"].as<string>());
-  stop_time = Clock::now();
-  cerr << "Reading alignment took "
-       << GetDuration(start_time, stop_time) << " seconds" << endl;
+  cerr << "Reading alignment in binary format..." << endl;
+  shared_ptr<Alignment> alignment = make_shared<Alignment>();
+  ifstream alignment_fstream(vm["alignment"].as<string>());
+  ar::binary_iarchive alignment_stream(alignment_fstream);
+  alignment_stream >> *alignment;
+  end_time = Clock::now();
+  cerr << "Reading alignment took " << GetDuration(start_time, end_time)
+       << " seconds" << endl;
 
+  start_time = Clock::now();
+  cerr << "Reading precomputation in binary format..." << endl;
+  shared_ptr<Precomputation> precomputation = make_shared<Precomputation>();
+  ifstream precomputation_fstream(vm["precomputation"].as<string>());
+  ar::binary_iarchive precomputation_stream(precomputation_fstream);
+  precomputation_stream >> *precomputation;
+  end_time = Clock::now();
+  cerr << "Reading precomputation took " << GetDuration(start_time, end_time)
+       << " seconds" << endl;
+
+  start_time = Clock::now();
+  cerr << "Reading vocabulary in binary format..." << endl;
   shared_ptr<Vocabulary> vocabulary = make_shared<Vocabulary>();
-
-  // Constructs an index storing the occurrences in the source data for each
-  // frequent collocation.
-  start_time = Clock::now();
-  cerr << "Precomputing collocations..." << endl;
-  shared_ptr<Precomputation> precomputation = make_shared<Precomputation>(
-      vocabulary,
-      source_suffix_array,
-      vm["frequent"].as<int>(),
-      vm["super_frequent"].as<int>(),
-      vm["max_rule_span"].as<int>(),
-      vm["max_rule_symbols"].as<int>(),
-      vm["min_gap_size"].as<int>(),
-      vm["max_phrase_len"].as<int>(),
-      vm["min_frequency"].as<int>());
-  stop_time = Clock::now();
-  cerr << "Precomputing collocations took "
-       << GetDuration(start_time, stop_time) << " seconds" << endl;
-
-  // Constructs a table storing p(e | f) and p(f | e) for every pair of source
-  // and target words.
-  start_time = Clock::now();
-  cerr << "Precomputing conditional probabilities..." << endl;
-  shared_ptr<TranslationTable> table = make_shared<TranslationTable>(
-      source_data_array, target_data_array, alignment);
-  stop_time = Clock::now();
-  cerr << "Precomputing conditional probabilities took "
-       << GetDuration(start_time, stop_time) << " seconds" << endl;
-
-  Clock::time_point preprocess_stop_time = Clock::now();
-  cerr << "Overall preprocessing step took "
-       << GetDuration(preprocess_start_time, preprocess_stop_time)
+  ifstream vocabulary_fstream(vm["vocabulary"].as<string>());
+  ar::binary_iarchive vocabulary_stream(vocabulary_fstream);
+  vocabulary_stream >> *vocabulary;
+  end_time = Clock::now();
+  cerr << "Reading vocabulary took " << GetDuration(start_time, end_time)
        << " seconds" << endl;
+
+  start_time = Clock::now();
+  cerr << "Reading translation table in binary format..." << endl;
+  shared_ptr<TranslationTable> table = make_shared<TranslationTable>();
+  ifstream ttable_fstream(vm["ttable"].as<string>());
+  ar::binary_iarchive ttable_stream(ttable_fstream);
+  ttable_stream >> *table;
+  end_time = Clock::now();
+  cerr << "Reading translation table took " << GetDuration(start_time, end_time)
+       << " seconds" << endl;
+
+  Clock::time_point read_end_time = Clock::now();
+  cerr << "Total time spent loading data structures into memory: "
+       << GetDuration(read_start_time, read_end_time) << " seconds" << endl;
 
   Clock::time_point extraction_start_time = Clock::now();
   // Features used to score each grammar rule.
@@ -187,7 +188,6 @@ int main(int argc, char** argv) {
   };
   shared_ptr<Scorer> scorer = make_shared<Scorer>(features);
 
-  // Sets up the grammar extractor.
   GrammarExtractor extractor(
       source_suffix_array,
       target_data_array,
@@ -217,8 +217,8 @@ int main(int argc, char** argv) {
   }
 
   // Extracts the grammar for each sentence and saves it to a file.
-  bool leave_one_out = vm.count("leave_one_out");
   vector<string> suffixes(sentences.size());
+  bool leave_one_out = vm.count("leave_one_out");
   #pragma omp parallel for schedule(dynamic) num_threads(num_threads)
   for (size_t i = 0; i < sentences.size(); ++i) {
     string suffix;

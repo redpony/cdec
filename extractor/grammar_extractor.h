@@ -15,7 +15,6 @@ class DataArray;
 class Grammar;
 class HieroCachingRuleFactory;
 class Precomputation;
-class Rule;
 class Scorer;
 class SuffixArray;
 class Vocabulary;
@@ -32,6 +31,7 @@ class GrammarExtractor {
       shared_ptr<Alignment> alignment,
       shared_ptr<Precomputation> precomputation,
       shared_ptr<Scorer> scorer,
+      shared_ptr<Vocabulary> vocabulary,
       int min_gap_size,
       int max_rule_span,
       int max_nonterminals,
@@ -45,7 +45,9 @@ class GrammarExtractor {
 
   // Converts the sentence to a vector of word ids and uses the RuleFactory to
   // extract the SCFG rules which may be used to decode the sentence.
-  Grammar GetGrammar(const string& sentence, const unordered_set<int>& blacklisted_sentence_ids, const shared_ptr<DataArray> source_data_array);
+  Grammar GetGrammar(
+      const string& sentence,
+      const unordered_set<int>& blacklisted_sentence_ids);
 
  private:
   // Splits the sentence in a vector of words.
