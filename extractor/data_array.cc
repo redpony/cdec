@@ -5,9 +5,6 @@
 #include <sstream>
 #include <string>
 
-#include <boost/filesystem.hpp>
-
-namespace fs = boost::filesystem;
 using namespace std;
 
 namespace extractor {
@@ -81,7 +78,7 @@ void DataArray::CreateDataArray(const vector<string>& lines) {
 
 DataArray::~DataArray() {}
 
-const vector<int>& DataArray::GetData() const {
+vector<int> DataArray::GetData() const {
   return data;
 }
 
@@ -91,6 +88,18 @@ int DataArray::AtIndex(int index) const {
 
 string DataArray::GetWordAtIndex(int index) const {
   return id2word[data[index]];
+}
+
+vector<int> DataArray::GetWordIds(int index, int size) const {
+  return vector<int>(data.begin() + index, data.begin() + index + size);
+}
+
+vector<string> DataArray::GetWords(int start_index, int size) const {
+  vector<string> words;
+  for (int word_id: GetWordIds(start_index, size)) {
+    words.push_back(id2word[word_id]);
+  }
+  return words;
 }
 
 int DataArray::GetSize() const {
@@ -116,10 +125,6 @@ int DataArray::GetSentenceLength(int sentence_id) const {
 
 int DataArray::GetSentenceId(int position) const {
   return sentence_id[position];
-}
-
-bool DataArray::HasWord(const string& word) const {
-  return word2id.count(word);
 }
 
 int DataArray::GetWordId(const string& word) const {

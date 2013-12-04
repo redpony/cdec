@@ -12,6 +12,7 @@
 #include "phrase_builder.h"
 #include "rule.h"
 #include "rule_extractor.h"
+#include "phrase_location_sampler.h"
 #include "sampler.h"
 #include "scorer.h"
 #include "suffix_array.h"
@@ -68,7 +69,8 @@ HieroCachingRuleFactory::HieroCachingRuleFactory(
       target_data_array, alignment, phrase_builder, scorer, vocabulary,
       max_rule_span, min_gap_size, max_nonterminals, max_rule_symbols, true,
       false, require_tight_phrases);
-  sampler = make_shared<Sampler>(source_suffix_array, max_samples);
+  sampler = make_shared<PhraseLocationSampler>(
+      source_suffix_array, max_samples);
 }
 
 HieroCachingRuleFactory::HieroCachingRuleFactory(
@@ -101,7 +103,9 @@ HieroCachingRuleFactory::HieroCachingRuleFactory() {}
 
 HieroCachingRuleFactory::~HieroCachingRuleFactory() {}
 
-Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids, const unordered_set<int>& blacklisted_sentence_ids, const shared_ptr<DataArray> source_data_array) {
+Grammar HieroCachingRuleFactory::GetGrammar(
+    const vector<int>& word_ids,
+    const unordered_set<int>& blacklisted_sentence_ids) {
   Clock::time_point start_time = Clock::now();
   double total_extract_time = 0;
   double total_intersect_time = 0;
@@ -193,7 +197,8 @@ Grammar HieroCachingRuleFactory::GetGrammar(const vector<int>& word_ids, const u
       Clock::time_point extract_start = Clock::now();
       if (!state.starts_with_x) {
         // Extract rules for the sampled set of occurrences.
-        PhraseLocation sample = sampler->Sample(next_node->matchings, blacklisted_sentence_ids, source_data_array);
+        PhraseLocation sample = sampler->Sample(
+            next_node->matchings, blacklisted_sentence_ids);
         vector<Rule> new_rules =
             rule_extractor->ExtractRules(next_phrase, sample);
         rules.insert(rules.end(), new_rules.begin(), new_rules.end());

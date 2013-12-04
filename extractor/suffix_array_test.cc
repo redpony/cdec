@@ -21,7 +21,7 @@ class SuffixArrayTest : public Test {
   virtual void SetUp() {
     data = {6, 4, 1, 2, 4, 5, 3, 4, 6, 6, 4, 1, 2};
     data_array = make_shared<MockDataArray>();
-    EXPECT_CALL(*data_array, GetData()).WillRepeatedly(ReturnRef(data));
+    EXPECT_CALL(*data_array, GetData()).WillRepeatedly(Return(data));
     EXPECT_CALL(*data_array, GetVocabularySize()).WillRepeatedly(Return(7));
     EXPECT_CALL(*data_array, GetSize()).WillRepeatedly(Return(13));
     suffix_array = SuffixArray(data_array);
@@ -55,22 +55,18 @@ TEST_F(SuffixArrayTest, TestLookup) {
     EXPECT_CALL(*data_array, AtIndex(i)).WillRepeatedly(Return(data[i]));
   }
 
-  EXPECT_CALL(*data_array, HasWord("word1")).WillRepeatedly(Return(true));
   EXPECT_CALL(*data_array, GetWordId("word1")).WillRepeatedly(Return(6));
   EXPECT_EQ(PhraseLocation(11, 14), suffix_array.Lookup(0, 14, "word1", 0));
 
-  EXPECT_CALL(*data_array, HasWord("word2")).WillRepeatedly(Return(false));
+  EXPECT_CALL(*data_array, GetWordId("word2")).WillRepeatedly(Return(-1));
   EXPECT_EQ(PhraseLocation(0, 0), suffix_array.Lookup(0, 14, "word2", 0));
 
-  EXPECT_CALL(*data_array, HasWord("word3")).WillRepeatedly(Return(true));
   EXPECT_CALL(*data_array, GetWordId("word3")).WillRepeatedly(Return(4));
   EXPECT_EQ(PhraseLocation(11, 13), suffix_array.Lookup(11, 14, "word3", 1));
 
-  EXPECT_CALL(*data_array, HasWord("word4")).WillRepeatedly(Return(true));
   EXPECT_CALL(*data_array, GetWordId("word4")).WillRepeatedly(Return(1));
   EXPECT_EQ(PhraseLocation(11, 13), suffix_array.Lookup(11, 13, "word4", 2));
 
-  EXPECT_CALL(*data_array, HasWord("word5")).WillRepeatedly(Return(true));
   EXPECT_CALL(*data_array, GetWordId("word5")).WillRepeatedly(Return(2));
   EXPECT_EQ(PhraseLocation(11, 13), suffix_array.Lookup(11, 13, "word5", 3));
 

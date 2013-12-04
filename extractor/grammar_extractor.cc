@@ -19,10 +19,11 @@ GrammarExtractor::GrammarExtractor(
     shared_ptr<SuffixArray> source_suffix_array,
     shared_ptr<DataArray> target_data_array,
     shared_ptr<Alignment> alignment, shared_ptr<Precomputation> precomputation,
-    shared_ptr<Scorer> scorer, int min_gap_size, int max_rule_span,
+    shared_ptr<Scorer> scorer, shared_ptr<Vocabulary> vocabulary,
+    int min_gap_size, int max_rule_span,
     int max_nonterminals, int max_rule_symbols, int max_samples,
     bool require_tight_phrases) :
-    vocabulary(make_shared<Vocabulary>()),
+    vocabulary(vocabulary),
     rule_factory(make_shared<HieroCachingRuleFactory>(
         source_suffix_array, target_data_array, alignment, vocabulary,
         precomputation, scorer, min_gap_size, max_rule_span, max_nonterminals,
@@ -34,10 +35,12 @@ GrammarExtractor::GrammarExtractor(
     vocabulary(vocabulary),
     rule_factory(rule_factory) {}
 
-Grammar GrammarExtractor::GetGrammar(const string& sentence, const unordered_set<int>& blacklisted_sentence_ids, const shared_ptr<DataArray> source_data_array) {
+Grammar GrammarExtractor::GetGrammar(
+    const string& sentence,
+    const unordered_set<int>& blacklisted_sentence_ids) {
   vector<string> words = TokenizeSentence(sentence);
   vector<int> word_ids = AnnotateWords(words);
-  return rule_factory->GetGrammar(word_ids, blacklisted_sentence_ids, source_data_array);
+  return rule_factory->GetGrammar(word_ids, blacklisted_sentence_ids);
 }
 
 vector<string> GrammarExtractor::TokenizeSentence(const string& sentence) {

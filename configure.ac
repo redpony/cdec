@@ -199,7 +199,7 @@ AC_CONFIG_FILES([mteval/Makefile])
 AC_CONFIG_FILES([mteval/meteor_jar.cc])
 AC_CONFIG_FILES([decoder/Makefile])
 AC_CONFIG_FILES([python/setup.py])
-#AC_CONFIG_FILES([extractor/Makefile])
+AC_CONFIG_FILES([extractor/Makefile])
 AC_CONFIG_FILES([word-aligner/Makefile])
 
 # KenLM stuff
