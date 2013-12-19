@@ -117,7 +117,7 @@ bool TRule::ReadFromString(const string& line, bool strict, bool mono) {
     // use lexer
     istringstream il(line);
     n_assigned=0;
-    RuleLexer::ReadRules(&il,assign_trule,this);
+    RuleLexer::ReadRules(&il,assign_trule,"STRING",this);
     if (n_assigned>1)
       cerr<<"\nWARNING: more than one rule parsed from multi-line string; kept last: "<<line<<".\n";
     return n_assigned;
