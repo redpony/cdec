@@ -18,6 +18,7 @@ std::istream* scfglex_stream = NULL;
 RuleLexer::RuleCallback rule_callback = NULL;
 void* rule_callback_extra = NULL;
 std::vector<int> scfglex_phrase_fnames;
+std::string scfglex_fname;
 
 #undef YY_INPUT
 #define YY_INPUT(buf, result, max_size) (result = scfglex_stream->read(buf, max_size).gcount())
@@ -38,12 +39,12 @@ WordID scfglex_lhs;
 int scfglex_src_arity;
 int scfglex_trg_arity;
 
-#define MAX_FEATS 100
+#define MAX_FEATS 10000
 int scfglex_feat_ids[MAX_FEATS];
 double scfglex_feat_vals[MAX_FEATS];
 int scfglex_num_feats;
 
-#define MAX_ARITY 200
+#define MAX_ARITY 1000
 int scfglex_nt_sanity[MAX_ARITY];
 int scfglex_src_nts[MAX_ARITY];
 // float scfglex_nt_size_means[MAX_ARITY];
@@ -51,7 +52,7 @@ int scfglex_src_nts[MAX_ARITY];
 std::stack<TRulePtr> ctf_rule_stack;
 unsigned int ctf_level = 0;
 
-#define MAX_ALS 200
+#define MAX_ALS 2000
 AlignmentPoint scfglex_als[MAX_ALS];
 int scfglex_num_als;
 
@@ -190,7 +191,7 @@ NT [^\t \[\],]+
 		BEGIN(SRC);
 		}
 <INITIAL,LHS_END>.	{
-		std::cerr << "Line " << lex_line << ": unexpected input in LHS: " << yytext << std::endl;
+		std::cerr << "Grammar " << scfglex_fname << " line " << lex_line << ": unexpected input in LHS: " << yytext << std::endl;
 		abort();
 		}
 
@@ -217,7 +218,7 @@ NT [^\t \[\],]+
 
 <TRG,FEATS,ALIGNS>\n	{
                 if (scfglex_src_arity != scfglex_trg_arity) {
-                  std::cerr << "Line " << lex_line << ": LHS and RHS arity mismatch!\n";
+                  std::cerr << "Grammar " << scfglex_fname << " line " << lex_line << ": LHS and RHS arity mismatch!\n";
                   abort();
                 }
 		// const bool ignore_grammar_features = false;
@@ -258,7 +259,7 @@ NT [^\t \[\],]+
 		BEGIN(FEATS);
 		}
 <FEATVAL>.	{
-		std::cerr << "Line " << lex_line << ": unexpected input in feature value: " << yytext << std::endl;
+		std::cerr << "Grammar " << scfglex_fname << " line " << lex_line << ": unexpected input in feature value: " << yytext << std::endl;
 		abort();
 		}
 <FEATS>{REAL} 	{
@@ -267,7 +268,7 @@ NT [^\t \[\],]+
 		++scfglex_num_feats;
 		}
 <FEATS>.	{
-		std::cerr << "Line " << lex_line << " unexpected input in features: " << yytext << std::endl;
+		std::cerr << "Grammar " << scfglex_fname << " line " << lex_line << " unexpected input in features: " << yytext << std::endl;
 		abort();
 		}
 <ALIGNS>[0-9]+-[0-9]+	{
@@ -291,14 +292,14 @@ NT [^\t \[\],]+
 		}
 <ALIGNS>[ \t]	;
 <ALIGNS>.	{
-		std::cerr << "Line " << lex_line << ": unexpected input in alignment: " << yytext << std::endl;
+		std::cerr << "Grammar " << scfglex_fname << " line " << lex_line << ": unexpected input in alignment: " << yytext << std::endl;
 		abort();
 		}
 %%
 
 #include "filelib.h"
 
-void RuleLexer::ReadRules(std::istream* in, RuleLexer::RuleCallback func, void* extra) {
+void RuleLexer::ReadRules(std::istream* in, RuleLexer::RuleCallback func, const std::string& fname, void* extra) {
   if (scfglex_phrase_fnames.empty()) {
     scfglex_phrase_fnames.resize(100);
     for (int i = 0; i < scfglex_phrase_fnames.size(); ++i) {
@@ -308,6 +309,7 @@ void RuleLexer::ReadRules(std::istream* in, RuleLexer::RuleCallback func, void* 
     }
   }
   lex_line = 1;
+  scfglex_fname = fname;
   scfglex_stream = in;
   rule_callback_extra = extra,
   rule_callback = func;

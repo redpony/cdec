@@ -14,6 +14,8 @@
 
 using namespace std;
 
+static WordID kEPS = 0;
+
 class ActiveChart;
 class PassiveChart {
  public:
@@ -74,9 +76,12 @@ class ActiveChart {
       gptr_(g), ant_nodes_(), lattice_cost(0.0) {}
 
     void ExtendTerminal(int symbol, float src_cost, vector<ActiveItem>* out_cell) const {
-      const GrammarIter* ni = gptr_->Extend(symbol);
-      if (ni) {
-        out_cell->push_back(ActiveItem(ni, ant_nodes_, lattice_cost + src_cost));
+      if (symbol == kEPS) {
+        out_cell->push_back(ActiveItem(gptr_, ant_nodes_, lattice_cost + src_cost));
+      } else {
+        const GrammarIter* ni = gptr_->Extend(symbol);
+        if (ni)
+          out_cell->push_back(ActiveItem(ni, ant_nodes_, lattice_cost + src_cost));
       }
     }
     void ExtendNonTerminal(const Hypergraph* hg, int node_index, vector<ActiveItem>* out_cell) const {
@@ -127,8 +132,10 @@ class ActiveChart {
       const WordID& f = ai->label;
       const double& c = ai->cost;
       const int& len = ai->dist2next;
-      //VLOG(1) << "F: " << TD::Convert(f) << endl;
+      //cerr << "F: " << TD::Convert(f) << "  dest=" << i << "," << (j+len-1) << endl;
       const vector<ActiveItem>& ec = act_chart_(i, j-1);
+      //cerr << "    SRC=" << i << "," << (j-1) << " [ec=" << ec.size() << "]" << endl;
+      //if (ec.size() > 0) { cerr << "   LC=" << ec[0].lattice_cost << endl; }
       for (vector<ActiveItem>::const_iterator di = ec.begin(); di != ec.end(); ++di)
         di->ExtendTerminal(f, c, &act_chart_(i, j + len - 1));
     }
@@ -166,6 +173,7 @@ void PassiveChart::ApplyRule(const int i,
                              const Hypergraph::TailNodeVector& ant_nodes,
                              const float lattice_cost) {
   Hypergraph::Edge* new_edge = forest_->AddEdge(r, ant_nodes);
+  //cerr << i << " " << j << ": APPLYING RULE: " << r->AsString() << endl;
   new_edge->prev_i_ = r->prev_i;
   new_edge->prev_j_ = r->prev_j;
   new_edge->i_ = i;
@@ -198,8 +206,11 @@ void PassiveChart::ApplyRules(const int i,
                        const Hypergraph::TailNodeVector& tail,
                        const float lattice_cost) {
   const int n = rules->GetNumRules();
-  for (int k = 0; k < n; ++k)
+  //cerr << i << " " << j << ": NUM RULES: " << n << endl;
+  for (int k = 0; k < n; ++k) {
+    //cerr << i << " " << j << ": R=" << rules->GetIthRule(k)->AsString() << endl;
     ApplyRule(i, j, rules->GetIthRule(k), tail, lattice_cost);
+  }
 }
 
 void PassiveChart::ApplyUnaryRules(const int i, const int j) {
@@ -284,6 +295,7 @@ ExhaustiveBottomUpParser::ExhaustiveBottomUpParser(
 
 bool ExhaustiveBottomUpParser::Parse(const Lattice& input,
                                      Hypergraph* forest) const {
+  kEPS = TD::Convert("*EPS*");
   PassiveChart chart(goal_sym_, grammars_, input, forest);
   const bool result = chart.Parse();
   return result;
