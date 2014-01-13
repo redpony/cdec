@@ -121,11 +121,11 @@ static void AddRuleHelper(const TRulePtr& new_rule, const unsigned int ctf_level
 
 void TextGrammar::ReadFromFile(const string& filename) {
   ReadFile in(filename);
-  ReadFromStream(in.stream());
+  RuleLexer::ReadRules(in.stream(), &AddRuleHelper, filename, this);
 }
 
 void TextGrammar::ReadFromStream(istream* in) {
-  RuleLexer::ReadRules(in, &AddRuleHelper, this);
+  RuleLexer::ReadRules(in, &AddRuleHelper, "UNKNOWN", this);
 }
 
 bool TextGrammar::HasRuleForSpan(int /* i */, int /* j */, int distance) const {

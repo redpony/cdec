@@ -78,7 +78,7 @@ PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat, 
 }
 
 bool PassThroughGrammar::HasRuleForSpan(int, int, int distance) const {
-  return (distance < 2);
+  return (distance < 4);  // TODO this isn't great, but helps with EPS lattices
 }
 
 struct SCFGTranslatorImpl {

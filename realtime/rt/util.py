@@ -4,8 +4,6 @@ import subprocess
 import sys
 import threading
 
-from cdec.configobj import ConfigObj
-
 SA_INI_FILES = set((
     'f_sa_file',
     'e_file',

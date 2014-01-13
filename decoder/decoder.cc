@@ -387,6 +387,7 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
         ("show_partition,z", "Compute and show the partition (inside score)")
         ("show_conditional_prob", "Output the conditional log prob to STDOUT instead of a translation")
         ("show_cfg_search_space", "Show the search space as a CFG")
+        ("show_cfg_alignment_space", "Show the alignment hypergraph as a CFG")
         ("show_target_graph", po::value<string>(), "Directory to write the target hypergraphs to")
         ("incremental_search", po::value<string>(), "Run lazy search with this language model file")
         ("coarse_to_fine_beam_prune", po::value<double>(), "Prune paths from coarse parse forest before fine parse, keeping paths within exp(alpha>=0)")
@@ -988,6 +989,8 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
          cerr << "  Contst. partition  log(Z): " << log(z) << endl;
       }
       o->NotifyAlignmentForest(smeta, &forest);
+      if (conf.count("show_cfg_alignment_space"))
+        HypergraphIO::WriteAsCFG(forest);
       if (conf.count("forest_output")) {
         ForestWriter writer(str("forest_output",conf), sent_id);
         if (FileExists(writer.fname_)) {
