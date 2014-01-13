@@ -69,28 +69,6 @@ void RuleIdentityFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   features->add_value(it->second, 1);
 }
 
-RuleWordAlignmentFeatures::RuleWordAlignmentFeatures(const std::string& param) {
-}
-
-void RuleWordAlignmentFeatures::PrepareForInput(const SentenceMetadata& smeta) {
-}
-
-void RuleWordAlignmentFeatures::TraversalFeaturesImpl(const SentenceMetadata& smeta,
-                                         const Hypergraph::Edge& edge,
-                                         const vector<const void*>& ant_contexts,
-                                         SparseVector<double>* features,
-                                         SparseVector<double>* estimated_features,
-                                         void* context) const {
-  const TRule& rule = *edge.rule_;
-  ostringstream os;
-  vector<AlignmentPoint> als = rule.als(); 
-  std::vector<AlignmentPoint>::const_iterator xx = als.begin();
-  for (; xx != als.end(); ++xx) {
-    os << "WA:" <<  TD::Convert(rule.f_[xx->s_]) << ":" << TD::Convert(rule.e_[xx->t_]);
-  }
-  features->add_value(FD::Convert(Escape(os.str())), 1);
-}
-
 RuleSourceBigramFeatures::RuleSourceBigramFeatures(const std::string& param) {
 }
 
