@@ -24,6 +24,7 @@
 #include "ff_charset.h"
 #include "ff_wordset.h"
 #include "ff_external.h"
+#include "ff_lexical.h"
 
 
 void register_feature_functions() {
@@ -39,6 +40,7 @@ void register_feature_functions() {
   RegisterFF<SourceWordPenalty>();
   RegisterFF<ArityPenalty>();
   RegisterFF<BLEUModel>();
+  RegisterFF<LexicalFeatures>();
 
   //TODO: use for all features the new Register which requires static FF::usage(false,false) give name
   ff_registry.Register("SpanFeatures", new FFFactory<SpanFeatures>());
