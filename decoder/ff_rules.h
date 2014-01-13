@@ -24,6 +24,19 @@ class RuleIdentityFeatures : public FeatureFunction {
   mutable std::map<const TRule*, int> rule2_fid_;
 };
 
+class RuleWordAlignmentFeatures : public FeatureFunction {
+ public:
+  RuleWordAlignmentFeatures(const std::string& param);
+ protected:
+  virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
+                                     const HG::Edge& edge,
+                                     const std::vector<const void*>& ant_contexts,
+                                     SparseVector<double>* features,
+                                     SparseVector<double>* estimated_features,
+                                     void* context) const;
+  virtual void PrepareForInput(const SentenceMetadata& smeta);
+};
+
 class RuleSourceBigramFeatures : public FeatureFunction {
  public:
   RuleSourceBigramFeatures(const std::string& param);

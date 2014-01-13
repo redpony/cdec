@@ -32,7 +32,7 @@ BleuScorer::Bleu(NgramCounts& counts, const unsigned hyp_len, const unsigned ref
 }
 
 score_t
-BleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+BleuScorer::Score(const vector<WordID>& hyp, const vector<WordID>& ref,
                   const unsigned /*rank*/, const unsigned /*src_len*/)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
@@ -52,7 +52,7 @@ BleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  * NOTE: 0 iff no 1gram match ('grounded')
  */
 score_t
-StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+StupidBleuScorer::Score(const vector<WordID>& hyp, const vector<WordID>& ref,
                         const unsigned /*rank*/, const unsigned /*src_len*/)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
@@ -81,7 +81,7 @@ StupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  * (Nakov et al. '12)
  */
 score_t
-FixedStupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+FixedStupidBleuScorer::Score(const vector<WordID>& hyp, const vector<WordID>& ref,
                         const unsigned /*rank*/, const unsigned /*src_len*/)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
@@ -112,7 +112,7 @@ FixedStupidBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  * NOTE: max is 0.9375 (with N=4)
  */
 score_t
-SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+SmoothBleuScorer::Score(const vector<WordID>& hyp, const vector<WordID>& ref,
                         const unsigned /*rank*/, const unsigned /*src_len*/)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
@@ -143,7 +143,7 @@ SmoothBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  * sum up Ngram precisions
  */
 score_t
-SumBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+SumBleuScorer::Score(const vector<WordID>& hyp, const vector<WordID>& ref,
                         const unsigned /*rank*/, const unsigned /*src_len*/)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
@@ -167,7 +167,7 @@ SumBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  * sum up exp(Ngram precisions)
  */
 score_t
-SumExpBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+SumExpBleuScorer::Score(const vector<WordID>& hyp, const vector<WordID>& ref,
                         const unsigned /*rank*/, const unsigned /*src_len*/)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
@@ -191,7 +191,7 @@ SumExpBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  * sum up exp(weight * log(Ngram precisions))
  */
 score_t
-SumWhateverBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+SumWhateverBleuScorer::Score(const vector<WordID>& hyp, const vector<WordID>& ref,
                         const unsigned /*rank*/, const unsigned /*src_len*/)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
@@ -224,7 +224,7 @@ SumWhateverBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  *       No scaling by src len.
  */
 score_t
-ApproxBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+ApproxBleuScorer::Score(const vector<WordID>& hyp, const vector<WordID>& ref,
                         const unsigned rank, const unsigned src_len)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();
@@ -255,7 +255,7 @@ ApproxBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
  *
  */
 score_t
-LinearBleuScorer::Score(vector<WordID>& hyp, vector<WordID>& ref,
+LinearBleuScorer::Score(const vector<WordID>& hyp, const vector<WordID>& ref,
                         const unsigned rank, const unsigned /*src_len*/)
 {
   unsigned hyp_len = hyp.size(), ref_len = ref.size();

@@ -64,7 +64,7 @@ struct LocalScorer
   vector<score_t> w_;
 
   virtual score_t
-  Score(vector<WordID>& hyp, vector<WordID>& ref, const unsigned rank, const unsigned src_len)=0;
+  Score(const vector<WordID>& hyp, const vector<WordID>& ref, const unsigned rank, const unsigned src_len)=0;
 
   virtual void Reset() {} // only for ApproxBleuScorer, LinearBleuScorer
 
