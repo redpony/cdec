@@ -61,6 +61,11 @@ while(<STDIN>) {
   s/«/"/g;
   s/»/"/g;
   tr/！-～/!-~/;
+  tr/०-९/0-9/; # devangari
+  tr/౦-౯/0-9/; # telugu
+  tr/೦-೯/0-9/; # kannada
+  tr/೦-௯/0-9/; # tamil
+  tr/൦-൯/0-9/; # malayalam
   s/、/,/g;
   # s/。/./g;
   s/…/.../g;
