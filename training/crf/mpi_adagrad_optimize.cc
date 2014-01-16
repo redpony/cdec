@@ -157,11 +157,11 @@ struct TrainingObserver : public DecoderObserver {
 
   void GetGradient(SparseVector<double>* g) const {
     g->clear();
-#if HAVE_CXX11
+#if HAVE_CXX11 && (__GNUC_MINOR__ > 4 || __GNUC__ > 4)
     for (auto& gi : acc_grad) {
 #else
     for (FastSparseVector<prob_t>::const_iterator it = acc_grad.begin(); it != acc_grad.end(); ++it) {
-      pair<unsigned, double>& gi = *it;
+      const pair<unsigned, prob_t>& gi = *it;
 #endif
       g->set_value(gi.first, -gi.second.as_float());
     }
@@ -190,7 +190,7 @@ class AdaGradOptimizer {
       G() {}
   void update(const SparseVector<double>& g, vector<double>* x, SparseVector<double>* sx) {
     if (x->size() > G.size()) G.resize(x->size(), 0.0);
-#if HAVE_CXX11
+#if HAVE_CXX11 && (__GNUC_MINOR__ > 4 || __GNUC__ > 4)
     for (auto& gi : g) {
 #else
     for (SparseVector<double>::const_iterator it = g.begin(); it != g.end(); ++it) {
@@ -220,7 +220,7 @@ class AdaGradL1Optimizer {
       G.resize(x->size(), 0.0);
       u.resize(x->size(), 0.0);
     }
-#if HAVE_CXX11
+#if HAVE_CXX11 && (__GNUC_MINOR__ > 4 || __GNUC__ > 4)
     for (auto& gi : g) {
 #else
     for (SparseVector<double>::const_iterator it = g.begin(); it != g.end(); ++it) {
@@ -236,11 +236,11 @@ class AdaGradL1Optimizer {
     // compute updates (avoid invalidating iterators by putting them all
     // in the vector vupdate and applying them after this)
     vector<pair<unsigned, double>> vupdate;
-#if HAVE_CXX11
+#if HAVE_CXX11 && (__GNUC_MINOR__ > 4 || __GNUC__ > 4)
     for (auto& xi : *sx) {
 #else
-    for (SparseVector<double>::const_iterator it = sx->begin(); it != sx->end(); ++it) {
-      const pair<unsigned,double>& gi = *it;
+    for (SparseVector<double>::iterator it = sx->begin(); it != sx->end(); ++it) {
+      const pair<unsigned,double>& xi = *it;
 #endif
       double z = fabs(u[xi.first] / t) - lambda;
       double s = 1;

@@ -252,6 +252,10 @@ cdef class HypergraphNode:
         self.node = &hg.nodes_[i]
         return self
 
+    property id:
+        def __get__(self):
+            return self.node.id_
+
     property in_edges:
         def __get__(self):
             cdef unsigned i
