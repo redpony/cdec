@@ -45,10 +45,21 @@ my $numnodes = 8;
 my $user = $ENV{"USER"};
 my $pmem = "9g";
 my $basep=50300;
-my $randp=300;
 my $tryp=50;
 my $no_which;
 my $no_cd;
+
+if (-r '/dev/urandom') {
+  open(RR,'</dev/urandom') or die "Failed to read /dev/urandom: $!";
+  my $buffer;
+  die "Failed to read 4 bytes of entropy" unless read(RR,$buffer,4) == 4;
+  close RR;
+  my ($val) = unpack 'L1', $buffer;
+  srand($val);
+} else {
+  srand();
+}
+my $randp=4000;
 
 my $DEBUG=$ENV{DEBUG};
 print STDERR "DEBUG=$DEBUG output enabled.\n" if $DEBUG;
@@ -206,8 +217,7 @@ chomp $host;
 
 
 # find open port
-srand;
-my $port = 50300+int(rand($randp));
+my $port = $basep+int(rand($randp));
 my $endp=$port+$tryp;
 sub listening_port_lines {
     my $quiet=$verbose?'':'2>/dev/null';
