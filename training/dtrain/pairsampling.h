@@ -112,6 +112,7 @@ _PRO_cmp_pair_by_diff_d(pair<ScoredHyp,ScoredHyp> a, pair<ScoredHyp,ScoredHyp> b
 inline void
 PROsampling(vector<ScoredHyp>* s, vector<pair<ScoredHyp,ScoredHyp> >& training, score_t threshold, unsigned max, bool _unused=false, float _also_unused=0)
 {
+  sort(s->begin(), s->end(), cmp_hyp_by_score_d);
   unsigned max_count = 5000, count = 0, sz = s->size();
   bool b = false;
   for (unsigned i = 0; i < sz-1; i++) {
