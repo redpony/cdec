@@ -37,7 +37,8 @@ struct BasicCSplitFeaturesImpl {
       short_range_(FD::Convert("ShortRange")),
       high_freq_(FD::Convert("HighFreq")),
       med_freq_(FD::Convert("MedFreq")),
-      freq_(FD::Convert("Freq")),
+      logfreq_(FD::Convert("LogFreq")),
+      loglogfreq_(FD::Convert("LogLogFreq")),
       in_dict_full_word_(FD::Convert("InDictFullWord")),
       fl1_(FD::Convert("FreqLen1")),
       fl2_(FD::Convert("FreqLen2")),
@@ -86,7 +87,8 @@ struct BasicCSplitFeaturesImpl {
   const int short_range_;
   const int high_freq_;
   const int med_freq_;
-  const int freq_;
+  const int logfreq_;
+  const int loglogfreq_;
   const int in_dict_full_word_;
   const int fl1_;
   const int fl2_;
@@ -139,7 +141,8 @@ void BasicCSplitFeaturesImpl::TraversalFeaturesImpl(
 
   float freq = freq_dict_.LookUp(word);
   if (freq) {
-    features->set_value(freq_, freq);
+    features->set_value(logfreq_, freq);
+    features->set_value(loglogfreq_, log(freq) / log(1.69));
     features->set_value(in_dict_, 1.0);
     if (subword) features->set_value(in_dict_sub_word_, 1.0);
   } else {
