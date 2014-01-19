@@ -41,5 +41,4 @@ Instructions:
 
 If you make use of cdec, please cite:
 
-C. Dyer, A. Lopez, J. Ganitkevitch, J. Weese, F. Ture, P. Blunsom, H. Setiawan, V. Eidelman, and P. Resnik. cdec: A Decoder, Alignment, and Learning Framework for Finite-State and Context-Free Translation Models. In **Proceedings of ACL**, July, 2010. [[bibtex](http://www.cdec-decoder.org/cdec.bibtex.txt)]
-
+C. Dyer, A. Lopez, J. Ganitkevitch, J. Weese, F. Ture, P. Blunsom, H. Setiawan, V. Eidelman, and P. Resnik. cdec: A Decoder, Alignment, and Learning Framework for Finite-State and Context-Free Translation Models. In *Proceedings of ACL*, July, 2010. [[bibtex](http://www.cdec-decoder.org/cdec.bibtex.txt)] [[pdf](http://www.aclweb.org/anthology/P/P10/P10-4002.pdf)]
