@@ -37,3 +37,9 @@ Instructions:
 
 [For more information, refer to the `cdec` documentation](http://www.cdec-decoder.org)
 
+## Citation
+
+If you make use of cdec, please cite:
+
+C. Dyer, A. Lopez, J. Ganitkevitch, J. Weese, F. Ture, P. Blunsom, H. Setiawan, V. Eidelman, and P. Resnik. cdec: A Decoder, Alignment, and Learning Framework for Finite-State and Context-Free Translation Models. In **Proceedings of ACL**, July, 2010. [[bibtex](http://www.cdec-decoder.org/cdec.bibtex.txt)]
+
