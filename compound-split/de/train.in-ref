@@ -1,3 +1,5 @@
+niederlande ||| # niederlande
+hauptstadt ||| # hauptstadt
 untersuchungsausschuss ||| ((('#',0,1),),(('untersuchung',0,1),('untersuchungs',0,1),),(('ausschuss',0,1),),)
 vielleicht ||| # vielleicht
 hochzeiten ||| # hochzeiten
@@ -197,6 +199,10 @@ gespräch ||| # gespräch
 ausschließlich ||| # ausschließlich
 auszustrahlen ||| # auszustrahlen
 veröffentlichung ||| # veröffentlichung
+deutschland ||| # deutschland
+deutschland ||| # deutschland
+deutschland ||| # deutschland
+deutschland ||| # deutschland
 deutschland ||| # deutschland
 exkommunikation ||| # exkommunikation
 hintergrund ||| # hintergrund
@@ -553,6 +559,9 @@ bedrohlich ||| # bedrohlich
 anstieg ||| # anstieg
 kohlendioxids ||| ((('#',0,1),),(('kohle',0,1),('kohlen',0,1),),(('dioxids',0,1),),)
 computermodelle ||| # computer modelle
+hauptbahnhof ||| # haupt bahnhof
+hauptziel ||| # haupt ziel
+hauptunterschied ||| # haupt unterschied
 überhaupt ||| # überhaupt
 schützen ||| # schützen
 welchem ||| # welchem
@@ -815,6 +824,8 @@ reserven ||| # reserven
 wähler ||| # wähler
 bekommen ||| # bekommen
 herausforderer ||| # herausforderer
+herausforederung ||| # herausforderung
+herauseforderungen ||| # herauseforderungen
 romney ||| # romney
 kündigte ||| # kündigte
 wahltag ||| # wahltag
@@ -1199,6 +1210,9 @@ gegenleistung ||| # gegenleistung
 gegenteil ||| # gegenteil
 gegenüber ||| # gegenüber
 gehalten ||| # gehalten
+dienstleistung ||| # dienstleistung
+dienstleistungen ||| # dienstleistungen
+geheimdienst ||| # geheim dienst
 geheimdienste ||| # geheim dienste
 geheimdienstes ||| # geheim dienstes
 geheimdienstkreise ||| # geheim dienst kreise
@@ -2117,3 +2131,401 @@ irakkrieg ||| # irak krieg
 strafsteuer ||| # straf steuer
 regierungsmethode ||| # regierung methode
 rechtsschutzversicherungsgesellschaften ||| # recht schutz versicherung gesellschaften
+umstand ||| # umstand
+auffassungen ||| # auffassungen
+wirklichkeiten ||| # wirklichkeiten
+subkultur ||| # subkultur
+akzeptieren ||| # akzeptieren
+ausdruck ||| # ausdruck
+bürgerlichen ||| # bürgerlichen
+ordnungspolitik ||| # ordnung politik
+verpflichteten ||| # verpflichteten
+gesellschaftsverständnisses ||| # gesellschaft verständnisses
+ultras ||| # ultras
+dschungelcamp ||| # dschungel camp
+verfolgen ||| # verfolgen
+millionen ||| # millionen
+zuschauer ||| # zuschauer
+winfried ||| # winfried
+glatzeder ||| # glatzeder
+schauspieler ||| # schauspieler
+offenbar ||| # offenbar
+aufmerksamkeit ||| # aufmerksamkeit
+wiedergutmachungskurs ||| # wiedergutmachung kurs
+südsudanesische ||| # süd sudanesische
+schlüsselstadt ||| # schlüssel stadt
+rebellen ||| # rebellen
+zurückerobert ||| # zurück erobert
+zehntausende ||| # zehn tausende
+demonstrieren ||| # demonstrieren
+dänemark ||| # dänemark
+gewinnt ||| # gewinnt
+spitzenspiel ||| # spitzenspiel
+spanien ||| # spanien
+agrarindustrie ||| # agrar industrie
+minoische ||| # minoische
+computertechniker ||| # computer techniker
+geheime ||| # geheime
+gesundheitsministerium ||| # gesundheit ministerium
+geschmuggelt ||| # geschmuggelt
+apotheker ||| # apotheker
+lobbyisten ||| # lobbyisten
+thomas ||| # thomas
+bellartz ||| # bellartz
+verkauft ||| # verkauft
+eruption ||| # eruption
+santorin ||| # santorin
+spätbronzezeitliche ||| # spät bronze zeitliche
+ausbruch ||| # ausbruch
+ägäischen ||| # ägäischen
+vulkaninsel ||| # vulkan insel
+santorin ||| # santorin
+bezeichnet ||| # bezeichnet
+jahrhundert ||| # jahrhundert
+minoischen ||| # minoischen
+kultur ||| # kultur
+verbundene ||| # verbundene
+siedlung ||| # siedlung
+akrotiri ||| # akrotiri
+moderner ||| # moderner
+begrub ||| # begrub
+molekulare ||| # molekulare
+lenkraketen ||| # lenk raketen
+schlafende ||| # schlafende
+erreger ||| # erreger
+forscher ||| # forscher
+tierversuch ||| # tier versuch
+gefunden ||| # gefunden
+schlafenden ||| # schlafenden
+anzugreifen ||| # anzugreifen
+hubschrauber ||| # hubschrauber
+aufwachen ||| # aufwachen
+sonnenaufgang ||| ((('#',0,1),),(('sonnenaufgang',0,2),('sonne',0,1),),(('aufgang',0,1),),)
+atlantik ||| # atlantik
+zähneputzen ||| # zähne putzen
+freiheitsstatue ||| # freiheit statue
+dinner ||| # dinner
+central ||| # central
+abendsonne ||| # abend sonne
+derselben ||| # derselben
+wohnung ||| # wohnung
+besser ||| # besser
+jeffrey ||| # jeffrey
+dvorett ||| # dvorett
+immobilienmanager ||| # immobilien manager
+lieblingsprojekts ||| # liebling projekts
+seiner ||| # seiner
+entwicklungsfirma ||| # entwicklung firma
+lächelt ||| # lächelt
+veleba ||| # veleba
+diente ||| # diente
+grundlage ||| # grundlage
+entschädigungsverhandlungen ||| # entschädigung verhandlungen
+gutachten ||| # gutachten
+universitätskrankenhaus ||| # universität krankenhaus
+erarbeitet ||| # erarbeitet
+hauptplattform ||| # haupt plattform
+hollywoodfilme ||| # hollywood filme
+montreal ||| # montreal
+bekommen ||| # bekommen
+geringerer ||| # geringerer
+terminator ||| # terminator
+united ||| # united
+internet ||| # internet
+anteil ||| # anteil
+prozent ||| # prozent
+telekommunikationsunternehmen ||| # telekommunikation unternehmen
+versatel ||| # versatel
+gesichert ||| # gesichert
+durchschnittspreis ||| # durchschnitt preis
+beträgt ||| # beträgt
+unternehmen ||| # unternehmen
+mittwochabend ||| # mittwoch abend
+mitteilte ||| # mitteilte
+nationale ||| # nationale
+sicherheitsberater ||| # sicherheit berater
+norberto ||| # norberto
+gonzales ||| # gonzales
+verurteilte ||| # verurteilte
+vorgehen ||| # vorgehen
+soldaten ||| # soldaten
+militärtransportflugzeug ||| # militär transport flugzeug
+zufrieden ||| # zufrieden
+aktiengesellschaft ||| # aktie gesellschaft
+wiederaufnahme ||| # wiederaufnahme
+tonbandaufnahme ||| # tonband aufnahme
+staatskrise ||| # staat krise
+madagaskars ||| # madagaskars
+präsident ||| # präsident
+bittet ||| # bittet
+schlagworte ||| # schlagworte
+demonstration ||| # demonstration
+putsch ||| # putsch
+machtkampf ||| # macht kampf
+zwischen ||| # zwischen
+opposition ||| # opposition
+regierungspartei ||| # regierung partei
+spitzt ||| # spitzt
+afrikanischen ||| # afrikanischen
+botschaft ||| # botschaft
+befürchtet ||| # befürchtet
+mitglieder ||| # mitglieder
+oppositionspartei ||| # opposition partei
+demonstrieren ||| # demonstrieren
+putsch ||| # putsch
+madagaskars ||| # madagaskars
+präsidenten ||| # präsidenten
+ravalomanana ||| # ravalomanana
+mitglieder ||| # mitglieder
+oppositionspartei ||| # opposition partei
+demonstrieren ||| # demonstrieren
+putsch ||| # putsch
+madagaskars ||| # madagaskars
+präsidenten ||| # präsidenten
+ravalomanana ||| # ravalomanana
+bedrängte ||| # bedrängte
+präsident ||| # präsident
+wandte ||| # wandte
+öffentlichen ||| # öffentlichen
+hilferuf ||| # hilfe ruf
+anhänger ||| # anhänger
+forderte ||| # forderte
+regierungssitz ||| # regierung sitz
+schützen ||| # schützen
+mitglieder ||| # mitglieder
+präsidentengarde ||| # präsidenten garde
+unbestätigten ||| # unbestätigten
+medienberichten ||| # medien berichten
+begonnen ||| # begonnen
+posten ||| # posten
+verlassen ||| # verlassen
+augenzeugen ||| # auge zeugen
+berichteten ||| # berichteten
+gepanzerte ||| # gepanzerte
+fahrzeuge ||| # fahrzeuge
+außenbezirken ||| # außen bezirken
+hauptstadt ||| # hauptstadt
+antananarivo ||| # antananarivo
+botschafter ||| # botschafter
+marquardt ||| # marquardt
+nationalen ||| # nationalen
+fernsehen ||| # fernsehen
+erklärt ||| # erklärt
+steuere ||| # steuere
+bürgerkrieg ||| ((('#',0,1),),(('bürger',0,1),('bürgerkrieg',0,2),),(('krieg',0,1),),)
+botschaft ||| # botschaft
+familien ||| # familien
+mitarbeiter ||| # mitarbeiter
+unbedingt ||| # unbedingt
+benötigt ||| # benötigt
+werden ||| # werden
+bürger ||| # bürger
+verlassen ||| # verlassen
+landes ||| # landes
+aufgefordert ||| # aufgefordert
+deutsche ||| # deutsche
+botschaft ||| # botschaft
+dagegen ||| # dagegen
+wollte ||| # wollte
+absprache ||| # absprache
+anderen ||| # anderen
+europäischen ||| # europäischen
+vertretungen ||| # vertretungen
+zunächst ||| # zunächst
+ausreise ||| # ausreise
+empfehlung ||| # empfehlung
+regierung ||| # regierung
+angeschlagenen ||| # angeschlagenen
+staatspräsidenten ||| # staat präsidenten
+ravalomanana ||| # ravalomanana
+demokratiebewegung ||| # demokratie bewegung
+selbst ||| # selbst
+ernannten ||| # ernannten
+präsidenten ||| # präsidenten
+übergangsregierung ||| # übergang regierung
+rajoelina ||| # rajoelina
+gegenüber ||| # gegenüber
+wochen ||| # wochen
+andauernde ||| # andauernde
+erbitterte ||| # erbitterte
+machtkampf ||| # macht kampf
+menschen ||| # menschen
+gekostet ||| # gekostet
+hunderte ||| # hunderte
+wurden ||| # wurden
+verletzt ||| # verletzt
+modernisierung ||| # modernisierung
+atomwaffen ||| # atom waffen
+umbauten ||| # umbauten
+marine ||| # marine
+russlands ||| # russlands
+präsident ||| # präsident
+medwedew ||| # medwedew
+aufrüstung ||| # aufrüstung
+begründung ||| # begründung
+versuche ||| # versuche
+präsenz ||| # präsenz
+grenzen ||| # grenzen
+landes ||| # landes
+verstärken ||| # verstärken
+anzeige ||| # anzeige
+moskau ||| # moskau
+dmitrij ||| # dmitrij
+medwedew ||| # medwedew
+begründet ||| # begründet
+bebaren ||| # bebaren
+russischen ||| # russischen
+streitkräfte ||| # streit kräfte
+sollten ||| # sollten
+massiv ||| # massiv
+gestärkt ||| # gestärkt
+atomwaffenarsenal ||| ((('#',0,1),),(('atom',0,1),('atomwaffen',0,2),),(('waffen',0,1),),)
+modernisiert ||| # modernisiert
+werden ||| # werden
+westliche ||| # westliche
+militärbündnis ||| # militär bündnis
+versuche ||| # versuche
+präsenz ||| # präsenz
+grenzen ||| # grenzen
+auszubauen ||| # auszubauen
+präsident ||| # präsident
+deshalb ||| # deshalb
+aufrüstung ||| # aufrüstung
+marine ||| # marine
+umfang ||| # umfang
+beginne ||| # beginne
+umfassende ||| # umfassende
+umrüstung ||| # umrüstung
+heeres ||| # heeres
+flotte ||| # flotte
+ernstes ||| # ernstes
+konfliktpotential ||| # konflikt potential
+infrastruktur ||| # infrastruktur
+kampfkraft ||| # kampf kraft
+streitkräfte ||| # streit kräfte
+strategischen ||| # strategischen
+atomwaffen ||| # atom waffen
+internationalen ||| # internationalen
+terrorismus ||| # terrorismus
+gefechtsbereitschaft ||| # gefecht bereitschaft
+strategischen ||| # strategischen
+atomwaffen ||| # atomwaffen
+militärs ||| # militärs
+aktuellen ||| # aktuellen
+haushaltsprobleme ||| # haushalt probleme
+auswirkungen ||| # auswirkungen
+regierung ||| # regierung
+streitkräfteetat ||| # streit kräfte etat
+infolge ||| # infolge
+finanzkrise ||| # finanz krise
+zusammengestrichen ||| # zusammen gestrichen
+weitere ||| # weitere
+kürzungen ||| # kürzungen
+ausgeschlossen ||| # ausgeschlossen
+medwedews ||| # medwedews
+vorgänger ||| # vorgänger
+wladimir ||| # wladimir
+wiederholt ||| # wiederholt
+modernisierung ||| # modernisierung
+waffenarsenals ||| # waffen arsenals
+verkündet ||| # verkündet
+umsetzung ||| # umsetzung
+ankündigungen ||| # ankündigungen
+großteil ||| # groß teil
+atomwaffen ||| # atom waffen
+sowjetzeiten ||| # sowjet zeiten
+stimmung ||| # stimmung
+streitkräften ||| # streit kräften
+rahmen ||| # rahmen
+reform ||| # reform
+offizierkorps ||| # offizier korps
+verkleinert ||| # verkleinert
+werden ||| # werden
+trifolium ||| # trifolium
+umfassende ||| # umfassende
+pflanzengattung ||| # pflanze gattung
+unterfamilie ||| # unterfamilie
+schmetterlingsblütler ||| # schmetterling blütler
+faboideae ||| # faboideae
+pflanzenfamilie ||| # pflanze familie
+hülsenfrüchtler ||| # hülse früchtler
+fabaceae ||| # fabaceae
+gezählt ||| # gezählt
+sprachgebrauch ||| # sprach gebrauch
+allerdings ||| # allerdings
+häufig ||| # häufig
+gattung ||| # gattung
+bezeichnet ||| # bezeichnet
+sondern ||| # sondern
+nahverwandten ||| # nah verwandten
+gattungen ||| # gattungen
+schneckenklee ||| # schnecke klee
+medicago ||| # medicago
+steinklee ||| # stein klee
+melilotus ||| # melilotus
+taxonomisch ||| # taxonomisch
+entfernten ||| # entfernten
+gattung ||| # gattung
+sauerklee ||| # sauer klee
+oxalis ||| # oxalis
+charakteristische ||| # charakteristische
+merkmale ||| # merkmale
+gattung ||| # gattung
+dreifiedrige ||| # drei fiedrige
+blätter ||| # blätter
+vielblütige ||| # viel blütige
+kopfige ||| # kopfige
+blütenstände ||| ((('#',0,1),),(('blüten',0,1),('blüte',0,1),),(('stände',0,1),),)
+kontinenten ||| # kontinenten
+ausnahme ||| # ausnahme
+australiens ||| # australiens
+antarktikas ||| # antarktikas
+natürlich ||| # natürlich
+verbreitet ||| # verbreitet
+australien ||| # australien
+wurden ||| # wurden
+verschiedene ||| # verschiedene
+kleearten ||| # klee arten
+menschen ||| # menschen
+eingeführt ||| # eingeführt
+landwirtschaft ||| # landwirtschaft
+werden ||| # werden
+verschiedene ||| # verschiedene
+kleearten ||| # klee arten
+futterpflanzen ||| # futter pflanzen
+verwendet ||| # verwendet
+kleeanbau ||| # klee anbau
+europa ||| # europa
+nordamerika ||| # nord amerika
+ökonomischer ||| # ökonomischer
+bedeutung ||| # bedeutung
+europa ||| # europa
+jahrhundert ||| # jahrhundert
+christus ||| # christus
+angebaut ||| # angebaut
+fähigkeit ||| # fähigkeit
+symbiose ||| # symbiose
+knöllchenbakterien ||| # knöllchen bakterien
+rhizobiaceae ||| # rhizobiaceae
+wurzeln ||| # wurzeln
+stickstoff ||| # stickstoff
+verbesserung ||| # verbesserung
+bodenfruchtbarkeit ||| # boden fruchtbarkeit
+bedeutend ||| # bedeutend
+kleeblatt ||| # klee blatt
+symbolik ||| # symbolik
+vieler ||| # vieler
+kulturen ||| # kulturen
+eingang ||| # eingang
+repräsentiert ||| # repräsentiert
+dreiheit ||| # dreiheit
+beispiel ||| # beispiel
+christentum ||| # christentum
+dreifaltigkeit ||| # dreifaltigkeit
+weiterhin ||| # weiterhin
+sommer ||| # sommer
+symbolisiert ||| # symbolisiert
+vierblättrige ||| # vier blättrige
+kleeblatt ||| # klee blatt
+abschnittsweise ||| # abschnittsweise
+glücksbringer ||| # glücks bringer
