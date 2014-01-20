@@ -112,6 +112,7 @@ my $new_token_total = 0;
 
 while(<STDIN>){
     chomp();
+    s/\x{0970}/./g;  # dev abbreviation character
     if(/^(\[b\s+|\]b|\]f|\[f\s+)/ || (/^\[[bf]$/) || (/^\s*$/) || /^<DOC/ || /^<\/DOC/) {
 	## markup
 	print STDOUT "$_\n";
