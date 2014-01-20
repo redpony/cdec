@@ -14,6 +14,7 @@ fi
 $SUPPORT/utf8-normalize.sh $NORMARGS |
   $SUPPORT/quote-norm.pl |
   $SUPPORT/tokenizer.pl |
+  $SUPPORT/fix-eos.pl |
   sed $SEDFLAGS -e 's/ al - / al-/g' |
   $SUPPORT/fix-contract.pl |
   sed $SEDFLAGS -e 's/^ //' | sed $SEDFLAGS -e 's/ $//' |
