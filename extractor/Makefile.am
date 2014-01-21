@@ -188,5 +188,5 @@ libextractor_a_SOURCES = \
   translation_table.h \
   vocabulary.h
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare -fopenmp $(GTEST_CPPFLAGS) $(GMOCK_CPPFLAGS)
-AM_LDFLAGS = -fopenmp
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(OPENMP_CXXFLAGS) $(GTEST_CPPFLAGS) $(GMOCK_CPPFLAGS)
+AM_LDFLAGS = $(OPENMP_CXXFLAGS)
