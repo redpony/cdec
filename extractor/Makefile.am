@@ -132,6 +132,14 @@ libextractor_a_SOURCES = \
   features/max_lex_target_given_source.cc \
   features/sample_source_count.cc \
   features/target_given_source_coherent.cc \
+  features/count_source_target.h \
+  features/feature.h \
+  features/is_source_singleton.h \
+  features/is_source_target_singleton.h \
+  features/max_lex_source_given_target.h \
+  features/max_lex_target_given_source.h \
+  features/sample_source_count.h \
+  features/target_given_source_coherent.h \
   grammar.cc \
   grammar_extractor.cc \
   matchings_finder.cc \
@@ -152,7 +160,33 @@ libextractor_a_SOURCES = \
   target_phrase_extractor.cc \
   time_util.cc \
   translation_table.cc \
-  vocabulary.cc
+  vocabulary.cc \
+  alignment.h \
+  backoff_sampler.h \
+  data_array.h \
+  fast_intersector.h \
+  grammar.h \
+  grammar_extractor.h \
+  matchings_finder.h \
+  matchings_sampler.h \
+  matchings_trie.h \
+  phrase.h \
+  phrase_builder.h \
+  phrase_location.h \
+  phrase_location_sampler.h \
+  precomputation.h \
+  rule.h \
+  rule_extractor.h \
+  rule_extractor_helper.h \
+  rule_factory.h \
+  sampler.h \
+  scorer.h \
+  suffix_array.h \
+  suffix_array_sampler.h \
+  target_phrase_extractor.h \
+  time_util.h \
+  translation_table.h \
+  vocabulary.h
 
 AM_CPPFLAGS = -W -Wall -Wno-sign-compare -fopenmp $(GTEST_CPPFLAGS) $(GMOCK_CPPFLAGS)
 AM_LDFLAGS = -fopenmp
