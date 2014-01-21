@@ -12,11 +12,10 @@ SUBDIRS = \
   klm/search \
   decoder \
   training \
-  training/liblbfgs \
   word-aligner \
+  extractor \
   example_extff
 
-#  extractor
 
 EXTRA_DIST = corpus tests python/cdec python/tests python/examples compound-split environment
 AUTOMAKE_OPTIONS = foreign
