@@ -1,7 +1,5 @@
 
-bin_PROGRAMS = compile run_extractor extract
-
-if HAVE_CXX11
+bin_PROGRAMS = sacompile run_extractor extract
 
 EXTRA_PROGRAMS = alignment_test \
     data_array_test \
@@ -114,8 +112,8 @@ vocabulary_test_LDADD = $(GTEST_LDFLAGS) $(GTEST_LIBS) libextractor.a
 
 noinst_LIBRARIES = libextractor.a
 
-compile_SOURCES = compile.cc
-compile_LDADD = libextractor.a
+sacompile_SOURCES = sacompile.cc
+sacompile_LDADD = libextractor.a
 run_extractor_SOURCES = run_extractor.cc
 run_extractor_LDADD = libextractor.a
 extract_SOURCES = extract.cc
@@ -156,6 +154,5 @@ libextractor_a_SOURCES = \
   translation_table.cc \
   vocabulary.cc
 
-AM_CPPFLAGS = -W -Wall -Wno-sign-compare $(CXX11_SWITCH) -fopenmp $(GTEST_CPPFLAGS) $(GMOCK_CPPFLAGS)
+AM_CPPFLAGS = -W -Wall -Wno-sign-compare -fopenmp $(GTEST_CPPFLAGS) $(GMOCK_CPPFLAGS)
 AM_LDFLAGS = -fopenmp
-endif
