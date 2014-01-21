@@ -9,8 +9,6 @@ LIB = ['../decoder', '../utils', '../mteval', '../training/utils', '../klm/lm', 
 LIBS = re.findall('-l([^\s]+)', '@LIBS@')
 CPPFLAGS = re.findall('-[^\s]+', '@CPPFLAGS@ @CXXFLAGS@')
 LDFLAGS = re.findall('-[^\s]+', '@LDFLAGS@')
-# Make sure linker flags go only to the linker
-LDFLAGS = [opt.replace('-R', '-Wl,-rpath,') for opt in LDFLAGS]
 
 ext_modules = [
     Extension(name='cdec._cdec',
