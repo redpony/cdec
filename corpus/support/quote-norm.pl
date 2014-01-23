@@ -37,6 +37,10 @@ while(<STDIN>) {
   s/&\s*#45\s*;\s*&\s*#45\s*;/--/g; # hyphen-minus hyphen-minus
   s/&\s*#45\s*;/--/g;               # hyphen-minus
 
+  # Convert arbitrary hex or decimal HTML entities to actual characters:
+  s/&\#x([0-9A-Fa-f]+);/pack("U", hex($1))/ge;
+  s/&\#([0-9]+);/pack("U", $1)/ge;
+
   # Convert other Windows 1252 characters to UTF-8 
   s/\x{80}/\x{20ac}/g;    # euro sign
   s/\x{95}/\x{2022}/g;    # bullet
@@ -146,10 +150,6 @@ while(<STDIN>) {
   s/\x{fb02}/fl/g;    # "fl" ligature
   s/\x{fb03}/ffi/g;   # "ffi" ligature
   s/\x{fb04}/ffi/g;   # "ffl" ligature
-
-  # Convert arbitrary hex or decimal HTML entities to actual characters:
-  s/&\#x([0-9A-Fa-f]+);/pack("U", hex($1))/ge;
-  s/&\#([0-9]+);/pack("U", $1)/ge;
 
   s/β/ß/g; # WMT 2010 error
 
