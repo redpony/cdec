@@ -22,7 +22,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 m4_define([_BOOST_SERIAL], [m4_translit([
-# serial 16
+# serial 18
 ], [#
 ], [])])
 
@@ -403,15 +403,25 @@ dnl generated only once above (before we start the for loops).
       LDFLAGS=$boost_save_LDFLAGS
       LIBS=$boost_save_LIBS
       if test x"$Boost_lib" = xyes; then
-        # Because Boost is often installed in non-standard locations we want to
-        # hardcode the path to the library (with rpath).  Here we assume that
-        # Libtool's macro was already invoked so we can steal its variable
-        # hardcode_libdir_flag_spec in order to get the right flags for ld.
-        boost_save_libdir=$libdir
-        libdir=$boost_ldpath
-        eval boost_rpath=\"$hardcode_libdir_flag_spec\"
-        libdir=$boost_save_libdir
-        Boost_lib_LDFLAGS="-L$boost_ldpath $boost_rpath"
+        # Check or used cached result of whether or not using -R or -rpath makes sense.
+        # Some implementations of ld, such as for Mac OSX, require -rpath but
+        # -R is the flag known to work on other systems.
+        # https://github.com/tsuna/boost.m4/issues/19
+        AC_CACHE_VAL([boost_cv_rpath_link_ldflag],
+          [for boost_cv_rpath_link_ldflag in -Wl,-R, -Wl,-rpath,; do
+            LDFLAGS="$boost_save_LDFLAGS -L$boost_ldpath $boost_cv_rpath_link_ldflag$boost_ldpath"
+            LIBS="$boost_save_LIBS $Boost_lib_LIBS"
+            _BOOST_AC_LINK_IFELSE([],
+              [boost_rpath_link_ldflag_found=yes
+              break],
+              [boost_rpath_link_ldflag_found=no])
+          done
+          AS_IF([test "x$boost_rpath_link_ldflag_found" != "xyes"],
+            [AC_MSG_ERROR([Unable to determine whether to use -R or -rpath])])
+          LDFLAGS=$boost_save_LDFLAGS
+          LIBS=$boost_save_LIBS
+          ])
+        Boost_lib_LDFLAGS="-L$boost_ldpath $boost_cv_rpath_link_ldflag$boost_ldpath"
         Boost_lib_LDPATH="$boost_ldpath"
         break 6
       else
@@ -496,21 +506,21 @@ BOOST_DEFUN([Chrono],
 # added as of 1.35.0.  If we have a version <1.35, we must not attempt to
 # find Boost.System as it didn't exist by then.
 if test $boost_major_version -ge 135; then
-  BOOST_SYSTEM([$1])
+BOOST_SYSTEM([$1])
 fi # end of the Boost.System check.
-boost_system_save_LIBS=$LIBS
-boost_system_save_LDFLAGS=$LDFLAGS
+boost_filesystem_save_LIBS=$LIBS
+boost_filesystem_save_LDFLAGS=$LDFLAGS
 m4_pattern_allow([^BOOST_SYSTEM_(LIBS|LDFLAGS)$])dnl
 LIBS="$LIBS $BOOST_SYSTEM_LIBS"
 LDFLAGS="$LDFLAGS $BOOST_SYSTEM_LDFLAGS"
 BOOST_FIND_LIB([chrono], [$1],
-               [boost/chrono.hpp],
-               [boost::chrono::system_clock::time_point d = boost::chrono::system_clock::now();])
+                [boost/chrono.hpp],
+                [boost::chrono::thread_clock d;])
 if test $enable_static_boost = yes && test $boost_major_version -ge 135; then
-    AC_SUBST([BOOST_SYSTEM_LIBS], ["$BOOST_SYSTEM_LIBS $BOOST_SYSTEM_LIBS"])
+    AC_SUBST([BOOST_FILESYSTEM_LIBS], ["$BOOST_FILESYSTEM_LIBS $BOOST_SYSTEM_LIBS"])
 fi
-LIBS=$boost_system_save_LIBS
-LDFLAGS=$boost_system_save_LDFLAGS
+LIBS=$boost_filesystem_save_LIBS
+LDFLAGS=$boost_filesystem_save_LDFLAGS
 
 ])# BOOST_CHRONO
 
@@ -524,6 +534,14 @@ BOOST_FIND_HEADER([boost/lexical_cast.hpp])
 ])# BOOST_CONVERSION
 
 
+# BOOST_CRC()
+# -----------
+# Look for Boost.CRC
+BOOST_DEFUN([CRC],
+[BOOST_FIND_HEADER([boost/crc.hpp])
+])# BOOST_CRC
+
+
 # BOOST_DATE_TIME([PREFERRED-RT-OPT])
 # -----------------------------------
 # Look for Boost.Date_Time.  For the documentation of PREFERRED-RT-OPT, see the
@@ -534,25 +552,6 @@ BOOST_DEFUN([Date_Time],
                 [boost::posix_time::ptime t;])
 ])# BOOST_DATE_TIME
 
-# BOOST_TIMER([PREFERRED-RT-OPT])
-# -----------------------------------
-# Look for Boost.Timer.  For the documentation of PREFERRED-RT-OPT, see the
-# documentation of BOOST_FIND_LIB above.
-BOOST_DEFUN([Timer],
-[#check for Boost.System
-BOOST_SYSTEM([$1])
-boost_system_save_LIBS=$LIBS
-boost_system_save_LDFLAGS=$LDFLAGS
-m4_pattern_allow([^BOOST_SYSTEM_(LIBS|LDFLAGS)$])dnl
-LIBS="$LIBS $BOOST_SYSTEM_LIBS"
-LDFLAGS="$LDFLAGS $BOOST_SYSTEM_LDFLAGS"
-BOOST_FIND_LIB([timer], [$1],
-                [boost/timer/timer.hpp],
-                [boost::timer::auto_cpu_timer t;])
-AC_SUBST([BOOST_SYSTEM_LIBS], ["$BOOST_SYSTEM_LIBS $BOOST_SYSTEM_LIBS"])
-LIBS=$boost_system_save_LIBS
-LDFLAGS=$boost_system_save_LDFLAGS
-])# BOOST_TIMER
 
 # BOOST_FILESYSTEM([PREFERRED-RT-OPT])
 # ------------------------------------
@@ -605,6 +604,14 @@ BOOST_DEFUN([Format],
 # Look for Boost.Function
 BOOST_DEFUN([Function],
 [BOOST_FIND_HEADER([boost/function.hpp])])
+
+
+# BOOST_GEOMETRY()
+# ----------------
+# Look for Boost.Geometry (new since 1.47.0).
+BOOST_DEFUN([Geometry],
+[BOOST_FIND_HEADER([boost/geometry.hpp])
+])# BOOST_GEOMETRY
 
 
 # BOOST_GRAPH([PREFERRED-RT-OPT])
@@ -802,6 +809,14 @@ BOOST_DEFUN([Signals],
 ])# BOOST_SIGNALS
 
 
+# BOOST_SIGNALS2()
+# ----------------
+# Look for Boost.Signals2 (new since 1.39.0).
+BOOST_DEFUN([Signals2],
+[BOOST_FIND_HEADER([boost/signals2.hpp])
+])# BOOST_SIGNALS2
+
+
 # BOOST_SMART_PTR()
 # -----------------
 # Look for Boost.SmartPtr
@@ -949,6 +964,17 @@ BOOST_DEFUN([Variant],
 [BOOST_FIND_HEADER([boost/variant/variant_fwd.hpp])
 BOOST_FIND_HEADER([boost/variant.hpp])])
 
+# BOOST_POINTERCONTAINER()
+# ------------------------
+# Look for Boost.PointerContainer
+BOOST_DEFUN([Pointer_Container],
+[BOOST_FIND_HEADER([boost/ptr_container/ptr_deque.hpp])
+BOOST_FIND_HEADER([boost/ptr_container/ptr_list.hpp])
+BOOST_FIND_HEADER([boost/ptr_container/ptr_vector.hpp])
+BOOST_FIND_HEADER([boost/ptr_container/ptr_array.hpp])
+BOOST_FIND_HEADER([boost/ptr_container/ptr_set.hpp])
+BOOST_FIND_HEADER([boost/ptr_container/ptr_map.hpp])
+])# BOOST_POINTERCONTAINER
 
 # BOOST_WAVE([PREFERRED-RT-OPT])
 # ------------------------------

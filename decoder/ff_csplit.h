@@ -10,6 +10,7 @@ class BasicCSplitFeaturesImpl;
 class BasicCSplitFeatures : public FeatureFunction {
  public:
   BasicCSplitFeatures(const std::string& param);
+  virtual void PrepareForInput(const SentenceMetadata& smeta);
  protected:
   virtual void TraversalFeaturesImpl(const SentenceMetadata& smeta,
                                      const HG::Edge& edge,

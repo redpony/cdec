@@ -65,7 +65,7 @@ my $Split_AposD  = 1;  ## 'd
 
 
 ### some patterns
-my $common_right_punc = '\.|\,|\;|:|\!|\?|\"|\)|\]|\}|\>|\-';
+my $common_right_punc = '\x{0964}|\.|\,|\;|\!|:|\?|\"|\)|\]|\}|\>|\-';
 
 #### step 1: read files
 
@@ -112,7 +112,7 @@ my $new_token_total = 0;
 
 while(<STDIN>){
     chomp();
-
+    s/\x{0970}/./g;  # dev abbreviation character
     if(/^(\[b\s+|\]b|\]f|\[f\s+)/ || (/^\[[bf]$/) || (/^\s*$/) || /^<DOC/ || /^<\/DOC/) {
 	## markup
 	print STDOUT "$_\n";
@@ -121,7 +121,7 @@ while(<STDIN>){
 
     my $orig_num = 0;
     my $deep_proc_num = 0;
-
+    s/(\x{0964}+)/ $1/g;  # Devangari end of sentence
     my $new_line = proc_line($_, \$orig_num, \$deep_proc_num);
 
     $orig_token_total += $orig_num;
@@ -148,7 +148,8 @@ while(<STDIN>){
 	$new_line =~ s/(set|src|tgt|trg)/ $1/g;
     }
 
-    print STDOUT " $new_line\n";
+    chomp $new_line;
+    print STDOUT "$new_line\n";
 }
 
 ########################################################################
@@ -228,6 +229,7 @@ sub proc_token {
 
     ## step 1: check the most common case
     if($token =~ /^[a-z0-9\p{Cyrillic}\p{Greek}\p{Hebrew}\p{Han}\p{Arabic}\p{Devanagari}]+$/i){
+    #if($token =~ /^[a-z0-9\p{Cyrillic}\p{Greek}\p{Hebrew}\p{Han}\p{Arabic}]+$/i){
 	### most common cases
 	return $token;
     }
@@ -363,7 +365,7 @@ sub deep_proc_token {
 
     ##### step 0: if it mades up of all puncts, remove one punct at a time.
     if($line !~ /[\p{Cyrillic}\p{Greek}\p{Hebrew}\p{Han}\p{Arabic}\p{Devanagari}a-zA-Z\d]/){
-	if($line =~ /^(\!+|\@+|\++|\=+|\*+|\<+|\>+|\|+|\?+|\.+|\-+|\_+|\&+)$/){
+	if($line =~ /^(\!+|\@+|\++|\=+|\*+|\<+|\>+|\|+|\?+|\x{0964}+|\.+|\-+|\_+|\&+)$/){
 	    ## ++ @@@@ !!! ....
 	    return $line;
 	}
@@ -454,7 +456,7 @@ sub deep_proc_token {
 	### deal with ': e.g., 's, 't, 'm, 'll, 're, 've, n't
 
 	##  'there => ' there   '98 => the same
-	$suc += ($line =~ s/^(\'+)([a-z]+)/ $1 $2/gi);
+	$suc += ($line =~ s/^(\'+)([a-z\p{Cyrillic}\p{Greek}\p{Hebrew}\p{Han}\p{Arabic}\p{Devanagari}]+)/ $1 $2/gi);
 	
 	##  note that \' and \. could interact: e.g.,  U.S.'s;   're.
 	if($Split_NAposT && ($line =~ /^(.*[a-z]+)(n\'t)([\.]*)$/i)){
@@ -664,10 +666,10 @@ sub deep_proc_token {
 	    return $line;
 	}
 
-	if($line =~ /^(([a-z]\.)+)(\.*)$/i){
+        if ($line =~ /^(([a-z]|ए|बी|सी|डी|ई|एफ|जी|एच|आई|जे|के|एल|एम|एन|ओ|पी|क़यू|आर|एस|टी|यू|वी|डबल्यू|एक्स|वाई|ज़ेड|ज़ी)(\.([a-z]|ए|बी|सी|डी|ई|एफ|जी|एच|आई|जे|के|एल|एम|एन|ओ|पी|क़यू|आर|एस|टी|यू|वी|डबल्यू|एक्स|वाई|ज़ेड|ज़ी))+)(\.?)(\.*)$/i){
 	    ## I.B.M.
-	    my $t1 = $1;
-	    my $t3 = $3;
+	    my $t1 = $1 . $5;
+	    my $t3 = $6;
 	    return $t1 . " ". proc_token($t3);
 	}
 
@@ -700,11 +702,4 @@ sub deep_proc_token {
     ## no pattern applies
     return $line;
 }
-
-
-
-
-
-
-		   
 
