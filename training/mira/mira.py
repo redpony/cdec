@@ -143,6 +143,8 @@ def main():
   parser.add_argument('--pass-suffix', 
                       help='multipass decoding iteration. see documentation '
                            'at www.cdec-decoder.org for more information')
+  parser.add_argument('-v', '--verbose',
+                      help='more verbose mira optimizers')
   args = parser.parse_args()
 
   args.metric = args.metric.upper()
@@ -352,6 +354,8 @@ def optimize(args, script_dir, dev_size):
       decoder_cmd += ' -a'
     if not args.no_pseudo:
       decoder_cmd += ' -e'
+    if args.verbose:
+      decoder_cmd += ' -v'
     
     #always use fork 
     parallel_cmd = '{0} --use-fork -e {1} -j {2} --'.format(
