@@ -265,6 +265,8 @@ inline unsigned int UTF8Len(unsigned char x) {
   else if ((x >> 5) == 0x06) return 2;
   else if ((x >> 4) == 0x0e) return 3;
   else if ((x >> 3) == 0x1e) return 4;
+  else if ((x >> 2) == 0x3e) return 5;
+  else if ((x >> 1) == 0x7e) return 6;
   else return 0;
 }
 

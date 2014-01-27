@@ -8,7 +8,11 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <omp.h>
+#if HAVE_OPEN_MP
+ #include <omp.h>
+#else
+  const unsigned omp_get_num_threads() { return 1; }
+#endif
 
 #include "alignment.h"
 #include "data_array.h"
