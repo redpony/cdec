@@ -102,7 +102,7 @@ struct ChartState {
   }
 
   bool operator<(const ChartState &other) const {
-    return Compare(other) == -1;
+    return Compare(other) < 0;
   }
 
   void ZeroRemaining() {

@@ -447,7 +447,7 @@ def optimize(args, script_dir, dev_size):
     new_weights_file = '{}/weights.{}'.format(args.output_dir, i+1)
     last_weights_file = '{}/weights.{}'.format(args.output_dir, i)
     i += 1
-    weight_files = args.output_dir+'/weights.pass*/weights.mira-pass*[0-9].gz'
+    weight_files = weightdir+'/weights.mira-pass*.*[0-9].gz'
     average_weights(new_weights_file, weight_files)
 
   logging.info('BEST ITERATION: {} (SCORE={})'.format(
