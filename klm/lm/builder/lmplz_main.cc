@@ -33,7 +33,10 @@ int main(int argc, char *argv[]) {
     po::options_description options("Language model building options");
     lm::builder::PipelineConfig pipeline;
 
+    std::string text, arpa;
+
     options.add_options()
+      ("help", po::bool_switch(), "Show this help message")
       ("order,o", po::value<std::size_t>(&pipeline.order)
 #if BOOST_VERSION >= 104200
          ->required()
@@ -47,8 +50,13 @@ int main(int argc, char *argv[]) {
       ("vocab_estimate", po::value<lm::WordIndex>(&pipeline.vocab_estimate)->default_value(1000000), "Assume this vocabulary size for purposes of calculating memory in step 1 (corpus count) and pre-sizing the hash table")
       ("block_count", po::value<std::size_t>(&pipeline.block_count)->default_value(2), "Block count (per order)")
       ("vocab_file", po::value<std::string>(&pipeline.vocab_file)->default_value(""), "Location to write vocabulary file")
-      ("verbose_header", po::bool_switch(&pipeline.verbose_header), "Add a verbose header to the ARPA file that includes information such as token count, smoothing type, etc.");
-    if (argc == 1) {
+      ("verbose_header", po::bool_switch(&pipeline.verbose_header), "Add a verbose header to the ARPA file that includes information such as token count, smoothing type, etc.")
+      ("text", po::value<std::string>(&text), "Read text from a file instead of stdin")
+      ("arpa", po::value<std::string>(&arpa), "Write ARPA to a file instead of stdout");
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, options), vm);
+
+    if (argc == 1 || vm["help"].as<bool>()) {
       std::cerr << 
         "Builds unpruned language models with modified Kneser-Ney smoothing.\n\n"
         "Please cite:\n"
@@ -66,12 +74,17 @@ int main(int argc, char *argv[]) {
         "setting the temporary file location (-T) and sorting memory (-S) is recommended.\n\n"
         "Memory sizes are specified like GNU sort: a number followed by a unit character.\n"
         "Valid units are \% for percentage of memory (supported platforms only) and (in\n"
-        "increasing powers of 1024): b, K, M, G, T, P, E, Z, Y.  Default is K (*1024).\n\n";
+        "increasing powers of 1024): b, K, M, G, T, P, E, Z, Y.  Default is K (*1024).\n";
+      uint64_t mem = util::GuessPhysicalMemory();
+      if (mem) {
+        std::cerr << "This machine has " << mem << " bytes of memory.\n\n";
+      } else {
+        std::cerr << "Unable to determine the amount of memory on this machine.\n\n";
+      } 
       std::cerr << options << std::endl;
       return 1;
     }
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, options), vm);
+
     po::notify(vm);
 
     // required() appeared in Boost 1.42.0.
@@ -92,9 +105,17 @@ int main(int argc, char *argv[]) {
     initial.adder_out.block_count = 2;
     pipeline.read_backoffs = initial.adder_out;
 
+    util::scoped_fd in(0), out(1);
+    if (vm.count("text")) {
+      in.reset(util::OpenReadOrThrow(text.c_str()));
+    }
+    if (vm.count("arpa")) {
+      out.reset(util::CreateOrThrow(arpa.c_str()));
+    }
+
     // Read from stdin
     try {
-      lm::builder::Pipeline(pipeline, 0, 1);
+      lm::builder::Pipeline(pipeline, in.release(), out.release());
     } catch (const util::MallocException &e) {
       std::cerr << e.what() << std::endl;
       std::cerr << "Try rerunning with a more conservative -S setting than " << vm["memory"].as<std::string>() << std::endl;
