@@ -133,6 +133,7 @@ static const int MAX_SMO = 10;
 int cur_pass;
 
 struct HypothesisInfo {
+  HypothesisInfo() : mt_metric(), hope(), fear(), alpha(), oracle_loss() {}
   SparseVector<double> features;
   vector<WordID> hyp;
   double mt_metric;
@@ -414,8 +415,9 @@ struct TrainingObserver : public DecoderObserver {
   template <class Filter>  
   void UpdateOracles(int sent_id, const Hypergraph& forest) {
 
-	if (stream) sent_id = 0;
+    if (stream) sent_id = 0;
     bool PRINT_LIST= false;
+    assert(sent_id < oracles.size());
     vector<boost::shared_ptr<HypothesisInfo> >& cur_good = oracles[sent_id].good;
     vector<boost::shared_ptr<HypothesisInfo> >& cur_bad = oracles[sent_id].bad;
     //TODO: look at keeping previous iterations hypothesis lists around
@@ -810,7 +812,6 @@ int main(int argc, char** argv) {
       }
       else if(optimizer == 1) //sgd - nonadapted step size
 	{
-	   
 	  lambdas += (cur_good.features) * max_step_size;
 	  lambdas -= (cur_bad.features) * max_step_size;
 	}
@@ -928,11 +929,11 @@ int main(int argc, char** argv) {
 
 			lambdas += (cur_pair[1]->features) * step_size;
 			lambdas -= (cur_pair[0]->features) * step_size;
-			cerr << " Lambdas " << lambdas << endl;
-			//reload weights based on update
 
+			//reload weights based on update
 			dense_weights.clear();
 			lambdas.init_vector(&dense_weights);
+                        ShowLargestFeatures(dense_weights);
 			dense_w_local = dense_weights;
 			iter++;
 					
@@ -971,7 +972,7 @@ int main(int argc, char** argv) {
 
 	    for(int u=0;u!=cur_constraint.size();u++)	
 	      { 
-		cerr << cur_constraint[u]->alpha << " " << cur_constraint[u]->hope << " " << cur_constraint[u]->fear << endl;
+		cerr << "alpha=" << cur_constraint[u]->alpha << " hope=" << cur_constraint[u]->hope << " fear=" << cur_constraint[u]->fear << endl;
 		temp_objective += cur_constraint[u]->alpha * cur_constraint[u]->fear;
 	      }
 	    objective += temp_objective;
