@@ -119,12 +119,12 @@ def main():
   parser.add_argument('--metric-scale', type=int, default=1, metavar='N',
                       help='scale MT loss by this amount when computing'
                       ' hope/fear candidates')
-  parser.add_argument('-k', '--kbest-size', type=int, default=250, metavar='N', 
+  parser.add_argument('-k', '--kbest-size', type=int, default=500, metavar='N', 
                       help='size of k-best list to extract from forest')
   parser.add_argument('--update-size', type=int, metavar='N', 
                       help='size of k-best list to use for update. defaults to '
                       'equal kbest-size (applies to optimizer 5)')
-  parser.add_argument('--step-size', type=float, default=0.01, 
+  parser.add_argument('--step-size', type=float, default=0.001, 
                       help='controls aggresiveness of update')
   parser.add_argument('--hope', type=int, default=1, choices=range(1,3),
                      help='how to select hope candidate. options: '
