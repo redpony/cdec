@@ -937,7 +937,8 @@ int main(int argc, char** argv) {
 			//reload weights based on update
 			dense_weights.clear();
 			lambdas.init_vector(&dense_weights);
-                        ShowLargestFeatures(dense_weights);
+                        if (dense_weights.size() < 500)
+                          ShowLargestFeatures(dense_weights);
 			dense_w_local = dense_weights;
 			iter++;
 					
@@ -1004,7 +1005,7 @@ int main(int argc, char** argv) {
     if (!stream) {
 		int node_id = rng->next() * 100000;
 		cerr << " Writing weights to " << node_id << endl;
-		Weights::ShowLargestFeatures(dense_weights);
+		//Weights::ShowLargestFeatures(dense_weights);
 		dots = 0;
 		ostringstream os;
 		os << weights_dir << "/weights.mira-pass" << (cur_pass < 10 ? "0" : "") << cur_pass << "." << node_id << ".gz";
