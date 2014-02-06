@@ -2,6 +2,7 @@
 #include <vector>
 #include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
+#include "fast_lexical_cast.hpp"
 #include "hash.h"
 #include "translator.h"
 #include "hg.h"
@@ -353,15 +354,31 @@ bool SCFGTranslator::TranslateImpl(const string& input,
   return pimpl_->Translate(input, smeta, weights, minus_lm_forest);
 }
 
-/*
-Check for grammar pointer in the sentence markup, for use with sentence specific grammars
- */
+//
+// Check for extra grammars in the sentence markup, for use with sentence specific grammars
+//
 void SCFGTranslator::ProcessMarkupHintsImpl(const map<string, string>& kv) {
-  map<string,string>::const_iterator it = kv.find("grammar");
-  if (it != kv.end()) {
-    TextGrammar* sentGrammar = new TextGrammar(it->second);
+  if (kv.find("grammar0") != kv.end()) {
+    cerr << "SGML tag grammar0 is not expected (order is: grammar, grammar1, grammar2, ...)\n";
+    abort();
+  }
+  unsigned gc = 0;
+  set<string> loaded;
+  while(true) {
+    string gkey = "grammar";
+    if (gc > 0) gkey += boost::lexical_cast<string>(gc);
+    ++gc;
+    map<string,string>::const_iterator it = kv.find(gkey);
+    if (it == kv.end()) break;
+    const string& gfile = it->second;
+    if (loaded.count(gfile) == 1) {
+      cerr << "Attempting to load " << gfile << " twice!\n";
+      abort();
+    }
+    loaded.insert(gfile);
+    TextGrammar* sentGrammar = new TextGrammar(gfile);
     sentGrammar->SetMaxSpan(pimpl_->max_span_limit);
-    sentGrammar->SetGrammarName(it->second);
+    sentGrammar->SetGrammarName(gfile);
     pimpl_->AddSupplementalGrammar(GrammarPtr(sentGrammar));
   }
 }
