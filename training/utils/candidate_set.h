@@ -47,7 +47,7 @@ class CandidateSet {
   void ReadFromFile(const std::string& file);
   void WriteToFile(const std::string& file) const;
   void AddKBestCandidates(const Hypergraph& hg, size_t kbest_size, const SegmentEvaluator* scorer = NULL);
-  // TODO add code to do unique k-best
+  void AddUniqueKBestCandidates(const Hypergraph& hg, size_t kbest_size, const SegmentEvaluator* scorer = NULL);
   // TODO add code to draw k samples
 
  private:

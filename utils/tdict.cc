@@ -70,7 +70,7 @@ struct add_wordids {
 
 }
 
-void TD::ConvertSentence(std::string const& s, std::vector<WordID>* ids) {
+void TD::ConvertSentence(std::string const& s, std::vector<WordID>* ids, unsigned start) {
   ids->clear();
-  VisitTokens(s,add_wordids(ids));
+  VisitTokens(s,add_wordids(ids),start);
 }

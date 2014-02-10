@@ -13,6 +13,40 @@ DocumentScorer::~DocumentScorer() {}
 
 DocumentScorer::DocumentScorer() {}
 
+DocumentScorer::DocumentScorer(const EvaluationMetric* metric,
+                               const string& src_ref_file) {
+  const WordID kDIV = TD::Convert("|||");
+  assert(!src_ref_file.empty());
+  cerr << "Loading source and references from " << src_ref_file << "...\n";
+  ReadFile rf(src_ref_file);
+  istream& in = *rf.stream();
+  unsigned lc = 0;
+  string src_ref;
+  vector<WordID> tmp;
+  vector<vector<WordID> > refs;
+  while(getline(in, src_ref)) {
+    ++lc;
+    size_t end_src = src_ref.find(" ||| ");
+    if (end_src == string::npos) {
+      cerr << "Expected SRC ||| REF [||| REF2 ||| REF3 ...] in line " << lc << endl;
+      abort();
+    }
+    refs.clear();
+    tmp.clear();
+    TD::ConvertSentence(src_ref, &tmp, end_src + 5);
+    unsigned last = 0;
+    for (unsigned j = 0; j < tmp.size(); ++j) {
+      if (tmp[j] == kDIV) {
+        refs.push_back(vector<WordID>(tmp.begin() + last, tmp.begin() + j));
+        last = j + 1;
+      }
+    }
+    refs.push_back(vector<WordID>(tmp.begin() + last, tmp.end()));
+    scorers_.push_back(metric->CreateSegmentEvaluator(refs));
+    scorers_.back()->src = src_ref.substr(0, end_src);
+  }
+}
+
 void DocumentScorer::Init(const EvaluationMetric* metric,
             const vector<string>& ref_files,
             const string& src_file,

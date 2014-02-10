@@ -9,7 +9,7 @@
 
 struct TD {
   static WordID end(); // next id to be assigned; [begin,end) give the non-reserved tokens seen so far
-  static void ConvertSentence(std::string const& sent, std::vector<WordID>* ids);
+  static void ConvertSentence(std::string const& sent, std::vector<WordID>* ids, unsigned start=0);
   static void GetWordIDs(const std::vector<std::string>& strings, std::vector<WordID>* ids);
   static std::string GetString(const std::vector<WordID>& str);
   static std::string GetString(WordID const* i,WordID const* e);
