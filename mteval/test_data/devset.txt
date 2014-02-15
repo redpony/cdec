@@ -1,0 +1,2 @@
+Quelltext hier . ||| source text here . ||| original text . ||| some source text .
+ein anderer Satz . ||| another sentence . ||| a different sentece .
