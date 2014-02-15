@@ -171,4 +171,19 @@ void CandidateSet::AddKBestCandidates(const Hypergraph& hg, size_t kbest_size, c
   Dedup();
 }
 
+void CandidateSet::AddUniqueKBestCandidates(const Hypergraph& hg, size_t kbest_size, const SegmentEvaluator* scorer) {
+  typedef KBest::KBestDerivations<vector<WordID>, ESentenceTraversal, KBest::FilterUnique> K;
+  K kbest(hg, kbest_size);
+
+  for (unsigned i = 0; i < kbest_size; ++i) {
+    const K::Derivation* d =
+      kbest.LazyKthBest(hg.nodes_.size() - 1, i);
+    if (!d) break;
+    cs.push_back(Candidate(d->yield, d->feature_values));
+    if (scorer)
+      scorer->Evaluate(d->yield, &cs.back().eval_feats);
+  }
+  Dedup();
+}
+
 }

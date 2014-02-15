@@ -3,6 +3,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
+#include "ns_docscorer.h"
 #include "ns.h"
 #include "tdict.h"
 #include "scorer.h"
@@ -221,6 +222,14 @@ BOOST_AUTO_TEST_CASE(NewScoreAPI) {
   cerr << metric->ComputeScore(stats1) << endl;
   //SufficientStats statse("IBM_BLEU 53 32 18 11 65 63 61 59 65 72");
   //cerr << metric->ComputeScore(statse) << endl;
+}
+
+BOOST_AUTO_TEST_CASE(HybridSourceReferenceFileFormat) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
+  EvaluationMetric* metric = EvaluationMetric::Instance("IBM_BLEU");
+  DocumentScorer ds(metric, path + "/devset.txt");
+  BOOST_CHECK_EQUAL(2, ds.size());
+  BOOST_CHECK_EQUAL("Quelltext hier .", ds[0]->src);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

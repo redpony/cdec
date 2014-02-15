@@ -78,6 +78,7 @@ inline const SufficientStats operator-(const SufficientStats& a, const Sufficien
 struct SegmentEvaluator {
   virtual ~SegmentEvaluator();
   virtual void Evaluate(const std::vector<WordID>& hyp, SufficientStats* out) const = 0;
+  std::string src; // this may not always be available
 };
 
 // Instructions for implementing a new metric

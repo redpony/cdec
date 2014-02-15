@@ -35,6 +35,7 @@ die "Don't know about language: $LANG\n" unless -d "./$LANG";
 my $CONFIG="cdec-$LANG.ini";
 die "Can't find $CONFIG" unless -f $CONFIG;
 die "--output must be '1best' or 'plf'\n" unless ($OUTPUT =~ /^(plf|1best)$/);
+check_dependencies($CONFIG, $LANG);
 print STDERR "(Run with --help for options)\n";
 print STDERR "LANGUAGE: $LANG\n";
 print STDERR "  OUTPUT: $OUTPUT\n";
@@ -146,3 +147,31 @@ Usage: $0 [OPTIONS] < file.txt
 EOT
   exit(1);
 }
+
+sub check_dependencies {
+  my ($conf, $lang) = @_;
+  my @files = ();
+  open F, "<$conf" or die "Can't read $conf: $!";
+  while(<F>){
+    chomp;
+    my @x = split /\s+/;
+    for my $f (@x) {
+      push @files, $f if ($f =~ /\.gz$/);
+    }
+  }
+  close F;
+  my $c = 0;
+  for my $file (@files) {
+    $c++ if -f $file;
+  }
+  if ($c != scalar @files) {
+    print STDERR <<EOT;
+Missing data dependencies; to install, please run:
+
+  $script_dir/install-data-deps.sh
+
+EOT
+    exit(1);
+  }
+}
+

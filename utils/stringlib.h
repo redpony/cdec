@@ -242,6 +242,21 @@ void VisitTokens(std::string const& s,F f) {
   VisitTokens(mp.p,mp.p+s.size(),f);
 }
 
+template <class F>
+void VisitTokens(std::string const& s,F f, unsigned start) {
+  if (0) {
+  std::vector<std::string> ss=SplitOnWhitespace(s);
+  for (unsigned i=0;i<ss.size();++i)
+    f(ss[i]);
+  return;
+  }
+  //FIXME:
+  if (s.empty()) return;
+  mutable_c_str mp(s);
+  SLIBDBG("mp="<<mp.p);
+  VisitTokens(mp.p+start,mp.p+s.size(),f);
+}
+
 inline void SplitCommandAndParam(const std::string& in, std::string* cmd, std::string* param) {
   cmd->clear();
   param->clear();
