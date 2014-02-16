@@ -58,6 +58,7 @@ void register_feature_functions() {
   ff_registry.Register("KLanguageModel", new KLanguageModelFactory());
   ff_registry.Register("NonLatinCount", new FFFactory<NonLatinCount>);
   ff_registry.Register("RuleShape", new FFFactory<RuleShapeFeatures>);
+  ff_registry.Register("RuleShape2", new FFFactory<RuleShapeFeatures2>);
   ff_registry.Register("RelativeSentencePosition", new FFFactory<RelativeSentencePosition>);
   ff_registry.Register("LexNullJump", new FFFactory<LexNullJump>);
   ff_registry.Register("NewJump", new FFFactory<NewJump>);
