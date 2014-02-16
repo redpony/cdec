@@ -93,6 +93,8 @@ while(<STDIN>) {
   s/\x{ab}/\"/g;      # opening guillemet
   s/\x{bb}/\"/g;      # closing guillemet
   s/\x{0301}/'/g;     # combining acute accent
+  s/\x{203a}/\"/g;    # angle quotation mark
+  s/\x{2039}/\"/g;    # angle quotation mark
 
   # Space inverted punctuation:
   s/¡/ ¡ /g;
