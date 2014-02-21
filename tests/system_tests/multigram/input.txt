@@ -1,0 +1,1 @@
+<seg id="0" grammar="g1.scfg" grammar1="g2.scfg">foo bar</seg>
