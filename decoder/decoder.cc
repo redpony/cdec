@@ -408,7 +408,7 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
         ("max_translation_sample,X", po::value<int>(), "Sample the max translation from the chart")
         ("pb_max_distortion,D", po::value<int>()->default_value(4), "Phrase-based decoder: maximum distortion")
         ("cll_gradient,G","Compute conditional log-likelihood gradient and write to STDOUT (src & ref required)")
-        ("get_oracle_forest,o", "Calculate rescored hypregraph using approximate BLEU scoring of rules")
+        ("get_oracle_forest,o", "Calculate rescored hypergraph using approximate BLEU scoring of rules")
         ("feature_expectations","Write feature expectations for all features in chart (**OBJ** will be the partition)")
         ("vector_format",po::value<string>()->default_value("b64"), "Sparse vector serialization format for feature expectations or gradients, includes (text or b64)")
         ("combine_size,C",po::value<int>()->default_value(1), "When option -G is used, process this many sentence pairs before writing the gradient (1=emit after every sentence pair)")
