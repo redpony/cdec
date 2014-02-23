@@ -36,7 +36,7 @@ struct State {
   }
   explicit State(const State<MAX_ORDER>& other, unsigned order, WordID extend) {
     char om1 = order - 1;
-    assert(om1 > 0);
+    if (!om1) { memset(state, 0, sizeof(state)); return; }
     for (char i = 1; i < om1; ++i) state[i - 1]= other.state[i];
     state[om1 - 1] = extend;
   }
@@ -152,7 +152,7 @@ usage:
        << "Example feature instantiation: \n"
        << "  tri:a|b|c \n\n";
 
-  return false;
+  abort();
 }
 
 class NgramDetectorImpl {
