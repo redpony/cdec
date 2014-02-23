@@ -662,11 +662,6 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
   oracle.show_derivation=conf.count("show_derivations");
   remove_intersected_rule_annotations = conf.count("remove_intersected_rule_annotations");
 
-  if (conf.count("extract_rules")) {
-    stringstream ss;
-    ss << sent_id;
-    extract_file.reset(new WriteFile(str("extract_rules",conf)+"/"+ss.str()));
-  }
   combine_size = conf["combine_size"].as<int>();
   if (combine_size < 1) combine_size = 1;
   sent_id = -1;
@@ -719,6 +714,11 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       cerr << buf.substr(0, x) << " ..." << endl;
     }
     cerr << "  id = " << sent_id << endl;
+  }
+  if (conf.count("extract_rules")) {
+    stringstream ss;
+    ss << sent_id << ".gz";
+    extract_file.reset(new WriteFile(str("extract_rules",conf)+"/"+ss.str()));
   }
   string to_translate;
   Lattice ref;
