@@ -147,6 +147,7 @@ def CountExceptLM(vocab):
     return CountExceptLM
 
 def CountExceptLex(ttable):
-    def CountExceptLex(ctx): # Word count in online data but NOT original bitext
+    def CountExceptLex(ctx): # Word count in online data but NOT aligned in original bitext
+        # TODO: Check that online data actually contains aligned word when rulefactory TODO is addressed.
         return sum(1 for e in ctx.ephrase.words if not ttable.contains_e_word(e))
     return CountExceptLex
