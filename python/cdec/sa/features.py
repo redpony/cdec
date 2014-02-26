@@ -140,3 +140,13 @@ def IsSupportedOnline(ctx): # Occurs in online data?
         return (ctx.online.paircount > 0.01)
     else:
         return False
+
+def CountExceptLM(vocab):
+    def CountExceptLM(ctx): # Word count in bitext (inc online data) but NOT mono text
+        return sum(1 for e in ctx.ephrase.words if e not in vocab)
+    return CountExceptLM
+
+def CountExceptLex(ttable):
+    def CountExceptLex(ctx): # Word count in online data but NOT original bitext
+        return sum(1 for e in ctx.ephrase.words if not ttable.contains_e_word(e))
+    return CountExceptLex
