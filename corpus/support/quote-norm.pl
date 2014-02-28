@@ -11,6 +11,15 @@ while(<STDIN>) {
   # Delete control characters:
   s/[\x{00}-\x{1f}]//g; 
 
+  # PTB --> normal
+  s/-LRB-/(/g;
+  s/-RRB-/)/g;
+  s/-LSB-/[/g;
+  s/-RSB-/]/g;
+  s/-LCB-/{/g;
+  s/-RCB-/}/g;
+  s/ gon na / gonna /g;
+
   # Regularize named HTML/XML escapes:
   s/&\s*lt\s*;/</gi;    # HTML opening angle bracket
   s/&\s*gt\s*;/>/gi;    # HTML closing angle bracket
