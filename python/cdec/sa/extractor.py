@@ -1,16 +1,17 @@
 from itertools import chain
 import os, sys
 import cdec.configobj
+from cdec.sa._sa import gzip_or_text
 from cdec.sa.features import EgivenFCoherent, SampleCountF, CountEF,\
         MaxLexEgivenF, MaxLexFgivenE, IsSingletonF, IsSingletonFE,\
-        IsSupportedOnline
+        IsSupportedOnline, CountExceptLM, CountExceptLex
 import cdec.sa
 
 # maximum span of a grammar rule in TEST DATA
 MAX_INITIAL_SIZE = 15
 
 class GrammarExtractor:
-    def __init__(self, config, online=False, features=None):
+    def __init__(self, config, online=False, vocab=None, features=None):
         if isinstance(config, basestring):
             if not os.path.exists(config):
                 raise IOError('cannot read configuration from {0}'.format(config))
@@ -62,6 +63,10 @@ class GrammarExtractor:
         extended_features = []
         if online:
             extended_features.append(IsSupportedOnline)
+        if vocab:
+            vcb_set = set(line.strip() for line in gzip_or_text(vocab))
+            extended_features.append(CountExceptLM(vcb_set))
+            extended_features.append(CountExceptLex(tt))
             
         # TODO: use @cdec.sa.features decorator for standard features too
         # + add a mask to disable features

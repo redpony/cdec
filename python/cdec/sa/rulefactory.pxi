@@ -2052,6 +2052,7 @@ cdef class HieroCachingRuleFactory:
                 stats.phrases_al[f_ph][e_ph] = al
             
         # Update Bilexical counts
+        # TODO: use alignments instead of cooc
         for e_w in e_words:
             stats.bilex_e[e_w] += 1
         for f_w in f_words:
