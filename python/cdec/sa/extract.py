@@ -12,12 +12,13 @@ from cdec.sa._sa import monitor_cpu
 
 extractor, prefix = None, None
 online, compress = False, False
+vocab = None
 
 def make_extractor(args):
     global extractor, prefix, online, compress
     signal.signal(signal.SIGINT, signal.SIG_IGN) # Let parent process catch Ctrl+C
     load_features(args.features)
-    extractor = cdec.sa.GrammarExtractor(args.config, online)
+    extractor = cdec.sa.GrammarExtractor(args.config, online, vocab)
     prefix = args.grammars
     online = args.online
     compress = args.compress
@@ -63,7 +64,7 @@ def extract(inp):
     return '<seg grammar="{}" id="{}">{}</seg>{}'.format(grammar_file, i, sentence, suffix)
 
 def main():
-    global online
+    global online, vocab
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(description='Extract grammars from a compiled corpus.')
     parser.add_argument('-c', '--config', required=True,
@@ -78,6 +79,8 @@ def main():
                         help='additional feature definitions')
     parser.add_argument('-o', '--online', action='store_true',
                         help='online grammar extraction')
+    parser.add_argument('-e', '--except-vocab', default=None,
+                        help='add LM and Lex except features (use with -o, pass vocab.gz)')
     parser.add_argument('-z', '--compress', action='store_true',
                         help='compress grammars with gzip')
     args = parser.parse_args()
@@ -91,6 +94,7 @@ def main():
             sys.exit(1)
 
     online = args.online
+    vocab = args.except_vocab
 
     start_time = monitor_cpu()
     if args.jobs > 1:

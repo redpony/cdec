@@ -8,20 +8,17 @@ while(<STDIN>) {
   chomp;
   $_ = " $_ ";
 
-  # Regularlize spaces:
-  s/\x{a0}/ /g;       # non-breaking space
-  s/\x{2009}/ /g;     # thin space
-  s/\x{2028}/ /g;     # "line separator"
-  s/\x{2029}/ /g;     # "paragraph separator"
-  s/\x{202a}/ /g;     # "left-to-right embedding"
-  s/\x{202b}/ /g;     # "right-to-left embedding"
-  s/\x{202c}/ /g;     # "pop directional formatting"
-  s/\x{202d}/ /g;     # "left-to-right override"
-  s/\x{202e}/ /g;     # "right-to-left override"
-  s/\x{85}/ /g;       # "next line"
-  s/\x{fffd}/ /g;     # "replacement character"
-  s/\x{feff}/ /g;     # byte-order mark
-  s/\x{fdd3}/ /g;     # "unicode non-character"
+  # Delete control characters:
+  s/[\x{00}-\x{1f}]//g; 
+
+  # PTB --> normal
+  s/-LRB-/(/g;
+  s/-RRB-/)/g;
+  s/-LSB-/[/g;
+  s/-RSB-/]/g;
+  s/-LCB-/{/g;
+  s/-RCB-/}/g;
+  s/ gon na / gonna /g;
 
   # Regularize named HTML/XML escapes:
   s/&\s*lt\s*;/</gi;    # HTML opening angle bracket
@@ -41,6 +38,21 @@ while(<STDIN>) {
   s/&\#x([0-9A-Fa-f]+);/pack("U", hex($1))/ge;
   s/&\#([0-9]+);/pack("U", $1)/ge;
 
+  # Regularlize spaces:
+  s/\x{a0}/ /g;       # non-breaking space
+  s/\x{2009}/ /g;     # thin space
+  s/\x{2028}/ /g;     # "line separator"
+  s/\x{2029}/ /g;     # "paragraph separator"
+  s/\x{202a}/ /g;     # "left-to-right embedding"
+  s/\x{202b}/ /g;     # "right-to-left embedding"
+  s/\x{202c}/ /g;     # "pop directional formatting"
+  s/\x{202d}/ /g;     # "left-to-right override"
+  s/\x{202e}/ /g;     # "right-to-left override"
+  s/\x{85}/ /g;       # "next line"
+  s/\x{fffd}/ /g;     # "replacement character"
+  s/\x{feff}/ /g;     # byte-order mark
+  s/\x{fdd3}/ /g;     # "unicode non-character"
+
   # Convert other Windows 1252 characters to UTF-8 
   s/\x{80}/\x{20ac}/g;    # euro sign
   s/\x{95}/\x{2022}/g;    # bullet
@@ -53,7 +65,7 @@ while(<STDIN>) {
   s/(\W)([A-Z]+\$?)(\d*\.\d+|\d+)/$1$2 $3/g;
   s/(\W)(euro?)(\d*\.\d+|\d+)/$1EUR $3/gi;
 
-  # Ridiculous double conversions(?) (news commentary and Giga-FrEn):
+  # Ridiculous double conversions, UTF8 -> Windows 1252 -> UTF8:
   s/ï¿½c/--/g;                        # long dash
   s/\x{e2}\x{20ac}oe/\"/g;            # opening double quote
   s/\x{e2}\x{20ac}\x{9c}/\"/g;        # opening double quote
@@ -63,6 +75,19 @@ while(<STDIN>) {
   s/\x{e2}\x{20ac}\x{201d}/ -- /g;    # em dash? 
   s/â(\x{80}\x{99}|\x{80}\x{98})/'/g; # single quote?
   s/â(\x{80}\x{9c}|\x{80}\x{9d})/"/g; # double quote?
+  s/\x{c3}\x{9f}/\x{df}/g;            # esset
+  s/\x{c3}\x{0178}/\x{df}/g;          # esset
+  s/\x{c3}\x{a4}/\x{e4}/g;            # a umlaut
+  s/\x{c3}\x{b6}/\x{f6}/g;            # o umlaut
+  s/\x{c3}\x{bc}/\x{fc}/g;            # u umlaut
+  s/\x{c3}\x{84}/\x{c4}/g;            # A umlaut: create no C4s after this
+  s/\x{c3}\x{201e}/\x{c4}/g;          # A umlaut: create no C4s after this
+  s/\x{c3}\x{96}/\x{d6}/g;            # O umlaut
+  s/\x{c3}\x{2013}/\x{d6}/g;          # O umlaut
+  s/\x{c3}\x{bc}/\x{dc}/g;            # U umlaut
+  s/\x{80}/\x{20ac}/g;                # euro sign
+  s/\x{95}/\x{2022}/g;                # bullet
+  s/\x{99}/\x{2122}/g;                # trademark sign
 
   # Regularize quotes:
   s/ˇ/'/g;            # caron
@@ -93,6 +118,8 @@ while(<STDIN>) {
   s/\x{ab}/\"/g;      # opening guillemet
   s/\x{bb}/\"/g;      # closing guillemet
   s/\x{0301}/'/g;     # combining acute accent
+  s/\x{203a}/\"/g;    # angle quotation mark
+  s/\x{2039}/\"/g;    # angle quotation mark
 
   # Space inverted punctuation:
   s/¡/ ¡ /g;
@@ -130,6 +157,7 @@ while(<STDIN>) {
   s/–/--/g;
   s/─/--/g;
   s/—/--/g;
+  s/\x{97}/--/g;
   s/•/ * /g;
   s/\*/ * /g;
   s/،/,/g;
@@ -158,8 +186,6 @@ while(<STDIN>) {
   s/^\s+//;
   s/\s+$//;
 
-  # Delete control characters:
-  s/[\x{00}-\x{1f}]//g; 
   print "$_\n";
 }
 
