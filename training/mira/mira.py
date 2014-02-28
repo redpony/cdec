@@ -244,7 +244,7 @@ def evaluate(testset, weights, ini, script_dir, out_dir):
   evaluator = '{}/../utils/decode-and-evaluate.pl'.format(script_dir)
   try:
     p = subprocess.Popen([evaluator, '-c', ini, '-w', weights, '-i', testset, 
-                         '-d', out_dir], stdout=subprocess.PIPE)
+                         '-d', out_dir, '--jobs', args.jobs], stdout=subprocess.PIPE)
     results, err = p.communicate()
     bleu, results = results.split('\n',1)
   except subprocess.CalledProcessError:

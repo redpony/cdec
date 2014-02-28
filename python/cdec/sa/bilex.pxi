@@ -249,6 +249,14 @@ cdef class BiLex:
         fclose(f)
 
 
+    def contains_e_word(self, eword):
+        return (eword in self.eword2id)
+
+
+    def contains_f_word(self, fword):
+        return (fword in self.fword2id)
+
+
     def get_e_id(self, eword):
         if eword not in self.eword2id:
             e_id = len(self.id2eword)

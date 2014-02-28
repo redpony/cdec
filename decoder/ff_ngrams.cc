@@ -36,7 +36,7 @@ struct State {
   }
   explicit State(const State<MAX_ORDER>& other, unsigned order, WordID extend) {
     char om1 = order - 1;
-    assert(om1 > 0);
+    if (!om1) { memset(state, 0, sizeof(state)); return; }
     for (char i = 1; i < om1; ++i) state[i - 1]= other.state[i];
     state[om1 - 1] = extend;
   }
@@ -60,8 +60,9 @@ namespace {
   }
 }
 
-static bool ParseArgs(string const& in, bool* explicit_markers, unsigned* order, vector<string>& prefixes, string& target_separator, string* cluster_file) {
+static bool ParseArgs(string const& in, bool* explicit_markers, unsigned* order, vector<string>& prefixes, string& target_separator, string* cluster_file, string* featname) {
   vector<string> const& argv=SplitOnWhitespace(in);
+  *featname = "";
   *explicit_markers = false;
   *order = 3;
   prefixes.push_back("NOT-USED");
@@ -82,6 +83,9 @@ static bool ParseArgs(string const& in, bool* explicit_markers, unsigned* order,
       switch (s[1]) {
       case 'x':
         *explicit_markers = true;
+        break;
+      case 'n':
+        LMSPEC_NEXTARG; *featname=*i;
         break;
       case 'U':
 	LMSPEC_NEXTARG;
@@ -148,7 +152,7 @@ usage:
        << "Example feature instantiation: \n"
        << "  tri:a|b|c \n\n";
 
-  return false;
+  abort();
 }
 
 class NgramDetectorImpl {
@@ -226,6 +230,7 @@ class NgramDetectorImpl {
       ++n;
       if (!fid) {
         ostringstream os;
+        os << featname_;
         os << prefixes_[n];
         for (int i = n-1; i >= 0; --i) {
           os << (i != n-1 ? target_separator_ : "");
@@ -404,7 +409,8 @@ class NgramDetectorImpl {
 
  public:
   explicit NgramDetectorImpl(bool explicit_markers, unsigned order,
-			     vector<string>& prefixes, string& target_separator, const string& clusters) :
+			     vector<string>& prefixes, string& target_separator, const string& clusters,
+                             const string& featname) :
       kCDEC_UNK(TD::Convert("<unk>")) ,
       add_sos_eos_(!explicit_markers) {
     order_ = order;
@@ -414,6 +420,7 @@ class NgramDetectorImpl {
     unscored_words_offset_ = is_complete_offset_ + 1;
     prefixes_ = prefixes;
     target_separator_ = target_separator;
+    featname_ = featname;
 
     // special handling of beginning / ending sentence markers
     dummy_state_ = new char[state_size_];
@@ -454,6 +461,7 @@ class NgramDetectorImpl {
   TRulePtr dummy_rule_;
   vector<string> prefixes_;
   string target_separator_;
+  string featname_;
   struct FidTree {
     map<WordID, int> fids;
     map<WordID, FidTree> levels;
@@ -467,9 +475,9 @@ NgramDetector::NgramDetector(const string& param) {
   bool explicit_markers = false;
   unsigned order = 3;
   string clusters;
-  ParseArgs(param, &explicit_markers, &order, prefixes, target_separator, &clusters);
+  ParseArgs(param, &explicit_markers, &order, prefixes, target_separator, &clusters, &featname);
   pimpl_ = new NgramDetectorImpl(explicit_markers, order, prefixes, 
-				 target_separator, clusters);
+				 target_separator, clusters, featname);
   SetStateSize(pimpl_->ReserveStateSize());
 }
 
