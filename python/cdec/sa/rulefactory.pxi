@@ -2070,7 +2070,7 @@ cdef class HieroCachingRuleFactory:
         for e_i in range(len(e_words)):
             f_i_aligned = aligned_ef[e_i]
             lc = len(f_i_aligned)
-            if lc > 1:
+            if lc > 0:
                 stats.bilex_e[e_words[e_i]] += 1
                 for f_i in f_i_aligned:
                     stats.bilex_ef[e_words[e_i]][f_words[f_i]] += (1.0) / lc
