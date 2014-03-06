@@ -2057,23 +2057,28 @@ cdef class HieroCachingRuleFactory:
         # Update Bilexical counts
         aligned_fe = [list() for _ in range(len(f_words))]
         aligned_ef = [list() for _ in range(len(e_words))]
+        null_word = sym_fromstring('NULL', True)
         for (i, j) in alignment:
             aligned_fe[i].append(j)
             aligned_ef[j].append(i)
         for f_i in range(len(f_words)):
+            stats.bilex_f[f_words[f_i]] += 1
             e_i_aligned = aligned_fe[f_i]
             lc = len(e_i_aligned)
             if lc > 0:
-                stats.bilex_f[f_words[f_i]] += 1
                 for e_i in e_i_aligned:
                     stats.bilex_fe[f_words[f_i]][e_words[e_i]] += (1.0) / lc
+            else:
+                stats.bilex_fe[f_words[f_i]][null_word] += 1
         for e_i in range(len(e_words)):
+            stats.bilex_e[e_words[e_i]] += 1
             f_i_aligned = aligned_ef[e_i]
             lc = len(f_i_aligned)
             if lc > 0:
-                stats.bilex_e[e_words[e_i]] += 1
                 for f_i in f_i_aligned:
                     stats.bilex_ef[e_words[e_i]][f_words[f_i]] += (1.0) / lc
+            else:
+                stats.bilex_ef[e_words[e_i]][null_word] += 1
 
     # Create a rule from source, target, non-terminals, and alignments
     def form_rule(self, f_i, e_i, f_span, e_span, nt, al):
