@@ -132,9 +132,11 @@ def main():
         start_time = monitor_cpu()
         logger.info('Compiling online bilexical dictionary')
         if args.bitext:
-            bilex = cdec.sa.online.Bilex(alignment_f=args.alignment, text_f=args.bitext)
+            bilex = cdec.sa.online.Bilex()
+            bilex.add_bitext(args.alignment, args.bitext)
         else:
-            bilex = cdec.sa.online.Bilex(alignment_f=args.alignment, text_f=args.source, text_target_f=args.target)
+            bilex = cdec.sa.online.Bilex()
+            bilex.add_bitext(args.alignment, args.source, args.target)
         bilex.write(bilex_file)
         stop_time = monitor_cpu()
         logger.info('Compiling online bilexical dictionary took %f seconds', stop_time - start_time)
