@@ -36,9 +36,10 @@ class Bilex:
 
     def get_score(self, f, e, dir):
         if dir == 0:
-            return self.p_fe(f, e)
-        if dir == 1:
-            return self.p_ef(e, f)
+            p = self.p_fe(f, e)
+        elif dir == 1:
+            p = self.p_ef(e, f)
+        return p
 
     def p_fe(self, f, e):
         d = self.fe.get(f, None)
@@ -60,22 +61,22 @@ class Bilex:
             aligned_fe[i].append(j)
             aligned_ef[j].append(i)
         for f_i in range(len(f_words)):
-            self.f[f_words[f_i]] += 1
             e_i_aligned = aligned_fe[f_i]
-            lc = len(e_i_aligned)
-            if lc > 0:
+            if len(e_i_aligned) > 0:
                 for e_i in e_i_aligned:
-                    self.fe[f_words[f_i]][e_words[e_i]] += (1 / lc)
+                    self.f[f_words[f_i]] += 1
+                    self.fe[f_words[f_i]][e_words[e_i]] += 1
             else:
+                self.f[f_words[f_i]] += 1
                 self.fe[f_words[f_i]][NULL_WORD] += 1
         for e_i in range(len(e_words)):
-            self.e[e_words[e_i]] += 1
             f_i_aligned = aligned_ef[e_i]
-            lc = len(f_i_aligned)
-            if lc > 0:
+            if len(f_i_aligned) > 0:
                 for f_i in f_i_aligned:
-                    self.ef[e_words[e_i]][f_words[f_i]] += (1 / lc)
+                    self.e[e_words[e_i]] += 1
+                    self.ef[e_words[e_i]][f_words[f_i]] += 1
             else:
+                self.e[e_words[e_i]] += 1
                 self.ef[e_words[e_i]][NULL_WORD] += 1
 
     # Update counts from alignd bitext
@@ -103,9 +104,11 @@ class Bilex:
             for f in fv:
                 for (e, c) in sorted(self.fe[f].iteritems()):
                     out.write('{} {} {}\n'.format(f, e, c))
+            out.write('\n')
             for e in ev:
                 for (f, c) in sorted(self.ef[e].iteritems()):
                     out.write('{} {} {}\n'.format(e, f, c))
+            out.write('\n')
 
     def read(self, in_f):
         with gzip_or_text(in_f) as inp:
