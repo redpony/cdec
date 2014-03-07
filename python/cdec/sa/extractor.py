@@ -4,7 +4,7 @@ import cdec.configobj
 from cdec.sa._sa import gzip_or_text
 from cdec.sa.features import EgivenFCoherent, SampleCountF, CountEF,\
         MaxLexEgivenF, MaxLexFgivenE, IsSingletonF, IsSingletonFE,\
-        IsSupportedOnline, CountExceptLM
+        IsSupportedOnline
 import cdec.sa
 
 # maximum span of a grammar rule in TEST DATA
@@ -57,16 +57,16 @@ class GrammarExtractor:
                 )
 
         # lexical weighting tables
-        tt = cdec.sa.BiLex(from_binary=config['lex_file'])
+        if not online:
+            tt = cdec.sa.BiLex(from_binary=config['lex_file'])
+        else:
+            tt = cdec.sa.online.Bilex(config['bilex_file'])
 
         # TODO: clean this up
         # Load data and add features for online grammar extraction
         extended_features = []
         if online:
             extended_features.append(IsSupportedOnline)
-            vocab_file = config['vocab_file']
-            vcb_set = set(line.strip() for line in gzip_or_text(vocab))
-            extended_features.append(CountExceptLM(vcb_set))
             
         # TODO: use @cdec.sa.features decorator for standard features too
         # + add a mask to disable features

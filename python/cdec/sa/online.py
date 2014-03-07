@@ -26,28 +26,33 @@ def read_vocab(in_f):
 
 class Bilex:
 
-    def __init__(self, in_f=None, alignment_f=None, text_f=None, target_text_f=None):
+    def __init__(self, in_f=None):
         self.f = collections.defaultdict(int)
         self.e = collections.defaultdict(int)
         self.fe = collections.defaultdict(lambda: collections.defaultdict(int))
         self.ef = collections.defaultdict(lambda: collections.defaultdict(int))
-
-        # Read from file
         if in_f:
             self.read(in_f)
-        # Build from aligned bitext
-        elif alignment_f:
-            # Allow one or two args for bitext
-            if target_text_f:
-                t = itertools.izip((line.strip() for line in gzip_or_text(text_f)), (line.strip() for line in gzip_or_text(target_text_f)))
-            else:
-                t = (line.strip().split(' ||| ') for line in gzip_or_text(text_f))
-            a = (line.strip() for line in gzip_or_text(alignment_f))
-            for (source, target) in t:
-                links = sorted(tuple(int(link) for link in link_str.split('-')) for link_str in a.next().split())
-                self.update(source.split(), target.split(), links)
 
-    # Add bilex counts from new aligned sentence pair
+    def get_score(self, f, e, dir):
+        if dir == 0:
+            return self.p_fe(f, e)
+        if dir == 1:
+            return self.p_ef(e, f)
+
+    def p_fe(self, f, e):
+        d = self.fe.get(f, None)
+        if not d:
+            return 0
+        return d.get(e, 0) / self.f.get(f)
+
+    def p_ef(self, e, f):
+        d = self.ef.get(e, None)
+        if not d:
+            return 0
+        return d.get(f, 0) / self.e.get(e)
+
+    # Update counts from aligned sentence
     def update(self, f_words, e_words, links):
         aligned_fe = [list() for _ in range(len(f_words))]
         aligned_ef = [list() for _ in range(len(e_words))]
@@ -73,6 +78,18 @@ class Bilex:
             else:
                 self.ef[e_words[e_i]][NULL_WORD] += 1
 
+    # Update counts from alignd bitext
+    def add_bitext(self, alignment_f, text_f, target_text_f=None):
+        # Allow one or two args for bitext
+        if target_text_f:
+            t = itertools.izip((line.strip() for line in gzip_or_text(text_f)), (line.strip() for line in gzip_or_text(target_text_f)))
+        else:
+            t = (line.strip().split(' ||| ') for line in gzip_or_text(text_f))
+        a = (line.strip() for line in gzip_or_text(alignment_f))
+        for (source, target) in t:
+            links = sorted(tuple(int(link) for link in link_str.split('-')) for link_str in a.next().split())
+            self.update(source.split(), target.split(), links)
+
     def write(self, out_f):
         fv = sorted(self.f)
         ev = sorted(self.e)
@@ -92,4 +109,27 @@ class Bilex:
 
     def read(self, in_f):
         with gzip_or_text(in_f) as inp:
-            pass
+            while True:
+                line = inp.readline().strip()
+                if not line:
+                    break
+                (w, c) = line.split()
+                self.f[w] = int(c)
+            while True:
+                line = inp.readline().strip()
+                if not line:
+                    break
+                (w, c) = line.split()
+                self.e[w] = int(c)
+            while True:
+                line = inp.readline().strip()
+                if not line:
+                    break
+                (f, e, c) = line.split()
+                self.fe[f][e] = float(c)
+            while True:
+                line = inp.readline().strip()
+                if not line:
+                    break
+                (e, f, c) = line.split()
+                self.ef[e][f] = float(c)
