@@ -44,40 +44,46 @@ class Bilex:
     def p_fe(self, f, e):
         d = self.fe.get(f, None)
         if not d:
-            return 0
-        return d.get(e, 0) / self.f.get(f)
+            return None
+        val = d.get(e, None)
+        if not val:
+            return None
+        return val / self.f.get(f)
 
     def p_ef(self, e, f):
         d = self.ef.get(e, None)
         if not d:
-            return 0
-        return d.get(f, 0) / self.e.get(e)
+            return None
+        val = d.get(f, None)
+        if not val:
+            return None
+        return val / self.e.get(e)
 
     # Update counts from aligned sentence
     def update(self, f_words, e_words, links):
-        aligned_fe = [list() for _ in range(len(f_words))]
-        aligned_ef = [list() for _ in range(len(e_words))]
+        covered_f = set()
+        covered_e = set()
         for (i, j) in links:
-            aligned_fe[i].append(j)
-            aligned_ef[j].append(i)
-        for f_i in range(len(f_words)):
-            e_i_aligned = aligned_fe[f_i]
-            if len(e_i_aligned) > 0:
-                for e_i in e_i_aligned:
-                    self.f[f_words[f_i]] += 1
-                    self.fe[f_words[f_i]][e_words[e_i]] += 1
-            else:
-                self.f[f_words[f_i]] += 1
-                self.fe[f_words[f_i]][NULL_WORD] += 1
-        for e_i in range(len(e_words)):
-            f_i_aligned = aligned_ef[e_i]
-            if len(f_i_aligned) > 0:
-                for f_i in f_i_aligned:
-                    self.e[e_words[e_i]] += 1
-                    self.ef[e_words[e_i]][f_words[f_i]] += 1
-            else:
-                self.e[e_words[e_i]] += 1
-                self.ef[e_words[e_i]][NULL_WORD] += 1
+            covered_f.add(i)
+            covered_e.add(j)
+            self.f[f_words[i]] += 1
+            self.e[e_words[j]] += 1
+            self.fe[f_words[i]][e_words[j]] += 1
+            self.ef[e_words[j]][f_words[i]] += 1
+        # e being covered corresponds to f->e
+        for j in range(len(e_words)):
+            if j not in covered_e:
+                self.f[NULL_WORD] += 1
+                self.e[e_words[j]] += 1
+                self.fe[NULL_WORD][e_words[j]] += 1
+                self.ef[e_words[j]][NULL_WORD] += 1
+        # e->f
+        for i in range(len(f_words)):
+            if i not in covered_f:
+                self.f[f_words[i]] += 1
+                self.e[NULL_WORD] += 1
+                self.ef[NULL_WORD][f_words[i]] += 1
+                self.fe[f_words[i]][NULL_WORD] += 1
 
     # Update counts from alignd bitext
     def add_bitext(self, alignment_f, text_f, target_text_f=None):
