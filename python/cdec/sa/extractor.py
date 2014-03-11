@@ -1,5 +1,7 @@
 from itertools import chain
-import os, sys
+import logging
+import os
+import sys
 import cdec.configobj
 from cdec.sa._sa import gzip_or_text
 from cdec.sa.features import EgivenFCoherent, SampleCountF, CountEF,\
@@ -12,14 +14,31 @@ MAX_INITIAL_SIZE = 15
 
 class GrammarExtractor:
     def __init__(self, config, online=False, features=None):
+
+        logging.basicConfig(level=logging.INFO)
+        logger = logging.getLogger('cdec.sa')
+
         if isinstance(config, basestring):
             if not os.path.exists(config):
                 raise IOError('cannot read configuration from {0}'.format(config))
             config = cdec.configobj.ConfigObj(config, unrepr=True)
+
+        logger.info('Loading alignment...')
         alignment = cdec.sa.Alignment(from_binary=config['a_file'])
+
+        # lexical weighting tables
+        if not online:
+            logger.info('Loading bilexical dictionary...')
+            tt = cdec.sa.BiLex(from_binary=config['lex_file'])
+        else:
+            logger.info('Loading online bilexical dictionary...')
+            tt = cdec.sa.online.Bilex(config['bilex_file'])
+
         self.factory = cdec.sa.HieroCachingRuleFactory(
                 # compiled alignment object (REQUIRED)
                 alignment,
+                # bilexical dictionary if online
+                bilex=tt if online else None,
                 # name of generic nonterminal used by Hiero
                 category="[X]",
                 # maximum number of contiguous chunks of terminal symbols in RHS of a rule
@@ -55,12 +74,6 @@ class GrammarExtractor:
                 # False if phrases should be loose (better but slower), True otherwise
                 tight_phrases=config.get('tight_phrases', True),
                 )
-
-        # lexical weighting tables
-        if not online:
-            tt = cdec.sa.BiLex(from_binary=config['lex_file'])
-        else:
-            tt = cdec.sa.online.Bilex(config['bilex_file'])
 
         # TODO: clean this up
         # Load data and add features for online grammar extraction
