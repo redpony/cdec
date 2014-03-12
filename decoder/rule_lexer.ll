@@ -12,6 +12,7 @@
 #include "fdict.h"
 #include "trule.h"
 #include "verbose.h"
+#include "tree_fragment.h"
 
 int lex_line = 0;
 std::istream* scfglex_stream = NULL;
@@ -51,6 +52,7 @@ int scfglex_src_nts[MAX_ARITY];
 // float scfglex_nt_size_vars[MAX_ARITY];
 std::stack<TRulePtr> ctf_rule_stack;
 unsigned int ctf_level = 0;
+boost::shared_ptr<cdec::TreeFragment> scfglex_tree;
 
 #define MAX_ALS 2000
 AlignmentPoint scfglex_als[MAX_ALS];
@@ -120,7 +122,7 @@ void check_and_update_ctf_stack(const TRulePtr& rp) {
 REAL [\-+]?[0-9]+(\.[0-9]*([eE][-+]*[0-9]+)?)?|inf|[\-+]inf
 NT [^\t \[\],]+
 
-%x LHS_END SRC TRG FEATS FEATVAL ALIGNS
+%x LHS_END SRC TRG FEATS FEATVAL ALIGNS TREE
 %%
 
 <INITIAL>[ \t]	{
@@ -205,7 +207,13 @@ NT [^\t \[\],]+
 		++scfglex_src_rhs_size;
 		}
 <SRC>[ \t]+	{ ; }
-
+<TREE>[^|\n]+	{
+                if (yyleng > 0) {
+		  int len = yyleng;
+                  while(len > 1 && yytext[len - 1] != ')') { --len; }
+                  scfglex_tree.reset(new cdec::TreeFragment(std::string(yytext, len), true));
+                }
+		}
 <TRG>\|\|\|	{
 		BEGIN(FEATS);
 		}
@@ -216,7 +224,7 @@ NT [^\t \[\],]+
 		}
 <TRG>[ \t]+	{ ; }
 
-<TRG,FEATS,ALIGNS>\n	{
+<TRG,FEATS,ALIGNS,TREE>\n	{
                 if (scfglex_src_arity != scfglex_trg_arity) {
                   std::cerr << "Grammar " << scfglex_fname << " line " << lex_line << ": LHS and RHS arity mismatch!\n";
                   abort();
@@ -224,18 +232,25 @@ NT [^\t \[\],]+
 		// const bool ignore_grammar_features = false;
 		// if (ignore_grammar_features) scfglex_num_feats = 0;
 		TRulePtr rp(new TRule(scfglex_lhs, scfglex_src_rhs, scfglex_src_rhs_size, scfglex_trg_rhs, scfglex_trg_rhs_size, scfglex_feat_ids, scfglex_feat_vals, scfglex_num_feats, scfglex_src_arity, scfglex_als, scfglex_num_als));
-    check_and_update_ctf_stack(rp);
-    TRulePtr coarse_rp = ((ctf_level == 0) ? TRulePtr() : ctf_rule_stack.top());
+		if (scfglex_tree) {
+		  if (scfglex_tree->frontier_sites != rp->Arity()) {
+		    std::cerr << "Arity mismatch with tree annotation: " << *scfglex_tree << std::endl;
+		    abort();
+		  }
+		  rp->tree_structure.swap(scfglex_tree);
+		}
+		check_and_update_ctf_stack(rp);
+		TRulePtr coarse_rp = ((ctf_level == 0) ? TRulePtr() : ctf_rule_stack.top());
 		rule_callback(rp, ctf_level, coarse_rp, rule_callback_extra);
-    ctf_rule_stack.push(rp);
+		ctf_rule_stack.push(rp);
 		// std::cerr << rp->AsString() << std::endl;
 		num_rules++;
-    lex_line++;
-    if (!SILENT) {
-      if (num_rules %   50000 == 0) { std::cerr << '.' << std::flush; fl = true; }
-      if (num_rules % 2000000 == 0) { std::cerr << " [" << num_rules << "]\n"; fl = false; }
-    }
-    ctf_level = 0;
+		lex_line++;
+		if (!SILENT) {
+		  if (num_rules %   50000 == 0) { std::cerr << '.' << std::flush; fl = true; }
+		  if (num_rules % 2000000 == 0) { std::cerr << " [" << num_rules << "]\n"; fl = false; }
+		}
+		ctf_level = 0;
 		BEGIN(INITIAL);
 		}
 
@@ -252,6 +267,9 @@ NT [^\t \[\],]+
 		}
 <FEATS>\|\|\|	{
 		BEGIN(ALIGNS);
+		}
+<ALIGNS>\|\|\|[ \t]*	{
+		BEGIN(TREE);
 		}
 <FEATVAL>{REAL}	{
 		scfglex_feat_vals[scfglex_num_feats] = strtod(yytext, NULL);
