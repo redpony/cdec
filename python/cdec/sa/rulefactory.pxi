@@ -291,10 +291,13 @@ cdef class HieroCachingRuleFactory:
 
     cdef bint online
     cdef online_stats
+    cdef bilex
 
     def __cinit__(self,
             # compiled alignment object (REQUIRED)
             Alignment alignment,
+            # bilexical dictionary if online
+            bilex=None,
             # parameter for double-binary search; doesn't seem to matter much
             float by_slack_factor=1.0,
             # name of generic nonterminal used by Hiero
@@ -400,7 +403,10 @@ cdef class HieroCachingRuleFactory:
         self.findexes1 = IntList(initial_len=10)
         
         # Online stats 
-        
+
+        # None if not online        
+        self.bilex = bilex
+
         # True after data is added
         self.online = False
         self.online_stats = defaultdict(OnlineStats)
@@ -2039,6 +2045,12 @@ cdef class HieroCachingRuleFactory:
             stats.phrases_fe[f_ph][e_ph] += 1
             if not stats.phrases_al[f_ph][e_ph]:
                 stats.phrases_al[f_ph][e_ph] = al
+
+        # Update bilexical dictionary (if exists)
+        if self.bilex:
+            self.bilex.update(f_words, e_words, alignment)
+        else:
+            logger.warning('No online bilexical dictionary specified, not updating lexical weights')
             
     # Create a rule from source, target, non-terminals, and alignments
     def form_rule(self, f_i, e_i, f_span, e_span, nt, al):
