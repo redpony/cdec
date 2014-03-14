@@ -15,6 +15,8 @@
 class TRule;
 typedef boost::shared_ptr<TRule> TRulePtr;
 
+namespace cdec { struct TreeFragment; }
+
 struct AlignmentPoint {
   AlignmentPoint() : s_(), t_() {}
   AlignmentPoint(int s, int t) : s_(s), t_(t) {}
@@ -158,6 +160,9 @@ class TRule {
 
   // only for coarse-to-fine decoding
   boost::shared_ptr<std::vector<TRulePtr> > fine_rules_;
+
+  // optional, shows internal structure of TSG rules
+  boost::shared_ptr<cdec::TreeFragment> tree_structure;
 
  private:
   TRule(const WordID& src, const WordID& trg) : e_(1, trg), f_(1, src), lhs_(), arity_(), prev_i(), prev_j() {}
