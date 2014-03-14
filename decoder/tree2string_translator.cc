@@ -33,7 +33,7 @@ using namespace std;
 // *0*        implication: (S [A] _[B])
 // b          implication: (S [A] (B b *INCOMPLETE*))
 struct Tree2StringGrammarNode {
-  unordered_map<unsigned, Tree2StringGrammarNode> next;
+  map<unsigned, Tree2StringGrammarNode> next;
   string rules;
 };
 
