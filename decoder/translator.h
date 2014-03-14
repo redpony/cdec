@@ -98,4 +98,20 @@ class RescoreTranslator : public Translator {
   boost::shared_ptr<RescoreTranslatorImpl> pimpl_;
 };
 
+class Tree2StringTranslatorImpl;
+class Tree2StringTranslator : public Translator {
+ public:
+  Tree2StringTranslator(const boost::program_options::variables_map& conf);
+  virtual std::string GetDecoderType() const;
+ protected:
+  bool TranslateImpl(const std::string& src,
+                 SentenceMetadata* smeta,
+                 const std::vector<double>& weights,
+                 Hypergraph* minus_lm_forest);
+  void ProcessMarkupHintsImpl(const std::map<std::string, std::string>& kv);
+  void SentenceCompleteImpl();
+ private:
+  boost::shared_ptr<Tree2StringTranslatorImpl> pimpl_;
+};
+
 #endif
