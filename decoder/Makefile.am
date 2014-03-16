@@ -130,6 +130,7 @@ libcdec_a_SOURCES = \
   ffset.cc \
   forest_writer.cc \
   fst_translator.cc \
+  tree2string_translator.cc \
   grammar.cc \
   hg.cc \
   hg_intersect.cc \
@@ -142,6 +143,8 @@ libcdec_a_SOURCES = \
   lattice.cc \
   lexalign.cc \
   lextrans.cc \
+  tree_fragment.cc \
+  tree_fragment.h \
   maxtrans_blunsom.cc \
   phrasebased_translator.cc \
   phrasetable_fst.cc \

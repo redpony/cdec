@@ -39,6 +39,7 @@ while(<STDIN>) {
   s/&\#([0-9]+);/pack("U", $1)/ge;
 
   # Regularlize spaces:
+  s/\x{ad}//g;        # soft hyphen
   s/\x{a0}/ /g;       # non-breaking space
   s/\x{2009}/ /g;     # thin space
   s/\x{2028}/ /g;     # "line separator"
