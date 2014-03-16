@@ -54,6 +54,8 @@ def main():
                         help='Bitext word alignment')
     parser.add_argument('-o', '--output', required=True,
                         help='Output path')
+    parser.add_argument('--online', action='store_true',
+                        help='Compile data for online grammar extraction')
     args = parser.parse_args()
 
     if not ((args.source and args.target) or args.bitext):
@@ -74,6 +76,8 @@ def main():
     precomp_bin = os.path.join(args.output, precomp_file)
     a_bin = os.path.join(args.output, 'a.bin')
     lex_bin = os.path.join(args.output, 'lex.bin')
+    # online only
+    bilex_file = os.path.join(args.output, 'bilex.gz')
 
     config = cdec.configobj.ConfigObj(args.config, unrepr=True)
     config['f_sa_file'] = os.path.abspath(f_sa_bin)
@@ -81,6 +85,8 @@ def main():
     config['a_file'] = os.path.abspath(a_bin)
     config['lex_file'] = os.path.abspath(lex_bin)
     config['precompute_file'] = os.path.abspath(precomp_bin)
+    if args.online:
+        config['bilex_file'] = os.path.abspath(bilex_file)
 
     start_time = monitor_cpu()
     logger.info('Compiling source suffix array')
@@ -121,6 +127,19 @@ def main():
     lex.write_binary(lex_bin)
     stop_time = monitor_cpu()
     logger.info('Compiling bilexical dictionary took %f seconds', stop_time - start_time)
+
+    if args.online:
+        start_time = monitor_cpu()
+        logger.info('Compiling online bilexical dictionary')
+        if args.bitext:
+            bilex = cdec.sa.online.Bilex()
+            bilex.add_bitext(args.alignment, args.bitext)
+        else:
+            bilex = cdec.sa.online.Bilex()
+            bilex.add_bitext(args.alignment, args.source, args.target)
+        bilex.write(bilex_file)
+        stop_time = monitor_cpu()
+        logger.info('Compiling online bilexical dictionary took %f seconds', stop_time - start_time)
 
     # Write configuration
     for name, value in zip(param_names, params):
