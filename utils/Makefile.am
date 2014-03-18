@@ -27,6 +27,7 @@ libutils_a_SOURCES = \
   citycrc.h \
   corpus_tools.h \
   dict.h \
+  exp_semiring.h \
   fast_sparse_vector.h \
   fdict.h \
   feature_vector.h \
@@ -49,6 +50,7 @@ libutils_a_SOURCES = \
   show.h \
   small_vector.h \
   sparse_vector.h \
+  star.h \
   static_utoa.h \
   stringlib.h \
   tdict.h \

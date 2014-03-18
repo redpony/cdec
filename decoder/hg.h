@@ -25,6 +25,7 @@
 #include "tdict.h"
 #include "trule.h"
 #include "prob.h"
+#include "exp_semiring.h"
 #include "indices_after.h"
 #include "nt_span.h"
 
@@ -527,7 +528,21 @@ struct EdgeFeaturesAndProbWeightFunction {
 
 struct TransitionCountWeightFunction {
   typedef double Weight;
-  inline double operator()(const HG::Edge& e) const { (void)e; return 1.0; }
+  inline double operator()(const HG::Edge&) const { return 1.0; }
+};
+
+template <class P, class PWeightFunction, class R, class RWeightFunction>
+struct PRWeightFunction {
+  explicit PRWeightFunction(const PWeightFunction& pwf = PWeightFunction(),
+                            const RWeightFunction& rwf = RWeightFunction()) :
+    pweight(pwf), rweight(rwf) {}
+  PRPair<P,R> operator()(const HG::Edge& e) const {
+    const P p = pweight(e);
+    const R r = rweight(e);
+    return PRPair<P,R>(p, r * p);
+  }
+  const PWeightFunction pweight;
+  const RWeightFunction rweight;
 };
 
 #endif
