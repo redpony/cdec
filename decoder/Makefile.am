@@ -37,7 +37,6 @@ libcdec_a_SOURCES = \
   csplit.h \
   decoder.h \
   earley_composer.h \
-  exp_semiring.h \
   factored_lexicon_helper.h \
   ff.h \
   ff_basic.h \
