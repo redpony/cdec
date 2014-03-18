@@ -244,7 +244,7 @@ template <class T>
 std::size_t hash_value(const LogVal<T>& x) { return x.hash_impl(); }
 
 template <class T>
-LogVal<T> star(LogVal<T> x) {
+inline LogVal<T> star(LogVal<T> x) {
   if (x.is_0()) return x;
   if (x.v_ >= 0) {
     x.v_ = std::numeric_limits<T>::infinity();

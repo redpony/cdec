@@ -56,7 +56,7 @@ const PRPair<P,R> operator*(const PRPair<P,R>& a, const PRPair<P,R>& b) {
 }
 
 template <class P, class R>
-const PRPair<P,R> star(const PRPair<P,R>& x) {
+inline const PRPair<P,R> star(const PRPair<P,R>& x) {
   const P pstar = star(x.p);
   return PRPair<P,R>(pstar, pstar * x.r * pstar);
 }
