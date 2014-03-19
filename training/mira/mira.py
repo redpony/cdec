@@ -201,14 +201,15 @@ def main():
   if have_mpl: graph_file = graph(args.output_dir, hope_best_fear, args.metric)
 
   dev_results, dev_bleu = evaluate(args.devset, args.weights, args.config, 
-                         script_dir, args.output_dir)
+                         script_dir, args.output_dir, args.jobs)
   if args.test:
     if args.test_config:
       test_results, test_bleu = evaluate(args.test, args.weights, 
-                              args.test_config, script_dir, args.output_dir)
+                              args.test_config, script_dir, args.output_dir,
+                              args.jobs)
     else:
       test_results, test_bleu = evaluate(args.test, args.weights, args.config,
-                              script_dir, args.output_dir)
+                              script_dir, args.output_dir, args.jobs)
   else: 
     test_results = ''
     test_bleu = ''
@@ -238,11 +239,11 @@ def graph(output_dir, hope_best_fear, metric):
   return graph_file
 
 #evaluate a given test set using decode-and-evaluate.pl
-def evaluate(testset, weights, ini, script_dir, out_dir):
+def evaluate(testset, weights, ini, script_dir, out_dir, jobs):
   evaluator = '{}/../utils/decode-and-evaluate.pl'.format(script_dir)
   try:
     p = subprocess.Popen([evaluator, '-c', ini, '-w', weights, '-i', testset, 
-                         '-d', out_dir, '--jobs', args.jobs], stdout=subprocess.PIPE)
+                         '-d', out_dir, '--jobs', str(jobs)], stdout=subprocess.PIPE)
     results, err = p.communicate()
     bleu, results = results.split('\n',1)
   except subprocess.CalledProcessError:
