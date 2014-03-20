@@ -63,10 +63,10 @@ ScoreServer::ScoreServer(const string& cmd) {
     cerr << "Exec'ing from child " << cmd << endl;
     vector<string> vargs;
     SplitOnWhitespace(cmd, &vargs);
-    const char** cargv = static_cast<const char**>(malloc(sizeof(const char*) * vargs.size()));
-    for (unsigned i = 1; i < vargs.size(); ++i) cargv[i-1] = vargs[i].c_str();
-    cargv[vargs.size() - 1] = NULL;
-    execvp(vargs[0].c_str(), (char* const*)cargv);
+    const char** cargv = static_cast<const char**>(malloc(sizeof(const char*) * (vargs.size() + 1)));
+    for (unsigned i = 0; i < vargs.size(); i++) cargv[i] = vargs[i].c_str();
+    cargv[vargs.size()] = NULL;
+    execvp(*cargv, (char* const*)cargv);
   } else { // parent
     close(c2p[1]);
     close(p2c[0]);
