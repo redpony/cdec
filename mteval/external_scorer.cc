@@ -9,22 +9,34 @@
 #include <cassert>
 
 #include "stringlib.h"
+#include "filelib.h"
 #include "tdict.h"
 
 using namespace std;
+
+extern const char* meteor_jar_path;
 
 map<string, boost::shared_ptr<ScoreServer> > ScoreServerManager::servers_;
 
 class METEORServer : public ScoreServer {
  public:
-  METEORServer() : ScoreServer("java -Xmx1024m -jar /usr0/cdyer/meteor/meteor-1.3.jar - - -mira -lower -t tune -l en") {}
+  METEORServer(const string& cmd) : ScoreServer(cmd) {}
 };
 
 ScoreServer* ScoreServerManager::Instance(const string& score_type) {
   boost::shared_ptr<ScoreServer>& s = servers_[score_type];
   if (!s) {
     if (score_type == "meteor") {
-      s.reset(new METEORServer);
+#if HAVE_METEOR
+      if (!FileExists(meteor_jar_path)) {
+        cerr << meteor_jar_path << " not found!\n";
+        abort();
+      }
+      s.reset(new METEORServer(string("java -Xmx1536m -jar ") + meteor_jar_path + " - - -mira -lower -t tune -l en"));
+#else
+      cerr << "cdec was not built with the --with-meteor option." << endl;
+      abort();
+#endif
     } else {
       cerr << "Don't know how to create score server for type '" << score_type << "'\n";
       abort();
@@ -138,7 +150,11 @@ struct ExternalScore : public ScoreBase<ExternalScore> {
     assert(!"not implemented"); // no idea
   }
   void PlusEquals(const Score& delta, const float scale) {
-    assert(!"not implemented"); // don't even know what this is
+    if (static_cast<const ExternalScore&>(delta).score_server) score_server = static_cast<const ExternalScore&>(delta).score_server;
+    if (fields.size() != static_cast<const ExternalScore&>(delta).fields.size())
+      fields.resize(max(fields.size(), static_cast<const ExternalScore&>(delta).fields.size()));
+    for (unsigned i = 0; i < static_cast<const ExternalScore&>(delta).fields.size(); ++i)
+      fields[i] += static_cast<const ExternalScore&>(delta).fields[i] * scale;
   }
   void PlusEquals(const Score& delta) {
     if (static_cast<const ExternalScore&>(delta).score_server) score_server = static_cast<const ExternalScore&>(delta).score_server;
