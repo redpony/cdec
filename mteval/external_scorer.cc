@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <unistd.h>
-#include <signal.h>
 #include <sstream>
 #include <iostream>
 #include <cassert>
@@ -16,7 +15,7 @@
 using namespace std;
 
 extern const char* meteor_jar_path;
-extern void metric_child_signal_handler(int);
+extern void setup_child_process_handler();
 
 map<string, boost::shared_ptr<ScoreServer> > ScoreServerManager::servers_;
 
@@ -48,11 +47,7 @@ ScoreServer* ScoreServerManager::Instance(const string& score_type) {
 }
 
 ScoreServer::ScoreServer(const string& cmd) {
-  static bool need_init = true;
-  if (need_init) {
-    need_init = false;
-    signal(SIGCHLD, metric_child_signal_handler);
-  }
+  setup_child_process_handler();
   cerr << "Invoking " << cmd << " ..." << endl;
   if (pipe(p2c) < 0) { perror("pipe"); exit(1); }
   if (pipe(c2p) < 0) { perror("pipe"); exit(1); }
@@ -83,6 +78,7 @@ ScoreServer::ScoreServer(const string& cmd) {
 }
 
 ScoreServer::~ScoreServer() {
+  cerr << "ScoreServer::~ScoreServer()\n";
   // TODO close stuff, join stuff
 }
 
