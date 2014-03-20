@@ -340,23 +340,22 @@ struct BasicObserver: public DecoderObserver {
 };
 
 struct TrainingObserver : public DecoderObserver {
-  TrainingObserver(const int k, const DocScorer& d, vector<GoodBadOracle>* o, vector<ScoreP>* cbs) : ds(d), oracles(*o), corpus_bleu_sent_stats(*cbs), kbest_size(k) {
-    
-
-    if(!pseudo_doc && !sent_approx)
-    if(cur_pass > 0)     //calculate corpus bleu score from previous iterations 1-best for BLEU gain
-      {
-	ScoreP acc;
-	for (int ii = 0; ii < corpus_bleu_sent_stats.size(); ii++) {
-	  if (!acc) { acc = corpus_bleu_sent_stats[ii]->GetZero(); }
-	  acc->PlusEquals(*corpus_bleu_sent_stats[ii]);
-	  
-	}
-	corpus_bleu_stats = acc;
-	corpus_bleu_score = acc->ComputeScore();
+  TrainingObserver(const int k,
+                   const DocScorer& d,
+                   vector<GoodBadOracle>* o,
+                   vector<ScoreP>* cbs) : ds(d), oracles(*o), corpus_bleu_sent_stats(*cbs), kbest_size(k) {
+    if(!pseudo_doc && !sent_approx) {
+      if(cur_pass > 0) {    //calculate corpus bleu score from previous iterations 1-best for BLEU gain
+        ScoreP acc;
+        for (int ii = 0; ii < corpus_bleu_sent_stats.size(); ii++) {
+          if (!acc) { acc = corpus_bleu_sent_stats[ii]->GetZero(); }
+          acc->PlusEquals(*corpus_bleu_sent_stats[ii]);
+        }
+        corpus_bleu_stats = acc;
+        corpus_bleu_score = acc->ComputeScore();
       }
-
-}
+    }
+  }
   const DocScorer& ds;
   vector<ScoreP>& corpus_bleu_sent_stats;
   vector<GoodBadOracle>& oracles;
@@ -460,7 +459,6 @@ struct TrainingObserver : public DecoderObserver {
 	    }
 	  else //use sentence-level smoothing ( used when cur_pass=0 if not pseudo_doc)
 	    {
-	     
 	      sentscore = mt_metric_scale * (ds[sent_id]->ScoreCandidate(d->yield)->ComputeScore());
 	    }
 	
@@ -574,19 +572,15 @@ void ReadTrainingCorpus(const string& fname, vector<string>* c) {
   }
 }
 
-void ReadPastTranslationForScore(const int cur_pass, vector<ScoreP>* c, DocScorer& ds, const string& od)
-{
-  cerr << "Reading BLEU gain file ";
+void ReadPastTranslationForScore(const int cur_pass, vector<ScoreP>* c, DocScorer& ds, const string& od) {
+  cerr << "Reading previous score file ";
   string fname;
-  if(cur_pass == 0)
-    {
-      fname = od + "/run.raw.init";
-    }
-  else
-    {
-      int last_pass = cur_pass - 1; 
-      fname = od + "/run.raw."  +  boost::lexical_cast<std::string>(last_pass) + ".B";
-    }
+  if (cur_pass == 0) {
+    fname = od + "/run.raw.init";
+  } else {
+    int last_pass = cur_pass - 1; 
+    fname = od + "/run.raw."  +  boost::lexical_cast<std::string>(last_pass) + ".B";
+  }
   cerr << fname << "\n";
   ReadFile rf(fname);
   istream& in = *rf.stream();
@@ -603,7 +597,6 @@ void ReadPastTranslationForScore(const int cur_pass, vector<ScoreP>* c, DocScore
     if (!acc) { acc = sentscore->GetZero(); }
     acc->PlusEquals(*sentscore);
     ++lc;
- 
   }
   
   assert(lc > 0);
@@ -611,7 +604,6 @@ void ReadPastTranslationForScore(const int cur_pass, vector<ScoreP>* c, DocScore
   string details;
   acc->ScoreDetails(&details);
   cerr << "Previous run: " << details << score << endl;
-
 }
 
 
@@ -670,10 +662,9 @@ int main(int argc, char** argv) {
   
   //check training pass,if >0, then use previous iterations corpus bleu stats
   cur_pass = stream ? 0 : conf["pass"].as<int>();
-  if(cur_pass > 0)
-    {
-      ReadPastTranslationForScore(cur_pass, &corpus_bleu_sent_stats, *ds, output_dir);
-    }
+  if(cur_pass > 0) {
+    ReadPastTranslationForScore(cur_pass, &corpus_bleu_sent_stats, *ds, output_dir);
+  }
   
   cerr << "Using optimizer:" << optimizer << endl;
     
