@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
 #include <sstream>
 #include <iostream>
 #include <cassert>
@@ -12,6 +14,14 @@
 #include "tdict.h"
 
 using namespace std;
+
+void metric_child_signal_handler(int signo) {
+  int status = 0;
+  cerr << "Received SIGCHLD(" << signo << ") ... aborting.\n";
+  // reap zombies
+  while (waitpid(-1, &status, WNOHANG) > 0) {}
+  abort();
+}
 
 struct NScoreServer {
   NScoreServer(const std::string& cmd);
@@ -27,6 +37,12 @@ struct NScoreServer {
 };
 
 NScoreServer::NScoreServer(const string& cmd) {
+  static bool need_init = true;
+  if (need_init) {
+    need_init = false;
+    signal(SIGCHLD, metric_child_signal_handler);
+  }
+
   cerr << "Invoking " << cmd << " ..." << endl;
   if (pipe(p2c) < 0) { perror("pipe"); exit(1); }
   if (pipe(c2p) < 0) { perror("pipe"); exit(1); }
