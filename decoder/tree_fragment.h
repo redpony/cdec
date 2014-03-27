@@ -91,14 +91,10 @@ class BreadthFirstIterator : public std::iterator<std::forward_iterator_tag, uns
   void Stage() {
     if (q_.empty()) return;
     const TFIState& s = q_.front();
-    if (s.rhspos < 0) {
-      sym = tf_->nodes[s.node].lhs;
-    } else {
-      sym = tf_->nodes[s.node].rhs[s.rhspos];
-      if (IsInternalNT(sym)) {
-        q_.push(TFIState(sym & ALL_MASK, 0));
-        sym = tf_->nodes[sym & ALL_MASK].lhs;
-      }
+    sym = tf_->nodes[s.node].rhs[s.rhspos];
+    if (IsInternalNT(sym)) {
+      q_.push(TFIState(sym & ALL_MASK, 0));
+      sym = tf_->nodes[sym & ALL_MASK].lhs;
     }
   }
   const BreadthFirstIterator& operator++() {
