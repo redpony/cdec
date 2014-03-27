@@ -13,25 +13,6 @@
 
 using namespace std;
 
-// root: S
-// A          implication: (S [A] *INCOMPLETE*
-// B          implication: (S [A] [B] *INCOMPLETE*
-// *0*        implication: (S _[A] [B])
-// a          implication: (S (A a *INCOMPLETE* [B])
-// a          implication: (S (A a a *INCOMPLETE* [B])
-// *0*        implication: (S (A a a) _[B])
-// D          implication: (S (A a a) (B [D] *INCOMPLETE*)
-// *0*        implication: (S (A a a) (B _[D]))
-// d          implication: (S (A a a) (B (D d *INCOMPLETE*))
-// *0*        implication: (S (A a a) (B (D d)))
-// --there are no further outgoing links possible--
-
-// root: S
-// A          implication: (S [A] *INCOMPLETE*
-// B          implication: (S [A] [B] *INCOMPLETE*
-// *0*        implication: (S _[A] [B])
-// *0*        implication: (S [A] _[B])
-// b          implication: (S [A] (B b *INCOMPLETE*))
 struct Tree2StringGrammarNode {
   map<unsigned, Tree2StringGrammarNode> next;
   string rules;
@@ -44,8 +25,19 @@ void ReadTree2StringGrammar(istream* in, unordered_map<unsigned, Tree2StringGram
     size_t pos = line.find("|||");
     assert(pos != string::npos);
     assert(pos > 3);
-    if (line[pos - 1] == ' ') --pos;
+    unsigned xc = 0;
+    while (line[pos - 1] == ' ') { --pos; xc++; }
     cdec::TreeFragment rule_src(line.substr(0, pos), true);
+    Tree2StringGrammarNode* cur = &roots[rule_src.root];
+    for (auto sym : rule_src)
+      cur = &cur->next[sym];
+    pos += 3 + xc;
+    while(line[pos] == ' ') { ++pos; }
+    size_t pos2 = line.find("|||", pos);
+    assert(pos2 != string::npos);
+    while (line[pos2 - 1] == ' ') { --pos2; }
+    cur->rules = line.substr(pos, pos2 - pos);
+    cerr << "OUTPUT = '" << cur->rules << "'\n";
   }
 }
 
