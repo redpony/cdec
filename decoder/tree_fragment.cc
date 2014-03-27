@@ -112,4 +112,12 @@ void TreeFragment::ParseRec(const string& tree, bool afs, unsigned cp, unsigned 
   *psymp = symp;
 }
 
+BreadthFirstIterator TreeFragment::begin() const {
+  return BreadthFirstIterator(this);
+}
+
+BreadthFirstIterator TreeFragment::end() const {
+  return BreadthFirstIterator(this, 0);
+}
+
 }
