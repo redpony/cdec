@@ -490,8 +490,8 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
   }
 
   formalism = LowercaseString(str("formalism",conf));
-  if (formalism != "scfg" && formalism != "fst" && formalism != "lextrans" && formalism != "pb" && formalism != "csplit" && formalism != "tagger" && formalism != "lexalign" && formalism != "rescore") {
-    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 'csplit', 'lextrans', 'lexalign', 'rescore', or 'tagger'\n";
+  if (formalism != "t2s" && formalism != "scfg" && formalism != "fst" && formalism != "lextrans" && formalism != "pb" && formalism != "csplit" && formalism != "tagger" && formalism != "lexalign" && formalism != "rescore") {
+    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 't2s', 'csplit', 'lextrans', 'lexalign', 'rescore', or 'tagger'\n";
     cerr << dcmdline_options << endl;
     exit(1);
   }
@@ -626,6 +626,8 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
   // set up translation back end
   if (formalism == "scfg")
     translator.reset(new SCFGTranslator(conf));
+  else if (formalism == "t2s")
+    translator.reset(new Tree2StringTranslator(conf));
   else if (formalism == "fst")
     translator.reset(new FSTTranslator(conf));
   else if (formalism == "pb")
