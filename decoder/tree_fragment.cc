@@ -36,7 +36,7 @@ void TreeFragment::DebugRec(unsigned cur, ostream* out) const {
     *out << ' ';
     if (IsFrontier(x)) {
       *out << '[' << TD::Convert(x & ALL_MASK) << ']';
-    } else if (IsInternalNT(x)) {
+    } else if (IsRHS(x)) {
       DebugRec(x & ALL_MASK, out);
     } else { // must be terminal
       *out << TD::Convert(x);
@@ -66,7 +66,7 @@ void TreeFragment::ParseRec(const string& tree, bool afs, unsigned cp, unsigned 
       // recursively call parser to deal with constituent
       ParseRec(tree, afs, cp, symp, np, &cp, &symp, &np);
       unsigned ind = np - 1;
-      rhs.push_back(ind | NT_BIT);
+      rhs.push_back(ind | RHS_BIT);
     } else { // deal with terminal / nonterminal substitution
       ++symp;
       assert(tree[cp] != ' ');
@@ -95,7 +95,7 @@ void TreeFragment::ParseRec(const string& tree, bool afs, unsigned cp, unsigned 
   } // continuent has completed, cp is at ), build node
   const unsigned j = symp; // span from (i,j)
   // add an internal non-terminal symbol
-  const unsigned nt = TD::Convert(tree.substr(nt_start, nt_end - nt_start)) | NT_BIT;
+  const unsigned nt = TD::Convert(tree.substr(nt_start, nt_end - nt_start)) | RHS_BIT;
   nodes[np] = TreeFragmentProduction(nt, rhs);
   //cerr << np << " production(" << i << "," << j << ")=  " << TD::Convert(nt & ALL_MASK) << " -->";
   //for (auto& x : rhs) {
@@ -113,11 +113,15 @@ void TreeFragment::ParseRec(const string& tree, bool afs, unsigned cp, unsigned 
 }
 
 BreadthFirstIterator TreeFragment::begin() const {
-  return BreadthFirstIterator(this);
+  return BreadthFirstIterator(this, nodes.size() - 1);
+}
+
+BreadthFirstIterator TreeFragment::begin(unsigned node_idx) const {
+  return BreadthFirstIterator(this, node_idx);
 }
 
 BreadthFirstIterator TreeFragment::end() const {
-  return BreadthFirstIterator(this, 0);
+  return BreadthFirstIterator(this);
 }
 
 }
