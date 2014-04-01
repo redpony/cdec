@@ -167,6 +167,12 @@ struct Tree2StringTranslatorImpl {
     //cerr << "Goal node: " << goal << endl;
     hg.TopologicallySortNodesAndEdges(goal);
     hg.Reweight(weights);
+
+    // there might be nodes that cannot be derived
+    // the following takes care of them
+    vector<bool> prune(hg.edges_.size(), false);
+    hg.PruneEdges(prune, true);
+
     //hg.PrintGraphviz();
     minus_lm_forest->swap(hg);
     return true;
