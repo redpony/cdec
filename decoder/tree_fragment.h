@@ -107,6 +107,7 @@ class BreadthFirstIterator : public std::iterator<std::forward_iterator_tag, uns
   bool operator!=(const BreadthFirstIterator& other) const {
     return (tf_ != other.tf_) || (q_ != other.q_);
   }
+  unsigned node_idx() const { return q_.front().node; }
   const BreadthFirstIterator& operator++() {
     TFIState& s = q_.front();
     if (s.state == 0) {
