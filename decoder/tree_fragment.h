@@ -139,6 +139,10 @@ class BreadthFirstIterator : public std::iterator<std::forward_iterator_tag, uns
     q_.pop_back();
     return *this;
   }
+  unsigned child_node() const {
+    assert(IsRHS(sym));
+    return q_.back().node;
+  }
   BreadthFirstIterator remainder() const {
     assert(IsRHS(sym));
     return BreadthFirstIterator(tf_, q_.back());
