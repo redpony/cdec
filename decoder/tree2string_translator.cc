@@ -214,7 +214,7 @@ struct Tree2StringTranslatorImpl {
     // the following takes care of them
     vector<bool> prune(hg.edges_.size(), false);
     hg.PruneEdges(prune, true);
-
+    if (hg.edges_.size() == 0) return false;
     //hg.PrintGraphviz();
     minus_lm_forest->swap(hg);
     return true;
