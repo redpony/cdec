@@ -119,7 +119,7 @@ void check_and_update_ctf_stack(const TRulePtr& rp) {
 
 %}
 
-REAL [\-+]?[0-9]+(\.[0-9]*([eE][-+]*[0-9]+)?)?|inf|[\-+]inf
+REAL [\-+]?[0-9]+(\.[0-9]*)?([eE][-+]*[0-9]+)?
 NT [^\t \[\],]+
 
 %x LHS_END SRC TRG FEATS FEATVAL ALIGNS TREE
