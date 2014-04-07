@@ -51,23 +51,18 @@ class TRule {
   TRule(const TRule& other) :
     e_(other.e_), f_(other.f_), lhs_(other.lhs_), scores_(other.scores_), arity_(other.arity_), prev_i(-1), prev_j(-1), a_(other.a_) {}
 
-  // if mono or strict is true, then lexer won't be used, and //FIXME: > 9 variables won't work
-  explicit TRule(const std::string& text, bool strict = false, bool mono = false) : prev_i(-1), prev_j(-1) {
-    ReadFromString(text, strict, mono);
+  explicit TRule(const std::string& text, bool mono = false) : prev_i(-1), prev_j(-1) {
+    ReadFromString(text, mono);
   }
 
-  // deprecated, use lexer
   // make a rule from a hiero-like rule table, e.g.
   //    [X] ||| [X,1] DE [X,2] ||| [X,2] of the [X,1]
-  // if misformatted, returns NULL
   static TRule* CreateRuleSynchronous(const std::string& rule);
 
-  // deprecated, use lexer
   // make a rule from a phrasetable entry (i.e., one that has no LHS type), e.g:
   //    el gato ||| the cat ||| Feature_2=0.34
   static TRule* CreateRulePhrasetable(const std::string& rule);
 
-  // deprecated, use lexer
   // make a rule from a non-synchrnous CFG representation, e.g.:
   //    [LHS] ||| term1 [NT] term2 [OTHER_NT] [YET_ANOTHER_NT]
   static TRule* CreateRuleMonolingual(const std::string& rule);
@@ -80,11 +75,10 @@ class TRule {
                    std::vector<WordID>* result) const {
     unsigned vc = 0;
     result->clear();
-    for (std::vector<WordID>::const_iterator i = e_.begin(); i != e_.end(); ++i) {
-      const WordID& c = *i;
+    for (const auto& c : e_) {
       if (c < 1) {
         ++vc;
-        const std::vector<WordID>& var_value = *var_values[-c];
+        const auto& var_value = *var_values[-c];
         std::copy(var_value.begin(),
                   var_value.end(),
                   std::back_inserter(*result));
@@ -99,10 +93,9 @@ class TRule {
                    std::vector<WordID>* result) const {
     unsigned vc = 0;
     result->clear();
-    for (std::vector<WordID>::const_iterator i = f_.begin(); i != f_.end(); ++i) {
-      const WordID& c = *i;
+    for (const auto& c : f_) {
       if (c < 1) {
-        const std::vector<WordID>& var_value = *var_values[vc++];
+        const auto& var_value = *var_values[vc++];
         std::copy(var_value.begin(),
                   var_value.end(),
                   std::back_inserter(*result));
@@ -113,7 +106,7 @@ class TRule {
     assert(vc == var_values.size());
   }
 
-  bool ReadFromString(const std::string& line, bool strict = false, bool monolingual = false);
+  bool ReadFromString(const std::string& line, bool monolingual = false);
 
   bool Initialized() const { return e_.size(); }
 
@@ -166,7 +159,6 @@ class TRule {
 
  private:
   TRule(const WordID& src, const WordID& trg) : e_(1, trg), f_(1, src), lhs_(), arity_(), prev_i(), prev_j() {}
-  bool SanityCheck() const;
 };
 
 inline size_t hash_value(const TRule& r) {

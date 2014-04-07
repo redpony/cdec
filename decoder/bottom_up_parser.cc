@@ -159,7 +159,7 @@ PassiveChart::PassiveChart(const string& goal,
     chart_(input.size()+1, input.size()+1),
     nodemap_(input.size()+1, input.size()+1),
     goal_cat_(TD::Convert(goal) * -1),
-    goal_rule_(new TRule("[Goal] ||| [" + goal + ",1] ||| [" + goal + ",1]")),
+    goal_rule_(new TRule("[Goal] ||| [" + goal + "] ||| [1]")),
     goal_idx_(-1),
     lc_fid_(FD::Convert("LatticeCost")),
     unaries_() {

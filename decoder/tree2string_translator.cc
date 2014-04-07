@@ -174,6 +174,7 @@ struct Tree2StringTranslatorImpl {
       q.push(ParserState(input_tree.begin(), g.get()));
       unique.insert(q.back());
     }
+    if (q.size() == 0) return false;
     unsigned tree_top = q.front().input_node_idx;
     while(!q.empty()) {
       ParserState& s = q.front();
