@@ -49,7 +49,7 @@ cdef TRule convert_rule(_sa.Rule rule):
 cdef class TRule:
     cdef shared_ptr[grammar.TRule]* rule
 
-    def __init__(self, lhs, f, e, scores, a=None):
+    def __init__(self, lhs, f, e, scores, a=None, text=None):
         """TRule(lhs, f, e, scores, a=None) -> Translation rule.
         lhs: left hand side non-terminal
         f: source phrase (list of words/NT)
@@ -57,12 +57,18 @@ cdef class TRule:
         scores: dictionary of feature scores
         a: optional list of alignment points"""
         self.rule = new shared_ptr[grammar.TRule](new grammar.TRule())
-        self.lhs = lhs
-        self.e = e
-        self.f = f
-        self.scores = scores
+        if lhs:
+          self.lhs = lhs
+        if e:
+          self.e = e
+        if f:
+          self.f = f
+        if scores:
+          self.scores = scores
         if a:
-            self.a = a
+          self.a = a
+        if text:
+          self.rule.get().ReadFromString(text, 0)
         self.rule.get().ComputeArity()
 
     def __dealloc__(self):

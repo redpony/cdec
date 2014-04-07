@@ -16,6 +16,7 @@ cdef extern from "decoder/trule.h":
         FastSparseVector[weight_t] scores_
         WordID lhs_
         int arity_
+        bint ReadFromString(string& line, bint monolingual)
         bint IsUnary()
         bint IsGoal()
         void ComputeArity()
