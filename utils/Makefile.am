@@ -39,7 +39,8 @@ libutils_a_SOURCES = \
   kernel_string_subseq.h \
   logval.h \
   m.h \
-  murmur_hash.h \
+  murmur_hash3.h \
+  murmur_hash3.cc \
   named_enum.h \
   null_deleter.h \
   null_traits.h \

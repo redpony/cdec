@@ -750,6 +750,11 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     return false;
   }
 
+  // this is mainly used for debugging, eventually this will be an assertion
+  if (!forest.AreNodesUniquelyIdentified()) {
+    if (!SILENT) cerr << "  *** NODES NOT UNIQUELY IDENTIFIED ***\n";
+  }
+
   const bool show_tree_structure=conf.count("show_tree_structure");
   if (!SILENT) forest_stats(forest,"  Init. forest",show_tree_structure,oracle.show_derivation);
   if (conf.count("show_expected_length")) {
@@ -813,6 +818,10 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       forest.swap(rescored_forest);
       forest.Reweight(cur_weights);
       if (!SILENT) forest_stats(forest,"  " + passtr +" forest",show_tree_structure,oracle.show_derivation, conf.count("extract_rules"), extract_file);
+      // this is mainly used for debugging, eventually this will be an assertion
+      if (!forest.AreNodesUniquelyIdentified()) {
+        if (!SILENT) cerr << "  *** NODES NOT UNIQUELY IDENTIFIED ***\n";
+      }
     }
 
     if (conf.count("show_partition")) {
@@ -984,6 +993,10 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
             forest.edges_[i].rule_ = forest.edges_[i].rule_->parent_rule_;
       }
       forest.Reweight(last_weights);
+      // this is mainly used for debugging, eventually this will be an assertion
+      if (!forest.AreNodesUniquelyIdentified()) {
+        if (!SILENT) cerr << "  *** NODES NOT UNIQUELY IDENTIFIED ***\n";
+      }
       if (!SILENT) forest_stats(forest,"  Constr. forest",show_tree_structure,oracle.show_derivation);
       if (!SILENT) cerr << "  Constr. VitTree: " << ViterbiFTree(forest) << endl;
       if (conf.count("show_partition")) {

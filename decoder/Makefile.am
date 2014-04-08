@@ -144,6 +144,7 @@ libcdec_a_SOURCES = \
   lattice.cc \
   lexalign.cc \
   lextrans.cc \
+  node_state_hash.h \
   tree_fragment.cc \
   tree_fragment.h \
   maxtrans_blunsom.cc \

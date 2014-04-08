@@ -184,13 +184,19 @@ struct Tree2StringTranslatorImpl {
         //   TD::Convert(input_tree.nodes[s.input_node_idx].lhs & cdec::ALL_MASK) << endl;
         if (s.node->rules.size()) {
           int& node_id = tree2hg[s.input_node_idx];
-          if (node_id < 0)
-            node_id = hg.AddNode(-(input_tree.nodes[s.input_node_idx].lhs & cdec::ALL_MASK))->id_;
+          if (node_id < 0) {
+            HG::Node* new_node = hg.AddNode(-(input_tree.nodes[s.input_node_idx].lhs & cdec::ALL_MASK));
+            new_node->node_hash = s.input_node_idx + 1;
+            node_id = new_node->id_;
+          }
           TailNodeVector tail;
           for (auto n : s.future_work) {
             int& nix = tree2hg[n];
-            if (nix < 0)
-              nix = hg.AddNode(-(input_tree.nodes[n].lhs & cdec::ALL_MASK))->id_;
+            if (nix < 0) {
+              HG::Node* new_node = hg.AddNode(-(input_tree.nodes[n].lhs & cdec::ALL_MASK));
+              new_node->node_hash = n + 1;
+              nix = new_node->id_;
+            }
             tail.push_back(nix);
           }
           for (auto& r : s.node->rules) {
