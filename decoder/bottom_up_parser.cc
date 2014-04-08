@@ -7,6 +7,8 @@
 #include <iostream>
 #include <map>
 
+#include "node_state_hash.h"
+#include "nt_span.h"
 #include "hg.h"
 #include "array2d.h"
 #include "tdict.h"
@@ -356,5 +358,13 @@ bool ExhaustiveBottomUpParser::Parse(const Lattice& input,
   kEPS = TD::Convert("*EPS*");
   PassiveChart chart(goal_sym_, grammars_, input, forest);
   const bool result = chart.Parse();
+
+  if (result) {
+    for (auto& node : forest->nodes_) {
+      Span prev;
+      const Span s = forest->NodeSpan(node.id_, &prev);
+      node.node_hash = cdec::HashNode(node.cat_, s.l, s.r, prev.l, prev.r);
+    }
+  }
   return result;
 }

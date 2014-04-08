@@ -142,13 +142,15 @@ namespace HG {
   // TODO get rid of cat_?
   // TODO keep cat_ and add span and/or state? :)
   struct Node {
-    Node() : id_(), cat_() {}
+    Node() : node_hash(), id_(), cat_() {}
+    size_t node_hash;  // hash of all the information that makes this node unique
     int id_; // equal to this object's position in the nodes_ vector
     WordID cat_;  // non-terminal category if <0, 0 if not set
     WordID NT() const { return -cat_; }
     EdgesVector in_edges_;   // an in edge is an edge with this node as its head.  (in edges come from the bottom up to us)  indices in edges_
     EdgesVector out_edges_;  // an out edge is an edge with this node as its tail.  (out edges leave us up toward the top/goal). indices in edges_
     void copy_fixed(Node const& o) { // nonstructural fields only - structural ones are managed by sorting/pruning/subsetting
+      node_hash = o.node_hash;
       cat_=o.cat_;
     }
     void copy_reindex(Node const& o,indices_after const& n2,indices_after const& e2) {
@@ -192,13 +194,14 @@ public:
     SetNodeOrigin(nodeid,r);
     return r;
   }
-  Span NodeSpan(int nodeid) const {
+  Span NodeSpan(int nodeid, Span* prev = nullptr) const {
     Span s;
     Node const &n=nodes_[nodeid];
     if (!n.in_edges_.empty()) {
       Edge const& e=edges_[n.in_edges_.front()];
       s.l=e.i_;
       s.r=e.j_;
+      if (prev) { prev->l = e.prev_i_; prev->r = e.prev_j_; }
     }
     return s;
   }
@@ -261,6 +264,9 @@ public:
     nodes_.resize(size);
     for (int i = 0; i < size; ++i) nodes_[i].id_ = i;
   }
+
+  // if all node states are unique, return true
+  bool AreNodesUniquelyIdentified() const;
 
   // reserves space in the nodes vector to prevent memory locations
   // from changing

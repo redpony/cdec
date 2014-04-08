@@ -280,6 +280,11 @@ bool LexicalTrans::TranslateImpl(const string& input,
   smeta->SetSourceLength(lattice.size());
   if (!pimpl_->BuildTrellis(lattice, *smeta, forest)) return false;
   forest->Reweight(weights);
+  // since we don't do any pruning, the node_hash will be the same for
+  // every run of the composer
+  int nc = 0;
+  for (auto& node : forest->nodes_)
+    node.node_hash = ++nc;
   return true;
 }
 

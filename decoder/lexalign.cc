@@ -124,6 +124,11 @@ bool LexicalAlign::TranslateImpl(const string& input,
   pimpl_->BuildTrellis(lattice, *smeta, forest);
   forest->is_linear_chain_ = true;
   forest->Reweight(weights);
+  // since we don't do any pruning, the node_hash will be the same for
+  // every run of the composer
+  int nc = 0;
+  for (auto& node : forest->nodes_)
+    node.node_hash = ++nc;
   return true;
 }
 
