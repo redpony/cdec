@@ -1,5 +1,7 @@
 #include "hg_io.h"
 
+#include <cstdio>
+#include <cstdlib>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -15,10 +17,15 @@ using namespace std;
 struct HGReader : public JSONParser {
   HGReader(Hypergraph* g) : rp("[X] ||| "), state(-1), hg(*g), nodes_needed(true), edges_needed(true) { nodes = 0; edges = 0; }
 
-  void CreateNode(const string& cat, const vector<int>& in_edges) {
+  void CreateNode(const string& cat, const string& shash, const vector<int>& in_edges) {
     WordID c = TD::Convert("X") * -1;
     if (!cat.empty()) c = TD::Convert(cat) * -1;
     Hypergraph::Node* node = hg.AddNode(c);
+    char* dend;
+    if (shash.size())
+      node->node_hash = strtoull(shash.c_str(), &dend, 16);
+    else
+      node->node_hash = 0;
     for (int i = 0; i < in_edges.size(); ++i) {
       if (in_edges[i] >= hg.edges_.size()) {
         cerr << "JSONParser: in_edges[" << i << "]=" << in_edges[i]
@@ -102,17 +109,19 @@ struct HGReader : public JSONParser {
       ++nodes;
       in_edges.clear();
       cat.clear();
+      shash.clear();
       state = 9; break;
     case 9:
       if (type == JSON_T_OBJECT_END) {
         //cerr << "Creating NODE\n";
-        CreateNode(cat, in_edges);
+        CreateNode(cat, shash, in_edges);
         state = 0; break;
       }
       assert(type == JSON_T_KEY);
       cur_key = value->vu.str.value;
       if (cur_key == "cat") { assert(cat.empty()); state = 10; break; }
       if (cur_key == "in_edges") { assert(in_edges.empty()); state = 11; break; }
+      if (cur_key == "node_hash") { assert(shash.empty()); state = 24; break; }
       cerr << "Syntax error: unexpected key " << cur_key << " in node specification.\n";
       return false;
     case 10:
@@ -224,6 +233,12 @@ struct HGReader : public JSONParser {
       assert(spanc < 4);
       spans[spanc] = value->vu.integer_value;
       ++spanc;
+      break;
+    case 24:  // read node hash
+      assert(type == JSON_T_STRING);
+      shash = value->vu.str.value;
+      state = 9;
+      break;
     }
     return true;
   }
@@ -231,6 +246,7 @@ struct HGReader : public JSONParser {
   string cat;
   SmallVectorUnsigned tail;
   vector<int> in_edges;
+  string shash;
   TRulePtr cur_rule;
   map<int, TRulePtr> rules;
   vector<int> fdict;
@@ -340,6 +356,9 @@ bool HypergraphIO::WriteToJSON(const Hypergraph& hg, bool remove_rules, ostream*
        o << ",\"cat\":";
        JSONParser::WriteEscapedString(TD::Convert(node.cat_ * -1), &o);
     }
+    char buf[48];
+    sprintf(buf, "%016lX", node.node_hash);
+    o << ",\"node_hash\":\"" << buf << "\"";
     o << "}";
   }
   o << "}\n";
