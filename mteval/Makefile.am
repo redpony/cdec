@@ -1,7 +1,6 @@
 bin_PROGRAMS = \
   fast_score \
-  mbr_kbest\
-  marginalize
+  mbr_kbest
 
 noinst_PROGRAMS = \
   scorer_test
@@ -46,8 +45,5 @@ mbr_kbest_LDADD = libmteval.a ../utils/libutils.a
 
 scorer_test_SOURCES = scorer_test.cc
 scorer_test_LDADD = libmteval.a ../utils/libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
-
-marginalize_SOURCES = marginalize.cc
-marginalize_LDADD = libmteval.a ../klm/search/libksearch.a ../klm/lm/libklm.a ../klm/util/libklm_util.a ../klm/util/double-conversion/libklm_util_double.a ../utils/libutils.a
 
 AM_CPPFLAGS = -DTEST_DATA=\"$(top_srcdir)/mteval/test_data\" -DBOOST_TEST_DYN_LINK -W -Wall -Wno-sign-compare -I$(top_srcdir) -I$(top_srcdir)/utils -I$(top_srcdir)/klm
