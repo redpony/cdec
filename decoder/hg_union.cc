@@ -7,6 +7,7 @@
 namespace std { using std::tr1::unordered_set; }
 #endif
 
+#include "verbose.h"
 #include "hg.h"
 #include "sparse_vector.h"
 
@@ -43,7 +44,7 @@ void Union(const Hypergraph& in, Hypergraph* out) {
     abort();
   }
   if (out->nodes_.back().node_hash != in.nodes_.back().node_hash) {
-    cerr << "Union: Goal nodes are mismatched!\n";
+    cerr << "Union: Goal nodes are mismatched!\n  a=" << in.nodes_.back().node_hash << " b=" << out->nodes_.back().node_hash << "\n";
     abort();
   }
   const int cgoal = out->nodes_.back().id_;
@@ -59,6 +60,8 @@ void Union(const Hypergraph& in, Hypergraph* out) {
     }
   }
 
+  double n_exists = 0;
+  double n_created = 0;
   for (const auto& in_node : in.nodes_) {
     HG::Node& out_node = out->nodes_[h2n[in_node.node_hash]];
     for (const auto oeid : out_node.in_edges_) {
@@ -82,12 +85,20 @@ void Union(const Hypergraph& in, Hypergraph* out) {
           t[i] = h2n[in.nodes_[in_edge.tail_nodes_[i]].node_hash];
         HG::Edge* new_edge = out->AddEdge(in_edge, t);
         out->ConnectEdgeToHeadNode(new_edge, &head);
+        ++n_created;
         //cerr << "Created: " << new_edge->rule_->AsString() << " [head=" << new_edge->head_node_ << "]\n";
-      } //else {
+      } else {
+        ++n_exists;
+      }
       //  cerr << "Not created: " << in.edges_[ieid].rule_->AsString() << "\n";
       //}
     }
   }
+  if (!SILENT)
+    cerr << "  Union: edges_created=" << n_created
+         << " edges_already_existing="
+         << n_exists << "  ratio_new=" << (n_created / (n_exists + n_created))
+         << endl;
   out->TopologicallySortNodesAndEdges(cgoal);
 }
 
