@@ -3,14 +3,19 @@
 
 #include <cassert>
 #include <cstring>
+#include "tdict.h"
 #include "murmur_hash3.h"
 #include "ffset.h"
 
 namespace cdec {
 
   struct FirstPassNode {
-    FirstPassNode(int cat, int i, int j, int pi, int pj) : lhs(cat), s(i), t(j), u(pi), v(pj) {}
-    int32_t lhs;
+    FirstPassNode(int cat, int i, int j, int pi, int pj) : s(i), t(j), u(pi), v(pj) {
+      memset(lhs, 0, 120);
+      unsigned it = 0;
+      for (auto& c : TD::Convert(-cat)) { lhs[it++] = c; if (it == 120) break; }
+    }
+    char lhs[120];
     short s;
     short t;
     short u;
@@ -23,6 +28,7 @@ namespace cdec {
   }
 
   inline uint64_t HashNode(uint64_t old_hash, const FFState& state) {
+    if (state.size() == 0) return old_hash;
     uint8_t buf[1024];
     std::memcpy(buf, &old_hash, sizeof(uint64_t));
     assert(state.size() < (1024u - sizeof(uint64_t)));
