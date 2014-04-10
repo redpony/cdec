@@ -38,7 +38,7 @@ class CdecDecoder(Decoder):
 
 class MIRADecoder(Decoder):
 
-    def __init__(self, config, weights, metric='bleu'):
+    def __init__(self, config, weights, metric='ibm_bleu'):
         cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         mira = os.path.join(cdec_root, 'training', 'mira', 'kbest_cut_mira')
         #                                              optimizer=2 step=0.001    best=500,    k=500,       uniq, stream, metric
