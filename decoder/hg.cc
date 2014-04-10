@@ -396,6 +396,7 @@ void Hypergraph::PrintGraphviz() const {
   for (const auto& node : nodes_) {
     cerr << "  " << node.id_ << "[label=\"" << (node.cat_ < 0 ? TD::Convert(node.cat_ * -1) : "")
          << " n=" << node.id_
+         << " h=" << node.node_hash
          << "\"];\n";
   }
   cerr << "}\n";

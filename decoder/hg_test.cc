@@ -44,6 +44,13 @@ BOOST_AUTO_TEST_CASE(Union) {
   Hypergraph hg2;
   CreateHG_tiny(path, &hg1);
   CreateHG(path, &hg2);
+  int nc = 0;
+  for (auto& node: hg1.nodes_)
+    node.node_hash = ++nc;
+  for (auto& node: hg2.nodes_)
+    node.node_hash = ++nc;
+  hg1.nodes_.back().node_hash = nc;
+
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 0.4);
   wts.set_value(FD::Convert("f2"), 1.0);
@@ -56,8 +63,11 @@ BOOST_AUTO_TEST_CASE(Union) {
   int l2 = ViterbiPathLength(hg2);
   cerr << c1 << "\t" << TD::GetString(t1) << endl;
   cerr << c2 << "\t" << TD::GetString(t2) << endl;
+  hg1.PrintGraphviz();
+  hg2.PrintGraphviz();
   HG::Union(hg2, &hg1);
   hg1.Reweight(wts);
+  hg1.PrintGraphviz();
   c3 = ViterbiESentence(hg1, &t3);
   int l3 = ViterbiPathLength(hg1);
   cerr << c3 << "\t" << TD::GetString(t3) << endl;
@@ -84,6 +94,13 @@ BOOST_AUTO_TEST_CASE(Union) {
   BOOST_CHECK_CLOSE(log(list[0].second), log(c4), 1e-4);
   BOOST_CHECK_EQUAL(list.size(), 6);
   BOOST_CHECK_CLOSE(log(list.back().second / list.front().second), -97.7, 1e-4);
+  hg1 = hg2;
+  BOOST_CHECK_EQUAL(hg1.nodes_.size(), hg2.nodes_.size());
+  BOOST_CHECK_EQUAL(hg1.edges_.size(), hg2.edges_.size());
+  HG::Union(hg1, &hg2);  // this should be a no-op
+  BOOST_CHECK_EQUAL(hg1.nodes_.size(), hg2.nodes_.size());
+  BOOST_CHECK_EQUAL(hg1.edges_.size(), hg2.edges_.size());
+  cerr << "DONE UNION\n";
 }
 
 BOOST_AUTO_TEST_CASE(ControlledKBest) {
