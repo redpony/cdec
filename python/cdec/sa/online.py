@@ -126,3 +126,17 @@ class Bilex:
                     break
                 (f, e, c) = line.split()
                 self.fe[(f, e)] = float(c)
+
+# Bilex get_score for multiple instances
+def get_score_multilex(f, e, dir, bilex_list):
+    num = 0
+    denom = 0
+    for bilex in bilex_list:
+        if dir == 0:
+            denom += bilex.f.get(f, 0)
+        else:
+            denom += bilex.e.get(e, 0)
+        num += bilex.fe.get((f, e), 0)
+    if (not num) or (not denom):
+        return None
+    return num / denom
