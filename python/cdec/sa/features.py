@@ -40,13 +40,31 @@ def CoherenceProb(ctx): # c(f) / sample c(f)
         prob = (ctx.fcount + ctx.online.fcount) / (ctx.fsample_count + ctx.online.fsample_count)
     return -math.log10(prob)
 
+# Not a feature, used for MaxLex
+# bilex get_score for multiple instances
+def get_lex_online(f, e, dir, bilex_list):
+    num = 0
+    denom = 0
+    for bilex in bilex_list:
+        if dir == 0:
+            denom += bilex.f.get(f, 0)
+        else:
+            denom += bilex.e.get(e, 0)
+        num += bilex.fe.get((f, e), 0)
+    if (not num) or (not denom):
+        return None
+    return num / denom
+
 def MaxLexEgivenF(ttable):
     def MaxLexEgivenF(ctx):
         fwords = ctx.fphrase.words
         fwords.append('NULL')
         maxOffScore = 0.0
         for e in ctx.ephrase.words:
-            maxScore = max(ttable.get_score(f, e, 0) for f in fwords)
+            if ctx.online:
+                maxScore = max(get_lex_online(f, e, 0, (ttable, ctx.online.bilex)) for f in fwords)
+            else:
+                maxScore = max(ttable.get_score(f, e, 0) for f in fwords)
             maxOffScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
         return maxOffScore
     return MaxLexEgivenF
@@ -57,7 +75,10 @@ def MaxLexFgivenE(ttable):
         ewords.append('NULL')
         maxOffScore = 0.0
         for f in ctx.fphrase.words:
-            maxScore = max(ttable.get_score(f, e, 1) for e in ewords)
+            if ctx.online:
+                maxScore = max(get_lex_online(f, e, 1, (ttable, ctx.online.bilex)) for e in ewords)
+            else:
+                maxScore = max(ttable.get_score(f, e, 1) for e in ewords)
             maxOffScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
         return maxOffScore
     return MaxLexFgivenE
