@@ -15,8 +15,11 @@ BOOST_AUTO_TEST_CASE(TestTreeFragments) {
   vector<WordID> aw, bw;
   cerr << "TREE1: " << tree << endl;
   cerr << "TREE2: " << tree2 << endl;
-  for (auto& sym : tree)
+  for (auto& sym : tree) {
+    if (cdec::IsLHS(sym)) cerr << "(";
+    cerr << TD::Convert(sym & cdec::ALL_MASK) << endl;
     if (cdec::IsTerminal(sym)) aw.push_back(sym); else a.push_back(sym);
+  }
   for (auto& sym : tree2)
     if (cdec::IsTerminal(sym)) bw.push_back(sym); else b.push_back(sym);
   BOOST_CHECK_EQUAL(a.size(), b.size());
@@ -38,11 +41,12 @@ BOOST_AUTO_TEST_CASE(TestTreeFragments) {
       if (cdec::IsFrontier(*it)) nts += "*";
     }
   }
+  cerr << "Truncated: " << nts << endl;
   BOOST_CHECK_EQUAL(nts, "(S NP* VP*");
 
   nts.clear();
   int ntc = 0;
-  for (cdec::TreeFragment::iterator it = tree.begin(); it != tree.end(); ++it) {
+  for (auto it = tree.bfs_begin(); it != tree.bfs_end(); ++it) {
     if (cdec::IsNT(*it)) {
       if (cdec::IsRHS(*it)) {
         ++ntc;
