@@ -38,14 +38,13 @@ void ReadTree2StringGrammar(istream* in, Tree2StringGrammarNode* root) {
     // but it will not generate source strings correctly
     vector<int> frhs;
     for (auto sym : rule_src) {
+      //cerr << TD::Convert(sym & cdec::ALL_MASK) << endl;
       cur = &cur->next[sym];
-      if (sym) {
-        if (cdec::IsFrontier(sym)) {  // frontier symbols -> variables
-          int nt = (sym & cdec::ALL_MASK);
-          frhs.push_back(-nt);
-        } else if (cdec::IsTerminal(sym)) {
-          frhs.push_back(sym);
-        }
+      if (cdec::IsFrontier(sym)) {  // frontier symbols -> variables
+        int nt = (sym & cdec::ALL_MASK);
+        frhs.push_back(-nt);
+      } else if (cdec::IsTerminal(sym)) {
+        frhs.push_back(sym);
       }
     }
     os << '[' << TD::Convert(-lhs) << "] |||";
@@ -61,6 +60,7 @@ void ReadTree2StringGrammar(istream* in, Tree2StringGrammarNode* root) {
     os << " ||| " << line.substr(pos);
     TRulePtr rule(new TRule(os.str()));
     cur->rules.push_back(rule);
+    //cerr << "RULE: " << rule->AsString() << "\n\n";
   }
 }
 
@@ -82,7 +82,7 @@ struct ParserState {
   }
   vector<unsigned> future_work;
   int input_node_idx; // lhs of top level NT
-  Tree2StringGrammarNode* node;
+  Tree2StringGrammarNode* node; // pointer into grammar
 };
 
 namespace std {
@@ -239,11 +239,13 @@ struct Tree2StringTranslatorImpl {
             new_s.future_work.push_back(new_work);  // if this traversal of the input succeeds, future_work goes on the q
             if (unique.insert(new_s).second) q.push(new_s);
           }
+          //else { cerr << "did not match [" << TD::Convert(sym & cdec::ALL_MASK) << "]\n"; }
           if (nit1 != s.node->next.end()) {
             //cerr << "MATCHED FULL RHS: " << TD::Convert(sym & cdec::ALL_MASK) << endl;
             const ParserState new_s(++s.in_iter, &nit1->second, s);
             if (unique.insert(new_s).second) q.push(new_s);
           }
+          //else { cerr << "did not match " << TD::Convert(sym & cdec::ALL_MASK) << "\n"; }
         } else if (cdec::IsTerminal(sym)) {
           auto nit = s.node->next.find(sym);
           if (nit != s.node->next.end()) {

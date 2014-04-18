@@ -1,0 +1,4 @@
+If the hypergraph serialization format changes, you will need to rerun
+the following command to regenerate the compiled CFG:
+
+cat input.cfg | ../../../training/utils/grammar_convert  > input.txt
