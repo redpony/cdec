@@ -1,0 +1,4 @@
+0 ||| the broccoli was eaten by John ||| Passive=1 Definite=1 ||| 2
+0 ||| John ate the broccoli ||| Active=1 Definite=1 ||| 1.1
+0 ||| broccoli was eaten by John ||| Passive=1 ||| 1
+0 ||| John ate broccoli ||| Active=1 ||| 0.1
