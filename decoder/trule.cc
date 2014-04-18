@@ -56,6 +56,12 @@ bool TRule::ReadFromString(const string& line, bool mono) {
   RuleLexer::ReadRule(line + '\n', assign_trule, mono, this);
   if (n_assigned > 1)
     cerr<<"\nWARNING: more than one rule parsed from multi-line string; kept last: "<<line<<".\n";
+  if (mono) {
+    e_ = f_;
+    int ntc = 0;
+    for (auto& i : e_)
+      if (i < 0) i = -ntc++;
+  }
   return n_assigned;
 }
 
