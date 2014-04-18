@@ -23,7 +23,25 @@ Extract grammar rules from the compiled corpus:
 	cat input.txt | python -m cdec.sa.extract -c extract.ini -g grammars/ -z
 
 This will create per-sentence grammar files in the `grammars` directory and output annotated input suitable for translation with cdec.
-	
+
+Extract rules in stream mode:
+
+    python -m cdec.sa.extract -c extract.ini -t -z	
+
+This will enable stdio interaction with the following types of lines:
+
+Extract grammar:
+
+    context ||| sentence ||| grammar_file
+
+Learn (online mode, specify context name):
+
+    context ||| sentence ||| reference ||| alignment
+
+Drop (online mode, specify context name):
+
+    context ||| drop
+
 ## Library usage
 
 A basic demo of pycdec's features is available in `examples/test.py`.
