@@ -75,23 +75,27 @@ def stream_extract():
             if cmd.lower() == 'drop':
                 if online:
                     extractor.drop_ctx(context)
+                    sys.stdout.write('drop {}\n'.format(context))
                 else:
-                    sys.stderr.write('Error: online mode not set. Skipping line: {}\n'.format(line.strip()))
+                    sys.stdout.write('Error: online mode not set. Skipping line: {}\n'.format(line.strip()))
         # context ||| sentence ||| grammar_file
         elif len(fields) == 3:
             (context, sentence, grammar_file) = fields
             with (gzip.open if compress else open)(grammar_file, 'w') as output:
                 for rule in extractor.grammar(sentence, context):
                     output.write(str(rule)+'\n')
+            sys.stdout.write('{}\n'.format(grammar_file))
         # context ||| sentence ||| reference ||| alignment
         elif len(fields) == 4:
             (context, sentence, reference, alignment) = fields
             if online:
                 extractor.add_instance(sentence, reference, alignment, context)
+                sys.stdout.write('learn {}\n'.format(context))
             else:
-                sys.stderr.write('Error: online mode not set. Skipping line: {}\n'.format(line.strip()))
+                sys.stdout.write('Error: online mode not set. Skipping line: {}\n'.format(line.strip()))
         else:
-            sys.stderr.write('Error: see README.md for stream mode usage.  Skipping line: {}\n'.format(line.strip()))
+            sys.stdout.write('Error: see README.md for stream mode usage.  Skipping line: {}\n'.format(line.strip()))
+        sys.stdout.flush()
 
 def main():
     global online
