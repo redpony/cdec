@@ -42,6 +42,9 @@ class TRule {
       scores_.set_value(feat_ids[i], feat_vals[i]);
   }
 
+  TRule(WordID lhs, const WordID* src, int src_size, const WordID* trg, int trg_size, int arity, int pi, int pj) :
+    e_(trg, trg + trg_size), f_(src, src + src_size), lhs_(lhs), arity_(arity), prev_i(pi), prev_j(pj) {}
+
   bool IsGoal() const;
 
   explicit TRule(const std::vector<WordID>& e) : e_(e), lhs_(0), prev_i(-1), prev_j(-1) {}

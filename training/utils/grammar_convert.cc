@@ -292,10 +292,10 @@ int main(int argc, char **argv) {
   int lc = 0;
   Hypergraph hg;
   map<WordID, int> lhs2node;
+  string line;
   while(*in) {
-    string line;
+    getline(*in,line);
     ++lc;
-    getline(*in, line);
     if (is_json_input) {
       if (line.empty() || line[0] == '#') continue;
       string ref;
@@ -342,6 +342,7 @@ int main(int argc, char **argv) {
       edge->feature_values_ = tr->scores_;
       Hypergraph::Node* node = &hg.nodes_[head];
       hg.ConnectEdgeToHeadNode(edge, node);
+      node->node_hash = lc;
     }
   }
 }
