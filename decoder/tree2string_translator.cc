@@ -126,6 +126,17 @@ namespace std {
   }; 
 };
 
+void AddDummyGoalNode(Hypergraph* hg) {
+  static const int kGOAL = -TD::Convert("Goal");
+  static TRulePtr kGOAL_RULE(new TRule("[Goal] ||| [X] ||| [1]"));
+  unsigned old_goal_node_idx = hg->nodes_.size() - 1;
+  HG::Node* goal_node = hg->AddNode(kGOAL);
+  goal_node->node_hash = 1;
+  TailNodeVector tail(1, old_goal_node_idx);
+  HG::Edge* new_edge = hg->AddEdge(kGOAL_RULE, tail);
+  hg->ConnectEdgeToHeadNode(new_edge, goal_node);
+}
+
 struct Tree2StringTranslatorImpl {
   vector<boost::shared_ptr<Tree2StringGrammarNode>> root;
   bool add_pass_through_rules;
@@ -308,14 +319,18 @@ struct Tree2StringTranslatorImpl {
     if (goal_it == x2hg.end()) return false;
     //cerr << "Goal node: " << goal << endl;
     hg.TopologicallySortNodesAndEdges(goal_it->second);
-    hg.Reweight(weights);
 
     // there might be nodes that cannot be derived
     // the following takes care of them
     vector<bool> prune(hg.edges_.size(), false);
     hg.PruneEdges(prune, true);
     if (hg.edges_.size() == 0) return false;
+    // rescoring assumes the goal edge is arity 1 (code laziness), add that here
+    AddDummyGoalNode(&hg);
+
+    hg.Reweight(weights);
     //hg.PrintGraphviz();
+
     minus_lm_forest->swap(hg);
     return true;
   }
