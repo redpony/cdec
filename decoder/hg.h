@@ -268,6 +268,10 @@ public:
   // if all node states are unique, return true
   bool AreNodesUniquelyIdentified() const;
 
+  // the feature function interface assumes that pre-goal edges are
+  // arity 1 (this simplifies the "final transition" feature computation)
+  bool ArePreGoalEdgesArity1() const;
+
   // reserves space in the nodes vector to prevent memory locations
   // from changing
   void ReserveNodes(size_t n, size_t e = 0) {
