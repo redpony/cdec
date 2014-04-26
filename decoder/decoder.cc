@@ -755,6 +755,11 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     if (!SILENT) cerr << "  *** NODES NOT UNIQUELY IDENTIFIED ***\n";
   }
 
+  if (!forest.ArePreGoalEdgesArity1()) {
+    cerr << "Pre-goal edges are not arity-1. The decoder requires this.\n";
+    abort();
+  }
+
   const bool show_tree_structure=conf.count("show_tree_structure");
   if (!SILENT) forest_stats(forest,"  Init. forest",show_tree_structure,oracle.show_derivation);
   if (conf.count("show_expected_length")) {

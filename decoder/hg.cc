@@ -28,6 +28,13 @@ bool Hypergraph::AreNodesUniquelyIdentified() const {
   return true;
 }
 
+bool Hypergraph::ArePreGoalEdgesArity1() const {
+  auto& n = nodes_.back();
+  for (auto eid : n.in_edges_)
+    if (edges_[eid].Arity() != 1) return false;
+  return true;
+}
+
 Hypergraph::Edge const* Hypergraph::ViterbiSortInEdges() {
   NodeProbs nv;
   ComputeNodeViterbi(&nv);
