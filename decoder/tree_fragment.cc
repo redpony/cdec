@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include "tdict.h"
+
 using namespace std;
 
 namespace cdec {

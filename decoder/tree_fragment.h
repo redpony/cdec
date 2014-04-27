@@ -5,8 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-
-#include "tdict.h"
+#include <cassert>
 
 namespace cdec {
 
