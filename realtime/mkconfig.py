@@ -59,9 +59,14 @@ def main():
     shutil.copy(weights_final, os.path.join(output_d, 'weights.final'))
 
     # other options
-    # TODO: automatically set some things here
-    with open(os.path.join(output_d, 'rt.ini'), 'w') as rt_ini:
-        pass
+    rt_ini = os.path.join(output_d, 'rt.ini')
+    with open(rt_ini, 'w') as out:
+        if libcdec_ff_hpyplm_so and corpus_hpyplm:
+            out.write('hpyplm=true\n')
+        else:
+            out.write('hpyplm=false\n')
+        out.write('metric=ibm_bleu\n')
+    sys.stderr.write('IMPORTANT: add any additional options such as metric=meteor to {}\n'.format(rt_ini))
             
 if __name__ == '__main__':
     main()
