@@ -128,12 +128,14 @@ namespace std {
 
 void AddDummyGoalNode(Hypergraph* hg) {
   static const int kGOAL = -TD::Convert("Goal");
-  static TRulePtr kGOAL_RULE(new TRule("[Goal] ||| [X] ||| [1]"));
   unsigned old_goal_node_idx = hg->nodes_.size() - 1;
+  int old_goal_cat = hg->nodes_[old_goal_node_idx].cat_;
+  TRulePtr goal_rule(new TRule("[Goal] ||| [X] ||| [1]"));
+  goal_rule->f_[0] = old_goal_cat;
   HG::Node* goal_node = hg->AddNode(kGOAL);
   goal_node->node_hash = 1;
   TailNodeVector tail(1, old_goal_node_idx);
-  HG::Edge* new_edge = hg->AddEdge(kGOAL_RULE, tail);
+  HG::Edge* new_edge = hg->AddEdge(goal_rule, tail);
   hg->ConnectEdgeToHeadNode(new_edge, goal_node);
 }
 
