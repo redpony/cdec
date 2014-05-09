@@ -21,6 +21,8 @@ struct Tree2StringGrammarNode {
   vector<TRulePtr> rules;
 };
 
+// this needs to be rewritten so it is fast and checks errors well
+// use a lexer probably
 void ReadTree2StringGrammar(istream* in, Tree2StringGrammarNode* root) {
   string line;
   while(getline(*in, line)) {
@@ -36,10 +38,8 @@ void ReadTree2StringGrammar(istream* in, Tree2StringGrammarNode* root) {
     ostringstream os;
     int lhs = -(rule_src.root & cdec::ALL_MASK);
     // build source RHS for SCFG projection
-    // TODO - this is buggy - it will generate a well-formed SCFG rule
-    // so it will not generate source strings correctly
-    // it will, however, generate target translations appropriately
     vector<int> frhs;
+    // we traverse the rule_src in left to right, DFS order
     for (auto sym : rule_src) {
       //cerr << TD::Convert(sym & cdec::ALL_MASK) << endl;
       cur = &cur->next[sym];
@@ -48,7 +48,7 @@ void ReadTree2StringGrammar(istream* in, Tree2StringGrammarNode* root) {
         frhs.push_back(-nt);
       } else if (cdec::IsTerminal(sym)) {
         frhs.push_back(sym);
-      }
+      } // else internal NT, nothing to do
     }
     os << '[' << TD::Convert(-lhs) << "] |||";
     for (auto x : frhs) {
