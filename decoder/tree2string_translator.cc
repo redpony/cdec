@@ -158,7 +158,11 @@ struct Tree2StringTranslatorImpl {
   }
 
   void CreatePassThroughRules(const cdec::TreeFragment& tree) {
+    static const int kFIDlex = FD::Convert("PassThrough_Lexical");
+    static const int kFIDabs = FD::Convert("PassThrough_Abstract");
+    static const int kFIDmix = FD::Convert("PassThrough_Mix");
     static const int kFID = FD::Convert("PassThrough");
+    static unordered_map<int, int> pntfid;
     root.resize(root.size() + 1);
     root.back().reset(new Tree2StringGrammarNode);
     ++remove_grammars;
@@ -167,14 +171,24 @@ struct Tree2StringTranslatorImpl {
       vector<int> rhse, rhsf;
       int ntc = 0;
       int lhs = -(prod.lhs & cdec::ALL_MASK);
+      int &ntfid = pntfid[lhs];
+      if (!ntfid) {
+        ostringstream fos;
+        fos << "PassThrough:" << TD::Convert(-lhs);
+        ntfid = FD::Convert(fos.str());
+      }
+      bool has_lex = false;
+      bool has_nt = false;
       os << '(' << TD::Convert(-lhs);
       for (auto& sym : prod.rhs) {
         os << ' ';
         if (cdec::IsTerminal(sym)) {
+          has_lex = true;
           os << TD::Convert(sym);
           rhse.push_back(sym);
           rhsf.push_back(sym);
         } else {
+          has_nt = true;
           unsigned id = tree.nodes[sym & cdec::ALL_MASK].lhs & cdec::ALL_MASK;
           os << '[' << TD::Convert(id) << ']';
           rhsf.push_back(-id);
@@ -192,7 +206,12 @@ struct Tree2StringTranslatorImpl {
         cur = &cur->next[sym];
       TRulePtr rule(new TRule(rhse, rhsf, lhs));
       rule->ComputeArity();
+      rule->scores_.set_value(ntfid, 1.0);
       rule->scores_.set_value(kFID, 1.0);
+      if (has_lex && has_nt)
+        rule->scores_.set_value(kFIDmix, 1.0);
+      else if (has_lex) rule->scores_.set_value(kFIDlex, 1.0);
+      else if (has_nt) rule->scores_.set_value(kFIDabs, 1.0);
       cur->rules.push_back(rule);
     }
   }
