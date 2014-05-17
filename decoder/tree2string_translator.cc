@@ -23,7 +23,7 @@ struct Tree2StringGrammarNode {
 
 // this needs to be rewritten so it is fast and checks errors well
 // use a lexer probably
-void ReadTree2StringGrammar(istream* in, Tree2StringGrammarNode* root) {
+void ReadTree2StringGrammar(istream* in, Tree2StringGrammarNode* root, bool has_multiple_states) {
   string line;
   while(getline(*in, line)) {
     size_t pos = line.find("|||");
@@ -143,7 +143,8 @@ struct Tree2StringTranslatorImpl {
   vector<boost::shared_ptr<Tree2StringGrammarNode>> root;
   bool add_pass_through_rules;
   unsigned remove_grammars;
-  Tree2StringTranslatorImpl(const boost::program_options::variables_map& conf) :
+  Tree2StringTranslatorImpl(const boost::program_options::variables_map& conf,
+                            bool has_multiple_states) :
       add_pass_through_rules(conf.count("add_pass_through_rules")) {
     if (conf.count("grammar")) {
       const vector<string> gf = conf["grammar"].as<vector<string>>();
@@ -152,7 +153,7 @@ struct Tree2StringTranslatorImpl {
       for (auto& f : gf) {
         ReadFile rf(f);
         root[gc].reset(new Tree2StringGrammarNode);
-        ReadTree2StringGrammar(rf.stream(), &*root[gc++]);
+        ReadTree2StringGrammar(rf.stream(), &*root[gc++], has_multiple_states);
       }
     }
   }
@@ -357,8 +358,9 @@ struct Tree2StringTranslatorImpl {
   }
 };
 
-Tree2StringTranslator::Tree2StringTranslator(const boost::program_options::variables_map& conf) :
-  pimpl_(new Tree2StringTranslatorImpl(conf)) {}
+Tree2StringTranslator::Tree2StringTranslator(const boost::program_options::variables_map& conf,
+                                             bool has_multiple_states) :
+  pimpl_(new Tree2StringTranslatorImpl(conf, has_multiple_states)) {}
 
 bool Tree2StringTranslator::TranslateImpl(const string& input,
                                SentenceMetadata* smeta,

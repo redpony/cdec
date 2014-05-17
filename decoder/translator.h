@@ -101,7 +101,8 @@ class RescoreTranslator : public Translator {
 class Tree2StringTranslatorImpl;
 class Tree2StringTranslator : public Translator {
  public:
-  Tree2StringTranslator(const boost::program_options::variables_map& conf);
+  Tree2StringTranslator(const boost::program_options::variables_map& conf,
+                        bool has_multiple_states);
   virtual std::string GetDecoderType() const;
  protected:
   bool TranslateImpl(const std::string& src,
