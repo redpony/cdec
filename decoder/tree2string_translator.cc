@@ -167,9 +167,8 @@ struct Tree2StringTranslatorImpl {
     root.resize(root.size() + 1);
     root.back().reset(new Tree2StringGrammarNode);
     ++remove_grammars;
+    unordered_set<vector<unsigned>,boost::hash<vector<unsigned>>> unique_rule_check;
     for (auto& prod : tree.nodes) {
-      ostringstream os;
-      vector<int> rhse, rhsf;
       int ntc = 0;
       int lhs = -(prod.lhs & cdec::ALL_MASK);
       int &ntfid = pntfid[lhs];
@@ -178,8 +177,16 @@ struct Tree2StringTranslatorImpl {
         fos << "PassThrough:" << TD::Convert(-lhs);
         ntfid = FD::Convert(fos.str());
       }
+
+      // check for duplicate rule in tree
+      vector<unsigned> key = prod.rhs;
+      key.push_back(prod.lhs);
+      if (!unique_rule_check.insert(key).second) continue;
+
       bool has_lex = false;
       bool has_nt = false;
+      vector<int> rhse, rhsf;
+      ostringstream os;
       os << '(' << TD::Convert(-lhs);
       for (auto& sym : prod.rhs) {
         os << ' ';
