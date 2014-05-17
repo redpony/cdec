@@ -48,8 +48,8 @@ cdef class Hypergraph:
 
     def kbest(self, size):
         """hg.kbest(size) -> List of k-best hypotheses in the hypergraph."""
-        cdef kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal]* derivations = new kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal](self.hg[0], size)
-        cdef kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal].Derivation* derivation
+        cdef kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal, kbest.NoFilter[vector[int]]]* derivations = new kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal, kbest.NoFilter[vector[int]]](self.hg[0], size)
+        cdef kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal, kbest.NoFilter[vector[int]]].Derivation* derivation
         cdef unsigned k
         try:
             for k in range(size):
@@ -60,11 +60,11 @@ cdef class Hypergraph:
             del derivations
 
     def kbest_trees(self, size):
-        """hg.kbest_trees(size) -> List of k-best trees in the hypergraph."""
-        cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal]* f_derivations = new kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal](self.hg[0], size)
-        cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal].Derivation* f_derivation
-        cdef kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal]* e_derivations = new kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal](self.hg[0], size)
-        cdef kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal].Derivation* e_derivation
+        """hg.kbest_trees(size) -> List of k-best trees in the hypergrapt.NoFilter."""
+        cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.NoFilter[vector[int]]]* f_derivations = new kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.NoFilter[vector[int]]](self.hg[0], size)
+        cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.NoFilter[vector[int]]].Derivation* f_derivation
+        cdef kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal, kbest.NoFilter[vector[int]]]* e_derivations = new kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal, kbest.NoFilter[vector[int]]](self.hg[0], size)
+        cdef kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal, kbest.NoFilter[vector[int]]].Derivation* e_derivation
         cdef unsigned k
         try:
             for k in range(size):
@@ -80,8 +80,56 @@ cdef class Hypergraph:
 
     def kbest_features(self, size):
         """hg.kbest_trees(size) -> List of k-best feature vectors in the hypergraph."""
-        cdef kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal]* derivations = new kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal](self.hg[0], size)
-        cdef kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal].Derivation* derivation
+        cdef kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal, kbest.NoFilter[FastSparseVector[double]]]* derivations = new kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal, kbest.NoFilter[FastSparseVector[double]]](self.hg[0], size)
+        cdef kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal, kbest.NoFilter[FastSparseVector[double]]].Derivation* derivation
+        cdef SparseVector fmap
+        cdef unsigned k
+        try:
+            for k in range(size):
+                derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
+                if not derivation: break
+                fmap = SparseVector.__new__(SparseVector)
+                fmap.vector = new FastSparseVector[weight_t](derivation._yield)
+                yield fmap
+        finally:
+            del derivations
+
+    def unique_kbest(self, size):
+        """hg.kbest(size) -> List of unique k-best hypotheses in the hypergraph."""
+        cdef kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal, kbest.FilterUnique]* derivations = new kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal, kbest.FilterUnique](self.hg[0], size)
+        cdef kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal, kbest.FilterUnique].Derivation* derivation
+        cdef unsigned k
+        try:
+            for k in range(size):
+                derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
+                if not derivation: break
+                yield unicode(GetString(derivation._yield).c_str(), 'utf8')
+        finally:
+            del derivations
+
+    def unique_kbest_trees(self, size):
+        """hg.kbest_trees(size) -> List of unique k-best trees in the hypergraph."""
+        cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.FilterUnique]* f_derivations = new kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.FilterUnique](self.hg[0], size)
+        cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.FilterUnique].Derivation* f_derivation
+        cdef kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal, kbest.FilterUnique]* e_derivations = new kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal, kbest.FilterUnique](self.hg[0], size)
+        cdef kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal, kbest.FilterUnique].Derivation* e_derivation
+        cdef unsigned k
+        try:
+            for k in range(size):
+                f_derivation = f_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
+                e_derivation = e_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
+                if not f_derivation or not e_derivation: break
+                f_tree = unicode(GetString(f_derivation._yield).c_str(), 'utf8')
+                e_tree = unicode(GetString(e_derivation._yield).c_str(), 'utf8')
+                yield (f_tree, e_tree)
+        finally:
+            del f_derivations
+            del e_derivations
+
+    def unique_kbest_features(self, size):
+        """hg.kbest_trees(size) -> List of unique k-best feature vectors in the hypergraph."""
+        cdef kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal, kbest.NoFilter[FastSparseVector[double]]]* derivations = new kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal, kbest.NoFilter[FastSparseVector[double]]](self.hg[0], size)
+        cdef kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal, kbest.NoFilter[FastSparseVector[double]]].Derivation* derivation
         cdef SparseVector fmap
         cdef unsigned k
         try:

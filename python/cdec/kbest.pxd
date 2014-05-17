@@ -13,7 +13,13 @@ cdef extern from "decoder/viterbi.h":
         pass
 
 cdef extern from "decoder/kbest.h" namespace "KBest":
-    cdef cppclass KBestDerivations[T, Traversal]:
+    cdef cppclass NoFilter[Dummy]:
+        pass
+
+    cdef cppclass FilterUnique:
+        pass
+
+    cdef cppclass KBestDerivations[T, Traversal, Filter]:
         cppclass Derivation:
             T _yield "yield"
         KBestDerivations(Hypergraph& hg, unsigned k) nogil
