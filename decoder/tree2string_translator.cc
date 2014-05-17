@@ -167,7 +167,7 @@ struct Tree2StringTranslatorImpl {
     root.resize(root.size() + 1);
     root.back().reset(new Tree2StringGrammarNode);
     ++remove_grammars;
-    unordered_set<vector<unsigned>,boost::hash<vector<unsigned>>> unique_rule_check;
+    unordered_set<vector<int>,boost::hash<vector<int>>> unique_rule_check;
     for (auto& prod : tree.nodes) {
       int ntc = 0;
       int lhs = -(prod.lhs & cdec::ALL_MASK);
@@ -179,9 +179,8 @@ struct Tree2StringTranslatorImpl {
       }
 
       // check for duplicate rule in tree
-      vector<unsigned> key = prod.rhs;
+      vector<int> key;
       key.push_back(prod.lhs);
-      if (!unique_rule_check.insert(key).second) continue;
 
       bool has_lex = false;
       bool has_nt = false;
@@ -195,16 +194,19 @@ struct Tree2StringTranslatorImpl {
           os << TD::Convert(sym);
           rhse.push_back(sym);
           rhsf.push_back(sym);
+          key.push_back(sym);
         } else {
           has_nt = true;
           unsigned id = tree.nodes[sym & cdec::ALL_MASK].lhs & cdec::ALL_MASK;
           os << '[' << TD::Convert(id) << ']';
           rhsf.push_back(-id);
           rhse.push_back(-ntc);
+          key.push_back(-id);
           ++ntc;
         }
       }
       os << ')';
+      if (!unique_rule_check.insert(key).second) continue;
       cdec::TreeFragment rule_src(os.str(), true);
       Tree2StringGrammarNode* cur = root.back().get();
       // do we need all transducer states here??? a list??? no pass through rules???
