@@ -13,6 +13,7 @@ To re-build pycdec from the cython source, modify setup.py in the following ways
   * Change the source file from cdec/\_cdec.cpp to cdec/\_cdec.pyx
   * Add language='c++' as a property to ext\_modules (e.g. right after extra\_link\_args)
   * In the final setup block, change ext\_modules=ext\_modules to ext\_modules=cythonize(ext\_modules)
+
 Then just build and install normally, as described above.
 
 ## Grammar extractor
