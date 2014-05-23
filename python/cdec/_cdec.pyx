@@ -51,7 +51,7 @@ cdef class Decoder:
         if config_str is None:
             formalism = config.get('formalism', None)
             if formalism not in ('scfg', 'fst', 'lextrans', 'pb',
-                    'csplit', 'tagger', 'lexalign'):
+                    'csplit', 'tagger', 'lexalign', 't2s'):
                 raise InvalidConfig('formalism "%s" unknown' % formalism)
             config_str = '\n'.join('%s = %s' % kv for kv in _make_config(config))
         cdef istringstream* config_stream = new istringstream(config_str)
