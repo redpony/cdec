@@ -27,6 +27,9 @@ cdef class SufficientStats:
     cdef mteval.SufficientStats* stats
     cdef mteval.EvaluationMetric* metric
 
+    def __cinit__(self):
+        self.stats = new mteval.SufficientStats()
+
     def __dealloc__(self):
         del self.stats
 
