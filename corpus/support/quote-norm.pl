@@ -40,6 +40,7 @@ while(<STDIN>) {
 
   # Regularlize spaces:
   s/\x{ad}//g;        # soft hyphen
+  s/\x{200C}//g;      # zero-width non-joiner
   s/\x{a0}/ /g;       # non-breaking space
   s/\x{2009}/ /g;     # thin space
   s/\x{2028}/ /g;     # "line separator"
