@@ -88,23 +88,43 @@ struct DiffOrder {
   }
 };
 
-void Sample(const unsigned gamma,
+double LengthDifferenceStdDev(const training::CandidateSet& J_i, int n) {
+  double sum = 0;
+  for (int i = 0; i < n; ++i) {
+    const size_t a = rng->inclusive(0, J_i.size() - 1)();
+    const size_t b = rng->inclusive(0, J_i.size() - 1)();
+    if (a == b) { --i; continue; }
+    double p = J_i[a].ewords.size();
+    p -= J_i[b].ewords.size();
+    sum += p * p;  // mean is 0 by construction
+  }
+  return max(sqrt(sum / n), 2.0);
+};
+
+void Sample(const int gamma,
             const unsigned xi,
             const training::CandidateSet& J_i,
             const EvaluationMetric* metric,
             vector<TrainingInstance>* pv) {
+  const double len_stddev = LengthDifferenceStdDev(J_i, 5000);
   const bool invert_score = metric->IsErrorMetric();
   vector<TrainingInstance> v1, v2;
   float avg_diff = 0;
-  for (unsigned i = 0; i < gamma; ++i) {
+  const double z_score_threshold=2;
+  for (int i = 0; i < gamma; ++i) {
     const size_t a = rng->inclusive(0, J_i.size() - 1)();
     const size_t b = rng->inclusive(0, J_i.size() - 1)();
-    if (a == b) continue;
+    if (a == b) { --i; continue; }
+    double z_score = fabs(((int)J_i[a].ewords.size() - (int)J_i[b].ewords.size()) / len_stddev);
+    // variation on Nakov et al. (2011)
+    if (z_score > z_score_threshold) { --i; continue; }
     float ga = metric->ComputeScore(J_i[a].eval_feats);
     float gb = metric->ComputeScore(J_i[b].eval_feats);
     bool positive = gb < ga;
     if (invert_score) positive = !positive;
     const float gdiff = fabs(ga - gb);
+    //cerr << ((int)J_i[a].ewords.size() - (int)J_i[b].ewords.size()) << endl;
+    //cerr << (ga - gb) << endl;
     if (!gdiff) continue;
     avg_diff += gdiff;
     SparseVector<weight_t> xdiff = (J_i[a].fmap - J_i[b].fmap).erase_zeros();
