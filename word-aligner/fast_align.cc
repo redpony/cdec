@@ -38,12 +38,13 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("alpha,a", po::value<double>()->default_value(0.01), "Hyperparameter for optional Dirichlet prior")
         ("no_null_word,N","Do not generate from a null token")
         ("output_parameters,p", po::value<string>(), "Write model parameters to file")
+        ("output_expected_counts,c", po::value<string>(), "Write final expected counts to file")
         ("beam_threshold,t",po::value<double>()->default_value(-4),"When writing parameters, log_10 of beam threshold for writing parameter (-10000 to include everything, 0 max parameter only)")
         ("hide_training_alignments,H", "Hide training alignments (only useful if you want to use -x option and just compute testset statistics)")
         ("testset,x", po::value<string>(), "After training completes, compute the log likelihood of this set of sentence pairs under the learned model")
         ("no_add_viterbi,V","When writing model parameters, do not add Viterbi alignment points (may generate a grammar where some training sentence pairs are unreachable)")
-		("force_align,f",po::value<string>(), "Load previously written parameters to 'force align' input. Set --diagonal_tension and --mean_srclen_multiplier as estimated during training.")
-		("mean_srclen_multiplier,m",po::value<double>()->default_value(1), "When --force_align, use this source length multiplier");
+        ("force_align,f",po::value<string>(), "Load previously written parameters to 'force align' input. Set --diagonal_tension and --mean_srclen_multiplier as estimated during training.")
+        ("mean_srclen_multiplier,m",po::value<double>()->default_value(1), "When --force_align, use this source length multiplier");
   po::options_description clo("Command line options");
   clo.add_options()
         ("config", po::value<string>(), "Configuration file")
@@ -78,7 +79,6 @@ int main(int argc, char** argv) {
   const WordID kNULL = TD::Convert("<eps>");
   const bool add_viterbi = (conf.count("no_add_viterbi") == 0);
   const bool variational_bayes = (conf.count("variational_bayes") > 0);
-  const bool output_parameters = (conf.count("force_align")) ? false : conf.count("output_parameters");
   double diagonal_tension = conf["diagonal_tension"].as<double>();
   bool optimize_tension = conf.count("optimize_tension");
   bool hide_training_alignments = (conf.count("hide_training_alignments") > 0);
@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
   }
   
   
-  TTable s2t, t2s;
+  TTable s2t;
   TTable::Word2Word2Double s2t_viterbi;
   unordered_map<pair<short, short>, unsigned, boost::hash<pair<short, short> > > size_counts;
   double tot_len_ratio = 0;
@@ -104,10 +104,10 @@ int main(int argc, char** argv) {
   vector<double> probs;
   
   if (conf.count("force_align")) {
-	// load model parameters
-	ReadFile s2t_f(conf["force_align"].as<string>());
-	s2t.DeserializeLogProbsFromText(s2t_f.stream());
-	mean_srclen_multiplier = conf["mean_srclen_multiplier"].as<double>();
+    // load model parameters
+    ReadFile s2t_f(conf["force_align"].as<string>());
+    s2t.DeserializeProbs(s2t_f.stream(), true);
+    mean_srclen_multiplier = conf["mean_srclen_multiplier"].as<double>();
   }
   
   for (int iter = 0; iter < ITERATIONS; ++iter) {
@@ -120,7 +120,6 @@ int main(int argc, char** argv) {
     int lc = 0;
     bool flag = false;
     string line;
-    string ssrc, strg;
     vector<WordID> src, trg;
     double c0 = 0;
     double emp_feat = 0;
@@ -138,12 +137,13 @@ int main(int argc, char** argv) {
         cerr << "Error: " << lc << "\n" << line << endl;
         return 1;
       }
-      if (iter == 0)
+      if (iter == 0) {
         tot_len_ratio += static_cast<double>(trg.size()) / static_cast<double>(src.size());
+        ++size_counts[make_pair<short,short>(trg.size(), src.size())];
+      }
       denom += trg.size();
       probs.resize(src.size() + 1);
-      if (iter == 0)
-        ++size_counts[make_pair<short,short>(trg.size(), src.size())];
+        
       bool first_al = true;  // used for write_alignments
       toks += trg.size();
       for (unsigned j = 0; j < trg.size(); ++j) {
@@ -164,6 +164,7 @@ int main(int argc, char** argv) {
           probs[i] = s2t.prob(src[i-1], f_j) * prob_a_i;
           sum += probs[i];
         }
+
         if (final_iteration) {
           if (add_viterbi || write_alignments) {
             WordID max_i = 0;
@@ -193,19 +194,20 @@ int main(int argc, char** argv) {
             if (s2t_viterbi.size() <= static_cast<unsigned>(max_i)) s2t_viterbi.resize(max_i + 1);
             s2t_viterbi[max_i][f_j] = 1.0;
           }
-        } else {
-          if (use_null) {
-            double count = probs[0] / sum;
-            c0 += count;
-            s2t.Increment(kNULL, f_j, count);
-          }
-          for (unsigned i = 1; i <= src.size(); ++i) {
-            const double p = probs[i] / sum;
-            s2t.Increment(src[i-1], f_j, p);
-            emp_feat += DiagonalAlignment::Feature(j, i, trg.size(), src.size()) * p;
-          }
+        }
+
+        if (use_null) {
+          double count = probs[0] / sum;
+          c0 += count;
+          s2t.Increment(kNULL, f_j, count);
+        }
+        for (unsigned i = 1; i <= src.size(); ++i) {
+          const double p = probs[i] / sum;
+          s2t.Increment(src[i-1], f_j, p);
+          emp_feat += DiagonalAlignment::Feature(j, i, trg.size(), src.size()) * p;
         }
         likelihood += log(sum);
+
       }
       if (write_alignments && final_iteration && !hide_training_alignments) cout << endl;
     }
@@ -245,6 +247,7 @@ int main(int argc, char** argv) {
         }
         cerr << "     final tension: " << diagonal_tension << endl;
       }
+
       if (variational_bayes)
         s2t.NormalizeVB(alpha);
       else
@@ -307,23 +310,15 @@ int main(int argc, char** argv) {
     cerr << "TOTAL LOG PROB " << tlp << endl;
   }
 
-  if (output_parameters) {
+  if (conf.count("output_parameters")) {
     WriteFile params_out(conf["output_parameters"].as<string>());
-    for (unsigned eind = 1; eind < s2t.ttable.size(); ++eind) {
-      const auto& cpd = s2t.ttable[eind];
-      const TTable::Word2Double& vit = s2t_viterbi[eind];
-      const string& esym = TD::Convert(eind);
-      double max_p = -1;
-      for (auto& fi : cpd)
-        if (fi.second > max_p) max_p = fi.second;
-      const double threshold = max_p * BEAM_THRESHOLD;
-      for (auto& fi : cpd) {
-        if (fi.second > threshold || (vit.find(fi.first) != vit.end())) {
-          *params_out << esym << ' ' << TD::Convert(fi.first) << ' ' << log(fi.second) << endl;
-        }
-      } 
-    }
+    s2t.SerializeProbs(*params_out, s2t_viterbi, BEAM_THRESHOLD, true);
   }
+  if (conf.count("output_expected_counts")) {
+    WriteFile counts_out(conf["output_expected_counts"].as<string>());
+    s2t.SerializeCounts(*counts_out, s2t_viterbi, BEAM_THRESHOLD, true);
+  }
+  
   return 0;
 }
 

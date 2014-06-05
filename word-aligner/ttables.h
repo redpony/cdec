@@ -90,16 +90,12 @@ class TTable {
       }
     }
   }
-  void DeserializeProbsFromText(std::istream* in);
-  void DeserializeLogProbsFromText(std::istream* in);
-  void SerializeCounts(std::string* out) const { SerializeHelper(out, counts); }
-  void DeserializeCounts(const std::string& in) { DeserializeHelper(in, &counts); }
-  void SerializeProbs(std::string* out) const { SerializeHelper(out, ttable); }
-  void DeserializeProbs(const std::string& in) { DeserializeHelper(in, &ttable); }
- private:
-  static void SerializeHelper(std::string*, const Word2Word2Double& o);
-  static void DeserializeHelper(const std::string&, Word2Word2Double* o);
- public:
+  void SerializeHelper(std::ostream& out, const TTable::Word2Word2Double params, const TTable::Word2Word2Double& viterbi, const double beam_threshold, const bool logsave) const;
+  void SerializeProbs(std::ostream& out, const TTable::Word2Word2Double& viterbi, const double beam_threshold, const bool logsave=true) const { SerializeHelper(out, ttable, viterbi, beam_threshold, logsave); };
+  void SerializeCounts(std::ostream& out, const TTable::Word2Word2Double& viterbi, const double beam_threshold, const bool logsave=true) const { SerializeHelper(out, counts, viterbi, beam_threshold, logsave); };
+  void DeserializeHelper(std::istream* in, const bool logsaved, Word2Word2Double& table);
+  void DeserializeProbs(std::istream* in, const bool logsaved=true) { DeserializeHelper(in, logsaved, ttable); };
+  void DeserializeCounts(std::istream* in, const bool logsaved=true) { DeserializeHelper(in, logsaved, counts); };
   Word2Word2Double ttable;
   Word2Word2Double counts;
 };
