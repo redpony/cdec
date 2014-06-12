@@ -4,9 +4,12 @@ noinst_PROGRAMS = \
   trule_test \
   hg_test \
   parser_test \
+  t2s_test \
   grammar_test
 
 TESTS = trule_test parser_test grammar_test hg_test
+t2s_test_SOURCES = t2s_test.cc
+t2s_test_LDADD = $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a
 parser_test_SOURCES = parser_test.cc
 parser_test_LDADD = $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) libcdec.a ../mteval/libmteval.a ../utils/libutils.a
 grammar_test_SOURCES = grammar_test.cc
@@ -37,7 +40,6 @@ libcdec_a_SOURCES = \
   csplit.h \
   decoder.h \
   earley_composer.h \
-  exp_semiring.h \
   factored_lexicon_helper.h \
   ff.h \
   ff_basic.h \
@@ -143,6 +145,7 @@ libcdec_a_SOURCES = \
   lattice.cc \
   lexalign.cc \
   lextrans.cc \
+  node_state_hash.h \
   tree_fragment.cc \
   tree_fragment.h \
   maxtrans_blunsom.cc \

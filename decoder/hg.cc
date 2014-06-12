@@ -1,14 +1,17 @@
-//TODO: lazily generate feature vectors for hyperarcs (because some of them will be pruned).  this means 1) storing ref to rule for those features 2) providing ff interface for regenerating its feature vector from hyperedge+states and probably 3) still caching feat. vect on hyperedge once it's been generated.  ff would normally just contribute its weighted score and result state, not component features.  however, the hypergraph drops the state used by ffs after rescoring is done, so recomputation would have to start at the leaves and work bottom up.  question: which takes more space, feature id+value, or state?
-
 #include "hg.h"
 
 #include <algorithm>
 #include <cassert>
 #include <numeric>
-#include <set>
 #include <map>
 #include <iostream>
 #include <sstream>
+#ifndef HAVE_OLD_CPP
+# include <unordered_set>
+#else
+# include <tr1/unordered_set>
+namespace std { using std::tr1::unordered_set; }
+#endif
 
 #include "viterbi.h"
 #include "inside_outside.h"
@@ -17,28 +20,28 @@
 
 using namespace std;
 
-#if 0
-Hypergraph::Edge const* Hypergraph::ViterbiGoalEdge() const
-{
-  Edge const* r=0;
-  for (unsigned i=0,e=edges_.size();i<e;++i) {
-    Edge const& e=edges_[i];
-    if (e.rule_ && e.rule_->IsGoal() && (!r || e.edge_prob_ > r->edge_prob_))
-      r=&e;
-  }
-  return r;
+bool Hypergraph::AreNodesUniquelyIdentified() const {
+  unordered_set<size_t> s(nodes_.size() * 3 + 7);
+  for (const auto& n : nodes_)
+    if (!s.insert(n.node_hash).second)
+      return false;
+  return true;
 }
-#endif
 
-Hypergraph::Edge const* Hypergraph::ViterbiSortInEdges()
-{
+bool Hypergraph::ArePreGoalEdgesArity1() const {
+  auto& n = nodes_.back();
+  for (auto eid : n.in_edges_)
+    if (edges_[eid].Arity() != 1) return false;
+  return true;
+}
+
+Hypergraph::Edge const* Hypergraph::ViterbiSortInEdges() {
   NodeProbs nv;
   ComputeNodeViterbi(&nv);
   return SortInEdgesByNodeViterbi(nv);
 }
 
-Hypergraph::Edge const* Hypergraph::SortInEdgesByNodeViterbi(NodeProbs const& nv)
-{
+Hypergraph::Edge const* Hypergraph::SortInEdgesByNodeViterbi(NodeProbs const& nv) {
   EdgeProbs ev;
   ComputeEdgeViterbi(nv,&ev);
   return ViterbiSortInEdges(ev);
@@ -375,9 +378,7 @@ bool Hypergraph::PruneInsideOutside(double alpha,double density,const EdgeMask* 
 void Hypergraph::PrintGraphviz() const {
   int ei = 0;
   cerr << "digraph G {\n  rankdir=LR;\n  nodesep=.05;\n";
-  for (vector<Edge>::const_iterator i = edges_.begin();
-       i != edges_.end(); ++i) {
-    const Edge& edge=*i;
+  for (const auto& edge : edges_) {
     ++ei;
     static const string none = "<null>";
     string rule = (edge.rule_ ? edge.rule_->AsString(false) : none);
@@ -399,14 +400,10 @@ void Hypergraph::PrintGraphviz() const {
     }
     cerr << "     A_" << ei << " -> " << edge.head_node_ << ";\n";
   }
-  for (vector<Node>::const_iterator ni = nodes_.begin();
-      ni != nodes_.end(); ++ni) {
-    cerr << "  " << ni->id_ << "[label=\"" << (ni->cat_ < 0 ? TD::Convert(ni->cat_ * -1) : "")
-    //cerr << "  " << ni->id_ << "[label=\"" << ni->cat_
-         << " n=" << ni->id_
-//         << ",x=" << &*ni
-//         << ",in=" << ni->in_edges_.size()
-//         << ",out=" << ni->out_edges_.size()
+  for (const auto& node : nodes_) {
+    cerr << "  " << node.id_ << "[label=\"" << (node.cat_ < 0 ? TD::Convert(node.cat_ * -1) : "")
+         << " n=" << node.id_
+         << " h=" << node.node_hash
          << "\"];\n";
   }
   cerr << "}\n";

@@ -14,6 +14,7 @@
 #include "verbose.h"
 #include "tree_fragment.h"
 
+bool lex_mono_rules = false;
 int lex_line = 0;
 std::istream* scfglex_stream = NULL;
 RuleLexer::RuleCallback rule_callback = NULL;
@@ -119,8 +120,8 @@ void check_and_update_ctf_stack(const TRulePtr& rp) {
 
 %}
 
-REAL [\-+]?[0-9]+(\.[0-9]*([eE][-+]*[0-9]+)?)?|inf|[\-+]inf
-NT [^\t \[\],]+
+REAL [\-+]?[0-9]+(\.[0-9]*)?([eE][-+]*[0-9]+)?
+NT ([^\t \n\r\[\],]+|Goal)
 
 %x LHS_END SRC TRG FEATS FEATVAL ALIGNS TREE
 %%
@@ -132,7 +133,7 @@ NT [^\t \[\],]+
 <INITIAL>\[{NT}\]   {
 		scfglex_tmp_token.assign(yytext + 1, yyleng - 2);
 		scfglex_lhs = -TD::Convert(scfglex_tmp_token);
-		// std::cerr << scfglex_tmp_token << "\n";
+		//std::cerr << "LHS: " << scfglex_tmp_token << "\n";
   		BEGIN(LHS_END);
 		}
 
@@ -199,9 +200,9 @@ NT [^\t \[\],]+
 
 <SRC>\|\|\|	{
 		memset(scfglex_nt_sanity, 0, scfglex_src_arity * sizeof(int));
-		BEGIN(TRG);
+		if (lex_mono_rules) { BEGIN(FEATS); } else { BEGIN(TRG); }
 		}
-<SRC>[^ \t]+	{
+<SRC>[^ \t\n\r]+	{
 		scfglex_tmp_token.assign(yytext, yyleng);
 		scfglex_src_rhs[scfglex_src_rhs_size] = TD::Convert(scfglex_tmp_token);
 		++scfglex_src_rhs_size;
@@ -217,14 +218,28 @@ NT [^\t \[\],]+
 <TRG>\|\|\|	{
 		BEGIN(FEATS);
 		}
-<TRG>[^ \t]+	{
+<TRG>[^ \t\n\r]+	{
 		scfglex_tmp_token.assign(yytext, yyleng);
 		scfglex_trg_rhs[scfglex_trg_rhs_size] = TD::Convert(scfglex_tmp_token);
 		++scfglex_trg_rhs_size;
 		}
 <TRG>[ \t]+	{ ; }
 
-<TRG,FEATS,ALIGNS,TREE>\n	{
+<SRC,TRG,FEATS,ALIGNS,TREE>\n	{
+		if (lex_mono_rules) {
+		  if (scfglex_trg_rhs_size != 0) {
+		    std::cerr << "Grammar " << scfglex_fname << " line " << lex_line << ": expected monolingual rule\n";
+		    abort();
+		  }
+		  scfglex_trg_arity = scfglex_src_arity;
+		  scfglex_trg_rhs_size = scfglex_src_rhs_size;
+		  int ntc = 0;
+		  for (int i = 0; i < scfglex_src_rhs_size; ++i)
+		    if (scfglex_trg_rhs[i] <= 0)
+                      scfglex_trg_rhs[i] = ntc--;
+                    else
+                      scfglex_trg_rhs[i] = scfglex_src_rhs[i];
+		}
                 if (scfglex_src_arity != scfglex_trg_arity) {
                   std::cerr << "Grammar " << scfglex_fname << " line " << lex_line << ": LHS and RHS arity mismatch!\n";
                   abort();
@@ -243,7 +258,7 @@ NT [^\t \[\],]+
 		TRulePtr coarse_rp = ((ctf_level == 0) ? TRulePtr() : ctf_rule_stack.top());
 		rule_callback(rp, ctf_level, coarse_rp, rule_callback_extra);
 		ctf_rule_stack.push(rp);
-		// std::cerr << rp->AsString() << std::endl;
+		//std::cerr << "RULE: " << rp->AsString() << std::endl;
 		num_rules++;
 		lex_line++;
 		if (!SILENT) {
@@ -317,7 +332,7 @@ NT [^\t \[\],]+
 
 #include "filelib.h"
 
-void RuleLexer::ReadRules(std::istream* in, RuleLexer::RuleCallback func, const std::string& fname, void* extra) {
+static void init_default_feature_names() {
   if (scfglex_phrase_fnames.empty()) {
     scfglex_phrase_fnames.resize(100);
     for (int i = 0; i < scfglex_phrase_fnames.size(); ++i) {
@@ -326,11 +341,27 @@ void RuleLexer::ReadRules(std::istream* in, RuleLexer::RuleCallback func, const 
       scfglex_phrase_fnames[i] = FD::Convert(os.str());
     }
   }
+}
+
+void RuleLexer::ReadRules(std::istream* in, RuleLexer::RuleCallback func, const std::string& fname, void* extra) {
+  init_default_feature_names();
+  lex_mono_rules = false;
   lex_line = 1;
   scfglex_fname = fname;
   scfglex_stream = in;
   rule_callback_extra = extra,
   rule_callback = func;
   yylex();
+}
+
+void RuleLexer::ReadRule(const std::string& srule, RuleCallback func, bool mono, void* extra) {
+  init_default_feature_names();
+  lex_mono_rules = mono;
+  lex_line = 1;
+  rule_callback_extra = extra;
+  rule_callback = func;
+  yy_scan_string(srule.c_str());
+  yylex();
+  yylex_destroy();
 }
 

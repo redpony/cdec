@@ -18,8 +18,10 @@ using namespace std;
 BOOST_FIXTURE_TEST_SUITE( s, HGSetup );
 
 BOOST_AUTO_TEST_CASE(Controlled) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
+  cerr << "PATH: " << path << "/hg.tiny\n";
   Hypergraph hg;
-  CreateHG_tiny(&hg);
+  CreateHG_tiny(path, &hg);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 0.4);
   wts.set_value(FD::Convert("f2"), 0.8);
@@ -37,10 +39,18 @@ BOOST_AUTO_TEST_CASE(Controlled) {
 }
 
 BOOST_AUTO_TEST_CASE(Union) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg1;
   Hypergraph hg2;
-  CreateHG_tiny(&hg1);
-  CreateHG(&hg2);
+  CreateHG_tiny(path, &hg1);
+  CreateHG(path, &hg2);
+  int nc = 0;
+  for (auto& node: hg1.nodes_)
+    node.node_hash = ++nc;
+  for (auto& node: hg2.nodes_)
+    node.node_hash = ++nc;
+  hg1.nodes_.back().node_hash = nc;
+
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 0.4);
   wts.set_value(FD::Convert("f2"), 1.0);
@@ -53,8 +63,11 @@ BOOST_AUTO_TEST_CASE(Union) {
   int l2 = ViterbiPathLength(hg2);
   cerr << c1 << "\t" << TD::GetString(t1) << endl;
   cerr << c2 << "\t" << TD::GetString(t2) << endl;
+  hg1.PrintGraphviz();
+  hg2.PrintGraphviz();
   HG::Union(hg2, &hg1);
   hg1.Reweight(wts);
+  hg1.PrintGraphviz();
   c3 = ViterbiESentence(hg1, &t3);
   int l3 = ViterbiPathLength(hg1);
   cerr << c3 << "\t" << TD::GetString(t3) << endl;
@@ -81,11 +94,19 @@ BOOST_AUTO_TEST_CASE(Union) {
   BOOST_CHECK_CLOSE(log(list[0].second), log(c4), 1e-4);
   BOOST_CHECK_EQUAL(list.size(), 6);
   BOOST_CHECK_CLOSE(log(list.back().second / list.front().second), -97.7, 1e-4);
+  hg1 = hg2;
+  BOOST_CHECK_EQUAL(hg1.nodes_.size(), hg2.nodes_.size());
+  BOOST_CHECK_EQUAL(hg1.edges_.size(), hg2.edges_.size());
+  HG::Union(hg1, &hg2);  // this should be a no-op
+  BOOST_CHECK_EQUAL(hg1.nodes_.size(), hg2.nodes_.size());
+  BOOST_CHECK_EQUAL(hg1.edges_.size(), hg2.edges_.size());
+  cerr << "DONE UNION\n";
 }
 
 BOOST_AUTO_TEST_CASE(ControlledKBest) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
-  CreateHG(&hg);
+  CreateHG(path, &hg);
   vector<double> w(2); w[0]=0.4; w[1]=0.8;
   hg.Reweight(w);
   vector<WordID> trans;
@@ -107,10 +128,11 @@ BOOST_AUTO_TEST_CASE(ControlledKBest) {
 
 
 BOOST_AUTO_TEST_CASE(InsideScore) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 1.0);
   Hypergraph hg;
-  CreateTinyLatticeHG(&hg);
+  CreateTinyLatticeHG(path, &hg);
   hg.Reweight(wts);
   vector<WordID> trans;
   prob_t cost = ViterbiESentence(hg, &trans);
@@ -130,10 +152,11 @@ BOOST_AUTO_TEST_CASE(InsideScore) {
 
 
 BOOST_AUTO_TEST_CASE(PruneInsideOutside) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("Feature_1"), 1.0);
   Hypergraph hg;
-  CreateLatticeHG(&hg);
+  CreateLatticeHG(path, &hg);
   hg.Reweight(wts);
   vector<WordID> trans;
   prob_t cost = ViterbiESentence(hg, &trans);
@@ -152,8 +175,9 @@ BOOST_AUTO_TEST_CASE(PruneInsideOutside) {
 }
 
 BOOST_AUTO_TEST_CASE(TestPruneEdges) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
-  CreateLatticeHG(&hg);
+  CreateLatticeHG(path, &hg);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 1.0);
   hg.Reweight(wts);
@@ -166,8 +190,9 @@ BOOST_AUTO_TEST_CASE(TestPruneEdges) {
 }
 
 BOOST_AUTO_TEST_CASE(TestIntersect) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
-  CreateHG_int(&hg);
+  CreateHG_int(path, &hg);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 1.0);
   hg.Reweight(wts);
@@ -192,8 +217,9 @@ BOOST_AUTO_TEST_CASE(TestIntersect) {
 }
 
 BOOST_AUTO_TEST_CASE(TestPrune2) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
-  CreateHG_int(&hg);
+  CreateHG_int(path, &hg);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 1.0);
   hg.Reweight(wts);
@@ -207,8 +233,9 @@ BOOST_AUTO_TEST_CASE(TestPrune2) {
 }
 
 BOOST_AUTO_TEST_CASE(Sample) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
-  CreateLatticeHG(&hg);
+  CreateLatticeHG(path, &hg);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("Feature_1"), 0.0);
   hg.Reweight(wts);
@@ -220,6 +247,7 @@ BOOST_AUTO_TEST_CASE(Sample) {
 }
 
 BOOST_AUTO_TEST_CASE(PLF) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
   string inplf = "((('haupt',-2.06655,1),('hauptgrund',-5.71033,2),),(('grund',-1.78709,1),),(('für\\'',0.1,1),),)";
   HypergraphIO::ReadFromPLF(inplf, &hg);
@@ -234,8 +262,9 @@ BOOST_AUTO_TEST_CASE(PLF) {
 }
 
 BOOST_AUTO_TEST_CASE(PushWeightsToGoal) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
-  CreateHG(&hg);
+  CreateHG(path, &hg);
   vector<double> w(2); w[0]=0.4; w[1]=0.8;
   hg.Reweight(w);
   vector<WordID> trans;
@@ -248,8 +277,9 @@ BOOST_AUTO_TEST_CASE(PushWeightsToGoal) {
 }
 
 BOOST_AUTO_TEST_CASE(TestSpecialKBest) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
-  CreateHGBalanced(&hg);
+  CreateHGBalanced(path, &hg);
   vector<double> w(1); w[0]=0;
   hg.Reweight(w);
   vector<pair<vector<WordID>, prob_t> > list;
@@ -264,8 +294,9 @@ BOOST_AUTO_TEST_CASE(TestSpecialKBest) {
 }
 
 BOOST_AUTO_TEST_CASE(TestGenericViterbi) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
-  CreateHG_tiny(&hg);
+  CreateHG_tiny(path, &hg);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 0.4);
   wts.set_value(FD::Convert("f2"), 0.8);
@@ -279,8 +310,9 @@ BOOST_AUTO_TEST_CASE(TestGenericViterbi) {
 }
 
 BOOST_AUTO_TEST_CASE(TestGenericInside) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
-  CreateTinyLatticeHG(&hg);
+  CreateTinyLatticeHG(path, &hg);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 1.0);
   hg.Reweight(wts);
@@ -296,8 +328,9 @@ BOOST_AUTO_TEST_CASE(TestGenericInside) {
 }
 
 BOOST_AUTO_TEST_CASE(TestGenericInside2) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
-  CreateHG(&hg);
+  CreateHG(path, &hg);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 0.4);
   wts.set_value(FD::Convert("f2"), 0.8);
@@ -322,8 +355,9 @@ BOOST_AUTO_TEST_CASE(TestGenericInside2) {
 }
 
 BOOST_AUTO_TEST_CASE(TestAddExpectations) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
-  CreateHG(&hg);
+  CreateHG(path, &hg);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 0.4);
   wts.set_value(FD::Convert("f2"), 0.8);
@@ -338,8 +372,8 @@ BOOST_AUTO_TEST_CASE(TestAddExpectations) {
 }
 
 BOOST_AUTO_TEST_CASE(Small) {
-  Hypergraph hg;
   std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
+  Hypergraph hg;
   CreateSmallHG(&hg, path);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("Model_0"), -2.0);
@@ -361,6 +395,7 @@ BOOST_AUTO_TEST_CASE(Small) {
 }
 
 BOOST_AUTO_TEST_CASE(JSONTest) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   ostringstream os;
   JSONParser::WriteEscapedString("\"I don't know\", she said.", &os);
   BOOST_CHECK_EQUAL("\"\\\"I don't know\\\", she said.\"", os.str());
@@ -370,9 +405,10 @@ BOOST_AUTO_TEST_CASE(JSONTest) {
 }
 
 BOOST_AUTO_TEST_CASE(TestGenericKBest) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
-  CreateHG(&hg);
-  //CreateHGBalanced(&hg);
+  CreateHG(path, &hg);
+  //CreateHGBalanced(path, &hg);
   SparseVector<double> wts;
   wts.set_value(FD::Convert("f1"), 0.4);
   wts.set_value(FD::Convert("f2"), 1.0);
@@ -392,8 +428,9 @@ BOOST_AUTO_TEST_CASE(TestGenericKBest) {
 }
 
 BOOST_AUTO_TEST_CASE(TestReadWriteHG) {
+  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg,hg2;
-  CreateHG(&hg);
+  CreateHG(path, &hg);
   hg.edges_.front().j_ = 23;
   hg.edges_.back().prev_i_ = 99;
   ostringstream os;

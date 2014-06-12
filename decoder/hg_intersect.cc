@@ -92,7 +92,7 @@ bool Intersect(const Lattice& target, Hypergraph* hg) {
     return FastLinearIntersect(target, hg);
 
   vector<bool> rem(hg->edges_.size(), false);
-  const RuleFilter filter(target, 15);   // TODO make configurable
+  const RuleFilter filter(target, 9999);   // TODO make configurable
   for (unsigned i = 0; i < rem.size(); ++i)
     rem[i] = filter(*hg->edges_[i].rule_);
   hg->PruneEdges(rem, true);

@@ -10,6 +10,7 @@ SA_INI_FILES = set((
     'a_file',
     'lex_file',
     'precompute_file',
+    'bilex_file',
     ))
 
 class FIFOLock:

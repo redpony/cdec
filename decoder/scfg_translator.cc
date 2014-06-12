@@ -47,7 +47,7 @@ GlueGrammar::GlueGrammar(const string& goal_nt, const string& default_nt, const 
   TRulePtr stop_glue(new TRule("[" + goal_nt + "] ||| [" + default_nt + ",1] ||| [1]"));
   AddRule(stop_glue);
   RefineRule(stop_glue, ctf_level);
-  TRulePtr glue(new TRule("[" + goal_nt + "] ||| [" + goal_nt + ",1] ["+ default_nt + ",2] ||| [1] [2] ||| Glue=1"));
+  TRulePtr glue(new TRule("[" + goal_nt + "] ||| [" + goal_nt + "] ["+ default_nt + "] ||| [1] [2] ||| Glue=1"));
   AddRule(glue);
   RefineRule(glue, ctf_level);
 }

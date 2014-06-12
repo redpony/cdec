@@ -67,6 +67,12 @@ struct FSTTranslatorImpl {
       Hypergraph::Edge* hg_edge = forest->AddEdge(kGOAL_RULE, tail);
       forest->ConnectEdgeToHeadNode(hg_edge, goal);
       forest->Reweight(weights);
+
+      // since we don't do any pruning, the node_hash will be the same for
+      // every run of the composer
+      int nc = 0;
+      for (auto& node : forest->nodes_)
+        node.node_hash = ++nc;
     }
     if (add_pass_through_rules)
       fst->ClearPassThroughTranslations();

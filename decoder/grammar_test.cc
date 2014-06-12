@@ -33,9 +33,9 @@ BOOST_AUTO_TEST_CASE(TestTextGrammar) {
   ModelSet models(w, ms);
 
   TextGrammar g;
-  TRulePtr r1(new TRule("[X] ||| a b c ||| A B C ||| 0.1 0.2 0.3", true));
-  TRulePtr r2(new TRule("[X] ||| a b c ||| 1 2 3 ||| 0.2 0.3 0.4", true));
-  TRulePtr r3(new TRule("[X] ||| a b c d ||| A B C D ||| 0.1 0.2 0.3", true));
+  TRulePtr r1(new TRule("[X] ||| a b c ||| A B C ||| 0.1 0.2 0.3"));
+  TRulePtr r2(new TRule("[X] ||| a b c ||| 1 2 3 ||| 0.2 0.3 0.4"));
+  TRulePtr r3(new TRule("[X] ||| a b c d ||| A B C D ||| 0.1 0.2 0.3"));
   cerr << r1->AsString() << endl;
   g.AddRule(r1);
   g.AddRule(r2);

@@ -384,13 +384,21 @@ class FastSparseVector {
   T dot(const std::vector<T>& v) const {
     T res = T();
     for (const_iterator it = begin(), e = end(); it != e; ++it)
+#if FP_FAST_FMA
+      if (static_cast<unsigned>(it->first) < v.size()) res = std::fma(it->second, v[it->first], res);
+#else
       if (static_cast<unsigned>(it->first) < v.size()) res += it->second * v[it->first];
+#endif
     return res;
   }
   T dot(const FastSparseVector<T>& other) const {
     T res = T();
     for (const_iterator it = begin(), e = end(); it != e; ++it)
+#if FP_FAST_FMA
+      res = std::fma(other.value(it->first), it->second, res);
+#else
       res += other.value(it->first) * it->second;
+#endif
     return res;
   }
   bool operator==(const FastSparseVector<T>& other) const {

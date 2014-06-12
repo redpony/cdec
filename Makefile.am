@@ -3,13 +3,13 @@
 # cyclic dependencies between these directories!
 SUBDIRS = \
   utils \
-  mteval \
   klm/util/double-conversion \
   klm/util \
   klm/util/stream \
   klm/lm \
   klm/lm/builder \
   klm/search \
+  mteval \
   decoder \
   training \
   word-aligner \

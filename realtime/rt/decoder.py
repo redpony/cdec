@@ -38,11 +38,11 @@ class CdecDecoder(Decoder):
 
 class MIRADecoder(Decoder):
 
-    def __init__(self, config, weights):
+    def __init__(self, config, weights, metric='ibm_bleu'):
         cdec_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         mira = os.path.join(cdec_root, 'training', 'mira', 'kbest_cut_mira')
-        #                                              optimizer=2 step=0.001    best=500,    k=500,       uniq, stream
-        mira_cmd = [mira, '-c', config, '-w', weights, '-o', '2', '-C', '0.001', '-b', '500', '-k', '500', '-u', '-t']
+        #                                              optimizer=2 step=0.001    best=500,    k=500,       uniq, stream, metric
+        mira_cmd = [mira, '-c', config, '-w', weights, '-o', '2', '-C', '0.001', '-b', '500', '-k', '500', '-u', '-t', '-m', metric]
         logger.info('Executing: {}'.format(' '.join(mira_cmd)))
         self.decoder = util.popen_io(mira_cmd)
         self.lock = util.FIFOLock()

@@ -1,0 +1,8 @@
+(S [NP-C] [VP] (PUNC .)) ||| [1] [2] . ||| R1=1
+(NP-C (DT the) (NN gunman)) ||| qiangshou ||| R2=1
+(NP-C (DT the) [NN]) ||| [1] ||| R2a=1
+(NN gunman) ||| qiangshou ||| R2b=1
+(VP (VBD was) (VP-C [VBN] (PP (IN by) [NP-C]))) ||| bei [2] [1] ||| R3=1
+(NP-C (DT the) (NN police)) ||| jingfang ||| R4=1
+(VBN killed) ||| jibi ||| R5=1
+(VBN killed) ||| killed' ||| R6=1
