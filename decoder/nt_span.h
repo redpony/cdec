@@ -7,7 +7,7 @@
 
 struct Span {
   int l,r;
-  Span() : l(-1) {  }
+  Span() : l(-1), r(-1) {  }
   bool is_null() const { return l<0; }
   void print(std::ostream &o,char const* for_null="") const {
     if (is_null())

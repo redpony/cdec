@@ -2,6 +2,7 @@
 #define _EXP_SEMIRING_H_
 
 #include <iostream>
+#include "star.h"
 
 // this file implements the first-order expectation semiring described
 // in Li & Eisner (EMNLP 2009)
@@ -54,18 +55,10 @@ const PRPair<P,R> operator*(const PRPair<P,R>& a, const PRPair<P,R>& b) {
   return result;
 }
 
-template <class P, class PWeightFunction, class R, class RWeightFunction>
-struct PRWeightFunction {
-  explicit PRWeightFunction(const PWeightFunction& pwf = PWeightFunction(),
-                            const RWeightFunction& rwf = RWeightFunction()) :
-    pweight(pwf), rweight(rwf) {}
-  PRPair<P,R> operator()(const HG::Edge& e) const {
-    const P p = pweight(e);
-    const R r = rweight(e);
-    return PRPair<P,R>(p, r * p);
-  }
-  const PWeightFunction pweight;
-  const RWeightFunction rweight;
-};
+template <class P, class R>
+inline const PRPair<P,R> star(const PRPair<P,R>& x) {
+  const P pstar = star(x.p);
+  return PRPair<P,R>(pstar, pstar * x.r * pstar);
+}
 
 #endif

@@ -3,6 +3,8 @@ import math
 
 from cdec.sa import isvar
 
+from online import get_score_multilex
+
 MAXSCORE = 99
 
 def EgivenF(ctx): # p(e|f) = c(e, f)/c(f)
@@ -46,7 +48,10 @@ def MaxLexEgivenF(ttable):
         fwords.append('NULL')
         maxOffScore = 0.0
         for e in ctx.ephrase.words:
-            maxScore = max(ttable.get_score(f, e, 0) for f in fwords)
+            if ctx.online:
+                maxScore = max(get_score_multilex(f, e, 0, (ttable, ctx.online.bilex)) for f in fwords)
+            else:
+                maxScore = max(ttable.get_score(f, e, 0) for f in fwords)
             maxOffScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
         return maxOffScore
     return MaxLexEgivenF
@@ -57,7 +62,10 @@ def MaxLexFgivenE(ttable):
         ewords.append('NULL')
         maxOffScore = 0.0
         for f in ctx.fphrase.words:
-            maxScore = max(ttable.get_score(f, e, 1) for e in ewords)
+            if ctx.online:
+                maxScore = max(get_score_multilex(f, e, 1, (ttable, ctx.online.bilex)) for e in ewords)
+            else:
+                maxScore = max(ttable.get_score(f, e, 1) for e in ewords)
             maxOffScore += -math.log10(maxScore) if maxScore > 0 else MAXSCORE
         return maxOffScore
     return MaxLexFgivenE

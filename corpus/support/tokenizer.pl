@@ -240,6 +240,10 @@ sub proc_token {
 	return $token;
     }
 
+    if($token =~ /^\d+(.\d+)+(亿|百万|万|千)?$/){
+	return $token;
+    }
+
     ## 1,234,345.34
     if($token =~ /^\d+(\.\d{3})*,\d+$/){
 	## number

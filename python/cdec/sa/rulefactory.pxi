@@ -11,6 +11,8 @@ from libc.math cimport fmod, ceil, floor, log
 
 from collections import defaultdict, Counter, namedtuple
 
+from online import Bilex
+
 FeatureContext = namedtuple('FeatureContext',
     ['fphrase', 
      'ephrase', 
@@ -31,6 +33,7 @@ OnlineFeatureContext = namedtuple('OnlineFeatureContext',
     ['fcount',
      'fsample_count',
      'paircount',
+     'bilex',
     ])
 
 cdef class OnlineStats:
@@ -39,6 +42,7 @@ cdef class OnlineStats:
     cdef public phrases_e
     cdef public phrases_fe
     cdef public phrases_al
+    cdef public bilex
 
     def __cinit__(self):
         # Keep track of everything that can be sampled:
@@ -49,6 +53,9 @@ cdef class OnlineStats:
         self.phrases_e = defaultdict(int)
         self.phrases_fe = defaultdict(lambda: defaultdict(int))
         self.phrases_al = defaultdict(lambda: defaultdict(tuple))
+
+        # Instance-specific bilex
+        self.bilex = Bilex()
 
 cdef int PRECOMPUTE = 0
 cdef int MERGE = 1
@@ -404,7 +411,8 @@ cdef class HieroCachingRuleFactory:
         
         # Online stats 
 
-        # None if not online        
+        # None if not online
+        # Base bilex, also need one per instance
         self.bilex = bilex
 
         # True after data is added
@@ -2046,11 +2054,8 @@ cdef class HieroCachingRuleFactory:
             if not stats.phrases_al[f_ph][e_ph]:
                 stats.phrases_al[f_ph][e_ph] = al
 
-        # Update bilexical dictionary (if exists)
-        if self.bilex:
-            self.bilex.update(f_words, e_words, alignment)
-        else:
-            logger.warning('No online bilexical dictionary specified, not updating lexical weights')
+        # Update bilexical dictionary
+        stats.bilex.update(f_words, e_words, alignment)
             
     # Create a rule from source, target, non-terminals, and alignments
     def form_rule(self, f_i, e_i, f_span, e_span, nt, al):
@@ -2131,7 +2136,7 @@ cdef class HieroCachingRuleFactory:
             fsample_count = stats.samples_f.get(f, 0)
             d = stats.phrases_fe.get(f, None)
             paircount = d.get(e, 0) if d else 0
-            return OnlineFeatureContext(fcount, fsample_count, paircount)
+            return OnlineFeatureContext(fcount, fsample_count, paircount, stats.bilex)
         return None
     
     # Find all phrases that we might try to extract

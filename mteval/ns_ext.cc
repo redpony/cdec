@@ -4,14 +4,56 @@
 #include <cstdlib>
 #include <cstring>
 #include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
 #include <sstream>
 #include <iostream>
 #include <cassert>
 
+#include "filelib.h"
 #include "stringlib.h"
 #include "tdict.h"
 
 using namespace std;
+
+static volatile bool child_need_init = true;
+
+void metric_child_signal_handler(int signo) {
+  int status = 0;
+  string cmd;
+  {
+    ReadFile rf("/proc/self/cmdline");
+    if (rf) getline(*rf.stream(), cmd);
+  }
+  for (unsigned i = 0; i < cmd.size(); ++i)
+    if (cmd[i] == 0) cmd[i] = ' ';
+  cerr << "Received SIGCHLD(" << signo << ")\n";
+  if (cmd.size())
+    cerr << "  Parent command line: " << cmd << endl;
+  else
+    cerr << "  Parent command line not available!\n";
+  // reap zombies
+  bool should_exit = false;
+  while (waitpid(-1, &status, WNOHANG) > 0) {
+    cerr << "  Child status: " << status << (status ? " [FAILURE]" : " [OK]") << endl; 
+    if (status) should_exit = true;
+  }
+  if (should_exit) {
+    cerr << "Exiting on account of non-zero child exit code...\n";
+    exit(1);
+  }
+}
+
+void setup_child_process_handler() {
+  if (child_need_init == true) {
+    child_need_init = false;
+    struct sigaction sa;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_NOCLDSTOP;
+    sa.sa_handler = metric_child_signal_handler;
+    sigaction(SIGCHLD, &sa, NULL);
+  }
+}
 
 struct NScoreServer {
   NScoreServer(const std::string& cmd);
@@ -27,6 +69,7 @@ struct NScoreServer {
 };
 
 NScoreServer::NScoreServer(const string& cmd) {
+  setup_child_process_handler();
   cerr << "Invoking " << cmd << " ..." << endl;
   if (pipe(p2c) < 0) { perror("pipe"); exit(1); }
   if (pipe(c2p) < 0) { perror("pipe"); exit(1); }

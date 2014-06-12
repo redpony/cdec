@@ -190,6 +190,7 @@ int main(int argc, char** argv) {
                   cout << (max_index - 1) << '-' << j;
               }
             }
+            if (s2t_viterbi.size() <= static_cast<unsigned>(max_i)) s2t_viterbi.resize(max_i + 1);
             s2t_viterbi[max_i][f_j] = 1.0;
           }
         } else {
@@ -308,17 +309,17 @@ int main(int argc, char** argv) {
 
   if (output_parameters) {
     WriteFile params_out(conf["output_parameters"].as<string>());
-    for (TTable::Word2Word2Double::iterator ei = s2t.ttable.begin(); ei != s2t.ttable.end(); ++ei) {
-      const TTable::Word2Double& cpd = ei->second;
-      const TTable::Word2Double& vit = s2t_viterbi[ei->first];
-      const string& esym = TD::Convert(ei->first);
+    for (unsigned eind = 1; eind < s2t.ttable.size(); ++eind) {
+      const auto& cpd = s2t.ttable[eind];
+      const TTable::Word2Double& vit = s2t_viterbi[eind];
+      const string& esym = TD::Convert(eind);
       double max_p = -1;
-      for (TTable::Word2Double::const_iterator fi = cpd.begin(); fi != cpd.end(); ++fi)
-        if (fi->second > max_p) max_p = fi->second;
+      for (auto& fi : cpd)
+        if (fi.second > max_p) max_p = fi.second;
       const double threshold = max_p * BEAM_THRESHOLD;
-      for (TTable::Word2Double::const_iterator fi = cpd.begin(); fi != cpd.end(); ++fi) {
-        if (fi->second > threshold || (vit.find(fi->first) != vit.end())) {
-          *params_out << esym << ' ' << TD::Convert(fi->first) << ' ' << log(fi->second) << endl;
+      for (auto& fi : cpd) {
+        if (fi.second > threshold || (vit.find(fi.first) != vit.end())) {
+          *params_out << esym << ' ' << TD::Convert(fi.first) << ' ' << log(fi.second) << endl;
         }
       } 
     }

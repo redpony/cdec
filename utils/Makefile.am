@@ -27,6 +27,7 @@ libutils_a_SOURCES = \
   citycrc.h \
   corpus_tools.h \
   dict.h \
+  exp_semiring.h \
   fast_sparse_vector.h \
   fdict.h \
   feature_vector.h \
@@ -38,7 +39,8 @@ libutils_a_SOURCES = \
   kernel_string_subseq.h \
   logval.h \
   m.h \
-  murmur_hash.h \
+  murmur_hash3.h \
+  murmur_hash3.cc \
   named_enum.h \
   null_deleter.h \
   null_traits.h \
@@ -49,6 +51,7 @@ libutils_a_SOURCES = \
   show.h \
   small_vector.h \
   sparse_vector.h \
+  star.h \
   static_utoa.h \
   stringlib.h \
   tdict.h \

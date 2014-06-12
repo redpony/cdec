@@ -9,22 +9,35 @@
 #include <cassert>
 
 #include "stringlib.h"
+#include "filelib.h"
 #include "tdict.h"
 
 using namespace std;
+
+extern const char* meteor_jar_path;
+extern void setup_child_process_handler();
 
 map<string, boost::shared_ptr<ScoreServer> > ScoreServerManager::servers_;
 
 class METEORServer : public ScoreServer {
  public:
-  METEORServer() : ScoreServer("java -Xmx1024m -jar /usr0/cdyer/meteor/meteor-1.3.jar - - -mira -lower -t tune -l en") {}
+  METEORServer(const string& cmd) : ScoreServer(cmd) {}
 };
 
 ScoreServer* ScoreServerManager::Instance(const string& score_type) {
   boost::shared_ptr<ScoreServer>& s = servers_[score_type];
   if (!s) {
     if (score_type == "meteor") {
-      s.reset(new METEORServer);
+#if HAVE_METEOR
+      if (!FileExists(meteor_jar_path)) {
+        cerr << meteor_jar_path << " not found!\n";
+        abort();
+      }
+      s.reset(new METEORServer(string("java -Xmx1536m -jar ") + meteor_jar_path + " - - -mira -lower -t tune -l en"));
+#else
+      cerr << "cdec was not built with the --with-meteor option." << endl;
+      abort();
+#endif
     } else {
       cerr << "Don't know how to create score server for type '" << score_type << "'\n";
       abort();
@@ -34,6 +47,7 @@ ScoreServer* ScoreServerManager::Instance(const string& score_type) {
 }
 
 ScoreServer::ScoreServer(const string& cmd) {
+  setup_child_process_handler();
   cerr << "Invoking " << cmd << " ..." << endl;
   if (pipe(p2c) < 0) { perror("pipe"); exit(1); }
   if (pipe(c2p) < 0) { perror("pipe"); exit(1); }
@@ -49,10 +63,10 @@ ScoreServer::ScoreServer(const string& cmd) {
     cerr << "Exec'ing from child " << cmd << endl;
     vector<string> vargs;
     SplitOnWhitespace(cmd, &vargs);
-    const char** cargv = static_cast<const char**>(malloc(sizeof(const char*) * vargs.size()));
-    for (unsigned i = 1; i < vargs.size(); ++i) cargv[i-1] = vargs[i].c_str();
-    cargv[vargs.size() - 1] = NULL;
-    execvp(vargs[0].c_str(), (char* const*)cargv);
+    const char** cargv = static_cast<const char**>(malloc(sizeof(const char*) * (vargs.size() + 1)));
+    for (unsigned i = 0; i < vargs.size(); i++) cargv[i] = vargs[i].c_str();
+    cargv[vargs.size()] = NULL;
+    execvp(*cargv, (char* const*)cargv);
   } else { // parent
     close(c2p[1]);
     close(p2c[0]);
@@ -64,6 +78,7 @@ ScoreServer::ScoreServer(const string& cmd) {
 }
 
 ScoreServer::~ScoreServer() {
+  cerr << "ScoreServer::~ScoreServer()\n";
   // TODO close stuff, join stuff
 }
 
@@ -138,7 +153,11 @@ struct ExternalScore : public ScoreBase<ExternalScore> {
     assert(!"not implemented"); // no idea
   }
   void PlusEquals(const Score& delta, const float scale) {
-    assert(!"not implemented"); // don't even know what this is
+    if (static_cast<const ExternalScore&>(delta).score_server) score_server = static_cast<const ExternalScore&>(delta).score_server;
+    if (fields.size() != static_cast<const ExternalScore&>(delta).fields.size())
+      fields.resize(max(fields.size(), static_cast<const ExternalScore&>(delta).fields.size()));
+    for (unsigned i = 0; i < static_cast<const ExternalScore&>(delta).fields.size(); ++i)
+      fields[i] += static_cast<const ExternalScore&>(delta).fields[i] * scale;
   }
   void PlusEquals(const Score& delta) {
     if (static_cast<const ExternalScore&>(delta).score_server) score_server = static_cast<const ExternalScore&>(delta).score_server;

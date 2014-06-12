@@ -25,6 +25,7 @@
 #include "tdict.h"
 #include "trule.h"
 #include "prob.h"
+#include "exp_semiring.h"
 #include "indices_after.h"
 #include "nt_span.h"
 
@@ -141,13 +142,15 @@ namespace HG {
   // TODO get rid of cat_?
   // TODO keep cat_ and add span and/or state? :)
   struct Node {
-    Node() : id_(), cat_() {}
+    Node() : node_hash(), id_(), cat_() {}
+    size_t node_hash;  // hash of all the information that makes this node unique
     int id_; // equal to this object's position in the nodes_ vector
     WordID cat_;  // non-terminal category if <0, 0 if not set
     WordID NT() const { return -cat_; }
     EdgesVector in_edges_;   // an in edge is an edge with this node as its head.  (in edges come from the bottom up to us)  indices in edges_
     EdgesVector out_edges_;  // an out edge is an edge with this node as its tail.  (out edges leave us up toward the top/goal). indices in edges_
     void copy_fixed(Node const& o) { // nonstructural fields only - structural ones are managed by sorting/pruning/subsetting
+      node_hash = o.node_hash;
       cat_=o.cat_;
     }
     void copy_reindex(Node const& o,indices_after const& n2,indices_after const& e2) {
@@ -191,13 +194,14 @@ public:
     SetNodeOrigin(nodeid,r);
     return r;
   }
-  Span NodeSpan(int nodeid) const {
+  Span NodeSpan(int nodeid, Span* prev = nullptr) const {
     Span s;
     Node const &n=nodes_[nodeid];
     if (!n.in_edges_.empty()) {
       Edge const& e=edges_[n.in_edges_.front()];
       s.l=e.i_;
       s.r=e.j_;
+      if (prev) { prev->l = e.prev_i_; prev->r = e.prev_j_; }
     }
     return s;
   }
@@ -260,6 +264,13 @@ public:
     nodes_.resize(size);
     for (int i = 0; i < size; ++i) nodes_[i].id_ = i;
   }
+
+  // if all node states are unique, return true
+  bool AreNodesUniquelyIdentified() const;
+
+  // the feature function interface assumes that pre-goal edges are
+  // arity 1 (this simplifies the "final transition" feature computation)
+  bool ArePreGoalEdgesArity1() const;
 
   // reserves space in the nodes vector to prevent memory locations
   // from changing
@@ -527,7 +538,21 @@ struct EdgeFeaturesAndProbWeightFunction {
 
 struct TransitionCountWeightFunction {
   typedef double Weight;
-  inline double operator()(const HG::Edge& e) const { (void)e; return 1.0; }
+  inline double operator()(const HG::Edge&) const { return 1.0; }
+};
+
+template <class P, class PWeightFunction, class R, class RWeightFunction>
+struct PRWeightFunction {
+  explicit PRWeightFunction(const PWeightFunction& pwf = PWeightFunction(),
+                            const RWeightFunction& rwf = RWeightFunction()) :
+    pweight(pwf), rweight(rwf) {}
+  PRPair<P,R> operator()(const HG::Edge& e) const {
+    const P p = pweight(e);
+    const R r = rweight(e);
+    return PRPair<P,R>(p, r * p);
+  }
+  const PWeightFunction pweight;
+  const RWeightFunction rweight;
 };
 
 #endif

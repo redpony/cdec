@@ -11,6 +11,7 @@
 #include <cassert>
 #include "semiring.h"
 #include "show.h"
+#include "star.h"
 
 //TODO: template for supporting negation or not - most uses are for nonnegative "probs" only; probably some 10-20% speedup available
 template <class T>
@@ -241,5 +242,16 @@ bool operator>=(const LogVal<T>& lhs, const LogVal<T>& rhs) {
 
 template <class T>
 std::size_t hash_value(const LogVal<T>& x) { return x.hash_impl(); }
+
+template <class T>
+inline LogVal<T> star(LogVal<T> x) {
+  if (x.is_0()) return x;
+  if (x.v_ >= 0) {
+    x.v_ = std::numeric_limits<T>::infinity();
+  } else {
+    x.v_ = -log1p(-x.as_float());
+  }
+  return x;
+}
 
 #endif

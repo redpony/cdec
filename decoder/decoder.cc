@@ -490,8 +490,8 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
   }
 
   formalism = LowercaseString(str("formalism",conf));
-  if (formalism != "scfg" && formalism != "fst" && formalism != "lextrans" && formalism != "pb" && formalism != "csplit" && formalism != "tagger" && formalism != "lexalign" && formalism != "rescore") {
-    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 'csplit', 'lextrans', 'lexalign', 'rescore', or 'tagger'\n";
+  if (formalism != "t2s" && formalism != "t2t" && formalism != "scfg" && formalism != "fst" && formalism != "lextrans" && formalism != "pb" && formalism != "csplit" && formalism != "tagger" && formalism != "lexalign" && formalism != "rescore") {
+    cerr << "Error: --formalism takes only 'scfg', 'fst', 'pb', 't2s', 't2t', 'csplit', 'lextrans', 'lexalign', 'rescore', or 'tagger'\n";
     cerr << dcmdline_options << endl;
     exit(1);
   }
@@ -626,6 +626,10 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
   // set up translation back end
   if (formalism == "scfg")
     translator.reset(new SCFGTranslator(conf));
+  else if (formalism == "t2s")
+    translator.reset(new Tree2StringTranslator(conf, false));
+  else if (formalism == "t2t")
+    translator.reset(new Tree2StringTranslator(conf, true));
   else if (formalism == "fst")
     translator.reset(new FSTTranslator(conf));
   else if (formalism == "pb")
@@ -748,6 +752,16 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
     return false;
   }
 
+  // this is mainly used for debugging, eventually this will be an assertion
+  if (!forest.AreNodesUniquelyIdentified()) {
+    if (!SILENT) cerr << "  *** NODES NOT UNIQUELY IDENTIFIED ***\n";
+  }
+
+  if (!forest.ArePreGoalEdgesArity1()) {
+    cerr << "Pre-goal edges are not arity-1. The decoder requires this.\n";
+    abort();
+  }
+
   const bool show_tree_structure=conf.count("show_tree_structure");
   if (!SILENT) forest_stats(forest,"  Init. forest",show_tree_structure,oracle.show_derivation);
   if (conf.count("show_expected_length")) {
@@ -811,6 +825,10 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       forest.swap(rescored_forest);
       forest.Reweight(cur_weights);
       if (!SILENT) forest_stats(forest,"  " + passtr +" forest",show_tree_structure,oracle.show_derivation, conf.count("extract_rules"), extract_file);
+      // this is mainly used for debugging, eventually this will be an assertion
+      if (!forest.AreNodesUniquelyIdentified()) {
+        if (!SILENT) cerr << "  *** NODES NOT UNIQUELY IDENTIFIED ***\n";
+      }
     }
 
     if (conf.count("show_partition")) {
@@ -982,6 +1000,10 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
             forest.edges_[i].rule_ = forest.edges_[i].rule_->parent_rule_;
       }
       forest.Reweight(last_weights);
+      // this is mainly used for debugging, eventually this will be an assertion
+      if (!forest.AreNodesUniquelyIdentified()) {
+        if (!SILENT) cerr << "  *** NODES NOT UNIQUELY IDENTIFIED ***\n";
+      }
       if (!SILENT) forest_stats(forest,"  Constr. forest",show_tree_structure,oracle.show_derivation);
       if (!SILENT) cerr << "  Constr. VitTree: " << ViterbiFTree(forest) << endl;
       if (conf.count("show_partition")) {

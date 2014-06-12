@@ -13,6 +13,7 @@ if (/Init.*\s+Viterbi:\s+($REAL)/) {
   # -LM Viterbi: australia is have diplomatic relations with north korea one of the few countries .
   print "-lm_trans $1\n";
 }
+if (/NODES NOT UNIQUELY IDENTIFIED/) { print "NODES_NOT_UNIQUE 1\n"; }
 #Constr. forest (nodes/edges): 111/305
 #Constr. forest       (paths): 9899
 if (/Constr\. forest\s+\(nodes\/edges\): (\d+)\/(\d+)/) { print "constr_nodes $1\nconstr_edges $2\n"; }

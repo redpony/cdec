@@ -3,7 +3,7 @@
 
 #include <boost/functional/hash.hpp>
 
-#include "murmur_hash.h"
+#include "murmur_hash3.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -44,23 +44,21 @@ const unsigned GOLDEN_MEAN_FRACTION=2654435769U;
 
 // assumes C is POD
 template <class C>
-struct murmur_hash
-{
-  typedef MurmurInt result_type;
+struct murmur_hash {
+  typedef size_t result_type;
   typedef C /*const&*/ argument_type;
   result_type operator()(argument_type const& c) const {
-    return MurmurHash((void*)&c,sizeof(c));
+    return cdec::MurmurHash3_64((void*)&c, sizeof(c), GOLDEN_MEAN_FRACTION);
   }
 };
 
 // murmur_hash_array isn't std guaranteed safe (you need to use string::data())
 template <>
-struct murmur_hash<std::string>
-{
-  typedef MurmurInt result_type;
+struct murmur_hash<std::string> {
+  typedef size_t result_type;
   typedef std::string /*const&*/ argument_type;
   result_type operator()(argument_type const& c) const {
-    return MurmurHash(c.data(),c.size());
+    return cdec::MurmurHash3_64(c.data(), c.size(), GOLDEN_MEAN_FRACTION);
   }
 };
 
@@ -68,10 +66,10 @@ struct murmur_hash<std::string>
 template <class C>
 struct murmur_hash_array
 {
-  typedef MurmurInt result_type;
+  typedef size_t result_type;
   typedef C /*const&*/ argument_type;
   result_type operator()(argument_type const& c) const {
-    return MurmurHash(&*c.begin(),c.size()*sizeof(*c.begin()));
+    return cdec::MurmurHash3_64(&*c.begin(), c.size()*sizeof(*c.begin()), GOLDEN_MEAN_FRACTION);
   }
 };
 
@@ -94,7 +92,6 @@ typename H::mapped_type & get_or_construct(H &ht,K const& k,C0 const& c0) {
     return i->second;
   }
 }
-
 
 // get_or_call (0 arg)
 template <class H,class K,class F>
