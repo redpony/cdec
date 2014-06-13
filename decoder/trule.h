@@ -144,6 +144,9 @@ class TRule {
   SparseVector<double> scores_;
 
   char arity_;
+  std::vector<WordID> ext_states_; // in t2s or t2t translation, this is of length arity_ and
+                                   // indicates what state the transducer is in after having processed
+                                   // this transduction rule
 
   // these attributes are application-specific and should probably be refactored
   TRulePtr parent_rule_;  // usually NULL, except when doing constrained decoding
