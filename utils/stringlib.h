@@ -16,6 +16,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include "string_piece.hh"
+
 namespace {
 const char c_isspace[]=" \t\n\r\f\v"; // somewhat ridiculous, including characters nobody uses.
 const char common_isspace[]=" \t\n\r"; // even \n\r is borderline, but maybe you pass multiline DOS format text.
@@ -219,6 +221,21 @@ void VisitTokens(char *p,char *const end,F f) {
     }
     last=p;
   }
+}
+
+inline std::vector<StringPiece> TokenizeMultisep(const StringPiece& text, const StringPiece& separator) {
+  std::vector<StringPiece> res;
+  size_t cur = 0;
+  while(cur < text.size()) {
+    const auto n = text.find(separator, cur);
+    if (n == StringPiece::npos) {
+      res.push_back(text.substr(cur));
+      break;
+    }
+    res.push_back(text.substr(cur, n - cur));
+    cur = n + separator.size();
+  }
+  return res;
 }
 
 template <class F>
