@@ -26,14 +26,21 @@ struct Tree2StringGrammarNode {
 // use a lexer probably
 static void ReadTree2StringGrammar(istream* in, Tree2StringGrammarNode* root, bool has_multiple_states) {
   string line;
+  int lc = 0;
   while(getline(*in, line)) {
-    size_t pos = line.find("|||");
-    assert(pos != string::npos);
-    assert(pos > 3);
-    unsigned xc = 0;
-    while (line[pos - 1] == ' ') { --pos; xc++; }
-    cdec::TreeFragment rule_src(line.substr(0, pos), true);
-    // TODO transducer_state should (optionally?) be read from input
+    ++lc;
+    std::vector<StringPiece> fields = TokenizeMultisep(line, " ||| ");
+    if (has_multiple_states && fields.size() != 4) {
+      cerr << "Expected 4 fields in rule file but line " << lc << " is:\n" << line << endl;
+      abort();
+    }
+    if (!has_multiple_states && fields.size() != 3) {
+      cerr << "Expected 3 fields in rule file but line " << lc << " is:\n" << line << endl;
+      abort();
+    }
+    
+    cdec::TreeFragment rule_src(fields[has_multiple_states ? 1 : 0], true);
+    // TODO transducer_state should be read from input
     const unsigned transducer_state = 0;
     Tree2StringGrammarNode* cur = &root->next[transducer_state];
     ostringstream os;
@@ -59,12 +66,13 @@ static void ReadTree2StringGrammar(istream* in, Tree2StringGrammarNode* root, bo
       else
         os << TD::Convert(x);
     }
-    pos += 3 + xc;
-    while(line[pos] == ' ') { ++pos; }
-    os << " ||| " << line.substr(pos);
-    TRulePtr rule(new TRule(os.str()));
-    // TODO the transducer_state you end up in after using this rule (for each NT)
-    // needs to be read and encoded somehow in the rule (for use XXX)
+    TRulePtr rule;
+    if (has_multiple_states) {
+      cerr << "Not implemented...\n"; abort(); // TODO read in states
+    } else {
+      os << " ||| " << fields[1] << " ||| " << fields[2];
+      rule.reset(new TRule(os.str()));
+    }
     cur->rules.push_back(rule);
     //cerr << "RULE: " << rule->AsString() << "\n\n";
   }
