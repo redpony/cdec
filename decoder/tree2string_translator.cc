@@ -29,6 +29,7 @@ static void ReadTree2StringGrammar(istream* in, Tree2StringGrammarNode* root, bo
   int lc = 0;
   while(getline(*in, line)) {
     ++lc;
+    if (line.size() == 0 || line[0] == '#') continue;
     std::vector<StringPiece> fields = TokenizeMultisep(line, " ||| ");
     if (has_multiple_states && fields.size() != 4) {
       cerr << "Expected 4 fields in rule file but line " << lc << " is:\n" << line << endl;
@@ -178,6 +179,32 @@ struct Tree2StringTranslatorImpl {
     ReadTree2StringGrammar(rf.stream(), root.back().get(), has_multiple_states);
   }
 
+  // src must be fully abstract
+  bool DoesAbstractPassThroughRuleExist(unsigned state, const cdec::TreeFragment& src) const {
+    unsigned len = root.size();
+    if (len <= 1) return false;
+    --len;
+    for (unsigned i = 0; i < len; ++i) {
+      const Tree2StringGrammarNode* cur = &*root[i];
+      auto it = cur->next.find(state);
+      if (it == cur->next.end()) continue;
+      cur = &it->second;
+      bool failed = false;
+      vector<int> trg;
+      for (auto sym : src) {
+        it = cur->next.find(sym);
+        if (it == cur->next.end()) { failed = true; break; }
+        if (cdec::IsFrontier(sym)) trg.push_back(-trg.size());
+        cur = &it->second;
+      }
+      if (failed) continue;
+      // TODO check for destination states in t2t
+      for (auto r : cur->rules)
+        if (r->e_ == trg) return true;
+    }
+    return false;
+  }
+
   void CreatePassThroughRules(const cdec::TreeFragment& tree) {
     static const int kFIDlex = FD::Convert("PassThrough_Lexical");
     static const int kFIDabs = FD::Convert("PassThrough_Abstract");
@@ -231,6 +258,9 @@ struct Tree2StringTranslatorImpl {
       Tree2StringGrammarNode* cur = root.back().get();
       // do we need all transducer states here??? a list??? no pass through rules???
       unsigned transducer_state = 0;
+      const bool abstract_rule = (has_nt && !has_lex);
+      // the following reduces ambiguity quite a lot
+      if (abstract_rule && DoesAbstractPassThroughRuleExist(transducer_state, rule_src)) continue; 
       cur = &cur->next[transducer_state];
       for (auto sym : rule_src)
         cur = &cur->next[sym];
