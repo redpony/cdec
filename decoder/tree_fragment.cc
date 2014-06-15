@@ -8,7 +8,7 @@ using namespace std;
 
 namespace cdec {
 
-TreeFragment::TreeFragment(const string& tree, bool allow_frontier_sites) {
+TreeFragment::TreeFragment(const StringPiece& tree, bool allow_frontier_sites) {
   int bal = 0;
   const unsigned len = tree.size();
   unsigned cur = 0;
@@ -50,7 +50,7 @@ void TreeFragment::DebugRec(unsigned cur, ostream* out) const {
 // cp is the character index in the tree
 // np keeps track of the nodes (nonterminals) that have been built
 // symp keeps track of the terminal symbols that have been built
-void TreeFragment::ParseRec(const string& tree, bool afs, unsigned cp, unsigned symp, unsigned np, unsigned* pcp, unsigned* psymp, unsigned* pnp) {
+void TreeFragment::ParseRec(const StringPiece& tree, bool afs, unsigned cp, unsigned symp, unsigned np, unsigned* pcp, unsigned* psymp, unsigned* pnp) {
   if (tree[cp] != '(') {
     cerr << "Expected ( at " << cp << endl;
     abort();
@@ -79,12 +79,12 @@ void TreeFragment::ParseRec(const string& tree, bool afs, unsigned cp, unsigned 
       // TODO: add a terminal symbol to the current edge
       const bool is_terminal = tree[t_start] != '[' || (t_end - t_start < 3 || tree[t_end - 1] != ']');
       if (is_terminal) {
-        const unsigned term = TD::Convert(tree.substr(t_start, t_end - t_start));
+        const unsigned term = TD::Convert(tree.substr(t_start, t_end - t_start).as_string());
         rhs.push_back(term);
         // cerr << "T='" << TD::Convert(term) << "'\n";
         ++terminals;
       } else { // frontier site (NT but no recursion)
-        const unsigned nt = TD::Convert(tree.substr(t_start + 1, t_end - t_start - 2)) | FRONTIER_BIT;
+        const unsigned nt = TD::Convert(tree.substr(t_start + 1, t_end - t_start - 2).as_string()) | FRONTIER_BIT;
         rhs.push_back(nt);
         ++frontier_sites;
         // cerr << "FRONT-NT=[" << TD::Convert(nt & ALL_MASK) << "]\n";
@@ -97,7 +97,7 @@ void TreeFragment::ParseRec(const string& tree, bool afs, unsigned cp, unsigned 
   } // continuent has completed, cp is at ), build node
   const unsigned j = symp; // span from (i,j)
   // add an internal non-terminal symbol
-  const unsigned nt = TD::Convert(tree.substr(nt_start, nt_end - nt_start)) | RHS_BIT;
+  const unsigned nt = TD::Convert(tree.substr(nt_start, nt_end - nt_start).as_string()) | RHS_BIT;
   nodes[np] = TreeFragmentProduction(nt, rhs);
   //cerr << np << " production(" << i << "," << j << ")=  " << TD::Convert(nt & ALL_MASK) << " -->";
   //for (auto& x : rhs) {
