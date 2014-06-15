@@ -8,6 +8,8 @@
 #include <cassert>
 #include <cstddef>
 
+#include "string_piece.hh"
+
 namespace cdec {
 
 class BreadthFirstIterator;
@@ -52,7 +54,7 @@ class TreeFragment {
  public:
   TreeFragment() : frontier_sites(), terminals() {}
   // (S (NP a (X b) c d) (VP (V foo) (NP (NN bar))))
-  explicit TreeFragment(const std::string& tree, bool allow_frontier_sites = false);
+  explicit TreeFragment(const StringPiece& tree, bool allow_frontier_sites = false);
   void DebugRec(unsigned cur, std::ostream* out) const;
   typedef DepthFirstIterator iterator;
   typedef ptrdiff_t difference_type;
@@ -73,7 +75,7 @@ class TreeFragment {
   // cp is the character index in the tree
   // np keeps track of the nodes (nonterminals) that have been built
   // symp keeps track of the terminal symbols that have been built
-  void ParseRec(const std::string& tree, bool afs, unsigned cp, unsigned symp, unsigned np, unsigned* pcp, unsigned* psymp, unsigned* pnp);
+  void ParseRec(const StringPiece& tree, bool afs, unsigned cp, unsigned symp, unsigned np, unsigned* pcp, unsigned* psymp, unsigned* pnp);
  public:
   unsigned root;
   unsigned char frontier_sites;
