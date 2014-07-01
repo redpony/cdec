@@ -43,9 +43,10 @@ inline bool IsTerminal(unsigned x) {
 
 struct TreeFragmentProduction {
   TreeFragmentProduction() {}
-  TreeFragmentProduction(int nttype, const std::vector<unsigned>& r) : lhs(nttype), rhs(r) {}
+  TreeFragmentProduction(int nttype, const std::vector<unsigned>& r) : lhs(nttype), rhs(r), span(std::make_pair<short,short>(-1,-1)) {}
   unsigned lhs;
   std::vector<unsigned> rhs;
+  std::pair<short, short> span; // the span of the node (in input, or not set for rules)
 };
 
 // this data structure represents a tree or forest
@@ -76,6 +77,10 @@ class TreeFragment {
   // np keeps track of the nodes (nonterminals) that have been built
   // symp keeps track of the terminal symbols that have been built
   void ParseRec(const StringPiece& tree, bool afs, unsigned cp, unsigned symp, unsigned np, unsigned* pcp, unsigned* psymp, unsigned* pnp);
+
+  // used by constructor to set up span indices for logging/alignment purposes
+  int SetupSpansRec(unsigned cur, int left);
+
  public:
   unsigned root;
   unsigned char frontier_sites;
