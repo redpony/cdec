@@ -332,7 +332,9 @@ struct Tree2StringTranslatorImpl {
             assert(tail.size() == r->Arity());
             HG::Edge* new_edge = hg.AddEdge(r, tail);
             new_edge->feature_values_ = r->GetFeatureValues();
-            // TODO: set i and j
+            auto& inspan = input_tree.nodes[s.task.input_node_idx].span;
+            new_edge->i_ = inspan.first;
+            new_edge->j_ = inspan.second;
             hg.ConnectEdgeToHeadNode(new_edge, &hg.nodes_[node_id]);
           }
           for (const auto& n : s.future_work) {
