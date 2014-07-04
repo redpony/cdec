@@ -28,12 +28,14 @@ TreeFragment::TreeFragment(const StringPiece& tree, bool allow_frontier_sites) {
   unsigned cp = 0, symp = 0, np = 0;
   ParseRec(tree, allow_frontier_sites, cp, symp, np, &cp, &symp, &np);
   root = nodes.back().lhs;
+  if (!allow_frontier_sites) SetupSpansRec(open - 1, 0);
   //cerr << "ROOT: " << TD::Convert(root & ALL_MASK) << endl;
   //DebugRec(open - 1, &cerr); cerr << "\n";
 }
 
 void TreeFragment::DebugRec(unsigned cur, ostream* out) const {
   *out << '(' << TD::Convert(nodes[cur].lhs & ALL_MASK);
+  // *out << "_{" << nodes[cur].span.first << ',' << nodes[cur].span.second << '}';
   for (auto& x : nodes[cur].rhs) {
     *out << ' ';
     if (IsFrontier(x)) {
@@ -45,6 +47,21 @@ void TreeFragment::DebugRec(unsigned cur, ostream* out) const {
     }
   }
   *out << ')';
+}
+
+// returns left + the number of terminals rooted at NT cur,
+int TreeFragment::SetupSpansRec(unsigned cur, int left) {
+  int right = left;
+  for (auto& x : nodes[cur].rhs) {
+    if (IsRHS(x)) {
+      right = SetupSpansRec(x & ALL_MASK, right);
+    } else {
+      ++right;
+    }
+  }
+  nodes[cur].span.first = left;
+  nodes[cur].span.second = right;
+  return right;
 }
 
 // cp is the character index in the tree
