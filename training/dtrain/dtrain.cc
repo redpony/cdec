@@ -438,7 +438,7 @@ main(int argc, char** argv)
         score_t model_diff = it->first.model - it->second.model;
         score_t loss = max(0.0, -1.0 * model_diff);
 
-        if (check && ki == 1) cout << losses[pair_idx] - loss << endl;
+        if (check && ki==repeat-1) cout << losses[pair_idx] - loss << endl;
         pair_idx++;
 
         if (repeat > 1) {
@@ -455,7 +455,7 @@ main(int argc, char** argv)
           margin = fabs(model_diff);
           if (!rank_error && margin < loss_margin) margin_violations++;
         }
-        if (rank_error && ki==1) rank_errors++;
+        if (rank_error && ki==0) rank_errors++;
         if (scale_bleu_diff) eta = it->first.score - it->second.score;
         if (rank_error || margin < loss_margin) {
           SparseVector<weight_t> diff_vec = it->first.f - it->second.f;
