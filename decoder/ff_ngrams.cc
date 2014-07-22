@@ -364,6 +364,9 @@ class NgramDetectorImpl {
     }
   }
 
+  // the cluster file is formatted as follows:
+  // cluster word
+  // cluster word
   void ReadClusterFile(const string& clusters) {
     ReadFile rf(clusters);
     istream& in = *rf.stream();
