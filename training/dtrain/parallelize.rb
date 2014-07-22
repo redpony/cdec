@@ -26,7 +26,6 @@ opts = Trollop::options do
 end
 usage if not opts[:config]&&opts[:shards]&&opts[:input]&&opts[:references]
 
-
 dtrain_dir = File.expand_path File.dirname(__FILE__)
 if not opts[:dtrain_binary]
   dtrain_bin = "#{dtrain_dir}/dtrain"
@@ -56,6 +55,7 @@ refs  = opts[:references]
 use_qsub       = opts[:qsub]
 shards_at_once = opts[:processes_at_once]
 first_input_weights  = opts[:first_input_weights]
+opts[:extra_qsub] = "-l #{opts[:extra_qsub]}" if opts[:extra_qsub]!=""
 
 `mkdir work`
 
@@ -64,8 +64,9 @@ def make_shards(input, refs, num_shards, epoch, rand)
   index = (0..lc-1).to_a
   index.reverse!
   index.shuffle! if rand
-  shard_sz = lc / num_shards
-  leftover = lc % num_shards
+  shard_sz = (lc / num_shards.to_f).round 0
+  leftover = lc - (num_shards*shard_sz)
+  leftover = 0 if leftover < 0
   in_f = File.new input, 'r'
   in_lines = in_f.readlines
   refs_f = File.new refs, 'r'
@@ -74,7 +75,10 @@ def make_shards(input, refs, num_shards, epoch, rand)
   shard_refs_files = []
   in_fns = []
   refs_fns = []
+  new_num_shards = 0
   0.upto(num_shards-1) { |shard|
+    break if index.size==0
+    new_num_shards += 1
     in_fn = "work/shard.#{shard}.#{epoch}.in"
     shard_in = File.new in_fn, 'w+'
     in_fns << in_fn
@@ -98,7 +102,7 @@ def make_shards(input, refs, num_shards, epoch, rand)
   (shard_in_files + shard_refs_files).each do |f| f.close end
   in_f.close
   refs_f.close
-  return [in_fns, refs_fns]
+  return in_fns, refs_fns, new_num_shards
 end
 
 input_files = []
@@ -111,7 +115,7 @@ if predefined_shards
   end
   num_shards = input_files.size
 else
-  input_files, refs_files = make_shards input, refs, num_shards, 0, rand
+  input_files, refs_files, num_shards = make_shards input, refs, num_shards, 0, rand
 end
 
 0.upto(epochs-1) { |epoch|
@@ -158,7 +162,7 @@ end
   `#{cat} work/weights.*.#{epoch} > work/weights_cat`
   `#{ruby} #{lplp_rb} #{lplp_args} #{num_shards} < work/weights_cat > work/weights.#{epoch}`
   if rand and reshard and epoch+1!=epochs
-    input_files, refs_files = make_shards input, refs, num_shards, epoch+1, rand
+    input_files, refs_files, num_shards = make_shards input, refs, num_shards, epoch+1, rand
   end
 }
 
