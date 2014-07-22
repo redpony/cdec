@@ -45,6 +45,7 @@ decoder/logval_test
 decoder/parser_test
 decoder/rule_lexer.cc
 decoder/small_vector_test
+decoder/t2s_test
 decoder/trule_test
 decoder/weights_test
 depcomp
@@ -74,6 +75,7 @@ extractor/*_test
 extractor/compile
 extractor/extract
 extractor/run_extractor
+extractor/sacompile
 gi/clda/src/clda
 gi/markov_al/ml
 gi/pf/align-lexonly
@@ -209,6 +211,7 @@ training/dpmert/sentserver
 training/dtrain/dtrain
 training/latent_svm/latent_svm
 training/minrisk/minrisk_optimize
+training/mira/ada_opt_sm
 training/mira/kbest_mira
 training/mira/kbest_cut_mira
 training/pro/mr_pro_map
@@ -218,4 +221,6 @@ training/utils/lbfgs_test
 training/utils/optimize_test
 training/utils/sentclient
 training/utils/sentserver
+utils/stringlib_test
+word-aligner/binderiv
 word-aligner/fast_align
