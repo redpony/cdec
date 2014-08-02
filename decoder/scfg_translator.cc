@@ -91,7 +91,7 @@ struct SCFGTranslatorImpl {
   SCFGTranslatorImpl(const boost::program_options::variables_map& conf) :
       max_span_limit(conf["scfg_max_span_limit"].as<int>()),
       add_pass_through_rules(conf.count("add_pass_through_rules")),
-      num_pt_features(conf["add_pass_through_features"].as<unsigned int>()),
+      num_pt_features(conf["add_extra_pass_through_features"].as<unsigned int>()),
       goal(conf["goal"].as<string>()),
       default_nt(conf["scfg_default_nt"].as<string>()),
       use_ctf_(conf.count("coarse_to_fine_beam_prune"))
