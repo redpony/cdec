@@ -64,19 +64,21 @@ PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat, 
       const int j = alts[k].dist2next + i;
       const string& src = TD::Convert(alts[k].label);
       if (ss.count(alts[k].label) == 0) {
-        TRulePtr pt;
         if (num_pt_features > 0) {
           int length = static_cast<int>(log(UTF8StringLen(src)) / log(1.6)) + 1;
           if (length > num_pt_features) length = num_pt_features;
           string len_feat = "PassThrough_0=1";
           len_feat[12] += length;
           TRulePtr pt(new TRule("[" + cat + "] ||| " + src + " ||| " + src + " ||| PassThrough=1 " + len_feat));
+          pt->a_.push_back(AlignmentPoint(0,0));
+          AddRule(pt);
+          RefineRule(pt, ctf_level);
         } else {
           TRulePtr pt(new TRule("[" + cat + "] ||| " + src + " ||| " + src + " ||| PassThrough=1 "));
           pt->a_.push_back(AlignmentPoint(0,0));
+          AddRule(pt);
+          RefineRule(pt, ctf_level);
         }
-        AddRule(pt);
-        RefineRule(pt, ctf_level);
         ss.insert(alts[k].label);
       }
     }
