@@ -366,7 +366,7 @@ DecoderImpl::DecoderImpl(po::variables_map& conf, int argc, char** argv, istream
         ("beam_prune3", po::value<double>(), "Optional pass 3")
 
         ("add_pass_through_rules,P","Add rules to translate OOV words as themselves")
-        ("add_extra_pass_through_features,Q",po::value<unsigned int>()->default_value(6), "Add PassThrough{1..N} features, capped at N.")
+        ("add_extra_pass_through_features,Q", po::value<unsigned int>()->default_value(6), "Add PassThrough{1..N} features, capped at N.")
         ("k_best,k",po::value<int>(),"Extract the k best derivations")
         ("unique_k_best,r", "Unique k-best translation list")
         ("aligner,a", "Run as a word/phrase aligner (src & ref required)")
