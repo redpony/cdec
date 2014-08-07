@@ -92,6 +92,7 @@ reconstruct_weights_SOURCES = reconstruct_weights.cc
 reconstruct_weights_LDADD = libutils.a
 atools_SOURCES = atools.cc
 atools_LDADD = libutils.a
+atools_LDFLAGS = $(STATIC_FLAGS)
 
 phmt_SOURCES = phmt.cc
 phmt_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
