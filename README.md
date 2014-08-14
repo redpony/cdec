@@ -35,6 +35,15 @@ Instructions:
     make -j4
     ./tests/run-system-tests.pl
 
+If you get into an error like this in debian based Linux:
+
+    configure: error: No lex (Flex, lex, etc.) program found
+
+Install flex by:
+    
+    sudo apt-get install flex
+
+
 ## Further information
 
 [For more information, refer to the `cdec` documentation](http://www.cdec-decoder.org)
