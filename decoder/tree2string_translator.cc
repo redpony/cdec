@@ -14,6 +14,7 @@
 #include "stringlib.h"
 #include "tdict.h"
 #include "verbose.h"
+#include <unordered_map>
 
 using namespace std;
 

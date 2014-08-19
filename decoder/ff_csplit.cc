@@ -20,6 +20,7 @@
 # include <tr1/unordered_set>
 namespace std { using std::tr1::unordered_set; }
 #endif
+#include <unordered_map>
 using namespace std;
 
 struct BasicCSplitFeaturesImpl {

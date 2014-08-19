@@ -13,6 +13,7 @@
 #include "tdict.h"
 #include "viterbi.h"
 #include "verbose.h"
+#include <unordered_set>
 
 #define foreach         BOOST_FOREACH
 #define reverse_foreach BOOST_REVERSE_FOREACH
