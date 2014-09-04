@@ -3,6 +3,7 @@
 #include "ns_ext.h"
 #include "ns_comb.h"
 #include "ns_cer.h"
+#include "ns_wer.h"
 #include "ns_ssk.h"
 
 #include <cstdio>
@@ -285,6 +286,8 @@ EvaluationMetric* EvaluationMetric::Instance(const string& imetric_id) {
       m = new CombinationMetric(metric_id);
     } else if (metric_id == "CER") {
       m = new CERMetric;
+    } else if (metric_id == "WER") {
+      m = new WERMetric;
     } else {
       cerr << "Implement please: " << metric_id << endl;
       abort();
