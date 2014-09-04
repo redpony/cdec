@@ -1,12 +1,12 @@
-#ifndef _NS_CER_H_
-#define _NS_CER_H_
+#ifndef _NS_WER_H_
+#define _NS_WER_H_
 
 #include "ns.h"
 
-class CERMetric : public EvaluationMetric {
+class WERMetric : public EvaluationMetric {
   friend class EvaluationMetric;
  protected:
-  CERMetric() : EvaluationMetric("CER") {}
+  WERMetric() : EvaluationMetric("WER") {}
 
  public:
   virtual bool IsErrorMetric() const;

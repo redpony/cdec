@@ -14,6 +14,7 @@ libmteval_a_SOURCES = \
   aer_scorer.h \
   comb_scorer.h \
   external_scorer.h \
+  levenshtein.h \
   ns.h \
   ns_cer.h \
   ns_comb.h \
@@ -21,6 +22,7 @@ libmteval_a_SOURCES = \
   ns_ext.h \
   ns_ssk.h \
   ns_ter.h \
+  ns_wer.h \
   scorer.h \
   ter.h \
   aer_scorer.cc \
@@ -34,6 +36,7 @@ libmteval_a_SOURCES = \
   ns_ext.cc \
   ns_ssk.cc \
   ns_ter.cc \
+  ns_wer.cc \
   scorer.cc \
   ter.cc
 
