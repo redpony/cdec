@@ -95,7 +95,8 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
     ("stream,t", "Stream mode (used for realtime)")
     ("weights_output,O",po::value<string>(),"Directory to write weights to")
     ("output_dir,D",po::value<string>(),"Directory to place output in")
-    ("decoder_config,c",po::value<string>(),"Decoder configuration file");
+    ("decoder_config,c",po::value<string>(),"Decoder configuration file")
+	("verbose,v",po::value<bool>()->zero_tokens(),"verbose stderr output");
   po::options_description clo("Command line options");
   clo.add_options()
     ("config", po::value<string>(), "Configuration file")
@@ -621,6 +622,7 @@ int main(int argc, char** argv) {
   
   vector<string> corpus;
 
+  const bool VERBOSE = conf.count("verbose");
   const string metric_name = conf["mt_metric"].as<string>();
   optimizer = conf["optimizer"].as<int>();
   fear_select = conf["fear"].as<int>();
@@ -783,7 +785,8 @@ int main(int argc, char** argv) {
 	  double margin = cur_bad.features.dot(dense_weights) - cur_good.features.dot(dense_weights);
 	  double mt_loss = (cur_good.mt_metric - cur_bad.mt_metric);
 	  const double loss = margin +  mt_loss;
-	  cerr << "LOSS: " << loss << " Margin:" << margin << " BLEUL:" << mt_loss << " " << cur_bad.features.dot(dense_weights) << " " << cur_good.features.dot(dense_weights) <<endl;
+	  cerr << "LOSS: " << loss << " Margin:" << margin << " BLEUL:" << mt_loss << endl;
+	  if (VERBOSE) cerr << cur_bad.features.dot(dense_weights) << " " << cur_good.features.dot(dense_weights) << endl;
 	  if (loss > 0.0 || !checkloss) {
 	    SparseVector<double> diff = cur_good.features;
 	    diff -= cur_bad.features;	    
@@ -920,6 +923,7 @@ int main(int argc, char** argv) {
 
 			lambdas += (cur_pair[1]->features) * step_size;
 			lambdas -= (cur_pair[0]->features) * step_size;
+			if (VERBOSE) cerr << " Lambdas " << lambdas << endl;
 
 			//reload weights based on update
 			dense_weights.clear();

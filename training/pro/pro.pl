@@ -79,6 +79,7 @@ if (GetOptions(
 	"help" => \$help,
 	"reg=f" => \$reg,
 	"reg-previous=f" => \$reg_previous,
+  "pmem=s" => \$pmem,
 	"output-dir=s" => \$dir,
 ) == 0 || @ARGV!=0 || $help) {
 	print_help();
