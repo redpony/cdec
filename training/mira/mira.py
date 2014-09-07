@@ -143,6 +143,12 @@ def main():
   parser.add_argument('--pass-suffix', 
                       help='multipass decoding iteration. see documentation '
                            'at www.cdec-decoder.org for more information')
+  parser.add_argument('--qsub',
+                      help='use qsub', action='store_true')
+  parser.add_argument('--pmem',
+                      help='memory for qsub', type=str, default='5G')
+  parser.add_argument('-v', '--verbose',
+                      help='more verbose mira optimizers')
   args = parser.parse_args()
 
   args.metric = args.metric.upper()
@@ -315,6 +321,8 @@ def split_devset(dev, outdir):
 
 def optimize(args, script_dir, dev_size):
   parallelize = script_dir+'/../utils/parallelize.pl'
+  if args.qsub:
+    parallelize += " -p %s"%args.pmem
   decoder = script_dir+'/kbest_cut_mira'
   (source, refs) = split_devset(args.devset, args.output_dir)
   port = random.randint(15000,50000)
@@ -353,10 +361,15 @@ def optimize(args, script_dir, dev_size):
       decoder_cmd += ' -a'
     if not args.no_pseudo:
       decoder_cmd += ' -e'
+    if args.verbose:
+      decoder_cmd += ' -v'
     
-    #always use fork 
-    parallel_cmd = '{0} --use-fork -e {1} -j {2} --'.format(
-                    parallelize, logdir, args.jobs)
+    if args.qsub:
+      parallel_cmd = '{0} -e {1} -j {2} --'.format(
+                      parallelize, logdir, args.jobs)
+    else:
+      parallel_cmd = '{0} --use-fork -e {1} -j {2} --'.format(
+                      parallelize, logdir, args.jobs)
     
     cmd = parallel_cmd + ' ' + decoder_cmd
     logging.info('OPTIMIZATION COMMAND: {}'.format(cmd))

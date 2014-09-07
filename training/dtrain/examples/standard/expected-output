@@ -4,7 +4,8 @@ Reading ./nc-wmt11.en.srilm.gz
 ----5---10---15---20---25---30---35---40---45---50---55---60---65---70---75---80---85---90---95--100
 ****************************************************************************************************
   Example feature: Shape_S00000_T00000
-Seeding random number sequence to 4138446869
+T=1 I=1 D=1
+Seeding random number sequence to 2327685089
 
 dtrain
 Parameters:
@@ -36,87 +37,87 @@ Iteration #1 of 3.
  . 10
 Stopping after 10 input sentences.
 WEIGHTS
-              Glue = -80.3
-       WordPenalty = -51.247
-     LanguageModel = +282.46
- LanguageModel_OOV = -85.8
-     PhraseModel_0 = -100.06
-     PhraseModel_1 = -98.692
-     PhraseModel_2 = -9.4958
-     PhraseModel_3 = +18.535
-     PhraseModel_4 = +62.35
-     PhraseModel_5 = +7
-     PhraseModel_6 = +31.4
-       PassThrough = -126.5
+              Glue = +6.9
+       WordPenalty = -46.426
+     LanguageModel = +535.12
+ LanguageModel_OOV = -123.5
+     PhraseModel_0 = -160.73
+     PhraseModel_1 = -350.13
+     PhraseModel_2 = -187.81
+     PhraseModel_3 = +172.04
+     PhraseModel_4 = +0.90108
+     PhraseModel_5 = +21.6
+     PhraseModel_6 = +67.2
+       PassThrough = -149.7
         ---
-       1best avg score: 0.25631 (+0.25631)
- 1best avg model score: -4843.6 (-4843.6)
-           avg # pairs: 744.4
+       1best avg score: 0.23327 (+0.23327)
+ 1best avg model score: -9084.9 (-9084.9)
+           avg # pairs: 780.7
         avg # rank err: 0 (meaningless)
      avg # margin viol: 0
        k-best loss imp: 100%
-    non0 feature count: 1274
+    non0 feature count: 1389
            avg list sz: 91.3
-           avg f count: 143.72
-(time 0.4 min, 2.4 s/S)
+           avg f count: 146.2
+(time 0.37 min, 2.2 s/S)
 
 Iteration #2 of 3.
  . 10
 WEIGHTS
-              Glue = -117.4
-       WordPenalty = -99.584
-     LanguageModel = +395.05
- LanguageModel_OOV = -136.8
-     PhraseModel_0 = +40.614
-     PhraseModel_1 = -123.29
-     PhraseModel_2 = -152
-     PhraseModel_3 = -161.13
-     PhraseModel_4 = -76.379
-     PhraseModel_5 = +39.1
-     PhraseModel_6 = +137.7
-       PassThrough = -162.1
+              Glue = -43
+       WordPenalty = -22.019
+     LanguageModel = +591.53
+ LanguageModel_OOV = -252.1
+     PhraseModel_0 = -120.21
+     PhraseModel_1 = -43.589
+     PhraseModel_2 = +73.53
+     PhraseModel_3 = +113.7
+     PhraseModel_4 = -223.81
+     PhraseModel_5 = +64
+     PhraseModel_6 = +54.8
+       PassThrough = -331.1
         ---
-       1best avg score: 0.26751 (+0.011198)
- 1best avg model score: -10061 (-5216.9)
-           avg # pairs: 639.1
+       1best avg score: 0.29568 (+0.062413)
+ 1best avg model score: -15879 (-6794.1)
+           avg # pairs: 566.1
         avg # rank err: 0 (meaningless)
      avg # margin viol: 0
        k-best loss imp: 100%
-    non0 feature count: 1845
+    non0 feature count: 1931
            avg list sz: 91.3
-           avg f count: 139.88
-(time 0.35 min, 2.1 s/S)
+           avg f count: 139.89
+(time 0.33 min, 2 s/S)
 
 Iteration #3 of 3.
  . 10
 WEIGHTS
-              Glue = -101.1
-       WordPenalty = -139.97
-     LanguageModel = +327.98
- LanguageModel_OOV = -234.7
-     PhraseModel_0 = -144.49
-     PhraseModel_1 = -263.88
-     PhraseModel_2 = -149.25
-     PhraseModel_3 = -38.805
-     PhraseModel_4 = +50.575
-     PhraseModel_5 = -52.4
-     PhraseModel_6 = +41.6
-       PassThrough = -230.2
+              Glue = -44.3
+       WordPenalty = -131.85
+     LanguageModel = +230.91
+ LanguageModel_OOV = -285.4
+     PhraseModel_0 = -194.27
+     PhraseModel_1 = -294.83
+     PhraseModel_2 = -92.043
+     PhraseModel_3 = -140.24
+     PhraseModel_4 = +85.613
+     PhraseModel_5 = +238.1
+     PhraseModel_6 = +158.7
+       PassThrough = -359.6
         ---
-       1best avg score: 0.36222 (+0.094717)
- 1best avg model score: -17416 (-7355.5)
-           avg # pairs: 661.2
+       1best avg score: 0.37375 (+0.078067)
+ 1best avg model score: -14519 (+1359.7)
+           avg # pairs: 545.4
         avg # rank err: 0 (meaningless)
      avg # margin viol: 0
        k-best loss imp: 100%
-    non0 feature count: 2163
+    non0 feature count: 2218
            avg list sz: 91.3
-           avg f count: 132.53
-(time 0.33 min, 2 s/S)
+           avg f count: 137.77
+(time 0.35 min, 2.1 s/S)
 
 Writing weights file to '-' ...
 done
 
 ---
-Best iteration: 3 [SCORE 'fixed_stupid_bleu'=0.36222].
-This took 1.0833 min.
+Best iteration: 3 [SCORE 'fixed_stupid_bleu'=0.37375].
+This took 1.05 min.

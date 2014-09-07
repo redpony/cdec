@@ -24,6 +24,7 @@
 #include "ff_charset.h"
 #include "ff_wordset.h"
 #include "ff_external.h"
+#include "ff_lexical.h"
 
 
 void register_feature_functions() {
@@ -39,13 +40,13 @@ void register_feature_functions() {
   RegisterFF<SourceWordPenalty>();
   RegisterFF<ArityPenalty>();
   RegisterFF<BLEUModel>();
+  RegisterFF<LexicalFeatures>();
 
   //TODO: use for all features the new Register which requires static FF::usage(false,false) give name
   ff_registry.Register("SpanFeatures", new FFFactory<SpanFeatures>());
   ff_registry.Register("NgramFeatures", new FFFactory<NgramDetector>());
   ff_registry.Register("RuleContextFeatures", new FFFactory<RuleContextFeatures>());
   ff_registry.Register("RuleIdentityFeatures", new FFFactory<RuleIdentityFeatures>());
-  ff_registry.Register("RuleWordAlignmentFeatures", new FFFactory<RuleWordAlignmentFeatures>());
   ff_registry.Register("ParseMatchFeatures", new FFFactory<ParseMatchFeatures>);
   ff_registry.Register("SoftSyntaxFeatures", new FFFactory<SoftSyntaxFeatures>);
   ff_registry.Register("SoftSyntaxFeaturesMindist", new FFFactory<SoftSyntaxFeaturesMindist>);

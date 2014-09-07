@@ -50,6 +50,7 @@ libcdec_a_SOURCES = \
   ff_external.h \
   ff_factory.h \
   ff_klm.h \
+	ff_lexical.h \
   ff_lm.h \
   ff_ngrams.h \
   ff_parse_match.h \

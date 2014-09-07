@@ -28,7 +28,7 @@ struct GlueGrammar : public TextGrammar {
 };
 
 struct PassThroughGrammar : public TextGrammar {
-  PassThroughGrammar(const Lattice& input, const std::string& cat, const unsigned int ctf_level=0);
+  PassThroughGrammar(const Lattice& input, const std::string& cat, const unsigned int ctf_level=0, const unsigned int num_pt_features=0);
   virtual bool HasRuleForSpan(int i, int j, int distance) const;
 };
 
@@ -56,7 +56,7 @@ bool GlueGrammar::HasRuleForSpan(int i, int /* j */, int /* distance */) const {
   return (i == 0);
 }
 
-PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat, const unsigned int ctf_level) {
+PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat, const unsigned int ctf_level, const unsigned num_pt_features) {
   unordered_set<WordID> ss;
   for (int i = 0; i < input.size(); ++i) {
     const vector<LatticeArc>& alts = input[i];
@@ -64,14 +64,21 @@ PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat, 
       const int j = alts[k].dist2next + i;
       const string& src = TD::Convert(alts[k].label);
       if (ss.count(alts[k].label) == 0) {
-        int length = static_cast<int>(log(UTF8StringLen(src)) / log(1.6)) + 1;
-        if (length > 6) length = 6;
-        string len_feat = "PassThrough_0=1";
-        len_feat[12] += length;
-        TRulePtr pt(new TRule("[" + cat + "] ||| " + src + " ||| " + src + " ||| PassThrough=1 " + len_feat));
-        pt->a_.push_back(AlignmentPoint(0,0));
-        AddRule(pt);
-        RefineRule(pt, ctf_level);
+        if (num_pt_features > 0) {
+          int length = static_cast<int>(log(UTF8StringLen(src)) / log(1.6)) + 1;
+          if (length > num_pt_features) length = num_pt_features;
+          string len_feat = "PassThrough_0=1";
+          len_feat[12] += length;
+          TRulePtr pt(new TRule("[" + cat + "] ||| " + src + " ||| " + src + " ||| PassThrough=1 " + len_feat));
+          pt->a_.push_back(AlignmentPoint(0,0));
+          AddRule(pt);
+          RefineRule(pt, ctf_level);
+        } else {
+          TRulePtr pt(new TRule("[" + cat + "] ||| " + src + " ||| " + src + " ||| PassThrough=1 "));
+          pt->a_.push_back(AlignmentPoint(0,0));
+          AddRule(pt);
+          RefineRule(pt, ctf_level);
+        }
         ss.insert(alts[k].label);
       }
     }
@@ -86,6 +93,7 @@ struct SCFGTranslatorImpl {
   SCFGTranslatorImpl(const boost::program_options::variables_map& conf) :
       max_span_limit(conf["scfg_max_span_limit"].as<int>()),
       add_pass_through_rules(conf.count("add_pass_through_rules")),
+      num_pt_features(conf["add_extra_pass_through_features"].as<unsigned int>()),
       goal(conf["goal"].as<string>()),
       default_nt(conf["scfg_default_nt"].as<string>()),
       use_ctf_(conf.count("coarse_to_fine_beam_prune"))
@@ -140,6 +148,7 @@ struct SCFGTranslatorImpl {
 
   const int max_span_limit;
   const bool add_pass_through_rules;
+  const unsigned int num_pt_features;
   const string goal;
   const string default_nt;
   const bool use_ctf_;
@@ -187,7 +196,7 @@ struct SCFGTranslatorImpl {
     smeta->SetSourceLength(lattice.size());
     if (add_pass_through_rules){
       if (!SILENT) cerr << "Adding pass through grammar" << endl;
-      PassThroughGrammar* g = new PassThroughGrammar(lattice, default_nt, ctf_iterations_);
+      PassThroughGrammar* g = new PassThroughGrammar(lattice, default_nt, ctf_iterations_, num_pt_features);
       g->SetGrammarName("PassThrough");
       glist.push_back(GrammarPtr(g));
     }
