@@ -1,5 +1,5 @@
 AC_CONFIG_MACRO_DIR([m4])
-AC_INIT([cdec],[2014-06-15])
+AC_INIT([cdec],[2014-09-08])
 AC_CONFIG_SRCDIR([decoder/cdec.cc])
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(config.h)
@@ -15,6 +15,7 @@ CXXFLAGS=$OLD_CXXFLAGS
 AX_CXX_COMPILE_STDCXX_11([],[mandatory])
 AC_LANG_CPLUSPLUS
 AC_OPENMP
+AC_CHECK_LIB(rt, clock_gettime)
 BOOST_REQUIRE([1.44])
 BOOST_FILESYSTEM
 BOOST_PROGRAM_OPTIONS
@@ -25,7 +26,6 @@ BOOST_TEST
 BOOST_THREADS
 AM_PATH_PYTHON
 AC_CHECK_HEADER(dlfcn.h,AC_DEFINE(HAVE_DLFCN_H))
-AC_CHECK_LIB(rt, clock_gettime)
 AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_HEADERS(zlib.h,
     AC_CHECK_LIB(z, gzread,[
@@ -54,7 +54,8 @@ AM_CONDITIONAL([MPI], [test "x$mpi" = xyes])
 if test "x$mpi" = xyes
 then
   AC_DEFINE([HAVE_MPI], [1], [flag for MPI])
-  LIBS="$LIBS -lboost_mpi"
+  BOOST_MPI
+  #LIBS="$LIBS -lboost_mpi"
 fi
 
 AM_CONDITIONAL([HAVE_METEOR], false)
