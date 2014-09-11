@@ -147,7 +147,7 @@ void Weights::ShowLargestFeatures(const vector<weight_t>& w) {
   vector<int> fnums(w.size());
   for (unsigned i = 0; i < w.size(); ++i)
     fnums[i] = i;
-  int nf = FD::NumFeats();
+  int nf = w.size();
   if (nf > 10) nf = 10;
   vector<int>::iterator mid = fnums.begin();
   mid += nf;
