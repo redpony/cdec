@@ -52,8 +52,10 @@ while(<F>) {
     }
     next;
   }
-  my @fs = split /\s+/, $sf;
-  my @es = split /\s+/, $se;
+  my @fs = ();
+  my @es = ();
+  if (defined $sf && length($sf) > 0) { @fs = split /\s+/, $sf; }
+  if (defined $se && length($se) > 0) { @es = split /\s+/, $se; }
   my $flen = scalar @fs;
   my $elen = scalar @es;
   if ($flen == 0) {
@@ -114,7 +116,7 @@ while(<F>) {
   if ($lines % 100000 == 0) { print STDERR " [$lines]\n"; }
   elsif ($lines % 2500 == 0) { print STDERR "."; }
   my ($sf, $se, @d) = split / \|\|\| /;
-  if (scalar @d != 0 or !defined $se) { next; }
+  if (!defined $se) { next; }
   my @fs = split /\s+/, $sf;
   my @es = split /\s+/, $se;
   my $flen = scalar @fs;

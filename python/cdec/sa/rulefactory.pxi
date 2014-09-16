@@ -1370,8 +1370,12 @@ cdef class HieroCachingRuleFactory:
     cdef extract_phrases(self, int e_low, int e_high, int* e_gap_low, int* e_gap_high, int* e_links_low, int num_gaps,
                         int f_low, int f_high, int* f_gap_low, int* f_gap_high, int* f_links_low, 
                         int sent_id, int e_sent_len, int e_sent_start):
-        cdef int i, j, k, m, n, *e_gap_order, e_x_low, e_x_high, e_x_gap_low, e_x_gap_high
-        cdef int *e_gaps1, *e_gaps2, len1, len2, step, num_chunks
+        cdef int i, j, k, m, n
+        cdef int *e_gap_order
+        cdef int e_x_low, e_x_high, e_x_gap_low, e_x_gap_high
+        cdef int *e_gaps1
+        cdef int *e_gaps2
+        cdef int len1, len2, step, num_chunks
         cdef IntList ephr_arr
         cdef result
 
@@ -1487,8 +1491,16 @@ cdef class HieroCachingRuleFactory:
         return ret
                 
     cdef extract(self, Phrase phrase, Matching* matching, int* chunklen, int num_chunks):
-        cdef int* sent_links, *e_links_low, *e_links_high, *f_links_low, *f_links_high
-        cdef int *f_gap_low, *f_gap_high, *e_gap_low, *e_gap_high, num_gaps, gap_start
+        cdef int *sent_links
+        cdef int *e_links_low
+        cdef int *e_links_high
+        cdef int *f_links_low
+        cdef int *f_links_high
+        cdef int *f_gap_low
+        cdef int *f_gap_high
+        cdef int *e_gap_low
+        cdef int *e_gap_high
+        cdef int num_gaps, gap_start
         cdef int i, j, k, e_i, f_i, num_links, num_aligned_chunks, met_constraints, x
         cdef int f_low, f_high, e_low, e_high, f_back_low, f_back_high
         cdef int e_sent_start, e_sent_end, f_sent_start, f_sent_end, e_sent_len, f_sent_len
