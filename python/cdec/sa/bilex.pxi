@@ -71,9 +71,16 @@ cdef class BiLex:
 
     cdef compute_from_data(self, SuffixArray fsa, DataArray eda, Alignment aa):
         cdef int sent_id, num_links, l, i, j, f_i, e_j, I, J, V_E, V_F, num_pairs
-        cdef int *fsent, *esent, *alignment, *links, *ealigned, *faligned
+        cdef int *fsent
+        cdef int *esent
+        cdef int *alignment
+        cdef int *links
+        cdef int *ealigned
+        cdef int *faligned
         cdef _node** dict
-        cdef int *fmargin, *emargin, *count
+        cdef int *fmargin
+        cdef int *emargin
+        cdef int *count
         cdef int null_word
 
         null_word = 0

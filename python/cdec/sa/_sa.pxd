@@ -28,7 +28,9 @@ cdef class FeatureVector:
 
 cdef class Phrase:
     cdef int *syms
-    cdef int n, *varpos, n_vars
+    cdef int n,
+    cdef int *varpos,
+    cdef n_vars
     cdef public int chunkpos(self, int k)
     cdef public int chunklen(self, int k)
 
