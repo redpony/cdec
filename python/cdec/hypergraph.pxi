@@ -152,6 +152,21 @@ cdef class Hypergraph:
                 yield unicode(GetString(hypos[0][k].words).c_str(), 'utf8')
         finally:
             del hypos
+    
+    def sample_hypotheses(self, unsigned n):
+        """hg.sample_string(n) -> Sample of n hypotheses from the hypergraph.
+        Generates (sample_string, dot, fmap)"""
+        cdef vector[hypergraph.Hypothesis]* hypos = new vector[hypergraph.Hypothesis]()
+        cdef SparseVector fmap = None
+        hypergraph.sample_hypotheses(self.hg[0], n, self._rng(), hypos)
+        cdef unsigned k
+        try:
+            for k in range(hypos.size()):
+                fmap = SparseVector.__new__(SparseVector)
+                fmap.vector = new FastSparseVector[weight_t](hypos[0][k].fmap)
+                yield unicode(GetString(hypos[0][k].words).c_str(), 'utf8'), hypos[0][k].model_score.as_float(), fmap
+        finally:
+            del hypos
 
     def sample_trees(self, unsigned n):
        """hg.sample_trees(n) -> Sample of n trees from the hypergraph."""

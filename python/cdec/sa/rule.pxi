@@ -154,6 +154,25 @@ cdef class Phrase:
     property words:
         def __get__(self):
             return [sym_tostring(w) for w in self if not sym_isvar(w)]
+    
+    def iterspans(self, nt_flag = False, to_str = True):
+        """iterate over (terminal and nonterminal) spans, it generates pairs of the kind (terminal span, !nt_flag) or (nonterminal, nt_flag)
+        Example: iterspans(False, False) --> ([-1], False), ([2,3], True), ([-1], False), ([4], True), ([-1], False)
+        for the sequence -1 2 3 -1 4 -1"""
+        span = []
+        cdef int i, s
+        get_sym = lambda sym : sym_tostring(sym) if to_str else lambda sym : sym
+        for i from 0 <= i < self.n:
+            s = self.syms[i]
+            if sym_isvar(s):
+                if len(span):
+                    yield (span, not nt_flag)
+                    span = []
+                yield ([get_sym(s)], nt_flag)
+            else:
+                span.append(get_sym(s))
+        if len(span):
+            yield (span, not nt_flag)
 
 cdef class Rule:
 
