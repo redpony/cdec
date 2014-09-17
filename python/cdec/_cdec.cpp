@@ -453,7 +453,7 @@ static const char *__pyx_f[] = {
   "cdec/hypergraph.pxi",
   "cdec/lattice.pxi",
   "cdec/mteval.pxi",
-  "cdec/stringsource",
+  "stringsource",
   "cdec/sa/_sa.pxd",
 };
 
@@ -497,20 +497,21 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_11_unique_kbest;
 struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_12_unique_kbest_trees;
 struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_13_unique_kbest_features;
 struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_14_sample;
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees;
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__;
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses;
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees;
 struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_17___get__;
 struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__;
 struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__;
 struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_20___get__;
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__;
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot;
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines;
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__;
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__;
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__;
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot;
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines;
 struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__;
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config;
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__;
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr;
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__;
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config;
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__;
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr;
 struct __pyx_opt_args_4cdec_5_cdec_as_str;
 
 /* "cdec/_cdec.pyx":6
@@ -608,7 +609,7 @@ struct __pyx_obj_4cdec_2sa_3_sa_Rule {
 };
 
 
-/* "vectors.pxi":3
+/* "cdec/vectors.pxi":3
  * from cython.operator cimport preincrement as pinc
  * 
  * cdef class DenseVector:             # <<<<<<<<<<<<<<
@@ -622,7 +623,7 @@ struct __pyx_obj_4cdec_5_cdec_DenseVector {
 };
 
 
-/* "vectors.pxi":48
+/* "cdec/vectors.pxi":48
  *         return sparse
  * 
  * cdef class SparseVector:             # <<<<<<<<<<<<<<
@@ -635,7 +636,7 @@ struct __pyx_obj_4cdec_5_cdec_SparseVector {
 };
 
 
-/* "grammar.pxi":8
+/* "cdec/grammar.pxi":8
  *     return ' '.join(w.encode('utf8') if isinstance(w, unicode) else str(w) for w in phrase)
  * 
  * cdef class NT:             # <<<<<<<<<<<<<<
@@ -649,7 +650,7 @@ struct __pyx_obj_4cdec_5_cdec_NT {
 };
 
 
-/* "grammar.pxi":21
+/* "cdec/grammar.pxi":21
  *         return '[%s]' % self.cat
  * 
  * cdef class NTRef:             # <<<<<<<<<<<<<<
@@ -662,7 +663,7 @@ struct __pyx_obj_4cdec_5_cdec_NTRef {
 };
 
 
-/* "grammar.pxi":49
+/* "cdec/grammar.pxi":49
  *     return TRule(lhs, f, e, scores, a)
  * 
  * cdef class TRule:             # <<<<<<<<<<<<<<
@@ -675,7 +676,7 @@ struct __pyx_obj_4cdec_5_cdec_TRule {
 };
 
 
-/* "grammar.pxi":183
+/* "cdec/grammar.pxi":183
  *                 _phrase(self.f), _phrase(self.e), scores)
  * 
  * cdef class MRule(TRule):             # <<<<<<<<<<<<<<
@@ -687,7 +688,7 @@ struct __pyx_obj_4cdec_5_cdec_MRule {
 };
 
 
-/* "grammar.pxi":199
+/* "cdec/grammar.pxi":199
  *         super(MRule, self).__init__(lhs, rhs, e, scores, None)
  * 
  * cdef class Grammar:             # <<<<<<<<<<<<<<
@@ -700,7 +701,7 @@ struct __pyx_obj_4cdec_5_cdec_Grammar {
 };
 
 
-/* "grammar.pxi":223
+/* "cdec/grammar.pxi":223
  *             self.grammar.get().SetGrammarName(name)
  * 
  * cdef class TextGrammar(Grammar):             # <<<<<<<<<<<<<<
@@ -712,7 +713,7 @@ struct __pyx_obj_4cdec_5_cdec_TextGrammar {
 };
 
 
-/* "hypergraph.pxi":4
+/* "cdec/hypergraph.pxi":4
  * cimport kbest
  * 
  * cdef class Hypergraph:             # <<<<<<<<<<<<<<
@@ -727,7 +728,7 @@ struct __pyx_obj_4cdec_5_cdec_Hypergraph {
 };
 
 
-/* "hypergraph.pxi":244
+/* "cdec/hypergraph.pxi":259
  *         return vector
  * 
  * cdef class HypergraphEdge:             # <<<<<<<<<<<<<<
@@ -743,7 +744,7 @@ struct __pyx_obj_4cdec_5_cdec_HypergraphEdge {
 };
 
 
-/* "hypergraph.pxi":294
+/* "cdec/hypergraph.pxi":309
  *         raise NotImplemented('comparison not implemented for HypergraphEdge')
  * 
  * cdef class HypergraphNode:             # <<<<<<<<<<<<<<
@@ -758,7 +759,7 @@ struct __pyx_obj_4cdec_5_cdec_HypergraphNode {
 };
 
 
-/* "lattice.pxi":3
+/* "cdec/lattice.pxi":3
  * cimport lattice
  * 
  * cdef class Lattice:             # <<<<<<<<<<<<<<
@@ -771,7 +772,7 @@ struct __pyx_obj_4cdec_5_cdec_Lattice {
 };
 
 
-/* "mteval.pxi":12
+/* "cdec/mteval.pxi":12
  *         return stats
  * 
  * cdef class Candidate:             # <<<<<<<<<<<<<<
@@ -785,7 +786,7 @@ struct __pyx_obj_4cdec_5_cdec_Candidate {
 };
 
 
-/* "mteval.pxi":26
+/* "cdec/mteval.pxi":26
  *             return fmap
  * 
  * cdef class SufficientStats:             # <<<<<<<<<<<<<<
@@ -799,7 +800,7 @@ struct __pyx_obj_4cdec_5_cdec_SufficientStats {
 };
 
 
-/* "mteval.pxi":68
+/* "cdec/mteval.pxi":68
  *         return result
  * 
  * cdef class CandidateSet:             # <<<<<<<<<<<<<<
@@ -814,7 +815,7 @@ struct __pyx_obj_4cdec_5_cdec_CandidateSet {
 };
 
 
-/* "mteval.pxi":103
+/* "cdec/mteval.pxi":103
  *         self.cs.AddKBestCandidates(hypergraph.hg[0], k, self.scorer.get())
  * 
  * cdef class SegmentEvaluator:             # <<<<<<<<<<<<<<
@@ -828,7 +829,7 @@ struct __pyx_obj_4cdec_5_cdec_SegmentEvaluator {
 };
 
 
-/* "mteval.pxi":124
+/* "cdec/mteval.pxi":124
  *         return CandidateSet(self)
  * 
  * cdef class Scorer:             # <<<<<<<<<<<<<<
@@ -842,7 +843,7 @@ struct __pyx_obj_4cdec_5_cdec_Scorer {
 };
 
 
-/* "mteval.pxi":179
+/* "cdec/mteval.pxi":179
  *         out.fields[i] = ss[i]
  * 
  * cdef class Metric:             # <<<<<<<<<<<<<<
@@ -869,7 +870,7 @@ struct __pyx_obj_4cdec_5_cdec_Decoder {
 };
 
 
-/* "vectors.pxi":32
+/* "cdec/vectors.pxi":32
  *         self.vector[0][fid] = value
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -885,7 +886,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct____iter__ {
 };
 
 
-/* "vectors.pxi":72
+/* "cdec/vectors.pxi":72
  *         self.vector.set_value(fid, value)
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -902,7 +903,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_1___iter__ {
 };
 
 
-/* "grammar.pxi":5
+/* "cdec/grammar.pxi":5
  * import cdec.sa._sa as _sa
  * 
  * def _phrase(phrase):             # <<<<<<<<<<<<<<
@@ -915,7 +916,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_2__phrase {
 };
 
 
-/* "grammar.pxi":6
+/* "cdec/grammar.pxi":6
  * 
  * def _phrase(phrase):
  *     return ' '.join(w.encode('utf8') if isinstance(w, unicode) else str(w) for w in phrase)             # <<<<<<<<<<<<<<
@@ -932,7 +933,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_3_genexpr {
 };
 
 
-/* "grammar.pxi":137
+/* "cdec/grammar.pxi":137
  * 
  *     property a:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -949,7 +950,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_4___get__ {
 };
 
 
-/* "grammar.pxi":178
+/* "cdec/grammar.pxi":178
  *             self.rule.get().lhs_ = -TDConvert((<NT> lhs).cat)
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
@@ -962,7 +963,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_5___str__ {
 };
 
 
-/* "grammar.pxi":179
+/* "cdec/grammar.pxi":179
  * 
  *     def __str__(self):
  *         scores = ' '.join('%s=%s' % feat for feat in self.scores)             # <<<<<<<<<<<<<<
@@ -979,7 +980,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_6_genexpr {
 };
 
 
-/* "grammar.pxi":205
+/* "cdec/grammar.pxi":205
  *         del self.grammar
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -998,7 +999,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_7___iter__ {
 };
 
 
-/* "hypergraph.pxi":49
+/* "cdec/hypergraph.pxi":49
  *         return unicode(hypergraph.JoshuaVisualizationString(self.hg[0]).c_str(), 'utf8')
  * 
  *     def kbest(self, size):             # <<<<<<<<<<<<<<
@@ -1017,7 +1018,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_8_kbest {
 };
 
 
-/* "hypergraph.pxi":62
+/* "cdec/hypergraph.pxi":62
  *             del derivations
  * 
  *     def kbest_trees(self, size):             # <<<<<<<<<<<<<<
@@ -1040,7 +1041,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_9_kbest_trees {
 };
 
 
-/* "hypergraph.pxi":81
+/* "cdec/hypergraph.pxi":81
  *             del e_derivations
  * 
  *     def kbest_features(self, size):             # <<<<<<<<<<<<<<
@@ -1060,7 +1061,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_10_kbest_features {
 };
 
 
-/* "hypergraph.pxi":97
+/* "cdec/hypergraph.pxi":97
  *             del derivations
  * 
  *     def unique_kbest(self, size):             # <<<<<<<<<<<<<<
@@ -1079,7 +1080,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_11_unique_kbest {
 };
 
 
-/* "hypergraph.pxi":110
+/* "cdec/hypergraph.pxi":110
  *             del derivations
  * 
  *     def unique_kbest_trees(self, size):             # <<<<<<<<<<<<<<
@@ -1102,7 +1103,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_12_unique_kbest_trees {
 };
 
 
-/* "hypergraph.pxi":129
+/* "cdec/hypergraph.pxi":129
  *             del e_derivations
  * 
  *     def unique_kbest_features(self, size):             # <<<<<<<<<<<<<<
@@ -1122,7 +1123,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_13_unique_kbest_features {
 };
 
 
-/* "hypergraph.pxi":145
+/* "cdec/hypergraph.pxi":145
  *             del derivations
  * 
  *     def sample(self, unsigned n):             # <<<<<<<<<<<<<<
@@ -1140,14 +1141,33 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_14_sample {
 };
 
 
-/* "hypergraph.pxi":156
+/* "cdec/hypergraph.pxi":156
+ *             del hypos
+ * 
+ *     def sample_hypotheses(self, unsigned n):             # <<<<<<<<<<<<<<
+ *         """hg.sample_string(n) -> Sample of n hypotheses from the hypergraph.
+ *         Generates (sample_string, dot, fmap)"""
+ */
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses {
+  PyObject_HEAD
+  struct __pyx_obj_4cdec_5_cdec_SparseVector *__pyx_v_fmap;
+  std::vector<HypergraphSampler::Hypothesis>  *__pyx_v_hypos;
+  unsigned int __pyx_v_k;
+  unsigned int __pyx_v_n;
+  struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self;
+  size_t __pyx_t_0;
+  unsigned int __pyx_t_1;
+};
+
+
+/* "cdec/hypergraph.pxi":171
  *             del hypos
  * 
  *     def sample_trees(self, unsigned n):             # <<<<<<<<<<<<<<
  *        """hg.sample_trees(n) -> Sample of n trees from the hypergraph."""
  *        cdef vector[string]* trees = new vector[string]()
  */
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees {
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees {
   PyObject_HEAD
   unsigned int __pyx_v_k;
   unsigned int __pyx_v_n;
@@ -1158,28 +1178,12 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees {
 };
 
 
-/* "hypergraph.pxi":209
+/* "cdec/hypergraph.pxi":224
  * 
  *     property edges:
  *         def __get__(self):             # <<<<<<<<<<<<<<
  *             cdef unsigned i
  *             for i in range(self.hg.edges_.size()):
- */
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ {
-  PyObject_HEAD
-  unsigned int __pyx_v_i;
-  struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self;
-  size_t __pyx_t_0;
-  unsigned int __pyx_t_1;
-};
-
-
-/* "hypergraph.pxi":215
- * 
- *     property nodes:
- *         def __get__(self):             # <<<<<<<<<<<<<<
- *             cdef unsigned i
- *             for i in range(self.hg.nodes_.size()):
  */
 struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_17___get__ {
   PyObject_HEAD
@@ -1190,14 +1194,30 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_17___get__ {
 };
 
 
-/* "hypergraph.pxi":264
+/* "cdec/hypergraph.pxi":230
+ * 
+ *     property nodes:
+ *         def __get__(self):             # <<<<<<<<<<<<<<
+ *             cdef unsigned i
+ *             for i in range(self.hg.nodes_.size()):
+ */
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ {
+  PyObject_HEAD
+  unsigned int __pyx_v_i;
+  struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self;
+  size_t __pyx_t_0;
+  unsigned int __pyx_t_1;
+};
+
+
+/* "cdec/hypergraph.pxi":279
  * 
  *     property tail_nodes:
  *         def __get__(self):             # <<<<<<<<<<<<<<
  *             cdef unsigned i
  *             for i in range(self.edge.tail_nodes_.size()):
  */
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ {
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__ {
   PyObject_HEAD
   unsigned int __pyx_v_i;
   struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *__pyx_v_self;
@@ -1206,28 +1226,12 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ {
 };
 
 
-/* "hypergraph.pxi":308
+/* "cdec/hypergraph.pxi":323
  * 
  *     property in_edges:
  *         def __get__(self):             # <<<<<<<<<<<<<<
  *             cdef unsigned i
  *             for i in range(self.node.in_edges_.size()):
- */
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__ {
-  PyObject_HEAD
-  unsigned int __pyx_v_i;
-  struct __pyx_obj_4cdec_5_cdec_HypergraphNode *__pyx_v_self;
-  size_t __pyx_t_0;
-  unsigned int __pyx_t_1;
-};
-
-
-/* "hypergraph.pxi":314
- * 
- *     property out_edges:
- *         def __get__(self):             # <<<<<<<<<<<<<<
- *             cdef unsigned i
- *             for i in range(self.node.out_edges_.size()):
  */
 struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_20___get__ {
   PyObject_HEAD
@@ -1238,14 +1242,30 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_20___get__ {
 };
 
 
-/* "lattice.pxi":56
+/* "cdec/hypergraph.pxi":329
+ * 
+ *     property out_edges:
+ *         def __get__(self):             # <<<<<<<<<<<<<<
+ *             cdef unsigned i
+ *             for i in range(self.node.out_edges_.size()):
+ */
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ {
+  PyObject_HEAD
+  unsigned int __pyx_v_i;
+  struct __pyx_obj_4cdec_5_cdec_HypergraphNode *__pyx_v_self;
+  size_t __pyx_t_0;
+  unsigned int __pyx_t_1;
+};
+
+
+/* "cdec/lattice.pxi":56
  *         return unicode(str(self), 'utf8')
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
  *         cdef unsigned i
  *         for i in range(len(self)):
  */
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ {
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ {
   PyObject_HEAD
   unsigned int __pyx_v_i;
   struct __pyx_obj_4cdec_5_cdec_Lattice *__pyx_v_self;
@@ -1254,29 +1274,29 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ {
 };
 
 
-/* "lattice.pxi":61
+/* "cdec/lattice.pxi":61
  *             yield self[i]
  * 
  *     def todot(self):             # <<<<<<<<<<<<<<
  *         """lattice.todot() -> Representation of the lattice in GraphViz dot format."""
  *         def lines():
  */
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot {
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot {
   PyObject_HEAD
   struct __pyx_obj_4cdec_5_cdec_Lattice *__pyx_v_self;
 };
 
 
-/* "lattice.pxi":63
+/* "cdec/lattice.pxi":63
  *     def todot(self):
  *         """lattice.todot() -> Representation of the lattice in GraphViz dot format."""
  *         def lines():             # <<<<<<<<<<<<<<
  *             yield 'digraph lattice {'
  *             yield 'rankdir = LR;'
  */
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines {
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines {
   PyObject_HEAD
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *__pyx_outer_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *__pyx_outer_scope;
   PyObject *__pyx_v_delta;
   PyObject *__pyx_v_i;
   PyObject *__pyx_v_label;
@@ -1290,14 +1310,14 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines {
 };
 
 
-/* "mteval.pxi":47
+/* "cdec/mteval.pxi":47
  *         return self.stats.size()
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
  *         for i in range(len(self)):
  *             yield self[i]
  */
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ {
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ {
   PyObject_HEAD
   Py_ssize_t __pyx_v_i;
   struct __pyx_obj_4cdec_5_cdec_SufficientStats *__pyx_v_self;
@@ -1306,14 +1326,14 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ {
 };
 
 
-/* "mteval.pxi":93
+/* "cdec/mteval.pxi":93
  *         return candidate
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
  *         cdef unsigned i
  *         for i in range(len(self)):
  */
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ {
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ {
   PyObject_HEAD
   unsigned int __pyx_v_i;
   struct __pyx_obj_4cdec_5_cdec_CandidateSet *__pyx_v_self;
@@ -1329,7 +1349,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ {
  *     for key, value in config.items():
  *         if isinstance(value, dict):
  */
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config {
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config {
   PyObject_HEAD
   PyObject *__pyx_v_config;
   PyObject *__pyx_v_info;
@@ -1352,7 +1372,7 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config {
  *         """Decoder('formalism = scfg') -> initialize from configuration string
  *         Decoder(formalism='scfg') -> initialize from named parameters
  */
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ {
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ {
   PyObject_HEAD
   PyObject *__pyx_v_config;
 };
@@ -1365,9 +1385,9 @@ struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ {
  *         cdef istringstream* config_stream = new istringstream(config_str)
  *         self.dec = new decoder.Decoder(config_stream)
  */
-struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr {
+struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr {
   PyObject_HEAD
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *__pyx_outer_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *__pyx_outer_scope;
   PyObject *__pyx_v_kv;
   PyObject *__pyx_t_0;
   Py_ssize_t __pyx_t_1;
@@ -1427,7 +1447,7 @@ struct __pyx_vtabstruct_4cdec_2sa_3_sa_Phrase {
 static struct __pyx_vtabstruct_4cdec_2sa_3_sa_Phrase *__pyx_vtabptr_4cdec_2sa_3_sa_Phrase;
 
 
-/* "hypergraph.pxi":4
+/* "cdec/hypergraph.pxi":4
  * cimport kbest
  * 
  * cdef class Hypergraph:             # <<<<<<<<<<<<<<
@@ -1441,7 +1461,7 @@ struct __pyx_vtabstruct_4cdec_5_cdec_Hypergraph {
 static struct __pyx_vtabstruct_4cdec_5_cdec_Hypergraph *__pyx_vtabptr_4cdec_5_cdec_Hypergraph;
 
 
-/* "hypergraph.pxi":244
+/* "cdec/hypergraph.pxi":259
  *         return vector
  * 
  * cdef class HypergraphEdge:             # <<<<<<<<<<<<<<
@@ -1455,7 +1475,7 @@ struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphEdge {
 static struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphEdge *__pyx_vtabptr_4cdec_5_cdec_HypergraphEdge;
 
 
-/* "hypergraph.pxi":294
+/* "cdec/hypergraph.pxi":309
  *         raise NotImplemented('comparison not implemented for HypergraphEdge')
  * 
  * cdef class HypergraphNode:             # <<<<<<<<<<<<<<
@@ -2009,20 +2029,21 @@ static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_11_unique_kbest
 static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_12_unique_kbest_trees = 0;
 static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_13_unique_kbest_features = 0;
 static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_14_sample = 0;
-static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_15_sample_trees = 0;
-static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_16___get__ = 0;
+static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses = 0;
+static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_16_sample_trees = 0;
 static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_17___get__ = 0;
 static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_18___get__ = 0;
 static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_19___get__ = 0;
 static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_20___get__ = 0;
-static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_21___iter__ = 0;
-static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_22_todot = 0;
-static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_23_lines = 0;
-static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_24___iter__ = 0;
+static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_21___get__ = 0;
+static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_22___iter__ = 0;
+static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_23_todot = 0;
+static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_24_lines = 0;
 static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_25___iter__ = 0;
-static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_26__make_config = 0;
-static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_27___init__ = 0;
-static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_28_genexpr = 0;
+static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_26___iter__ = 0;
+static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_27__make_config = 0;
+static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_28___init__ = 0;
+static PyTypeObject *__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_29_genexpr = 0;
 static PyObject *__pyx_f_4cdec_5_cdec_as_str(PyObject *, struct __pyx_opt_args_4cdec_5_cdec_as_str *__pyx_optional_args); /*proto*/
 static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(struct __pyx_obj_4cdec_2sa_3_sa_Rule *); /*proto*/
 static struct __pyx_obj_4cdec_5_cdec_SufficientStats *__pyx_f_4cdec_5_cdec_as_stats(PyObject *, PyObject *); /*proto*/
@@ -2122,17 +2143,18 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_21unique_kbest(struct __pyx_
 static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_24unique_kbest_trees(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_size); /* proto */
 static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_27unique_kbest_features(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_size); /* proto */
 static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_30sample(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, unsigned int __pyx_v_n); /* proto */
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_33sample_trees(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, unsigned int __pyx_v_n); /* proto */
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_36intersect(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_inp); /* proto */
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_38prune(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_beam_alpha, PyObject *__pyx_v_density, PyObject *__pyx_v_kwargs); /* proto */
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_40lattice(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_42plf(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_44reweight(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_weights); /* proto */
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_33sample_hypotheses(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, unsigned int __pyx_v_n); /* proto */
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_36sample_trees(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, unsigned int __pyx_v_n); /* proto */
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_39intersect(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_inp); /* proto */
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_41prune(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_beam_alpha, PyObject *__pyx_v_density, PyObject *__pyx_v_kwargs); /* proto */
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_43lattice(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_45plf(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_47reweight(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_weights); /* proto */
 static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_5edges___get__(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_5nodes___get__(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_4goal___get__(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_6npaths___get__(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_49inside_outside(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self); /* proto */
 static Py_ssize_t __pyx_pf_4cdec_5_cdec_14HypergraphEdge___len__(struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_9head_node___get__(struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_10tail_nodes___get__(struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *__pyx_v_self); /* proto */
@@ -2200,7 +2222,7 @@ static void __pyx_pf_4cdec_5_cdec_7Decoder_2__dealloc__(struct __pyx_obj_4cdec_5
 static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_7weights___get__(struct __pyx_obj_4cdec_5_cdec_Decoder *__pyx_v_self); /* proto */
 static int __pyx_pf_4cdec_5_cdec_7Decoder_7weights_2__set__(struct __pyx_obj_4cdec_5_cdec_Decoder *__pyx_v_self, PyObject *__pyx_v_weights); /* proto */
 static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_9formalism___get__(struct __pyx_obj_4cdec_5_cdec_Decoder *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4cdec_5_cdec_Decoder *__pyx_v_self, PyObject *__pyx_v_weights); /* proto */
+static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4cdec_5_cdec_Decoder *__pyx_v_self, PyObject *__pyx_v_weights, PyObject *__pyx_v_scaling); /* proto */
 static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_6translate(struct __pyx_obj_4cdec_5_cdec_Decoder *__pyx_v_self, PyObject *__pyx_v_sentence, PyObject *__pyx_v_grammar); /* proto */
 static PyObject *__pyx_tp_new_4cdec_5_cdec_DenseVector(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_4cdec_5_cdec_SparseVector(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
@@ -2236,20 +2258,21 @@ static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_11_unique_kbest(Py
 static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_12_unique_kbest_trees(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_13_unique_kbest_features(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_14_sample(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_15_sample_trees(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_16___get__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_16_sample_trees(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_17___get__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_18___get__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_19___get__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_20___get__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_21___iter__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_22_todot(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_23_lines(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_24___iter__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_21___get__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_22___iter__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_23_todot(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_24_lines(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_25___iter__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_26__make_config(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_27___init__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_28_genexpr(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_26___iter__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_27__make_config(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_28___init__(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_29_genexpr(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static char __pyx_k_a[] = "a";
 static char __pyx_k_d[] = "[%d]";
 static char __pyx_k_e[] = "e";
@@ -2343,6 +2366,8 @@ static char __pyx_k_grammar[] = "grammar";
 static char __pyx_k_prepare[] = "__prepare__";
 static char __pyx_k_replace[] = "replace";
 static char __pyx_k_s_s_s_s[] = "%s ||| %s ||| %s ||| %s";
+static char __pyx_k_scaling[] = "scaling";
+static char __pyx_k_weights[] = "weights";
 static char __pyx_k_IBM_BLEU[] = "IBM_BLEU";
 static char __pyx_k_KeyError[] = "KeyError";
 static char __pyx_k_encoding[] = "encoding";
@@ -2389,6 +2414,7 @@ static char __pyx_k_Hypergraph___get[] = "Hypergraph.__get__";
 static char __pyx_k_Hypergraph_kbest[] = "Hypergraph.kbest";
 static char __pyx_k_Hypergraph_sample[] = "Hypergraph.sample";
 static char __pyx_k_node_shape_circle[] = "node [shape=circle];";
+static char __pyx_k_sample_hypotheses[] = "sample_hypotheses";
 static char __pyx_k_DenseVector___iter[] = "DenseVector.__iter__";
 static char __pyx_k_todot_locals_lines[] = "todot.<locals>.lines";
 static char __pyx_k_unique_kbest_trees[] = "unique_kbest_trees";
@@ -2410,12 +2436,15 @@ static char __pyx_k_Hypergraph_kbest_features[] = "Hypergraph.kbest_features";
 static char __pyx_k_csplit_preserve_full_word[] = "csplit_preserve_full_word";
 static char __pyx_k_lattice_index_out_of_range[] = "lattice index out of range";
 static char __pyx_k_Cannot_convert_type_s_to_str[] = "Cannot convert type %s to str";
+static char __pyx_k_Hypergraph_sample_hypotheses[] = "Hypergraph.sample_hypotheses";
 static char __pyx_k_cannot_create_lattice_from_s[] = "cannot create lattice from %s";
 static char __pyx_k_Cannot_translate_input_type_s[] = "Cannot translate input type %s";
 static char __pyx_k_Hypergraph_unique_kbest_trees[] = "Hypergraph.unique_kbest_trees";
+static char __pyx_k_Users_waziz_workspace_mtm14_my[] = "/Users/waziz/workspace/mtm14/my-cdec/python/cdec/lattice.pxi";
 static char __pyx_k_cannot_reweight_hypergraph_with[] = "cannot reweight hypergraph with %s";
-static char __pyx_k_usr0_home_cdyer_cdec_python_cde[] = "/usr0/home/cdyer/cdec/python/cdec/lattice.pxi";
 static char __pyx_k_Hypergraph_unique_kbest_features[] = "Hypergraph.unique_kbest_features";
+static char __pyx_k_Users_waziz_workspace_mtm14_my_2[] = "/Users/waziz/workspace/mtm14/my-cdec/python/cdec/grammar.pxi";
+static char __pyx_k_Users_waziz_workspace_mtm14_my_3[] = "/Users/waziz/workspace/mtm14/my-cdec/python/cdec/_cdec.pyx";
 static char __pyx_k_candidate_set_index_out_of_range[] = "candidate set index out of range";
 static char __pyx_k_cannot_initialize_weights_with_s[] = "cannot initialize weights with %s";
 static char __pyx_k_cannot_intersect_hypergraph_with[] = "cannot intersect hypergraph with %s";
@@ -2424,8 +2453,6 @@ static char __pyx_k_comparison_not_implemented_for_H[] = "comparison not impleme
 static char __pyx_k_comparison_not_implemented_for_S[] = "comparison not implemented for SparseVector";
 static char __pyx_k_sufficient_stats_vector_index_ou[] = "sufficient stats vector index out of range";
 static char __pyx_k_the_grammar_should_contain_TRule[] = "the grammar should contain TRule objects";
-static char __pyx_k_usr0_home_cdyer_cdec_python_cde_2[] = "/usr0/home/cdyer/cdec/python/cdec/grammar.pxi";
-static char __pyx_k_usr0_home_cdyer_cdec_python_cde_3[] = "/usr0/home/cdyer/cdec/python/cdec/_cdec.pyx";
 static char __pyx_k_comparison_not_implemented_for_H_2[] = "comparison not implemented for HypergraphNode";
 static PyObject *__pyx_n_s_BLEU;
 static PyObject *__pyx_n_s_CER;
@@ -2441,6 +2468,7 @@ static PyObject *__pyx_n_s_Hypergraph_kbest;
 static PyObject *__pyx_n_s_Hypergraph_kbest_features;
 static PyObject *__pyx_n_s_Hypergraph_kbest_trees;
 static PyObject *__pyx_n_s_Hypergraph_sample;
+static PyObject *__pyx_n_s_Hypergraph_sample_hypotheses;
 static PyObject *__pyx_n_s_Hypergraph_sample_trees;
 static PyObject *__pyx_n_s_Hypergraph_unique_kbest;
 static PyObject *__pyx_n_s_Hypergraph_unique_kbest_features;
@@ -2460,6 +2488,9 @@ static PyObject *__pyx_n_s_SufficientStats___iter;
 static PyObject *__pyx_n_s_TER;
 static PyObject *__pyx_n_s_TRule___get;
 static PyObject *__pyx_n_s_TypeError;
+static PyObject *__pyx_kp_s_Users_waziz_workspace_mtm14_my;
+static PyObject *__pyx_kp_s_Users_waziz_workspace_mtm14_my_2;
+static PyObject *__pyx_kp_s_Users_waziz_workspace_mtm14_my_3;
 static PyObject *__pyx_n_s_ValueError;
 static PyObject *__pyx_kp_s__10;
 static PyObject *__pyx_kp_s__11;
@@ -2571,7 +2602,9 @@ static PyObject *__pyx_kp_s_s_s_3;
 static PyObject *__pyx_kp_s_s_s_s_s;
 static PyObject *__pyx_n_s_sa;
 static PyObject *__pyx_n_s_sample;
+static PyObject *__pyx_n_s_sample_hypotheses;
 static PyObject *__pyx_n_s_sample_trees;
+static PyObject *__pyx_n_s_scaling;
 static PyObject *__pyx_n_s_scfg;
 static PyObject *__pyx_n_s_score;
 static PyObject *__pyx_n_s_scores;
@@ -2596,13 +2629,12 @@ static PyObject *__pyx_n_s_todot_locals_lines;
 static PyObject *__pyx_n_s_unique_kbest;
 static PyObject *__pyx_n_s_unique_kbest_features;
 static PyObject *__pyx_n_s_unique_kbest_trees;
-static PyObject *__pyx_kp_s_usr0_home_cdyer_cdec_python_cde;
-static PyObject *__pyx_kp_s_usr0_home_cdyer_cdec_python_cde_2;
-static PyObject *__pyx_kp_s_usr0_home_cdyer_cdec_python_cde_3;
 static PyObject *__pyx_n_s_utf8;
 static PyObject *__pyx_n_s_value;
 static PyObject *__pyx_n_s_weight;
+static PyObject *__pyx_n_s_weights;
 static PyObject *__pyx_n_s_yn;
+static PyObject *__pyx_float_1_0;
 static PyObject *__pyx_int_0;
 static PyObject *__pyx_int_1;
 static PyObject *__pyx_tuple_;
@@ -2804,7 +2836,7 @@ static PyObject *__pyx_f_4cdec_5_cdec_as_str(PyObject *__pyx_v_data, struct __py
   return __pyx_r;
 }
 
-/* "vectors.pxi":7
+/* "cdec/vectors.pxi":7
  *     cdef bint owned # if True, do not manage memory
  * 
  *     def __init__(self):             # <<<<<<<<<<<<<<
@@ -2841,7 +2873,7 @@ static int __pyx_pf_4cdec_5_cdec_11DenseVector___init__(struct __pyx_obj_4cdec_5
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "vectors.pxi":9
+  /* "cdec/vectors.pxi":9
  *     def __init__(self):
  *         """DenseVector() -> Dense weight/feature vector."""
  *         self.vector = new vector[weight_t]()             # <<<<<<<<<<<<<<
@@ -2856,7 +2888,7 @@ static int __pyx_pf_4cdec_5_cdec_11DenseVector___init__(struct __pyx_obj_4cdec_5
   }
   __pyx_v_self->vector = __pyx_t_1;
 
-  /* "vectors.pxi":10
+  /* "cdec/vectors.pxi":10
  *         """DenseVector() -> Dense weight/feature vector."""
  *         self.vector = new vector[weight_t]()
  *         self.owned = False             # <<<<<<<<<<<<<<
@@ -2865,7 +2897,7 @@ static int __pyx_pf_4cdec_5_cdec_11DenseVector___init__(struct __pyx_obj_4cdec_5
  */
   __pyx_v_self->owned = 0;
 
-  /* "vectors.pxi":7
+  /* "cdec/vectors.pxi":7
  *     cdef bint owned # if True, do not manage memory
  * 
  *     def __init__(self):             # <<<<<<<<<<<<<<
@@ -2884,7 +2916,7 @@ static int __pyx_pf_4cdec_5_cdec_11DenseVector___init__(struct __pyx_obj_4cdec_5
   return __pyx_r;
 }
 
-/* "vectors.pxi":12
+/* "cdec/vectors.pxi":12
  *         self.owned = False
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -2908,7 +2940,7 @@ static void __pyx_pf_4cdec_5_cdec_11DenseVector_2__dealloc__(struct __pyx_obj_4c
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "vectors.pxi":13
+  /* "cdec/vectors.pxi":13
  * 
  *     def __dealloc__(self):
  *         if not self.owned:             # <<<<<<<<<<<<<<
@@ -2918,7 +2950,7 @@ static void __pyx_pf_4cdec_5_cdec_11DenseVector_2__dealloc__(struct __pyx_obj_4c
   __pyx_t_1 = ((!(__pyx_v_self->owned != 0)) != 0);
   if (__pyx_t_1) {
 
-    /* "vectors.pxi":14
+    /* "cdec/vectors.pxi":14
  *     def __dealloc__(self):
  *         if not self.owned:
  *             del self.vector             # <<<<<<<<<<<<<<
@@ -2930,7 +2962,7 @@ static void __pyx_pf_4cdec_5_cdec_11DenseVector_2__dealloc__(struct __pyx_obj_4c
   }
   __pyx_L3:;
 
-  /* "vectors.pxi":12
+  /* "cdec/vectors.pxi":12
  *         self.owned = False
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -2942,7 +2974,7 @@ static void __pyx_pf_4cdec_5_cdec_11DenseVector_2__dealloc__(struct __pyx_obj_4c
   __Pyx_RefNannyFinishContext();
 }
 
-/* "vectors.pxi":16
+/* "cdec/vectors.pxi":16
  *             del self.vector
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -2968,7 +3000,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_11DenseVector_4__len__(struct __pyx_obj_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__len__", 0);
 
-  /* "vectors.pxi":17
+  /* "cdec/vectors.pxi":17
  * 
  *     def __len__(self):
  *         return self.vector.size()             # <<<<<<<<<<<<<<
@@ -2978,7 +3010,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_11DenseVector_4__len__(struct __pyx_obj_
   __pyx_r = __pyx_v_self->vector->size();
   goto __pyx_L0;
 
-  /* "vectors.pxi":16
+  /* "cdec/vectors.pxi":16
  *             del self.vector
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -2992,7 +3024,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_11DenseVector_4__len__(struct __pyx_obj_
   return __pyx_r;
 }
 
-/* "vectors.pxi":19
+/* "cdec/vectors.pxi":19
  *         return self.vector.size()
  * 
  *     def __getitem__(self, char* fname):             # <<<<<<<<<<<<<<
@@ -3039,7 +3071,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_6__getitem__(struct __pyx_o
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__getitem__", 0);
 
-  /* "vectors.pxi":20
+  /* "cdec/vectors.pxi":20
  * 
  *     def __getitem__(self, char* fname):
  *         cdef int fid = FDConvert(fname)             # <<<<<<<<<<<<<<
@@ -3048,7 +3080,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_6__getitem__(struct __pyx_o
  */
   __pyx_v_fid = FD::Convert(__pyx_v_fname);
 
-  /* "vectors.pxi":21
+  /* "cdec/vectors.pxi":21
  *     def __getitem__(self, char* fname):
  *         cdef int fid = FDConvert(fname)
  *         if 0 <= fid < self.vector.size():             # <<<<<<<<<<<<<<
@@ -3062,7 +3094,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_6__getitem__(struct __pyx_o
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "vectors.pxi":22
+    /* "cdec/vectors.pxi":22
  *         cdef int fid = FDConvert(fname)
  *         if 0 <= fid < self.vector.size():
  *             return self.vector[0][fid]             # <<<<<<<<<<<<<<
@@ -3077,7 +3109,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_6__getitem__(struct __pyx_o
     goto __pyx_L0;
   }
 
-  /* "vectors.pxi":23
+  /* "cdec/vectors.pxi":23
  *         if 0 <= fid < self.vector.size():
  *             return self.vector[0][fid]
  *         raise KeyError(fname)             # <<<<<<<<<<<<<<
@@ -3098,7 +3130,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_6__getitem__(struct __pyx_o
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   {__pyx_filename = __pyx_f[1]; __pyx_lineno = 23; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "vectors.pxi":19
+  /* "cdec/vectors.pxi":19
  *         return self.vector.size()
  * 
  *     def __getitem__(self, char* fname):             # <<<<<<<<<<<<<<
@@ -3118,7 +3150,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_6__getitem__(struct __pyx_o
   return __pyx_r;
 }
 
-/* "vectors.pxi":25
+/* "cdec/vectors.pxi":25
  *         raise KeyError(fname)
  * 
  *     def __setitem__(self, char* fname, float value):             # <<<<<<<<<<<<<<
@@ -3168,7 +3200,7 @@ static int __pyx_pf_4cdec_5_cdec_11DenseVector_8__setitem__(struct __pyx_obj_4cd
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__setitem__", 0);
 
-  /* "vectors.pxi":26
+  /* "cdec/vectors.pxi":26
  * 
  *     def __setitem__(self, char* fname, float value):
  *         cdef int fid = FDConvert(fname)             # <<<<<<<<<<<<<<
@@ -3177,7 +3209,7 @@ static int __pyx_pf_4cdec_5_cdec_11DenseVector_8__setitem__(struct __pyx_obj_4cd
  */
   __pyx_v_fid = FD::Convert(__pyx_v_fname);
 
-  /* "vectors.pxi":27
+  /* "cdec/vectors.pxi":27
  *     def __setitem__(self, char* fname, float value):
  *         cdef int fid = FDConvert(fname)
  *         if fid < 0: raise KeyError(fname)             # <<<<<<<<<<<<<<
@@ -3201,7 +3233,7 @@ static int __pyx_pf_4cdec_5_cdec_11DenseVector_8__setitem__(struct __pyx_obj_4cd
     {__pyx_filename = __pyx_f[1]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "vectors.pxi":28
+  /* "cdec/vectors.pxi":28
  *         cdef int fid = FDConvert(fname)
  *         if fid < 0: raise KeyError(fname)
  *         if self.vector.size() <= fid:             # <<<<<<<<<<<<<<
@@ -3211,7 +3243,7 @@ static int __pyx_pf_4cdec_5_cdec_11DenseVector_8__setitem__(struct __pyx_obj_4cd
   __pyx_t_1 = ((__pyx_v_self->vector->size() <= __pyx_v_fid) != 0);
   if (__pyx_t_1) {
 
-    /* "vectors.pxi":29
+    /* "cdec/vectors.pxi":29
  *         if fid < 0: raise KeyError(fname)
  *         if self.vector.size() <= fid:
  *             self.vector.resize(fid + 1)             # <<<<<<<<<<<<<<
@@ -3223,7 +3255,7 @@ static int __pyx_pf_4cdec_5_cdec_11DenseVector_8__setitem__(struct __pyx_obj_4cd
   }
   __pyx_L4:;
 
-  /* "vectors.pxi":30
+  /* "cdec/vectors.pxi":30
  *         if self.vector.size() <= fid:
  *             self.vector.resize(fid + 1)
  *         self.vector[0][fid] = value             # <<<<<<<<<<<<<<
@@ -3232,7 +3264,7 @@ static int __pyx_pf_4cdec_5_cdec_11DenseVector_8__setitem__(struct __pyx_obj_4cd
  */
   ((__pyx_v_self->vector[0])[__pyx_v_fid]) = __pyx_v_value;
 
-  /* "vectors.pxi":25
+  /* "cdec/vectors.pxi":25
  *         raise KeyError(fname)
  * 
  *     def __setitem__(self, char* fname, float value):             # <<<<<<<<<<<<<<
@@ -3254,7 +3286,7 @@ static int __pyx_pf_4cdec_5_cdec_11DenseVector_8__setitem__(struct __pyx_obj_4cd
 }
 static PyObject *__pyx_gb_4cdec_5_cdec_11DenseVector_12generator(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "vectors.pxi":32
+/* "cdec/vectors.pxi":32
  *         self.vector[0][fid] = value
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -3333,7 +3365,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_11DenseVector_12generator(__pyx_Generator
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "vectors.pxi":34
+  /* "cdec/vectors.pxi":34
  *     def __iter__(self):
  *         cdef unsigned fid
  *         for fid in range(1, self.vector.size()):             # <<<<<<<<<<<<<<
@@ -3344,7 +3376,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_11DenseVector_12generator(__pyx_Generator
   for (__pyx_t_2 = 1; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_cur_scope->__pyx_v_fid = __pyx_t_2;
 
-    /* "vectors.pxi":35
+    /* "cdec/vectors.pxi":35
  *         cdef unsigned fid
  *         for fid in range(1, self.vector.size()):
  *             yield str(FDConvert(fid).c_str()), self.vector[0][fid]             # <<<<<<<<<<<<<<
@@ -3386,7 +3418,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_11DenseVector_12generator(__pyx_Generator
     if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 35; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "vectors.pxi":32
+  /* "cdec/vectors.pxi":32
  *         self.vector[0][fid] = value
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -3410,7 +3442,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_11DenseVector_12generator(__pyx_Generator
   return NULL;
 }
 
-/* "vectors.pxi":37
+/* "cdec/vectors.pxi":37
  *             yield str(FDConvert(fid).c_str()), self.vector[0][fid]
  * 
  *     def dot(self, SparseVector other):             # <<<<<<<<<<<<<<
@@ -3452,7 +3484,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_13dot(struct __pyx_obj_4cde
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("dot", 0);
 
-  /* "vectors.pxi":39
+  /* "cdec/vectors.pxi":39
  *     def dot(self, SparseVector other):
  *         """vector.dot(SparseVector other) -> Dot product of the two vectors."""
  *         return other.dot(self)             # <<<<<<<<<<<<<<
@@ -3491,7 +3523,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_13dot(struct __pyx_obj_4cde
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "vectors.pxi":37
+  /* "cdec/vectors.pxi":37
  *             yield str(FDConvert(fid).c_str()), self.vector[0][fid]
  * 
  *     def dot(self, SparseVector other):             # <<<<<<<<<<<<<<
@@ -3513,7 +3545,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_13dot(struct __pyx_obj_4cde
   return __pyx_r;
 }
 
-/* "vectors.pxi":41
+/* "cdec/vectors.pxi":41
  *         return other.dot(self)
  * 
  *     def tosparse(self):             # <<<<<<<<<<<<<<
@@ -3545,7 +3577,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_15tosparse(struct __pyx_obj
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("tosparse", 0);
 
-  /* "vectors.pxi":43
+  /* "cdec/vectors.pxi":43
  *     def tosparse(self):
  *         """vector.tosparse() -> Equivalent SparseVector."""
  *         cdef SparseVector sparse = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
@@ -3558,7 +3590,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_15tosparse(struct __pyx_obj
   __pyx_v_sparse = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "vectors.pxi":44
+  /* "cdec/vectors.pxi":44
  *         """vector.tosparse() -> Equivalent SparseVector."""
  *         cdef SparseVector sparse = SparseVector.__new__(SparseVector)
  *         sparse.vector = new FastSparseVector[weight_t]()             # <<<<<<<<<<<<<<
@@ -3567,7 +3599,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_15tosparse(struct __pyx_obj
  */
   __pyx_v_sparse->vector = new FastSparseVector<weight_t> ();
 
-  /* "vectors.pxi":45
+  /* "cdec/vectors.pxi":45
  *         cdef SparseVector sparse = SparseVector.__new__(SparseVector)
  *         sparse.vector = new FastSparseVector[weight_t]()
  *         InitSparseVector(self.vector[0], sparse.vector)             # <<<<<<<<<<<<<<
@@ -3576,7 +3608,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_15tosparse(struct __pyx_obj
  */
   Weights::InitSparseVector((__pyx_v_self->vector[0]), __pyx_v_sparse->vector);
 
-  /* "vectors.pxi":46
+  /* "cdec/vectors.pxi":46
  *         sparse.vector = new FastSparseVector[weight_t]()
  *         InitSparseVector(self.vector[0], sparse.vector)
  *         return sparse             # <<<<<<<<<<<<<<
@@ -3588,7 +3620,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_15tosparse(struct __pyx_obj
   __pyx_r = ((PyObject *)__pyx_v_sparse);
   goto __pyx_L0;
 
-  /* "vectors.pxi":41
+  /* "cdec/vectors.pxi":41
  *         return other.dot(self)
  * 
  *     def tosparse(self):             # <<<<<<<<<<<<<<
@@ -3608,7 +3640,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_11DenseVector_15tosparse(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "vectors.pxi":51
+/* "cdec/vectors.pxi":51
  *     cdef FastSparseVector[weight_t]* vector
  * 
  *     def __init__(self):             # <<<<<<<<<<<<<<
@@ -3641,7 +3673,7 @@ static int __pyx_pf_4cdec_5_cdec_12SparseVector___init__(struct __pyx_obj_4cdec_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "vectors.pxi":53
+  /* "cdec/vectors.pxi":53
  *     def __init__(self):
  *         """SparseVector() -> Sparse feature/weight vector."""
  *         self.vector = new FastSparseVector[weight_t]()             # <<<<<<<<<<<<<<
@@ -3650,7 +3682,7 @@ static int __pyx_pf_4cdec_5_cdec_12SparseVector___init__(struct __pyx_obj_4cdec_
  */
   __pyx_v_self->vector = new FastSparseVector<weight_t> ();
 
-  /* "vectors.pxi":51
+  /* "cdec/vectors.pxi":51
  *     cdef FastSparseVector[weight_t]* vector
  * 
  *     def __init__(self):             # <<<<<<<<<<<<<<
@@ -3664,7 +3696,7 @@ static int __pyx_pf_4cdec_5_cdec_12SparseVector___init__(struct __pyx_obj_4cdec_
   return __pyx_r;
 }
 
-/* "vectors.pxi":55
+/* "cdec/vectors.pxi":55
  *         self.vector = new FastSparseVector[weight_t]()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -3687,7 +3719,7 @@ static void __pyx_pf_4cdec_5_cdec_12SparseVector_2__dealloc__(struct __pyx_obj_4
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "vectors.pxi":56
+  /* "cdec/vectors.pxi":56
  * 
  *     def __dealloc__(self):
  *         del self.vector             # <<<<<<<<<<<<<<
@@ -3696,7 +3728,7 @@ static void __pyx_pf_4cdec_5_cdec_12SparseVector_2__dealloc__(struct __pyx_obj_4
  */
   delete __pyx_v_self->vector;
 
-  /* "vectors.pxi":55
+  /* "cdec/vectors.pxi":55
  *         self.vector = new FastSparseVector[weight_t]()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -3708,7 +3740,7 @@ static void __pyx_pf_4cdec_5_cdec_12SparseVector_2__dealloc__(struct __pyx_obj_4
   __Pyx_RefNannyFinishContext();
 }
 
-/* "vectors.pxi":58
+/* "cdec/vectors.pxi":58
  *         del self.vector
  * 
  *     def copy(self):             # <<<<<<<<<<<<<<
@@ -3739,7 +3771,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_4copy(struct __pyx_obj_4cd
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("copy", 0);
 
-  /* "vectors.pxi":60
+  /* "cdec/vectors.pxi":60
  *     def copy(self):
  *         """vector.copy() -> SparseVector copy."""
  *         return self * 1             # <<<<<<<<<<<<<<
@@ -3753,7 +3785,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_4copy(struct __pyx_obj_4cd
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "vectors.pxi":58
+  /* "cdec/vectors.pxi":58
  *         del self.vector
  * 
  *     def copy(self):             # <<<<<<<<<<<<<<
@@ -3772,7 +3804,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_4copy(struct __pyx_obj_4cd
   return __pyx_r;
 }
 
-/* "vectors.pxi":62
+/* "cdec/vectors.pxi":62
  *         return self * 1
  * 
  *     def __getitem__(self, char* fname):             # <<<<<<<<<<<<<<
@@ -3818,7 +3850,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_6__getitem__(struct __pyx_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__getitem__", 0);
 
-  /* "vectors.pxi":63
+  /* "cdec/vectors.pxi":63
  * 
  *     def __getitem__(self, char* fname):
  *         cdef int fid = FDConvert(fname)             # <<<<<<<<<<<<<<
@@ -3827,7 +3859,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_6__getitem__(struct __pyx_
  */
   __pyx_v_fid = FD::Convert(__pyx_v_fname);
 
-  /* "vectors.pxi":64
+  /* "cdec/vectors.pxi":64
  *     def __getitem__(self, char* fname):
  *         cdef int fid = FDConvert(fname)
  *         if fid < 0: raise KeyError(fname)             # <<<<<<<<<<<<<<
@@ -3851,7 +3883,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_6__getitem__(struct __pyx_
     {__pyx_filename = __pyx_f[1]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "vectors.pxi":65
+  /* "cdec/vectors.pxi":65
  *         cdef int fid = FDConvert(fname)
  *         if fid < 0: raise KeyError(fname)
  *         return self.vector.value(fid)             # <<<<<<<<<<<<<<
@@ -3865,7 +3897,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_6__getitem__(struct __pyx_
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "vectors.pxi":62
+  /* "cdec/vectors.pxi":62
  *         return self * 1
  * 
  *     def __getitem__(self, char* fname):             # <<<<<<<<<<<<<<
@@ -3885,7 +3917,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_6__getitem__(struct __pyx_
   return __pyx_r;
 }
 
-/* "vectors.pxi":67
+/* "cdec/vectors.pxi":67
  *         return self.vector.value(fid)
  * 
  *     def __setitem__(self, char* fname, float value):             # <<<<<<<<<<<<<<
@@ -3935,7 +3967,7 @@ static int __pyx_pf_4cdec_5_cdec_12SparseVector_8__setitem__(struct __pyx_obj_4c
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__setitem__", 0);
 
-  /* "vectors.pxi":68
+  /* "cdec/vectors.pxi":68
  * 
  *     def __setitem__(self, char* fname, float value):
  *         cdef int fid = FDConvert(fname)             # <<<<<<<<<<<<<<
@@ -3944,7 +3976,7 @@ static int __pyx_pf_4cdec_5_cdec_12SparseVector_8__setitem__(struct __pyx_obj_4c
  */
   __pyx_v_fid = FD::Convert(__pyx_v_fname);
 
-  /* "vectors.pxi":69
+  /* "cdec/vectors.pxi":69
  *     def __setitem__(self, char* fname, float value):
  *         cdef int fid = FDConvert(fname)
  *         if fid < 0: raise KeyError(fname)             # <<<<<<<<<<<<<<
@@ -3968,7 +4000,7 @@ static int __pyx_pf_4cdec_5_cdec_12SparseVector_8__setitem__(struct __pyx_obj_4c
     {__pyx_filename = __pyx_f[1]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "vectors.pxi":70
+  /* "cdec/vectors.pxi":70
  *         cdef int fid = FDConvert(fname)
  *         if fid < 0: raise KeyError(fname)
  *         self.vector.set_value(fid, value)             # <<<<<<<<<<<<<<
@@ -3977,7 +4009,7 @@ static int __pyx_pf_4cdec_5_cdec_12SparseVector_8__setitem__(struct __pyx_obj_4c
  */
   __pyx_v_self->vector->set_value(__pyx_v_fid, __pyx_v_value);
 
-  /* "vectors.pxi":67
+  /* "cdec/vectors.pxi":67
  *         return self.vector.value(fid)
  * 
  *     def __setitem__(self, char* fname, float value):             # <<<<<<<<<<<<<<
@@ -3999,7 +4031,7 @@ static int __pyx_pf_4cdec_5_cdec_12SparseVector_8__setitem__(struct __pyx_obj_4c
 }
 static PyObject *__pyx_gb_4cdec_5_cdec_12SparseVector_12generator1(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "vectors.pxi":72
+/* "cdec/vectors.pxi":72
  *         self.vector.set_value(fid, value)
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -4087,7 +4119,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_12SparseVector_12generator1(__pyx_Generat
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 72; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "vectors.pxi":73
+  /* "cdec/vectors.pxi":73
  * 
  *     def __iter__(self):
  *         cdef FastSparseVector[weight_t].const_iterator* it = new FastSparseVector[weight_t].const_iterator(self.vector[0], False)             # <<<<<<<<<<<<<<
@@ -4096,7 +4128,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_12SparseVector_12generator1(__pyx_Generat
  */
   __pyx_cur_scope->__pyx_v_it = new FastSparseVector<weight_t> ::const_iterator((__pyx_cur_scope->__pyx_v_self->vector[0]), 0);
 
-  /* "vectors.pxi":75
+  /* "cdec/vectors.pxi":75
  *         cdef FastSparseVector[weight_t].const_iterator* it = new FastSparseVector[weight_t].const_iterator(self.vector[0], False)
  *         cdef unsigned i
  *         try:             # <<<<<<<<<<<<<<
@@ -4105,7 +4137,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_12SparseVector_12generator1(__pyx_Generat
  */
   /*try:*/ {
 
-    /* "vectors.pxi":76
+    /* "cdec/vectors.pxi":76
  *         cdef unsigned i
  *         try:
  *             for i in range(self.vector.size()):             # <<<<<<<<<<<<<<
@@ -4116,7 +4148,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_12SparseVector_12generator1(__pyx_Generat
     for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
       __pyx_cur_scope->__pyx_v_i = __pyx_t_2;
 
-      /* "vectors.pxi":77
+      /* "cdec/vectors.pxi":77
  *         try:
  *             for i in range(self.vector.size()):
  *                 yield (str(FDConvert(it[0].ptr().first).c_str()), it[0].ptr().second)             # <<<<<<<<<<<<<<
@@ -4157,7 +4189,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_12SparseVector_12generator1(__pyx_Generat
       __pyx_t_2 = __pyx_cur_scope->__pyx_t_1;
       if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
 
-      /* "vectors.pxi":78
+      /* "cdec/vectors.pxi":78
  *             for i in range(self.vector.size()):
  *                 yield (str(FDConvert(it[0].ptr().first).c_str()), it[0].ptr().second)
  *                 pinc(it[0]) # ++it             # <<<<<<<<<<<<<<
@@ -4168,7 +4200,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_12SparseVector_12generator1(__pyx_Generat
     }
   }
 
-  /* "vectors.pxi":80
+  /* "cdec/vectors.pxi":80
  *                 pinc(it[0]) # ++it
  *         finally:
  *             del it             # <<<<<<<<<<<<<<
@@ -4215,7 +4247,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_12SparseVector_12generator1(__pyx_Generat
     __pyx_L6:;
   }
 
-  /* "vectors.pxi":72
+  /* "cdec/vectors.pxi":72
  *         self.vector.set_value(fid, value)
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -4239,7 +4271,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_12SparseVector_12generator1(__pyx_Generat
   return NULL;
 }
 
-/* "vectors.pxi":82
+/* "cdec/vectors.pxi":82
  *             del it
  * 
  *     def dot(self, other):             # <<<<<<<<<<<<<<
@@ -4273,7 +4305,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_13dot(struct __pyx_obj_4cd
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("dot", 0);
 
-  /* "vectors.pxi":84
+  /* "cdec/vectors.pxi":84
  *     def dot(self, other):
  *         """vector.dot(SparseVector/DenseVector other) -> Dot product of the two vectors."""
  *         if isinstance(other, DenseVector):             # <<<<<<<<<<<<<<
@@ -4284,7 +4316,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_13dot(struct __pyx_obj_4cd
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "vectors.pxi":85
+    /* "cdec/vectors.pxi":85
  *         """vector.dot(SparseVector/DenseVector other) -> Dot product of the two vectors."""
  *         if isinstance(other, DenseVector):
  *             return self.vector.dot((<DenseVector> other).vector[0])             # <<<<<<<<<<<<<<
@@ -4299,7 +4331,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_13dot(struct __pyx_obj_4cd
     goto __pyx_L0;
   }
 
-  /* "vectors.pxi":86
+  /* "cdec/vectors.pxi":86
  *         if isinstance(other, DenseVector):
  *             return self.vector.dot((<DenseVector> other).vector[0])
  *         elif isinstance(other, SparseVector):             # <<<<<<<<<<<<<<
@@ -4310,7 +4342,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_13dot(struct __pyx_obj_4cd
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "vectors.pxi":87
+    /* "cdec/vectors.pxi":87
  *             return self.vector.dot((<DenseVector> other).vector[0])
  *         elif isinstance(other, SparseVector):
  *             return self.vector.dot((<SparseVector> other).vector[0])             # <<<<<<<<<<<<<<
@@ -4325,7 +4357,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_13dot(struct __pyx_obj_4cd
     goto __pyx_L0;
   }
 
-  /* "vectors.pxi":88
+  /* "cdec/vectors.pxi":88
  *         elif isinstance(other, SparseVector):
  *             return self.vector.dot((<SparseVector> other).vector[0])
  *         raise TypeError('cannot take the dot product of %s and SparseVector' % type(other))             # <<<<<<<<<<<<<<
@@ -4346,7 +4378,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_13dot(struct __pyx_obj_4cd
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   {__pyx_filename = __pyx_f[1]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "vectors.pxi":82
+  /* "cdec/vectors.pxi":82
  *             del it
  * 
  *     def dot(self, other):             # <<<<<<<<<<<<<<
@@ -4366,7 +4398,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_13dot(struct __pyx_obj_4cd
   return __pyx_r;
 }
 
-/* "vectors.pxi":90
+/* "cdec/vectors.pxi":90
  *         raise TypeError('cannot take the dot product of %s and SparseVector' % type(other))
  * 
  *     def __richcmp__(SparseVector x, SparseVector y, int op):             # <<<<<<<<<<<<<<
@@ -4406,7 +4438,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_15__richcmp__(struct __pyx
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__richcmp__", 0);
 
-  /* "vectors.pxi":93
+  /* "cdec/vectors.pxi":93
  *         if op == 2: # ==
  *             return x.vector[0] == y.vector[0]
  *         elif op == 3: # !=             # <<<<<<<<<<<<<<
@@ -4415,7 +4447,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_15__richcmp__(struct __pyx
  */
   switch (__pyx_v_op) {
 
-    /* "vectors.pxi":91
+    /* "cdec/vectors.pxi":91
  * 
  *     def __richcmp__(SparseVector x, SparseVector y, int op):
  *         if op == 2: # ==             # <<<<<<<<<<<<<<
@@ -4424,7 +4456,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_15__richcmp__(struct __pyx
  */
     case 2:
 
-    /* "vectors.pxi":92
+    /* "cdec/vectors.pxi":92
  *     def __richcmp__(SparseVector x, SparseVector y, int op):
  *         if op == 2: # ==
  *             return x.vector[0] == y.vector[0]             # <<<<<<<<<<<<<<
@@ -4439,7 +4471,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_15__richcmp__(struct __pyx
     goto __pyx_L0;
     break;
 
-    /* "vectors.pxi":93
+    /* "cdec/vectors.pxi":93
  *         if op == 2: # ==
  *             return x.vector[0] == y.vector[0]
  *         elif op == 3: # !=             # <<<<<<<<<<<<<<
@@ -4448,7 +4480,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_15__richcmp__(struct __pyx
  */
     case 3:
 
-    /* "vectors.pxi":94
+    /* "cdec/vectors.pxi":94
  *             return x.vector[0] == y.vector[0]
  *         elif op == 3: # !=
  *             return not (x == y)             # <<<<<<<<<<<<<<
@@ -4468,7 +4500,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_15__richcmp__(struct __pyx
     default: break;
   }
 
-  /* "vectors.pxi":95
+  /* "cdec/vectors.pxi":95
  *         elif op == 3: # !=
  *             return not (x == y)
  *         raise NotImplemented('comparison not implemented for SparseVector')             # <<<<<<<<<<<<<<
@@ -4481,7 +4513,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_15__richcmp__(struct __pyx
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   {__pyx_filename = __pyx_f[1]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "vectors.pxi":90
+  /* "cdec/vectors.pxi":90
  *         raise TypeError('cannot take the dot product of %s and SparseVector' % type(other))
  * 
  *     def __richcmp__(SparseVector x, SparseVector y, int op):             # <<<<<<<<<<<<<<
@@ -4500,7 +4532,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_15__richcmp__(struct __pyx
   return __pyx_r;
 }
 
-/* "vectors.pxi":97
+/* "cdec/vectors.pxi":97
  *         raise NotImplemented('comparison not implemented for SparseVector')
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -4526,7 +4558,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_12SparseVector_17__len__(struct __pyx_ob
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__len__", 0);
 
-  /* "vectors.pxi":98
+  /* "cdec/vectors.pxi":98
  * 
  *     def __len__(self):
  *         return self.vector.size()             # <<<<<<<<<<<<<<
@@ -4536,7 +4568,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_12SparseVector_17__len__(struct __pyx_ob
   __pyx_r = __pyx_v_self->vector->size();
   goto __pyx_L0;
 
-  /* "vectors.pxi":97
+  /* "cdec/vectors.pxi":97
  *         raise NotImplemented('comparison not implemented for SparseVector')
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -4550,7 +4582,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_12SparseVector_17__len__(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "vectors.pxi":100
+/* "cdec/vectors.pxi":100
  *         return self.vector.size()
  * 
  *     def __contains__(self, char* fname):             # <<<<<<<<<<<<<<
@@ -4589,7 +4621,7 @@ static int __pyx_pf_4cdec_5_cdec_12SparseVector_19__contains__(struct __pyx_obj_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__contains__", 0);
 
-  /* "vectors.pxi":101
+  /* "cdec/vectors.pxi":101
  * 
  *     def __contains__(self, char* fname):
  *         return self.vector.nonzero(FDConvert(fname))             # <<<<<<<<<<<<<<
@@ -4599,7 +4631,7 @@ static int __pyx_pf_4cdec_5_cdec_12SparseVector_19__contains__(struct __pyx_obj_
   __pyx_r = __pyx_v_self->vector->nonzero(FD::Convert(__pyx_v_fname));
   goto __pyx_L0;
 
-  /* "vectors.pxi":100
+  /* "cdec/vectors.pxi":100
  *         return self.vector.size()
  * 
  *     def __contains__(self, char* fname):             # <<<<<<<<<<<<<<
@@ -4613,7 +4645,7 @@ static int __pyx_pf_4cdec_5_cdec_12SparseVector_19__contains__(struct __pyx_obj_
   return __pyx_r;
 }
 
-/* "vectors.pxi":103
+/* "cdec/vectors.pxi":103
  *         return self.vector.nonzero(FDConvert(fname))
  * 
  *     def __neg__(self):             # <<<<<<<<<<<<<<
@@ -4644,7 +4676,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_21__neg__(struct __pyx_obj
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__neg__", 0);
 
-  /* "vectors.pxi":104
+  /* "cdec/vectors.pxi":104
  * 
  *     def __neg__(self):
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
@@ -4657,7 +4689,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_21__neg__(struct __pyx_obj
   __pyx_v_result = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "vectors.pxi":105
+  /* "cdec/vectors.pxi":105
  *     def __neg__(self):
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)
  *         result.vector = new FastSparseVector[weight_t](self.vector[0])             # <<<<<<<<<<<<<<
@@ -4666,7 +4698,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_21__neg__(struct __pyx_obj
  */
   __pyx_v_result->vector = new FastSparseVector<weight_t> ((__pyx_v_self->vector[0]));
 
-  /* "vectors.pxi":106
+  /* "cdec/vectors.pxi":106
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)
  *         result.vector = new FastSparseVector[weight_t](self.vector[0])
  *         result.vector[0] *= -1.0             # <<<<<<<<<<<<<<
@@ -4675,7 +4707,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_21__neg__(struct __pyx_obj
  */
   (__pyx_v_result->vector[0]) *= -1.0;
 
-  /* "vectors.pxi":107
+  /* "cdec/vectors.pxi":107
  *         result.vector = new FastSparseVector[weight_t](self.vector[0])
  *         result.vector[0] *= -1.0
  *         return result             # <<<<<<<<<<<<<<
@@ -4687,7 +4719,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_21__neg__(struct __pyx_obj
   __pyx_r = ((PyObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "vectors.pxi":103
+  /* "cdec/vectors.pxi":103
  *         return self.vector.nonzero(FDConvert(fname))
  * 
  *     def __neg__(self):             # <<<<<<<<<<<<<<
@@ -4707,7 +4739,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_21__neg__(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "vectors.pxi":109
+/* "cdec/vectors.pxi":109
  *         return result
  * 
  *     def __iadd__(SparseVector self, SparseVector other):             # <<<<<<<<<<<<<<
@@ -4741,7 +4773,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_23__iadd__(struct __pyx_ob
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__iadd__", 0);
 
-  /* "vectors.pxi":110
+  /* "cdec/vectors.pxi":110
  * 
  *     def __iadd__(SparseVector self, SparseVector other):
  *         self.vector[0] += other.vector[0]             # <<<<<<<<<<<<<<
@@ -4750,7 +4782,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_23__iadd__(struct __pyx_ob
  */
   (__pyx_v_self->vector[0]) += (__pyx_v_other->vector[0]);
 
-  /* "vectors.pxi":111
+  /* "cdec/vectors.pxi":111
  *     def __iadd__(SparseVector self, SparseVector other):
  *         self.vector[0] += other.vector[0]
  *         return self             # <<<<<<<<<<<<<<
@@ -4762,7 +4794,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_23__iadd__(struct __pyx_ob
   __pyx_r = ((PyObject *)__pyx_v_self);
   goto __pyx_L0;
 
-  /* "vectors.pxi":109
+  /* "cdec/vectors.pxi":109
  *         return result
  * 
  *     def __iadd__(SparseVector self, SparseVector other):             # <<<<<<<<<<<<<<
@@ -4777,7 +4809,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_23__iadd__(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "vectors.pxi":113
+/* "cdec/vectors.pxi":113
  *         return self
  * 
  *     def __isub__(SparseVector self, SparseVector other):             # <<<<<<<<<<<<<<
@@ -4811,7 +4843,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_25__isub__(struct __pyx_ob
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__isub__", 0);
 
-  /* "vectors.pxi":114
+  /* "cdec/vectors.pxi":114
  * 
  *     def __isub__(SparseVector self, SparseVector other):
  *         self.vector[0] -= other.vector[0]             # <<<<<<<<<<<<<<
@@ -4820,7 +4852,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_25__isub__(struct __pyx_ob
  */
   (__pyx_v_self->vector[0]) -= (__pyx_v_other->vector[0]);
 
-  /* "vectors.pxi":115
+  /* "cdec/vectors.pxi":115
  *     def __isub__(SparseVector self, SparseVector other):
  *         self.vector[0] -= other.vector[0]
  *         return self             # <<<<<<<<<<<<<<
@@ -4832,7 +4864,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_25__isub__(struct __pyx_ob
   __pyx_r = ((PyObject *)__pyx_v_self);
   goto __pyx_L0;
 
-  /* "vectors.pxi":113
+  /* "cdec/vectors.pxi":113
  *         return self
  * 
  *     def __isub__(SparseVector self, SparseVector other):             # <<<<<<<<<<<<<<
@@ -4847,7 +4879,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_25__isub__(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "vectors.pxi":117
+/* "cdec/vectors.pxi":117
  *         return self
  * 
  *     def __imul__(SparseVector self, float scalar):             # <<<<<<<<<<<<<<
@@ -4886,7 +4918,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_27__imul__(struct __pyx_ob
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__imul__", 0);
 
-  /* "vectors.pxi":118
+  /* "cdec/vectors.pxi":118
  * 
  *     def __imul__(SparseVector self, float scalar):
  *         self.vector[0] *= scalar             # <<<<<<<<<<<<<<
@@ -4895,7 +4927,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_27__imul__(struct __pyx_ob
  */
   (__pyx_v_self->vector[0]) *= __pyx_v_scalar;
 
-  /* "vectors.pxi":119
+  /* "cdec/vectors.pxi":119
  *     def __imul__(SparseVector self, float scalar):
  *         self.vector[0] *= scalar
  *         return self             # <<<<<<<<<<<<<<
@@ -4907,7 +4939,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_27__imul__(struct __pyx_ob
   __pyx_r = ((PyObject *)__pyx_v_self);
   goto __pyx_L0;
 
-  /* "vectors.pxi":117
+  /* "cdec/vectors.pxi":117
  *         return self
  * 
  *     def __imul__(SparseVector self, float scalar):             # <<<<<<<<<<<<<<
@@ -4922,7 +4954,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_27__imul__(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "vectors.pxi":121
+/* "cdec/vectors.pxi":121
  *         return self
  * 
  *     def __idiv__(SparseVector self, float scalar):             # <<<<<<<<<<<<<<
@@ -4964,7 +4996,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_29__idiv__(struct __pyx_ob
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__idiv__", 0);
 
-  /* "vectors.pxi":122
+  /* "cdec/vectors.pxi":122
  * 
  *     def __idiv__(SparseVector self, float scalar):
  *         self.vector[0] /= scalar             # <<<<<<<<<<<<<<
@@ -4973,7 +5005,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_29__idiv__(struct __pyx_ob
  */
   (__pyx_v_self->vector[0]) /= __pyx_v_scalar;
 
-  /* "vectors.pxi":123
+  /* "cdec/vectors.pxi":123
  *     def __idiv__(SparseVector self, float scalar):
  *         self.vector[0] /= scalar
  *         return self             # <<<<<<<<<<<<<<
@@ -4985,7 +5017,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_29__idiv__(struct __pyx_ob
   __pyx_r = ((PyObject *)__pyx_v_self);
   goto __pyx_L0;
 
-  /* "vectors.pxi":121
+  /* "cdec/vectors.pxi":121
  *         return self
  * 
  *     def __idiv__(SparseVector self, float scalar):             # <<<<<<<<<<<<<<
@@ -5001,7 +5033,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_29__idiv__(struct __pyx_ob
 }
 #endif /*!(#if PY_MAJOR_VERSION < 3)*/
 
-/* "vectors.pxi":125
+/* "cdec/vectors.pxi":125
  *         return self
  * 
  *     def __add__(SparseVector x, SparseVector y):             # <<<<<<<<<<<<<<
@@ -5041,7 +5073,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_31__add__(struct __pyx_obj
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__add__", 0);
 
-  /* "vectors.pxi":126
+  /* "cdec/vectors.pxi":126
  * 
  *     def __add__(SparseVector x, SparseVector y):
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
@@ -5054,7 +5086,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_31__add__(struct __pyx_obj
   __pyx_v_result = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "vectors.pxi":127
+  /* "cdec/vectors.pxi":127
  *     def __add__(SparseVector x, SparseVector y):
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)
  *         result.vector = new FastSparseVector[weight_t](x.vector[0] + y.vector[0])             # <<<<<<<<<<<<<<
@@ -5063,7 +5095,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_31__add__(struct __pyx_obj
  */
   __pyx_v_result->vector = new FastSparseVector<weight_t> (((__pyx_v_x->vector[0]) + (__pyx_v_y->vector[0])));
 
-  /* "vectors.pxi":128
+  /* "cdec/vectors.pxi":128
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)
  *         result.vector = new FastSparseVector[weight_t](x.vector[0] + y.vector[0])
  *         return result             # <<<<<<<<<<<<<<
@@ -5075,7 +5107,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_31__add__(struct __pyx_obj
   __pyx_r = ((PyObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "vectors.pxi":125
+  /* "cdec/vectors.pxi":125
  *         return self
  * 
  *     def __add__(SparseVector x, SparseVector y):             # <<<<<<<<<<<<<<
@@ -5095,7 +5127,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_31__add__(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "vectors.pxi":130
+/* "cdec/vectors.pxi":130
  *         return result
  * 
  *     def __sub__(SparseVector x, SparseVector y):             # <<<<<<<<<<<<<<
@@ -5135,7 +5167,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_33__sub__(struct __pyx_obj
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__sub__", 0);
 
-  /* "vectors.pxi":131
+  /* "cdec/vectors.pxi":131
  * 
  *     def __sub__(SparseVector x, SparseVector y):
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
@@ -5148,7 +5180,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_33__sub__(struct __pyx_obj
   __pyx_v_result = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "vectors.pxi":132
+  /* "cdec/vectors.pxi":132
  *     def __sub__(SparseVector x, SparseVector y):
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)
  *         result.vector = new FastSparseVector[weight_t](x.vector[0] - y.vector[0])             # <<<<<<<<<<<<<<
@@ -5157,7 +5189,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_33__sub__(struct __pyx_obj
  */
   __pyx_v_result->vector = new FastSparseVector<weight_t> (((__pyx_v_x->vector[0]) - (__pyx_v_y->vector[0])));
 
-  /* "vectors.pxi":133
+  /* "cdec/vectors.pxi":133
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)
  *         result.vector = new FastSparseVector[weight_t](x.vector[0] - y.vector[0])
  *         return result             # <<<<<<<<<<<<<<
@@ -5169,7 +5201,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_33__sub__(struct __pyx_obj
   __pyx_r = ((PyObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "vectors.pxi":130
+  /* "cdec/vectors.pxi":130
  *         return result
  * 
  *     def __sub__(SparseVector x, SparseVector y):             # <<<<<<<<<<<<<<
@@ -5189,7 +5221,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_33__sub__(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "vectors.pxi":135
+/* "cdec/vectors.pxi":135
  *         return result
  * 
  *     def __mul__(x, y):             # <<<<<<<<<<<<<<
@@ -5225,7 +5257,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_35__mul__(PyObject *__pyx_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__mul__", 0);
 
-  /* "vectors.pxi":138
+  /* "cdec/vectors.pxi":138
  *         cdef SparseVector vector
  *         cdef float scalar
  *         if isinstance(x, SparseVector): vector, scalar = x, y             # <<<<<<<<<<<<<<
@@ -5246,7 +5278,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_35__mul__(PyObject *__pyx_
   }
   /*else*/ {
 
-    /* "vectors.pxi":139
+    /* "cdec/vectors.pxi":139
  *         cdef float scalar
  *         if isinstance(x, SparseVector): vector, scalar = x, y
  *         else: vector, scalar = y, x             # <<<<<<<<<<<<<<
@@ -5263,7 +5295,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_35__mul__(PyObject *__pyx_
   }
   __pyx_L3:;
 
-  /* "vectors.pxi":140
+  /* "cdec/vectors.pxi":140
  *         if isinstance(x, SparseVector): vector, scalar = x, y
  *         else: vector, scalar = y, x
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
@@ -5276,7 +5308,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_35__mul__(PyObject *__pyx_
   __pyx_v_result = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "vectors.pxi":141
+  /* "cdec/vectors.pxi":141
  *         else: vector, scalar = y, x
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)
  *         result.vector = new FastSparseVector[weight_t](vector.vector[0] * scalar)             # <<<<<<<<<<<<<<
@@ -5285,7 +5317,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_35__mul__(PyObject *__pyx_
  */
   __pyx_v_result->vector = new FastSparseVector<weight_t> (((__pyx_v_vector->vector[0]) * __pyx_v_scalar));
 
-  /* "vectors.pxi":142
+  /* "cdec/vectors.pxi":142
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)
  *         result.vector = new FastSparseVector[weight_t](vector.vector[0] * scalar)
  *         return result             # <<<<<<<<<<<<<<
@@ -5297,7 +5329,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_35__mul__(PyObject *__pyx_
   __pyx_r = ((PyObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "vectors.pxi":135
+  /* "cdec/vectors.pxi":135
  *         return result
  * 
  *     def __mul__(x, y):             # <<<<<<<<<<<<<<
@@ -5318,7 +5350,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_35__mul__(PyObject *__pyx_
   return __pyx_r;
 }
 
-/* "vectors.pxi":144
+/* "cdec/vectors.pxi":144
  *         return result
  * 
  *     def __div__(x, y):             # <<<<<<<<<<<<<<
@@ -5357,7 +5389,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_37__div__(PyObject *__pyx_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__div__", 0);
 
-  /* "vectors.pxi":147
+  /* "cdec/vectors.pxi":147
  *         cdef SparseVector vector
  *         cdef float scalar
  *         if isinstance(x, SparseVector): vector, scalar = x, y             # <<<<<<<<<<<<<<
@@ -5378,7 +5410,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_37__div__(PyObject *__pyx_
   }
   /*else*/ {
 
-    /* "vectors.pxi":148
+    /* "cdec/vectors.pxi":148
  *         cdef float scalar
  *         if isinstance(x, SparseVector): vector, scalar = x, y
  *         else: vector, scalar = y, x             # <<<<<<<<<<<<<<
@@ -5395,7 +5427,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_37__div__(PyObject *__pyx_
   }
   __pyx_L3:;
 
-  /* "vectors.pxi":149
+  /* "cdec/vectors.pxi":149
  *         if isinstance(x, SparseVector): vector, scalar = x, y
  *         else: vector, scalar = y, x
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
@@ -5408,7 +5440,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_37__div__(PyObject *__pyx_
   __pyx_v_result = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "vectors.pxi":150
+  /* "cdec/vectors.pxi":150
  *         else: vector, scalar = y, x
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)
  *         result.vector = new FastSparseVector[weight_t](vector.vector[0] / scalar)             # <<<<<<<<<<<<<<
@@ -5416,7 +5448,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_37__div__(PyObject *__pyx_
  */
   __pyx_v_result->vector = new FastSparseVector<weight_t> (((__pyx_v_vector->vector[0]) / __pyx_v_scalar));
 
-  /* "vectors.pxi":151
+  /* "cdec/vectors.pxi":151
  *         cdef SparseVector result = SparseVector.__new__(SparseVector)
  *         result.vector = new FastSparseVector[weight_t](vector.vector[0] / scalar)
  *         return result             # <<<<<<<<<<<<<<
@@ -5426,7 +5458,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_37__div__(PyObject *__pyx_
   __pyx_r = ((PyObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "vectors.pxi":144
+  /* "cdec/vectors.pxi":144
  *         return result
  * 
  *     def __div__(x, y):             # <<<<<<<<<<<<<<
@@ -5448,7 +5480,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12SparseVector_37__div__(PyObject *__pyx_
 }
 #endif /*!(#if PY_MAJOR_VERSION < 3)*/
 
-/* "grammar.pxi":5
+/* "cdec/grammar.pxi":5
  * import cdec.sa._sa as _sa
  * 
  * def _phrase(phrase):             # <<<<<<<<<<<<<<
@@ -5469,9 +5501,9 @@ static PyObject *__pyx_pw_4cdec_5_cdec_1_phrase(PyObject *__pyx_self, PyObject *
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_7_phrase_2generator21(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_7_phrase_2generator22(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "grammar.pxi":6
+/* "cdec/grammar.pxi":6
  * 
  * def _phrase(phrase):
  *     return ' '.join(w.encode('utf8') if isinstance(w, unicode) else str(w) for w in phrase)             # <<<<<<<<<<<<<<
@@ -5497,7 +5529,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7_phrase_genexpr(PyObject *__pyx_self) {
   __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_outer_scope));
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_7_phrase_2generator21, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_phrase_locals_genexpr); if (unlikely(!gen)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 6; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_7_phrase_2generator22, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_phrase_locals_genexpr); if (unlikely(!gen)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 6; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -5513,7 +5545,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7_phrase_genexpr(PyObject *__pyx_self) {
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_7_phrase_2generator21(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_7_phrase_2generator22(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
   struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_3_genexpr *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_3_genexpr *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
@@ -5639,7 +5671,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7_phrase_2generator21(__pyx_GeneratorObje
   return NULL;
 }
 
-/* "grammar.pxi":5
+/* "cdec/grammar.pxi":5
  * import cdec.sa._sa as _sa
  * 
  * def _phrase(phrase):             # <<<<<<<<<<<<<<
@@ -5667,7 +5699,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec__phrase(CYTHON_UNUSED PyObject *__pyx_sel
   __Pyx_INCREF(__pyx_cur_scope->__pyx_v_phrase);
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_phrase);
 
-  /* "grammar.pxi":6
+  /* "cdec/grammar.pxi":6
  * 
  * def _phrase(phrase):
  *     return ' '.join(w.encode('utf8') if isinstance(w, unicode) else str(w) for w in phrase)             # <<<<<<<<<<<<<<
@@ -5684,7 +5716,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec__phrase(CYTHON_UNUSED PyObject *__pyx_sel
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "grammar.pxi":5
+  /* "cdec/grammar.pxi":5
  * import cdec.sa._sa as _sa
  * 
  * def _phrase(phrase):             # <<<<<<<<<<<<<<
@@ -5705,7 +5737,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec__phrase(CYTHON_UNUSED PyObject *__pyx_sel
   return __pyx_r;
 }
 
-/* "grammar.pxi":11
+/* "cdec/grammar.pxi":11
  *     cdef public bytes cat
  *     cdef public unsigned ref
  *     def __init__(self, bytes cat, unsigned ref=0):             # <<<<<<<<<<<<<<
@@ -5794,7 +5826,7 @@ static int __pyx_pf_4cdec_5_cdec_2NT___init__(struct __pyx_obj_4cdec_5_cdec_NT *
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "grammar.pxi":13
+  /* "cdec/grammar.pxi":13
  *     def __init__(self, bytes cat, unsigned ref=0):
  *         """NT(bytes cat, int ref=0) -> Non-terminal from category `cat`."""
  *         self.cat = cat             # <<<<<<<<<<<<<<
@@ -5807,7 +5839,7 @@ static int __pyx_pf_4cdec_5_cdec_2NT___init__(struct __pyx_obj_4cdec_5_cdec_NT *
   __Pyx_DECREF(__pyx_v_self->cat);
   __pyx_v_self->cat = __pyx_v_cat;
 
-  /* "grammar.pxi":14
+  /* "cdec/grammar.pxi":14
  *         """NT(bytes cat, int ref=0) -> Non-terminal from category `cat`."""
  *         self.cat = cat
  *         self.ref = ref             # <<<<<<<<<<<<<<
@@ -5816,7 +5848,7 @@ static int __pyx_pf_4cdec_5_cdec_2NT___init__(struct __pyx_obj_4cdec_5_cdec_NT *
  */
   __pyx_v_self->ref = __pyx_v_ref;
 
-  /* "grammar.pxi":11
+  /* "cdec/grammar.pxi":11
  *     cdef public bytes cat
  *     cdef public unsigned ref
  *     def __init__(self, bytes cat, unsigned ref=0):             # <<<<<<<<<<<<<<
@@ -5830,7 +5862,7 @@ static int __pyx_pf_4cdec_5_cdec_2NT___init__(struct __pyx_obj_4cdec_5_cdec_NT *
   return __pyx_r;
 }
 
-/* "grammar.pxi":16
+/* "cdec/grammar.pxi":16
  *         self.ref = ref
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
@@ -5862,7 +5894,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_2NT_2__str__(struct __pyx_obj_4cdec_5_cde
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__str__", 0);
 
-  /* "grammar.pxi":17
+  /* "cdec/grammar.pxi":17
  * 
  *     def __str__(self):
  *         if self.ref > 0:             # <<<<<<<<<<<<<<
@@ -5872,7 +5904,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_2NT_2__str__(struct __pyx_obj_4cdec_5_cde
   __pyx_t_1 = ((__pyx_v_self->ref > 0) != 0);
   if (__pyx_t_1) {
 
-    /* "grammar.pxi":18
+    /* "cdec/grammar.pxi":18
  *     def __str__(self):
  *         if self.ref > 0:
  *             return '[%s,%d]' % (self.cat, self.ref)             # <<<<<<<<<<<<<<
@@ -5898,7 +5930,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_2NT_2__str__(struct __pyx_obj_4cdec_5_cde
     goto __pyx_L0;
   }
 
-  /* "grammar.pxi":19
+  /* "cdec/grammar.pxi":19
  *         if self.ref > 0:
  *             return '[%s,%d]' % (self.cat, self.ref)
  *         return '[%s]' % self.cat             # <<<<<<<<<<<<<<
@@ -5912,7 +5944,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_2NT_2__str__(struct __pyx_obj_4cdec_5_cde
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "grammar.pxi":16
+  /* "cdec/grammar.pxi":16
  *         self.ref = ref
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
@@ -5932,7 +5964,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_2NT_2__str__(struct __pyx_obj_4cdec_5_cde
   return __pyx_r;
 }
 
-/* "grammar.pxi":9
+/* "cdec/grammar.pxi":9
  * 
  * cdef class NT:
  *     cdef public bytes cat             # <<<<<<<<<<<<<<
@@ -6040,7 +6072,7 @@ static int __pyx_pf_4cdec_5_cdec_2NT_3cat_4__del__(struct __pyx_obj_4cdec_5_cdec
   return __pyx_r;
 }
 
-/* "grammar.pxi":10
+/* "cdec/grammar.pxi":10
  * cdef class NT:
  *     cdef public bytes cat
  *     cdef public unsigned ref             # <<<<<<<<<<<<<<
@@ -6122,7 +6154,7 @@ static int __pyx_pf_4cdec_5_cdec_2NT_3ref_2__set__(struct __pyx_obj_4cdec_5_cdec
   return __pyx_r;
 }
 
-/* "grammar.pxi":23
+/* "cdec/grammar.pxi":23
  * cdef class NTRef:
  *     cdef public unsigned ref
  *     def __init__(self, unsigned ref):             # <<<<<<<<<<<<<<
@@ -6191,7 +6223,7 @@ static int __pyx_pf_4cdec_5_cdec_5NTRef___init__(struct __pyx_obj_4cdec_5_cdec_N
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "grammar.pxi":25
+  /* "cdec/grammar.pxi":25
  *     def __init__(self, unsigned ref):
  *         """NTRef(int ref) -> Non-terminal reference."""
  *         self.ref = ref             # <<<<<<<<<<<<<<
@@ -6200,7 +6232,7 @@ static int __pyx_pf_4cdec_5_cdec_5NTRef___init__(struct __pyx_obj_4cdec_5_cdec_N
  */
   __pyx_v_self->ref = __pyx_v_ref;
 
-  /* "grammar.pxi":23
+  /* "cdec/grammar.pxi":23
  * cdef class NTRef:
  *     cdef public unsigned ref
  *     def __init__(self, unsigned ref):             # <<<<<<<<<<<<<<
@@ -6214,7 +6246,7 @@ static int __pyx_pf_4cdec_5_cdec_5NTRef___init__(struct __pyx_obj_4cdec_5_cdec_N
   return __pyx_r;
 }
 
-/* "grammar.pxi":27
+/* "cdec/grammar.pxi":27
  *         self.ref = ref
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
@@ -6245,7 +6277,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5NTRef_2__str__(struct __pyx_obj_4cdec_5_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__str__", 0);
 
-  /* "grammar.pxi":28
+  /* "cdec/grammar.pxi":28
  * 
  *     def __str__(self):
  *         return '[%d]' % self.ref             # <<<<<<<<<<<<<<
@@ -6262,7 +6294,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5NTRef_2__str__(struct __pyx_obj_4cdec_5_
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "grammar.pxi":27
+  /* "cdec/grammar.pxi":27
  *         self.ref = ref
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
@@ -6282,7 +6314,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5NTRef_2__str__(struct __pyx_obj_4cdec_5_
   return __pyx_r;
 }
 
-/* "grammar.pxi":22
+/* "cdec/grammar.pxi":22
  * 
  * cdef class NTRef:
  *     cdef public unsigned ref             # <<<<<<<<<<<<<<
@@ -6364,7 +6396,7 @@ static int __pyx_pf_4cdec_5_cdec_5NTRef_3ref_2__set__(struct __pyx_obj_4cdec_5_c
   return __pyx_r;
 }
 
-/* "grammar.pxi":30
+/* "cdec/grammar.pxi":30
  *         return '[%d]' % self.ref
  * 
  * cdef TRule convert_rule(_sa.Rule rule):             # <<<<<<<<<<<<<<
@@ -6396,7 +6428,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("convert_rule", 0);
 
-  /* "grammar.pxi":31
+  /* "cdec/grammar.pxi":31
  * 
  * cdef TRule convert_rule(_sa.Rule rule):
  *     lhs = _sa.sym_tocat(rule.lhs)             # <<<<<<<<<<<<<<
@@ -6405,7 +6437,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
  */
   __pyx_v_lhs = __pyx_f_4cdec_2sa_3_sa_sym_tocat(__pyx_v_rule->lhs);
 
-  /* "grammar.pxi":32
+  /* "cdec/grammar.pxi":32
  * cdef TRule convert_rule(_sa.Rule rule):
  *     lhs = _sa.sym_tocat(rule.lhs)
  *     scores = dict(rule.scores)             # <<<<<<<<<<<<<<
@@ -6423,7 +6455,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
   __pyx_v_scores = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "grammar.pxi":33
+  /* "cdec/grammar.pxi":33
  *     lhs = _sa.sym_tocat(rule.lhs)
  *     scores = dict(rule.scores)
  *     f, e = [], []             # <<<<<<<<<<<<<<
@@ -6439,7 +6471,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
   __pyx_v_e = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "grammar.pxi":34
+  /* "cdec/grammar.pxi":34
  *     scores = dict(rule.scores)
  *     f, e = [], []
  *     cdef int* fsyms = rule.f.syms             # <<<<<<<<<<<<<<
@@ -6449,7 +6481,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
   __pyx_t_3 = __pyx_v_rule->f->syms;
   __pyx_v_fsyms = __pyx_t_3;
 
-  /* "grammar.pxi":35
+  /* "cdec/grammar.pxi":35
  *     f, e = [], []
  *     cdef int* fsyms = rule.f.syms
  *     for i in range(rule.f.n):             # <<<<<<<<<<<<<<
@@ -6460,7 +6492,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
   for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
     __pyx_v_i = __pyx_t_5;
 
-    /* "grammar.pxi":36
+    /* "cdec/grammar.pxi":36
  *     cdef int* fsyms = rule.f.syms
  *     for i in range(rule.f.n):
  *         if _sa.sym_isvar(fsyms[i]):             # <<<<<<<<<<<<<<
@@ -6470,7 +6502,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
     __pyx_t_6 = (__pyx_f_4cdec_2sa_3_sa_sym_isvar((__pyx_v_fsyms[__pyx_v_i])) != 0);
     if (__pyx_t_6) {
 
-      /* "grammar.pxi":37
+      /* "cdec/grammar.pxi":37
  *     for i in range(rule.f.n):
  *         if _sa.sym_isvar(fsyms[i]):
  *             f.append(NT(_sa.sym_tocat(fsyms[i])))             # <<<<<<<<<<<<<<
@@ -6493,7 +6525,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
     }
     /*else*/ {
 
-      /* "grammar.pxi":39
+      /* "cdec/grammar.pxi":39
  *             f.append(NT(_sa.sym_tocat(fsyms[i])))
  *         else:
  *             f.append(_sa.sym_tostring(fsyms[i]))             # <<<<<<<<<<<<<<
@@ -6508,7 +6540,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
     __pyx_L5:;
   }
 
-  /* "grammar.pxi":40
+  /* "cdec/grammar.pxi":40
  *         else:
  *             f.append(_sa.sym_tostring(fsyms[i]))
  *     cdef int* esyms = rule.e.syms             # <<<<<<<<<<<<<<
@@ -6518,7 +6550,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
   __pyx_t_3 = __pyx_v_rule->e->syms;
   __pyx_v_esyms = __pyx_t_3;
 
-  /* "grammar.pxi":41
+  /* "cdec/grammar.pxi":41
  *             f.append(_sa.sym_tostring(fsyms[i]))
  *     cdef int* esyms = rule.e.syms
  *     for i in range(rule.e.n):             # <<<<<<<<<<<<<<
@@ -6529,7 +6561,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
   for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
     __pyx_v_i = __pyx_t_5;
 
-    /* "grammar.pxi":42
+    /* "cdec/grammar.pxi":42
  *     cdef int* esyms = rule.e.syms
  *     for i in range(rule.e.n):
  *         if _sa.sym_isvar(esyms[i]):             # <<<<<<<<<<<<<<
@@ -6539,7 +6571,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
     __pyx_t_6 = (__pyx_f_4cdec_2sa_3_sa_sym_isvar((__pyx_v_esyms[__pyx_v_i])) != 0);
     if (__pyx_t_6) {
 
-      /* "grammar.pxi":43
+      /* "cdec/grammar.pxi":43
  *     for i in range(rule.e.n):
  *         if _sa.sym_isvar(esyms[i]):
  *             e.append(NTRef(_sa.sym_getindex(esyms[i])))             # <<<<<<<<<<<<<<
@@ -6562,7 +6594,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
     }
     /*else*/ {
 
-      /* "grammar.pxi":45
+      /* "cdec/grammar.pxi":45
  *             e.append(NTRef(_sa.sym_getindex(esyms[i])))
  *         else:
  *             e.append(_sa.sym_tostring(esyms[i]))             # <<<<<<<<<<<<<<
@@ -6577,7 +6609,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
     __pyx_L8:;
   }
 
-  /* "grammar.pxi":46
+  /* "cdec/grammar.pxi":46
  *         else:
  *             e.append(_sa.sym_tostring(esyms[i]))
  *     a = list(rule.alignments())             # <<<<<<<<<<<<<<
@@ -6615,7 +6647,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
   __pyx_v_a = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "grammar.pxi":47
+  /* "cdec/grammar.pxi":47
  *             e.append(_sa.sym_tostring(esyms[i]))
  *     a = list(rule.alignments())
  *     return TRule(lhs, f, e, scores, a)             # <<<<<<<<<<<<<<
@@ -6649,7 +6681,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "grammar.pxi":30
+  /* "cdec/grammar.pxi":30
  *         return '[%d]' % self.ref
  * 
  * cdef TRule convert_rule(_sa.Rule rule):             # <<<<<<<<<<<<<<
@@ -6674,7 +6706,7 @@ static struct __pyx_obj_4cdec_5_cdec_TRule *__pyx_f_4cdec_5_cdec_convert_rule(st
   return __pyx_r;
 }
 
-/* "grammar.pxi":52
+/* "cdec/grammar.pxi":52
  *     cdef shared_ptr[grammar.TRule]* rule
  * 
  *     def __init__(self, lhs, f, e, scores, a=None, text=None):             # <<<<<<<<<<<<<<
@@ -6798,7 +6830,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "grammar.pxi":59
+  /* "cdec/grammar.pxi":59
  *         scores: dictionary of feature scores
  *         a: optional list of alignment points"""
  *         self.rule = new shared_ptr[grammar.TRule](new grammar.TRule())             # <<<<<<<<<<<<<<
@@ -6813,7 +6845,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   }
   __pyx_v_self->rule = new boost::shared_ptr<TRule> (__pyx_t_1);
 
-  /* "grammar.pxi":60
+  /* "cdec/grammar.pxi":60
  *         a: optional list of alignment points"""
  *         self.rule = new shared_ptr[grammar.TRule](new grammar.TRule())
  *         if lhs:             # <<<<<<<<<<<<<<
@@ -6823,7 +6855,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_lhs); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__pyx_t_2) {
 
-    /* "grammar.pxi":61
+    /* "cdec/grammar.pxi":61
  *         self.rule = new shared_ptr[grammar.TRule](new grammar.TRule())
  *         if lhs:
  *           self.lhs = lhs             # <<<<<<<<<<<<<<
@@ -6835,7 +6867,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   }
   __pyx_L3:;
 
-  /* "grammar.pxi":62
+  /* "cdec/grammar.pxi":62
  *         if lhs:
  *           self.lhs = lhs
  *         if e:             # <<<<<<<<<<<<<<
@@ -6845,7 +6877,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_e); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 62; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__pyx_t_2) {
 
-    /* "grammar.pxi":63
+    /* "cdec/grammar.pxi":63
  *           self.lhs = lhs
  *         if e:
  *           self.e = e             # <<<<<<<<<<<<<<
@@ -6857,7 +6889,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   }
   __pyx_L4:;
 
-  /* "grammar.pxi":64
+  /* "cdec/grammar.pxi":64
  *         if e:
  *           self.e = e
  *         if f:             # <<<<<<<<<<<<<<
@@ -6867,7 +6899,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_f); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__pyx_t_2) {
 
-    /* "grammar.pxi":65
+    /* "cdec/grammar.pxi":65
  *           self.e = e
  *         if f:
  *           self.f = f             # <<<<<<<<<<<<<<
@@ -6879,7 +6911,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   }
   __pyx_L5:;
 
-  /* "grammar.pxi":66
+  /* "cdec/grammar.pxi":66
  *         if f:
  *           self.f = f
  *         if scores:             # <<<<<<<<<<<<<<
@@ -6889,7 +6921,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_scores); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__pyx_t_2) {
 
-    /* "grammar.pxi":67
+    /* "cdec/grammar.pxi":67
  *           self.f = f
  *         if scores:
  *           self.scores = scores             # <<<<<<<<<<<<<<
@@ -6901,7 +6933,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   }
   __pyx_L6:;
 
-  /* "grammar.pxi":68
+  /* "cdec/grammar.pxi":68
  *         if scores:
  *           self.scores = scores
  *         if a:             # <<<<<<<<<<<<<<
@@ -6911,7 +6943,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_a); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__pyx_t_2) {
 
-    /* "grammar.pxi":69
+    /* "cdec/grammar.pxi":69
  *           self.scores = scores
  *         if a:
  *           self.a = a             # <<<<<<<<<<<<<<
@@ -6923,7 +6955,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   }
   __pyx_L7:;
 
-  /* "grammar.pxi":70
+  /* "cdec/grammar.pxi":70
  *         if a:
  *           self.a = a
  *         if text:             # <<<<<<<<<<<<<<
@@ -6933,7 +6965,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_text); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 70; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__pyx_t_2) {
 
-    /* "grammar.pxi":71
+    /* "cdec/grammar.pxi":71
  *           self.a = a
  *         if text:
  *           self.rule.get().ReadFromString(text, 0)             # <<<<<<<<<<<<<<
@@ -6946,7 +6978,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   }
   __pyx_L8:;
 
-  /* "grammar.pxi":72
+  /* "cdec/grammar.pxi":72
  *         if text:
  *           self.rule.get().ReadFromString(text, 0)
  *         self.rule.get().ComputeArity()             # <<<<<<<<<<<<<<
@@ -6955,7 +6987,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
  */
   __pyx_v_self->rule->get()->ComputeArity();
 
-  /* "grammar.pxi":52
+  /* "cdec/grammar.pxi":52
  *     cdef shared_ptr[grammar.TRule]* rule
  * 
  *     def __init__(self, lhs, f, e, scores, a=None, text=None):             # <<<<<<<<<<<<<<
@@ -6974,7 +7006,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule___init__(struct __pyx_obj_4cdec_5_cdec_T
   return __pyx_r;
 }
 
-/* "grammar.pxi":74
+/* "cdec/grammar.pxi":74
  *         self.rule.get().ComputeArity()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -6997,7 +7029,7 @@ static void __pyx_pf_4cdec_5_cdec_5TRule_2__dealloc__(struct __pyx_obj_4cdec_5_c
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "grammar.pxi":75
+  /* "cdec/grammar.pxi":75
  * 
  *     def __dealloc__(self):
  *         del self.rule             # <<<<<<<<<<<<<<
@@ -7006,7 +7038,7 @@ static void __pyx_pf_4cdec_5_cdec_5TRule_2__dealloc__(struct __pyx_obj_4cdec_5_c
  */
   delete __pyx_v_self->rule;
 
-  /* "grammar.pxi":74
+  /* "cdec/grammar.pxi":74
  *         self.rule.get().ComputeArity()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -7018,7 +7050,7 @@ static void __pyx_pf_4cdec_5_cdec_5TRule_2__dealloc__(struct __pyx_obj_4cdec_5_c
   __Pyx_RefNannyFinishContext();
 }
 
-/* "grammar.pxi":78
+/* "cdec/grammar.pxi":78
  * 
  *     property arity:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -7048,7 +7080,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_5arity___get__(struct __pyx_obj_4c
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "grammar.pxi":79
+  /* "cdec/grammar.pxi":79
  *     property arity:
  *         def __get__(self):
  *             return self.rule.get().arity_             # <<<<<<<<<<<<<<
@@ -7062,7 +7094,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_5arity___get__(struct __pyx_obj_4c
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "grammar.pxi":78
+  /* "cdec/grammar.pxi":78
  * 
  *     property arity:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -7081,7 +7113,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_5arity___get__(struct __pyx_obj_4c
   return __pyx_r;
 }
 
-/* "grammar.pxi":82
+/* "cdec/grammar.pxi":82
  * 
  *     property f:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -7122,7 +7154,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1f___get__(struct __pyx_obj_4cdec_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "grammar.pxi":83
+  /* "cdec/grammar.pxi":83
  *     property f:
  *         def __get__(self):
  *             cdef vector[WordID]* f_ = &self.rule.get().f_             # <<<<<<<<<<<<<<
@@ -7131,7 +7163,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1f___get__(struct __pyx_obj_4cdec_
  */
   __pyx_v_f_ = (&__pyx_v_self->rule->get()->f_);
 
-  /* "grammar.pxi":85
+  /* "cdec/grammar.pxi":85
  *             cdef vector[WordID]* f_ = &self.rule.get().f_
  *             cdef WordID w
  *             cdef f = []             # <<<<<<<<<<<<<<
@@ -7143,7 +7175,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1f___get__(struct __pyx_obj_4cdec_
   __pyx_v_f = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "grammar.pxi":87
+  /* "cdec/grammar.pxi":87
  *             cdef f = []
  *             cdef unsigned i
  *             cdef int idx = 0             # <<<<<<<<<<<<<<
@@ -7152,7 +7184,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1f___get__(struct __pyx_obj_4cdec_
  */
   __pyx_v_idx = 0;
 
-  /* "grammar.pxi":88
+  /* "cdec/grammar.pxi":88
  *             cdef unsigned i
  *             cdef int idx = 0
  *             for i in range(f_.size()):             # <<<<<<<<<<<<<<
@@ -7163,7 +7195,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1f___get__(struct __pyx_obj_4cdec_
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "grammar.pxi":89
+    /* "cdec/grammar.pxi":89
  *             cdef int idx = 0
  *             for i in range(f_.size()):
  *                 w = f_[0][i]             # <<<<<<<<<<<<<<
@@ -7172,7 +7204,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1f___get__(struct __pyx_obj_4cdec_
  */
     __pyx_v_w = ((__pyx_v_f_[0])[__pyx_v_i]);
 
-    /* "grammar.pxi":90
+    /* "cdec/grammar.pxi":90
  *             for i in range(f_.size()):
  *                 w = f_[0][i]
  *                 if w < 0:             # <<<<<<<<<<<<<<
@@ -7182,7 +7214,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1f___get__(struct __pyx_obj_4cdec_
     __pyx_t_4 = ((__pyx_v_w < 0) != 0);
     if (__pyx_t_4) {
 
-      /* "grammar.pxi":91
+      /* "cdec/grammar.pxi":91
  *                 w = f_[0][i]
  *                 if w < 0:
  *                     idx += 1             # <<<<<<<<<<<<<<
@@ -7191,7 +7223,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1f___get__(struct __pyx_obj_4cdec_
  */
       __pyx_v_idx = (__pyx_v_idx + 1);
 
-      /* "grammar.pxi":92
+      /* "cdec/grammar.pxi":92
  *                 if w < 0:
  *                     idx += 1
  *                     f.append(NT(TDConvert(-w).c_str(), idx))             # <<<<<<<<<<<<<<
@@ -7219,7 +7251,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1f___get__(struct __pyx_obj_4cdec_
     }
     /*else*/ {
 
-      /* "grammar.pxi":94
+      /* "cdec/grammar.pxi":94
  *                     f.append(NT(TDConvert(-w).c_str(), idx))
  *                 else:
  *                     f.append(unicode(TDConvert(w).c_str(), encoding='utf8'))             # <<<<<<<<<<<<<<
@@ -7246,7 +7278,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1f___get__(struct __pyx_obj_4cdec_
     __pyx_L5:;
   }
 
-  /* "grammar.pxi":95
+  /* "cdec/grammar.pxi":95
  *                 else:
  *                     f.append(unicode(TDConvert(w).c_str(), encoding='utf8'))
  *             return f             # <<<<<<<<<<<<<<
@@ -7258,7 +7290,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1f___get__(struct __pyx_obj_4cdec_
   __pyx_r = __pyx_v_f;
   goto __pyx_L0;
 
-  /* "grammar.pxi":82
+  /* "cdec/grammar.pxi":82
  * 
  *     property f:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -7280,7 +7312,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1f___get__(struct __pyx_obj_4cdec_
   return __pyx_r;
 }
 
-/* "grammar.pxi":97
+/* "cdec/grammar.pxi":97
  *             return f
  * 
  *         def __set__(self, f):             # <<<<<<<<<<<<<<
@@ -7320,7 +7352,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1f_2__set__(struct __pyx_obj_4cdec_5_cde
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
 
-  /* "grammar.pxi":98
+  /* "cdec/grammar.pxi":98
  * 
  *         def __set__(self, f):
  *             cdef vector[WordID]* f_ = &self.rule.get().f_             # <<<<<<<<<<<<<<
@@ -7329,7 +7361,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1f_2__set__(struct __pyx_obj_4cdec_5_cde
  */
   __pyx_v_f_ = (&__pyx_v_self->rule->get()->f_);
 
-  /* "grammar.pxi":99
+  /* "cdec/grammar.pxi":99
  *         def __set__(self, f):
  *             cdef vector[WordID]* f_ = &self.rule.get().f_
  *             f_.resize(len(f))             # <<<<<<<<<<<<<<
@@ -7339,7 +7371,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1f_2__set__(struct __pyx_obj_4cdec_5_cde
   __pyx_t_1 = PyObject_Length(__pyx_v_f); if (unlikely(__pyx_t_1 == -1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 99; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_f_->resize(__pyx_t_1);
 
-  /* "grammar.pxi":101
+  /* "cdec/grammar.pxi":101
  *             f_.resize(len(f))
  *             cdef unsigned i
  *             cdef int idx = 0             # <<<<<<<<<<<<<<
@@ -7348,7 +7380,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1f_2__set__(struct __pyx_obj_4cdec_5_cde
  */
   __pyx_v_idx = 0;
 
-  /* "grammar.pxi":102
+  /* "cdec/grammar.pxi":102
  *             cdef unsigned i
  *             cdef int idx = 0
  *             for i in range(len(f)):             # <<<<<<<<<<<<<<
@@ -7359,7 +7391,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1f_2__set__(struct __pyx_obj_4cdec_5_cde
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_v_i = __pyx_t_2;
 
-    /* "grammar.pxi":103
+    /* "cdec/grammar.pxi":103
  *             cdef int idx = 0
  *             for i in range(len(f)):
  *                 if isinstance(f[i], NT):             # <<<<<<<<<<<<<<
@@ -7373,7 +7405,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1f_2__set__(struct __pyx_obj_4cdec_5_cde
     __pyx_t_5 = (__pyx_t_4 != 0);
     if (__pyx_t_5) {
 
-      /* "grammar.pxi":104
+      /* "cdec/grammar.pxi":104
  *             for i in range(len(f)):
  *                 if isinstance(f[i], NT):
  *                     f_[0][i] = -TDConvert((<NT> f[i]).cat)             # <<<<<<<<<<<<<<
@@ -7389,7 +7421,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1f_2__set__(struct __pyx_obj_4cdec_5_cde
     }
     /*else*/ {
 
-      /* "grammar.pxi":106
+      /* "cdec/grammar.pxi":106
  *                     f_[0][i] = -TDConvert((<NT> f[i]).cat)
  *                 else:
  *                     fi = as_str(f[i])             # <<<<<<<<<<<<<<
@@ -7404,7 +7436,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1f_2__set__(struct __pyx_obj_4cdec_5_cde
       __Pyx_XDECREF_SET(__pyx_v_fi, ((PyObject*)__pyx_t_7));
       __pyx_t_7 = 0;
 
-      /* "grammar.pxi":107
+      /* "cdec/grammar.pxi":107
  *                 else:
  *                     fi = as_str(f[i])
  *                     f_[0][i] = TDConvert(fi)             # <<<<<<<<<<<<<<
@@ -7417,7 +7449,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1f_2__set__(struct __pyx_obj_4cdec_5_cde
     __pyx_L5:;
   }
 
-  /* "grammar.pxi":97
+  /* "cdec/grammar.pxi":97
  *             return f
  * 
  *         def __set__(self, f):             # <<<<<<<<<<<<<<
@@ -7439,7 +7471,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1f_2__set__(struct __pyx_obj_4cdec_5_cde
   return __pyx_r;
 }
 
-/* "grammar.pxi":110
+/* "cdec/grammar.pxi":110
  * 
  *     property e:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -7480,7 +7512,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1e___get__(struct __pyx_obj_4cdec_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "grammar.pxi":111
+  /* "cdec/grammar.pxi":111
  *     property e:
  *         def __get__(self):
  *             cdef vector[WordID]* e_ = &self.rule.get().e_             # <<<<<<<<<<<<<<
@@ -7489,7 +7521,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1e___get__(struct __pyx_obj_4cdec_
  */
   __pyx_v_e_ = (&__pyx_v_self->rule->get()->e_);
 
-  /* "grammar.pxi":113
+  /* "cdec/grammar.pxi":113
  *             cdef vector[WordID]* e_ = &self.rule.get().e_
  *             cdef WordID w
  *             cdef e = []             # <<<<<<<<<<<<<<
@@ -7501,7 +7533,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1e___get__(struct __pyx_obj_4cdec_
   __pyx_v_e = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "grammar.pxi":115
+  /* "cdec/grammar.pxi":115
  *             cdef e = []
  *             cdef unsigned i
  *             cdef int idx = 0             # <<<<<<<<<<<<<<
@@ -7510,7 +7542,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1e___get__(struct __pyx_obj_4cdec_
  */
   __pyx_v_idx = 0;
 
-  /* "grammar.pxi":116
+  /* "cdec/grammar.pxi":116
  *             cdef unsigned i
  *             cdef int idx = 0
  *             for i in range(e_.size()):             # <<<<<<<<<<<<<<
@@ -7521,7 +7553,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1e___get__(struct __pyx_obj_4cdec_
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "grammar.pxi":117
+    /* "cdec/grammar.pxi":117
  *             cdef int idx = 0
  *             for i in range(e_.size()):
  *                 w = e_[0][i]             # <<<<<<<<<<<<<<
@@ -7530,7 +7562,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1e___get__(struct __pyx_obj_4cdec_
  */
     __pyx_v_w = ((__pyx_v_e_[0])[__pyx_v_i]);
 
-    /* "grammar.pxi":118
+    /* "cdec/grammar.pxi":118
  *             for i in range(e_.size()):
  *                 w = e_[0][i]
  *                 if w < 1:             # <<<<<<<<<<<<<<
@@ -7540,7 +7572,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1e___get__(struct __pyx_obj_4cdec_
     __pyx_t_4 = ((__pyx_v_w < 1) != 0);
     if (__pyx_t_4) {
 
-      /* "grammar.pxi":119
+      /* "cdec/grammar.pxi":119
  *                 w = e_[0][i]
  *                 if w < 1:
  *                     idx += 1             # <<<<<<<<<<<<<<
@@ -7549,7 +7581,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1e___get__(struct __pyx_obj_4cdec_
  */
       __pyx_v_idx = (__pyx_v_idx + 1);
 
-      /* "grammar.pxi":120
+      /* "cdec/grammar.pxi":120
  *                 if w < 1:
  *                     idx += 1
  *                     e.append(NTRef(1-w))             # <<<<<<<<<<<<<<
@@ -7572,7 +7604,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1e___get__(struct __pyx_obj_4cdec_
     }
     /*else*/ {
 
-      /* "grammar.pxi":122
+      /* "cdec/grammar.pxi":122
  *                     e.append(NTRef(1-w))
  *                 else:
  *                     e.append(unicode(TDConvert(w).c_str(), encoding='utf8'))             # <<<<<<<<<<<<<<
@@ -7599,7 +7631,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1e___get__(struct __pyx_obj_4cdec_
     __pyx_L5:;
   }
 
-  /* "grammar.pxi":123
+  /* "cdec/grammar.pxi":123
  *                 else:
  *                     e.append(unicode(TDConvert(w).c_str(), encoding='utf8'))
  *             return e             # <<<<<<<<<<<<<<
@@ -7611,7 +7643,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1e___get__(struct __pyx_obj_4cdec_
   __pyx_r = __pyx_v_e;
   goto __pyx_L0;
 
-  /* "grammar.pxi":110
+  /* "cdec/grammar.pxi":110
  * 
  *     property e:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -7633,7 +7665,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_1e___get__(struct __pyx_obj_4cdec_
   return __pyx_r;
 }
 
-/* "grammar.pxi":125
+/* "cdec/grammar.pxi":125
  *             return e
  * 
  *         def __set__(self, e):             # <<<<<<<<<<<<<<
@@ -7673,7 +7705,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1e_2__set__(struct __pyx_obj_4cdec_5_cde
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
 
-  /* "grammar.pxi":126
+  /* "cdec/grammar.pxi":126
  * 
  *         def __set__(self, e):
  *             cdef vector[WordID]* e_ = &self.rule.get().e_             # <<<<<<<<<<<<<<
@@ -7682,7 +7714,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1e_2__set__(struct __pyx_obj_4cdec_5_cde
  */
   __pyx_v_e_ = (&__pyx_v_self->rule->get()->e_);
 
-  /* "grammar.pxi":127
+  /* "cdec/grammar.pxi":127
  *         def __set__(self, e):
  *             cdef vector[WordID]* e_ = &self.rule.get().e_
  *             e_.resize(len(e))             # <<<<<<<<<<<<<<
@@ -7692,7 +7724,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1e_2__set__(struct __pyx_obj_4cdec_5_cde
   __pyx_t_1 = PyObject_Length(__pyx_v_e); if (unlikely(__pyx_t_1 == -1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 127; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_e_->resize(__pyx_t_1);
 
-  /* "grammar.pxi":129
+  /* "cdec/grammar.pxi":129
  *             e_.resize(len(e))
  *             cdef unsigned i
  *             for i in range(len(e)):             # <<<<<<<<<<<<<<
@@ -7703,7 +7735,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1e_2__set__(struct __pyx_obj_4cdec_5_cde
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_v_i = __pyx_t_2;
 
-    /* "grammar.pxi":130
+    /* "cdec/grammar.pxi":130
  *             cdef unsigned i
  *             for i in range(len(e)):
  *                 if isinstance(e[i], NTRef):             # <<<<<<<<<<<<<<
@@ -7717,7 +7749,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1e_2__set__(struct __pyx_obj_4cdec_5_cde
     __pyx_t_5 = (__pyx_t_4 != 0);
     if (__pyx_t_5) {
 
-      /* "grammar.pxi":131
+      /* "cdec/grammar.pxi":131
  *             for i in range(len(e)):
  *                 if isinstance(e[i], NTRef):
  *                     e_[0][i] = 1-e[i].ref             # <<<<<<<<<<<<<<
@@ -7739,7 +7771,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1e_2__set__(struct __pyx_obj_4cdec_5_cde
     }
     /*else*/ {
 
-      /* "grammar.pxi":133
+      /* "cdec/grammar.pxi":133
  *                     e_[0][i] = 1-e[i].ref
  *                 else:
  *                     ei = as_str(e[i])             # <<<<<<<<<<<<<<
@@ -7754,7 +7786,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1e_2__set__(struct __pyx_obj_4cdec_5_cde
       __Pyx_XDECREF_SET(__pyx_v_ei, ((PyObject*)__pyx_t_6));
       __pyx_t_6 = 0;
 
-      /* "grammar.pxi":134
+      /* "cdec/grammar.pxi":134
  *                 else:
  *                     ei = as_str(e[i])
  *                     e_[0][i] = TDConvert(ei)             # <<<<<<<<<<<<<<
@@ -7767,7 +7799,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1e_2__set__(struct __pyx_obj_4cdec_5_cde
     __pyx_L5:;
   }
 
-  /* "grammar.pxi":125
+  /* "cdec/grammar.pxi":125
  *             return e
  * 
  *         def __set__(self, e):             # <<<<<<<<<<<<<<
@@ -7790,7 +7822,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1e_2__set__(struct __pyx_obj_4cdec_5_cde
 }
 static PyObject *__pyx_gb_4cdec_5_cdec_5TRule_1a_2generator2(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "grammar.pxi":137
+/* "cdec/grammar.pxi":137
  * 
  *     property a:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -7869,7 +7901,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_5TRule_1a_2generator2(__pyx_GeneratorObje
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 137; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "grammar.pxi":139
+  /* "cdec/grammar.pxi":139
  *         def __get__(self):
  *             cdef unsigned i
  *             cdef vector[grammar.AlignmentPoint]* a = &self.rule.get().a_             # <<<<<<<<<<<<<<
@@ -7878,7 +7910,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_5TRule_1a_2generator2(__pyx_GeneratorObje
  */
   __pyx_cur_scope->__pyx_v_a = (&__pyx_cur_scope->__pyx_v_self->rule->get()->a_);
 
-  /* "grammar.pxi":140
+  /* "cdec/grammar.pxi":140
  *             cdef unsigned i
  *             cdef vector[grammar.AlignmentPoint]* a = &self.rule.get().a_
  *             for i in range(a.size()):             # <<<<<<<<<<<<<<
@@ -7889,7 +7921,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_5TRule_1a_2generator2(__pyx_GeneratorObje
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_cur_scope->__pyx_v_i = __pyx_t_2;
 
-    /* "grammar.pxi":141
+    /* "cdec/grammar.pxi":141
  *             cdef vector[grammar.AlignmentPoint]* a = &self.rule.get().a_
  *             for i in range(a.size()):
  *                 yield (a[0][i].s_, a[0][i].t_)             # <<<<<<<<<<<<<<
@@ -7923,7 +7955,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_5TRule_1a_2generator2(__pyx_GeneratorObje
     if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "grammar.pxi":137
+  /* "cdec/grammar.pxi":137
  * 
  *     property a:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -7947,7 +7979,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_5TRule_1a_2generator2(__pyx_GeneratorObje
   return NULL;
 }
 
-/* "grammar.pxi":143
+/* "cdec/grammar.pxi":143
  *                 yield (a[0][i].s_, a[0][i].t_)
  * 
  *         def __set__(self, a):             # <<<<<<<<<<<<<<
@@ -7989,7 +8021,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1a_3__set__(struct __pyx_obj_4cdec_5_cde
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
 
-  /* "grammar.pxi":144
+  /* "cdec/grammar.pxi":144
  * 
  *         def __set__(self, a):
  *             cdef vector[grammar.AlignmentPoint]* a_ = &self.rule.get().a_             # <<<<<<<<<<<<<<
@@ -7998,7 +8030,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1a_3__set__(struct __pyx_obj_4cdec_5_cde
  */
   __pyx_v_a_ = (&__pyx_v_self->rule->get()->a_);
 
-  /* "grammar.pxi":145
+  /* "cdec/grammar.pxi":145
  *         def __set__(self, a):
  *             cdef vector[grammar.AlignmentPoint]* a_ = &self.rule.get().a_
  *             a_.resize(len(a))             # <<<<<<<<<<<<<<
@@ -8008,7 +8040,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1a_3__set__(struct __pyx_obj_4cdec_5_cde
   __pyx_t_1 = PyObject_Length(__pyx_v_a); if (unlikely(__pyx_t_1 == -1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_a_->resize(__pyx_t_1);
 
-  /* "grammar.pxi":148
+  /* "cdec/grammar.pxi":148
  *             cdef unsigned i
  *             cdef int s, t
  *             for i in range(len(a)):             # <<<<<<<<<<<<<<
@@ -8019,7 +8051,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1a_3__set__(struct __pyx_obj_4cdec_5_cde
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_v_i = __pyx_t_2;
 
-    /* "grammar.pxi":149
+    /* "cdec/grammar.pxi":149
  *             cdef int s, t
  *             for i in range(len(a)):
  *                 s, t = a[i]             # <<<<<<<<<<<<<<
@@ -8085,7 +8117,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1a_3__set__(struct __pyx_obj_4cdec_5_cde
     __pyx_v_s = __pyx_t_8;
     __pyx_v_t = __pyx_t_9;
 
-    /* "grammar.pxi":150
+    /* "cdec/grammar.pxi":150
  *             for i in range(len(a)):
  *                 s, t = a[i]
  *                 a_[0][i] = grammar.AlignmentPoint(s, t)             # <<<<<<<<<<<<<<
@@ -8095,7 +8127,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1a_3__set__(struct __pyx_obj_4cdec_5_cde
     ((__pyx_v_a_[0])[__pyx_v_i]) = AlignmentPoint(__pyx_v_s, __pyx_v_t);
   }
 
-  /* "grammar.pxi":143
+  /* "cdec/grammar.pxi":143
  *                 yield (a[0][i].s_, a[0][i].t_)
  * 
  *         def __set__(self, a):             # <<<<<<<<<<<<<<
@@ -8118,7 +8150,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_1a_3__set__(struct __pyx_obj_4cdec_5_cde
   return __pyx_r;
 }
 
-/* "grammar.pxi":153
+/* "cdec/grammar.pxi":153
  * 
  *     property scores:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -8149,7 +8181,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_6scores___get__(struct __pyx_obj_4
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "grammar.pxi":154
+  /* "cdec/grammar.pxi":154
  *     property scores:
  *         def __get__(self):
  *             cdef SparseVector scores = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
@@ -8162,7 +8194,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_6scores___get__(struct __pyx_obj_4
   __pyx_v_scores = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "grammar.pxi":155
+  /* "cdec/grammar.pxi":155
  *         def __get__(self):
  *             cdef SparseVector scores = SparseVector.__new__(SparseVector)
  *             scores.vector = new FastSparseVector[double](self.rule.get().scores_)             # <<<<<<<<<<<<<<
@@ -8171,7 +8203,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_6scores___get__(struct __pyx_obj_4
  */
   __pyx_v_scores->vector = new FastSparseVector<double> (__pyx_v_self->rule->get()->scores_);
 
-  /* "grammar.pxi":156
+  /* "cdec/grammar.pxi":156
  *             cdef SparseVector scores = SparseVector.__new__(SparseVector)
  *             scores.vector = new FastSparseVector[double](self.rule.get().scores_)
  *             return scores             # <<<<<<<<<<<<<<
@@ -8183,7 +8215,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_6scores___get__(struct __pyx_obj_4
   __pyx_r = ((PyObject *)__pyx_v_scores);
   goto __pyx_L0;
 
-  /* "grammar.pxi":153
+  /* "cdec/grammar.pxi":153
  * 
  *     property scores:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -8203,7 +8235,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_6scores___get__(struct __pyx_obj_4
   return __pyx_r;
 }
 
-/* "grammar.pxi":158
+/* "cdec/grammar.pxi":158
  *             return scores
  * 
  *         def __set__(self, scores):             # <<<<<<<<<<<<<<
@@ -8248,7 +8280,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_6scores_2__set__(struct __pyx_obj_4cdec_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
 
-  /* "grammar.pxi":159
+  /* "cdec/grammar.pxi":159
  * 
  *         def __set__(self, scores):
  *             cdef FastSparseVector[double]* scores_ = &self.rule.get().scores_             # <<<<<<<<<<<<<<
@@ -8257,7 +8289,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_6scores_2__set__(struct __pyx_obj_4cdec_
  */
   __pyx_v_scores_ = (&__pyx_v_self->rule->get()->scores_);
 
-  /* "grammar.pxi":160
+  /* "cdec/grammar.pxi":160
  *         def __set__(self, scores):
  *             cdef FastSparseVector[double]* scores_ = &self.rule.get().scores_
  *             scores_.clear()             # <<<<<<<<<<<<<<
@@ -8266,7 +8298,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_6scores_2__set__(struct __pyx_obj_4cdec_
  */
   __pyx_v_scores_->clear();
 
-  /* "grammar.pxi":163
+  /* "cdec/grammar.pxi":163
  *             cdef int fid
  *             cdef float fval
  *             for fname, fval in scores.items():             # <<<<<<<<<<<<<<
@@ -8387,7 +8419,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_6scores_2__set__(struct __pyx_obj_4cdec_
     __pyx_t_3 = 0;
     __pyx_v_fval = __pyx_t_9;
 
-    /* "grammar.pxi":164
+    /* "cdec/grammar.pxi":164
  *             cdef float fval
  *             for fname, fval in scores.items():
  *                 fn = as_str(fname)             # <<<<<<<<<<<<<<
@@ -8399,7 +8431,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_6scores_2__set__(struct __pyx_obj_4cdec_
     __Pyx_XDECREF_SET(__pyx_v_fn, ((PyObject*)__pyx_t_1));
     __pyx_t_1 = 0;
 
-    /* "grammar.pxi":165
+    /* "cdec/grammar.pxi":165
  *             for fname, fval in scores.items():
  *                 fn = as_str(fname)
  *                 fid = FDConvert(fn)             # <<<<<<<<<<<<<<
@@ -8409,7 +8441,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_6scores_2__set__(struct __pyx_obj_4cdec_
     __pyx_t_10 = __Pyx_PyObject_AsString(__pyx_v_fn); if (unlikely((!__pyx_t_10) && PyErr_Occurred())) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 165; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_v_fid = FD::Convert(__pyx_t_10);
 
-    /* "grammar.pxi":166
+    /* "cdec/grammar.pxi":166
  *                 fn = as_str(fname)
  *                 fid = FDConvert(fn)
  *                 if fid < 0: raise KeyError(fname)             # <<<<<<<<<<<<<<
@@ -8431,7 +8463,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_6scores_2__set__(struct __pyx_obj_4cdec_
       {__pyx_filename = __pyx_f[2]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
 
-    /* "grammar.pxi":167
+    /* "cdec/grammar.pxi":167
  *                 fid = FDConvert(fn)
  *                 if fid < 0: raise KeyError(fname)
  *                 scores_.set_value(fid, fval)             # <<<<<<<<<<<<<<
@@ -8440,7 +8472,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_6scores_2__set__(struct __pyx_obj_4cdec_
  */
     __pyx_v_scores_->set_value(__pyx_v_fid, __pyx_v_fval);
 
-    /* "grammar.pxi":163
+    /* "cdec/grammar.pxi":163
  *             cdef int fid
  *             cdef float fval
  *             for fname, fval in scores.items():             # <<<<<<<<<<<<<<
@@ -8450,7 +8482,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_6scores_2__set__(struct __pyx_obj_4cdec_
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "grammar.pxi":158
+  /* "cdec/grammar.pxi":158
  *             return scores
  * 
  *         def __set__(self, scores):             # <<<<<<<<<<<<<<
@@ -8476,7 +8508,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_6scores_2__set__(struct __pyx_obj_4cdec_
   return __pyx_r;
 }
 
-/* "grammar.pxi":170
+/* "cdec/grammar.pxi":170
  * 
  *     property lhs:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -8507,7 +8539,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_3lhs___get__(struct __pyx_obj_4cde
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "grammar.pxi":171
+  /* "cdec/grammar.pxi":171
  *     property lhs:
  *         def __get__(self):
  *             return NT(TDConvert(-self.rule.get().lhs_).c_str())             # <<<<<<<<<<<<<<
@@ -8529,7 +8561,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_3lhs___get__(struct __pyx_obj_4cde
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "grammar.pxi":170
+  /* "cdec/grammar.pxi":170
  * 
  *     property lhs:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -8549,7 +8581,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_3lhs___get__(struct __pyx_obj_4cde
   return __pyx_r;
 }
 
-/* "grammar.pxi":173
+/* "cdec/grammar.pxi":173
  *             return NT(TDConvert(-self.rule.get().lhs_).c_str())
  * 
  *         def __set__(self, lhs):             # <<<<<<<<<<<<<<
@@ -8584,7 +8616,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_3lhs_2__set__(struct __pyx_obj_4cdec_5_c
   __Pyx_RefNannySetupContext("__set__", 0);
   __Pyx_INCREF(__pyx_v_lhs);
 
-  /* "grammar.pxi":174
+  /* "cdec/grammar.pxi":174
  * 
  *         def __set__(self, lhs):
  *             if not isinstance(lhs, NT):             # <<<<<<<<<<<<<<
@@ -8595,7 +8627,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_3lhs_2__set__(struct __pyx_obj_4cdec_5_c
   __pyx_t_2 = ((!(__pyx_t_1 != 0)) != 0);
   if (__pyx_t_2) {
 
-    /* "grammar.pxi":175
+    /* "cdec/grammar.pxi":175
  *         def __set__(self, lhs):
  *             if not isinstance(lhs, NT):
  *                 lhs = NT(lhs)             # <<<<<<<<<<<<<<
@@ -8616,7 +8648,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_3lhs_2__set__(struct __pyx_obj_4cdec_5_c
   }
   __pyx_L3:;
 
-  /* "grammar.pxi":176
+  /* "cdec/grammar.pxi":176
  *             if not isinstance(lhs, NT):
  *                 lhs = NT(lhs)
  *             self.rule.get().lhs_ = -TDConvert((<NT> lhs).cat)             # <<<<<<<<<<<<<<
@@ -8626,7 +8658,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_3lhs_2__set__(struct __pyx_obj_4cdec_5_c
   __pyx_t_5 = __Pyx_PyObject_AsString(((struct __pyx_obj_4cdec_5_cdec_NT *)__pyx_v_lhs)->cat); if (unlikely((!__pyx_t_5) && PyErr_Occurred())) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_self->rule->get()->lhs_ = (-TD::Convert(__pyx_t_5));
 
-  /* "grammar.pxi":173
+  /* "cdec/grammar.pxi":173
  *             return NT(TDConvert(-self.rule.get().lhs_).c_str())
  * 
  *         def __set__(self, lhs):             # <<<<<<<<<<<<<<
@@ -8648,7 +8680,7 @@ static int __pyx_pf_4cdec_5_cdec_5TRule_3lhs_2__set__(struct __pyx_obj_4cdec_5_c
   return __pyx_r;
 }
 
-/* "grammar.pxi":178
+/* "cdec/grammar.pxi":178
  *             self.rule.get().lhs_ = -TDConvert((<NT> lhs).cat)
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
@@ -8668,9 +8700,9 @@ static PyObject *__pyx_pw_4cdec_5_cdec_5TRule_5__str__(PyObject *__pyx_v_self) {
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_5TRule_7__str___2generator22(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_5TRule_7__str___2generator23(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "grammar.pxi":179
+/* "cdec/grammar.pxi":179
  * 
  *     def __str__(self):
  *         scores = ' '.join('%s=%s' % feat for feat in self.scores)             # <<<<<<<<<<<<<<
@@ -8696,7 +8728,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_7__str___genexpr(PyObject *__pyx_s
   __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_outer_scope));
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_5TRule_7__str___2generator22, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_str___locals_genexpr); if (unlikely(!gen)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 179; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_5TRule_7__str___2generator23, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_str___locals_genexpr); if (unlikely(!gen)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 179; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -8712,7 +8744,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_7__str___genexpr(PyObject *__pyx_s
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_5TRule_7__str___2generator22(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_5TRule_7__str___2generator23(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
   struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_6_genexpr *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_6_genexpr *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
@@ -8817,7 +8849,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_5TRule_7__str___2generator22(__pyx_Genera
   return NULL;
 }
 
-/* "grammar.pxi":178
+/* "cdec/grammar.pxi":178
  *             self.rule.get().lhs_ = -TDConvert((<NT> lhs).cat)
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
@@ -8851,7 +8883,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_4__str__(struct __pyx_obj_4cdec_5_
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
 
-  /* "grammar.pxi":179
+  /* "cdec/grammar.pxi":179
  * 
  *     def __str__(self):
  *         scores = ' '.join('%s=%s' % feat for feat in self.scores)             # <<<<<<<<<<<<<<
@@ -8866,7 +8898,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_4__str__(struct __pyx_obj_4cdec_5_
   __pyx_v_scores = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "grammar.pxi":180
+  /* "cdec/grammar.pxi":180
  *     def __str__(self):
  *         scores = ' '.join('%s=%s' % feat for feat in self.scores)
  *         return '%s ||| %s ||| %s ||| %s' % (self.lhs,             # <<<<<<<<<<<<<<
@@ -8877,7 +8909,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_4__str__(struct __pyx_obj_4cdec_5_
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_n_s_lhs); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 180; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
 
-  /* "grammar.pxi":181
+  /* "cdec/grammar.pxi":181
  *         scores = ' '.join('%s=%s' % feat for feat in self.scores)
  *         return '%s ||| %s ||| %s ||| %s' % (self.lhs,
  *                 _phrase(self.f), _phrase(self.e), scores)             # <<<<<<<<<<<<<<
@@ -8945,7 +8977,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_4__str__(struct __pyx_obj_4cdec_5_
   }
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-  /* "grammar.pxi":180
+  /* "cdec/grammar.pxi":180
  *     def __str__(self):
  *         scores = ' '.join('%s=%s' % feat for feat in self.scores)
  *         return '%s ||| %s ||| %s ||| %s' % (self.lhs,             # <<<<<<<<<<<<<<
@@ -8973,7 +9005,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_4__str__(struct __pyx_obj_4cdec_5_
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "grammar.pxi":178
+  /* "cdec/grammar.pxi":178
  *             self.rule.get().lhs_ = -TDConvert((<NT> lhs).cat)
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
@@ -9000,7 +9032,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_5TRule_4__str__(struct __pyx_obj_4cdec_5_
   return __pyx_r;
 }
 
-/* "grammar.pxi":184
+/* "cdec/grammar.pxi":184
  * 
  * cdef class MRule(TRule):
  *     def __init__(self, lhs, rhs, scores):             # <<<<<<<<<<<<<<
@@ -9102,7 +9134,7 @@ static int __pyx_pf_4cdec_5_cdec_5MRule___init__(struct __pyx_obj_4cdec_5_cdec_M
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "grammar.pxi":189
+  /* "cdec/grammar.pxi":189
  *         rhs: right hand side phrase (list of words/NT)
  *         scores: dictionary of feature scores"""
  *         cdef unsigned i = 1             # <<<<<<<<<<<<<<
@@ -9111,7 +9143,7 @@ static int __pyx_pf_4cdec_5_cdec_5MRule___init__(struct __pyx_obj_4cdec_5_cdec_M
  */
   __pyx_v_i = 1;
 
-  /* "grammar.pxi":190
+  /* "cdec/grammar.pxi":190
  *         scores: dictionary of feature scores"""
  *         cdef unsigned i = 1
  *         e = []             # <<<<<<<<<<<<<<
@@ -9123,7 +9155,7 @@ static int __pyx_pf_4cdec_5_cdec_5MRule___init__(struct __pyx_obj_4cdec_5_cdec_M
   __pyx_v_e = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "grammar.pxi":191
+  /* "cdec/grammar.pxi":191
  *         cdef unsigned i = 1
  *         e = []
  *         for s in rhs:             # <<<<<<<<<<<<<<
@@ -9170,7 +9202,7 @@ static int __pyx_pf_4cdec_5_cdec_5MRule___init__(struct __pyx_obj_4cdec_5_cdec_M
     __Pyx_XDECREF_SET(__pyx_v_s, __pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "grammar.pxi":192
+    /* "cdec/grammar.pxi":192
  *         e = []
  *         for s in rhs:
  *             if isinstance(s, NT):             # <<<<<<<<<<<<<<
@@ -9181,7 +9213,7 @@ static int __pyx_pf_4cdec_5_cdec_5MRule___init__(struct __pyx_obj_4cdec_5_cdec_M
     __pyx_t_6 = (__pyx_t_5 != 0);
     if (__pyx_t_6) {
 
-      /* "grammar.pxi":193
+      /* "cdec/grammar.pxi":193
  *         for s in rhs:
  *             if isinstance(s, NT):
  *                 e.append(NTRef(i))             # <<<<<<<<<<<<<<
@@ -9201,7 +9233,7 @@ static int __pyx_pf_4cdec_5_cdec_5MRule___init__(struct __pyx_obj_4cdec_5_cdec_M
       __pyx_t_8 = __Pyx_PyList_Append(__pyx_v_e, __pyx_t_4); if (unlikely(__pyx_t_8 == -1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-      /* "grammar.pxi":194
+      /* "cdec/grammar.pxi":194
  *             if isinstance(s, NT):
  *                 e.append(NTRef(i))
  *                 i += 1             # <<<<<<<<<<<<<<
@@ -9213,7 +9245,7 @@ static int __pyx_pf_4cdec_5_cdec_5MRule___init__(struct __pyx_obj_4cdec_5_cdec_M
     }
     /*else*/ {
 
-      /* "grammar.pxi":196
+      /* "cdec/grammar.pxi":196
  *                 i += 1
  *             else:
  *                 e.append(s)             # <<<<<<<<<<<<<<
@@ -9224,7 +9256,7 @@ static int __pyx_pf_4cdec_5_cdec_5MRule___init__(struct __pyx_obj_4cdec_5_cdec_M
     }
     __pyx_L5:;
 
-    /* "grammar.pxi":191
+    /* "cdec/grammar.pxi":191
  *         cdef unsigned i = 1
  *         e = []
  *         for s in rhs:             # <<<<<<<<<<<<<<
@@ -9234,7 +9266,7 @@ static int __pyx_pf_4cdec_5_cdec_5MRule___init__(struct __pyx_obj_4cdec_5_cdec_M
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "grammar.pxi":197
+  /* "cdec/grammar.pxi":197
  *             else:
  *                 e.append(s)
  *         super(MRule, self).__init__(lhs, rhs, e, scores, None)             # <<<<<<<<<<<<<<
@@ -9293,7 +9325,7 @@ static int __pyx_pf_4cdec_5_cdec_5MRule___init__(struct __pyx_obj_4cdec_5_cdec_M
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "grammar.pxi":184
+  /* "cdec/grammar.pxi":184
  * 
  * cdef class MRule(TRule):
  *     def __init__(self, lhs, rhs, scores):             # <<<<<<<<<<<<<<
@@ -9318,7 +9350,7 @@ static int __pyx_pf_4cdec_5_cdec_5MRule___init__(struct __pyx_obj_4cdec_5_cdec_M
   return __pyx_r;
 }
 
-/* "grammar.pxi":202
+/* "cdec/grammar.pxi":202
  *     cdef shared_ptr[grammar.Grammar]* grammar
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -9341,7 +9373,7 @@ static void __pyx_pf_4cdec_5_cdec_7Grammar___dealloc__(struct __pyx_obj_4cdec_5_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "grammar.pxi":203
+  /* "cdec/grammar.pxi":203
  * 
  *     def __dealloc__(self):
  *         del self.grammar             # <<<<<<<<<<<<<<
@@ -9350,7 +9382,7 @@ static void __pyx_pf_4cdec_5_cdec_7Grammar___dealloc__(struct __pyx_obj_4cdec_5_
  */
   delete __pyx_v_self->grammar;
 
-  /* "grammar.pxi":202
+  /* "cdec/grammar.pxi":202
  *     cdef shared_ptr[grammar.Grammar]* grammar
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -9363,7 +9395,7 @@ static void __pyx_pf_4cdec_5_cdec_7Grammar___dealloc__(struct __pyx_obj_4cdec_5_
 }
 static PyObject *__pyx_gb_4cdec_5_cdec_7Grammar_4generator3(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "grammar.pxi":205
+/* "cdec/grammar.pxi":205
  *         del self.grammar
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -9440,7 +9472,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Grammar_4generator3(__pyx_GeneratorObjec
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "grammar.pxi":206
+  /* "cdec/grammar.pxi":206
  * 
  *     def __iter__(self):
  *         cdef grammar.const_GrammarIter* root = self.grammar.get().GetRoot()             # <<<<<<<<<<<<<<
@@ -9449,7 +9481,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Grammar_4generator3(__pyx_GeneratorObjec
  */
   __pyx_cur_scope->__pyx_v_root = __pyx_cur_scope->__pyx_v_self->grammar->get()->GetRoot();
 
-  /* "grammar.pxi":207
+  /* "cdec/grammar.pxi":207
  *     def __iter__(self):
  *         cdef grammar.const_GrammarIter* root = self.grammar.get().GetRoot()
  *         cdef grammar.const_RuleBin* rbin = root.GetRules()             # <<<<<<<<<<<<<<
@@ -9458,7 +9490,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Grammar_4generator3(__pyx_GeneratorObjec
  */
   __pyx_cur_scope->__pyx_v_rbin = __pyx_cur_scope->__pyx_v_root->GetRules();
 
-  /* "grammar.pxi":210
+  /* "cdec/grammar.pxi":210
  *         cdef TRule trule
  *         cdef unsigned i
  *         for i in range(rbin.GetNumRules()):             # <<<<<<<<<<<<<<
@@ -9469,7 +9501,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Grammar_4generator3(__pyx_GeneratorObjec
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_cur_scope->__pyx_v_i = __pyx_t_2;
 
-    /* "grammar.pxi":211
+    /* "cdec/grammar.pxi":211
  *         cdef unsigned i
  *         for i in range(rbin.GetNumRules()):
  *             trule = TRule.__new__(TRule)             # <<<<<<<<<<<<<<
@@ -9484,7 +9516,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Grammar_4generator3(__pyx_GeneratorObjec
     __Pyx_GIVEREF(__pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "grammar.pxi":212
+    /* "cdec/grammar.pxi":212
  *         for i in range(rbin.GetNumRules()):
  *             trule = TRule.__new__(TRule)
  *             trule.rule = new shared_ptr[grammar.TRule](rbin.GetIthRule(i))             # <<<<<<<<<<<<<<
@@ -9493,7 +9525,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Grammar_4generator3(__pyx_GeneratorObjec
  */
     __pyx_cur_scope->__pyx_v_trule->rule = new boost::shared_ptr<TRule> (__pyx_cur_scope->__pyx_v_rbin->GetIthRule(__pyx_cur_scope->__pyx_v_i));
 
-    /* "grammar.pxi":213
+    /* "cdec/grammar.pxi":213
  *             trule = TRule.__new__(TRule)
  *             trule.rule = new shared_ptr[grammar.TRule](rbin.GetIthRule(i))
  *             yield trule             # <<<<<<<<<<<<<<
@@ -9515,7 +9547,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Grammar_4generator3(__pyx_GeneratorObjec
     if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "grammar.pxi":205
+  /* "cdec/grammar.pxi":205
  *         del self.grammar
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -9537,7 +9569,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Grammar_4generator3(__pyx_GeneratorObjec
   return NULL;
 }
 
-/* "grammar.pxi":216
+/* "cdec/grammar.pxi":216
  * 
  *     property name:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -9568,7 +9600,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Grammar_4name___get__(struct __pyx_obj_4
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "grammar.pxi":217
+  /* "cdec/grammar.pxi":217
  *     property name:
  *         def __get__(self):
  *             str(self.grammar.get().GetGrammarName().c_str())             # <<<<<<<<<<<<<<
@@ -9587,7 +9619,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Grammar_4name___get__(struct __pyx_obj_4
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "grammar.pxi":216
+  /* "cdec/grammar.pxi":216
  * 
  *     property name:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -9609,7 +9641,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Grammar_4name___get__(struct __pyx_obj_4
   return __pyx_r;
 }
 
-/* "grammar.pxi":219
+/* "cdec/grammar.pxi":219
  *             str(self.grammar.get().GetGrammarName().c_str())
  * 
  *         def __set__(self, name):             # <<<<<<<<<<<<<<
@@ -9641,7 +9673,7 @@ static int __pyx_pf_4cdec_5_cdec_7Grammar_4name_2__set__(struct __pyx_obj_4cdec_
   __Pyx_RefNannySetupContext("__set__", 0);
   __Pyx_INCREF(__pyx_v_name);
 
-  /* "grammar.pxi":220
+  /* "cdec/grammar.pxi":220
  * 
  *         def __set__(self, name):
  *             name = as_str(name)             # <<<<<<<<<<<<<<
@@ -9653,7 +9685,7 @@ static int __pyx_pf_4cdec_5_cdec_7Grammar_4name_2__set__(struct __pyx_obj_4cdec_
   __Pyx_DECREF_SET(__pyx_v_name, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "grammar.pxi":221
+  /* "cdec/grammar.pxi":221
  *         def __set__(self, name):
  *             name = as_str(name)
  *             self.grammar.get().SetGrammarName(name)             # <<<<<<<<<<<<<<
@@ -9663,7 +9695,7 @@ static int __pyx_pf_4cdec_5_cdec_7Grammar_4name_2__set__(struct __pyx_obj_4cdec_
   __pyx_t_2 = __pyx_convert_string_from_py_(__pyx_v_name); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_self->grammar->get()->SetGrammarName(__pyx_t_2);
 
-  /* "grammar.pxi":219
+  /* "cdec/grammar.pxi":219
  *             str(self.grammar.get().GetGrammarName().c_str())
  * 
  *         def __set__(self, name):             # <<<<<<<<<<<<<<
@@ -9684,7 +9716,7 @@ static int __pyx_pf_4cdec_5_cdec_7Grammar_4name_2__set__(struct __pyx_obj_4cdec_
   return __pyx_r;
 }
 
-/* "grammar.pxi":224
+/* "cdec/grammar.pxi":224
  * 
  * cdef class TextGrammar(Grammar):
  *     def __init__(self, rules):             # <<<<<<<<<<<<<<
@@ -9764,7 +9796,7 @@ static int __pyx_pf_4cdec_5_cdec_11TextGrammar___init__(struct __pyx_obj_4cdec_5
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "grammar.pxi":226
+  /* "cdec/grammar.pxi":226
  *     def __init__(self, rules):
  *         """TextGrammar(rules) -> SCFG Grammar containing the rules."""
  *         self.grammar = new shared_ptr[grammar.Grammar](new grammar.TextGrammar())             # <<<<<<<<<<<<<<
@@ -9773,7 +9805,7 @@ static int __pyx_pf_4cdec_5_cdec_11TextGrammar___init__(struct __pyx_obj_4cdec_5
  */
   __pyx_v_self->__pyx_base.grammar = new boost::shared_ptr<Grammar> (new TextGrammar());
 
-  /* "grammar.pxi":227
+  /* "cdec/grammar.pxi":227
  *         """TextGrammar(rules) -> SCFG Grammar containing the rules."""
  *         self.grammar = new shared_ptr[grammar.Grammar](new grammar.TextGrammar())
  *         cdef grammar.TextGrammar* _g = <grammar.TextGrammar*> self.grammar.get()             # <<<<<<<<<<<<<<
@@ -9782,7 +9814,7 @@ static int __pyx_pf_4cdec_5_cdec_11TextGrammar___init__(struct __pyx_obj_4cdec_5
  */
   __pyx_v__g = ((TextGrammar *)__pyx_v_self->__pyx_base.grammar->get());
 
-  /* "grammar.pxi":228
+  /* "cdec/grammar.pxi":228
  *         self.grammar = new shared_ptr[grammar.Grammar](new grammar.TextGrammar())
  *         cdef grammar.TextGrammar* _g = <grammar.TextGrammar*> self.grammar.get()
  *         for trule in rules:             # <<<<<<<<<<<<<<
@@ -9829,7 +9861,7 @@ static int __pyx_pf_4cdec_5_cdec_11TextGrammar___init__(struct __pyx_obj_4cdec_5
     __Pyx_XDECREF_SET(__pyx_v_trule, __pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "grammar.pxi":229
+    /* "cdec/grammar.pxi":229
  *         cdef grammar.TextGrammar* _g = <grammar.TextGrammar*> self.grammar.get()
  *         for trule in rules:
  *             if isinstance(trule, _sa.Rule):             # <<<<<<<<<<<<<<
@@ -9840,7 +9872,7 @@ static int __pyx_pf_4cdec_5_cdec_11TextGrammar___init__(struct __pyx_obj_4cdec_5
     __pyx_t_6 = (__pyx_t_5 != 0);
     if (__pyx_t_6) {
 
-      /* "grammar.pxi":230
+      /* "cdec/grammar.pxi":230
  *         for trule in rules:
  *             if isinstance(trule, _sa.Rule):
  *                 trule = convert_rule(trule)             # <<<<<<<<<<<<<<
@@ -9855,7 +9887,7 @@ static int __pyx_pf_4cdec_5_cdec_11TextGrammar___init__(struct __pyx_obj_4cdec_5
       goto __pyx_L5;
     }
 
-    /* "grammar.pxi":231
+    /* "cdec/grammar.pxi":231
  *             if isinstance(trule, _sa.Rule):
  *                 trule = convert_rule(trule)
  *             elif not isinstance(trule, TRule):             # <<<<<<<<<<<<<<
@@ -9866,7 +9898,7 @@ static int __pyx_pf_4cdec_5_cdec_11TextGrammar___init__(struct __pyx_obj_4cdec_5
     __pyx_t_5 = ((!(__pyx_t_6 != 0)) != 0);
     if (__pyx_t_5) {
 
-      /* "grammar.pxi":232
+      /* "cdec/grammar.pxi":232
  *                 trule = convert_rule(trule)
  *             elif not isinstance(trule, TRule):
  *                 raise ValueError('the grammar should contain TRule objects')             # <<<<<<<<<<<<<<
@@ -9880,14 +9912,14 @@ static int __pyx_pf_4cdec_5_cdec_11TextGrammar___init__(struct __pyx_obj_4cdec_5
     }
     __pyx_L5:;
 
-    /* "grammar.pxi":233
+    /* "cdec/grammar.pxi":233
  *             elif not isinstance(trule, TRule):
  *                 raise ValueError('the grammar should contain TRule objects')
  *             _g.AddRule((<TRule> trule).rule[0])             # <<<<<<<<<<<<<<
  */
     __pyx_v__g->AddRule((((struct __pyx_obj_4cdec_5_cdec_TRule *)__pyx_v_trule)->rule[0]));
 
-    /* "grammar.pxi":228
+    /* "cdec/grammar.pxi":228
  *         self.grammar = new shared_ptr[grammar.Grammar](new grammar.TextGrammar())
  *         cdef grammar.TextGrammar* _g = <grammar.TextGrammar*> self.grammar.get()
  *         for trule in rules:             # <<<<<<<<<<<<<<
@@ -9897,7 +9929,7 @@ static int __pyx_pf_4cdec_5_cdec_11TextGrammar___init__(struct __pyx_obj_4cdec_5
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "grammar.pxi":224
+  /* "cdec/grammar.pxi":224
  * 
  * cdef class TextGrammar(Grammar):
  *     def __init__(self, rules):             # <<<<<<<<<<<<<<
@@ -9919,7 +9951,7 @@ static int __pyx_pf_4cdec_5_cdec_11TextGrammar___init__(struct __pyx_obj_4cdec_5
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":8
+/* "cdec/hypergraph.pxi":8
  *     cdef MT19937* rng
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -9943,7 +9975,7 @@ static void __pyx_pf_4cdec_5_cdec_10Hypergraph___dealloc__(struct __pyx_obj_4cde
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "hypergraph.pxi":9
+  /* "cdec/hypergraph.pxi":9
  * 
  *     def __dealloc__(self):
  *         del self.hg             # <<<<<<<<<<<<<<
@@ -9952,7 +9984,7 @@ static void __pyx_pf_4cdec_5_cdec_10Hypergraph___dealloc__(struct __pyx_obj_4cde
  */
   delete __pyx_v_self->hg;
 
-  /* "hypergraph.pxi":10
+  /* "cdec/hypergraph.pxi":10
  *     def __dealloc__(self):
  *         del self.hg
  *         if self.rng != NULL:             # <<<<<<<<<<<<<<
@@ -9962,7 +9994,7 @@ static void __pyx_pf_4cdec_5_cdec_10Hypergraph___dealloc__(struct __pyx_obj_4cde
   __pyx_t_1 = ((__pyx_v_self->rng != NULL) != 0);
   if (__pyx_t_1) {
 
-    /* "hypergraph.pxi":11
+    /* "cdec/hypergraph.pxi":11
  *         del self.hg
  *         if self.rng != NULL:
  *             del self.rng             # <<<<<<<<<<<<<<
@@ -9974,7 +10006,7 @@ static void __pyx_pf_4cdec_5_cdec_10Hypergraph___dealloc__(struct __pyx_obj_4cde
   }
   __pyx_L3:;
 
-  /* "hypergraph.pxi":8
+  /* "cdec/hypergraph.pxi":8
  *     cdef MT19937* rng
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -9986,7 +10018,7 @@ static void __pyx_pf_4cdec_5_cdec_10Hypergraph___dealloc__(struct __pyx_obj_4cde
   __Pyx_RefNannyFinishContext();
 }
 
-/* "hypergraph.pxi":13
+/* "cdec/hypergraph.pxi":13
  *             del self.rng
  * 
  *     cdef MT19937* _rng(self):             # <<<<<<<<<<<<<<
@@ -10004,7 +10036,7 @@ static MT19937 *__pyx_f_4cdec_5_cdec_10Hypergraph__rng(struct __pyx_obj_4cdec_5_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_rng", 0);
 
-  /* "hypergraph.pxi":14
+  /* "cdec/hypergraph.pxi":14
  * 
  *     cdef MT19937* _rng(self):
  *         if self.rng == NULL:             # <<<<<<<<<<<<<<
@@ -10014,7 +10046,7 @@ static MT19937 *__pyx_f_4cdec_5_cdec_10Hypergraph__rng(struct __pyx_obj_4cdec_5_
   __pyx_t_1 = ((__pyx_v_self->rng == NULL) != 0);
   if (__pyx_t_1) {
 
-    /* "hypergraph.pxi":15
+    /* "cdec/hypergraph.pxi":15
  *     cdef MT19937* _rng(self):
  *         if self.rng == NULL:
  *             self.rng = new MT19937()             # <<<<<<<<<<<<<<
@@ -10032,7 +10064,7 @@ static MT19937 *__pyx_f_4cdec_5_cdec_10Hypergraph__rng(struct __pyx_obj_4cdec_5_
   }
   __pyx_L3:;
 
-  /* "hypergraph.pxi":16
+  /* "cdec/hypergraph.pxi":16
  *         if self.rng == NULL:
  *             self.rng = new MT19937()
  *         return self.rng             # <<<<<<<<<<<<<<
@@ -10042,7 +10074,7 @@ static MT19937 *__pyx_f_4cdec_5_cdec_10Hypergraph__rng(struct __pyx_obj_4cdec_5_
   __pyx_r = __pyx_v_self->rng;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":13
+  /* "cdec/hypergraph.pxi":13
  *             del self.rng
  * 
  *     cdef MT19937* _rng(self):             # <<<<<<<<<<<<<<
@@ -10059,7 +10091,7 @@ static MT19937 *__pyx_f_4cdec_5_cdec_10Hypergraph__rng(struct __pyx_obj_4cdec_5_
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":18
+/* "cdec/hypergraph.pxi":18
  *         return self.rng
  * 
  *     def viterbi(self):             # <<<<<<<<<<<<<<
@@ -10092,7 +10124,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_2viterbi(struct __pyx_obj_4c
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("viterbi", 0);
 
-  /* "hypergraph.pxi":21
+  /* "cdec/hypergraph.pxi":21
  *         """hg.viterbi() -> String for the best hypothesis in the hypergraph."""
  *         cdef vector[WordID] trans
  *         hypergraph.ViterbiESentence(self.hg[0], &trans)             # <<<<<<<<<<<<<<
@@ -10101,7 +10133,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_2viterbi(struct __pyx_obj_4c
  */
   ViterbiESentence((__pyx_v_self->hg[0]), (&__pyx_v_trans));
 
-  /* "hypergraph.pxi":22
+  /* "cdec/hypergraph.pxi":22
  *         cdef vector[WordID] trans
  *         hypergraph.ViterbiESentence(self.hg[0], &trans)
  *         return unicode(GetString(trans).c_str(), 'utf8')             # <<<<<<<<<<<<<<
@@ -10126,7 +10158,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_2viterbi(struct __pyx_obj_4c
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":18
+  /* "cdec/hypergraph.pxi":18
  *         return self.rng
  * 
  *     def viterbi(self):             # <<<<<<<<<<<<<<
@@ -10146,7 +10178,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_2viterbi(struct __pyx_obj_4c
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":24
+/* "cdec/hypergraph.pxi":24
  *         return unicode(GetString(trans).c_str(), 'utf8')
  * 
  *     def viterbi_trees(self):             # <<<<<<<<<<<<<<
@@ -10180,7 +10212,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_4viterbi_trees(struct __pyx_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("viterbi_trees", 0);
 
-  /* "hypergraph.pxi":29
+  /* "cdec/hypergraph.pxi":29
  *         e_tree: Target tree for the best hypothesis in the hypergraph.
  *         """
  *         f_tree = unicode(hypergraph.ViterbiFTree(self.hg[0]).c_str(), 'utf8')             # <<<<<<<<<<<<<<
@@ -10203,7 +10235,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_4viterbi_trees(struct __pyx_
   __pyx_v_f_tree = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hypergraph.pxi":30
+  /* "cdec/hypergraph.pxi":30
  *         """
  *         f_tree = unicode(hypergraph.ViterbiFTree(self.hg[0]).c_str(), 'utf8')
  *         e_tree = unicode(hypergraph.ViterbiETree(self.hg[0]).c_str(), 'utf8')             # <<<<<<<<<<<<<<
@@ -10226,7 +10258,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_4viterbi_trees(struct __pyx_
   __pyx_v_e_tree = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hypergraph.pxi":31
+  /* "cdec/hypergraph.pxi":31
  *         f_tree = unicode(hypergraph.ViterbiFTree(self.hg[0]).c_str(), 'utf8')
  *         e_tree = unicode(hypergraph.ViterbiETree(self.hg[0]).c_str(), 'utf8')
  *         return (f_tree, e_tree)             # <<<<<<<<<<<<<<
@@ -10246,7 +10278,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_4viterbi_trees(struct __pyx_
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":24
+  /* "cdec/hypergraph.pxi":24
  *         return unicode(GetString(trans).c_str(), 'utf8')
  * 
  *     def viterbi_trees(self):             # <<<<<<<<<<<<<<
@@ -10268,7 +10300,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_4viterbi_trees(struct __pyx_
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":33
+/* "cdec/hypergraph.pxi":33
  *         return (f_tree, e_tree)
  * 
  *     def viterbi_features(self):             # <<<<<<<<<<<<<<
@@ -10300,7 +10332,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_6viterbi_features(struct __p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("viterbi_features", 0);
 
-  /* "hypergraph.pxi":36
+  /* "cdec/hypergraph.pxi":36
  *         """hg.viterbi_features() -> SparseVector with the features corresponding
  *         to the best derivation in the hypergraph."""
  *         cdef SparseVector fmap = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
@@ -10313,7 +10345,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_6viterbi_features(struct __p
   __pyx_v_fmap = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hypergraph.pxi":37
+  /* "cdec/hypergraph.pxi":37
  *         to the best derivation in the hypergraph."""
  *         cdef SparseVector fmap = SparseVector.__new__(SparseVector)
  *         fmap.vector = new FastSparseVector[weight_t](hypergraph.ViterbiFeatures(self.hg[0]))             # <<<<<<<<<<<<<<
@@ -10322,7 +10354,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_6viterbi_features(struct __p
  */
   __pyx_v_fmap->vector = new FastSparseVector<weight_t> (ViterbiFeatures((__pyx_v_self->hg[0])));
 
-  /* "hypergraph.pxi":38
+  /* "cdec/hypergraph.pxi":38
  *         cdef SparseVector fmap = SparseVector.__new__(SparseVector)
  *         fmap.vector = new FastSparseVector[weight_t](hypergraph.ViterbiFeatures(self.hg[0]))
  *         return fmap             # <<<<<<<<<<<<<<
@@ -10334,7 +10366,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_6viterbi_features(struct __p
   __pyx_r = ((PyObject *)__pyx_v_fmap);
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":33
+  /* "cdec/hypergraph.pxi":33
  *         return (f_tree, e_tree)
  * 
  *     def viterbi_features(self):             # <<<<<<<<<<<<<<
@@ -10354,7 +10386,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_6viterbi_features(struct __p
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":40
+/* "cdec/hypergraph.pxi":40
  *         return fmap
  * 
  *     def viterbi_forest(self):             # <<<<<<<<<<<<<<
@@ -10385,7 +10417,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_8viterbi_forest(struct __pyx
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("viterbi_forest", 0);
 
-  /* "hypergraph.pxi":41
+  /* "cdec/hypergraph.pxi":41
  * 
  *     def viterbi_forest(self):
  *         cdef Hypergraph hg = Hypergraph()             # <<<<<<<<<<<<<<
@@ -10397,7 +10429,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_8viterbi_forest(struct __pyx
   __pyx_v_hg = ((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hypergraph.pxi":42
+  /* "cdec/hypergraph.pxi":42
  *     def viterbi_forest(self):
  *         cdef Hypergraph hg = Hypergraph()
  *         hg.hg = new hypergraph.Hypergraph(self.hg[0].CreateViterbiHypergraph(NULL).get()[0])             # <<<<<<<<<<<<<<
@@ -10406,7 +10438,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_8viterbi_forest(struct __pyx
  */
   __pyx_v_hg->hg = new Hypergraph(((__pyx_v_self->hg[0]).CreateViterbiHypergraph(NULL).get()[0]));
 
-  /* "hypergraph.pxi":43
+  /* "cdec/hypergraph.pxi":43
  *         cdef Hypergraph hg = Hypergraph()
  *         hg.hg = new hypergraph.Hypergraph(self.hg[0].CreateViterbiHypergraph(NULL).get()[0])
  *         return hg             # <<<<<<<<<<<<<<
@@ -10418,7 +10450,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_8viterbi_forest(struct __pyx
   __pyx_r = ((PyObject *)__pyx_v_hg);
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":40
+  /* "cdec/hypergraph.pxi":40
  *         return fmap
  * 
  *     def viterbi_forest(self):             # <<<<<<<<<<<<<<
@@ -10438,7 +10470,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_8viterbi_forest(struct __pyx
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":45
+/* "cdec/hypergraph.pxi":45
  *         return hg
  * 
  *     def viterbi_joshua(self):             # <<<<<<<<<<<<<<
@@ -10470,7 +10502,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_10viterbi_joshua(struct __py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("viterbi_joshua", 0);
 
-  /* "hypergraph.pxi":47
+  /* "cdec/hypergraph.pxi":47
  *     def viterbi_joshua(self):
  *         """hg.viterbi_joshua() -> Joshua representation of the best derivation."""
  *         return unicode(hypergraph.JoshuaVisualizationString(self.hg[0]).c_str(), 'utf8')             # <<<<<<<<<<<<<<
@@ -10495,7 +10527,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_10viterbi_joshua(struct __py
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":45
+  /* "cdec/hypergraph.pxi":45
  *         return hg
  * 
  *     def viterbi_joshua(self):             # <<<<<<<<<<<<<<
@@ -10516,7 +10548,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_10viterbi_joshua(struct __py
 }
 static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_14generator4(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":49
+/* "cdec/hypergraph.pxi":49
  *         return unicode(hypergraph.JoshuaVisualizationString(self.hg[0]).c_str(), 'utf8')
  * 
  *     def kbest(self, size):             # <<<<<<<<<<<<<<
@@ -10608,7 +10640,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_14generator4(__pyx_Generator
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 49; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":51
+  /* "cdec/hypergraph.pxi":51
  *     def kbest(self, size):
  *         """hg.kbest(size) -> List of k-best hypotheses in the hypergraph."""
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal, kbest.NoFilter[vector[int]]]* derivations = new kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal, kbest.NoFilter[vector[int]]](self.hg[0], size)             # <<<<<<<<<<<<<<
@@ -10618,7 +10650,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_14generator4(__pyx_Generator
   __pyx_t_1 = __Pyx_PyInt_As_unsigned_int(__pyx_cur_scope->__pyx_v_size); if (unlikely((__pyx_t_1 == (unsigned int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_cur_scope->__pyx_v_derivations = new KBest::KBestDerivations<std::vector<WordID> ,ESentenceTraversal,KBest::NoFilter<std::vector<int> > > ((__pyx_cur_scope->__pyx_v_self->hg[0]), __pyx_t_1);
 
-  /* "hypergraph.pxi":54
+  /* "cdec/hypergraph.pxi":54
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal, kbest.NoFilter[vector[int]]].Derivation* derivation
  *         cdef unsigned k
  *         try:             # <<<<<<<<<<<<<<
@@ -10627,7 +10659,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_14generator4(__pyx_Generator
  */
   /*try:*/ {
 
-    /* "hypergraph.pxi":55
+    /* "cdec/hypergraph.pxi":55
  *         cdef unsigned k
  *         try:
  *             for k in range(size):             # <<<<<<<<<<<<<<
@@ -10638,7 +10670,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_14generator4(__pyx_Generator
     for (__pyx_t_1 = 0; __pyx_t_1 < __pyx_t_2; __pyx_t_1+=1) {
       __pyx_cur_scope->__pyx_v_k = __pyx_t_1;
 
-      /* "hypergraph.pxi":56
+      /* "cdec/hypergraph.pxi":56
  *         try:
  *             for k in range(size):
  *                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)             # <<<<<<<<<<<<<<
@@ -10647,7 +10679,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_14generator4(__pyx_Generator
  */
       __pyx_cur_scope->__pyx_v_derivation = __pyx_cur_scope->__pyx_v_derivations->LazyKthBest((__pyx_cur_scope->__pyx_v_self->hg->nodes_.size() - 1), __pyx_cur_scope->__pyx_v_k);
 
-      /* "hypergraph.pxi":57
+      /* "cdec/hypergraph.pxi":57
  *             for k in range(size):
  *                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 if not derivation: break             # <<<<<<<<<<<<<<
@@ -10659,7 +10691,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_14generator4(__pyx_Generator
         goto __pyx_L8_break;
       }
 
-      /* "hypergraph.pxi":58
+      /* "cdec/hypergraph.pxi":58
  *                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 if not derivation: break
  *                 yield unicode(GetString(derivation._yield).c_str(), 'utf8')             # <<<<<<<<<<<<<<
@@ -10696,7 +10728,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_14generator4(__pyx_Generator
     __pyx_L8_break:;
   }
 
-  /* "hypergraph.pxi":60
+  /* "cdec/hypergraph.pxi":60
  *                 yield unicode(GetString(derivation._yield).c_str(), 'utf8')
  *         finally:
  *             del derivations             # <<<<<<<<<<<<<<
@@ -10742,7 +10774,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_14generator4(__pyx_Generator
     __pyx_L6:;
   }
 
-  /* "hypergraph.pxi":49
+  /* "cdec/hypergraph.pxi":49
  *         return unicode(hypergraph.JoshuaVisualizationString(self.hg[0]).c_str(), 'utf8')
  * 
  *     def kbest(self, size):             # <<<<<<<<<<<<<<
@@ -10766,7 +10798,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_14generator4(__pyx_Generator
 }
 static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":62
+/* "cdec/hypergraph.pxi":62
  *             del derivations
  * 
  *     def kbest_trees(self, size):             # <<<<<<<<<<<<<<
@@ -10859,7 +10891,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 62; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":64
+  /* "cdec/hypergraph.pxi":64
  *     def kbest_trees(self, size):
  *         """hg.kbest_trees(size) -> List of k-best trees in the hypergrapt.NoFilter."""
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.NoFilter[vector[int]]]* f_derivations = new kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.NoFilter[vector[int]]](self.hg[0], size)             # <<<<<<<<<<<<<<
@@ -10869,7 +10901,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
   __pyx_t_1 = __Pyx_PyInt_As_unsigned_int(__pyx_cur_scope->__pyx_v_size); if (unlikely((__pyx_t_1 == (unsigned int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_cur_scope->__pyx_v_f_derivations = new KBest::KBestDerivations<std::vector<WordID> ,FTreeTraversal,KBest::NoFilter<std::vector<int> > > ((__pyx_cur_scope->__pyx_v_self->hg[0]), __pyx_t_1);
 
-  /* "hypergraph.pxi":66
+  /* "cdec/hypergraph.pxi":66
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.NoFilter[vector[int]]]* f_derivations = new kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.NoFilter[vector[int]]](self.hg[0], size)
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.NoFilter[vector[int]]].Derivation* f_derivation
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal, kbest.NoFilter[vector[int]]]* e_derivations = new kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal, kbest.NoFilter[vector[int]]](self.hg[0], size)             # <<<<<<<<<<<<<<
@@ -10879,7 +10911,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
   __pyx_t_1 = __Pyx_PyInt_As_unsigned_int(__pyx_cur_scope->__pyx_v_size); if (unlikely((__pyx_t_1 == (unsigned int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_cur_scope->__pyx_v_e_derivations = new KBest::KBestDerivations<std::vector<WordID> ,ETreeTraversal,KBest::NoFilter<std::vector<int> > > ((__pyx_cur_scope->__pyx_v_self->hg[0]), __pyx_t_1);
 
-  /* "hypergraph.pxi":69
+  /* "cdec/hypergraph.pxi":69
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal, kbest.NoFilter[vector[int]]].Derivation* e_derivation
  *         cdef unsigned k
  *         try:             # <<<<<<<<<<<<<<
@@ -10888,7 +10920,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
  */
   /*try:*/ {
 
-    /* "hypergraph.pxi":70
+    /* "cdec/hypergraph.pxi":70
  *         cdef unsigned k
  *         try:
  *             for k in range(size):             # <<<<<<<<<<<<<<
@@ -10899,7 +10931,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
     for (__pyx_t_1 = 0; __pyx_t_1 < __pyx_t_2; __pyx_t_1+=1) {
       __pyx_cur_scope->__pyx_v_k = __pyx_t_1;
 
-      /* "hypergraph.pxi":71
+      /* "cdec/hypergraph.pxi":71
  *         try:
  *             for k in range(size):
  *                 f_derivation = f_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)             # <<<<<<<<<<<<<<
@@ -10908,7 +10940,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
  */
       __pyx_cur_scope->__pyx_v_f_derivation = __pyx_cur_scope->__pyx_v_f_derivations->LazyKthBest((__pyx_cur_scope->__pyx_v_self->hg->nodes_.size() - 1), __pyx_cur_scope->__pyx_v_k);
 
-      /* "hypergraph.pxi":72
+      /* "cdec/hypergraph.pxi":72
  *             for k in range(size):
  *                 f_derivation = f_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 e_derivation = e_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)             # <<<<<<<<<<<<<<
@@ -10917,7 +10949,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
  */
       __pyx_cur_scope->__pyx_v_e_derivation = __pyx_cur_scope->__pyx_v_e_derivations->LazyKthBest((__pyx_cur_scope->__pyx_v_self->hg->nodes_.size() - 1), __pyx_cur_scope->__pyx_v_k);
 
-      /* "hypergraph.pxi":73
+      /* "cdec/hypergraph.pxi":73
  *                 f_derivation = f_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 e_derivation = e_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 if not f_derivation or not e_derivation: break             # <<<<<<<<<<<<<<
@@ -10939,7 +10971,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
         goto __pyx_L8_break;
       }
 
-      /* "hypergraph.pxi":74
+      /* "cdec/hypergraph.pxi":74
  *                 e_derivation = e_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 if not f_derivation or not e_derivation: break
  *                 f_tree = unicode(GetString(f_derivation._yield).c_str(), 'utf8')             # <<<<<<<<<<<<<<
@@ -10964,7 +10996,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
       __Pyx_GIVEREF(__pyx_t_5);
       __pyx_t_5 = 0;
 
-      /* "hypergraph.pxi":75
+      /* "cdec/hypergraph.pxi":75
  *                 if not f_derivation or not e_derivation: break
  *                 f_tree = unicode(GetString(f_derivation._yield).c_str(), 'utf8')
  *                 e_tree = unicode(GetString(e_derivation._yield).c_str(), 'utf8')             # <<<<<<<<<<<<<<
@@ -10989,7 +11021,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
       __Pyx_GIVEREF(__pyx_t_5);
       __pyx_t_5 = 0;
 
-      /* "hypergraph.pxi":76
+      /* "cdec/hypergraph.pxi":76
  *                 f_tree = unicode(GetString(f_derivation._yield).c_str(), 'utf8')
  *                 e_tree = unicode(GetString(e_derivation._yield).c_str(), 'utf8')
  *                 yield (f_tree, e_tree)             # <<<<<<<<<<<<<<
@@ -11021,7 +11053,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
     __pyx_L8_break:;
   }
 
-  /* "hypergraph.pxi":78
+  /* "cdec/hypergraph.pxi":78
  *                 yield (f_tree, e_tree)
  *         finally:
  *             del f_derivations             # <<<<<<<<<<<<<<
@@ -11032,7 +11064,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
     /*normal exit:*/{
       delete __pyx_cur_scope->__pyx_v_f_derivations;
 
-      /* "hypergraph.pxi":79
+      /* "cdec/hypergraph.pxi":79
  *         finally:
  *             del f_derivations
  *             del e_derivations             # <<<<<<<<<<<<<<
@@ -11058,7 +11090,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
       __pyx_t_7 = __pyx_lineno; __pyx_t_8 = __pyx_clineno; __pyx_t_9 = __pyx_filename;
       {
 
-        /* "hypergraph.pxi":78
+        /* "cdec/hypergraph.pxi":78
  *                 yield (f_tree, e_tree)
  *         finally:
  *             del f_derivations             # <<<<<<<<<<<<<<
@@ -11067,7 +11099,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
  */
         delete __pyx_cur_scope->__pyx_v_f_derivations;
 
-        /* "hypergraph.pxi":79
+        /* "cdec/hypergraph.pxi":79
  *         finally:
  *             del f_derivations
  *             del e_derivations             # <<<<<<<<<<<<<<
@@ -11093,7 +11125,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
     __pyx_L6:;
   }
 
-  /* "hypergraph.pxi":62
+  /* "cdec/hypergraph.pxi":62
  *             del derivations
  * 
  *     def kbest_trees(self, size):             # <<<<<<<<<<<<<<
@@ -11117,7 +11149,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_17generator5(__pyx_Generator
 }
 static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_20generator6(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":81
+/* "cdec/hypergraph.pxi":81
  *             del e_derivations
  * 
  *     def kbest_features(self, size):             # <<<<<<<<<<<<<<
@@ -11208,7 +11240,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_20generator6(__pyx_Generator
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":83
+  /* "cdec/hypergraph.pxi":83
  *     def kbest_features(self, size):
  *         """hg.kbest_trees(size) -> List of k-best feature vectors in the hypergraph."""
  *         cdef kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal, kbest.NoFilter[FastSparseVector[double]]]* derivations = new kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal, kbest.NoFilter[FastSparseVector[double]]](self.hg[0], size)             # <<<<<<<<<<<<<<
@@ -11218,7 +11250,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_20generator6(__pyx_Generator
   __pyx_t_1 = __Pyx_PyInt_As_unsigned_int(__pyx_cur_scope->__pyx_v_size); if (unlikely((__pyx_t_1 == (unsigned int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 83; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_cur_scope->__pyx_v_derivations = new KBest::KBestDerivations<FastSparseVector<weight_t> ,FeatureVectorTraversal,KBest::NoFilter<FastSparseVector<double> > > ((__pyx_cur_scope->__pyx_v_self->hg[0]), __pyx_t_1);
 
-  /* "hypergraph.pxi":87
+  /* "cdec/hypergraph.pxi":87
  *         cdef SparseVector fmap
  *         cdef unsigned k
  *         try:             # <<<<<<<<<<<<<<
@@ -11227,7 +11259,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_20generator6(__pyx_Generator
  */
   /*try:*/ {
 
-    /* "hypergraph.pxi":88
+    /* "cdec/hypergraph.pxi":88
  *         cdef unsigned k
  *         try:
  *             for k in range(size):             # <<<<<<<<<<<<<<
@@ -11238,7 +11270,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_20generator6(__pyx_Generator
     for (__pyx_t_1 = 0; __pyx_t_1 < __pyx_t_2; __pyx_t_1+=1) {
       __pyx_cur_scope->__pyx_v_k = __pyx_t_1;
 
-      /* "hypergraph.pxi":89
+      /* "cdec/hypergraph.pxi":89
  *         try:
  *             for k in range(size):
  *                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)             # <<<<<<<<<<<<<<
@@ -11247,7 +11279,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_20generator6(__pyx_Generator
  */
       __pyx_cur_scope->__pyx_v_derivation = __pyx_cur_scope->__pyx_v_derivations->LazyKthBest((__pyx_cur_scope->__pyx_v_self->hg->nodes_.size() - 1), __pyx_cur_scope->__pyx_v_k);
 
-      /* "hypergraph.pxi":90
+      /* "cdec/hypergraph.pxi":90
  *             for k in range(size):
  *                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 if not derivation: break             # <<<<<<<<<<<<<<
@@ -11259,7 +11291,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_20generator6(__pyx_Generator
         goto __pyx_L8_break;
       }
 
-      /* "hypergraph.pxi":91
+      /* "cdec/hypergraph.pxi":91
  *                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 if not derivation: break
  *                 fmap = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
@@ -11274,7 +11306,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_20generator6(__pyx_Generator
       __Pyx_GIVEREF(__pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "hypergraph.pxi":92
+      /* "cdec/hypergraph.pxi":92
  *                 if not derivation: break
  *                 fmap = SparseVector.__new__(SparseVector)
  *                 fmap.vector = new FastSparseVector[weight_t](derivation._yield)             # <<<<<<<<<<<<<<
@@ -11283,7 +11315,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_20generator6(__pyx_Generator
  */
       __pyx_cur_scope->__pyx_v_fmap->vector = new FastSparseVector<weight_t> (__pyx_cur_scope->__pyx_v_derivation->yield);
 
-      /* "hypergraph.pxi":93
+      /* "cdec/hypergraph.pxi":93
  *                 fmap = SparseVector.__new__(SparseVector)
  *                 fmap.vector = new FastSparseVector[weight_t](derivation._yield)
  *                 yield fmap             # <<<<<<<<<<<<<<
@@ -11307,7 +11339,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_20generator6(__pyx_Generator
     __pyx_L8_break:;
   }
 
-  /* "hypergraph.pxi":95
+  /* "cdec/hypergraph.pxi":95
  *                 yield fmap
  *         finally:
  *             del derivations             # <<<<<<<<<<<<<<
@@ -11352,7 +11384,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_20generator6(__pyx_Generator
     __pyx_L6:;
   }
 
-  /* "hypergraph.pxi":81
+  /* "cdec/hypergraph.pxi":81
  *             del e_derivations
  * 
  *     def kbest_features(self, size):             # <<<<<<<<<<<<<<
@@ -11375,7 +11407,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_20generator6(__pyx_Generator
 }
 static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_23generator7(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":97
+/* "cdec/hypergraph.pxi":97
  *             del derivations
  * 
  *     def unique_kbest(self, size):             # <<<<<<<<<<<<<<
@@ -11467,7 +11499,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_23generator7(__pyx_Generator
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 97; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":99
+  /* "cdec/hypergraph.pxi":99
  *     def unique_kbest(self, size):
  *         """hg.kbest(size) -> List of unique k-best hypotheses in the hypergraph."""
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal, kbest.FilterUnique]* derivations = new kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal, kbest.FilterUnique](self.hg[0], size)             # <<<<<<<<<<<<<<
@@ -11477,7 +11509,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_23generator7(__pyx_Generator
   __pyx_t_1 = __Pyx_PyInt_As_unsigned_int(__pyx_cur_scope->__pyx_v_size); if (unlikely((__pyx_t_1 == (unsigned int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 99; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_cur_scope->__pyx_v_derivations = new KBest::KBestDerivations<std::vector<WordID> ,ESentenceTraversal,KBest::FilterUnique> ((__pyx_cur_scope->__pyx_v_self->hg[0]), __pyx_t_1);
 
-  /* "hypergraph.pxi":102
+  /* "cdec/hypergraph.pxi":102
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.ESentenceTraversal, kbest.FilterUnique].Derivation* derivation
  *         cdef unsigned k
  *         try:             # <<<<<<<<<<<<<<
@@ -11486,7 +11518,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_23generator7(__pyx_Generator
  */
   /*try:*/ {
 
-    /* "hypergraph.pxi":103
+    /* "cdec/hypergraph.pxi":103
  *         cdef unsigned k
  *         try:
  *             for k in range(size):             # <<<<<<<<<<<<<<
@@ -11497,7 +11529,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_23generator7(__pyx_Generator
     for (__pyx_t_1 = 0; __pyx_t_1 < __pyx_t_2; __pyx_t_1+=1) {
       __pyx_cur_scope->__pyx_v_k = __pyx_t_1;
 
-      /* "hypergraph.pxi":104
+      /* "cdec/hypergraph.pxi":104
  *         try:
  *             for k in range(size):
  *                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)             # <<<<<<<<<<<<<<
@@ -11506,7 +11538,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_23generator7(__pyx_Generator
  */
       __pyx_cur_scope->__pyx_v_derivation = __pyx_cur_scope->__pyx_v_derivations->LazyKthBest((__pyx_cur_scope->__pyx_v_self->hg->nodes_.size() - 1), __pyx_cur_scope->__pyx_v_k);
 
-      /* "hypergraph.pxi":105
+      /* "cdec/hypergraph.pxi":105
  *             for k in range(size):
  *                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 if not derivation: break             # <<<<<<<<<<<<<<
@@ -11518,7 +11550,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_23generator7(__pyx_Generator
         goto __pyx_L8_break;
       }
 
-      /* "hypergraph.pxi":106
+      /* "cdec/hypergraph.pxi":106
  *                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 if not derivation: break
  *                 yield unicode(GetString(derivation._yield).c_str(), 'utf8')             # <<<<<<<<<<<<<<
@@ -11555,7 +11587,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_23generator7(__pyx_Generator
     __pyx_L8_break:;
   }
 
-  /* "hypergraph.pxi":108
+  /* "cdec/hypergraph.pxi":108
  *                 yield unicode(GetString(derivation._yield).c_str(), 'utf8')
  *         finally:
  *             del derivations             # <<<<<<<<<<<<<<
@@ -11601,7 +11633,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_23generator7(__pyx_Generator
     __pyx_L6:;
   }
 
-  /* "hypergraph.pxi":97
+  /* "cdec/hypergraph.pxi":97
  *             del derivations
  * 
  *     def unique_kbest(self, size):             # <<<<<<<<<<<<<<
@@ -11625,7 +11657,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_23generator7(__pyx_Generator
 }
 static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":110
+/* "cdec/hypergraph.pxi":110
  *             del derivations
  * 
  *     def unique_kbest_trees(self, size):             # <<<<<<<<<<<<<<
@@ -11718,7 +11750,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 110; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":112
+  /* "cdec/hypergraph.pxi":112
  *     def unique_kbest_trees(self, size):
  *         """hg.kbest_trees(size) -> List of unique k-best trees in the hypergraph."""
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.FilterUnique]* f_derivations = new kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.FilterUnique](self.hg[0], size)             # <<<<<<<<<<<<<<
@@ -11728,7 +11760,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
   __pyx_t_1 = __Pyx_PyInt_As_unsigned_int(__pyx_cur_scope->__pyx_v_size); if (unlikely((__pyx_t_1 == (unsigned int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_cur_scope->__pyx_v_f_derivations = new KBest::KBestDerivations<std::vector<WordID> ,FTreeTraversal,KBest::FilterUnique> ((__pyx_cur_scope->__pyx_v_self->hg[0]), __pyx_t_1);
 
-  /* "hypergraph.pxi":114
+  /* "cdec/hypergraph.pxi":114
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.FilterUnique]* f_derivations = new kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.FilterUnique](self.hg[0], size)
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.FTreeTraversal, kbest.FilterUnique].Derivation* f_derivation
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal, kbest.FilterUnique]* e_derivations = new kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal, kbest.FilterUnique](self.hg[0], size)             # <<<<<<<<<<<<<<
@@ -11738,7 +11770,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
   __pyx_t_1 = __Pyx_PyInt_As_unsigned_int(__pyx_cur_scope->__pyx_v_size); if (unlikely((__pyx_t_1 == (unsigned int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_cur_scope->__pyx_v_e_derivations = new KBest::KBestDerivations<std::vector<WordID> ,ETreeTraversal,KBest::FilterUnique> ((__pyx_cur_scope->__pyx_v_self->hg[0]), __pyx_t_1);
 
-  /* "hypergraph.pxi":117
+  /* "cdec/hypergraph.pxi":117
  *         cdef kbest.KBestDerivations[vector[WordID], kbest.ETreeTraversal, kbest.FilterUnique].Derivation* e_derivation
  *         cdef unsigned k
  *         try:             # <<<<<<<<<<<<<<
@@ -11747,7 +11779,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
  */
   /*try:*/ {
 
-    /* "hypergraph.pxi":118
+    /* "cdec/hypergraph.pxi":118
  *         cdef unsigned k
  *         try:
  *             for k in range(size):             # <<<<<<<<<<<<<<
@@ -11758,7 +11790,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
     for (__pyx_t_1 = 0; __pyx_t_1 < __pyx_t_2; __pyx_t_1+=1) {
       __pyx_cur_scope->__pyx_v_k = __pyx_t_1;
 
-      /* "hypergraph.pxi":119
+      /* "cdec/hypergraph.pxi":119
  *         try:
  *             for k in range(size):
  *                 f_derivation = f_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)             # <<<<<<<<<<<<<<
@@ -11767,7 +11799,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
  */
       __pyx_cur_scope->__pyx_v_f_derivation = __pyx_cur_scope->__pyx_v_f_derivations->LazyKthBest((__pyx_cur_scope->__pyx_v_self->hg->nodes_.size() - 1), __pyx_cur_scope->__pyx_v_k);
 
-      /* "hypergraph.pxi":120
+      /* "cdec/hypergraph.pxi":120
  *             for k in range(size):
  *                 f_derivation = f_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 e_derivation = e_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)             # <<<<<<<<<<<<<<
@@ -11776,7 +11808,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
  */
       __pyx_cur_scope->__pyx_v_e_derivation = __pyx_cur_scope->__pyx_v_e_derivations->LazyKthBest((__pyx_cur_scope->__pyx_v_self->hg->nodes_.size() - 1), __pyx_cur_scope->__pyx_v_k);
 
-      /* "hypergraph.pxi":121
+      /* "cdec/hypergraph.pxi":121
  *                 f_derivation = f_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 e_derivation = e_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 if not f_derivation or not e_derivation: break             # <<<<<<<<<<<<<<
@@ -11798,7 +11830,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
         goto __pyx_L8_break;
       }
 
-      /* "hypergraph.pxi":122
+      /* "cdec/hypergraph.pxi":122
  *                 e_derivation = e_derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 if not f_derivation or not e_derivation: break
  *                 f_tree = unicode(GetString(f_derivation._yield).c_str(), 'utf8')             # <<<<<<<<<<<<<<
@@ -11823,7 +11855,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
       __Pyx_GIVEREF(__pyx_t_5);
       __pyx_t_5 = 0;
 
-      /* "hypergraph.pxi":123
+      /* "cdec/hypergraph.pxi":123
  *                 if not f_derivation or not e_derivation: break
  *                 f_tree = unicode(GetString(f_derivation._yield).c_str(), 'utf8')
  *                 e_tree = unicode(GetString(e_derivation._yield).c_str(), 'utf8')             # <<<<<<<<<<<<<<
@@ -11848,7 +11880,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
       __Pyx_GIVEREF(__pyx_t_5);
       __pyx_t_5 = 0;
 
-      /* "hypergraph.pxi":124
+      /* "cdec/hypergraph.pxi":124
  *                 f_tree = unicode(GetString(f_derivation._yield).c_str(), 'utf8')
  *                 e_tree = unicode(GetString(e_derivation._yield).c_str(), 'utf8')
  *                 yield (f_tree, e_tree)             # <<<<<<<<<<<<<<
@@ -11880,7 +11912,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
     __pyx_L8_break:;
   }
 
-  /* "hypergraph.pxi":126
+  /* "cdec/hypergraph.pxi":126
  *                 yield (f_tree, e_tree)
  *         finally:
  *             del f_derivations             # <<<<<<<<<<<<<<
@@ -11891,7 +11923,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
     /*normal exit:*/{
       delete __pyx_cur_scope->__pyx_v_f_derivations;
 
-      /* "hypergraph.pxi":127
+      /* "cdec/hypergraph.pxi":127
  *         finally:
  *             del f_derivations
  *             del e_derivations             # <<<<<<<<<<<<<<
@@ -11917,7 +11949,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
       __pyx_t_7 = __pyx_lineno; __pyx_t_8 = __pyx_clineno; __pyx_t_9 = __pyx_filename;
       {
 
-        /* "hypergraph.pxi":126
+        /* "cdec/hypergraph.pxi":126
  *                 yield (f_tree, e_tree)
  *         finally:
  *             del f_derivations             # <<<<<<<<<<<<<<
@@ -11926,7 +11958,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
  */
         delete __pyx_cur_scope->__pyx_v_f_derivations;
 
-        /* "hypergraph.pxi":127
+        /* "cdec/hypergraph.pxi":127
  *         finally:
  *             del f_derivations
  *             del e_derivations             # <<<<<<<<<<<<<<
@@ -11952,7 +11984,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
     __pyx_L6:;
   }
 
-  /* "hypergraph.pxi":110
+  /* "cdec/hypergraph.pxi":110
  *             del derivations
  * 
  *     def unique_kbest_trees(self, size):             # <<<<<<<<<<<<<<
@@ -11976,7 +12008,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_26generator8(__pyx_Generator
 }
 static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_29generator9(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":129
+/* "cdec/hypergraph.pxi":129
  *             del e_derivations
  * 
  *     def unique_kbest_features(self, size):             # <<<<<<<<<<<<<<
@@ -12067,7 +12099,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_29generator9(__pyx_Generator
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 129; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":131
+  /* "cdec/hypergraph.pxi":131
  *     def unique_kbest_features(self, size):
  *         """hg.kbest_trees(size) -> List of unique k-best feature vectors in the hypergraph."""
  *         cdef kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal, kbest.NoFilter[FastSparseVector[double]]]* derivations = new kbest.KBestDerivations[FastSparseVector[weight_t], kbest.FeatureVectorTraversal, kbest.NoFilter[FastSparseVector[double]]](self.hg[0], size)             # <<<<<<<<<<<<<<
@@ -12077,7 +12109,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_29generator9(__pyx_Generator
   __pyx_t_1 = __Pyx_PyInt_As_unsigned_int(__pyx_cur_scope->__pyx_v_size); if (unlikely((__pyx_t_1 == (unsigned int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_cur_scope->__pyx_v_derivations = new KBest::KBestDerivations<FastSparseVector<weight_t> ,FeatureVectorTraversal,KBest::NoFilter<FastSparseVector<double> > > ((__pyx_cur_scope->__pyx_v_self->hg[0]), __pyx_t_1);
 
-  /* "hypergraph.pxi":135
+  /* "cdec/hypergraph.pxi":135
  *         cdef SparseVector fmap
  *         cdef unsigned k
  *         try:             # <<<<<<<<<<<<<<
@@ -12086,7 +12118,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_29generator9(__pyx_Generator
  */
   /*try:*/ {
 
-    /* "hypergraph.pxi":136
+    /* "cdec/hypergraph.pxi":136
  *         cdef unsigned k
  *         try:
  *             for k in range(size):             # <<<<<<<<<<<<<<
@@ -12097,7 +12129,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_29generator9(__pyx_Generator
     for (__pyx_t_1 = 0; __pyx_t_1 < __pyx_t_2; __pyx_t_1+=1) {
       __pyx_cur_scope->__pyx_v_k = __pyx_t_1;
 
-      /* "hypergraph.pxi":137
+      /* "cdec/hypergraph.pxi":137
  *         try:
  *             for k in range(size):
  *                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)             # <<<<<<<<<<<<<<
@@ -12106,7 +12138,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_29generator9(__pyx_Generator
  */
       __pyx_cur_scope->__pyx_v_derivation = __pyx_cur_scope->__pyx_v_derivations->LazyKthBest((__pyx_cur_scope->__pyx_v_self->hg->nodes_.size() - 1), __pyx_cur_scope->__pyx_v_k);
 
-      /* "hypergraph.pxi":138
+      /* "cdec/hypergraph.pxi":138
  *             for k in range(size):
  *                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 if not derivation: break             # <<<<<<<<<<<<<<
@@ -12118,7 +12150,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_29generator9(__pyx_Generator
         goto __pyx_L8_break;
       }
 
-      /* "hypergraph.pxi":139
+      /* "cdec/hypergraph.pxi":139
  *                 derivation = derivations.LazyKthBest(self.hg.nodes_.size() - 1, k)
  *                 if not derivation: break
  *                 fmap = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
@@ -12133,7 +12165,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_29generator9(__pyx_Generator
       __Pyx_GIVEREF(__pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "hypergraph.pxi":140
+      /* "cdec/hypergraph.pxi":140
  *                 if not derivation: break
  *                 fmap = SparseVector.__new__(SparseVector)
  *                 fmap.vector = new FastSparseVector[weight_t](derivation._yield)             # <<<<<<<<<<<<<<
@@ -12142,7 +12174,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_29generator9(__pyx_Generator
  */
       __pyx_cur_scope->__pyx_v_fmap->vector = new FastSparseVector<weight_t> (__pyx_cur_scope->__pyx_v_derivation->yield);
 
-      /* "hypergraph.pxi":141
+      /* "cdec/hypergraph.pxi":141
  *                 fmap = SparseVector.__new__(SparseVector)
  *                 fmap.vector = new FastSparseVector[weight_t](derivation._yield)
  *                 yield fmap             # <<<<<<<<<<<<<<
@@ -12166,7 +12198,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_29generator9(__pyx_Generator
     __pyx_L8_break:;
   }
 
-  /* "hypergraph.pxi":143
+  /* "cdec/hypergraph.pxi":143
  *                 yield fmap
  *         finally:
  *             del derivations             # <<<<<<<<<<<<<<
@@ -12211,7 +12243,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_29generator9(__pyx_Generator
     __pyx_L6:;
   }
 
-  /* "hypergraph.pxi":129
+  /* "cdec/hypergraph.pxi":129
  *             del e_derivations
  * 
  *     def unique_kbest_features(self, size):             # <<<<<<<<<<<<<<
@@ -12234,7 +12266,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_29generator9(__pyx_Generator
 }
 static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_32generator10(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":145
+/* "cdec/hypergraph.pxi":145
  *             del derivations
  * 
  *     def sample(self, unsigned n):             # <<<<<<<<<<<<<<
@@ -12337,7 +12369,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_32generator10(__pyx_Generato
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":147
+  /* "cdec/hypergraph.pxi":147
  *     def sample(self, unsigned n):
  *         """hg.sample(n) -> Sample of n hypotheses from the hypergraph."""
  *         cdef vector[hypergraph.Hypothesis]* hypos = new vector[hypergraph.Hypothesis]()             # <<<<<<<<<<<<<<
@@ -12352,7 +12384,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_32generator10(__pyx_Generato
   }
   __pyx_cur_scope->__pyx_v_hypos = __pyx_t_1;
 
-  /* "hypergraph.pxi":148
+  /* "cdec/hypergraph.pxi":148
  *         """hg.sample(n) -> Sample of n hypotheses from the hypergraph."""
  *         cdef vector[hypergraph.Hypothesis]* hypos = new vector[hypergraph.Hypothesis]()
  *         hypergraph.sample_hypotheses(self.hg[0], n, self._rng(), hypos)             # <<<<<<<<<<<<<<
@@ -12361,7 +12393,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_32generator10(__pyx_Generato
  */
   HypergraphSampler::sample_hypotheses((__pyx_cur_scope->__pyx_v_self->hg[0]), __pyx_cur_scope->__pyx_v_n, ((struct __pyx_vtabstruct_4cdec_5_cdec_Hypergraph *)__pyx_cur_scope->__pyx_v_self->__pyx_vtab)->_rng(__pyx_cur_scope->__pyx_v_self), __pyx_cur_scope->__pyx_v_hypos);
 
-  /* "hypergraph.pxi":150
+  /* "cdec/hypergraph.pxi":150
  *         hypergraph.sample_hypotheses(self.hg[0], n, self._rng(), hypos)
  *         cdef unsigned k
  *         try:             # <<<<<<<<<<<<<<
@@ -12370,7 +12402,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_32generator10(__pyx_Generato
  */
   /*try:*/ {
 
-    /* "hypergraph.pxi":151
+    /* "cdec/hypergraph.pxi":151
  *         cdef unsigned k
  *         try:
  *             for k in range(hypos.size()):             # <<<<<<<<<<<<<<
@@ -12381,7 +12413,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_32generator10(__pyx_Generato
     for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
       __pyx_cur_scope->__pyx_v_k = __pyx_t_3;
 
-      /* "hypergraph.pxi":152
+      /* "cdec/hypergraph.pxi":152
  *         try:
  *             for k in range(hypos.size()):
  *                 yield unicode(GetString(hypos[0][k].words).c_str(), 'utf8')             # <<<<<<<<<<<<<<
@@ -12417,12 +12449,12 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_32generator10(__pyx_Generato
     }
   }
 
-  /* "hypergraph.pxi":154
+  /* "cdec/hypergraph.pxi":154
  *                 yield unicode(GetString(hypos[0][k].words).c_str(), 'utf8')
  *         finally:
  *             del hypos             # <<<<<<<<<<<<<<
  * 
- *     def sample_trees(self, unsigned n):
+ *     def sample_hypotheses(self, unsigned n):
  */
   /*finally:*/ {
     /*normal exit:*/{
@@ -12463,7 +12495,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_32generator10(__pyx_Generato
     __pyx_L6:;
   }
 
-  /* "hypergraph.pxi":145
+  /* "cdec/hypergraph.pxi":145
  *             del derivations
  * 
  *     def sample(self, unsigned n):             # <<<<<<<<<<<<<<
@@ -12487,50 +12519,50 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_32generator10(__pyx_Generato
 }
 static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":156
+/* "cdec/hypergraph.pxi":156
  *             del hypos
  * 
- *     def sample_trees(self, unsigned n):             # <<<<<<<<<<<<<<
- *        """hg.sample_trees(n) -> Sample of n trees from the hypergraph."""
- *        cdef vector[string]* trees = new vector[string]()
+ *     def sample_hypotheses(self, unsigned n):             # <<<<<<<<<<<<<<
+ *         """hg.sample_string(n) -> Sample of n hypotheses from the hypergraph.
+ *         Generates (sample_string, dot, fmap)"""
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_34sample_trees(PyObject *__pyx_v_self, PyObject *__pyx_arg_n); /*proto*/
-static char __pyx_doc_4cdec_5_cdec_10Hypergraph_33sample_trees[] = "hg.sample_trees(n) -> Sample of n trees from the hypergraph.";
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_34sample_trees(PyObject *__pyx_v_self, PyObject *__pyx_arg_n) {
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_34sample_hypotheses(PyObject *__pyx_v_self, PyObject *__pyx_arg_n); /*proto*/
+static char __pyx_doc_4cdec_5_cdec_10Hypergraph_33sample_hypotheses[] = "hg.sample_string(n) -> Sample of n hypotheses from the hypergraph.\n        Generates (sample_string, dot, fmap)";
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_34sample_hypotheses(PyObject *__pyx_v_self, PyObject *__pyx_arg_n) {
   unsigned int __pyx_v_n;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("sample_trees (wrapper)", 0);
+  __Pyx_RefNannySetupContext("sample_hypotheses (wrapper)", 0);
   assert(__pyx_arg_n); {
     __pyx_v_n = __Pyx_PyInt_As_unsigned_int(__pyx_arg_n); if (unlikely((__pyx_v_n == (unsigned int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
-  __Pyx_AddTraceback("cdec._cdec.Hypergraph.sample_trees", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("cdec._cdec.Hypergraph.sample_hypotheses", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_33sample_trees(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self), ((unsigned int)__pyx_v_n));
+  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_33sample_hypotheses(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self), ((unsigned int)__pyx_v_n));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_33sample_trees(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, unsigned int __pyx_v_n) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees *__pyx_cur_scope;
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_33sample_hypotheses(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, unsigned int __pyx_v_n) {
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("sample_trees", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_15_sample_trees(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_15_sample_trees, __pyx_empty_tuple, NULL);
+  __Pyx_RefNannySetupContext("sample_hypotheses", 0);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
@@ -12541,7 +12573,311 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_33sample_trees(struct __pyx_
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __pyx_cur_scope->__pyx_v_n = __pyx_v_n;
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11, (PyObject *) __pyx_cur_scope, __pyx_n_s_sample_trees, __pyx_n_s_Hypergraph_sample_trees); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11, (PyObject *) __pyx_cur_scope, __pyx_n_s_sample_hypotheses, __pyx_n_s_Hypergraph_sample_hypotheses); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_cur_scope);
+    __Pyx_RefNannyFinishContext();
+    return (PyObject *) gen;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("cdec._cdec.Hypergraph.sample_hypotheses", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __Pyx_DECREF(((PyObject *)__pyx_cur_scope));
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+{
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses *)__pyx_generator->closure);
+  PyObject *__pyx_r = NULL;
+  std::vector<HypergraphSampler::Hypothesis>  *__pyx_t_1;
+  size_t __pyx_t_2;
+  unsigned int __pyx_t_3;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  PyObject *__pyx_t_6 = NULL;
+  int __pyx_t_7;
+  int __pyx_t_8;
+  char const *__pyx_t_9;
+  PyObject *__pyx_t_10 = NULL;
+  PyObject *__pyx_t_11 = NULL;
+  PyObject *__pyx_t_12 = NULL;
+  PyObject *__pyx_t_13 = NULL;
+  PyObject *__pyx_t_14 = NULL;
+  PyObject *__pyx_t_15 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("None", 0);
+  switch (__pyx_generator->resume_label) {
+    case 0: goto __pyx_L3_first_run;
+    case 1: goto __pyx_L9_resume_from_yield;
+    default: /* CPython raises the right error here */
+    __Pyx_RefNannyFinishContext();
+    return NULL;
+  }
+  __pyx_L3_first_run:;
+  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "cdec/hypergraph.pxi":159
+ *         """hg.sample_string(n) -> Sample of n hypotheses from the hypergraph.
+ *         Generates (sample_string, dot, fmap)"""
+ *         cdef vector[hypergraph.Hypothesis]* hypos = new vector[hypergraph.Hypothesis]()             # <<<<<<<<<<<<<<
+ *         cdef SparseVector fmap = None
+ *         hypergraph.sample_hypotheses(self.hg[0], n, self._rng(), hypos)
+ */
+  try {
+    __pyx_t_1 = new std::vector<HypergraphSampler::Hypothesis> ();
+  } catch(...) {
+    __Pyx_CppExn2PyErr();
+    {__pyx_filename = __pyx_f[3]; __pyx_lineno = 159; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __pyx_cur_scope->__pyx_v_hypos = __pyx_t_1;
+
+  /* "cdec/hypergraph.pxi":160
+ *         Generates (sample_string, dot, fmap)"""
+ *         cdef vector[hypergraph.Hypothesis]* hypos = new vector[hypergraph.Hypothesis]()
+ *         cdef SparseVector fmap = None             # <<<<<<<<<<<<<<
+ *         hypergraph.sample_hypotheses(self.hg[0], n, self._rng(), hypos)
+ *         cdef unsigned k
+ */
+  __Pyx_INCREF(Py_None);
+  __Pyx_GIVEREF(Py_None);
+  __pyx_cur_scope->__pyx_v_fmap = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)Py_None);
+
+  /* "cdec/hypergraph.pxi":161
+ *         cdef vector[hypergraph.Hypothesis]* hypos = new vector[hypergraph.Hypothesis]()
+ *         cdef SparseVector fmap = None
+ *         hypergraph.sample_hypotheses(self.hg[0], n, self._rng(), hypos)             # <<<<<<<<<<<<<<
+ *         cdef unsigned k
+ *         try:
+ */
+  HypergraphSampler::sample_hypotheses((__pyx_cur_scope->__pyx_v_self->hg[0]), __pyx_cur_scope->__pyx_v_n, ((struct __pyx_vtabstruct_4cdec_5_cdec_Hypergraph *)__pyx_cur_scope->__pyx_v_self->__pyx_vtab)->_rng(__pyx_cur_scope->__pyx_v_self), __pyx_cur_scope->__pyx_v_hypos);
+
+  /* "cdec/hypergraph.pxi":163
+ *         hypergraph.sample_hypotheses(self.hg[0], n, self._rng(), hypos)
+ *         cdef unsigned k
+ *         try:             # <<<<<<<<<<<<<<
+ *             for k in range(hypos.size()):
+ *                 fmap = SparseVector.__new__(SparseVector)
+ */
+  /*try:*/ {
+
+    /* "cdec/hypergraph.pxi":164
+ *         cdef unsigned k
+ *         try:
+ *             for k in range(hypos.size()):             # <<<<<<<<<<<<<<
+ *                 fmap = SparseVector.__new__(SparseVector)
+ *                 fmap.vector = new FastSparseVector[weight_t](hypos[0][k].fmap)
+ */
+    __pyx_t_2 = __pyx_cur_scope->__pyx_v_hypos->size();
+    for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+      __pyx_cur_scope->__pyx_v_k = __pyx_t_3;
+
+      /* "cdec/hypergraph.pxi":165
+ *         try:
+ *             for k in range(hypos.size()):
+ *                 fmap = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
+ *                 fmap.vector = new FastSparseVector[weight_t](hypos[0][k].fmap)
+ *                 yield unicode(GetString(hypos[0][k].words).c_str(), 'utf8'), hypos[0][k].model_score.as_float(), fmap
+ */
+      __pyx_t_4 = __pyx_tp_new_4cdec_5_cdec_SparseVector(((PyTypeObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_SparseVector)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 165; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
+      __Pyx_GOTREF(__pyx_t_4);
+      if (!(likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_4cdec_5_cdec_SparseVector)))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 165; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
+      __Pyx_GOTREF(((PyObject *)__pyx_cur_scope->__pyx_v_fmap));
+      __Pyx_DECREF_SET(__pyx_cur_scope->__pyx_v_fmap, ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)__pyx_t_4));
+      __Pyx_GIVEREF(__pyx_t_4);
+      __pyx_t_4 = 0;
+
+      /* "cdec/hypergraph.pxi":166
+ *             for k in range(hypos.size()):
+ *                 fmap = SparseVector.__new__(SparseVector)
+ *                 fmap.vector = new FastSparseVector[weight_t](hypos[0][k].fmap)             # <<<<<<<<<<<<<<
+ *                 yield unicode(GetString(hypos[0][k].words).c_str(), 'utf8'), hypos[0][k].model_score.as_float(), fmap
+ *         finally:
+ */
+      __pyx_cur_scope->__pyx_v_fmap->vector = new FastSparseVector<weight_t> (((__pyx_cur_scope->__pyx_v_hypos[0])[__pyx_cur_scope->__pyx_v_k]).fmap);
+
+      /* "cdec/hypergraph.pxi":167
+ *                 fmap = SparseVector.__new__(SparseVector)
+ *                 fmap.vector = new FastSparseVector[weight_t](hypos[0][k].fmap)
+ *                 yield unicode(GetString(hypos[0][k].words).c_str(), 'utf8'), hypos[0][k].model_score.as_float(), fmap             # <<<<<<<<<<<<<<
+ *         finally:
+ *             del hypos
+ */
+      __pyx_t_4 = __Pyx_PyBytes_FromString(TD::GetString(((__pyx_cur_scope->__pyx_v_hypos[0])[__pyx_cur_scope->__pyx_v_k]).words).c_str()); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
+      __Pyx_GOTREF(__pyx_t_4);
+      __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
+      __Pyx_GOTREF(__pyx_t_5);
+      PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4);
+      __Pyx_GIVEREF(__pyx_t_4);
+      __Pyx_INCREF(__pyx_n_s_utf8);
+      PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_n_s_utf8);
+      __Pyx_GIVEREF(__pyx_n_s_utf8);
+      __pyx_t_4 = 0;
+      __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)(&PyUnicode_Type))), __pyx_t_5, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+      __pyx_t_5 = PyFloat_FromDouble(((__pyx_cur_scope->__pyx_v_hypos[0])[__pyx_cur_scope->__pyx_v_k]).model_score.as_float()); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
+      __Pyx_GOTREF(__pyx_t_5);
+      __pyx_t_6 = PyTuple_New(3); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
+      __Pyx_GOTREF(__pyx_t_6);
+      PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_4);
+      __Pyx_GIVEREF(__pyx_t_4);
+      PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_5);
+      __Pyx_GIVEREF(__pyx_t_5);
+      __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_v_fmap));
+      PyTuple_SET_ITEM(__pyx_t_6, 2, ((PyObject *)__pyx_cur_scope->__pyx_v_fmap));
+      __Pyx_GIVEREF(((PyObject *)__pyx_cur_scope->__pyx_v_fmap));
+      __pyx_t_4 = 0;
+      __pyx_t_5 = 0;
+      __pyx_r = __pyx_t_6;
+      __pyx_t_6 = 0;
+      __pyx_cur_scope->__pyx_t_0 = __pyx_t_2;
+      __pyx_cur_scope->__pyx_t_1 = __pyx_t_3;
+      __Pyx_XGIVEREF(__pyx_r);
+      __Pyx_RefNannyFinishContext();
+      /* return from generator, yielding value */
+      __pyx_generator->resume_label = 1;
+      return __pyx_r;
+      __pyx_L9_resume_from_yield:;
+      __pyx_t_2 = __pyx_cur_scope->__pyx_t_0;
+      __pyx_t_3 = __pyx_cur_scope->__pyx_t_1;
+      if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 167; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
+    }
+  }
+
+  /* "cdec/hypergraph.pxi":169
+ *                 yield unicode(GetString(hypos[0][k].words).c_str(), 'utf8'), hypos[0][k].model_score.as_float(), fmap
+ *         finally:
+ *             del hypos             # <<<<<<<<<<<<<<
+ * 
+ *     def sample_trees(self, unsigned n):
+ */
+  /*finally:*/ {
+    /*normal exit:*/{
+      delete __pyx_cur_scope->__pyx_v_hypos;
+      goto __pyx_L6;
+    }
+    /*exception exit:*/{
+      __pyx_L5_error:;
+      __pyx_t_10 = 0; __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0;
+      __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+      __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
+      if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_13, &__pyx_t_14, &__pyx_t_15);
+      if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_10, &__pyx_t_11, &__pyx_t_12) < 0)) __Pyx_ErrFetch(&__pyx_t_10, &__pyx_t_11, &__pyx_t_12);
+      __Pyx_XGOTREF(__pyx_t_10);
+      __Pyx_XGOTREF(__pyx_t_11);
+      __Pyx_XGOTREF(__pyx_t_12);
+      __Pyx_XGOTREF(__pyx_t_13);
+      __Pyx_XGOTREF(__pyx_t_14);
+      __Pyx_XGOTREF(__pyx_t_15);
+      __pyx_t_7 = __pyx_lineno; __pyx_t_8 = __pyx_clineno; __pyx_t_9 = __pyx_filename;
+      {
+        delete __pyx_cur_scope->__pyx_v_hypos;
+      }
+      if (PY_MAJOR_VERSION >= 3) {
+        __Pyx_XGIVEREF(__pyx_t_13);
+        __Pyx_XGIVEREF(__pyx_t_14);
+        __Pyx_XGIVEREF(__pyx_t_15);
+        __Pyx_ExceptionReset(__pyx_t_13, __pyx_t_14, __pyx_t_15);
+      }
+      __Pyx_XGIVEREF(__pyx_t_10);
+      __Pyx_XGIVEREF(__pyx_t_11);
+      __Pyx_XGIVEREF(__pyx_t_12);
+      __Pyx_ErrRestore(__pyx_t_10, __pyx_t_11, __pyx_t_12);
+      __pyx_t_10 = 0; __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0;
+      __pyx_lineno = __pyx_t_7; __pyx_clineno = __pyx_t_8; __pyx_filename = __pyx_t_9;
+      goto __pyx_L1_error;
+    }
+    __pyx_L6:;
+  }
+
+  /* "cdec/hypergraph.pxi":156
+ *             del hypos
+ * 
+ *     def sample_hypotheses(self, unsigned n):             # <<<<<<<<<<<<<<
+ *         """hg.sample_string(n) -> Sample of n hypotheses from the hypergraph.
+ *         Generates (sample_string, dot, fmap)"""
+ */
+
+  /* function exit code */
+  PyErr_SetNone(PyExc_StopIteration);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_AddTraceback("sample_hypotheses", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_generator->resume_label = -1;
+  __Pyx_Generator_clear((PyObject*)__pyx_generator);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+}
+static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_38generator12(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+
+/* "cdec/hypergraph.pxi":171
+ *             del hypos
+ * 
+ *     def sample_trees(self, unsigned n):             # <<<<<<<<<<<<<<
+ *        """hg.sample_trees(n) -> Sample of n trees from the hypergraph."""
+ *        cdef vector[string]* trees = new vector[string]()
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_37sample_trees(PyObject *__pyx_v_self, PyObject *__pyx_arg_n); /*proto*/
+static char __pyx_doc_4cdec_5_cdec_10Hypergraph_36sample_trees[] = "hg.sample_trees(n) -> Sample of n trees from the hypergraph.";
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_37sample_trees(PyObject *__pyx_v_self, PyObject *__pyx_arg_n) {
+  unsigned int __pyx_v_n;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("sample_trees (wrapper)", 0);
+  assert(__pyx_arg_n); {
+    __pyx_v_n = __Pyx_PyInt_As_unsigned_int(__pyx_arg_n); if (unlikely((__pyx_v_n == (unsigned int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("cdec._cdec.Hypergraph.sample_trees", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_36sample_trees(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self), ((unsigned int)__pyx_v_n));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_36sample_trees(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, unsigned int __pyx_v_n) {
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees *__pyx_cur_scope;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("sample_trees", 0);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_16_sample_trees(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_16_sample_trees, __pyx_empty_tuple, NULL);
+  if (unlikely(!__pyx_cur_scope)) {
+    __Pyx_RefNannyFinishContext();
+    return NULL;
+  }
+  __Pyx_GOTREF(__pyx_cur_scope);
+  __pyx_cur_scope->__pyx_v_self = __pyx_v_self;
+  __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
+  __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
+  __pyx_cur_scope->__pyx_v_n = __pyx_v_n;
+  {
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_10Hypergraph_38generator12, (PyObject *) __pyx_cur_scope, __pyx_n_s_sample_trees, __pyx_n_s_Hypergraph_sample_trees); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -12557,9 +12893,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_33sample_trees(struct __pyx_
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_38generator12(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees *)__pyx_generator->closure);
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   std::vector<std::string>  *__pyx_t_1;
   size_t __pyx_t_2;
@@ -12588,9 +12924,9 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_Generato
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":158
+  /* "cdec/hypergraph.pxi":173
  *     def sample_trees(self, unsigned n):
  *        """hg.sample_trees(n) -> Sample of n trees from the hypergraph."""
  *        cdef vector[string]* trees = new vector[string]()             # <<<<<<<<<<<<<<
@@ -12601,11 +12937,11 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_Generato
     __pyx_t_1 = new std::vector<std::string> ();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    {__pyx_filename = __pyx_f[3]; __pyx_lineno = 158; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[3]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_cur_scope->__pyx_v_trees = __pyx_t_1;
 
-  /* "hypergraph.pxi":159
+  /* "cdec/hypergraph.pxi":174
  *        """hg.sample_trees(n) -> Sample of n trees from the hypergraph."""
  *        cdef vector[string]* trees = new vector[string]()
  *        hypergraph.sample_trees(self.hg[0], n, self._rng(), trees)             # <<<<<<<<<<<<<<
@@ -12614,7 +12950,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_Generato
  */
   HypergraphSampler::sample_trees((__pyx_cur_scope->__pyx_v_self->hg[0]), __pyx_cur_scope->__pyx_v_n, ((struct __pyx_vtabstruct_4cdec_5_cdec_Hypergraph *)__pyx_cur_scope->__pyx_v_self->__pyx_vtab)->_rng(__pyx_cur_scope->__pyx_v_self), __pyx_cur_scope->__pyx_v_trees);
 
-  /* "hypergraph.pxi":161
+  /* "cdec/hypergraph.pxi":176
  *        hypergraph.sample_trees(self.hg[0], n, self._rng(), trees)
  *        cdef unsigned k
  *        try:             # <<<<<<<<<<<<<<
@@ -12623,7 +12959,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_Generato
  */
   /*try:*/ {
 
-    /* "hypergraph.pxi":162
+    /* "cdec/hypergraph.pxi":177
  *        cdef unsigned k
  *        try:
  *            for k in range(trees.size()):             # <<<<<<<<<<<<<<
@@ -12634,16 +12970,16 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_Generato
     for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
       __pyx_cur_scope->__pyx_v_k = __pyx_t_3;
 
-      /* "hypergraph.pxi":163
+      /* "cdec/hypergraph.pxi":178
  *        try:
  *            for k in range(trees.size()):
  *                yield unicode(trees[0][k].c_str(), 'utf8')             # <<<<<<<<<<<<<<
  *        finally:
  *            del trees
  */
-      __pyx_t_4 = __Pyx_PyBytes_FromString(((__pyx_cur_scope->__pyx_v_trees[0])[__pyx_cur_scope->__pyx_v_k]).c_str()); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
+      __pyx_t_4 = __Pyx_PyBytes_FromString(((__pyx_cur_scope->__pyx_v_trees[0])[__pyx_cur_scope->__pyx_v_k]).c_str()); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
+      __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
       __Pyx_GOTREF(__pyx_t_5);
       PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4);
       __Pyx_GIVEREF(__pyx_t_4);
@@ -12651,7 +12987,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_Generato
       PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_n_s_utf8);
       __Pyx_GIVEREF(__pyx_n_s_utf8);
       __pyx_t_4 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)(&PyUnicode_Type))), __pyx_t_5, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
+      __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)(&PyUnicode_Type))), __pyx_t_5, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_r = __pyx_t_4;
@@ -12666,11 +13002,11 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_Generato
       __pyx_L9_resume_from_yield:;
       __pyx_t_2 = __pyx_cur_scope->__pyx_t_0;
       __pyx_t_3 = __pyx_cur_scope->__pyx_t_1;
-      if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
+      if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L5_error;}
     }
   }
 
-  /* "hypergraph.pxi":165
+  /* "cdec/hypergraph.pxi":180
  *                yield unicode(trees[0][k].c_str(), 'utf8')
  *        finally:
  *            del trees             # <<<<<<<<<<<<<<
@@ -12716,7 +13052,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_Generato
     __pyx_L6:;
   }
 
-  /* "hypergraph.pxi":156
+  /* "cdec/hypergraph.pxi":171
  *             del hypos
  * 
  *     def sample_trees(self, unsigned n):             # <<<<<<<<<<<<<<
@@ -12739,7 +13075,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_Generato
   return NULL;
 }
 
-/* "hypergraph.pxi":167
+/* "cdec/hypergraph.pxi":182
  *            del trees
  * 
  *     def intersect(self, inp):             # <<<<<<<<<<<<<<
@@ -12748,20 +13084,20 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_35generator11(__pyx_Generato
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_37intersect(PyObject *__pyx_v_self, PyObject *__pyx_v_inp); /*proto*/
-static char __pyx_doc_4cdec_5_cdec_10Hypergraph_36intersect[] = "hg.intersect(Lattice/string): Intersect the hypergraph with the provided reference.";
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_37intersect(PyObject *__pyx_v_self, PyObject *__pyx_v_inp) {
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_40intersect(PyObject *__pyx_v_self, PyObject *__pyx_v_inp); /*proto*/
+static char __pyx_doc_4cdec_5_cdec_10Hypergraph_39intersect[] = "hg.intersect(Lattice/string): Intersect the hypergraph with the provided reference.";
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_40intersect(PyObject *__pyx_v_self, PyObject *__pyx_v_inp) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("intersect (wrapper)", 0);
-  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_36intersect(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self), ((PyObject *)__pyx_v_inp));
+  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_39intersect(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self), ((PyObject *)__pyx_v_inp));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_36intersect(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_inp) {
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_39intersect(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_inp) {
   struct __pyx_obj_4cdec_5_cdec_Lattice *__pyx_v_lat = 0;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -12774,7 +13110,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_36intersect(struct __pyx_obj
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("intersect", 0);
 
-  /* "hypergraph.pxi":170
+  /* "cdec/hypergraph.pxi":185
  *         """hg.intersect(Lattice/string): Intersect the hypergraph with the provided reference."""
  *         cdef Lattice lat
  *         if isinstance(inp, Lattice):             # <<<<<<<<<<<<<<
@@ -12785,7 +13121,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_36intersect(struct __pyx_obj
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "hypergraph.pxi":171
+    /* "cdec/hypergraph.pxi":186
  *         cdef Lattice lat
  *         if isinstance(inp, Lattice):
  *             lat = <Lattice> inp             # <<<<<<<<<<<<<<
@@ -12799,7 +13135,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_36intersect(struct __pyx_obj
     goto __pyx_L3;
   }
 
-  /* "hypergraph.pxi":172
+  /* "cdec/hypergraph.pxi":187
  *         if isinstance(inp, Lattice):
  *             lat = <Lattice> inp
  *         elif isinstance(inp, basestring):             # <<<<<<<<<<<<<<
@@ -12810,19 +13146,19 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_36intersect(struct __pyx_obj
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "hypergraph.pxi":173
+    /* "cdec/hypergraph.pxi":188
  *             lat = <Lattice> inp
  *         elif isinstance(inp, basestring):
  *             lat = Lattice(inp)             # <<<<<<<<<<<<<<
  *         else:
  *             raise TypeError('cannot intersect hypergraph with %s' % type(inp))
  */
-    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_INCREF(__pyx_v_inp);
     PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_v_inp);
     __Pyx_GIVEREF(__pyx_v_inp);
-    __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_Lattice)), __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 173; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_Lattice)), __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_v_lat = ((struct __pyx_obj_4cdec_5_cdec_Lattice *)__pyx_t_4);
@@ -12831,30 +13167,30 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_36intersect(struct __pyx_obj
   }
   /*else*/ {
 
-    /* "hypergraph.pxi":175
+    /* "cdec/hypergraph.pxi":190
  *             lat = Lattice(inp)
  *         else:
  *             raise TypeError('cannot intersect hypergraph with %s' % type(inp))             # <<<<<<<<<<<<<<
  *         return hypergraph.Intersect(lat.lattice[0], self.hg)
  * 
  */
-    __pyx_t_4 = __Pyx_PyString_Format(__pyx_kp_s_cannot_intersect_hypergraph_with, ((PyObject *)Py_TYPE(__pyx_v_inp))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyString_Format(__pyx_kp_s_cannot_intersect_hypergraph_with, ((PyObject *)Py_TYPE(__pyx_v_inp))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
     __Pyx_GIVEREF(__pyx_t_4);
     __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_Raise(__pyx_t_4, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    {__pyx_filename = __pyx_f[3]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[3]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_L3:;
 
-  /* "hypergraph.pxi":176
+  /* "cdec/hypergraph.pxi":191
  *         else:
  *             raise TypeError('cannot intersect hypergraph with %s' % type(inp))
  *         return hypergraph.Intersect(lat.lattice[0], self.hg)             # <<<<<<<<<<<<<<
@@ -12862,13 +13198,13 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_36intersect(struct __pyx_obj
  *     def prune(self, beam_alpha=0, density=0, **kwargs):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = __Pyx_PyBool_FromLong(HG::Intersect((__pyx_v_lat->lattice[0]), __pyx_v_self->hg)); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyBool_FromLong(HG::Intersect((__pyx_v_lat->lattice[0]), __pyx_v_self->hg)); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 191; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":167
+  /* "cdec/hypergraph.pxi":182
  *            del trees
  * 
  *     def intersect(self, inp):             # <<<<<<<<<<<<<<
@@ -12889,7 +13225,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_36intersect(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":178
+/* "cdec/hypergraph.pxi":193
  *         return hypergraph.Intersect(lat.lattice[0], self.hg)
  * 
  *     def prune(self, beam_alpha=0, density=0, **kwargs):             # <<<<<<<<<<<<<<
@@ -12898,9 +13234,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_36intersect(struct __pyx_obj
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_39prune(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_4cdec_5_cdec_10Hypergraph_38prune[] = "hg.prune(beam_alpha=0, density=0): Prune the hypergraph.\n        beam_alpha: use beam pruning\n        density: use density pruning";
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_39prune(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_42prune(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_4cdec_5_cdec_10Hypergraph_41prune[] = "hg.prune(beam_alpha=0, density=0): Prune the hypergraph.\n        beam_alpha: use beam pruning\n        density: use density pruning";
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_42prune(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_beam_alpha = 0;
   PyObject *__pyx_v_density = 0;
   PyObject *__pyx_v_kwargs = 0;
@@ -12940,7 +13276,7 @@ static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_39prune(PyObject *__pyx_v_se
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, __pyx_v_kwargs, values, pos_args, "prune") < 0)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, __pyx_v_kwargs, values, pos_args, "prune") < 0)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -12955,14 +13291,14 @@ static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_39prune(PyObject *__pyx_v_se
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("prune", 0, 0, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[3]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("prune", 0, 0, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[3]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_DECREF(__pyx_v_kwargs); __pyx_v_kwargs = 0;
   __Pyx_AddTraceback("cdec._cdec.Hypergraph.prune", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_38prune(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self), __pyx_v_beam_alpha, __pyx_v_density, __pyx_v_kwargs);
+  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_41prune(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self), __pyx_v_beam_alpha, __pyx_v_density, __pyx_v_kwargs);
 
   /* function exit code */
   __Pyx_XDECREF(__pyx_v_kwargs);
@@ -12970,7 +13306,7 @@ static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_39prune(PyObject *__pyx_v_se
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_38prune(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_beam_alpha, PyObject *__pyx_v_density, PyObject *__pyx_v_kwargs) {
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_41prune(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_beam_alpha, PyObject *__pyx_v_density, PyObject *__pyx_v_kwargs) {
   std::vector<bool> *__pyx_v_preserve_mask;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -12983,7 +13319,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_38prune(struct __pyx_obj_4cd
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("prune", 0);
 
-  /* "hypergraph.pxi":182
+  /* "cdec/hypergraph.pxi":197
  *         beam_alpha: use beam pruning
  *         density: use density pruning"""
  *         cdef hypergraph.EdgeMask* preserve_mask = NULL             # <<<<<<<<<<<<<<
@@ -12992,18 +13328,18 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_38prune(struct __pyx_obj_4cd
  */
   __pyx_v_preserve_mask = NULL;
 
-  /* "hypergraph.pxi":183
+  /* "cdec/hypergraph.pxi":198
  *         density: use density pruning"""
  *         cdef hypergraph.EdgeMask* preserve_mask = NULL
  *         if 'csplit_preserve_full_word' in kwargs:             # <<<<<<<<<<<<<<
  *              preserve_mask = new hypergraph.EdgeMask(self.hg.edges_.size())
  *              preserve_mask[0][hypergraph.GetFullWordEdgeIndex(self.hg[0])] = True
  */
-  __pyx_t_1 = (__Pyx_PyDict_Contains(__pyx_n_s_csplit_preserve_full_word, __pyx_v_kwargs, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = (__Pyx_PyDict_Contains(__pyx_n_s_csplit_preserve_full_word, __pyx_v_kwargs, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "hypergraph.pxi":184
+    /* "cdec/hypergraph.pxi":199
  *         cdef hypergraph.EdgeMask* preserve_mask = NULL
  *         if 'csplit_preserve_full_word' in kwargs:
  *              preserve_mask = new hypergraph.EdgeMask(self.hg.edges_.size())             # <<<<<<<<<<<<<<
@@ -13012,7 +13348,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_38prune(struct __pyx_obj_4cd
  */
     __pyx_v_preserve_mask = new std::vector<bool>(__pyx_v_self->hg->edges_.size());
 
-    /* "hypergraph.pxi":185
+    /* "cdec/hypergraph.pxi":200
  *         if 'csplit_preserve_full_word' in kwargs:
  *              preserve_mask = new hypergraph.EdgeMask(self.hg.edges_.size())
  *              preserve_mask[0][hypergraph.GetFullWordEdgeIndex(self.hg[0])] = True             # <<<<<<<<<<<<<<
@@ -13024,18 +13360,18 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_38prune(struct __pyx_obj_4cd
   }
   __pyx_L3:;
 
-  /* "hypergraph.pxi":186
+  /* "cdec/hypergraph.pxi":201
  *              preserve_mask = new hypergraph.EdgeMask(self.hg.edges_.size())
  *              preserve_mask[0][hypergraph.GetFullWordEdgeIndex(self.hg[0])] = True
  *         self.hg.PruneInsideOutside(beam_alpha, density, preserve_mask, False, 1, False)             # <<<<<<<<<<<<<<
  *         if preserve_mask:
  *             del preserve_mask
  */
-  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_beam_alpha); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_v_density); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_beam_alpha); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 201; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_v_density); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 201; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_self->hg->PruneInsideOutside(__pyx_t_3, __pyx_t_4, __pyx_v_preserve_mask, 0, 1.0, 0);
 
-  /* "hypergraph.pxi":187
+  /* "cdec/hypergraph.pxi":202
  *              preserve_mask[0][hypergraph.GetFullWordEdgeIndex(self.hg[0])] = True
  *         self.hg.PruneInsideOutside(beam_alpha, density, preserve_mask, False, 1, False)
  *         if preserve_mask:             # <<<<<<<<<<<<<<
@@ -13045,7 +13381,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_38prune(struct __pyx_obj_4cd
   __pyx_t_2 = (__pyx_v_preserve_mask != 0);
   if (__pyx_t_2) {
 
-    /* "hypergraph.pxi":188
+    /* "cdec/hypergraph.pxi":203
  *         self.hg.PruneInsideOutside(beam_alpha, density, preserve_mask, False, 1, False)
  *         if preserve_mask:
  *             del preserve_mask             # <<<<<<<<<<<<<<
@@ -13057,7 +13393,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_38prune(struct __pyx_obj_4cd
   }
   __pyx_L4:;
 
-  /* "hypergraph.pxi":178
+  /* "cdec/hypergraph.pxi":193
  *         return hypergraph.Intersect(lat.lattice[0], self.hg)
  * 
  *     def prune(self, beam_alpha=0, density=0, **kwargs):             # <<<<<<<<<<<<<<
@@ -13077,7 +13413,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_38prune(struct __pyx_obj_4cd
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":190
+/* "cdec/hypergraph.pxi":205
  *             del preserve_mask
  * 
  *     def lattice(self): # TODO direct hg -> lattice conversion in cdec             # <<<<<<<<<<<<<<
@@ -13086,20 +13422,20 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_38prune(struct __pyx_obj_4cd
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_41lattice(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_4cdec_5_cdec_10Hypergraph_40lattice[] = "hg.lattice() -> Lattice corresponding to the hypergraph.";
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_41lattice(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_44lattice(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_4cdec_5_cdec_10Hypergraph_43lattice[] = "hg.lattice() -> Lattice corresponding to the hypergraph.";
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_44lattice(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("lattice (wrapper)", 0);
-  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_40lattice(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_43lattice(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_40lattice(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self) {
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_43lattice(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self) {
   PyObject *__pyx_v_plf = 0;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -13111,19 +13447,19 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_40lattice(struct __pyx_obj_4
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("lattice", 0);
 
-  /* "hypergraph.pxi":192
+  /* "cdec/hypergraph.pxi":207
  *     def lattice(self): # TODO direct hg -> lattice conversion in cdec
  *         """hg.lattice() -> Lattice corresponding to the hypergraph."""
  *         cdef bytes plf = hypergraph.AsPLF(self.hg[0], True).c_str()             # <<<<<<<<<<<<<<
  *         return Lattice(eval(plf))
  * 
  */
-  __pyx_t_1 = __Pyx_PyBytes_FromString(HypergraphIO::AsPLF((__pyx_v_self->hg[0]), 1).c_str()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 192; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyBytes_FromString(HypergraphIO::AsPLF((__pyx_v_self->hg[0]), 1).c_str()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_plf = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hypergraph.pxi":193
+  /* "cdec/hypergraph.pxi":208
  *         """hg.lattice() -> Lattice corresponding to the hypergraph."""
  *         cdef bytes plf = hypergraph.AsPLF(self.hg[0], True).c_str()
  *         return Lattice(eval(plf))             # <<<<<<<<<<<<<<
@@ -13131,17 +13467,17 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_40lattice(struct __pyx_obj_4
  *     def plf(self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_Globals(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_Globals(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   if (__pyx_v_plf) {
-    if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_plf, __pyx_v_plf) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_plf, __pyx_v_plf) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   if (((PyObject *)__pyx_v_self)) {
-    if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_self, ((PyObject *)__pyx_v_self)) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_self, ((PyObject *)__pyx_v_self)) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
-  __pyx_t_3 = PyTuple_New(3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_v_plf);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_v_plf);
@@ -13152,22 +13488,22 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_40lattice(struct __pyx_obj_4
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_eval, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_eval, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_Lattice)), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_Lattice)), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":190
+  /* "cdec/hypergraph.pxi":205
  *             del preserve_mask
  * 
  *     def lattice(self): # TODO direct hg -> lattice conversion in cdec             # <<<<<<<<<<<<<<
@@ -13189,7 +13525,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_40lattice(struct __pyx_obj_4
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":195
+/* "cdec/hypergraph.pxi":210
  *         return Lattice(eval(plf))
  * 
  *     def plf(self):             # <<<<<<<<<<<<<<
@@ -13198,20 +13534,20 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_40lattice(struct __pyx_obj_4
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_43plf(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_4cdec_5_cdec_10Hypergraph_42plf[] = "hg.plf() -> Lattice PLF representation corresponding to the hypergraph.";
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_43plf(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_46plf(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_4cdec_5_cdec_10Hypergraph_45plf[] = "hg.plf() -> Lattice PLF representation corresponding to the hypergraph.";
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_46plf(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("plf (wrapper)", 0);
-  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_42plf(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_45plf(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_42plf(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self) {
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_45plf(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -13221,7 +13557,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_42plf(struct __pyx_obj_4cdec
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("plf", 0);
 
-  /* "hypergraph.pxi":197
+  /* "cdec/hypergraph.pxi":212
  *     def plf(self):
  *         """hg.plf() -> Lattice PLF representation corresponding to the hypergraph."""
  *         return bytes(hypergraph.AsPLF(self.hg[0], True).c_str())             # <<<<<<<<<<<<<<
@@ -13229,21 +13565,21 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_42plf(struct __pyx_obj_4cdec
  *     def reweight(self, weights):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyBytes_FromString(HypergraphIO::AsPLF((__pyx_v_self->hg[0]), 1).c_str()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyBytes_FromString(HypergraphIO::AsPLF((__pyx_v_self->hg[0]), 1).c_str()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 212; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 212; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)(&PyBytes_Type))), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)(&PyBytes_Type))), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 212; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":195
+  /* "cdec/hypergraph.pxi":210
  *         return Lattice(eval(plf))
  * 
  *     def plf(self):             # <<<<<<<<<<<<<<
@@ -13263,7 +13599,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_42plf(struct __pyx_obj_4cdec
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":199
+/* "cdec/hypergraph.pxi":214
  *         return bytes(hypergraph.AsPLF(self.hg[0], True).c_str())
  * 
  *     def reweight(self, weights):             # <<<<<<<<<<<<<<
@@ -13272,20 +13608,20 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_42plf(struct __pyx_obj_4cdec
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_45reweight(PyObject *__pyx_v_self, PyObject *__pyx_v_weights); /*proto*/
-static char __pyx_doc_4cdec_5_cdec_10Hypergraph_44reweight[] = "hg.reweight(SparseVector/DenseVector): Reweight the hypergraph with a new vector.";
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_45reweight(PyObject *__pyx_v_self, PyObject *__pyx_v_weights) {
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_48reweight(PyObject *__pyx_v_self, PyObject *__pyx_v_weights); /*proto*/
+static char __pyx_doc_4cdec_5_cdec_10Hypergraph_47reweight[] = "hg.reweight(SparseVector/DenseVector): Reweight the hypergraph with a new vector.";
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_48reweight(PyObject *__pyx_v_self, PyObject *__pyx_v_weights) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("reweight (wrapper)", 0);
-  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_44reweight(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self), ((PyObject *)__pyx_v_weights));
+  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_47reweight(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self), ((PyObject *)__pyx_v_weights));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_44reweight(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_weights) {
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_47reweight(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self, PyObject *__pyx_v_weights) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
@@ -13297,7 +13633,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_44reweight(struct __pyx_obj_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("reweight", 0);
 
-  /* "hypergraph.pxi":201
+  /* "cdec/hypergraph.pxi":216
  *     def reweight(self, weights):
  *         """hg.reweight(SparseVector/DenseVector): Reweight the hypergraph with a new vector."""
  *         if isinstance(weights, SparseVector):             # <<<<<<<<<<<<<<
@@ -13308,7 +13644,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_44reweight(struct __pyx_obj_
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "hypergraph.pxi":202
+    /* "cdec/hypergraph.pxi":217
  *         """hg.reweight(SparseVector/DenseVector): Reweight the hypergraph with a new vector."""
  *         if isinstance(weights, SparseVector):
  *             self.hg.Reweight((<SparseVector> weights).vector[0])             # <<<<<<<<<<<<<<
@@ -13319,7 +13655,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_44reweight(struct __pyx_obj_
     goto __pyx_L3;
   }
 
-  /* "hypergraph.pxi":203
+  /* "cdec/hypergraph.pxi":218
  *         if isinstance(weights, SparseVector):
  *             self.hg.Reweight((<SparseVector> weights).vector[0])
  *         elif isinstance(weights, DenseVector):             # <<<<<<<<<<<<<<
@@ -13330,7 +13666,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_44reweight(struct __pyx_obj_
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "hypergraph.pxi":204
+    /* "cdec/hypergraph.pxi":219
  *             self.hg.Reweight((<SparseVector> weights).vector[0])
  *         elif isinstance(weights, DenseVector):
  *             self.hg.Reweight((<DenseVector> weights).vector[0])             # <<<<<<<<<<<<<<
@@ -13342,30 +13678,30 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_44reweight(struct __pyx_obj_
   }
   /*else*/ {
 
-    /* "hypergraph.pxi":206
+    /* "cdec/hypergraph.pxi":221
  *             self.hg.Reweight((<DenseVector> weights).vector[0])
  *         else:
  *             raise TypeError('cannot reweight hypergraph with %s' % type(weights))             # <<<<<<<<<<<<<<
  * 
  *     property edges:
  */
-    __pyx_t_3 = __Pyx_PyString_Format(__pyx_kp_s_cannot_reweight_hypergraph_with, ((PyObject *)Py_TYPE(__pyx_v_weights))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyString_Format(__pyx_kp_s_cannot_reweight_hypergraph_with, ((PyObject *)Py_TYPE(__pyx_v_weights))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_3);
     __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    {__pyx_filename = __pyx_f[3]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[3]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_L3:;
 
-  /* "hypergraph.pxi":199
+  /* "cdec/hypergraph.pxi":214
  *         return bytes(hypergraph.AsPLF(self.hg[0], True).c_str())
  * 
  *     def reweight(self, weights):             # <<<<<<<<<<<<<<
@@ -13386,9 +13722,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_44reweight(struct __pyx_obj_
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5edges_2generator12(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5edges_2generator13(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":209
+/* "cdec/hypergraph.pxi":224
  * 
  *     property edges:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -13410,14 +13746,14 @@ static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_5edges_1__get__(PyObject *__
 }
 
 static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_5edges___get__(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_17___get__ *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_16___get__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_16___get__, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_17___get__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_17___get__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_17___get__, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
@@ -13427,7 +13763,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_5edges___get__(struct __pyx_
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_10Hypergraph_5edges_2generator12, (PyObject *) __pyx_cur_scope, __pyx_n_s_get, __pyx_n_s_Hypergraph___get); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_10Hypergraph_5edges_2generator13, (PyObject *) __pyx_cur_scope, __pyx_n_s_get, __pyx_n_s_Hypergraph___get); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 224; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -13443,9 +13779,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_5edges___get__(struct __pyx_
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5edges_2generator12(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5edges_2generator13(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ *)__pyx_generator->closure);
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_17___get__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_17___get__ *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   size_t __pyx_t_1;
   unsigned int __pyx_t_2;
@@ -13464,9 +13800,9 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5edges_2generator12(__pyx_Ge
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 224; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":211
+  /* "cdec/hypergraph.pxi":226
  *         def __get__(self):
  *             cdef unsigned i
  *             for i in range(self.hg.edges_.size()):             # <<<<<<<<<<<<<<
@@ -13477,16 +13813,16 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5edges_2generator12(__pyx_Ge
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_cur_scope->__pyx_v_i = __pyx_t_2;
 
-    /* "hypergraph.pxi":212
+    /* "cdec/hypergraph.pxi":227
  *             cdef unsigned i
  *             for i in range(self.hg.edges_.size()):
  *                 yield HypergraphEdge().init(self.hg, i)             # <<<<<<<<<<<<<<
  * 
  *     property nodes:
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphEdge)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 212; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphEdge)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 227; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphEdge *)((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_t_3)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_t_3), __pyx_cur_scope->__pyx_v_self->hg, __pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 212; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphEdge *)((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_t_3)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_t_3), __pyx_cur_scope->__pyx_v_self->hg, __pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 227; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_4;
@@ -13501,10 +13837,10 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5edges_2generator12(__pyx_Ge
     __pyx_L6_resume_from_yield:;
     __pyx_t_1 = __pyx_cur_scope->__pyx_t_0;
     __pyx_t_2 = __pyx_cur_scope->__pyx_t_1;
-    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 212; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 227; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "hypergraph.pxi":209
+  /* "cdec/hypergraph.pxi":224
  * 
  *     property edges:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -13526,9 +13862,9 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5edges_2generator12(__pyx_Ge
   __Pyx_RefNannyFinishContext();
   return NULL;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5nodes_2generator13(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5nodes_2generator14(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":215
+/* "cdec/hypergraph.pxi":230
  * 
  *     property nodes:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -13550,14 +13886,14 @@ static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_5nodes_1__get__(PyObject *__
 }
 
 static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_5nodes___get__(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_17___get__ *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_17___get__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_17___get__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_17___get__, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_18___get__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_18___get__, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
@@ -13567,7 +13903,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_5nodes___get__(struct __pyx_
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_10Hypergraph_5nodes_2generator13, (PyObject *) __pyx_cur_scope, __pyx_n_s_get, __pyx_n_s_Hypergraph___get); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_10Hypergraph_5nodes_2generator14, (PyObject *) __pyx_cur_scope, __pyx_n_s_get, __pyx_n_s_Hypergraph___get); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -13583,9 +13919,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_5nodes___get__(struct __pyx_
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5nodes_2generator13(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5nodes_2generator14(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_17___get__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_17___get__ *)__pyx_generator->closure);
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   size_t __pyx_t_1;
   unsigned int __pyx_t_2;
@@ -13604,9 +13940,9 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5nodes_2generator13(__pyx_Ge
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":217
+  /* "cdec/hypergraph.pxi":232
  *         def __get__(self):
  *             cdef unsigned i
  *             for i in range(self.hg.nodes_.size()):             # <<<<<<<<<<<<<<
@@ -13617,16 +13953,16 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5nodes_2generator13(__pyx_Ge
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_cur_scope->__pyx_v_i = __pyx_t_2;
 
-    /* "hypergraph.pxi":218
+    /* "cdec/hypergraph.pxi":233
  *             cdef unsigned i
  *             for i in range(self.hg.nodes_.size()):
  *                 yield HypergraphNode().init(self.hg, i)             # <<<<<<<<<<<<<<
  * 
  *     property goal:
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphNode)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphNode)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphNode *)((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_3)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_3), __pyx_cur_scope->__pyx_v_self->hg, __pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphNode *)((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_3)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_3), __pyx_cur_scope->__pyx_v_self->hg, __pyx_cur_scope->__pyx_v_i); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_4;
@@ -13641,10 +13977,10 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5nodes_2generator13(__pyx_Ge
     __pyx_L6_resume_from_yield:;
     __pyx_t_1 = __pyx_cur_scope->__pyx_t_0;
     __pyx_t_2 = __pyx_cur_scope->__pyx_t_1;
-    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "hypergraph.pxi":215
+  /* "cdec/hypergraph.pxi":230
  * 
  *     property nodes:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -13667,7 +14003,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_10Hypergraph_5nodes_2generator13(__pyx_Ge
   return NULL;
 }
 
-/* "hypergraph.pxi":221
+/* "cdec/hypergraph.pxi":236
  * 
  *     property goal:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -13698,7 +14034,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_4goal___get__(struct __pyx_o
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "hypergraph.pxi":222
+  /* "cdec/hypergraph.pxi":237
  *     property goal:
  *         def __get__(self):
  *             return HypergraphNode().init(self.hg, self.hg.GoalNode())             # <<<<<<<<<<<<<<
@@ -13706,16 +14042,16 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_4goal___get__(struct __pyx_o
  *     property npaths:
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphNode)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphNode)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 237; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphNode *)((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_1)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_1), __pyx_v_self->hg, __pyx_v_self->hg->GoalNode()); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphNode *)((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_1)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_1), __pyx_v_self->hg, __pyx_v_self->hg->GoalNode()); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 237; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":221
+  /* "cdec/hypergraph.pxi":236
  * 
  *     property goal:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -13735,7 +14071,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_4goal___get__(struct __pyx_o
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":225
+/* "cdec/hypergraph.pxi":240
  * 
  *     property npaths:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -13765,7 +14101,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_6npaths___get__(struct __pyx
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "hypergraph.pxi":226
+  /* "cdec/hypergraph.pxi":241
  *     property npaths:
  *         def __get__(self):
  *             return self.hg.NumberOfPaths()             # <<<<<<<<<<<<<<
@@ -13773,13 +14109,13 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_6npaths___get__(struct __pyx
  *     def inside_outside(self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->hg->NumberOfPaths()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 226; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->hg->NumberOfPaths()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":225
+  /* "cdec/hypergraph.pxi":240
  * 
  *     property npaths:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -13798,7 +14134,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_6npaths___get__(struct __pyx
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":228
+/* "cdec/hypergraph.pxi":243
  *             return self.hg.NumberOfPaths()
  * 
  *     def inside_outside(self):             # <<<<<<<<<<<<<<
@@ -13807,20 +14143,20 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_6npaths___get__(struct __pyx
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_47inside_outside(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_4cdec_5_cdec_10Hypergraph_46inside_outside[] = "hg.inside_outside() -> SparseVector with inside-outside scores for each feature.";
-static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_47inside_outside(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_50inside_outside(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_4cdec_5_cdec_10Hypergraph_49inside_outside[] = "hg.inside_outside() -> SparseVector with inside-outside scores for each feature.";
+static PyObject *__pyx_pw_4cdec_5_cdec_10Hypergraph_50inside_outside(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("inside_outside (wrapper)", 0);
-  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4cdec_5_cdec_10Hypergraph_49inside_outside(((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self) {
+static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_49inside_outside(struct __pyx_obj_4cdec_5_cdec_Hypergraph *__pyx_v_self) {
   FastSparseVector<prob_t>  *__pyx_v_result;
   prob_t __pyx_v_z;
   struct __pyx_obj_4cdec_5_cdec_SparseVector *__pyx_v_vector = 0;
@@ -13836,7 +14172,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("inside_outside", 0);
 
-  /* "hypergraph.pxi":230
+  /* "cdec/hypergraph.pxi":245
  *     def inside_outside(self):
  *         """hg.inside_outside() -> SparseVector with inside-outside scores for each feature."""
  *         cdef FastSparseVector[prob_t]* result = new FastSparseVector[prob_t]()             # <<<<<<<<<<<<<<
@@ -13845,7 +14181,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
  */
   __pyx_v_result = new FastSparseVector<prob_t> ();
 
-  /* "hypergraph.pxi":231
+  /* "cdec/hypergraph.pxi":246
  *         """hg.inside_outside() -> SparseVector with inside-outside scores for each feature."""
  *         cdef FastSparseVector[prob_t]* result = new FastSparseVector[prob_t]()
  *         cdef prob_t z = hypergraph.InsideOutside(self.hg[0], result)             # <<<<<<<<<<<<<<
@@ -13854,7 +14190,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
  */
   __pyx_v_z = InsideOutside<prob_t, EdgeProb, SparseVector<prob_t>, EdgeFeaturesAndProbWeightFunction>((__pyx_v_self->hg[0]), __pyx_v_result);
 
-  /* "hypergraph.pxi":232
+  /* "cdec/hypergraph.pxi":247
  *         cdef FastSparseVector[prob_t]* result = new FastSparseVector[prob_t]()
  *         cdef prob_t z = hypergraph.InsideOutside(self.hg[0], result)
  *         result[0] /= z             # <<<<<<<<<<<<<<
@@ -13863,20 +14199,20 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
  */
   (__pyx_v_result[0]) /= __pyx_v_z;
 
-  /* "hypergraph.pxi":233
+  /* "cdec/hypergraph.pxi":248
  *         cdef prob_t z = hypergraph.InsideOutside(self.hg[0], result)
  *         result[0] /= z
  *         cdef SparseVector vector = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
  *         vector.vector = new FastSparseVector[double]()
  *         cdef FastSparseVector[prob_t].const_iterator* it = new FastSparseVector[prob_t].const_iterator(result[0], False)
  */
-  __pyx_t_1 = __pyx_tp_new_4cdec_5_cdec_SparseVector(((PyTypeObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_SparseVector)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_tp_new_4cdec_5_cdec_SparseVector(((PyTypeObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_SparseVector)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 248; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (!(likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_4cdec_5_cdec_SparseVector)))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_4cdec_5_cdec_SparseVector)))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 248; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_vector = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hypergraph.pxi":234
+  /* "cdec/hypergraph.pxi":249
  *         result[0] /= z
  *         cdef SparseVector vector = SparseVector.__new__(SparseVector)
  *         vector.vector = new FastSparseVector[double]()             # <<<<<<<<<<<<<<
@@ -13885,7 +14221,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
  */
   __pyx_v_vector->vector = new FastSparseVector<double> ();
 
-  /* "hypergraph.pxi":235
+  /* "cdec/hypergraph.pxi":250
  *         cdef SparseVector vector = SparseVector.__new__(SparseVector)
  *         vector.vector = new FastSparseVector[double]()
  *         cdef FastSparseVector[prob_t].const_iterator* it = new FastSparseVector[prob_t].const_iterator(result[0], False)             # <<<<<<<<<<<<<<
@@ -13894,7 +14230,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
  */
   __pyx_v_it = new FastSparseVector<prob_t> ::const_iterator((__pyx_v_result[0]), 0);
 
-  /* "hypergraph.pxi":237
+  /* "cdec/hypergraph.pxi":252
  *         cdef FastSparseVector[prob_t].const_iterator* it = new FastSparseVector[prob_t].const_iterator(result[0], False)
  *         cdef unsigned i
  *         for i in range(result.size()):             # <<<<<<<<<<<<<<
@@ -13905,7 +14241,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "hypergraph.pxi":238
+    /* "cdec/hypergraph.pxi":253
  *         cdef unsigned i
  *         for i in range(result.size()):
  *             vector.vector.set_value(it[0].ptr().first, log(it[0].ptr().second))             # <<<<<<<<<<<<<<
@@ -13914,7 +14250,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
  */
     __pyx_v_vector->vector->set_value((__pyx_v_it[0]).operator->()->first, log((__pyx_v_it[0]).operator->()->second));
 
-    /* "hypergraph.pxi":239
+    /* "cdec/hypergraph.pxi":254
  *         for i in range(result.size()):
  *             vector.vector.set_value(it[0].ptr().first, log(it[0].ptr().second))
  *             pinc(it[0]) # ++it             # <<<<<<<<<<<<<<
@@ -13924,7 +14260,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
     (++(__pyx_v_it[0]));
   }
 
-  /* "hypergraph.pxi":240
+  /* "cdec/hypergraph.pxi":255
  *             vector.vector.set_value(it[0].ptr().first, log(it[0].ptr().second))
  *             pinc(it[0]) # ++it
  *         del it             # <<<<<<<<<<<<<<
@@ -13933,7 +14269,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
  */
   delete __pyx_v_it;
 
-  /* "hypergraph.pxi":241
+  /* "cdec/hypergraph.pxi":256
  *             pinc(it[0]) # ++it
  *         del it
  *         del result             # <<<<<<<<<<<<<<
@@ -13942,7 +14278,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
  */
   delete __pyx_v_result;
 
-  /* "hypergraph.pxi":242
+  /* "cdec/hypergraph.pxi":257
  *         del it
  *         del result
  *         return vector             # <<<<<<<<<<<<<<
@@ -13954,7 +14290,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
   __pyx_r = ((PyObject *)__pyx_v_vector);
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":228
+  /* "cdec/hypergraph.pxi":243
  *             return self.hg.NumberOfPaths()
  * 
  *     def inside_outside(self):             # <<<<<<<<<<<<<<
@@ -13974,7 +14310,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_10Hypergraph_46inside_outside(struct __py
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":249
+/* "cdec/hypergraph.pxi":264
  *     cdef public TRule trule
  * 
  *     cdef init(self, hypergraph.Hypergraph* hg, unsigned i):             # <<<<<<<<<<<<<<
@@ -13991,7 +14327,7 @@ static PyObject *__pyx_f_4cdec_5_cdec_14HypergraphEdge_init(struct __pyx_obj_4cd
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("init", 0);
 
-  /* "hypergraph.pxi":250
+  /* "cdec/hypergraph.pxi":265
  * 
  *     cdef init(self, hypergraph.Hypergraph* hg, unsigned i):
  *         self.hg = hg             # <<<<<<<<<<<<<<
@@ -14000,7 +14336,7 @@ static PyObject *__pyx_f_4cdec_5_cdec_14HypergraphEdge_init(struct __pyx_obj_4cd
  */
   __pyx_v_self->hg = __pyx_v_hg;
 
-  /* "hypergraph.pxi":251
+  /* "cdec/hypergraph.pxi":266
  *     cdef init(self, hypergraph.Hypergraph* hg, unsigned i):
  *         self.hg = hg
  *         self.edge = &hg.edges_[i]             # <<<<<<<<<<<<<<
@@ -14009,23 +14345,23 @@ static PyObject *__pyx_f_4cdec_5_cdec_14HypergraphEdge_init(struct __pyx_obj_4cd
  */
   __pyx_v_self->edge = (&(__pyx_v_hg->edges_[__pyx_v_i]));
 
-  /* "hypergraph.pxi":252
+  /* "cdec/hypergraph.pxi":267
  *         self.hg = hg
  *         self.edge = &hg.edges_[i]
  *         self.trule = TRule.__new__(TRule)             # <<<<<<<<<<<<<<
  *         self.trule.rule = new shared_ptr[grammar.TRule](self.edge.rule_)
  *         return self
  */
-  __pyx_t_1 = __pyx_tp_new_4cdec_5_cdec_TRule(((PyTypeObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_TRule)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 252; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_tp_new_4cdec_5_cdec_TRule(((PyTypeObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_TRule)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 267; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (!(likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_4cdec_5_cdec_TRule)))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 252; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_4cdec_5_cdec_TRule)))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 267; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GIVEREF(__pyx_t_1);
   __Pyx_GOTREF(__pyx_v_self->trule);
   __Pyx_DECREF(((PyObject *)__pyx_v_self->trule));
   __pyx_v_self->trule = ((struct __pyx_obj_4cdec_5_cdec_TRule *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hypergraph.pxi":253
+  /* "cdec/hypergraph.pxi":268
  *         self.edge = &hg.edges_[i]
  *         self.trule = TRule.__new__(TRule)
  *         self.trule.rule = new shared_ptr[grammar.TRule](self.edge.rule_)             # <<<<<<<<<<<<<<
@@ -14034,7 +14370,7 @@ static PyObject *__pyx_f_4cdec_5_cdec_14HypergraphEdge_init(struct __pyx_obj_4cd
  */
   __pyx_v_self->trule->rule = new boost::shared_ptr<TRule> (__pyx_v_self->edge->rule_);
 
-  /* "hypergraph.pxi":254
+  /* "cdec/hypergraph.pxi":269
  *         self.trule = TRule.__new__(TRule)
  *         self.trule.rule = new shared_ptr[grammar.TRule](self.edge.rule_)
  *         return self             # <<<<<<<<<<<<<<
@@ -14046,7 +14382,7 @@ static PyObject *__pyx_f_4cdec_5_cdec_14HypergraphEdge_init(struct __pyx_obj_4cd
   __pyx_r = ((PyObject *)__pyx_v_self);
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":249
+  /* "cdec/hypergraph.pxi":264
  *     cdef public TRule trule
  * 
  *     cdef init(self, hypergraph.Hypergraph* hg, unsigned i):             # <<<<<<<<<<<<<<
@@ -14065,7 +14401,7 @@ static PyObject *__pyx_f_4cdec_5_cdec_14HypergraphEdge_init(struct __pyx_obj_4cd
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":256
+/* "cdec/hypergraph.pxi":271
  *         return self
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -14091,7 +14427,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_14HypergraphEdge___len__(struct __pyx_ob
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__len__", 0);
 
-  /* "hypergraph.pxi":257
+  /* "cdec/hypergraph.pxi":272
  * 
  *     def __len__(self):
  *         return self.edge.tail_nodes_.size()             # <<<<<<<<<<<<<<
@@ -14101,7 +14437,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_14HypergraphEdge___len__(struct __pyx_ob
   __pyx_r = __pyx_v_self->edge->tail_nodes_.size();
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":256
+  /* "cdec/hypergraph.pxi":271
  *         return self
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -14115,7 +14451,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_14HypergraphEdge___len__(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":260
+/* "cdec/hypergraph.pxi":275
  * 
  *     property head_node:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14146,7 +14482,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_9head_node___get__(struc
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "hypergraph.pxi":261
+  /* "cdec/hypergraph.pxi":276
  *     property head_node:
  *         def __get__(self):
  *             return HypergraphNode().init(self.hg, self.edge.head_node_)             # <<<<<<<<<<<<<<
@@ -14154,16 +14490,16 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_9head_node___get__(struc
  *     property tail_nodes:
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphNode)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 261; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphNode)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphNode *)((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_1)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_1), __pyx_v_self->hg, __pyx_v_self->edge->head_node_); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 261; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphNode *)((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_1)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_1), __pyx_v_self->hg, __pyx_v_self->edge->head_node_); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":260
+  /* "cdec/hypergraph.pxi":275
  * 
  *     property head_node:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14182,9 +14518,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_9head_node___get__(struc
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphEdge_10tail_nodes_2generator14(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphEdge_10tail_nodes_2generator15(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":264
+/* "cdec/hypergraph.pxi":279
  * 
  *     property tail_nodes:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14206,14 +14542,14 @@ static PyObject *__pyx_pw_4cdec_5_cdec_14HypergraphEdge_10tail_nodes_1__get__(Py
 }
 
 static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_10tail_nodes___get__(struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *__pyx_v_self) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__ *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_18___get__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_18___get__, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_19___get__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_19___get__, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
@@ -14223,7 +14559,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_10tail_nodes___get__(str
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_14HypergraphEdge_10tail_nodes_2generator14, (PyObject *) __pyx_cur_scope, __pyx_n_s_get, __pyx_n_s_HypergraphEdge___get); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 264; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_14HypergraphEdge_10tail_nodes_2generator15, (PyObject *) __pyx_cur_scope, __pyx_n_s_get, __pyx_n_s_HypergraphEdge___get); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -14239,9 +14575,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_10tail_nodes___get__(str
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphEdge_10tail_nodes_2generator14(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphEdge_10tail_nodes_2generator15(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ *)__pyx_generator->closure);
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__ *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   unsigned int __pyx_t_1;
   unsigned int __pyx_t_2;
@@ -14260,9 +14596,9 @@ static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphEdge_10tail_nodes_2generator1
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 264; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":266
+  /* "cdec/hypergraph.pxi":281
  *         def __get__(self):
  *             cdef unsigned i
  *             for i in range(self.edge.tail_nodes_.size()):             # <<<<<<<<<<<<<<
@@ -14273,16 +14609,16 @@ static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphEdge_10tail_nodes_2generator1
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_cur_scope->__pyx_v_i = __pyx_t_2;
 
-    /* "hypergraph.pxi":267
+    /* "cdec/hypergraph.pxi":282
  *             cdef unsigned i
  *             for i in range(self.edge.tail_nodes_.size()):
  *                 yield HypergraphNode().init(self.hg, self.edge.tail_nodes_[i])             # <<<<<<<<<<<<<<
  * 
  *     property span:
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphNode)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 267; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphNode)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 282; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphNode *)((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_3)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_3), __pyx_cur_scope->__pyx_v_self->hg, (__pyx_cur_scope->__pyx_v_self->edge->tail_nodes_[__pyx_cur_scope->__pyx_v_i])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 267; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphNode *)((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_3)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_t_3), __pyx_cur_scope->__pyx_v_self->hg, (__pyx_cur_scope->__pyx_v_self->edge->tail_nodes_[__pyx_cur_scope->__pyx_v_i])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 282; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_4;
@@ -14297,10 +14633,10 @@ static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphEdge_10tail_nodes_2generator1
     __pyx_L6_resume_from_yield:;
     __pyx_t_1 = __pyx_cur_scope->__pyx_t_0;
     __pyx_t_2 = __pyx_cur_scope->__pyx_t_1;
-    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 267; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 282; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "hypergraph.pxi":264
+  /* "cdec/hypergraph.pxi":279
  * 
  *     property tail_nodes:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14323,7 +14659,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphEdge_10tail_nodes_2generator1
   return NULL;
 }
 
-/* "hypergraph.pxi":270
+/* "cdec/hypergraph.pxi":285
  * 
  *     property span:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14355,7 +14691,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_4span___get__(struct __p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "hypergraph.pxi":271
+  /* "cdec/hypergraph.pxi":286
  *     property span:
  *         def __get__(self):
  *             return (self.edge.i_, self.edge.j_)             # <<<<<<<<<<<<<<
@@ -14363,11 +14699,11 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_4span___get__(struct __p
  *     property src_span:
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_short(__pyx_v_self->edge->i_); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_short(__pyx_v_self->edge->i_); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_From_short(__pyx_v_self->edge->j_); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_From_short(__pyx_v_self->edge->j_); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 286; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
@@ -14379,7 +14715,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_4span___get__(struct __p
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":270
+  /* "cdec/hypergraph.pxi":285
  * 
  *     property span:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14400,7 +14736,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_4span___get__(struct __p
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":274
+/* "cdec/hypergraph.pxi":289
  * 
  *     property src_span:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14432,7 +14768,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_8src_span___get__(struct
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "hypergraph.pxi":275
+  /* "cdec/hypergraph.pxi":290
  *     property src_span:
  *         def __get__(self):
  *             return (self.edge.prev_i_, self.edge.prev_j_)             # <<<<<<<<<<<<<<
@@ -14440,11 +14776,11 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_8src_span___get__(struct
  *     property feature_values:
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_short(__pyx_v_self->edge->prev_i_); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_short(__pyx_v_self->edge->prev_i_); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_From_short(__pyx_v_self->edge->prev_j_); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_From_short(__pyx_v_self->edge->prev_j_); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
@@ -14456,7 +14792,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_8src_span___get__(struct
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":274
+  /* "cdec/hypergraph.pxi":289
  * 
  *     property src_span:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14477,7 +14813,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_8src_span___get__(struct
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":278
+/* "cdec/hypergraph.pxi":293
  * 
  *     property feature_values:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14508,20 +14844,20 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_14feature_values___get__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "hypergraph.pxi":279
+  /* "cdec/hypergraph.pxi":294
  *     property feature_values:
  *         def __get__(self):
  *             cdef SparseVector vector = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
  *             vector.vector = new FastSparseVector[double](self.edge.feature_values_)
  *             return vector
  */
-  __pyx_t_1 = __pyx_tp_new_4cdec_5_cdec_SparseVector(((PyTypeObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_SparseVector)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_tp_new_4cdec_5_cdec_SparseVector(((PyTypeObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_SparseVector)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (!(likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_4cdec_5_cdec_SparseVector)))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_4cdec_5_cdec_SparseVector)))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_vector = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hypergraph.pxi":280
+  /* "cdec/hypergraph.pxi":295
  *         def __get__(self):
  *             cdef SparseVector vector = SparseVector.__new__(SparseVector)
  *             vector.vector = new FastSparseVector[double](self.edge.feature_values_)             # <<<<<<<<<<<<<<
@@ -14530,7 +14866,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_14feature_values___get__
  */
   __pyx_v_vector->vector = new FastSparseVector<double> (__pyx_v_self->edge->feature_values_);
 
-  /* "hypergraph.pxi":281
+  /* "cdec/hypergraph.pxi":296
  *             cdef SparseVector vector = SparseVector.__new__(SparseVector)
  *             vector.vector = new FastSparseVector[double](self.edge.feature_values_)
  *             return vector             # <<<<<<<<<<<<<<
@@ -14542,7 +14878,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_14feature_values___get__
   __pyx_r = ((PyObject *)__pyx_v_vector);
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":278
+  /* "cdec/hypergraph.pxi":293
  * 
  *     property feature_values:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14562,7 +14898,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_14feature_values___get__
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":284
+/* "cdec/hypergraph.pxi":299
  * 
  *     property prob:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14592,7 +14928,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_4prob___get__(struct __p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "hypergraph.pxi":285
+  /* "cdec/hypergraph.pxi":300
  *     property prob:
  *         def __get__(self):
  *             return self.edge.edge_prob_.as_float()             # <<<<<<<<<<<<<<
@@ -14600,13 +14936,13 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_4prob___get__(struct __p
  *     def __richcmp__(HypergraphEdge x, HypergraphEdge y, int op):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->edge->edge_prob_.as_float()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->edge->edge_prob_.as_float()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":284
+  /* "cdec/hypergraph.pxi":299
  * 
  *     property prob:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14625,7 +14961,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_4prob___get__(struct __p
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":287
+/* "cdec/hypergraph.pxi":302
  *             return self.edge.edge_prob_.as_float()
  * 
  *     def __richcmp__(HypergraphEdge x, HypergraphEdge y, int op):             # <<<<<<<<<<<<<<
@@ -14642,8 +14978,8 @@ static PyObject *__pyx_pw_4cdec_5_cdec_14HypergraphEdge_3__richcmp__(PyObject *_
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__richcmp__ (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), __pyx_ptype_4cdec_5_cdec_HypergraphEdge, 1, "x", 0))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), __pyx_ptype_4cdec_5_cdec_HypergraphEdge, 1, "y", 0))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), __pyx_ptype_4cdec_5_cdec_HypergraphEdge, 1, "x", 0))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 302; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), __pyx_ptype_4cdec_5_cdec_HypergraphEdge, 1, "y", 0))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 302; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_4cdec_5_cdec_14HypergraphEdge_2__richcmp__(((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_v_x), ((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_v_y), ((int)__pyx_v_op));
 
   /* function exit code */
@@ -14665,7 +15001,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_2__richcmp__(struct __py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__richcmp__", 0);
 
-  /* "hypergraph.pxi":290
+  /* "cdec/hypergraph.pxi":305
  *         if op == 2: # ==
  *             return x.edge == y.edge
  *         elif op == 3: # !=             # <<<<<<<<<<<<<<
@@ -14674,7 +15010,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_2__richcmp__(struct __py
  */
   switch (__pyx_v_op) {
 
-    /* "hypergraph.pxi":288
+    /* "cdec/hypergraph.pxi":303
  * 
  *     def __richcmp__(HypergraphEdge x, HypergraphEdge y, int op):
  *         if op == 2: # ==             # <<<<<<<<<<<<<<
@@ -14683,7 +15019,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_2__richcmp__(struct __py
  */
     case 2:
 
-    /* "hypergraph.pxi":289
+    /* "cdec/hypergraph.pxi":304
  *     def __richcmp__(HypergraphEdge x, HypergraphEdge y, int op):
  *         if op == 2: # ==
  *             return x.edge == y.edge             # <<<<<<<<<<<<<<
@@ -14691,14 +15027,14 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_2__richcmp__(struct __py
  *             return not (x == y)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __Pyx_PyBool_FromLong((__pyx_v_x->edge == __pyx_v_y->edge)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyBool_FromLong((__pyx_v_x->edge == __pyx_v_y->edge)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 304; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
     goto __pyx_L0;
     break;
 
-    /* "hypergraph.pxi":290
+    /* "cdec/hypergraph.pxi":305
  *         if op == 2: # ==
  *             return x.edge == y.edge
  *         elif op == 3: # !=             # <<<<<<<<<<<<<<
@@ -14707,7 +15043,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_2__richcmp__(struct __py
  */
     case 3:
 
-    /* "hypergraph.pxi":291
+    /* "cdec/hypergraph.pxi":306
  *             return x.edge == y.edge
  *         elif op == 3: # !=
  *             return not (x == y)             # <<<<<<<<<<<<<<
@@ -14715,10 +15051,10 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_2__richcmp__(struct __py
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = PyObject_RichCompare(((PyObject *)__pyx_v_x), ((PyObject *)__pyx_v_y), Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 291; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 291; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyObject_RichCompare(((PyObject *)__pyx_v_x), ((PyObject *)__pyx_v_y), Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 306; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 306; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyBool_FromLong((!__pyx_t_2)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 291; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyBool_FromLong((!__pyx_t_2)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 306; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
@@ -14727,20 +15063,20 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_2__richcmp__(struct __py
     default: break;
   }
 
-  /* "hypergraph.pxi":292
+  /* "cdec/hypergraph.pxi":307
  *         elif op == 3: # !=
  *             return not (x == y)
  *         raise NotImplemented('comparison not implemented for HypergraphEdge')             # <<<<<<<<<<<<<<
  * 
  * cdef class HypergraphNode:
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_NotImplemented, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 292; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_NotImplemented, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 307; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  {__pyx_filename = __pyx_f[3]; __pyx_lineno = 292; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  {__pyx_filename = __pyx_f[3]; __pyx_lineno = 307; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":287
+  /* "cdec/hypergraph.pxi":302
  *             return self.edge.edge_prob_.as_float()
  * 
  *     def __richcmp__(HypergraphEdge x, HypergraphEdge y, int op):             # <<<<<<<<<<<<<<
@@ -14759,7 +15095,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphEdge_2__richcmp__(struct __py
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":247
+/* "cdec/hypergraph.pxi":262
  *     cdef hypergraph.Hypergraph* hg
  *     cdef hypergraph.HypergraphEdge* edge
  *     cdef public TRule trule             # <<<<<<<<<<<<<<
@@ -14817,7 +15153,7 @@ static int __pyx_pf_4cdec_5_cdec_14HypergraphEdge_5trule_2__set__(struct __pyx_o
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
-  if (!(likely(((__pyx_v_value) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_value, __pyx_ptype_4cdec_5_cdec_TRule))))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_v_value) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_value, __pyx_ptype_4cdec_5_cdec_TRule))))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 262; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_1 = __pyx_v_value;
   __Pyx_INCREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
@@ -14867,7 +15203,7 @@ static int __pyx_pf_4cdec_5_cdec_14HypergraphEdge_5trule_4__del__(struct __pyx_o
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":298
+/* "cdec/hypergraph.pxi":313
  *     cdef hypergraph.HypergraphNode* node
  * 
  *     cdef init(self, hypergraph.Hypergraph* hg, unsigned i):             # <<<<<<<<<<<<<<
@@ -14880,7 +15216,7 @@ static PyObject *__pyx_f_4cdec_5_cdec_14HypergraphNode_init(struct __pyx_obj_4cd
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("init", 0);
 
-  /* "hypergraph.pxi":299
+  /* "cdec/hypergraph.pxi":314
  * 
  *     cdef init(self, hypergraph.Hypergraph* hg, unsigned i):
  *         self.hg = hg             # <<<<<<<<<<<<<<
@@ -14889,7 +15225,7 @@ static PyObject *__pyx_f_4cdec_5_cdec_14HypergraphNode_init(struct __pyx_obj_4cd
  */
   __pyx_v_self->hg = __pyx_v_hg;
 
-  /* "hypergraph.pxi":300
+  /* "cdec/hypergraph.pxi":315
  *     cdef init(self, hypergraph.Hypergraph* hg, unsigned i):
  *         self.hg = hg
  *         self.node = &hg.nodes_[i]             # <<<<<<<<<<<<<<
@@ -14898,7 +15234,7 @@ static PyObject *__pyx_f_4cdec_5_cdec_14HypergraphNode_init(struct __pyx_obj_4cd
  */
   __pyx_v_self->node = (&(__pyx_v_hg->nodes_[__pyx_v_i]));
 
-  /* "hypergraph.pxi":301
+  /* "cdec/hypergraph.pxi":316
  *         self.hg = hg
  *         self.node = &hg.nodes_[i]
  *         return self             # <<<<<<<<<<<<<<
@@ -14910,7 +15246,7 @@ static PyObject *__pyx_f_4cdec_5_cdec_14HypergraphNode_init(struct __pyx_obj_4cd
   __pyx_r = ((PyObject *)__pyx_v_self);
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":298
+  /* "cdec/hypergraph.pxi":313
  *     cdef hypergraph.HypergraphNode* node
  * 
  *     cdef init(self, hypergraph.Hypergraph* hg, unsigned i):             # <<<<<<<<<<<<<<
@@ -14925,7 +15261,7 @@ static PyObject *__pyx_f_4cdec_5_cdec_14HypergraphNode_init(struct __pyx_obj_4cd
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":304
+/* "cdec/hypergraph.pxi":319
  * 
  *     property id:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14955,7 +15291,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_2id___get__(struct __pyx
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "hypergraph.pxi":305
+  /* "cdec/hypergraph.pxi":320
  *     property id:
  *         def __get__(self):
  *             return self.node.id_             # <<<<<<<<<<<<<<
@@ -14963,13 +15299,13 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_2id___get__(struct __pyx
  *     property in_edges:
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->node->id_); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 305; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->node->id_); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 320; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":304
+  /* "cdec/hypergraph.pxi":319
  * 
  *     property id:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -14987,9 +15323,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_2id___get__(struct __pyx
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_8in_edges_2generator15(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_8in_edges_2generator16(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":308
+/* "cdec/hypergraph.pxi":323
  * 
  *     property in_edges:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -15011,14 +15347,14 @@ static PyObject *__pyx_pw_4cdec_5_cdec_14HypergraphNode_8in_edges_1__get__(PyObj
 }
 
 static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_8in_edges___get__(struct __pyx_obj_4cdec_5_cdec_HypergraphNode *__pyx_v_self) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__ *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_20___get__ *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_19___get__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_19___get__, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_20___get__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_20___get__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_20___get__, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
@@ -15028,7 +15364,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_8in_edges___get__(struct
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_14HypergraphNode_8in_edges_2generator15, (PyObject *) __pyx_cur_scope, __pyx_n_s_get, __pyx_n_s_HypergraphNode___get); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 308; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_14HypergraphNode_8in_edges_2generator16, (PyObject *) __pyx_cur_scope, __pyx_n_s_get, __pyx_n_s_HypergraphNode___get); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -15044,9 +15380,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_8in_edges___get__(struct
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_8in_edges_2generator15(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_8in_edges_2generator16(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__ *)__pyx_generator->closure);
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_20___get__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_20___get__ *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   size_t __pyx_t_1;
   unsigned int __pyx_t_2;
@@ -15065,9 +15401,9 @@ static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_8in_edges_2generator15(_
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 308; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":310
+  /* "cdec/hypergraph.pxi":325
  *         def __get__(self):
  *             cdef unsigned i
  *             for i in range(self.node.in_edges_.size()):             # <<<<<<<<<<<<<<
@@ -15078,16 +15414,16 @@ static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_8in_edges_2generator15(_
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_cur_scope->__pyx_v_i = __pyx_t_2;
 
-    /* "hypergraph.pxi":311
+    /* "cdec/hypergraph.pxi":326
  *             cdef unsigned i
  *             for i in range(self.node.in_edges_.size()):
  *                 yield HypergraphEdge().init(self.hg, self.node.in_edges_[i])             # <<<<<<<<<<<<<<
  * 
  *     property out_edges:
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphEdge)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphEdge)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 326; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphEdge *)((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_t_3)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_t_3), __pyx_cur_scope->__pyx_v_self->hg, (__pyx_cur_scope->__pyx_v_self->node->in_edges_[__pyx_cur_scope->__pyx_v_i])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphEdge *)((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_t_3)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_t_3), __pyx_cur_scope->__pyx_v_self->hg, (__pyx_cur_scope->__pyx_v_self->node->in_edges_[__pyx_cur_scope->__pyx_v_i])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 326; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_4;
@@ -15102,10 +15438,10 @@ static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_8in_edges_2generator15(_
     __pyx_L6_resume_from_yield:;
     __pyx_t_1 = __pyx_cur_scope->__pyx_t_0;
     __pyx_t_2 = __pyx_cur_scope->__pyx_t_1;
-    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 326; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "hypergraph.pxi":308
+  /* "cdec/hypergraph.pxi":323
  * 
  *     property in_edges:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -15127,9 +15463,9 @@ static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_8in_edges_2generator15(_
   __Pyx_RefNannyFinishContext();
   return NULL;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_9out_edges_2generator16(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_9out_edges_2generator17(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "hypergraph.pxi":314
+/* "cdec/hypergraph.pxi":329
  * 
  *     property out_edges:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -15151,14 +15487,14 @@ static PyObject *__pyx_pw_4cdec_5_cdec_14HypergraphNode_9out_edges_1__get__(PyOb
 }
 
 static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_9out_edges___get__(struct __pyx_obj_4cdec_5_cdec_HypergraphNode *__pyx_v_self) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_20___get__ *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_20___get__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_20___get__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_20___get__, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_21___get__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_21___get__, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
@@ -15168,7 +15504,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_9out_edges___get__(struc
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_14HypergraphNode_9out_edges_2generator16, (PyObject *) __pyx_cur_scope, __pyx_n_s_get, __pyx_n_s_HypergraphNode___get); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_14HypergraphNode_9out_edges_2generator17, (PyObject *) __pyx_cur_scope, __pyx_n_s_get, __pyx_n_s_HypergraphNode___get); if (unlikely(!gen)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 329; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -15184,9 +15520,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_9out_edges___get__(struc
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_9out_edges_2generator16(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_9out_edges_2generator17(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_20___get__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_20___get__ *)__pyx_generator->closure);
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   size_t __pyx_t_1;
   unsigned int __pyx_t_2;
@@ -15205,9 +15541,9 @@ static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_9out_edges_2generator16(
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 329; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":316
+  /* "cdec/hypergraph.pxi":331
  *         def __get__(self):
  *             cdef unsigned i
  *             for i in range(self.node.out_edges_.size()):             # <<<<<<<<<<<<<<
@@ -15218,16 +15554,16 @@ static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_9out_edges_2generator16(
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_cur_scope->__pyx_v_i = __pyx_t_2;
 
-    /* "hypergraph.pxi":317
+    /* "cdec/hypergraph.pxi":332
  *             cdef unsigned i
  *             for i in range(self.node.out_edges_.size()):
  *                 yield HypergraphEdge().init(self.hg, self.node.out_edges_[i])             # <<<<<<<<<<<<<<
  * 
  *     property span:
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphEdge)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_4cdec_5_cdec_HypergraphEdge)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphEdge *)((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_t_3)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_t_3), __pyx_cur_scope->__pyx_v_self->hg, (__pyx_cur_scope->__pyx_v_self->node->out_edges_[__pyx_cur_scope->__pyx_v_i])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = ((struct __pyx_vtabstruct_4cdec_5_cdec_HypergraphEdge *)((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_t_3)->__pyx_vtab)->init(((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)__pyx_t_3), __pyx_cur_scope->__pyx_v_self->hg, (__pyx_cur_scope->__pyx_v_self->node->out_edges_[__pyx_cur_scope->__pyx_v_i])); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_4;
@@ -15242,10 +15578,10 @@ static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_9out_edges_2generator16(
     __pyx_L6_resume_from_yield:;
     __pyx_t_1 = __pyx_cur_scope->__pyx_t_0;
     __pyx_t_2 = __pyx_cur_scope->__pyx_t_1;
-    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "hypergraph.pxi":314
+  /* "cdec/hypergraph.pxi":329
  * 
  *     property out_edges:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -15268,7 +15604,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_14HypergraphNode_9out_edges_2generator16(
   return NULL;
 }
 
-/* "hypergraph.pxi":320
+/* "cdec/hypergraph.pxi":335
  * 
  *     property span:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -15299,7 +15635,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_4span___get__(struct __p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "hypergraph.pxi":321
+  /* "cdec/hypergraph.pxi":336
  *     property span:
  *         def __get__(self):
  *             return next(self.in_edges).span             # <<<<<<<<<<<<<<
@@ -15307,19 +15643,19 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_4span___get__(struct __p
  *     property cat:
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_in_edges); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_in_edges); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 336; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyIter_Next(__pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyIter_Next(__pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 336; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_span); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_span); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 336; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hypergraph.pxi":320
+  /* "cdec/hypergraph.pxi":335
  * 
  *     property span:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -15339,7 +15675,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_4span___get__(struct __p
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":324
+/* "cdec/hypergraph.pxi":339
  * 
  *     property cat:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -15371,7 +15707,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_3cat___get__(struct __py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "hypergraph.pxi":325
+  /* "cdec/hypergraph.pxi":340
  *     property cat:
  *         def __get__(self):
  *             if self.node.cat_:             # <<<<<<<<<<<<<<
@@ -15381,7 +15717,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_3cat___get__(struct __py
   __pyx_t_1 = (__pyx_v_self->node->cat_ != 0);
   if (__pyx_t_1) {
 
-    /* "hypergraph.pxi":326
+    /* "cdec/hypergraph.pxi":341
  *         def __get__(self):
  *             if self.node.cat_:
  *                 return str(TDConvert(-self.node.cat_).c_str())             # <<<<<<<<<<<<<<
@@ -15389,14 +15725,14 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_3cat___get__(struct __py
  *     def __richcmp__(HypergraphNode x, HypergraphNode y, int op):
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_PyBytes_FromString(TD::Convert((-__pyx_v_self->node->cat_)).c_str()); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 326; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyBytes_FromString(TD::Convert((-__pyx_v_self->node->cat_)).c_str()); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 326; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
     __Pyx_GIVEREF(__pyx_t_2);
     __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)(&PyString_Type))), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 326; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)(&PyString_Type))), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_2;
@@ -15404,7 +15740,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_3cat___get__(struct __py
     goto __pyx_L0;
   }
 
-  /* "hypergraph.pxi":324
+  /* "cdec/hypergraph.pxi":339
  * 
  *     property cat:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -15426,7 +15762,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode_3cat___get__(struct __py
   return __pyx_r;
 }
 
-/* "hypergraph.pxi":328
+/* "cdec/hypergraph.pxi":343
  *                 return str(TDConvert(-self.node.cat_).c_str())
  * 
  *     def __richcmp__(HypergraphNode x, HypergraphNode y, int op):             # <<<<<<<<<<<<<<
@@ -15443,8 +15779,8 @@ static PyObject *__pyx_pw_4cdec_5_cdec_14HypergraphNode_1__richcmp__(PyObject *_
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__richcmp__ (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), __pyx_ptype_4cdec_5_cdec_HypergraphNode, 1, "x", 0))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 328; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), __pyx_ptype_4cdec_5_cdec_HypergraphNode, 1, "y", 0))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 328; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), __pyx_ptype_4cdec_5_cdec_HypergraphNode, 1, "x", 0))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 343; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), __pyx_ptype_4cdec_5_cdec_HypergraphNode, 1, "y", 0))) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 343; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_4cdec_5_cdec_14HypergraphNode___richcmp__(((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_v_x), ((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)__pyx_v_y), ((int)__pyx_v_op));
 
   /* function exit code */
@@ -15466,7 +15802,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode___richcmp__(struct __pyx
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__richcmp__", 0);
 
-  /* "hypergraph.pxi":331
+  /* "cdec/hypergraph.pxi":346
  *         if op == 2: # ==
  *             return x.node == y.node
  *         elif op == 3: # !=             # <<<<<<<<<<<<<<
@@ -15475,7 +15811,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode___richcmp__(struct __pyx
  */
   switch (__pyx_v_op) {
 
-    /* "hypergraph.pxi":329
+    /* "cdec/hypergraph.pxi":344
  * 
  *     def __richcmp__(HypergraphNode x, HypergraphNode y, int op):
  *         if op == 2: # ==             # <<<<<<<<<<<<<<
@@ -15484,7 +15820,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode___richcmp__(struct __pyx
  */
     case 2:
 
-    /* "hypergraph.pxi":330
+    /* "cdec/hypergraph.pxi":345
  *     def __richcmp__(HypergraphNode x, HypergraphNode y, int op):
  *         if op == 2: # ==
  *             return x.node == y.node             # <<<<<<<<<<<<<<
@@ -15492,14 +15828,14 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode___richcmp__(struct __pyx
  *             return not (x == y)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __Pyx_PyBool_FromLong((__pyx_v_x->node == __pyx_v_y->node)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 330; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyBool_FromLong((__pyx_v_x->node == __pyx_v_y->node)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
     goto __pyx_L0;
     break;
 
-    /* "hypergraph.pxi":331
+    /* "cdec/hypergraph.pxi":346
  *         if op == 2: # ==
  *             return x.node == y.node
  *         elif op == 3: # !=             # <<<<<<<<<<<<<<
@@ -15508,17 +15844,17 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode___richcmp__(struct __pyx
  */
     case 3:
 
-    /* "hypergraph.pxi":332
+    /* "cdec/hypergraph.pxi":347
  *             return x.node == y.node
  *         elif op == 3: # !=
  *             return not (x == y)             # <<<<<<<<<<<<<<
  *         raise NotImplemented('comparison not implemented for HypergraphNode')
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = PyObject_RichCompare(((PyObject *)__pyx_v_x), ((PyObject *)__pyx_v_y), Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyObject_RichCompare(((PyObject *)__pyx_v_x), ((PyObject *)__pyx_v_y), Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 347; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 347; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyBool_FromLong((!__pyx_t_2)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyBool_FromLong((!__pyx_t_2)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 347; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
@@ -15527,18 +15863,18 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode___richcmp__(struct __pyx
     default: break;
   }
 
-  /* "hypergraph.pxi":333
+  /* "cdec/hypergraph.pxi":348
  *         elif op == 3: # !=
  *             return not (x == y)
  *         raise NotImplemented('comparison not implemented for HypergraphNode')             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_NotImplemented, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_NotImplemented, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 348; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  {__pyx_filename = __pyx_f[3]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  {__pyx_filename = __pyx_f[3]; __pyx_lineno = 348; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "hypergraph.pxi":328
+  /* "cdec/hypergraph.pxi":343
  *                 return str(TDConvert(-self.node.cat_).c_str())
  * 
  *     def __richcmp__(HypergraphNode x, HypergraphNode y, int op):             # <<<<<<<<<<<<<<
@@ -15557,7 +15893,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_14HypergraphNode___richcmp__(struct __pyx
   return __pyx_r;
 }
 
-/* "lattice.pxi":6
+/* "cdec/lattice.pxi":6
  *     cdef lattice.Lattice* lattice
  * 
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
@@ -15586,7 +15922,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice___cinit__(struct __pyx_obj_4cdec_5_cde
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "lattice.pxi":7
+  /* "cdec/lattice.pxi":7
  * 
  *     def __cinit__(self):
  *         self.lattice = new lattice.Lattice()             # <<<<<<<<<<<<<<
@@ -15595,7 +15931,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice___cinit__(struct __pyx_obj_4cdec_5_cde
  */
   __pyx_v_self->lattice = new Lattice();
 
-  /* "lattice.pxi":6
+  /* "cdec/lattice.pxi":6
  *     cdef lattice.Lattice* lattice
  * 
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
@@ -15609,7 +15945,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice___cinit__(struct __pyx_obj_4cdec_5_cde
   return __pyx_r;
 }
 
-/* "lattice.pxi":9
+/* "cdec/lattice.pxi":9
  *         self.lattice = new lattice.Lattice()
  * 
  *     def __init__(self, inp):             # <<<<<<<<<<<<<<
@@ -15691,7 +16027,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_2__init__(struct __pyx_obj_4cdec_5_cde
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "lattice.pxi":12
+  /* "cdec/lattice.pxi":12
  *         """Lattice(tuple) -> Lattice from node list.
  *         Lattice(string) -> Lattice from PLF representation."""
  *         if isinstance(inp, tuple):             # <<<<<<<<<<<<<<
@@ -15702,7 +16038,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_2__init__(struct __pyx_obj_4cdec_5_cde
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "lattice.pxi":13
+    /* "cdec/lattice.pxi":13
  *         Lattice(string) -> Lattice from PLF representation."""
  *         if isinstance(inp, tuple):
  *             self.lattice.resize(len(inp))             # <<<<<<<<<<<<<<
@@ -15712,7 +16048,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_2__init__(struct __pyx_obj_4cdec_5_cde
     __pyx_t_3 = PyObject_Length(__pyx_v_inp); if (unlikely(__pyx_t_3 == -1)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 13; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_v_self->lattice->resize(__pyx_t_3);
 
-    /* "lattice.pxi":14
+    /* "cdec/lattice.pxi":14
  *         if isinstance(inp, tuple):
  *             self.lattice.resize(len(inp))
  *             for i, arcs in enumerate(inp):             # <<<<<<<<<<<<<<
@@ -15768,7 +16104,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_2__init__(struct __pyx_obj_4cdec_5_cde
       __pyx_t_4 = __pyx_t_7;
       __pyx_t_7 = 0;
 
-      /* "lattice.pxi":15
+      /* "cdec/lattice.pxi":15
  *             self.lattice.resize(len(inp))
  *             for i, arcs in enumerate(inp):
  *                 self[i] = arcs             # <<<<<<<<<<<<<<
@@ -15777,7 +16113,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_2__init__(struct __pyx_obj_4cdec_5_cde
  */
       if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_self), __pyx_v_i, __pyx_v_arcs) < 0)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-      /* "lattice.pxi":14
+      /* "cdec/lattice.pxi":14
  *         if isinstance(inp, tuple):
  *             self.lattice.resize(len(inp))
  *             for i, arcs in enumerate(inp):             # <<<<<<<<<<<<<<
@@ -15790,7 +16126,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_2__init__(struct __pyx_obj_4cdec_5_cde
     goto __pyx_L3;
   }
 
-  /* "lattice.pxi":16
+  /* "cdec/lattice.pxi":16
  *             for i, arcs in enumerate(inp):
  *                 self[i] = arcs
  *         elif isinstance(inp, basestring):             # <<<<<<<<<<<<<<
@@ -15801,7 +16137,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_2__init__(struct __pyx_obj_4cdec_5_cde
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "lattice.pxi":17
+    /* "cdec/lattice.pxi":17
  *                 self[i] = arcs
  *         elif isinstance(inp, basestring):
  *             lattice.ConvertTextOrPLF(as_str(inp), self.lattice)             # <<<<<<<<<<<<<<
@@ -15817,7 +16153,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_2__init__(struct __pyx_obj_4cdec_5_cde
   }
   /*else*/ {
 
-    /* "lattice.pxi":19
+    /* "cdec/lattice.pxi":19
  *             lattice.ConvertTextOrPLF(as_str(inp), self.lattice)
  *         else:
  *             raise TypeError('cannot create lattice from %s' % type(inp))             # <<<<<<<<<<<<<<
@@ -15840,7 +16176,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_2__init__(struct __pyx_obj_4cdec_5_cde
   }
   __pyx_L3:;
 
-  /* "lattice.pxi":9
+  /* "cdec/lattice.pxi":9
  *         self.lattice = new lattice.Lattice()
  * 
  *     def __init__(self, inp):             # <<<<<<<<<<<<<<
@@ -15864,7 +16200,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_2__init__(struct __pyx_obj_4cdec_5_cde
   return __pyx_r;
 }
 
-/* "lattice.pxi":21
+/* "cdec/lattice.pxi":21
  *             raise TypeError('cannot create lattice from %s' % type(inp))
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -15887,7 +16223,7 @@ static void __pyx_pf_4cdec_5_cdec_7Lattice_4__dealloc__(struct __pyx_obj_4cdec_5
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "lattice.pxi":22
+  /* "cdec/lattice.pxi":22
  * 
  *     def __dealloc__(self):
  *         del self.lattice             # <<<<<<<<<<<<<<
@@ -15896,7 +16232,7 @@ static void __pyx_pf_4cdec_5_cdec_7Lattice_4__dealloc__(struct __pyx_obj_4cdec_5
  */
   delete __pyx_v_self->lattice;
 
-  /* "lattice.pxi":21
+  /* "cdec/lattice.pxi":21
  *             raise TypeError('cannot create lattice from %s' % type(inp))
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -15908,7 +16244,7 @@ static void __pyx_pf_4cdec_5_cdec_7Lattice_4__dealloc__(struct __pyx_obj_4cdec_5
   __Pyx_RefNannyFinishContext();
 }
 
-/* "lattice.pxi":24
+/* "cdec/lattice.pxi":24
  *         del self.lattice
  * 
  *     def __getitem__(self, int index):             # <<<<<<<<<<<<<<
@@ -15964,7 +16300,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_6__getitem__(struct __pyx_obj_4c
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__getitem__", 0);
 
-  /* "lattice.pxi":25
+  /* "cdec/lattice.pxi":25
  * 
  *     def __getitem__(self, int index):
  *         if not 0 <= index < len(self):             # <<<<<<<<<<<<<<
@@ -15979,7 +16315,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_6__getitem__(struct __pyx_obj_4c
   __pyx_t_3 = ((!(__pyx_t_1 != 0)) != 0);
   if (__pyx_t_3) {
 
-    /* "lattice.pxi":26
+    /* "cdec/lattice.pxi":26
  *     def __getitem__(self, int index):
  *         if not 0 <= index < len(self):
  *             raise IndexError('lattice index out of range')             # <<<<<<<<<<<<<<
@@ -15993,7 +16329,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_6__getitem__(struct __pyx_obj_4c
     {__pyx_filename = __pyx_f[4]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "lattice.pxi":27
+  /* "cdec/lattice.pxi":27
  *         if not 0 <= index < len(self):
  *             raise IndexError('lattice index out of range')
  *         arcs = []             # <<<<<<<<<<<<<<
@@ -16005,7 +16341,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_6__getitem__(struct __pyx_obj_4c
   __pyx_v_arcs = ((PyObject*)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "lattice.pxi":28
+  /* "cdec/lattice.pxi":28
  *             raise IndexError('lattice index out of range')
  *         arcs = []
  *         cdef vector[lattice.LatticeArc] arc_vector = self.lattice[0][index]             # <<<<<<<<<<<<<<
@@ -16014,7 +16350,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_6__getitem__(struct __pyx_obj_4c
  */
   __pyx_v_arc_vector = ((__pyx_v_self->lattice[0])[__pyx_v_index]);
 
-  /* "lattice.pxi":31
+  /* "cdec/lattice.pxi":31
  *         cdef lattice.LatticeArc* arc
  *         cdef unsigned i
  *         for i in range(arc_vector.size()):             # <<<<<<<<<<<<<<
@@ -16025,7 +16361,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_6__getitem__(struct __pyx_obj_4c
   for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
     __pyx_v_i = __pyx_t_6;
 
-    /* "lattice.pxi":32
+    /* "cdec/lattice.pxi":32
  *         cdef unsigned i
  *         for i in range(arc_vector.size()):
  *             arc = &arc_vector[i]             # <<<<<<<<<<<<<<
@@ -16034,7 +16370,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_6__getitem__(struct __pyx_obj_4c
  */
     __pyx_v_arc = (&(__pyx_v_arc_vector[__pyx_v_i]));
 
-    /* "lattice.pxi":33
+    /* "cdec/lattice.pxi":33
  *         for i in range(arc_vector.size()):
  *             arc = &arc_vector[i]
  *             label = unicode(TDConvert(arc.label).c_str(), 'utf8')             # <<<<<<<<<<<<<<
@@ -16057,7 +16393,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_6__getitem__(struct __pyx_obj_4c
     __Pyx_XDECREF_SET(__pyx_v_label, ((PyObject*)__pyx_t_4));
     __pyx_t_4 = 0;
 
-    /* "lattice.pxi":34
+    /* "cdec/lattice.pxi":34
  *             arc = &arc_vector[i]
  *             label = unicode(TDConvert(arc.label).c_str(), 'utf8')
  *             arcs.append((label, arc.cost, arc.dist2next))             # <<<<<<<<<<<<<<
@@ -16083,7 +16419,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_6__getitem__(struct __pyx_obj_4c
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   }
 
-  /* "lattice.pxi":35
+  /* "cdec/lattice.pxi":35
  *             label = unicode(TDConvert(arc.label).c_str(), 'utf8')
  *             arcs.append((label, arc.cost, arc.dist2next))
  *         return tuple(arcs)             # <<<<<<<<<<<<<<
@@ -16097,7 +16433,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_6__getitem__(struct __pyx_obj_4c
   __pyx_t_8 = 0;
   goto __pyx_L0;
 
-  /* "lattice.pxi":24
+  /* "cdec/lattice.pxi":24
  *         del self.lattice
  * 
  *     def __getitem__(self, int index):             # <<<<<<<<<<<<<<
@@ -16120,7 +16456,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_6__getitem__(struct __pyx_obj_4c
   return __pyx_r;
 }
 
-/* "lattice.pxi":37
+/* "cdec/lattice.pxi":37
  *         return tuple(arcs)
  * 
  *     def __setitem__(self, int index, tuple arcs):             # <<<<<<<<<<<<<<
@@ -16185,7 +16521,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_8__setitem__(struct __pyx_obj_4cdec_5_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__setitem__", 0);
 
-  /* "lattice.pxi":38
+  /* "cdec/lattice.pxi":38
  * 
  *     def __setitem__(self, int index, tuple arcs):
  *         if not 0 <= index < len(self):             # <<<<<<<<<<<<<<
@@ -16200,7 +16536,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_8__setitem__(struct __pyx_obj_4cdec_5_
   __pyx_t_3 = ((!(__pyx_t_1 != 0)) != 0);
   if (__pyx_t_3) {
 
-    /* "lattice.pxi":39
+    /* "cdec/lattice.pxi":39
  *     def __setitem__(self, int index, tuple arcs):
  *         if not 0 <= index < len(self):
  *             raise IndexError('lattice index out of range')             # <<<<<<<<<<<<<<
@@ -16214,7 +16550,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_8__setitem__(struct __pyx_obj_4cdec_5_
     {__pyx_filename = __pyx_f[4]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "lattice.pxi":41
+  /* "cdec/lattice.pxi":41
  *             raise IndexError('lattice index out of range')
  *         cdef lattice.LatticeArc* arc
  *         for (label, cost, dist2next) in arcs:             # <<<<<<<<<<<<<<
@@ -16297,7 +16633,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_8__setitem__(struct __pyx_obj_4cdec_5_
     __Pyx_XDECREF_SET(__pyx_v_dist2next, __pyx_t_8);
     __pyx_t_8 = 0;
 
-    /* "lattice.pxi":42
+    /* "cdec/lattice.pxi":42
  *         cdef lattice.LatticeArc* arc
  *         for (label, cost, dist2next) in arcs:
  *             label_str = as_str(label)             # <<<<<<<<<<<<<<
@@ -16309,7 +16645,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_8__setitem__(struct __pyx_obj_4cdec_5_
     __Pyx_XDECREF_SET(__pyx_v_label_str, ((PyObject*)__pyx_t_5));
     __pyx_t_5 = 0;
 
-    /* "lattice.pxi":43
+    /* "cdec/lattice.pxi":43
  *         for (label, cost, dist2next) in arcs:
  *             label_str = as_str(label)
  *             arc = new lattice.LatticeArc(TDConvert(label_str), cost, dist2next)             # <<<<<<<<<<<<<<
@@ -16321,7 +16657,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_8__setitem__(struct __pyx_obj_4cdec_5_
     __pyx_t_13 = __Pyx_PyInt_As_int(__pyx_v_dist2next); if (unlikely((__pyx_t_13 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_v_arc = new LatticeArc(TD::Convert(__pyx_t_11), __pyx_t_12, __pyx_t_13);
 
-    /* "lattice.pxi":44
+    /* "cdec/lattice.pxi":44
  *             label_str = as_str(label)
  *             arc = new lattice.LatticeArc(TDConvert(label_str), cost, dist2next)
  *             self.lattice[0][index].push_back(arc[0])             # <<<<<<<<<<<<<<
@@ -16330,7 +16666,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_8__setitem__(struct __pyx_obj_4cdec_5_
  */
     ((__pyx_v_self->lattice[0])[__pyx_v_index]).push_back((__pyx_v_arc[0]));
 
-    /* "lattice.pxi":45
+    /* "cdec/lattice.pxi":45
  *             arc = new lattice.LatticeArc(TDConvert(label_str), cost, dist2next)
  *             self.lattice[0][index].push_back(arc[0])
  *             del arc             # <<<<<<<<<<<<<<
@@ -16339,7 +16675,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_8__setitem__(struct __pyx_obj_4cdec_5_
  */
     delete __pyx_v_arc;
 
-    /* "lattice.pxi":41
+    /* "cdec/lattice.pxi":41
  *             raise IndexError('lattice index out of range')
  *         cdef lattice.LatticeArc* arc
  *         for (label, cost, dist2next) in arcs:             # <<<<<<<<<<<<<<
@@ -16349,7 +16685,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_8__setitem__(struct __pyx_obj_4cdec_5_
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "lattice.pxi":37
+  /* "cdec/lattice.pxi":37
  *         return tuple(arcs)
  * 
  *     def __setitem__(self, int index, tuple arcs):             # <<<<<<<<<<<<<<
@@ -16378,7 +16714,7 @@ static int __pyx_pf_4cdec_5_cdec_7Lattice_8__setitem__(struct __pyx_obj_4cdec_5_
   return __pyx_r;
 }
 
-/* "lattice.pxi":47
+/* "cdec/lattice.pxi":47
  *             del arc
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -16404,7 +16740,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_7Lattice_10__len__(struct __pyx_obj_4cde
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__len__", 0);
 
-  /* "lattice.pxi":48
+  /* "cdec/lattice.pxi":48
  * 
  *     def __len__(self):
  *         return self.lattice.size()             # <<<<<<<<<<<<<<
@@ -16414,7 +16750,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_7Lattice_10__len__(struct __pyx_obj_4cde
   __pyx_r = __pyx_v_self->lattice->size();
   goto __pyx_L0;
 
-  /* "lattice.pxi":47
+  /* "cdec/lattice.pxi":47
  *             del arc
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -16428,7 +16764,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_7Lattice_10__len__(struct __pyx_obj_4cde
   return __pyx_r;
 }
 
-/* "lattice.pxi":50
+/* "cdec/lattice.pxi":50
  *         return self.lattice.size()
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
@@ -16459,7 +16795,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_12__str__(struct __pyx_obj_4cdec
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__str__", 0);
 
-  /* "lattice.pxi":51
+  /* "cdec/lattice.pxi":51
  * 
  *     def __str__(self):
  *         return str(hypergraph.AsPLF(self.lattice[0], True).c_str())             # <<<<<<<<<<<<<<
@@ -16481,7 +16817,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_12__str__(struct __pyx_obj_4cdec
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "lattice.pxi":50
+  /* "cdec/lattice.pxi":50
  *         return self.lattice.size()
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
@@ -16501,7 +16837,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_12__str__(struct __pyx_obj_4cdec
   return __pyx_r;
 }
 
-/* "lattice.pxi":53
+/* "cdec/lattice.pxi":53
  *         return str(hypergraph.AsPLF(self.lattice[0], True).c_str())
  * 
  *     def __unicode__(self):             # <<<<<<<<<<<<<<
@@ -16532,7 +16868,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_14__unicode__(struct __pyx_obj_4
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__unicode__", 0);
 
-  /* "lattice.pxi":54
+  /* "cdec/lattice.pxi":54
  * 
  *     def __unicode__(self):
  *         return unicode(str(self), 'utf8')             # <<<<<<<<<<<<<<
@@ -16563,7 +16899,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_14__unicode__(struct __pyx_obj_4
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "lattice.pxi":53
+  /* "cdec/lattice.pxi":53
  *         return str(hypergraph.AsPLF(self.lattice[0], True).c_str())
  * 
  *     def __unicode__(self):             # <<<<<<<<<<<<<<
@@ -16582,9 +16918,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_14__unicode__(struct __pyx_obj_4
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_18generator17(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_18generator18(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "lattice.pxi":56
+/* "cdec/lattice.pxi":56
  *         return unicode(str(self), 'utf8')
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -16606,14 +16942,14 @@ static PyObject *__pyx_pw_4cdec_5_cdec_7Lattice_17__iter__(PyObject *__pyx_v_sel
 }
 
 static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_16__iter__(struct __pyx_obj_4cdec_5_cdec_Lattice *__pyx_v_self) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__iter__", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_21___iter__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_21___iter__, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_22___iter__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_22___iter__, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
@@ -16623,7 +16959,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_16__iter__(struct __pyx_obj_4cde
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_7Lattice_18generator17, (PyObject *) __pyx_cur_scope, __pyx_n_s_iter, __pyx_n_s_Lattice___iter); if (unlikely(!gen)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_7Lattice_18generator18, (PyObject *) __pyx_cur_scope, __pyx_n_s_iter, __pyx_n_s_Lattice___iter); if (unlikely(!gen)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -16639,9 +16975,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_16__iter__(struct __pyx_obj_4cde
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_18generator17(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_18generator18(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ *)__pyx_generator->closure);
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   Py_ssize_t __pyx_t_1;
   unsigned int __pyx_t_2;
@@ -16661,7 +16997,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_18generator17(__pyx_GeneratorObj
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "lattice.pxi":58
+  /* "cdec/lattice.pxi":58
  *     def __iter__(self):
  *         cdef unsigned i
  *         for i in range(len(self)):             # <<<<<<<<<<<<<<
@@ -16672,7 +17008,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_18generator17(__pyx_GeneratorObj
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_cur_scope->__pyx_v_i = __pyx_t_2;
 
-    /* "lattice.pxi":59
+    /* "cdec/lattice.pxi":59
  *         cdef unsigned i
  *         for i in range(len(self)):
  *             yield self[i]             # <<<<<<<<<<<<<<
@@ -16696,7 +17032,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_18generator17(__pyx_GeneratorObj
     if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "lattice.pxi":56
+  /* "cdec/lattice.pxi":56
  *         return unicode(str(self), 'utf8')
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -16718,7 +17054,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_18generator17(__pyx_GeneratorObj
   return NULL;
 }
 
-/* "lattice.pxi":61
+/* "cdec/lattice.pxi":61
  *             yield self[i]
  * 
  *     def todot(self):             # <<<<<<<<<<<<<<
@@ -16739,9 +17075,9 @@ static PyObject *__pyx_pw_4cdec_5_cdec_7Lattice_20todot(PyObject *__pyx_v_self, 
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator24(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "lattice.pxi":63
+/* "cdec/lattice.pxi":63
  *     def todot(self):
  *         """lattice.todot() -> Representation of the lattice in GraphViz dot format."""
  *         def lines():             # <<<<<<<<<<<<<<
@@ -16764,24 +17100,24 @@ static PyObject *__pyx_pw_4cdec_5_cdec_7Lattice_5todot_1lines(PyObject *__pyx_se
 }
 
 static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_5todot_lines(PyObject *__pyx_self) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("lines", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_23_lines(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_23_lines, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_24_lines(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_24_lines, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
   }
   __Pyx_GOTREF(__pyx_cur_scope);
-  __pyx_cur_scope->__pyx_outer_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *) __Pyx_CyFunction_GetClosure(__pyx_self);
+  __pyx_cur_scope->__pyx_outer_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *) __Pyx_CyFunction_GetClosure(__pyx_self);
   __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_outer_scope));
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23, (PyObject *) __pyx_cur_scope, __pyx_n_s_lines, __pyx_n_s_todot_locals_lines); if (unlikely(!gen)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator24, (PyObject *) __pyx_cur_scope, __pyx_n_s_lines, __pyx_n_s_todot_locals_lines); if (unlikely(!gen)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -16797,9 +17133,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_5todot_lines(PyObject *__pyx_sel
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator24(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines *)__pyx_generator->closure);
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   PyObject *__pyx_t_1 = NULL;
   Py_ssize_t __pyx_t_2;
@@ -16833,7 +17169,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "lattice.pxi":64
+  /* "cdec/lattice.pxi":64
  *         """lattice.todot() -> Representation of the lattice in GraphViz dot format."""
  *         def lines():
  *             yield 'digraph lattice {'             # <<<<<<<<<<<<<<
@@ -16850,7 +17186,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
   __pyx_L4_resume_from_yield:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "lattice.pxi":65
+  /* "cdec/lattice.pxi":65
  *         def lines():
  *             yield 'digraph lattice {'
  *             yield 'rankdir = LR;'             # <<<<<<<<<<<<<<
@@ -16867,7 +17203,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
   __pyx_L5_resume_from_yield:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "lattice.pxi":66
+  /* "cdec/lattice.pxi":66
  *             yield 'digraph lattice {'
  *             yield 'rankdir = LR;'
  *             yield 'node [shape=circle];'             # <<<<<<<<<<<<<<
@@ -16884,7 +17220,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
   __pyx_L6_resume_from_yield:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "lattice.pxi":67
+  /* "cdec/lattice.pxi":67
  *             yield 'rankdir = LR;'
  *             yield 'node [shape=circle];'
  *             for i in range(len(self)):             # <<<<<<<<<<<<<<
@@ -16949,7 +17285,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
     __Pyx_GIVEREF(__pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "lattice.pxi":68
+    /* "cdec/lattice.pxi":68
  *             yield 'node [shape=circle];'
  *             for i in range(len(self)):
  *                 for label, weight, delta in self[i]:             # <<<<<<<<<<<<<<
@@ -17067,7 +17403,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
       __Pyx_GIVEREF(__pyx_t_10);
       __pyx_t_10 = 0;
 
-      /* "lattice.pxi":69
+      /* "cdec/lattice.pxi":69
  *             for i in range(len(self)):
  *                 for label, weight, delta in self[i]:
  *                     yield '%d -> %d [label="%s"];' % (i, i+delta, label.replace('"', '\\"'))             # <<<<<<<<<<<<<<
@@ -17123,7 +17459,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
       __pyx_t_7 = __pyx_cur_scope->__pyx_t_5;
       if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 69; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-      /* "lattice.pxi":68
+      /* "cdec/lattice.pxi":68
  *             yield 'node [shape=circle];'
  *             for i in range(len(self)):
  *                 for label, weight, delta in self[i]:             # <<<<<<<<<<<<<<
@@ -17133,7 +17469,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
     }
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-    /* "lattice.pxi":67
+    /* "cdec/lattice.pxi":67
  *             yield 'rankdir = LR;'
  *             yield 'node [shape=circle];'
  *             for i in range(len(self)):             # <<<<<<<<<<<<<<
@@ -17143,7 +17479,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "lattice.pxi":70
+  /* "cdec/lattice.pxi":70
  *                 for label, weight, delta in self[i]:
  *                     yield '%d -> %d [label="%s"];' % (i, i+delta, label.replace('"', '\\"'))
  *             yield '%d [shape=doublecircle]' % len(self)             # <<<<<<<<<<<<<<
@@ -17170,7 +17506,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
   __pyx_L14_resume_from_yield:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 70; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "lattice.pxi":71
+  /* "cdec/lattice.pxi":71
  *                     yield '%d -> %d [label="%s"];' % (i, i+delta, label.replace('"', '\\"'))
  *             yield '%d [shape=doublecircle]' % len(self)
  *             yield '}'             # <<<<<<<<<<<<<<
@@ -17187,7 +17523,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
   __pyx_L15_resume_from_yield:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "lattice.pxi":63
+  /* "cdec/lattice.pxi":63
  *     def todot(self):
  *         """lattice.todot() -> Representation of the lattice in GraphViz dot format."""
  *         def lines():             # <<<<<<<<<<<<<<
@@ -17215,7 +17551,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
   return NULL;
 }
 
-/* "lattice.pxi":61
+/* "cdec/lattice.pxi":61
  *             yield self[i]
  * 
  *     def todot(self):             # <<<<<<<<<<<<<<
@@ -17224,7 +17560,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Lattice_5todot_2generator23(__pyx_Genera
  */
 
 static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_19todot(struct __pyx_obj_4cdec_5_cdec_Lattice *__pyx_v_self) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *__pyx_cur_scope;
   PyObject *__pyx_v_lines = 0;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -17234,7 +17570,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_19todot(struct __pyx_obj_4cdec_5
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("todot", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_22_todot(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_22_todot, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_23_todot(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_23_todot, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
@@ -17244,7 +17580,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_19todot(struct __pyx_obj_4cdec_5
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
 
-  /* "lattice.pxi":63
+  /* "cdec/lattice.pxi":63
  *     def todot(self):
  *         """lattice.todot() -> Representation of the lattice in GraphViz dot format."""
  *         def lines():             # <<<<<<<<<<<<<<
@@ -17256,7 +17592,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_19todot(struct __pyx_obj_4cdec_5
   __pyx_v_lines = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "lattice.pxi":72
+  /* "cdec/lattice.pxi":72
  *             yield '%d [shape=doublecircle]' % len(self)
  *             yield '}'
  *         return '\n'.join(lines()).encode('utf8')             # <<<<<<<<<<<<<<
@@ -17279,7 +17615,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_19todot(struct __pyx_obj_4cdec_5
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "lattice.pxi":61
+  /* "cdec/lattice.pxi":61
  *             yield self[i]
  * 
  *     def todot(self):             # <<<<<<<<<<<<<<
@@ -17301,7 +17637,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_19todot(struct __pyx_obj_4cdec_5
   return __pyx_r;
 }
 
-/* "lattice.pxi":74
+/* "cdec/lattice.pxi":74
  *         return '\n'.join(lines()).encode('utf8')
  * 
  *     def as_hypergraph(self):             # <<<<<<<<<<<<<<
@@ -17336,7 +17672,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_21as_hypergraph(struct __pyx_obj
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("as_hypergraph", 0);
 
-  /* "lattice.pxi":76
+  /* "cdec/lattice.pxi":76
  *     def as_hypergraph(self):
  *         """lattice.as_hypergraph() -> Hypergraph representation of the lattice."""
  *         cdef Hypergraph result = Hypergraph.__new__(Hypergraph)             # <<<<<<<<<<<<<<
@@ -17349,7 +17685,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_21as_hypergraph(struct __pyx_obj
   __pyx_v_result = ((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "lattice.pxi":77
+  /* "cdec/lattice.pxi":77
  *         """lattice.as_hypergraph() -> Hypergraph representation of the lattice."""
  *         cdef Hypergraph result = Hypergraph.__new__(Hypergraph)
  *         result.hg = new hypergraph.Hypergraph()             # <<<<<<<<<<<<<<
@@ -17358,7 +17694,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_21as_hypergraph(struct __pyx_obj
  */
   __pyx_v_result->hg = new Hypergraph();
 
-  /* "lattice.pxi":78
+  /* "cdec/lattice.pxi":78
  *         cdef Hypergraph result = Hypergraph.__new__(Hypergraph)
  *         result.hg = new hypergraph.Hypergraph()
  *         cdef bytes plf = str(self)             # <<<<<<<<<<<<<<
@@ -17377,7 +17713,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_21as_hypergraph(struct __pyx_obj
   __pyx_v_plf = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "lattice.pxi":79
+  /* "cdec/lattice.pxi":79
  *         result.hg = new hypergraph.Hypergraph()
  *         cdef bytes plf = str(self)
  *         hypergraph.ReadFromPLF(plf, result.hg)             # <<<<<<<<<<<<<<
@@ -17386,7 +17722,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_21as_hypergraph(struct __pyx_obj
   __pyx_t_3 = __pyx_convert_string_from_py_(__pyx_v_plf); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   HypergraphIO::ReadFromPLF(__pyx_t_3, __pyx_v_result->hg);
 
-  /* "lattice.pxi":80
+  /* "cdec/lattice.pxi":80
  *         cdef bytes plf = str(self)
  *         hypergraph.ReadFromPLF(plf, result.hg)
  *         return result             # <<<<<<<<<<<<<<
@@ -17396,7 +17732,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_21as_hypergraph(struct __pyx_obj
   __pyx_r = ((PyObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "lattice.pxi":74
+  /* "cdec/lattice.pxi":74
  *         return '\n'.join(lines()).encode('utf8')
  * 
  *     def as_hypergraph(self):             # <<<<<<<<<<<<<<
@@ -17418,7 +17754,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Lattice_21as_hypergraph(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "mteval.pxi":3
+/* "cdec/mteval.pxi":3
  * cimport mteval
  * 
  * cdef SufficientStats as_stats(x, y):             # <<<<<<<<<<<<<<
@@ -17440,7 +17776,7 @@ static struct __pyx_obj_4cdec_5_cdec_SufficientStats *__pyx_f_4cdec_5_cdec_as_st
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("as_stats", 0);
 
-  /* "mteval.pxi":4
+  /* "cdec/mteval.pxi":4
  * 
  * cdef SufficientStats as_stats(x, y):
  *     if isinstance(x, SufficientStats):             # <<<<<<<<<<<<<<
@@ -17451,7 +17787,7 @@ static struct __pyx_obj_4cdec_5_cdec_SufficientStats *__pyx_f_4cdec_5_cdec_as_st
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "mteval.pxi":5
+    /* "cdec/mteval.pxi":5
  * cdef SufficientStats as_stats(x, y):
  *     if isinstance(x, SufficientStats):
  *         return x             # <<<<<<<<<<<<<<
@@ -17465,7 +17801,7 @@ static struct __pyx_obj_4cdec_5_cdec_SufficientStats *__pyx_f_4cdec_5_cdec_as_st
     goto __pyx_L0;
   }
 
-  /* "mteval.pxi":6
+  /* "cdec/mteval.pxi":6
  *     if isinstance(x, SufficientStats):
  *         return x
  *     elif x == 0 and isinstance(y, SufficientStats):             # <<<<<<<<<<<<<<
@@ -17488,7 +17824,7 @@ static struct __pyx_obj_4cdec_5_cdec_SufficientStats *__pyx_f_4cdec_5_cdec_as_st
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "mteval.pxi":7
+    /* "cdec/mteval.pxi":7
  *         return x
  *     elif x == 0 and isinstance(y, SufficientStats):
  *         stats = SufficientStats()             # <<<<<<<<<<<<<<
@@ -17500,7 +17836,7 @@ static struct __pyx_obj_4cdec_5_cdec_SufficientStats *__pyx_f_4cdec_5_cdec_as_st
     __pyx_v_stats = ((struct __pyx_obj_4cdec_5_cdec_SufficientStats *)__pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "mteval.pxi":8
+    /* "cdec/mteval.pxi":8
  *     elif x == 0 and isinstance(y, SufficientStats):
  *         stats = SufficientStats()
  *         stats.stats = new mteval.SufficientStats()             # <<<<<<<<<<<<<<
@@ -17509,7 +17845,7 @@ static struct __pyx_obj_4cdec_5_cdec_SufficientStats *__pyx_f_4cdec_5_cdec_as_st
  */
     __pyx_v_stats->stats = new SufficientStats();
 
-    /* "mteval.pxi":9
+    /* "cdec/mteval.pxi":9
  *         stats = SufficientStats()
  *         stats.stats = new mteval.SufficientStats()
  *         stats.metric = (<SufficientStats> y).metric             # <<<<<<<<<<<<<<
@@ -17519,7 +17855,7 @@ static struct __pyx_obj_4cdec_5_cdec_SufficientStats *__pyx_f_4cdec_5_cdec_as_st
     __pyx_t_5 = ((struct __pyx_obj_4cdec_5_cdec_SufficientStats *)__pyx_v_y)->metric;
     __pyx_v_stats->metric = __pyx_t_5;
 
-    /* "mteval.pxi":10
+    /* "cdec/mteval.pxi":10
  *         stats.stats = new mteval.SufficientStats()
  *         stats.metric = (<SufficientStats> y).metric
  *         return stats             # <<<<<<<<<<<<<<
@@ -17532,7 +17868,7 @@ static struct __pyx_obj_4cdec_5_cdec_SufficientStats *__pyx_f_4cdec_5_cdec_as_st
     goto __pyx_L0;
   }
 
-  /* "mteval.pxi":3
+  /* "cdec/mteval.pxi":3
  * cimport mteval
  * 
  * cdef SufficientStats as_stats(x, y):             # <<<<<<<<<<<<<<
@@ -17554,7 +17890,7 @@ static struct __pyx_obj_4cdec_5_cdec_SufficientStats *__pyx_f_4cdec_5_cdec_as_st
   return __pyx_r;
 }
 
-/* "mteval.pxi":17
+/* "cdec/mteval.pxi":17
  * 
  *     property words:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -17586,7 +17922,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_9Candidate_5words___get__(struct __pyx_ob
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "mteval.pxi":18
+  /* "cdec/mteval.pxi":18
  *     property words:
  *         def __get__(self):
  *             return unicode(GetString(self.candidate.ewords).c_str(), encoding='utf8')             # <<<<<<<<<<<<<<
@@ -17612,7 +17948,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_9Candidate_5words___get__(struct __pyx_ob
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "mteval.pxi":17
+  /* "cdec/mteval.pxi":17
  * 
  *     property words:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -17633,7 +17969,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_9Candidate_5words___get__(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "mteval.pxi":21
+/* "cdec/mteval.pxi":21
  * 
  *     property fmap:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -17664,7 +18000,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_9Candidate_4fmap___get__(struct __pyx_obj
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "mteval.pxi":22
+  /* "cdec/mteval.pxi":22
  *     property fmap:
  *         def __get__(self):
  *             cdef SparseVector fmap = SparseVector.__new__(SparseVector)             # <<<<<<<<<<<<<<
@@ -17677,7 +18013,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_9Candidate_4fmap___get__(struct __pyx_obj
   __pyx_v_fmap = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "mteval.pxi":23
+  /* "cdec/mteval.pxi":23
  *         def __get__(self):
  *             cdef SparseVector fmap = SparseVector.__new__(SparseVector)
  *             fmap.vector = new FastSparseVector[weight_t](self.candidate.fmap)             # <<<<<<<<<<<<<<
@@ -17686,7 +18022,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_9Candidate_4fmap___get__(struct __pyx_obj
  */
   __pyx_v_fmap->vector = new FastSparseVector<weight_t> (__pyx_v_self->candidate->fmap);
 
-  /* "mteval.pxi":24
+  /* "cdec/mteval.pxi":24
  *             cdef SparseVector fmap = SparseVector.__new__(SparseVector)
  *             fmap.vector = new FastSparseVector[weight_t](self.candidate.fmap)
  *             return fmap             # <<<<<<<<<<<<<<
@@ -17698,7 +18034,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_9Candidate_4fmap___get__(struct __pyx_obj
   __pyx_r = ((PyObject *)__pyx_v_fmap);
   goto __pyx_L0;
 
-  /* "mteval.pxi":21
+  /* "cdec/mteval.pxi":21
  * 
  *     property fmap:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -17718,7 +18054,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_9Candidate_4fmap___get__(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "mteval.pxi":14
+/* "cdec/mteval.pxi":14
  * cdef class Candidate:
  *     cdef mteval.const_Candidate* candidate
  *     cdef public float score             # <<<<<<<<<<<<<<
@@ -17800,7 +18136,7 @@ static int __pyx_pf_4cdec_5_cdec_9Candidate_5score_2__set__(struct __pyx_obj_4cd
   return __pyx_r;
 }
 
-/* "mteval.pxi":30
+/* "cdec/mteval.pxi":30
  *     cdef mteval.EvaluationMetric* metric
  * 
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
@@ -17829,7 +18165,7 @@ static int __pyx_pf_4cdec_5_cdec_15SufficientStats___cinit__(struct __pyx_obj_4c
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "mteval.pxi":31
+  /* "cdec/mteval.pxi":31
  * 
  *     def __cinit__(self):
  *         self.stats = new mteval.SufficientStats()             # <<<<<<<<<<<<<<
@@ -17838,7 +18174,7 @@ static int __pyx_pf_4cdec_5_cdec_15SufficientStats___cinit__(struct __pyx_obj_4c
  */
   __pyx_v_self->stats = new SufficientStats();
 
-  /* "mteval.pxi":30
+  /* "cdec/mteval.pxi":30
  *     cdef mteval.EvaluationMetric* metric
  * 
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
@@ -17852,7 +18188,7 @@ static int __pyx_pf_4cdec_5_cdec_15SufficientStats___cinit__(struct __pyx_obj_4c
   return __pyx_r;
 }
 
-/* "mteval.pxi":33
+/* "cdec/mteval.pxi":33
  *         self.stats = new mteval.SufficientStats()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -17875,7 +18211,7 @@ static void __pyx_pf_4cdec_5_cdec_15SufficientStats_2__dealloc__(struct __pyx_ob
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "mteval.pxi":34
+  /* "cdec/mteval.pxi":34
  * 
  *     def __dealloc__(self):
  *         del self.stats             # <<<<<<<<<<<<<<
@@ -17884,7 +18220,7 @@ static void __pyx_pf_4cdec_5_cdec_15SufficientStats_2__dealloc__(struct __pyx_ob
  */
   delete __pyx_v_self->stats;
 
-  /* "mteval.pxi":33
+  /* "cdec/mteval.pxi":33
  *         self.stats = new mteval.SufficientStats()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -17896,7 +18232,7 @@ static void __pyx_pf_4cdec_5_cdec_15SufficientStats_2__dealloc__(struct __pyx_ob
   __Pyx_RefNannyFinishContext();
 }
 
-/* "mteval.pxi":37
+/* "cdec/mteval.pxi":37
  * 
  *     property score:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -17926,7 +18262,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_5score___get__(struct _
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "mteval.pxi":38
+  /* "cdec/mteval.pxi":38
  *     property score:
  *         def __get__(self):
  *             return self.metric.ComputeScore(self.stats[0])             # <<<<<<<<<<<<<<
@@ -17940,7 +18276,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_5score___get__(struct _
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "mteval.pxi":37
+  /* "cdec/mteval.pxi":37
  * 
  *     property score:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -17959,7 +18295,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_5score___get__(struct _
   return __pyx_r;
 }
 
-/* "mteval.pxi":41
+/* "cdec/mteval.pxi":41
  * 
  *     property detail:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -17990,7 +18326,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_6detail___get__(struct 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "mteval.pxi":42
+  /* "cdec/mteval.pxi":42
  *     property detail:
  *         def __get__(self):
  *             return str(self.metric.DetailedScore(self.stats[0]).c_str())             # <<<<<<<<<<<<<<
@@ -18012,7 +18348,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_6detail___get__(struct 
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "mteval.pxi":41
+  /* "cdec/mteval.pxi":41
  * 
  *     property detail:
  *         def __get__(self):             # <<<<<<<<<<<<<<
@@ -18032,7 +18368,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_6detail___get__(struct 
   return __pyx_r;
 }
 
-/* "mteval.pxi":44
+/* "cdec/mteval.pxi":44
  *             return str(self.metric.DetailedScore(self.stats[0]).c_str())
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -18058,7 +18394,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_15SufficientStats_4__len__(struct __pyx_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__len__", 0);
 
-  /* "mteval.pxi":45
+  /* "cdec/mteval.pxi":45
  * 
  *     def __len__(self):
  *         return self.stats.size()             # <<<<<<<<<<<<<<
@@ -18068,7 +18404,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_15SufficientStats_4__len__(struct __pyx_
   __pyx_r = __pyx_v_self->stats->size();
   goto __pyx_L0;
 
-  /* "mteval.pxi":44
+  /* "cdec/mteval.pxi":44
  *             return str(self.metric.DetailedScore(self.stats[0]).c_str())
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -18081,9 +18417,9 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_15SufficientStats_4__len__(struct __pyx_
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_15SufficientStats_8generator18(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_15SufficientStats_8generator19(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "mteval.pxi":47
+/* "cdec/mteval.pxi":47
  *         return self.stats.size()
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -18105,14 +18441,14 @@ static PyObject *__pyx_pw_4cdec_5_cdec_15SufficientStats_7__iter__(PyObject *__p
 }
 
 static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_6__iter__(struct __pyx_obj_4cdec_5_cdec_SufficientStats *__pyx_v_self) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__iter__", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_24___iter__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_24___iter__, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_25___iter__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_25___iter__, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
@@ -18122,7 +18458,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_6__iter__(struct __pyx_
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_15SufficientStats_8generator18, (PyObject *) __pyx_cur_scope, __pyx_n_s_iter, __pyx_n_s_SufficientStats___iter); if (unlikely(!gen)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_15SufficientStats_8generator19, (PyObject *) __pyx_cur_scope, __pyx_n_s_iter, __pyx_n_s_SufficientStats___iter); if (unlikely(!gen)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -18138,9 +18474,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_6__iter__(struct __pyx_
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_15SufficientStats_8generator18(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_15SufficientStats_8generator19(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ *)__pyx_generator->closure);
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   Py_ssize_t __pyx_t_1;
   Py_ssize_t __pyx_t_2;
@@ -18160,7 +18496,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_15SufficientStats_8generator18(__pyx_Gene
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "mteval.pxi":48
+  /* "cdec/mteval.pxi":48
  * 
  *     def __iter__(self):
  *         for i in range(len(self)):             # <<<<<<<<<<<<<<
@@ -18171,7 +18507,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_15SufficientStats_8generator18(__pyx_Gene
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_cur_scope->__pyx_v_i = __pyx_t_2;
 
-    /* "mteval.pxi":49
+    /* "cdec/mteval.pxi":49
  *     def __iter__(self):
  *         for i in range(len(self)):
  *             yield self[i]             # <<<<<<<<<<<<<<
@@ -18195,7 +18531,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_15SufficientStats_8generator18(__pyx_Gene
     if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 49; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "mteval.pxi":47
+  /* "cdec/mteval.pxi":47
  *         return self.stats.size()
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -18217,7 +18553,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_15SufficientStats_8generator18(__pyx_Gene
   return NULL;
 }
 
-/* "mteval.pxi":51
+/* "cdec/mteval.pxi":51
  *             yield self[i]
  * 
  *     def __getitem__(self, int index):             # <<<<<<<<<<<<<<
@@ -18263,7 +18599,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_9__getitem__(struct __p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__getitem__", 0);
 
-  /* "mteval.pxi":52
+  /* "cdec/mteval.pxi":52
  * 
  *     def __getitem__(self, int index):
  *         if not 0 <= index < len(self):             # <<<<<<<<<<<<<<
@@ -18278,7 +18614,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_9__getitem__(struct __p
   __pyx_t_3 = ((!(__pyx_t_1 != 0)) != 0);
   if (__pyx_t_3) {
 
-    /* "mteval.pxi":53
+    /* "cdec/mteval.pxi":53
  *     def __getitem__(self, int index):
  *         if not 0 <= index < len(self):
  *             raise IndexError('sufficient stats vector index out of range')             # <<<<<<<<<<<<<<
@@ -18292,7 +18628,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_9__getitem__(struct __p
     {__pyx_filename = __pyx_f[5]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "mteval.pxi":54
+  /* "cdec/mteval.pxi":54
  *         if not 0 <= index < len(self):
  *             raise IndexError('sufficient stats vector index out of range')
  *         return self.stats[0][index]             # <<<<<<<<<<<<<<
@@ -18306,7 +18642,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_9__getitem__(struct __p
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "mteval.pxi":51
+  /* "cdec/mteval.pxi":51
  *             yield self[i]
  * 
  *     def __getitem__(self, int index):             # <<<<<<<<<<<<<<
@@ -18325,7 +18661,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_9__getitem__(struct __p
   return __pyx_r;
 }
 
-/* "mteval.pxi":56
+/* "cdec/mteval.pxi":56
  *         return self.stats[0][index]
  * 
  *     def __iadd__(SufficientStats self, SufficientStats other):             # <<<<<<<<<<<<<<
@@ -18359,7 +18695,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_11__iadd__(struct __pyx
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__iadd__", 0);
 
-  /* "mteval.pxi":57
+  /* "cdec/mteval.pxi":57
  * 
  *     def __iadd__(SufficientStats self, SufficientStats other):
  *         self.stats[0] += other.stats[0]             # <<<<<<<<<<<<<<
@@ -18368,7 +18704,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_11__iadd__(struct __pyx
  */
   (__pyx_v_self->stats[0]) += (__pyx_v_other->stats[0]);
 
-  /* "mteval.pxi":58
+  /* "cdec/mteval.pxi":58
  *     def __iadd__(SufficientStats self, SufficientStats other):
  *         self.stats[0] += other.stats[0]
  *         return self             # <<<<<<<<<<<<<<
@@ -18380,7 +18716,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_11__iadd__(struct __pyx
   __pyx_r = ((PyObject *)__pyx_v_self);
   goto __pyx_L0;
 
-  /* "mteval.pxi":56
+  /* "cdec/mteval.pxi":56
  *         return self.stats[0][index]
  * 
  *     def __iadd__(SufficientStats self, SufficientStats other):             # <<<<<<<<<<<<<<
@@ -18395,7 +18731,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_11__iadd__(struct __pyx
   return __pyx_r;
 }
 
-/* "mteval.pxi":60
+/* "cdec/mteval.pxi":60
  *         return self
  * 
  *     def __add__(x, y):             # <<<<<<<<<<<<<<
@@ -18429,7 +18765,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_13__add__(PyObject *__p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__add__", 0);
 
-  /* "mteval.pxi":61
+  /* "cdec/mteval.pxi":61
  * 
  *     def __add__(x, y):
  *         cdef SufficientStats sx = as_stats(x, y)             # <<<<<<<<<<<<<<
@@ -18441,7 +18777,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_13__add__(PyObject *__p
   __pyx_v_sx = ((struct __pyx_obj_4cdec_5_cdec_SufficientStats *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "mteval.pxi":62
+  /* "cdec/mteval.pxi":62
  *     def __add__(x, y):
  *         cdef SufficientStats sx = as_stats(x, y)
  *         cdef SufficientStats sy = as_stats(y, x)             # <<<<<<<<<<<<<<
@@ -18453,7 +18789,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_13__add__(PyObject *__p
   __pyx_v_sy = ((struct __pyx_obj_4cdec_5_cdec_SufficientStats *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "mteval.pxi":63
+  /* "cdec/mteval.pxi":63
  *         cdef SufficientStats sx = as_stats(x, y)
  *         cdef SufficientStats sy = as_stats(y, x)
  *         cdef SufficientStats result = SufficientStats()             # <<<<<<<<<<<<<<
@@ -18465,7 +18801,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_13__add__(PyObject *__p
   __pyx_v_result = ((struct __pyx_obj_4cdec_5_cdec_SufficientStats *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "mteval.pxi":64
+  /* "cdec/mteval.pxi":64
  *         cdef SufficientStats sy = as_stats(y, x)
  *         cdef SufficientStats result = SufficientStats()
  *         result.stats = new mteval.SufficientStats(mteval.add(sx.stats[0], sy.stats[0]))             # <<<<<<<<<<<<<<
@@ -18474,7 +18810,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_13__add__(PyObject *__p
  */
   __pyx_v_result->stats = new SufficientStats(operator+((__pyx_v_sx->stats[0]), (__pyx_v_sy->stats[0])));
 
-  /* "mteval.pxi":65
+  /* "cdec/mteval.pxi":65
  *         cdef SufficientStats result = SufficientStats()
  *         result.stats = new mteval.SufficientStats(mteval.add(sx.stats[0], sy.stats[0]))
  *         result.metric = sx.metric             # <<<<<<<<<<<<<<
@@ -18484,7 +18820,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_13__add__(PyObject *__p
   __pyx_t_2 = __pyx_v_sx->metric;
   __pyx_v_result->metric = __pyx_t_2;
 
-  /* "mteval.pxi":66
+  /* "cdec/mteval.pxi":66
  *         result.stats = new mteval.SufficientStats(mteval.add(sx.stats[0], sy.stats[0]))
  *         result.metric = sx.metric
  *         return result             # <<<<<<<<<<<<<<
@@ -18496,7 +18832,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_13__add__(PyObject *__p
   __pyx_r = ((PyObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "mteval.pxi":60
+  /* "cdec/mteval.pxi":60
  *         return self
  * 
  *     def __add__(x, y):             # <<<<<<<<<<<<<<
@@ -18518,7 +18854,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_15SufficientStats_13__add__(PyObject *__p
   return __pyx_r;
 }
 
-/* "mteval.pxi":73
+/* "cdec/mteval.pxi":73
  *     cdef mteval.CandidateSet* cs
  * 
  *     def __cinit__(self, SegmentEvaluator evaluator):             # <<<<<<<<<<<<<<
@@ -18589,7 +18925,7 @@ static int __pyx_pf_4cdec_5_cdec_12CandidateSet___cinit__(struct __pyx_obj_4cdec
   EvaluationMetric *__pyx_t_1;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "mteval.pxi":74
+  /* "cdec/mteval.pxi":74
  * 
  *     def __cinit__(self, SegmentEvaluator evaluator):
  *         self.scorer = new shared_ptr[mteval.SegmentEvaluator](evaluator.scorer[0])             # <<<<<<<<<<<<<<
@@ -18598,7 +18934,7 @@ static int __pyx_pf_4cdec_5_cdec_12CandidateSet___cinit__(struct __pyx_obj_4cdec
  */
   __pyx_v_self->scorer = new boost::shared_ptr<SegmentEvaluator> ((__pyx_v_evaluator->scorer[0]));
 
-  /* "mteval.pxi":75
+  /* "cdec/mteval.pxi":75
  *     def __cinit__(self, SegmentEvaluator evaluator):
  *         self.scorer = new shared_ptr[mteval.SegmentEvaluator](evaluator.scorer[0])
  *         self.metric = evaluator.metric             # <<<<<<<<<<<<<<
@@ -18608,7 +18944,7 @@ static int __pyx_pf_4cdec_5_cdec_12CandidateSet___cinit__(struct __pyx_obj_4cdec
   __pyx_t_1 = __pyx_v_evaluator->metric;
   __pyx_v_self->metric = __pyx_t_1;
 
-  /* "mteval.pxi":76
+  /* "cdec/mteval.pxi":76
  *         self.scorer = new shared_ptr[mteval.SegmentEvaluator](evaluator.scorer[0])
  *         self.metric = evaluator.metric
  *         self.cs = new mteval.CandidateSet()             # <<<<<<<<<<<<<<
@@ -18617,7 +18953,7 @@ static int __pyx_pf_4cdec_5_cdec_12CandidateSet___cinit__(struct __pyx_obj_4cdec
  */
   __pyx_v_self->cs = new training::CandidateSet();
 
-  /* "mteval.pxi":73
+  /* "cdec/mteval.pxi":73
  *     cdef mteval.CandidateSet* cs
  * 
  *     def __cinit__(self, SegmentEvaluator evaluator):             # <<<<<<<<<<<<<<
@@ -18631,7 +18967,7 @@ static int __pyx_pf_4cdec_5_cdec_12CandidateSet___cinit__(struct __pyx_obj_4cdec
   return __pyx_r;
 }
 
-/* "mteval.pxi":78
+/* "cdec/mteval.pxi":78
  *         self.cs = new mteval.CandidateSet()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -18654,7 +18990,7 @@ static void __pyx_pf_4cdec_5_cdec_12CandidateSet_2__dealloc__(struct __pyx_obj_4
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "mteval.pxi":79
+  /* "cdec/mteval.pxi":79
  * 
  *     def __dealloc__(self):
  *         del self.scorer             # <<<<<<<<<<<<<<
@@ -18663,7 +18999,7 @@ static void __pyx_pf_4cdec_5_cdec_12CandidateSet_2__dealloc__(struct __pyx_obj_4
  */
   delete __pyx_v_self->scorer;
 
-  /* "mteval.pxi":80
+  /* "cdec/mteval.pxi":80
  *     def __dealloc__(self):
  *         del self.scorer
  *         del self.cs             # <<<<<<<<<<<<<<
@@ -18672,7 +19008,7 @@ static void __pyx_pf_4cdec_5_cdec_12CandidateSet_2__dealloc__(struct __pyx_obj_4
  */
   delete __pyx_v_self->cs;
 
-  /* "mteval.pxi":78
+  /* "cdec/mteval.pxi":78
  *         self.cs = new mteval.CandidateSet()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -18684,7 +19020,7 @@ static void __pyx_pf_4cdec_5_cdec_12CandidateSet_2__dealloc__(struct __pyx_obj_4
   __Pyx_RefNannyFinishContext();
 }
 
-/* "mteval.pxi":82
+/* "cdec/mteval.pxi":82
  *         del self.cs
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -18710,7 +19046,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_12CandidateSet_4__len__(struct __pyx_obj
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__len__", 0);
 
-  /* "mteval.pxi":83
+  /* "cdec/mteval.pxi":83
  * 
  *     def __len__(self):
  *         return self.cs.size()             # <<<<<<<<<<<<<<
@@ -18720,7 +19056,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_12CandidateSet_4__len__(struct __pyx_obj
   __pyx_r = __pyx_v_self->cs->size();
   goto __pyx_L0;
 
-  /* "mteval.pxi":82
+  /* "cdec/mteval.pxi":82
  *         del self.cs
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -18734,7 +19070,7 @@ static Py_ssize_t __pyx_pf_4cdec_5_cdec_12CandidateSet_4__len__(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "mteval.pxi":85
+/* "cdec/mteval.pxi":85
  *         return self.cs.size()
  * 
  *     def __getitem__(self,int k):             # <<<<<<<<<<<<<<
@@ -18780,7 +19116,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_6__getitem__(struct __pyx_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__getitem__", 0);
 
-  /* "mteval.pxi":86
+  /* "cdec/mteval.pxi":86
  * 
  *     def __getitem__(self,int k):
  *         if not 0 <= k < self.cs.size():             # <<<<<<<<<<<<<<
@@ -18794,7 +19130,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_6__getitem__(struct __pyx_
   __pyx_t_2 = ((!(__pyx_t_1 != 0)) != 0);
   if (__pyx_t_2) {
 
-    /* "mteval.pxi":87
+    /* "cdec/mteval.pxi":87
  *     def __getitem__(self,int k):
  *         if not 0 <= k < self.cs.size():
  *             raise IndexError('candidate set index out of range')             # <<<<<<<<<<<<<<
@@ -18808,7 +19144,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_6__getitem__(struct __pyx_
     {__pyx_filename = __pyx_f[5]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "mteval.pxi":88
+  /* "cdec/mteval.pxi":88
  *         if not 0 <= k < self.cs.size():
  *             raise IndexError('candidate set index out of range')
  *         cdef Candidate candidate = Candidate()             # <<<<<<<<<<<<<<
@@ -18820,7 +19156,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_6__getitem__(struct __pyx_
   __pyx_v_candidate = ((struct __pyx_obj_4cdec_5_cdec_Candidate *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "mteval.pxi":89
+  /* "cdec/mteval.pxi":89
  *             raise IndexError('candidate set index out of range')
  *         cdef Candidate candidate = Candidate()
  *         candidate.candidate = &self.cs[0][k]             # <<<<<<<<<<<<<<
@@ -18829,7 +19165,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_6__getitem__(struct __pyx_
  */
   __pyx_v_candidate->candidate = (&((__pyx_v_self->cs[0])[__pyx_v_k]));
 
-  /* "mteval.pxi":90
+  /* "cdec/mteval.pxi":90
  *         cdef Candidate candidate = Candidate()
  *         candidate.candidate = &self.cs[0][k]
  *         candidate.score = self.metric.ComputeScore(self.cs[0][k].eval_feats)             # <<<<<<<<<<<<<<
@@ -18838,7 +19174,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_6__getitem__(struct __pyx_
  */
   __pyx_v_candidate->score = __pyx_v_self->metric->ComputeScore(((__pyx_v_self->cs[0])[__pyx_v_k]).eval_feats);
 
-  /* "mteval.pxi":91
+  /* "cdec/mteval.pxi":91
  *         candidate.candidate = &self.cs[0][k]
  *         candidate.score = self.metric.ComputeScore(self.cs[0][k].eval_feats)
  *         return candidate             # <<<<<<<<<<<<<<
@@ -18850,7 +19186,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_6__getitem__(struct __pyx_
   __pyx_r = ((PyObject *)__pyx_v_candidate);
   goto __pyx_L0;
 
-  /* "mteval.pxi":85
+  /* "cdec/mteval.pxi":85
  *         return self.cs.size()
  * 
  *     def __getitem__(self,int k):             # <<<<<<<<<<<<<<
@@ -18869,9 +19205,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_6__getitem__(struct __pyx_
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_12CandidateSet_10generator19(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_12CandidateSet_10generator20(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "mteval.pxi":93
+/* "cdec/mteval.pxi":93
  *         return candidate
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -18893,14 +19229,14 @@ static PyObject *__pyx_pw_4cdec_5_cdec_12CandidateSet_9__iter__(PyObject *__pyx_
 }
 
 static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_8__iter__(struct __pyx_obj_4cdec_5_cdec_CandidateSet *__pyx_v_self) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__iter__", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_25___iter__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_25___iter__, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_26___iter__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_26___iter__, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
@@ -18910,7 +19246,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_8__iter__(struct __pyx_obj
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_12CandidateSet_10generator19, (PyObject *) __pyx_cur_scope, __pyx_n_s_iter, __pyx_n_s_CandidateSet___iter); if (unlikely(!gen)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_12CandidateSet_10generator20, (PyObject *) __pyx_cur_scope, __pyx_n_s_iter, __pyx_n_s_CandidateSet___iter); if (unlikely(!gen)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -18926,9 +19262,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_8__iter__(struct __pyx_obj
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_12CandidateSet_10generator19(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_12CandidateSet_10generator20(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ *)__pyx_generator->closure);
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   Py_ssize_t __pyx_t_1;
   unsigned int __pyx_t_2;
@@ -18948,7 +19284,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_12CandidateSet_10generator19(__pyx_Genera
   __pyx_L3_first_run:;
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "mteval.pxi":95
+  /* "cdec/mteval.pxi":95
  *     def __iter__(self):
  *         cdef unsigned i
  *         for i in range(len(self)):             # <<<<<<<<<<<<<<
@@ -18959,7 +19295,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_12CandidateSet_10generator19(__pyx_Genera
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_cur_scope->__pyx_v_i = __pyx_t_2;
 
-    /* "mteval.pxi":96
+    /* "cdec/mteval.pxi":96
  *         cdef unsigned i
  *         for i in range(len(self)):
  *             yield self[i]             # <<<<<<<<<<<<<<
@@ -18983,7 +19319,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_12CandidateSet_10generator19(__pyx_Genera
     if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
 
-  /* "mteval.pxi":93
+  /* "cdec/mteval.pxi":93
  *         return candidate
  * 
  *     def __iter__(self):             # <<<<<<<<<<<<<<
@@ -19005,7 +19341,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_12CandidateSet_10generator19(__pyx_Genera
   return NULL;
 }
 
-/* "mteval.pxi":98
+/* "cdec/mteval.pxi":98
  *             yield self[i]
  * 
  *     def add_kbest(self, Hypergraph hypergraph, unsigned k):             # <<<<<<<<<<<<<<
@@ -19085,7 +19421,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_11add_kbest(struct __pyx_o
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("add_kbest", 0);
 
-  /* "mteval.pxi":101
+  /* "cdec/mteval.pxi":101
  *         """cs.add_kbest(Hypergraph hypergraph, int k) -> Extract K-best hypotheses
  *         from the hypergraph and add them to the candidate set."""
  *         self.cs.AddKBestCandidates(hypergraph.hg[0], k, self.scorer.get())             # <<<<<<<<<<<<<<
@@ -19094,7 +19430,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_11add_kbest(struct __pyx_o
  */
   __pyx_v_self->cs->AddKBestCandidates((__pyx_v_hypergraph->hg[0]), __pyx_v_k, __pyx_v_self->scorer->get());
 
-  /* "mteval.pxi":98
+  /* "cdec/mteval.pxi":98
  *             yield self[i]
  * 
  *     def add_kbest(self, Hypergraph hypergraph, unsigned k):             # <<<<<<<<<<<<<<
@@ -19109,7 +19445,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_12CandidateSet_11add_kbest(struct __pyx_o
   return __pyx_r;
 }
 
-/* "mteval.pxi":107
+/* "cdec/mteval.pxi":107
  *     cdef mteval.EvaluationMetric* metric
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -19132,7 +19468,7 @@ static void __pyx_pf_4cdec_5_cdec_16SegmentEvaluator___dealloc__(struct __pyx_ob
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "mteval.pxi":108
+  /* "cdec/mteval.pxi":108
  * 
  *     def __dealloc__(self):
  *         del self.scorer             # <<<<<<<<<<<<<<
@@ -19141,7 +19477,7 @@ static void __pyx_pf_4cdec_5_cdec_16SegmentEvaluator___dealloc__(struct __pyx_ob
  */
   delete __pyx_v_self->scorer;
 
-  /* "mteval.pxi":107
+  /* "cdec/mteval.pxi":107
  *     cdef mteval.EvaluationMetric* metric
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -19153,7 +19489,7 @@ static void __pyx_pf_4cdec_5_cdec_16SegmentEvaluator___dealloc__(struct __pyx_ob
   __Pyx_RefNannyFinishContext();
 }
 
-/* "mteval.pxi":110
+/* "cdec/mteval.pxi":110
  *         del self.scorer
  * 
  *     def evaluate(self, sentence):             # <<<<<<<<<<<<<<
@@ -19190,7 +19526,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_16SegmentEvaluator_2evaluate(struct __pyx
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("evaluate", 0);
 
-  /* "mteval.pxi":113
+  /* "cdec/mteval.pxi":113
  *         """se.evaluate(sentence) -> SufficientStats for the given hypothesis."""
  *         cdef vector[WordID] hyp
  *         cdef SufficientStats sf = SufficientStats()             # <<<<<<<<<<<<<<
@@ -19202,7 +19538,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_16SegmentEvaluator_2evaluate(struct __pyx
   __pyx_v_sf = ((struct __pyx_obj_4cdec_5_cdec_SufficientStats *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "mteval.pxi":114
+  /* "cdec/mteval.pxi":114
  *         cdef vector[WordID] hyp
  *         cdef SufficientStats sf = SufficientStats()
  *         sf.metric = self.metric             # <<<<<<<<<<<<<<
@@ -19212,7 +19548,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_16SegmentEvaluator_2evaluate(struct __pyx
   __pyx_t_2 = __pyx_v_self->metric;
   __pyx_v_sf->metric = __pyx_t_2;
 
-  /* "mteval.pxi":115
+  /* "cdec/mteval.pxi":115
  *         cdef SufficientStats sf = SufficientStats()
  *         sf.metric = self.metric
  *         sf.stats = new mteval.SufficientStats()             # <<<<<<<<<<<<<<
@@ -19221,7 +19557,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_16SegmentEvaluator_2evaluate(struct __pyx
  */
   __pyx_v_sf->stats = new SufficientStats();
 
-  /* "mteval.pxi":116
+  /* "cdec/mteval.pxi":116
  *         sf.metric = self.metric
  *         sf.stats = new mteval.SufficientStats()
  *         ConvertSentence(as_str(sentence.strip()), &hyp)             # <<<<<<<<<<<<<<
@@ -19255,7 +19591,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_16SegmentEvaluator_2evaluate(struct __pyx
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   TD::ConvertSentence(__pyx_t_5, (&__pyx_v_hyp));
 
-  /* "mteval.pxi":117
+  /* "cdec/mteval.pxi":117
  *         sf.stats = new mteval.SufficientStats()
  *         ConvertSentence(as_str(sentence.strip()), &hyp)
  *         self.scorer.get().Evaluate(hyp, sf.stats)             # <<<<<<<<<<<<<<
@@ -19264,7 +19600,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_16SegmentEvaluator_2evaluate(struct __pyx
  */
   __pyx_v_self->scorer->get()->Evaluate(__pyx_v_hyp, __pyx_v_sf->stats);
 
-  /* "mteval.pxi":118
+  /* "cdec/mteval.pxi":118
  *         ConvertSentence(as_str(sentence.strip()), &hyp)
  *         self.scorer.get().Evaluate(hyp, sf.stats)
  *         return sf             # <<<<<<<<<<<<<<
@@ -19276,7 +19612,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_16SegmentEvaluator_2evaluate(struct __pyx
   __pyx_r = ((PyObject *)__pyx_v_sf);
   goto __pyx_L0;
 
-  /* "mteval.pxi":110
+  /* "cdec/mteval.pxi":110
  *         del self.scorer
  * 
  *     def evaluate(self, sentence):             # <<<<<<<<<<<<<<
@@ -19298,7 +19634,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_16SegmentEvaluator_2evaluate(struct __pyx
   return __pyx_r;
 }
 
-/* "mteval.pxi":120
+/* "cdec/mteval.pxi":120
  *         return sf
  * 
  *     def candidate_set(self):             # <<<<<<<<<<<<<<
@@ -19330,7 +19666,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_16SegmentEvaluator_4candidate_set(struct 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("candidate_set", 0);
 
-  /* "mteval.pxi":122
+  /* "cdec/mteval.pxi":122
  *     def candidate_set(self):
  *         """se.candidate_set() -> Candidate set using this segment evaluator for scoring."""
  *         return CandidateSet(self)             # <<<<<<<<<<<<<<
@@ -19350,7 +19686,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_16SegmentEvaluator_4candidate_set(struct 
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "mteval.pxi":120
+  /* "cdec/mteval.pxi":120
  *         return sf
  * 
  *     def candidate_set(self):             # <<<<<<<<<<<<<<
@@ -19370,7 +19706,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_16SegmentEvaluator_4candidate_set(struct 
   return __pyx_r;
 }
 
-/* "mteval.pxi":128
+/* "cdec/mteval.pxi":128
  *     cdef mteval.EvaluationMetric* metric
  * 
  *     def __cinit__(self, bytes name=None):             # <<<<<<<<<<<<<<
@@ -19451,7 +19787,7 @@ static int __pyx_pf_4cdec_5_cdec_6Scorer___cinit__(struct __pyx_obj_4cdec_5_cdec
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "mteval.pxi":129
+  /* "cdec/mteval.pxi":129
  * 
  *     def __cinit__(self, bytes name=None):
  *         if name:             # <<<<<<<<<<<<<<
@@ -19461,7 +19797,7 @@ static int __pyx_pf_4cdec_5_cdec_6Scorer___cinit__(struct __pyx_obj_4cdec_5_cdec
   __pyx_t_1 = (__pyx_v_name != Py_None) && (PyBytes_GET_SIZE(__pyx_v_name) != 0);
   if (__pyx_t_1) {
 
-    /* "mteval.pxi":130
+    /* "cdec/mteval.pxi":130
  *     def __cinit__(self, bytes name=None):
  *         if name:
  *             self.name = new string(name)             # <<<<<<<<<<<<<<
@@ -19477,7 +19813,7 @@ static int __pyx_pf_4cdec_5_cdec_6Scorer___cinit__(struct __pyx_obj_4cdec_5_cdec
     }
     __pyx_v_self->name = __pyx_t_3;
 
-    /* "mteval.pxi":131
+    /* "cdec/mteval.pxi":131
  *         if name:
  *             self.name = new string(name)
  *             self.metric = mteval.MetricInstance(self.name[0])             # <<<<<<<<<<<<<<
@@ -19489,7 +19825,7 @@ static int __pyx_pf_4cdec_5_cdec_6Scorer___cinit__(struct __pyx_obj_4cdec_5_cdec
   }
   __pyx_L3:;
 
-  /* "mteval.pxi":128
+  /* "cdec/mteval.pxi":128
  *     cdef mteval.EvaluationMetric* metric
  * 
  *     def __cinit__(self, bytes name=None):             # <<<<<<<<<<<<<<
@@ -19508,7 +19844,7 @@ static int __pyx_pf_4cdec_5_cdec_6Scorer___cinit__(struct __pyx_obj_4cdec_5_cdec
   return __pyx_r;
 }
 
-/* "mteval.pxi":133
+/* "cdec/mteval.pxi":133
  *             self.metric = mteval.MetricInstance(self.name[0])
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -19531,7 +19867,7 @@ static void __pyx_pf_4cdec_5_cdec_6Scorer_2__dealloc__(struct __pyx_obj_4cdec_5_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "mteval.pxi":134
+  /* "cdec/mteval.pxi":134
  * 
  *     def __dealloc__(self):
  *         del self.name             # <<<<<<<<<<<<<<
@@ -19540,7 +19876,7 @@ static void __pyx_pf_4cdec_5_cdec_6Scorer_2__dealloc__(struct __pyx_obj_4cdec_5_
  */
   delete __pyx_v_self->name;
 
-  /* "mteval.pxi":133
+  /* "cdec/mteval.pxi":133
  *             self.metric = mteval.MetricInstance(self.name[0])
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -19552,7 +19888,7 @@ static void __pyx_pf_4cdec_5_cdec_6Scorer_2__dealloc__(struct __pyx_obj_4cdec_5_
   __Pyx_RefNannyFinishContext();
 }
 
-/* "mteval.pxi":136
+/* "cdec/mteval.pxi":136
  *         del self.name
  * 
  *     def __call__(self, refs):             # <<<<<<<<<<<<<<
@@ -19637,7 +19973,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
   __Pyx_RefNannySetupContext("__call__", 0);
   __Pyx_INCREF(__pyx_v_refs);
 
-  /* "mteval.pxi":137
+  /* "cdec/mteval.pxi":137
  * 
  *     def __call__(self, refs):
  *         if isinstance(refs, basestring):             # <<<<<<<<<<<<<<
@@ -19648,7 +19984,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "mteval.pxi":138
+    /* "cdec/mteval.pxi":138
  *     def __call__(self, refs):
  *         if isinstance(refs, basestring):
  *             refs = [refs]             # <<<<<<<<<<<<<<
@@ -19666,7 +20002,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
   }
   __pyx_L3:;
 
-  /* "mteval.pxi":139
+  /* "cdec/mteval.pxi":139
  *         if isinstance(refs, basestring):
  *             refs = [refs]
  *         cdef vector[vector[WordID]]* refsv = new vector[vector[WordID]]()             # <<<<<<<<<<<<<<
@@ -19681,7 +20017,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
   }
   __pyx_v_refsv = __pyx_t_4;
 
-  /* "mteval.pxi":141
+  /* "cdec/mteval.pxi":141
  *         cdef vector[vector[WordID]]* refsv = new vector[vector[WordID]]()
  *         cdef vector[WordID]* refv
  *         for ref in refs:             # <<<<<<<<<<<<<<
@@ -19728,7 +20064,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
     __Pyx_XDECREF_SET(__pyx_v_ref, __pyx_t_7);
     __pyx_t_7 = 0;
 
-    /* "mteval.pxi":142
+    /* "cdec/mteval.pxi":142
  *         cdef vector[WordID]* refv
  *         for ref in refs:
  *             refv = new vector[WordID]()             # <<<<<<<<<<<<<<
@@ -19743,7 +20079,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
     }
     __pyx_v_refv = __pyx_t_8;
 
-    /* "mteval.pxi":143
+    /* "cdec/mteval.pxi":143
  *         for ref in refs:
  *             refv = new vector[WordID]()
  *             ConvertSentence(as_str(ref.strip()), refv)             # <<<<<<<<<<<<<<
@@ -19777,7 +20113,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     TD::ConvertSentence(__pyx_t_11, __pyx_v_refv);
 
-    /* "mteval.pxi":144
+    /* "cdec/mteval.pxi":144
  *             refv = new vector[WordID]()
  *             ConvertSentence(as_str(ref.strip()), refv)
  *             refsv.push_back(refv[0])             # <<<<<<<<<<<<<<
@@ -19786,7 +20122,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
  */
     __pyx_v_refsv->push_back((__pyx_v_refv[0]));
 
-    /* "mteval.pxi":145
+    /* "cdec/mteval.pxi":145
  *             ConvertSentence(as_str(ref.strip()), refv)
  *             refsv.push_back(refv[0])
  *             del refv             # <<<<<<<<<<<<<<
@@ -19795,7 +20131,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
  */
     delete __pyx_v_refv;
 
-    /* "mteval.pxi":141
+    /* "cdec/mteval.pxi":141
  *         cdef vector[vector[WordID]]* refsv = new vector[vector[WordID]]()
  *         cdef vector[WordID]* refv
  *         for ref in refs:             # <<<<<<<<<<<<<<
@@ -19805,7 +20141,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "mteval.pxi":147
+  /* "cdec/mteval.pxi":147
  *             del refv
  *         cdef unsigned i
  *         cdef SegmentEvaluator evaluator = SegmentEvaluator()             # <<<<<<<<<<<<<<
@@ -19817,7 +20153,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
   __pyx_v_evaluator = ((struct __pyx_obj_4cdec_5_cdec_SegmentEvaluator *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "mteval.pxi":148
+  /* "cdec/mteval.pxi":148
  *         cdef unsigned i
  *         cdef SegmentEvaluator evaluator = SegmentEvaluator()
  *         evaluator.metric = self.metric             # <<<<<<<<<<<<<<
@@ -19827,7 +20163,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
   __pyx_t_12 = __pyx_v_self->metric;
   __pyx_v_evaluator->metric = __pyx_t_12;
 
-  /* "mteval.pxi":149
+  /* "cdec/mteval.pxi":149
  *         cdef SegmentEvaluator evaluator = SegmentEvaluator()
  *         evaluator.metric = self.metric
  *         evaluator.scorer = new shared_ptr[mteval.SegmentEvaluator](             # <<<<<<<<<<<<<<
@@ -19836,7 +20172,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
  */
   __pyx_v_evaluator->scorer = new boost::shared_ptr<SegmentEvaluator> (__pyx_v_self->metric->CreateSegmentEvaluator((__pyx_v_refsv[0])));
 
-  /* "mteval.pxi":151
+  /* "cdec/mteval.pxi":151
  *         evaluator.scorer = new shared_ptr[mteval.SegmentEvaluator](
  *                 self.metric.CreateSegmentEvaluator(refsv[0]))
  *         del refsv # in theory should not delete but store in SegmentEvaluator             # <<<<<<<<<<<<<<
@@ -19845,7 +20181,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
  */
   delete __pyx_v_refsv;
 
-  /* "mteval.pxi":152
+  /* "cdec/mteval.pxi":152
  *                 self.metric.CreateSegmentEvaluator(refsv[0]))
  *         del refsv # in theory should not delete but store in SegmentEvaluator
  *         return evaluator             # <<<<<<<<<<<<<<
@@ -19857,7 +20193,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
   __pyx_r = ((PyObject *)__pyx_v_evaluator);
   goto __pyx_L0;
 
-  /* "mteval.pxi":136
+  /* "cdec/mteval.pxi":136
  *         del self.name
  * 
  *     def __call__(self, refs):             # <<<<<<<<<<<<<<
@@ -19882,7 +20218,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_4__call__(struct __pyx_obj_4cdec_
   return __pyx_r;
 }
 
-/* "mteval.pxi":154
+/* "cdec/mteval.pxi":154
  *         return evaluator
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
@@ -19913,7 +20249,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_6__str__(struct __pyx_obj_4cdec_5
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__str__", 0);
 
-  /* "mteval.pxi":155
+  /* "cdec/mteval.pxi":155
  * 
  *     def __str__(self):
  *         return str(self.name.c_str())             # <<<<<<<<<<<<<<
@@ -19935,7 +20271,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_6__str__(struct __pyx_obj_4cdec_5
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "mteval.pxi":154
+  /* "cdec/mteval.pxi":154
  *         return evaluator
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
@@ -19955,7 +20291,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Scorer_6__str__(struct __pyx_obj_4cdec_5
   return __pyx_r;
 }
 
-/* "mteval.pxi":157
+/* "cdec/mteval.pxi":157
  *         return str(self.name.c_str())
  * 
  * cdef float _compute_score(void* metric_, mteval.SufficientStats* stats):             # <<<<<<<<<<<<<<
@@ -19982,7 +20318,7 @@ static float __pyx_f_4cdec_5_cdec__compute_score(void *__pyx_v_metric_, Sufficie
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_compute_score", 0);
 
-  /* "mteval.pxi":158
+  /* "cdec/mteval.pxi":158
  * 
  * cdef float _compute_score(void* metric_, mteval.SufficientStats* stats):
  *     cdef Metric metric = <Metric> metric_             # <<<<<<<<<<<<<<
@@ -19994,7 +20330,7 @@ static float __pyx_f_4cdec_5_cdec__compute_score(void *__pyx_v_metric_, Sufficie
   __pyx_v_metric = ((struct __pyx_obj_4cdec_5_cdec_Metric *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "mteval.pxi":159
+  /* "cdec/mteval.pxi":159
  * cdef float _compute_score(void* metric_, mteval.SufficientStats* stats):
  *     cdef Metric metric = <Metric> metric_
  *     cdef list ss = []             # <<<<<<<<<<<<<<
@@ -20006,7 +20342,7 @@ static float __pyx_f_4cdec_5_cdec__compute_score(void *__pyx_v_metric_, Sufficie
   __pyx_v_ss = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "mteval.pxi":161
+  /* "cdec/mteval.pxi":161
  *     cdef list ss = []
  *     cdef unsigned i
  *     for i in range(stats.size()):             # <<<<<<<<<<<<<<
@@ -20017,7 +20353,7 @@ static float __pyx_f_4cdec_5_cdec__compute_score(void *__pyx_v_metric_, Sufficie
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "mteval.pxi":162
+    /* "cdec/mteval.pxi":162
  *     cdef unsigned i
  *     for i in range(stats.size()):
  *         ss.append(stats[0][i])             # <<<<<<<<<<<<<<
@@ -20030,7 +20366,7 @@ static float __pyx_f_4cdec_5_cdec__compute_score(void *__pyx_v_metric_, Sufficie
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "mteval.pxi":163
+  /* "cdec/mteval.pxi":163
  *     for i in range(stats.size()):
  *         ss.append(stats[0][i])
  *     return metric.score(ss)             # <<<<<<<<<<<<<<
@@ -20069,7 +20405,7 @@ static float __pyx_f_4cdec_5_cdec__compute_score(void *__pyx_v_metric_, Sufficie
   __pyx_r = __pyx_t_8;
   goto __pyx_L0;
 
-  /* "mteval.pxi":157
+  /* "cdec/mteval.pxi":157
  *         return str(self.name.c_str())
  * 
  * cdef float _compute_score(void* metric_, mteval.SufficientStats* stats):             # <<<<<<<<<<<<<<
@@ -20092,7 +20428,7 @@ static float __pyx_f_4cdec_5_cdec__compute_score(void *__pyx_v_metric_, Sufficie
   return __pyx_r;
 }
 
-/* "mteval.pxi":165
+/* "cdec/mteval.pxi":165
  *     return metric.score(ss)
  * 
  * cdef void _compute_sufficient_stats(void* metric_,             # <<<<<<<<<<<<<<
@@ -20121,7 +20457,7 @@ static void __pyx_f_4cdec_5_cdec__compute_sufficient_stats(void *__pyx_v_metric_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_compute_sufficient_stats", 0);
 
-  /* "mteval.pxi":169
+  /* "cdec/mteval.pxi":169
  *         vector[string]* refs,
  *         mteval.SufficientStats* out):
  *     cdef Metric metric = <Metric> metric_             # <<<<<<<<<<<<<<
@@ -20133,7 +20469,7 @@ static void __pyx_f_4cdec_5_cdec__compute_sufficient_stats(void *__pyx_v_metric_
   __pyx_v_metric = ((struct __pyx_obj_4cdec_5_cdec_Metric *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "mteval.pxi":170
+  /* "cdec/mteval.pxi":170
  *         mteval.SufficientStats* out):
  *     cdef Metric metric = <Metric> metric_
  *     cdef list refs_ = []             # <<<<<<<<<<<<<<
@@ -20145,7 +20481,7 @@ static void __pyx_f_4cdec_5_cdec__compute_sufficient_stats(void *__pyx_v_metric_
   __pyx_v_refs_ = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "mteval.pxi":172
+  /* "cdec/mteval.pxi":172
  *     cdef list refs_ = []
  *     cdef unsigned i
  *     for i in range(refs.size()):             # <<<<<<<<<<<<<<
@@ -20156,7 +20492,7 @@ static void __pyx_f_4cdec_5_cdec__compute_sufficient_stats(void *__pyx_v_metric_
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "mteval.pxi":173
+    /* "cdec/mteval.pxi":173
  *     cdef unsigned i
  *     for i in range(refs.size()):
  *         refs_.append(str(refs[0][i].c_str()))             # <<<<<<<<<<<<<<
@@ -20177,7 +20513,7 @@ static void __pyx_f_4cdec_5_cdec__compute_sufficient_stats(void *__pyx_v_metric_
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "mteval.pxi":174
+  /* "cdec/mteval.pxi":174
  *     for i in range(refs.size()):
  *         refs_.append(str(refs[0][i].c_str()))
  *     cdef list ss = metric.evaluate(str(hyp.c_str()), refs_)             # <<<<<<<<<<<<<<
@@ -20227,7 +20563,7 @@ static void __pyx_f_4cdec_5_cdec__compute_sufficient_stats(void *__pyx_v_metric_
   __pyx_v_ss = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "mteval.pxi":175
+  /* "cdec/mteval.pxi":175
  *         refs_.append(str(refs[0][i].c_str()))
  *     cdef list ss = metric.evaluate(str(hyp.c_str()), refs_)
  *     out.fields.resize(len(ss))             # <<<<<<<<<<<<<<
@@ -20241,7 +20577,7 @@ static void __pyx_f_4cdec_5_cdec__compute_sufficient_stats(void *__pyx_v_metric_
   __pyx_t_8 = PyList_GET_SIZE(__pyx_v_ss); if (unlikely(__pyx_t_8 == -1)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_out->fields.resize(__pyx_t_8);
 
-  /* "mteval.pxi":176
+  /* "cdec/mteval.pxi":176
  *     cdef list ss = metric.evaluate(str(hyp.c_str()), refs_)
  *     out.fields.resize(len(ss))
  *     for i in range(len(ss)):             # <<<<<<<<<<<<<<
@@ -20256,7 +20592,7 @@ static void __pyx_f_4cdec_5_cdec__compute_sufficient_stats(void *__pyx_v_metric_
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_8; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "mteval.pxi":177
+    /* "cdec/mteval.pxi":177
  *     out.fields.resize(len(ss))
  *     for i in range(len(ss)):
  *         out.fields[i] = ss[i]             # <<<<<<<<<<<<<<
@@ -20274,7 +20610,7 @@ static void __pyx_f_4cdec_5_cdec__compute_sufficient_stats(void *__pyx_v_metric_
     (__pyx_v_out->fields[__pyx_v_i]) = __pyx_t_10;
   }
 
-  /* "mteval.pxi":165
+  /* "cdec/mteval.pxi":165
  *     return metric.score(ss)
  * 
  * cdef void _compute_sufficient_stats(void* metric_,             # <<<<<<<<<<<<<<
@@ -20298,7 +20634,7 @@ static void __pyx_f_4cdec_5_cdec__compute_sufficient_stats(void *__pyx_v_metric_
   __Pyx_RefNannyFinishContext();
 }
 
-/* "mteval.pxi":181
+/* "cdec/mteval.pxi":181
  * cdef class Metric:
  *     cdef Scorer scorer
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
@@ -20335,7 +20671,7 @@ static int __pyx_pf_4cdec_5_cdec_6Metric___cinit__(struct __pyx_obj_4cdec_5_cdec
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "mteval.pxi":182
+  /* "cdec/mteval.pxi":182
  *     cdef Scorer scorer
  *     def __cinit__(self):
  *         self.scorer = Scorer()             # <<<<<<<<<<<<<<
@@ -20350,7 +20686,7 @@ static int __pyx_pf_4cdec_5_cdec_6Metric___cinit__(struct __pyx_obj_4cdec_5_cdec
   __pyx_v_self->scorer = ((struct __pyx_obj_4cdec_5_cdec_Scorer *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "mteval.pxi":183
+  /* "cdec/mteval.pxi":183
  *     def __cinit__(self):
  *         self.scorer = Scorer()
  *         cdef bytes class_name = self.__class__.__name__             # <<<<<<<<<<<<<<
@@ -20366,7 +20702,7 @@ static int __pyx_pf_4cdec_5_cdec_6Metric___cinit__(struct __pyx_obj_4cdec_5_cdec
   __pyx_v_class_name = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "mteval.pxi":184
+  /* "cdec/mteval.pxi":184
  *         self.scorer = Scorer()
  *         cdef bytes class_name = self.__class__.__name__
  *         self.scorer.name = new string(class_name)             # <<<<<<<<<<<<<<
@@ -20382,7 +20718,7 @@ static int __pyx_pf_4cdec_5_cdec_6Metric___cinit__(struct __pyx_obj_4cdec_5_cdec
   }
   __pyx_v_self->scorer->name = __pyx_t_4;
 
-  /* "mteval.pxi":185
+  /* "cdec/mteval.pxi":185
  *         cdef bytes class_name = self.__class__.__name__
  *         self.scorer.name = new string(class_name)
  *         self.scorer.metric = mteval.PyMetricInstance(self.scorer.name[0],             # <<<<<<<<<<<<<<
@@ -20391,7 +20727,7 @@ static int __pyx_pf_4cdec_5_cdec_6Metric___cinit__(struct __pyx_obj_4cdec_5_cdec
  */
   __pyx_v_self->scorer->metric = PythonEvaluationMetric::Instance((__pyx_v_self->scorer->name[0]), ((void *)__pyx_v_self), __pyx_f_4cdec_5_cdec__compute_sufficient_stats, __pyx_f_4cdec_5_cdec__compute_score);
 
-  /* "mteval.pxi":181
+  /* "cdec/mteval.pxi":181
  * cdef class Metric:
  *     cdef Scorer scorer
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
@@ -20413,7 +20749,7 @@ static int __pyx_pf_4cdec_5_cdec_6Metric___cinit__(struct __pyx_obj_4cdec_5_cdec
   return __pyx_r;
 }
 
-/* "mteval.pxi":188
+/* "cdec/mteval.pxi":188
  *                 <void*> self, _compute_sufficient_stats, _compute_score)
  * 
  *     def __call__(self, refs):             # <<<<<<<<<<<<<<
@@ -20485,7 +20821,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Metric_2__call__(struct __pyx_obj_4cdec_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__call__", 0);
 
-  /* "mteval.pxi":189
+  /* "cdec/mteval.pxi":189
  * 
  *     def __call__(self, refs):
  *         return self.scorer(refs)             # <<<<<<<<<<<<<<
@@ -20523,7 +20859,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Metric_2__call__(struct __pyx_obj_4cdec_
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "mteval.pxi":188
+  /* "cdec/mteval.pxi":188
  *                 <void*> self, _compute_sufficient_stats, _compute_score)
  * 
  *     def __call__(self, refs):             # <<<<<<<<<<<<<<
@@ -20545,7 +20881,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Metric_2__call__(struct __pyx_obj_4cdec_
   return __pyx_r;
 }
 
-/* "mteval.pxi":191
+/* "cdec/mteval.pxi":191
  *         return self.scorer(refs)
  * 
  *     def score(SufficientStats stats):             # <<<<<<<<<<<<<<
@@ -20571,7 +20907,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Metric_4score(CYTHON_UNUSED struct __pyx
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("score", 0);
 
-  /* "mteval.pxi":192
+  /* "cdec/mteval.pxi":192
  * 
  *     def score(SufficientStats stats):
  *         return 0             # <<<<<<<<<<<<<<
@@ -20583,7 +20919,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Metric_4score(CYTHON_UNUSED struct __pyx
   __pyx_r = __pyx_int_0;
   goto __pyx_L0;
 
-  /* "mteval.pxi":191
+  /* "cdec/mteval.pxi":191
  *         return self.scorer(refs)
  * 
  *     def score(SufficientStats stats):             # <<<<<<<<<<<<<<
@@ -20598,7 +20934,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Metric_4score(CYTHON_UNUSED struct __pyx
   return __pyx_r;
 }
 
-/* "mteval.pxi":194
+/* "cdec/mteval.pxi":194
  *         return 0
  * 
  *     def evaluate(self, hyp, refs):             # <<<<<<<<<<<<<<
@@ -20676,7 +21012,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Metric_6evaluate(CYTHON_UNUSED struct __
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("evaluate", 0);
 
-  /* "mteval.pxi":195
+  /* "cdec/mteval.pxi":195
  * 
  *     def evaluate(self, hyp, refs):
  *         return []             # <<<<<<<<<<<<<<
@@ -20690,7 +21026,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_6Metric_6evaluate(CYTHON_UNUSED struct __
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "mteval.pxi":194
+  /* "cdec/mteval.pxi":194
  *         return 0
  * 
  *     def evaluate(self, hyp, refs):             # <<<<<<<<<<<<<<
@@ -20770,7 +21106,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_2set_silent(CYTHON_UNUSED PyObject *__pyx
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_6generator20(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_6generator21(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
 /* "cdec/_cdec.pyx":32
  *     SetSilent(yn)
@@ -20795,14 +21131,14 @@ static PyObject *__pyx_pw_4cdec_5_cdec_5_make_config(PyObject *__pyx_self, PyObj
 }
 
 static PyObject *__pyx_pf_4cdec_5_cdec_4_make_config(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_config) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_make_config", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_26__make_config(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_26__make_config, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_27__make_config(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_27__make_config, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
@@ -20812,7 +21148,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_4_make_config(CYTHON_UNUSED PyObject *__p
   __Pyx_INCREF(__pyx_cur_scope->__pyx_v_config);
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_config);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_6generator20, (PyObject *) __pyx_cur_scope, __pyx_n_s_make_config, __pyx_n_s_make_config); if (unlikely(!gen)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_6generator21, (PyObject *) __pyx_cur_scope, __pyx_n_s_make_config, __pyx_n_s_make_config); if (unlikely(!gen)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -20828,9 +21164,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_4_make_config(CYTHON_UNUSED PyObject *__p
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_6generator20(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_6generator21(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config *)__pyx_generator->closure);
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
@@ -21457,7 +21793,7 @@ static int __pyx_pw_4cdec_5_cdec_7Decoder_1__init__(PyObject *__pyx_v_self, PyOb
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static PyObject *__pyx_gb_4cdec_5_cdec_7Decoder_8__init___2generator24(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_4cdec_5_cdec_7Decoder_8__init___2generator25(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
 /* "cdec/_cdec.pyx":56
  *                     'csplit', 'tagger', 'lexalign', 't2s'):
@@ -21468,24 +21804,24 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Decoder_8__init___2generator24(__pyx_Gen
  */
 
 static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_8__init___genexpr(PyObject *__pyx_self) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("genexpr", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_28_genexpr(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_28_genexpr, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_29_genexpr(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_29_genexpr, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return NULL;
   }
   __Pyx_GOTREF(__pyx_cur_scope);
-  __pyx_cur_scope->__pyx_outer_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *) __pyx_self;
+  __pyx_cur_scope->__pyx_outer_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *) __pyx_self;
   __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_outer_scope));
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope);
   {
-    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_7Decoder_8__init___2generator24, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_init___locals_genexpr); if (unlikely(!gen)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_GeneratorObject *gen = __Pyx_Generator_New((__pyx_generator_body_t) __pyx_gb_4cdec_5_cdec_7Decoder_8__init___2generator25, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_init___locals_genexpr); if (unlikely(!gen)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -21501,9 +21837,9 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_8__init___genexpr(PyObject *__py
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_4cdec_5_cdec_7Decoder_8__init___2generator24(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_4cdec_5_cdec_7Decoder_8__init___2generator25(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value) /* generator body */
 {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr *)__pyx_generator->closure);
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr *__pyx_cur_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
@@ -21644,7 +21980,7 @@ static PyObject *__pyx_gb_4cdec_5_cdec_7Decoder_8__init___2generator24(__pyx_Gen
  */
 
 static int __pyx_pf_4cdec_5_cdec_7Decoder___init__(struct __pyx_obj_4cdec_5_cdec_Decoder *__pyx_v_self, PyObject *__pyx_v_config_str, PyObject *__pyx_v_config) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *__pyx_cur_scope;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *__pyx_cur_scope;
   PyObject *__pyx_v_formalism = NULL;
   std::istringstream *__pyx_v_config_stream;
   int __pyx_r;
@@ -21661,7 +21997,7 @@ static int __pyx_pf_4cdec_5_cdec_7Decoder___init__(struct __pyx_obj_4cdec_5_cdec
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 0);
-  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_27___init__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_27___init__, __pyx_empty_tuple, NULL);
+  __pyx_cur_scope = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *)__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_28___init__(__pyx_ptype_4cdec_5_cdec___pyx_scope_struct_28___init__, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
     __Pyx_RefNannyFinishContext();
     return -1;
@@ -22355,7 +22691,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_9formalism___get__(struct __pyx_
  *             cdef variables_map* conf = &self.dec.GetConf()
  *             return str(conf[0]['formalism'].as_str().c_str())             # <<<<<<<<<<<<<<
  * 
- *     def read_weights(self, weights):
+ *     def read_weights(self, weights, scaling = 1.0):
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = __Pyx_PyBytes_FromString(((__pyx_v_conf[0])[__pyx_k_formalism]).as<std::string>().c_str()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 86; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -22395,26 +22731,77 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_9formalism___get__(struct __pyx_
 /* "cdec/_cdec.pyx":88
  *             return str(conf[0]['formalism'].as_str().c_str())
  * 
- *     def read_weights(self, weights):             # <<<<<<<<<<<<<<
+ *     def read_weights(self, weights, scaling = 1.0):             # <<<<<<<<<<<<<<
  *         """decoder.read_weights(filename): Read decoder weights from a file."""
  *         with open(weights) as fp:
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4cdec_5_cdec_7Decoder_5read_weights(PyObject *__pyx_v_self, PyObject *__pyx_v_weights); /*proto*/
+static PyObject *__pyx_pw_4cdec_5_cdec_7Decoder_5read_weights(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static char __pyx_doc_4cdec_5_cdec_7Decoder_4read_weights[] = "decoder.read_weights(filename): Read decoder weights from a file.";
-static PyObject *__pyx_pw_4cdec_5_cdec_7Decoder_5read_weights(PyObject *__pyx_v_self, PyObject *__pyx_v_weights) {
+static PyObject *__pyx_pw_4cdec_5_cdec_7Decoder_5read_weights(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_weights = 0;
+  PyObject *__pyx_v_scaling = 0;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("read_weights (wrapper)", 0);
-  __pyx_r = __pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(((struct __pyx_obj_4cdec_5_cdec_Decoder *)__pyx_v_self), ((PyObject *)__pyx_v_weights));
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_weights,&__pyx_n_s_scaling,0};
+    PyObject* values[2] = {0,0};
+    values[1] = ((PyObject *)__pyx_float_1_0);
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_weights)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        case  1:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_scaling);
+          if (value) { values[1] = value; kw_args--; }
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "read_weights") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      }
+    } else {
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+    }
+    __pyx_v_weights = values[0];
+    __pyx_v_scaling = values[1];
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("read_weights", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("cdec._cdec.Decoder.read_weights", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(((struct __pyx_obj_4cdec_5_cdec_Decoder *)__pyx_v_self), __pyx_v_weights, __pyx_v_scaling);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4cdec_5_cdec_Decoder *__pyx_v_self, PyObject *__pyx_v_weights) {
+static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4cdec_5_cdec_Decoder *__pyx_v_self, PyObject *__pyx_v_weights, PyObject *__pyx_v_scaling) {
   PyObject *__pyx_v_fp = NULL;
   PyObject *__pyx_v_line = NULL;
   PyObject *__pyx_v_fname = NULL;
@@ -22443,7 +22830,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4
   __Pyx_RefNannySetupContext("read_weights", 0);
 
   /* "cdec/_cdec.pyx":90
- *     def read_weights(self, weights):
+ *     def read_weights(self, weights, scaling = 1.0):
  *         """decoder.read_weights(filename): Read decoder weights from a file."""
  *         with open(weights) as fp:             # <<<<<<<<<<<<<<
  *             for line in fp:
@@ -22545,7 +22932,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4
  *             for line in fp:
  *                 if line.strip().startswith('#'): continue             # <<<<<<<<<<<<<<
  *                 fname, value = line.split()
- *                 self.weights[fname.strip()] = float(value)
+ *                 self.weights[fname.strip()] = float(value) * scaling
  */
             __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_line, __pyx_n_s_strip); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L7_error;}
             __Pyx_GOTREF(__pyx_t_1);
@@ -22583,7 +22970,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4
  *             for line in fp:
  *                 if line.strip().startswith('#'): continue
  *                 fname, value = line.split()             # <<<<<<<<<<<<<<
- *                 self.weights[fname.strip()] = float(value)
+ *                 self.weights[fname.strip()] = float(value) * scaling
  * 
  */
             __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_line, __pyx_n_s_split); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L7_error;}
@@ -22664,13 +23051,16 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4
             /* "cdec/_cdec.pyx":94
  *                 if line.strip().startswith('#'): continue
  *                 fname, value = line.split()
- *                 self.weights[fname.strip()] = float(value)             # <<<<<<<<<<<<<<
+ *                 self.weights[fname.strip()] = float(value) * scaling             # <<<<<<<<<<<<<<
  * 
  *     def translate(self, sentence, grammar=None):
  */
             __pyx_t_14 = __Pyx_PyObject_AsDouble(__pyx_v_value); if (unlikely(__pyx_t_14 == ((double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L7_error;}
             __pyx_t_2 = PyFloat_FromDouble(__pyx_t_14); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L7_error;}
             __Pyx_GOTREF(__pyx_t_2);
+            __pyx_t_5 = PyNumber_Multiply(__pyx_t_2, __pyx_v_scaling); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L7_error;}
+            __Pyx_GOTREF(__pyx_t_5);
+            __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
             __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_fname, __pyx_n_s_strip); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L7_error;}
             __Pyx_GOTREF(__pyx_t_1);
             __pyx_t_12 = NULL;
@@ -22684,16 +23074,16 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4
               }
             }
             if (__pyx_t_12) {
-              __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_12); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L7_error;}
+              __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_12); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L7_error;}
               __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
             } else {
-              __pyx_t_5 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L7_error;}
+              __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L7_error;}
             }
-            __Pyx_GOTREF(__pyx_t_5);
+            __Pyx_GOTREF(__pyx_t_2);
             __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-            if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_self->weights), __pyx_t_5, __pyx_t_2) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L7_error;}
-            __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+            if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_self->weights), __pyx_t_2, __pyx_t_5) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L7_error;}
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+            __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
             /* "cdec/_cdec.pyx":91
  *         """decoder.read_weights(filename): Read decoder weights from a file."""
@@ -22713,12 +23103,12 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4
         __pyx_L7_error:;
         __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
         __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-        __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+        __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
         /* "cdec/_cdec.pyx":90
- *     def read_weights(self, weights):
+ *     def read_weights(self, weights, scaling = 1.0):
  *         """decoder.read_weights(filename): Read decoder weights from a file."""
  *         with open(weights) as fp:             # <<<<<<<<<<<<<<
  *             for line in fp:
@@ -22726,11 +23116,11 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4
  */
         /*except:*/ {
           __Pyx_AddTraceback("cdec._cdec.Decoder.read_weights", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_2, &__pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L9_except_error;}
+          if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_5, &__pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L9_except_error;}
           __Pyx_GOTREF(__pyx_t_4);
-          __Pyx_GOTREF(__pyx_t_2);
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_1 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L9_except_error;}
+          __Pyx_GOTREF(__pyx_t_2);
+          __pyx_t_1 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_5, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L9_except_error;}
           __Pyx_GOTREF(__pyx_t_1);
           __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_1, NULL);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -22743,15 +23133,15 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4
           __pyx_t_16 = ((!(__pyx_t_11 != 0)) != 0);
           if (__pyx_t_16) {
             __Pyx_GIVEREF(__pyx_t_4);
-            __Pyx_GIVEREF(__pyx_t_2);
-            __Pyx_XGIVEREF(__pyx_t_5);
-            __Pyx_ErrRestore(__pyx_t_4, __pyx_t_2, __pyx_t_5);
-            __pyx_t_4 = 0; __pyx_t_2 = 0; __pyx_t_5 = 0; 
+            __Pyx_GIVEREF(__pyx_t_5);
+            __Pyx_XGIVEREF(__pyx_t_2);
+            __Pyx_ErrRestore(__pyx_t_4, __pyx_t_5, __pyx_t_2);
+            __pyx_t_4 = 0; __pyx_t_5 = 0; __pyx_t_2 = 0; 
             {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L9_except_error;}
           }
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-          __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+          __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           goto __pyx_L8_exception_handled;
         }
         __pyx_L9_except_error:;
@@ -22791,7 +23181,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4
   /* "cdec/_cdec.pyx":88
  *             return str(conf[0]['formalism'].as_str().c_str())
  * 
- *     def read_weights(self, weights):             # <<<<<<<<<<<<<<
+ *     def read_weights(self, weights, scaling = 1.0):             # <<<<<<<<<<<<<<
  *         """decoder.read_weights(filename): Read decoder weights from a file."""
  *         with open(weights) as fp:
  */
@@ -22818,7 +23208,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_4read_weights(struct __pyx_obj_4
 }
 
 /* "cdec/_cdec.pyx":96
- *                 self.weights[fname.strip()] = float(value)
+ *                 self.weights[fname.strip()] = float(value) * scaling
  * 
  *     def translate(self, sentence, grammar=None):             # <<<<<<<<<<<<<<
  *         """decoder.translate(sentence, grammar=None) -> Hypergraph
@@ -23161,7 +23551,7 @@ static PyObject *__pyx_pf_4cdec_5_cdec_7Decoder_6translate(struct __pyx_obj_4cde
   goto __pyx_L0;
 
   /* "cdec/_cdec.pyx":96
- *                 self.weights[fname.strip()] = float(value)
+ *                 self.weights[fname.strip()] = float(value) * scaling
  * 
  *     def translate(self, sentence, grammar=None):             # <<<<<<<<<<<<<<
  *         """decoder.translate(sentence, grammar=None) -> Hypergraph
@@ -24259,13 +24649,14 @@ static PyMethodDef __pyx_methods_4cdec_5_cdec_Hypergraph[] = {
   {"unique_kbest_trees", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_25unique_kbest_trees, METH_O, __pyx_doc_4cdec_5_cdec_10Hypergraph_24unique_kbest_trees},
   {"unique_kbest_features", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_28unique_kbest_features, METH_O, __pyx_doc_4cdec_5_cdec_10Hypergraph_27unique_kbest_features},
   {"sample", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_31sample, METH_O, __pyx_doc_4cdec_5_cdec_10Hypergraph_30sample},
-  {"sample_trees", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_34sample_trees, METH_O, __pyx_doc_4cdec_5_cdec_10Hypergraph_33sample_trees},
-  {"intersect", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_37intersect, METH_O, __pyx_doc_4cdec_5_cdec_10Hypergraph_36intersect},
-  {"prune", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_39prune, METH_VARARGS|METH_KEYWORDS, __pyx_doc_4cdec_5_cdec_10Hypergraph_38prune},
-  {"lattice", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_41lattice, METH_NOARGS, __pyx_doc_4cdec_5_cdec_10Hypergraph_40lattice},
-  {"plf", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_43plf, METH_NOARGS, __pyx_doc_4cdec_5_cdec_10Hypergraph_42plf},
-  {"reweight", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_45reweight, METH_O, __pyx_doc_4cdec_5_cdec_10Hypergraph_44reweight},
-  {"inside_outside", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_47inside_outside, METH_NOARGS, __pyx_doc_4cdec_5_cdec_10Hypergraph_46inside_outside},
+  {"sample_hypotheses", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_34sample_hypotheses, METH_O, __pyx_doc_4cdec_5_cdec_10Hypergraph_33sample_hypotheses},
+  {"sample_trees", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_37sample_trees, METH_O, __pyx_doc_4cdec_5_cdec_10Hypergraph_36sample_trees},
+  {"intersect", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_40intersect, METH_O, __pyx_doc_4cdec_5_cdec_10Hypergraph_39intersect},
+  {"prune", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_42prune, METH_VARARGS|METH_KEYWORDS, __pyx_doc_4cdec_5_cdec_10Hypergraph_41prune},
+  {"lattice", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_44lattice, METH_NOARGS, __pyx_doc_4cdec_5_cdec_10Hypergraph_43lattice},
+  {"plf", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_46plf, METH_NOARGS, __pyx_doc_4cdec_5_cdec_10Hypergraph_45plf},
+  {"reweight", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_48reweight, METH_O, __pyx_doc_4cdec_5_cdec_10Hypergraph_47reweight},
+  {"inside_outside", (PyCFunction)__pyx_pw_4cdec_5_cdec_10Hypergraph_50inside_outside, METH_NOARGS, __pyx_doc_4cdec_5_cdec_10Hypergraph_49inside_outside},
   {0, 0, 0, 0}
 };
 
@@ -25537,7 +25928,7 @@ static PyObject *__pyx_getprop_4cdec_5_cdec_7Decoder_formalism(PyObject *o, CYTH
 }
 
 static PyMethodDef __pyx_methods_4cdec_5_cdec_Decoder[] = {
-  {"read_weights", (PyCFunction)__pyx_pw_4cdec_5_cdec_7Decoder_5read_weights, METH_O, __pyx_doc_4cdec_5_cdec_7Decoder_4read_weights},
+  {"read_weights", (PyCFunction)__pyx_pw_4cdec_5_cdec_7Decoder_5read_weights, METH_VARARGS|METH_KEYWORDS, __pyx_doc_4cdec_5_cdec_7Decoder_4read_weights},
   {"translate", (PyCFunction)__pyx_pw_4cdec_5_cdec_7Decoder_7translate, METH_VARARGS|METH_KEYWORDS, __pyx_doc_4cdec_5_cdec_7Decoder_6translate},
   {0, 0, 0, 0}
 };
@@ -27245,14 +27636,14 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_14_sample = {
   #endif
 };
 
-static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_15_sample_trees[8];
-static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_15_sample_trees = 0;
+static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses[8];
+static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses = 0;
 
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_15_sample_trees(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
   PyObject *o;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_15_sample_trees > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees)))) {
-    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_15_sample_trees[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_15_sample_trees];
-    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees));
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses)))) {
+    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses];
+    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses));
     (void) PyObject_INIT(o, t);
     PyObject_GC_Track(o);
   } else {
@@ -27262,41 +27653,48 @@ static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_15_sample_trees(Py
   return o;
 }
 
-static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_15_sample_trees(PyObject *o) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees *)o;
+static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses(PyObject *o) {
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses *)o;
   PyObject_GC_UnTrack(o);
+  Py_CLEAR(p->__pyx_v_fmap);
   Py_CLEAR(p->__pyx_v_self);
-  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_15_sample_trees < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees)))) {
-    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_15_sample_trees[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_15_sample_trees++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees *)o);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses)))) {
+    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses *)o);
   } else {
     (*Py_TYPE(o)->tp_free)(o);
   }
 }
 
-static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_15_sample_trees(PyObject *o, visitproc v, void *a) {
+static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses(PyObject *o, visitproc v, void *a) {
   int e;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses *)o;
+  if (p->__pyx_v_fmap) {
+    e = (*v)(((PyObject*)p->__pyx_v_fmap), a); if (e) return e;
+  }
   if (p->__pyx_v_self) {
     e = (*v)(((PyObject*)p->__pyx_v_self), a); if (e) return e;
   }
   return 0;
 }
 
-static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_15_sample_trees(PyObject *o) {
+static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses(PyObject *o) {
   PyObject* tmp;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses *)o;
+  tmp = ((PyObject*)p->__pyx_v_fmap);
+  p->__pyx_v_fmap = ((struct __pyx_obj_4cdec_5_cdec_SparseVector *)Py_None); Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
   tmp = ((PyObject*)p->__pyx_v_self);
   p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
   return 0;
 }
 
-static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_15_sample_trees = {
+static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses = {
   PyVarObject_HEAD_INIT(0, 0)
-  "cdec._cdec.__pyx_scope_struct_15_sample_trees", /*tp_name*/
-  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_trees), /*tp_basicsize*/
+  "cdec._cdec.__pyx_scope_struct_15_sample_hypotheses", /*tp_name*/
+  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_15_sample_trees, /*tp_dealloc*/
+  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses, /*tp_dealloc*/
   0, /*tp_print*/
   0, /*tp_getattr*/
   0, /*tp_setattr*/
@@ -27317,8 +27715,8 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_15_sample_trees =
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
   0, /*tp_doc*/
-  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_15_sample_trees, /*tp_traverse*/
-  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_15_sample_trees, /*tp_clear*/
+  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses, /*tp_traverse*/
+  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses, /*tp_clear*/
   0, /*tp_richcompare*/
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
@@ -27333,7 +27731,7 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_15_sample_trees =
   0, /*tp_dictoffset*/
   0, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_15_sample_trees, /*tp_new*/
+  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -27348,14 +27746,14 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_15_sample_trees =
   #endif
 };
 
-static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_16___get__[8];
-static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_16___get__ = 0;
+static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_16_sample_trees[8];
+static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_16_sample_trees = 0;
 
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_16___get__(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_16_sample_trees(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
   PyObject *o;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_16___get__ > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__)))) {
-    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_16___get__[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_16___get__];
-    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__));
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_16_sample_trees > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees)))) {
+    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_16_sample_trees[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_16_sample_trees];
+    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees));
     (void) PyObject_INIT(o, t);
     PyObject_GC_Track(o);
   } else {
@@ -27365,41 +27763,41 @@ static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_16___get__(PyTypeO
   return o;
 }
 
-static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_16___get__(PyObject *o) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ *)o;
+static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_16_sample_trees(PyObject *o) {
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees *)o;
   PyObject_GC_UnTrack(o);
   Py_CLEAR(p->__pyx_v_self);
-  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_16___get__ < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__)))) {
-    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_16___get__[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_16___get__++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ *)o);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_16_sample_trees < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees)))) {
+    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_16_sample_trees[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_16_sample_trees++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees *)o);
   } else {
     (*Py_TYPE(o)->tp_free)(o);
   }
 }
 
-static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_16___get__(PyObject *o, visitproc v, void *a) {
+static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_16_sample_trees(PyObject *o, visitproc v, void *a) {
   int e;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees *)o;
   if (p->__pyx_v_self) {
     e = (*v)(((PyObject*)p->__pyx_v_self), a); if (e) return e;
   }
   return 0;
 }
 
-static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_16___get__(PyObject *o) {
+static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_16_sample_trees(PyObject *o) {
   PyObject* tmp;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__ *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees *)o;
   tmp = ((PyObject*)p->__pyx_v_self);
   p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
   return 0;
 }
 
-static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_16___get__ = {
+static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_16_sample_trees = {
   PyVarObject_HEAD_INIT(0, 0)
-  "cdec._cdec.__pyx_scope_struct_16___get__", /*tp_name*/
-  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16___get__), /*tp_basicsize*/
+  "cdec._cdec.__pyx_scope_struct_16_sample_trees", /*tp_name*/
+  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_16_sample_trees), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_16___get__, /*tp_dealloc*/
+  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_16_sample_trees, /*tp_dealloc*/
   0, /*tp_print*/
   0, /*tp_getattr*/
   0, /*tp_setattr*/
@@ -27420,8 +27818,8 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_16___get__ = {
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
   0, /*tp_doc*/
-  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_16___get__, /*tp_traverse*/
-  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_16___get__, /*tp_clear*/
+  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_16_sample_trees, /*tp_traverse*/
+  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_16_sample_trees, /*tp_clear*/
   0, /*tp_richcompare*/
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
@@ -27436,7 +27834,7 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_16___get__ = {
   0, /*tp_dictoffset*/
   0, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_16___get__, /*tp_new*/
+  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_16_sample_trees, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -27595,7 +27993,7 @@ static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_18___get__(PyObject *o
   PyObject* tmp;
   struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_18___get__ *)o;
   tmp = ((PyObject*)p->__pyx_v_self);
-  p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)Py_None); Py_INCREF(Py_None);
+  p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_Hypergraph *)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
   return 0;
 }
@@ -27698,7 +28096,7 @@ static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_19___get__(PyObject *o
   PyObject* tmp;
   struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_19___get__ *)o;
   tmp = ((PyObject*)p->__pyx_v_self);
-  p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)Py_None); Py_INCREF(Py_None);
+  p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
   return 0;
 }
@@ -27863,14 +28261,14 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_20___get__ = {
   #endif
 };
 
-static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_21___iter__[8];
-static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_21___iter__ = 0;
+static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_21___get__[8];
+static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_21___get__ = 0;
 
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_21___iter__(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_21___get__(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
   PyObject *o;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_21___iter__ > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__)))) {
-    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_21___iter__[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_21___iter__];
-    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__));
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_21___get__ > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__)))) {
+    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_21___get__[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_21___get__];
+    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__));
     (void) PyObject_INIT(o, t);
     PyObject_GC_Track(o);
   } else {
@@ -27880,41 +28278,41 @@ static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_21___iter__(PyType
   return o;
 }
 
-static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_21___iter__(PyObject *o) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ *)o;
+static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_21___get__(PyObject *o) {
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ *)o;
   PyObject_GC_UnTrack(o);
   Py_CLEAR(p->__pyx_v_self);
-  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_21___iter__ < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__)))) {
-    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_21___iter__[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_21___iter__++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ *)o);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_21___get__ < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__)))) {
+    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_21___get__[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_21___get__++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ *)o);
   } else {
     (*Py_TYPE(o)->tp_free)(o);
   }
 }
 
-static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_21___iter__(PyObject *o, visitproc v, void *a) {
+static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_21___get__(PyObject *o, visitproc v, void *a) {
   int e;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ *)o;
   if (p->__pyx_v_self) {
     e = (*v)(((PyObject*)p->__pyx_v_self), a); if (e) return e;
   }
   return 0;
 }
 
-static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_21___iter__(PyObject *o) {
+static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_21___get__(PyObject *o) {
   PyObject* tmp;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__ *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__ *)o;
   tmp = ((PyObject*)p->__pyx_v_self);
-  p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_Lattice *)Py_None); Py_INCREF(Py_None);
+  p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_HypergraphNode *)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
   return 0;
 }
 
-static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_21___iter__ = {
+static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_21___get__ = {
   PyVarObject_HEAD_INIT(0, 0)
-  "cdec._cdec.__pyx_scope_struct_21___iter__", /*tp_name*/
-  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___iter__), /*tp_basicsize*/
+  "cdec._cdec.__pyx_scope_struct_21___get__", /*tp_name*/
+  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_21___get__), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_21___iter__, /*tp_dealloc*/
+  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_21___get__, /*tp_dealloc*/
   0, /*tp_print*/
   0, /*tp_getattr*/
   0, /*tp_setattr*/
@@ -27935,8 +28333,8 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_21___iter__ = {
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
   0, /*tp_doc*/
-  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_21___iter__, /*tp_traverse*/
-  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_21___iter__, /*tp_clear*/
+  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_21___get__, /*tp_traverse*/
+  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_21___get__, /*tp_clear*/
   0, /*tp_richcompare*/
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
@@ -27951,7 +28349,7 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_21___iter__ = {
   0, /*tp_dictoffset*/
   0, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_21___iter__, /*tp_new*/
+  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_21___get__, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -27966,14 +28364,14 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_21___iter__ = {
   #endif
 };
 
-static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_22_todot[8];
-static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_22_todot = 0;
+static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_22___iter__[8];
+static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_22___iter__ = 0;
 
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_22_todot(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_22___iter__(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
   PyObject *o;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_22_todot > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot)))) {
-    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_22_todot[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_22_todot];
-    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot));
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_22___iter__ > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__)))) {
+    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_22___iter__[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_22___iter__];
+    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__));
     (void) PyObject_INIT(o, t);
     PyObject_GC_Track(o);
   } else {
@@ -27983,41 +28381,41 @@ static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_22_todot(PyTypeObj
   return o;
 }
 
-static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_22_todot(PyObject *o) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *)o;
+static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_22___iter__(PyObject *o) {
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ *)o;
   PyObject_GC_UnTrack(o);
   Py_CLEAR(p->__pyx_v_self);
-  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_22_todot < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot)))) {
-    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_22_todot[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_22_todot++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *)o);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_22___iter__ < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__)))) {
+    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_22___iter__[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_22___iter__++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ *)o);
   } else {
     (*Py_TYPE(o)->tp_free)(o);
   }
 }
 
-static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_22_todot(PyObject *o, visitproc v, void *a) {
+static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_22___iter__(PyObject *o, visitproc v, void *a) {
   int e;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ *)o;
   if (p->__pyx_v_self) {
     e = (*v)(((PyObject*)p->__pyx_v_self), a); if (e) return e;
   }
   return 0;
 }
 
-static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_22_todot(PyObject *o) {
+static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_22___iter__(PyObject *o) {
   PyObject* tmp;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__ *)o;
   tmp = ((PyObject*)p->__pyx_v_self);
   p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_Lattice *)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
   return 0;
 }
 
-static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_22_todot = {
+static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_22___iter__ = {
   PyVarObject_HEAD_INIT(0, 0)
-  "cdec._cdec.__pyx_scope_struct_22_todot", /*tp_name*/
-  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot), /*tp_basicsize*/
+  "cdec._cdec.__pyx_scope_struct_22___iter__", /*tp_name*/
+  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22___iter__), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_22_todot, /*tp_dealloc*/
+  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_22___iter__, /*tp_dealloc*/
   0, /*tp_print*/
   0, /*tp_getattr*/
   0, /*tp_setattr*/
@@ -28038,8 +28436,8 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_22_todot = {
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
   0, /*tp_doc*/
-  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_22_todot, /*tp_traverse*/
-  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_22_todot, /*tp_clear*/
+  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_22___iter__, /*tp_traverse*/
+  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_22___iter__, /*tp_clear*/
   0, /*tp_richcompare*/
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
@@ -28054,7 +28452,7 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_22_todot = {
   0, /*tp_dictoffset*/
   0, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_22_todot, /*tp_new*/
+  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_22___iter__, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -28069,14 +28467,14 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_22_todot = {
   #endif
 };
 
-static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_23_lines[8];
-static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_23_lines = 0;
+static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_23_todot[8];
+static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_23_todot = 0;
 
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_23_lines(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_23_todot(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
   PyObject *o;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_23_lines > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines)))) {
-    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_23_lines[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_23_lines];
-    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines));
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_23_todot > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot)))) {
+    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_23_todot[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_23_todot];
+    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot));
     (void) PyObject_INIT(o, t);
     PyObject_GC_Track(o);
   } else {
@@ -28086,8 +28484,111 @@ static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_23_lines(PyTypeObj
   return o;
 }
 
-static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_23_lines(PyObject *o) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines *)o;
+static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_23_todot(PyObject *o) {
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *)o;
+  PyObject_GC_UnTrack(o);
+  Py_CLEAR(p->__pyx_v_self);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_23_todot < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot)))) {
+    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_23_todot[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_23_todot++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *)o);
+  } else {
+    (*Py_TYPE(o)->tp_free)(o);
+  }
+}
+
+static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_23_todot(PyObject *o, visitproc v, void *a) {
+  int e;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *)o;
+  if (p->__pyx_v_self) {
+    e = (*v)(((PyObject*)p->__pyx_v_self), a); if (e) return e;
+  }
+  return 0;
+}
+
+static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_23_todot(PyObject *o) {
+  PyObject* tmp;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *)o;
+  tmp = ((PyObject*)p->__pyx_v_self);
+  p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_Lattice *)Py_None); Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  return 0;
+}
+
+static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_23_todot = {
+  PyVarObject_HEAD_INIT(0, 0)
+  "cdec._cdec.__pyx_scope_struct_23_todot", /*tp_name*/
+  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot), /*tp_basicsize*/
+  0, /*tp_itemsize*/
+  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_23_todot, /*tp_dealloc*/
+  0, /*tp_print*/
+  0, /*tp_getattr*/
+  0, /*tp_setattr*/
+  #if PY_MAJOR_VERSION < 3
+  0, /*tp_compare*/
+  #else
+  0, /*reserved*/
+  #endif
+  0, /*tp_repr*/
+  0, /*tp_as_number*/
+  0, /*tp_as_sequence*/
+  0, /*tp_as_mapping*/
+  0, /*tp_hash*/
+  0, /*tp_call*/
+  0, /*tp_str*/
+  0, /*tp_getattro*/
+  0, /*tp_setattro*/
+  0, /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
+  0, /*tp_doc*/
+  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_23_todot, /*tp_traverse*/
+  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_23_todot, /*tp_clear*/
+  0, /*tp_richcompare*/
+  0, /*tp_weaklistoffset*/
+  0, /*tp_iter*/
+  0, /*tp_iternext*/
+  0, /*tp_methods*/
+  0, /*tp_members*/
+  0, /*tp_getset*/
+  0, /*tp_base*/
+  0, /*tp_dict*/
+  0, /*tp_descr_get*/
+  0, /*tp_descr_set*/
+  0, /*tp_dictoffset*/
+  0, /*tp_init*/
+  0, /*tp_alloc*/
+  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_23_todot, /*tp_new*/
+  0, /*tp_free*/
+  0, /*tp_is_gc*/
+  0, /*tp_bases*/
+  0, /*tp_mro*/
+  0, /*tp_cache*/
+  0, /*tp_subclasses*/
+  0, /*tp_weaklist*/
+  0, /*tp_del*/
+  0, /*tp_version_tag*/
+  #if PY_VERSION_HEX >= 0x030400a1
+  0, /*tp_finalize*/
+  #endif
+};
+
+static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_24_lines[8];
+static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_24_lines = 0;
+
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_24_lines(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+  PyObject *o;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_24_lines > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines)))) {
+    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_24_lines[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_24_lines];
+    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines));
+    (void) PyObject_INIT(o, t);
+    PyObject_GC_Track(o);
+  } else {
+    o = (*t->tp_alloc)(t, 0);
+    if (unlikely(!o)) return 0;
+  }
+  return o;
+}
+
+static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_24_lines(PyObject *o) {
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines *)o;
   PyObject_GC_UnTrack(o);
   Py_CLEAR(p->__pyx_outer_scope);
   Py_CLEAR(p->__pyx_v_delta);
@@ -28096,16 +28597,16 @@ static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_23_lines(PyObject *
   Py_CLEAR(p->__pyx_v_weight);
   Py_CLEAR(p->__pyx_t_1);
   Py_CLEAR(p->__pyx_t_3);
-  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_23_lines < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines)))) {
-    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_23_lines[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_23_lines++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines *)o);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_24_lines < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines)))) {
+    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_24_lines[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_24_lines++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines *)o);
   } else {
     (*Py_TYPE(o)->tp_free)(o);
   }
 }
 
-static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_23_lines(PyObject *o, visitproc v, void *a) {
+static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_24_lines(PyObject *o, visitproc v, void *a) {
   int e;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines *)o;
   if (p->__pyx_outer_scope) {
     e = (*v)(((PyObject*)p->__pyx_outer_scope), a); if (e) return e;
   }
@@ -28130,11 +28631,11 @@ static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_23_lines(PyObject *
   return 0;
 }
 
-static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_23_lines(PyObject *o) {
+static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_24_lines(PyObject *o) {
   PyObject* tmp;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines *)o;
   tmp = ((PyObject*)p->__pyx_outer_scope);
-  p->__pyx_outer_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_22_todot *)Py_None); Py_INCREF(Py_None);
+  p->__pyx_outer_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_todot *)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
   tmp = ((PyObject*)p->__pyx_v_delta);
   p->__pyx_v_delta = Py_None; Py_INCREF(Py_None);
@@ -28157,12 +28658,12 @@ static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_23_lines(PyObject *o) 
   return 0;
 }
 
-static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_23_lines = {
+static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_24_lines = {
   PyVarObject_HEAD_INIT(0, 0)
-  "cdec._cdec.__pyx_scope_struct_23_lines", /*tp_name*/
-  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_23_lines), /*tp_basicsize*/
+  "cdec._cdec.__pyx_scope_struct_24_lines", /*tp_name*/
+  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24_lines), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_23_lines, /*tp_dealloc*/
+  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_24_lines, /*tp_dealloc*/
   0, /*tp_print*/
   0, /*tp_getattr*/
   0, /*tp_setattr*/
@@ -28183,8 +28684,8 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_23_lines = {
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
   0, /*tp_doc*/
-  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_23_lines, /*tp_traverse*/
-  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_23_lines, /*tp_clear*/
+  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_24_lines, /*tp_traverse*/
+  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_24_lines, /*tp_clear*/
   0, /*tp_richcompare*/
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
@@ -28199,110 +28700,7 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_23_lines = {
   0, /*tp_dictoffset*/
   0, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_23_lines, /*tp_new*/
-  0, /*tp_free*/
-  0, /*tp_is_gc*/
-  0, /*tp_bases*/
-  0, /*tp_mro*/
-  0, /*tp_cache*/
-  0, /*tp_subclasses*/
-  0, /*tp_weaklist*/
-  0, /*tp_del*/
-  0, /*tp_version_tag*/
-  #if PY_VERSION_HEX >= 0x030400a1
-  0, /*tp_finalize*/
-  #endif
-};
-
-static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_24___iter__[8];
-static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_24___iter__ = 0;
-
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_24___iter__(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
-  PyObject *o;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_24___iter__ > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__)))) {
-    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_24___iter__[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_24___iter__];
-    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__));
-    (void) PyObject_INIT(o, t);
-    PyObject_GC_Track(o);
-  } else {
-    o = (*t->tp_alloc)(t, 0);
-    if (unlikely(!o)) return 0;
-  }
-  return o;
-}
-
-static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_24___iter__(PyObject *o) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ *)o;
-  PyObject_GC_UnTrack(o);
-  Py_CLEAR(p->__pyx_v_self);
-  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_24___iter__ < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__)))) {
-    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_24___iter__[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_24___iter__++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ *)o);
-  } else {
-    (*Py_TYPE(o)->tp_free)(o);
-  }
-}
-
-static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_24___iter__(PyObject *o, visitproc v, void *a) {
-  int e;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ *)o;
-  if (p->__pyx_v_self) {
-    e = (*v)(((PyObject*)p->__pyx_v_self), a); if (e) return e;
-  }
-  return 0;
-}
-
-static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_24___iter__(PyObject *o) {
-  PyObject* tmp;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__ *)o;
-  tmp = ((PyObject*)p->__pyx_v_self);
-  p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_SufficientStats *)Py_None); Py_INCREF(Py_None);
-  Py_XDECREF(tmp);
-  return 0;
-}
-
-static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_24___iter__ = {
-  PyVarObject_HEAD_INIT(0, 0)
-  "cdec._cdec.__pyx_scope_struct_24___iter__", /*tp_name*/
-  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_24___iter__), /*tp_basicsize*/
-  0, /*tp_itemsize*/
-  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_24___iter__, /*tp_dealloc*/
-  0, /*tp_print*/
-  0, /*tp_getattr*/
-  0, /*tp_setattr*/
-  #if PY_MAJOR_VERSION < 3
-  0, /*tp_compare*/
-  #else
-  0, /*reserved*/
-  #endif
-  0, /*tp_repr*/
-  0, /*tp_as_number*/
-  0, /*tp_as_sequence*/
-  0, /*tp_as_mapping*/
-  0, /*tp_hash*/
-  0, /*tp_call*/
-  0, /*tp_str*/
-  0, /*tp_getattro*/
-  0, /*tp_setattro*/
-  0, /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
-  0, /*tp_doc*/
-  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_24___iter__, /*tp_traverse*/
-  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_24___iter__, /*tp_clear*/
-  0, /*tp_richcompare*/
-  0, /*tp_weaklistoffset*/
-  0, /*tp_iter*/
-  0, /*tp_iternext*/
-  0, /*tp_methods*/
-  0, /*tp_members*/
-  0, /*tp_getset*/
-  0, /*tp_base*/
-  0, /*tp_dict*/
-  0, /*tp_descr_get*/
-  0, /*tp_descr_set*/
-  0, /*tp_dictoffset*/
-  0, /*tp_init*/
-  0, /*tp_alloc*/
-  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_24___iter__, /*tp_new*/
+  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_24_lines, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -28358,7 +28756,7 @@ static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_25___iter__(PyObject *
   PyObject* tmp;
   struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_25___iter__ *)o;
   tmp = ((PyObject*)p->__pyx_v_self);
-  p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_CandidateSet *)Py_None); Py_INCREF(Py_None);
+  p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_SufficientStats *)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
   return 0;
 }
@@ -28420,14 +28818,14 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_25___iter__ = {
   #endif
 };
 
-static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_26__make_config[8];
-static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_26__make_config = 0;
+static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_26___iter__[8];
+static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_26___iter__ = 0;
 
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_26__make_config(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_26___iter__(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
   PyObject *o;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_26__make_config > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config)))) {
-    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_26__make_config[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_26__make_config];
-    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config));
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_26___iter__ > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__)))) {
+    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_26___iter__[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_26___iter__];
+    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__));
     (void) PyObject_INIT(o, t);
     PyObject_GC_Track(o);
   } else {
@@ -28437,8 +28835,111 @@ static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_26__make_config(Py
   return o;
 }
 
-static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_26__make_config(PyObject *o) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config *)o;
+static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_26___iter__(PyObject *o) {
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ *)o;
+  PyObject_GC_UnTrack(o);
+  Py_CLEAR(p->__pyx_v_self);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_26___iter__ < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__)))) {
+    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_26___iter__[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_26___iter__++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ *)o);
+  } else {
+    (*Py_TYPE(o)->tp_free)(o);
+  }
+}
+
+static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_26___iter__(PyObject *o, visitproc v, void *a) {
+  int e;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ *)o;
+  if (p->__pyx_v_self) {
+    e = (*v)(((PyObject*)p->__pyx_v_self), a); if (e) return e;
+  }
+  return 0;
+}
+
+static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_26___iter__(PyObject *o) {
+  PyObject* tmp;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__ *)o;
+  tmp = ((PyObject*)p->__pyx_v_self);
+  p->__pyx_v_self = ((struct __pyx_obj_4cdec_5_cdec_CandidateSet *)Py_None); Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  return 0;
+}
+
+static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_26___iter__ = {
+  PyVarObject_HEAD_INIT(0, 0)
+  "cdec._cdec.__pyx_scope_struct_26___iter__", /*tp_name*/
+  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26___iter__), /*tp_basicsize*/
+  0, /*tp_itemsize*/
+  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_26___iter__, /*tp_dealloc*/
+  0, /*tp_print*/
+  0, /*tp_getattr*/
+  0, /*tp_setattr*/
+  #if PY_MAJOR_VERSION < 3
+  0, /*tp_compare*/
+  #else
+  0, /*reserved*/
+  #endif
+  0, /*tp_repr*/
+  0, /*tp_as_number*/
+  0, /*tp_as_sequence*/
+  0, /*tp_as_mapping*/
+  0, /*tp_hash*/
+  0, /*tp_call*/
+  0, /*tp_str*/
+  0, /*tp_getattro*/
+  0, /*tp_setattro*/
+  0, /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
+  0, /*tp_doc*/
+  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_26___iter__, /*tp_traverse*/
+  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_26___iter__, /*tp_clear*/
+  0, /*tp_richcompare*/
+  0, /*tp_weaklistoffset*/
+  0, /*tp_iter*/
+  0, /*tp_iternext*/
+  0, /*tp_methods*/
+  0, /*tp_members*/
+  0, /*tp_getset*/
+  0, /*tp_base*/
+  0, /*tp_dict*/
+  0, /*tp_descr_get*/
+  0, /*tp_descr_set*/
+  0, /*tp_dictoffset*/
+  0, /*tp_init*/
+  0, /*tp_alloc*/
+  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_26___iter__, /*tp_new*/
+  0, /*tp_free*/
+  0, /*tp_is_gc*/
+  0, /*tp_bases*/
+  0, /*tp_mro*/
+  0, /*tp_cache*/
+  0, /*tp_subclasses*/
+  0, /*tp_weaklist*/
+  0, /*tp_del*/
+  0, /*tp_version_tag*/
+  #if PY_VERSION_HEX >= 0x030400a1
+  0, /*tp_finalize*/
+  #endif
+};
+
+static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_27__make_config[8];
+static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_27__make_config = 0;
+
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_27__make_config(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+  PyObject *o;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_27__make_config > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config)))) {
+    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_27__make_config[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_27__make_config];
+    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config));
+    (void) PyObject_INIT(o, t);
+    PyObject_GC_Track(o);
+  } else {
+    o = (*t->tp_alloc)(t, 0);
+    if (unlikely(!o)) return 0;
+  }
+  return o;
+}
+
+static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_27__make_config(PyObject *o) {
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config *)o;
   PyObject_GC_UnTrack(o);
   Py_CLEAR(p->__pyx_v_config);
   Py_CLEAR(p->__pyx_v_info);
@@ -28447,16 +28948,16 @@ static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_26__make_config(PyO
   Py_CLEAR(p->__pyx_v_value);
   Py_CLEAR(p->__pyx_t_0);
   Py_CLEAR(p->__pyx_t_3);
-  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_26__make_config < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config)))) {
-    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_26__make_config[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_26__make_config++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config *)o);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_27__make_config < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config)))) {
+    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_27__make_config[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_27__make_config++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config *)o);
   } else {
     (*Py_TYPE(o)->tp_free)(o);
   }
 }
 
-static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_26__make_config(PyObject *o, visitproc v, void *a) {
+static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_27__make_config(PyObject *o, visitproc v, void *a) {
   int e;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config *)o;
   if (p->__pyx_v_config) {
     e = (*v)(p->__pyx_v_config, a); if (e) return e;
   }
@@ -28481,9 +28982,9 @@ static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_26__make_config(PyO
   return 0;
 }
 
-static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_26__make_config(PyObject *o) {
+static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_27__make_config(PyObject *o) {
   PyObject* tmp;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config *)o;
   tmp = ((PyObject*)p->__pyx_v_config);
   p->__pyx_v_config = Py_None; Py_INCREF(Py_None);
   Py_XDECREF(tmp);
@@ -28508,12 +29009,12 @@ static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_26__make_config(PyObje
   return 0;
 }
 
-static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_26__make_config = {
+static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_27__make_config = {
   PyVarObject_HEAD_INIT(0, 0)
-  "cdec._cdec.__pyx_scope_struct_26__make_config", /*tp_name*/
-  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_26__make_config), /*tp_basicsize*/
+  "cdec._cdec.__pyx_scope_struct_27__make_config", /*tp_name*/
+  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27__make_config), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_26__make_config, /*tp_dealloc*/
+  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_27__make_config, /*tp_dealloc*/
   0, /*tp_print*/
   0, /*tp_getattr*/
   0, /*tp_setattr*/
@@ -28534,8 +29035,8 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_26__make_config =
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
   0, /*tp_doc*/
-  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_26__make_config, /*tp_traverse*/
-  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_26__make_config, /*tp_clear*/
+  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_27__make_config, /*tp_traverse*/
+  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_27__make_config, /*tp_clear*/
   0, /*tp_richcompare*/
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
@@ -28550,7 +29051,7 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_26__make_config =
   0, /*tp_dictoffset*/
   0, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_26__make_config, /*tp_new*/
+  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_27__make_config, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -28565,14 +29066,14 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_26__make_config =
   #endif
 };
 
-static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_27___init__[8];
-static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_27___init__ = 0;
+static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_28___init__[8];
+static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_28___init__ = 0;
 
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_27___init__(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_28___init__(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
   PyObject *o;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_27___init__ > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__)))) {
-    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_27___init__[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_27___init__];
-    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__));
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_28___init__ > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__)))) {
+    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_28___init__[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_28___init__];
+    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__));
     (void) PyObject_INIT(o, t);
     PyObject_GC_Track(o);
   } else {
@@ -28582,41 +29083,41 @@ static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_27___init__(PyType
   return o;
 }
 
-static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_27___init__(PyObject *o) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *)o;
+static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_28___init__(PyObject *o) {
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *)o;
   PyObject_GC_UnTrack(o);
   Py_CLEAR(p->__pyx_v_config);
-  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_27___init__ < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__)))) {
-    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_27___init__[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_27___init__++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *)o);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_28___init__ < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__)))) {
+    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_28___init__[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_28___init__++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *)o);
   } else {
     (*Py_TYPE(o)->tp_free)(o);
   }
 }
 
-static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_27___init__(PyObject *o, visitproc v, void *a) {
+static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_28___init__(PyObject *o, visitproc v, void *a) {
   int e;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *)o;
   if (p->__pyx_v_config) {
     e = (*v)(p->__pyx_v_config, a); if (e) return e;
   }
   return 0;
 }
 
-static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_27___init__(PyObject *o) {
+static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_28___init__(PyObject *o) {
   PyObject* tmp;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *)o;
   tmp = ((PyObject*)p->__pyx_v_config);
   p->__pyx_v_config = ((PyObject*)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
   return 0;
 }
 
-static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_27___init__ = {
+static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_28___init__ = {
   PyVarObject_HEAD_INIT(0, 0)
-  "cdec._cdec.__pyx_scope_struct_27___init__", /*tp_name*/
-  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__), /*tp_basicsize*/
+  "cdec._cdec.__pyx_scope_struct_28___init__", /*tp_name*/
+  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_27___init__, /*tp_dealloc*/
+  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_28___init__, /*tp_dealloc*/
   0, /*tp_print*/
   0, /*tp_getattr*/
   0, /*tp_setattr*/
@@ -28637,8 +29138,8 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_27___init__ = {
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
   0, /*tp_doc*/
-  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_27___init__, /*tp_traverse*/
-  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_27___init__, /*tp_clear*/
+  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_28___init__, /*tp_traverse*/
+  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_28___init__, /*tp_clear*/
   0, /*tp_richcompare*/
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
@@ -28653,7 +29154,7 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_27___init__ = {
   0, /*tp_dictoffset*/
   0, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_27___init__, /*tp_new*/
+  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_28___init__, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -28668,14 +29169,14 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_27___init__ = {
   #endif
 };
 
-static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_28_genexpr[8];
-static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_28_genexpr = 0;
+static struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr *__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_29_genexpr[8];
+static int __pyx_freecount_4cdec_5_cdec___pyx_scope_struct_29_genexpr = 0;
 
-static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_28_genexpr(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_29_genexpr(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
   PyObject *o;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_28_genexpr > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr)))) {
-    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_28_genexpr[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_28_genexpr];
-    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr));
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_29_genexpr > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr)))) {
+    o = (PyObject*)__pyx_freelist_4cdec_5_cdec___pyx_scope_struct_29_genexpr[--__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_29_genexpr];
+    memset(o, 0, sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr));
     (void) PyObject_INIT(o, t);
     PyObject_GC_Track(o);
   } else {
@@ -28685,22 +29186,22 @@ static PyObject *__pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_28_genexpr(PyTypeO
   return o;
 }
 
-static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_28_genexpr(PyObject *o) {
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr *)o;
+static void __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_29_genexpr(PyObject *o) {
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr *)o;
   PyObject_GC_UnTrack(o);
   Py_CLEAR(p->__pyx_outer_scope);
   Py_CLEAR(p->__pyx_v_kv);
   Py_CLEAR(p->__pyx_t_0);
-  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_28_genexpr < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr)))) {
-    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_28_genexpr[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_28_genexpr++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr *)o);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_29_genexpr < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr)))) {
+    __pyx_freelist_4cdec_5_cdec___pyx_scope_struct_29_genexpr[__pyx_freecount_4cdec_5_cdec___pyx_scope_struct_29_genexpr++] = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr *)o);
   } else {
     (*Py_TYPE(o)->tp_free)(o);
   }
 }
 
-static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_28_genexpr(PyObject *o, visitproc v, void *a) {
+static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_29_genexpr(PyObject *o, visitproc v, void *a) {
   int e;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr *)o;
   if (p->__pyx_outer_scope) {
     e = (*v)(((PyObject*)p->__pyx_outer_scope), a); if (e) return e;
   }
@@ -28713,11 +29214,11 @@ static int __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_28_genexpr(PyObject
   return 0;
 }
 
-static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_28_genexpr(PyObject *o) {
+static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_29_genexpr(PyObject *o) {
   PyObject* tmp;
-  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr *)o;
+  struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr *p = (struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr *)o;
   tmp = ((PyObject*)p->__pyx_outer_scope);
-  p->__pyx_outer_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_27___init__ *)Py_None); Py_INCREF(Py_None);
+  p->__pyx_outer_scope = ((struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28___init__ *)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
   tmp = ((PyObject*)p->__pyx_v_kv);
   p->__pyx_v_kv = Py_None; Py_INCREF(Py_None);
@@ -28728,12 +29229,12 @@ static int __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_28_genexpr(PyObject *o
   return 0;
 }
 
-static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_28_genexpr = {
+static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_29_genexpr = {
   PyVarObject_HEAD_INIT(0, 0)
-  "cdec._cdec.__pyx_scope_struct_28_genexpr", /*tp_name*/
-  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_28_genexpr), /*tp_basicsize*/
+  "cdec._cdec.__pyx_scope_struct_29_genexpr", /*tp_name*/
+  sizeof(struct __pyx_obj_4cdec_5_cdec___pyx_scope_struct_29_genexpr), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_28_genexpr, /*tp_dealloc*/
+  __pyx_tp_dealloc_4cdec_5_cdec___pyx_scope_struct_29_genexpr, /*tp_dealloc*/
   0, /*tp_print*/
   0, /*tp_getattr*/
   0, /*tp_setattr*/
@@ -28754,8 +29255,8 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_28_genexpr = {
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
   0, /*tp_doc*/
-  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_28_genexpr, /*tp_traverse*/
-  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_28_genexpr, /*tp_clear*/
+  __pyx_tp_traverse_4cdec_5_cdec___pyx_scope_struct_29_genexpr, /*tp_traverse*/
+  __pyx_tp_clear_4cdec_5_cdec___pyx_scope_struct_29_genexpr, /*tp_clear*/
   0, /*tp_richcompare*/
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
@@ -28770,7 +29271,7 @@ static PyTypeObject __pyx_type_4cdec_5_cdec___pyx_scope_struct_28_genexpr = {
   0, /*tp_dictoffset*/
   0, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_28_genexpr, /*tp_new*/
+  __pyx_tp_new_4cdec_5_cdec___pyx_scope_struct_29_genexpr, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -28822,6 +29323,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_Hypergraph_kbest_features, __pyx_k_Hypergraph_kbest_features, sizeof(__pyx_k_Hypergraph_kbest_features), 0, 0, 1, 1},
   {&__pyx_n_s_Hypergraph_kbest_trees, __pyx_k_Hypergraph_kbest_trees, sizeof(__pyx_k_Hypergraph_kbest_trees), 0, 0, 1, 1},
   {&__pyx_n_s_Hypergraph_sample, __pyx_k_Hypergraph_sample, sizeof(__pyx_k_Hypergraph_sample), 0, 0, 1, 1},
+  {&__pyx_n_s_Hypergraph_sample_hypotheses, __pyx_k_Hypergraph_sample_hypotheses, sizeof(__pyx_k_Hypergraph_sample_hypotheses), 0, 0, 1, 1},
   {&__pyx_n_s_Hypergraph_sample_trees, __pyx_k_Hypergraph_sample_trees, sizeof(__pyx_k_Hypergraph_sample_trees), 0, 0, 1, 1},
   {&__pyx_n_s_Hypergraph_unique_kbest, __pyx_k_Hypergraph_unique_kbest, sizeof(__pyx_k_Hypergraph_unique_kbest), 0, 0, 1, 1},
   {&__pyx_n_s_Hypergraph_unique_kbest_features, __pyx_k_Hypergraph_unique_kbest_features, sizeof(__pyx_k_Hypergraph_unique_kbest_features), 0, 0, 1, 1},
@@ -28841,6 +29343,9 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_TER, __pyx_k_TER, sizeof(__pyx_k_TER), 0, 0, 1, 1},
   {&__pyx_n_s_TRule___get, __pyx_k_TRule___get, sizeof(__pyx_k_TRule___get), 0, 0, 1, 1},
   {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
+  {&__pyx_kp_s_Users_waziz_workspace_mtm14_my, __pyx_k_Users_waziz_workspace_mtm14_my, sizeof(__pyx_k_Users_waziz_workspace_mtm14_my), 0, 0, 1, 0},
+  {&__pyx_kp_s_Users_waziz_workspace_mtm14_my_2, __pyx_k_Users_waziz_workspace_mtm14_my_2, sizeof(__pyx_k_Users_waziz_workspace_mtm14_my_2), 0, 0, 1, 0},
+  {&__pyx_kp_s_Users_waziz_workspace_mtm14_my_3, __pyx_k_Users_waziz_workspace_mtm14_my_3, sizeof(__pyx_k_Users_waziz_workspace_mtm14_my_3), 0, 0, 1, 0},
   {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
   {&__pyx_kp_s__10, __pyx_k__10, sizeof(__pyx_k__10), 0, 0, 1, 0},
   {&__pyx_kp_s__11, __pyx_k__11, sizeof(__pyx_k__11), 0, 0, 1, 0},
@@ -28952,7 +29457,9 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_s_s_s_s, __pyx_k_s_s_s_s, sizeof(__pyx_k_s_s_s_s), 0, 0, 1, 0},
   {&__pyx_n_s_sa, __pyx_k_sa, sizeof(__pyx_k_sa), 0, 0, 1, 1},
   {&__pyx_n_s_sample, __pyx_k_sample, sizeof(__pyx_k_sample), 0, 0, 1, 1},
+  {&__pyx_n_s_sample_hypotheses, __pyx_k_sample_hypotheses, sizeof(__pyx_k_sample_hypotheses), 0, 0, 1, 1},
   {&__pyx_n_s_sample_trees, __pyx_k_sample_trees, sizeof(__pyx_k_sample_trees), 0, 0, 1, 1},
+  {&__pyx_n_s_scaling, __pyx_k_scaling, sizeof(__pyx_k_scaling), 0, 0, 1, 1},
   {&__pyx_n_s_scfg, __pyx_k_scfg, sizeof(__pyx_k_scfg), 0, 0, 1, 1},
   {&__pyx_n_s_score, __pyx_k_score, sizeof(__pyx_k_score), 0, 0, 1, 1},
   {&__pyx_n_s_scores, __pyx_k_scores, sizeof(__pyx_k_scores), 0, 0, 1, 1},
@@ -28977,12 +29484,10 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_unique_kbest, __pyx_k_unique_kbest, sizeof(__pyx_k_unique_kbest), 0, 0, 1, 1},
   {&__pyx_n_s_unique_kbest_features, __pyx_k_unique_kbest_features, sizeof(__pyx_k_unique_kbest_features), 0, 0, 1, 1},
   {&__pyx_n_s_unique_kbest_trees, __pyx_k_unique_kbest_trees, sizeof(__pyx_k_unique_kbest_trees), 0, 0, 1, 1},
-  {&__pyx_kp_s_usr0_home_cdyer_cdec_python_cde, __pyx_k_usr0_home_cdyer_cdec_python_cde, sizeof(__pyx_k_usr0_home_cdyer_cdec_python_cde), 0, 0, 1, 0},
-  {&__pyx_kp_s_usr0_home_cdyer_cdec_python_cde_2, __pyx_k_usr0_home_cdyer_cdec_python_cde_2, sizeof(__pyx_k_usr0_home_cdyer_cdec_python_cde_2), 0, 0, 1, 0},
-  {&__pyx_kp_s_usr0_home_cdyer_cdec_python_cde_3, __pyx_k_usr0_home_cdyer_cdec_python_cde_3, sizeof(__pyx_k_usr0_home_cdyer_cdec_python_cde_3), 0, 0, 1, 0},
   {&__pyx_n_s_utf8, __pyx_k_utf8, sizeof(__pyx_k_utf8), 0, 0, 1, 1},
   {&__pyx_n_s_value, __pyx_k_value, sizeof(__pyx_k_value), 0, 0, 1, 1},
   {&__pyx_n_s_weight, __pyx_k_weight, sizeof(__pyx_k_weight), 0, 0, 1, 1},
+  {&__pyx_n_s_weights, __pyx_k_weights, sizeof(__pyx_k_weights), 0, 0, 1, 1},
   {&__pyx_n_s_yn, __pyx_k_yn, sizeof(__pyx_k_yn), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
@@ -28994,7 +29499,7 @@ static int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_NotImplemented = __Pyx_GetBuiltinName(__pyx_n_s_NotImplemented); if (!__pyx_builtin_NotImplemented) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_super = __Pyx_GetBuiltinName(__pyx_n_s_super); if (!__pyx_builtin_super) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_builtin_eval = __Pyx_GetBuiltinName(__pyx_n_s_eval); if (!__pyx_builtin_eval) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_eval = __Pyx_GetBuiltinName(__pyx_n_s_eval); if (!__pyx_builtin_eval) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 14; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_IndexError = __Pyx_GetBuiltinName(__pyx_n_s_IndexError); if (!__pyx_builtin_IndexError) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_open = __Pyx_GetBuiltinName(__pyx_n_s_open); if (!__pyx_builtin_open) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -29018,7 +29523,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "vectors.pxi":95
+  /* "cdec/vectors.pxi":95
  *         elif op == 3: # !=
  *             return not (x == y)
  *         raise NotImplemented('comparison not implemented for SparseVector')             # <<<<<<<<<<<<<<
@@ -29029,7 +29534,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "grammar.pxi":6
+  /* "cdec/grammar.pxi":6
  * 
  * def _phrase(phrase):
  *     return ' '.join(w.encode('utf8') if isinstance(w, unicode) else str(w) for w in phrase)             # <<<<<<<<<<<<<<
@@ -29040,7 +29545,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "grammar.pxi":232
+  /* "cdec/grammar.pxi":232
  *                 trule = convert_rule(trule)
  *             elif not isinstance(trule, TRule):
  *                 raise ValueError('the grammar should contain TRule objects')             # <<<<<<<<<<<<<<
@@ -29050,27 +29555,27 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
 
-  /* "hypergraph.pxi":292
+  /* "cdec/hypergraph.pxi":307
  *         elif op == 3: # !=
  *             return not (x == y)
  *         raise NotImplemented('comparison not implemented for HypergraphEdge')             # <<<<<<<<<<<<<<
  * 
  * cdef class HypergraphNode:
  */
-  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_s_comparison_not_implemented_for_H); if (unlikely(!__pyx_tuple__6)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 292; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_s_comparison_not_implemented_for_H); if (unlikely(!__pyx_tuple__6)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 307; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
-  /* "hypergraph.pxi":333
+  /* "cdec/hypergraph.pxi":348
  *         elif op == 3: # !=
  *             return not (x == y)
  *         raise NotImplemented('comparison not implemented for HypergraphNode')             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_comparison_not_implemented_for_H_2); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_comparison_not_implemented_for_H_2); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 348; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
-  /* "lattice.pxi":26
+  /* "cdec/lattice.pxi":26
  *     def __getitem__(self, int index):
  *         if not 0 <= index < len(self):
  *             raise IndexError('lattice index out of range')             # <<<<<<<<<<<<<<
@@ -29081,7 +29586,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
 
-  /* "lattice.pxi":39
+  /* "cdec/lattice.pxi":39
  *     def __setitem__(self, int index, tuple arcs):
  *         if not 0 <= index < len(self):
  *             raise IndexError('lattice index out of range')             # <<<<<<<<<<<<<<
@@ -29092,7 +29597,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__9);
   __Pyx_GIVEREF(__pyx_tuple__9);
 
-  /* "lattice.pxi":69
+  /* "cdec/lattice.pxi":69
  *             for i in range(len(self)):
  *                 for label, weight, delta in self[i]:
  *                     yield '%d -> %d [label="%s"];' % (i, i+delta, label.replace('"', '\\"'))             # <<<<<<<<<<<<<<
@@ -29103,7 +29608,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
 
-  /* "lattice.pxi":63
+  /* "cdec/lattice.pxi":63
  *     def todot(self):
  *         """lattice.todot() -> Representation of the lattice in GraphViz dot format."""
  *         def lines():             # <<<<<<<<<<<<<<
@@ -29113,9 +29618,9 @@ static int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__14 = PyTuple_Pack(4, __pyx_n_s_i, __pyx_n_s_label, __pyx_n_s_weight, __pyx_n_s_delta); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
-  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(0, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_usr0_home_cdyer_cdec_python_cde, __pyx_n_s_lines, 63, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(0, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_waziz_workspace_mtm14_my, __pyx_n_s_lines, 63, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "lattice.pxi":72
+  /* "cdec/lattice.pxi":72
  *             yield '%d [shape=doublecircle]' % len(self)
  *             yield '}'
  *         return '\n'.join(lines()).encode('utf8')             # <<<<<<<<<<<<<<
@@ -29126,7 +29631,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__17);
   __Pyx_GIVEREF(__pyx_tuple__17);
 
-  /* "mteval.pxi":53
+  /* "cdec/mteval.pxi":53
  *     def __getitem__(self, int index):
  *         if not 0 <= index < len(self):
  *             raise IndexError('sufficient stats vector index out of range')             # <<<<<<<<<<<<<<
@@ -29137,7 +29642,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__18);
   __Pyx_GIVEREF(__pyx_tuple__18);
 
-  /* "mteval.pxi":87
+  /* "cdec/mteval.pxi":87
  *     def __getitem__(self,int k):
  *         if not 0 <= k < self.cs.size():
  *             raise IndexError('candidate set index out of range')             # <<<<<<<<<<<<<<
@@ -29153,14 +29658,14 @@ static int __Pyx_InitCachedConstants(void) {
  *             for line in fp:
  *                 if line.strip().startswith('#'): continue             # <<<<<<<<<<<<<<
  *                 fname, value = line.split()
- *                 self.weights[fname.strip()] = float(value)
+ *                 self.weights[fname.strip()] = float(value) * scaling
  */
   __pyx_tuple__21 = PyTuple_Pack(1, __pyx_kp_s__20); if (unlikely(!__pyx_tuple__21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__21);
   __Pyx_GIVEREF(__pyx_tuple__21);
 
   /* "cdec/_cdec.pyx":90
- *     def read_weights(self, weights):
+ *     def read_weights(self, weights, scaling = 1.0):
  *         """decoder.read_weights(filename): Read decoder weights from a file."""
  *         with open(weights) as fp:             # <<<<<<<<<<<<<<
  *             for line in fp:
@@ -29170,7 +29675,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__22);
   __Pyx_GIVEREF(__pyx_tuple__22);
 
-  /* "grammar.pxi":5
+  /* "cdec/grammar.pxi":5
  * import cdec.sa._sa as _sa
  * 
  * def _phrase(phrase):             # <<<<<<<<<<<<<<
@@ -29180,9 +29685,9 @@ static int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__24 = PyTuple_Pack(3, __pyx_n_s_phrase_2, __pyx_n_s_genexpr, __pyx_n_s_genexpr); if (unlikely(!__pyx_tuple__24)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 5; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__24);
   __Pyx_GIVEREF(__pyx_tuple__24);
-  __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__24, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_usr0_home_cdyer_cdec_python_cde_2, __pyx_n_s_phrase, 5, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 5; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__24, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_waziz_workspace_mtm14_my_2, __pyx_n_s_phrase, 5, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 5; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "mteval.pxi":197
+  /* "cdec/mteval.pxi":197
  *         return []
  * 
  * BLEU = Scorer('IBM_BLEU')             # <<<<<<<<<<<<<<
@@ -29193,7 +29698,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__26);
   __Pyx_GIVEREF(__pyx_tuple__26);
 
-  /* "mteval.pxi":198
+  /* "cdec/mteval.pxi":198
  * 
  * BLEU = Scorer('IBM_BLEU')
  * QCRI = Scorer('QCRI_BLEU')             # <<<<<<<<<<<<<<
@@ -29204,7 +29709,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__27);
   __Pyx_GIVEREF(__pyx_tuple__27);
 
-  /* "mteval.pxi":199
+  /* "cdec/mteval.pxi":199
  * BLEU = Scorer('IBM_BLEU')
  * QCRI = Scorer('QCRI_BLEU')
  * TER = Scorer('TER')             # <<<<<<<<<<<<<<
@@ -29215,7 +29720,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__28);
   __Pyx_GIVEREF(__pyx_tuple__28);
 
-  /* "mteval.pxi":200
+  /* "cdec/mteval.pxi":200
  * QCRI = Scorer('QCRI_BLEU')
  * TER = Scorer('TER')
  * CER = Scorer('CER')             # <<<<<<<<<<<<<<
@@ -29225,7 +29730,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__29);
   __Pyx_GIVEREF(__pyx_tuple__29);
 
-  /* "mteval.pxi":201
+  /* "cdec/mteval.pxi":201
  * TER = Scorer('TER')
  * CER = Scorer('CER')
  * SSK = Scorer('SSK')             # <<<<<<<<<<<<<<
@@ -29244,7 +29749,7 @@ static int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__31 = PyTuple_Pack(1, __pyx_n_s_yn); if (unlikely(!__pyx_tuple__31)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 28; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__31);
   __Pyx_GIVEREF(__pyx_tuple__31);
-  __pyx_codeobj__32 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__31, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_usr0_home_cdyer_cdec_python_cde_3, __pyx_n_s_set_silent, 28, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__32)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 28; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__32 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__31, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_waziz_workspace_mtm14_my_3, __pyx_n_s_set_silent, 28, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__32)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 28; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "cdec/_cdec.pyx":32
  *     SetSilent(yn)
@@ -29256,7 +29761,7 @@ static int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__33 = PyTuple_Pack(5, __pyx_n_s_config, __pyx_n_s_key, __pyx_n_s_value, __pyx_n_s_name, __pyx_n_s_info); if (unlikely(!__pyx_tuple__33)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__33);
   __Pyx_GIVEREF(__pyx_tuple__33);
-  __pyx_codeobj__34 = (PyObject*)__Pyx_PyCode_New(1, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__33, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_usr0_home_cdyer_cdec_python_cde_3, __pyx_n_s_make_config, 32, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__34)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__34 = (PyObject*)__Pyx_PyCode_New(1, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__33, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_waziz_workspace_mtm14_my_3, __pyx_n_s_make_config, 32, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__34)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -29266,6 +29771,7 @@ static int __Pyx_InitCachedConstants(void) {
 
 static int __Pyx_InitGlobals(void) {
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __pyx_float_1_0 = PyFloat_FromDouble(1.0); if (unlikely(!__pyx_float_1_0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_int_1 = PyInt_FromLong(1); if (unlikely(!__pyx_int_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   return 0;
@@ -29470,17 +29976,17 @@ PyMODINIT_FUNC PyInit__cdec(void)
   __pyx_ptype_4cdec_5_cdec_Hypergraph = &__pyx_type_4cdec_5_cdec_Hypergraph;
   __pyx_vtabptr_4cdec_5_cdec_HypergraphEdge = &__pyx_vtable_4cdec_5_cdec_HypergraphEdge;
   __pyx_vtable_4cdec_5_cdec_HypergraphEdge.init = (PyObject *(*)(struct __pyx_obj_4cdec_5_cdec_HypergraphEdge *, Hypergraph *, unsigned int))__pyx_f_4cdec_5_cdec_14HypergraphEdge_init;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec_HypergraphEdge) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec_HypergraphEdge) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_4cdec_5_cdec_HypergraphEdge.tp_print = 0;
-  if (__Pyx_SetVtable(__pyx_type_4cdec_5_cdec_HypergraphEdge.tp_dict, __pyx_vtabptr_4cdec_5_cdec_HypergraphEdge) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (PyObject_SetAttrString(__pyx_m, "HypergraphEdge", (PyObject *)&__pyx_type_4cdec_5_cdec_HypergraphEdge) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (__Pyx_SetVtable(__pyx_type_4cdec_5_cdec_HypergraphEdge.tp_dict, __pyx_vtabptr_4cdec_5_cdec_HypergraphEdge) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyObject_SetAttrString(__pyx_m, "HypergraphEdge", (PyObject *)&__pyx_type_4cdec_5_cdec_HypergraphEdge) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_4cdec_5_cdec_HypergraphEdge = &__pyx_type_4cdec_5_cdec_HypergraphEdge;
   __pyx_vtabptr_4cdec_5_cdec_HypergraphNode = &__pyx_vtable_4cdec_5_cdec_HypergraphNode;
   __pyx_vtable_4cdec_5_cdec_HypergraphNode.init = (PyObject *(*)(struct __pyx_obj_4cdec_5_cdec_HypergraphNode *, Hypergraph *, unsigned int))__pyx_f_4cdec_5_cdec_14HypergraphNode_init;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec_HypergraphNode) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec_HypergraphNode) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 309; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_4cdec_5_cdec_HypergraphNode.tp_print = 0;
-  if (__Pyx_SetVtable(__pyx_type_4cdec_5_cdec_HypergraphNode.tp_dict, __pyx_vtabptr_4cdec_5_cdec_HypergraphNode) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (PyObject_SetAttrString(__pyx_m, "HypergraphNode", (PyObject *)&__pyx_type_4cdec_5_cdec_HypergraphNode) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (__Pyx_SetVtable(__pyx_type_4cdec_5_cdec_HypergraphNode.tp_dict, __pyx_vtabptr_4cdec_5_cdec_HypergraphNode) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 309; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyObject_SetAttrString(__pyx_m, "HypergraphNode", (PyObject *)&__pyx_type_4cdec_5_cdec_HypergraphNode) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 309; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_4cdec_5_cdec_HypergraphNode = &__pyx_type_4cdec_5_cdec_HypergraphNode;
   if (PyType_Ready(&__pyx_type_4cdec_5_cdec_Lattice) < 0) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_4cdec_5_cdec_Lattice.tp_print = 0;
@@ -29579,48 +30085,51 @@ PyMODINIT_FUNC PyInit__cdec(void)
   if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_14_sample) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_4cdec_5_cdec___pyx_scope_struct_14_sample.tp_print = 0;
   __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_14_sample = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_14_sample;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_15_sample_trees) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_type_4cdec_5_cdec___pyx_scope_struct_15_sample_trees.tp_print = 0;
-  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_15_sample_trees = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_15_sample_trees;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_16___get__) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_type_4cdec_5_cdec___pyx_scope_struct_16___get__.tp_print = 0;
-  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_16___get__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_16___get__;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_17___get__) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses.tp_print = 0;
+  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_15_sample_hypotheses;
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_16_sample_trees) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_4cdec_5_cdec___pyx_scope_struct_16_sample_trees.tp_print = 0;
+  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_16_sample_trees = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_16_sample_trees;
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_17___get__) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 224; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_4cdec_5_cdec___pyx_scope_struct_17___get__.tp_print = 0;
   __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_17___get__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_17___get__;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_18___get__) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 264; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_18___get__) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_4cdec_5_cdec___pyx_scope_struct_18___get__.tp_print = 0;
   __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_18___get__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_18___get__;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_19___get__) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 308; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_19___get__) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_4cdec_5_cdec___pyx_scope_struct_19___get__.tp_print = 0;
   __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_19___get__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_19___get__;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_20___get__) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_20___get__) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_4cdec_5_cdec___pyx_scope_struct_20___get__.tp_print = 0;
   __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_20___get__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_20___get__;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_21___iter__) < 0) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_type_4cdec_5_cdec___pyx_scope_struct_21___iter__.tp_print = 0;
-  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_21___iter__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_21___iter__;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_22_todot) < 0) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_type_4cdec_5_cdec___pyx_scope_struct_22_todot.tp_print = 0;
-  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_22_todot = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_22_todot;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_23_lines) < 0) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_type_4cdec_5_cdec___pyx_scope_struct_23_lines.tp_print = 0;
-  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_23_lines = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_23_lines;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_24___iter__) < 0) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_type_4cdec_5_cdec___pyx_scope_struct_24___iter__.tp_print = 0;
-  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_24___iter__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_24___iter__;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_25___iter__) < 0) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_21___get__) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 329; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_4cdec_5_cdec___pyx_scope_struct_21___get__.tp_print = 0;
+  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_21___get__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_21___get__;
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_22___iter__) < 0) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_4cdec_5_cdec___pyx_scope_struct_22___iter__.tp_print = 0;
+  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_22___iter__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_22___iter__;
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_23_todot) < 0) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_4cdec_5_cdec___pyx_scope_struct_23_todot.tp_print = 0;
+  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_23_todot = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_23_todot;
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_24_lines) < 0) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_4cdec_5_cdec___pyx_scope_struct_24_lines.tp_print = 0;
+  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_24_lines = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_24_lines;
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_25___iter__) < 0) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_4cdec_5_cdec___pyx_scope_struct_25___iter__.tp_print = 0;
   __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_25___iter__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_25___iter__;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_26__make_config) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_type_4cdec_5_cdec___pyx_scope_struct_26__make_config.tp_print = 0;
-  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_26__make_config = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_26__make_config;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_27___init__) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_type_4cdec_5_cdec___pyx_scope_struct_27___init__.tp_print = 0;
-  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_27___init__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_27___init__;
-  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_28_genexpr) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_type_4cdec_5_cdec___pyx_scope_struct_28_genexpr.tp_print = 0;
-  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_28_genexpr = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_28_genexpr;
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_26___iter__) < 0) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_4cdec_5_cdec___pyx_scope_struct_26___iter__.tp_print = 0;
+  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_26___iter__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_26___iter__;
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_27__make_config) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_4cdec_5_cdec___pyx_scope_struct_27__make_config.tp_print = 0;
+  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_27__make_config = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_27__make_config;
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_28___init__) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_4cdec_5_cdec___pyx_scope_struct_28___init__.tp_print = 0;
+  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_28___init__ = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_28___init__;
+  if (PyType_Ready(&__pyx_type_4cdec_5_cdec___pyx_scope_struct_29_genexpr) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_4cdec_5_cdec___pyx_scope_struct_29_genexpr.tp_print = 0;
+  __pyx_ptype_4cdec_5_cdec___pyx_scope_struct_29_genexpr = &__pyx_type_4cdec_5_cdec___pyx_scope_struct_29_genexpr;
   /*--- Type import code ---*/
   __pyx_ptype_4cdec_2sa_3_sa_FloatList = __Pyx_ImportType("cdec.sa._sa", "FloatList", sizeof(struct __pyx_obj_4cdec_2sa_3_sa_FloatList), 1); if (unlikely(!__pyx_ptype_4cdec_2sa_3_sa_FloatList)) {__pyx_filename = __pyx_f[7]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_vtabptr_4cdec_2sa_3_sa_FloatList = (struct __pyx_vtabstruct_4cdec_2sa_3_sa_FloatList*)__Pyx_GetVtable(__pyx_ptype_4cdec_2sa_3_sa_FloatList->tp_dict); if (unlikely(!__pyx_vtabptr_4cdec_2sa_3_sa_FloatList)) {__pyx_filename = __pyx_f[7]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -29640,7 +30149,7 @@ PyMODINIT_FUNC PyInit__cdec(void)
   Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   /*--- Execution code ---*/
 
-  /* "grammar.pxi":3
+  /* "cdec/grammar.pxi":3
  * cimport grammar
  * cimport cdec.sa._sa as _sa
  * import cdec.sa._sa as _sa             # <<<<<<<<<<<<<<
@@ -29658,7 +30167,7 @@ PyMODINIT_FUNC PyInit__cdec(void)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_sa, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "grammar.pxi":5
+  /* "cdec/grammar.pxi":5
  * import cdec.sa._sa as _sa
  * 
  * def _phrase(phrase):             # <<<<<<<<<<<<<<
@@ -29670,7 +30179,7 @@ PyMODINIT_FUNC PyInit__cdec(void)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_phrase, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 5; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "mteval.pxi":197
+  /* "cdec/mteval.pxi":197
  *         return []
  * 
  * BLEU = Scorer('IBM_BLEU')             # <<<<<<<<<<<<<<
@@ -29682,7 +30191,7 @@ PyMODINIT_FUNC PyInit__cdec(void)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_BLEU, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "mteval.pxi":198
+  /* "cdec/mteval.pxi":198
  * 
  * BLEU = Scorer('IBM_BLEU')
  * QCRI = Scorer('QCRI_BLEU')             # <<<<<<<<<<<<<<
@@ -29694,7 +30203,7 @@ PyMODINIT_FUNC PyInit__cdec(void)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_QCRI, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "mteval.pxi":199
+  /* "cdec/mteval.pxi":199
  * BLEU = Scorer('IBM_BLEU')
  * QCRI = Scorer('QCRI_BLEU')
  * TER = Scorer('TER')             # <<<<<<<<<<<<<<
@@ -29706,7 +30215,7 @@ PyMODINIT_FUNC PyInit__cdec(void)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_TER, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 199; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "mteval.pxi":200
+  /* "cdec/mteval.pxi":200
  * QCRI = Scorer('QCRI_BLEU')
  * TER = Scorer('TER')
  * CER = Scorer('CER')             # <<<<<<<<<<<<<<
@@ -29717,7 +30226,7 @@ PyMODINIT_FUNC PyInit__cdec(void)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_CER, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 200; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "mteval.pxi":201
+  /* "cdec/mteval.pxi":201
  * TER = Scorer('TER')
  * CER = Scorer('CER')
  * SSK = Scorer('SSK')             # <<<<<<<<<<<<<<
