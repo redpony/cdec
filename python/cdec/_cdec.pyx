@@ -85,13 +85,13 @@ cdef class Decoder:
             cdef variables_map* conf = &self.dec.GetConf()
             return str(conf[0]['formalism'].as_str().c_str())
 
-    def read_weights(self, weights):
+    def read_weights(self, weights, scaling = 1.0):
         """decoder.read_weights(filename): Read decoder weights from a file."""
         with open(weights) as fp:
             for line in fp:
                 if line.strip().startswith('#'): continue
                 fname, value = line.split()
-                self.weights[fname.strip()] = float(value)
+                self.weights[fname.strip()] = float(value) * scaling
 
     def translate(self, sentence, grammar=None):
         """decoder.translate(sentence, grammar=None) -> Hypergraph
