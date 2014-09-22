@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <vector>
+#include <unordered_set>
 #include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
 #include "fast_lexical_cast.hpp"

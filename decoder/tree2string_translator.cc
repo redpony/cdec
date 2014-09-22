@@ -2,6 +2,7 @@
 #include <vector>
 #include <queue>
 #include <map>
+#include <unordered_map>
 #include <unordered_set>
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>

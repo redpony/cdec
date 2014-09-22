@@ -3,6 +3,7 @@
 #include <sstream>
 #include <stack>
 #include <string>
+#include <unordered_set>
 
 #include "sentence_metadata.h"
 #include "array2d.h"

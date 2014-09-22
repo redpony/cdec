@@ -2,6 +2,8 @@
 
 #include <set>
 #include <cstring>
+#include <unordered_set>
+#include <unordered_map>
 
 #include "klm/lm/model.hh"
 
@@ -14,12 +16,6 @@
 #include "stringlib.h"
 #include "tdict.h"
 
-#ifndef HAVE_OLD_CPP
-# include <unordered_set>
-#else
-# include <tr1/unordered_set>
-namespace std { using std::tr1::unordered_set; }
-#endif
 using namespace std;
 
 struct BasicCSplitFeaturesImpl {
