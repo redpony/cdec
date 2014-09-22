@@ -2,12 +2,7 @@
 
 #include <sstream>
 #include <stack>
-#ifndef HAVE_OLD_CPP
-# include <unordered_set>
-#else
-# include <tr1/unordered_set>
-namespace std { using std::tr1::unordered_set; }
-#endif
+#include <unordered_set>
 
 #include "sentence_metadata.h"
 #include "array2d.h"
