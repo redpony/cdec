@@ -1,6 +1,5 @@
 #include "config.h"
 
-#include <boost/container/flat_map.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/variables_map.hpp>
