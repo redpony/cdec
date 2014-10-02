@@ -4,7 +4,7 @@ The grammar extraction takes place in two steps: (a) precomputing a number of da
 
 To compile the data structures you need to run:
 
-    cdec/extractor/compile -a <alignment> -b <parallel_corpus> -c <compile_config_file> -o <compile_directory>
+    cdec/extractor/sacompile -a <alignment> -b <parallel_corpus> -c <compile_config_file> -o <compile_directory>
 
 To extract the grammars you need to run:
 
