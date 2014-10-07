@@ -21,7 +21,7 @@ trule_test_LDADD = $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEW
 
 cdec_SOURCES = cdec.cc
 cdec_LDFLAGS= -rdynamic $(STATIC_FLAGS)
-cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a ../klm/search/libksearch.a ../klm/lm/libklm.a ../klm/util/libklm_util.a ../klm/util/double-conversion/libklm_util_double.a
+cdec_LDADD = libcdec.a ../mteval/libmteval.a ../utils/libutils.a ../utils/synutils/maxent-3.0/libtsuruoka_maxent.a ../klm/search/libksearch.a ../klm/lm/libklm.a ../klm/util/libklm_util.a ../klm/util/double-conversion/libklm_util_double.a
 
 AM_CPPFLAGS = -DTEST_DATA=\"$(top_srcdir)/decoder/test_data\" -DBOOST_TEST_DYN_LINK -W -Wno-sign-compare -I$(top_srcdir) -I$(top_srcdir)/mteval -I$(top_srcdir)/utils -I$(top_srcdir)/klm
 
@@ -45,6 +45,7 @@ libcdec_a_SOURCES = \
   ff_basic.h \
   ff_bleu.h \
   ff_charset.h \
+  ff_const_reorder.h \
   ff_context.h \
   ff_csplit.h \
   ff_external.h \
@@ -111,6 +112,7 @@ libcdec_a_SOURCES = \
   ff_bleu.cc \
   ff_charset.cc \
   ff_context.cc \
+  ff_const_reorder.cc \
   ff_csplit.cc \
   ff_external.cc \
   ff_factory.cc \

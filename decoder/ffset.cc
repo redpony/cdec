@@ -15,6 +15,26 @@ ModelSet::ModelSet(const vector<double>& w, const vector<const FeatureFunction*>
     model_state_pos_[i] = state_size_;
     state_size_ += models_[i]->StateSize();
   }
+
+  //added by lijunhui
+  //erase the states for SRLReorderFeature and DepPrnFeatures
+  for (int i = 0; i < models_.size(); i++) {
+    if (models_[i]->name_ == string("SRLReorderFeature")
+      || models_[i]->name_ == string("DepPrnFeatures")
+      || models_[i]->name_ == string("SyntacticContextFeature")
+      || models_[i]->name_ == string("ArgtReorderFeature")
+      || models_[i]->name_ == string("ConstReorderSparseFeature")
+      || models_[i]->name_ == string("ConstReorderFeature")) {
+      int start_pos = model_state_pos_[i];
+      int end_pos;
+      if (i == models_.size() - 1)
+        end_pos = state_size_;
+      else
+        end_pos = model_state_pos_[i + 1];
+      erase_state_start_pos_.push_back(start_pos);
+      erase_state_end_pos_.push_back(end_pos);
+    }
+  }
 }
 
 void ModelSet::PrepareForInput(const SentenceMetadata& smeta) {
@@ -70,3 +90,32 @@ void ModelSet::AddFinalFeatures(const FFState& state, HG::Edge* edge,SentenceMet
   edge->edge_prob_.logeq(edge->feature_values_.dot(weights_));
 }
 
+bool ModelSet::HaveEraseState() const {
+       if (erase_state_start_pos_.size() == 0) return false;
+       return true;
+}
+
+void ModelSet::GetRealFFState(const FFState& state, FFState& real_state) const {
+       real_state.resize(state.size());
+       for (int i = 0; i < state.size(); i++) {
+               real_state[i] = state[i];
+       }
+
+       if (state.size() == 0)
+               return;
+       assert(state.size() == state_size_);
+
+       //erase the states for SRLReorderFeature and DepPrnFeatures and SyntacticContextFeature
+       for (int i = 0; i < erase_state_start_pos_.size(); i++){
+               int start_pos = erase_state_start_pos_[i];
+               int end_pos = erase_state_end_pos_[i];
+               for (int j = start_pos; j < end_pos; j++)
+                       real_state[j] = 0;
+       }
+}
+
+FFState ModelSet::GetRealFFState(const FFState& state) const {
+       FFState real_state;
+       GetRealFFState(state, real_state);
+       return real_state;
+}
