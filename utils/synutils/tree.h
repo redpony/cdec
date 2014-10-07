@@ -8,9 +8,11 @@
 #ifndef TREE_H_
 #define TREE_H_
 
-#include <string>
 #include <assert.h>
 #include <stdio.h>
+
+#include <string>
+#include <vector>
 
 using namespace std;
 

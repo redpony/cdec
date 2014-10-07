@@ -7,19 +7,19 @@
 #define TSURUOKA_MAXENT_H_
 
 #include "utility.h"
-#include "stringlib.h"
-#include "maxent-3.0/maxent.h"
+#include "utils/stringlib.h"
+#include "utils/synutils/maxent-3.0/maxent.h"
 
 #include <assert.h>
 #include <vector>
 #include <string>
 #include <string.h>
-#include <tr1/unordered_map>
+#include <unordered_map>
 
 using namespace std;
 
-typedef std::tr1::unordered_map<std::string, int> Map;
-typedef std::tr1::unordered_map<std::string, int>::iterator Iterator;
+typedef std::unordered_map<std::string, int> Map;
+typedef std::unordered_map<std::string, int>::iterator Iterator;
 
 struct Tsuruoka_Maxent {
   Tsuruoka_Maxent(const char* pszModelFName) {
