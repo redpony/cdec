@@ -47,6 +47,17 @@ class ModelSet {
 
   bool stateless() const { return !state_size_; }
 
+  //added by ljh
+  //some states of features are not contextual, but used for storing some useful information for calculate feature val
+  //it needs to erase these states
+  //this function is only called by IncorporateIntoPlusLMForest(...) in apply_models.cc
+  void GetRealFFState(const FFState& state, FFState& real_state) const;
+  FFState GetRealFFState(const FFState& state) const;
+  bool HaveEraseState() const;
+ private:
+  std::vector<int> erase_state_start_pos_;
+  std::vector<int> erase_state_end_pos_;
+
  private:
   std::vector<const FeatureFunction*> models_;
   const std::vector<double>& weights_;
