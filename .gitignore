@@ -183,6 +183,7 @@ training/plftools
 training/test_ngram
 utils/atools
 utils/bin/
+utils/const_reorder_model_trainer
 utils/crp_test
 utils/dict_test
 utils/logval_test
@@ -192,7 +193,6 @@ utils/phmt
 utils/reconstruct_weights
 utils/small_vector_test
 utils/sv_test
-utils/synutils/const_reorder_model_trainer
 utils/ts
 utils/weights_test
 training/crf/mpi_adagrad_optimize

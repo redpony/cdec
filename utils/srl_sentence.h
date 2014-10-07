@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "tree.h"
-#include "utils/stringlib.h"
+#include "stringlib.h"
 
 using namespace std;
 

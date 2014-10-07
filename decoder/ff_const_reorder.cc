@@ -3,11 +3,11 @@
 #include "stringlib.h"
 #include "hg.h"
 #include "sentence_metadata.h"
-#include "synutils/tree.h"
-#include "synutils/srl_sentence.h"
-#include "synutils/tsuruoka_maxent.h"
+#include "tree.h"
+#include "srl_sentence.h"
+#include "tsuruoka_maxent.h"
 #include "hash.h"
-#include "synutils/argument_reorder_model.h"
+#include "argument_reorder_model.h"
 
 #include <string>
 #include <vector>

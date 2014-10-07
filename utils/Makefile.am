@@ -1,4 +1,4 @@
-bin_PROGRAMS = reconstruct_weights atools
+bin_PROGRAMS = reconstruct_weights atools const_reorder_model_trainer
 
 noinst_PROGRAMS = \
   ts \
@@ -20,7 +20,9 @@ noinst_LIBRARIES = libutils.a
 libutils_a_SOURCES = \
   test_data \
   alias_sampler.h \
+  alignment.h \
   alignment_io.h \
+  argument_reorder_model.h \
   array2d.h \
   b64tools.h \
   batched_append.h \
@@ -38,13 +40,20 @@ libutils_a_SOURCES = \
   have_64_bits.h \
   indices_after.h \
   kernel_string_subseq.h \
+  lbfgs.h \
+  lbfgs.cpp \
   logval.h \
   m.h \
+  mathvec.h \
+  maxent.h \
+  maxent.cpp \
   murmur_hash3.h \
   murmur_hash3.cc \
   named_enum.h \
   null_deleter.h \
   null_traits.h \
+  owlqn.cpp \
+  sgd.cpp \
   perfect_hash.h \
   prob.h \
   sampler.h \
@@ -52,12 +61,15 @@ libutils_a_SOURCES = \
   show.h \
   small_vector.h \
   sparse_vector.h \
+  srl_sentence.h \
   star.h \
   static_utoa.h \
   stringlib.h \
   string_piece.hh \
   tdict.h \
   timing_stats.h \
+  tree.h \
+  tsuruoka_maxent.h \
   utoa.h \
   value_array.h \
   verbose.h \
@@ -79,6 +91,7 @@ libutils_a_SOURCES = \
   filelib.cc \
   stringlib.cc \
   string_piece.cc \
+  synutils.h \
   sparse_vector.cc \
   timing_stats.cc \
   verbose.cc \
@@ -93,6 +106,8 @@ reconstruct_weights_LDADD = libutils.a
 atools_SOURCES = atools.cc
 atools_LDADD = libutils.a
 atools_LDFLAGS = $(STATIC_FLAGS)
+const_reorder_model_trainer_SOURCES = constituent_reorder_model.cc
+const_reorder_model_trainer_LDADD = libutils.a
 
 phmt_SOURCES = phmt.cc
 phmt_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
@@ -117,4 +132,3 @@ stringlib_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_U
 # do NOT NOT NOT add any other -I includes NO NO NO NO NO ######
 AM_CPPFLAGS = -DBOOST_TEST_DYN_LINK -W -Wall -I. -I$(top_srcdir) -DTEST_DATA=\"$(top_srcdir)/utils/test_data\"
 ################################################################
-

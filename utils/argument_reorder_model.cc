@@ -9,7 +9,7 @@
 #include <fstream>
 
 #include "argument_reorder_model.h"
-#include "utility.h"
+#include "synutils.h"
 #include "tsuruoka_maxent.h"
 
 inline void fnPreparingTrainingdata(const char* pszFName, int iCutoff,
