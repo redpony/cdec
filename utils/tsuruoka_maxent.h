@@ -6,9 +6,9 @@
 #ifndef TSURUOKA_MAXENT_H_
 #define TSURUOKA_MAXENT_H_
 
-#include "utility.h"
-#include "utils/stringlib.h"
-#include "utils/synutils/maxent-3.0/maxent.h"
+#include "synutils.h"
+#include "stringlib.h"
+#include "maxent.h"
 
 #include <assert.h>
 #include <vector>

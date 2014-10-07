@@ -3,8 +3,6 @@
 # cyclic dependencies between these directories!
 SUBDIRS = \
   utils \
-  utils/synutils/maxent-3.0 \
-  utils/synutils \
   klm/util/double-conversion \
   klm/util \
   klm/util/stream \

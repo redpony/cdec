@@ -9,7 +9,7 @@
 
 #include "alignment.h"
 #include "tree.h"
-#include "utility.h"
+#include "synutils.h"
 #include "tsuruoka_maxent.h"
 
 #include <unordered_map>
