@@ -15,7 +15,8 @@
 #include <cassert>
 #include "mathvec.h"
 
-#define USE_HASH_MAP  // if you encounter errors with hash, try commenting out this line. (the program will be a bit slower, though)
+#define USE_HASH_MAP  // if you encounter errors with hash, try commenting out
+                      // this line. (the program will be a bit slower, though)
 #ifdef USE_HASH_MAP
 #include <ext/hash_map>
 #endif
@@ -23,68 +24,68 @@
 //
 // data format for each sample for training/testing
 //
-struct ME_Sample
-{
-public:
+struct ME_Sample {
+ public:
   ME_Sample() : label("") {};
-  ME_Sample(const std::string & l) : label(l) {};
-  void set_label(const std::string & l) { label = l; }
+  ME_Sample(const std::string& l) : label(l) {};
+  void set_label(const std::string& l) { label = l; }
 
   // to add a binary feature
-  void add_feature(const std::string & f) {
-    features.push_back(f);   
-  }
+  void add_feature(const std::string& f) { features.push_back(f); }
 
   // to add a real-valued feature
-  void add_feature(const std::string & s, const double d) {
-    rvfeatures.push_back(std::pair<std::string, double>(s, d)); 
+  void add_feature(const std::string& s, const double d) {
+    rvfeatures.push_back(std::pair<std::string, double>(s, d));
   }
 
-public:
+ public:
   std::string label;
   std::vector<std::string> features;
   std::vector<std::pair<std::string, double> > rvfeatures;
 
   // obsolete
-  void add_feature(const std::pair<std::string, double> & f) {  
-    rvfeatures.push_back(f); // real-valued features
+  void add_feature(const std::pair<std::string, double>& f) {
+    rvfeatures.push_back(f);  // real-valued features
   }
 };
-
 
 //
 // for those who want to use load_from_array()
 //
-typedef struct ME_Model_Data
-{
-  char * label;
-  char * feature;
+typedef struct ME_Model_Data {
+  char* label;
+  char* feature;
   double weight;
 } ME_Model_Data;
 
-
-class ME_Model
-{
-public:
-
-  void add_training_sample(const ME_Sample & s);
+class ME_Model {
+ public:
+  void add_training_sample(const ME_Sample& s);
   int train();
-  std::vector<double> classify(ME_Sample & s) const;
-  bool load_from_file(const std::string & filename);
-  bool save_to_file(const std::string & filename, const double th = 0) const;
+  std::vector<double> classify(ME_Sample& s) const;
+  bool load_from_file(const std::string& filename);
+  bool save_to_file(const std::string& filename, const double th = 0) const;
   int num_classes() const { return _num_classes; }
   std::string get_class_label(int i) const { return _label_bag.Str(i); }
-  int get_class_id(const std::string & s) const { return _label_bag.Id(s); }
-  void get_features(std::list< std::pair< std::pair<std::string, std::string>, double> > & fl);
-  void set_heldout(const int h, const int n = 0) { _nheldout = h; _early_stopping_n = n; };
+  int get_class_id(const std::string& s) const { return _label_bag.Id(s); }
+  void get_features(
+      std::list<std::pair<std::pair<std::string, std::string>, double> >& fl);
+  void set_heldout(const int h, const int n = 0) {
+    _nheldout = h;
+    _early_stopping_n = n;
+  };
   void use_l1_regularizer(const double v) { _l1reg = v; }
   void use_l2_regularizer(const double v) { _l2reg = v; }
   void use_SGD(int iter = 30, double eta0 = 1, double alpha = 0.85) {
     _optimization_method = SGD;
-    SGD_ITER = iter; SGD_ETA0 = eta0; SGD_ALPHA = alpha;
+    SGD_ITER = iter;
+    SGD_ETA0 = eta0;
+    SGD_ALPHA = alpha;
   }
   bool load_from_array(const ME_Model_Data data[]);
-  void set_reference_model(const ME_Model & ref_model) { _ref_modelp = &ref_model; };
+  void set_reference_model(const ME_Model& ref_model) {
+    _ref_modelp = &ref_model;
+  };
   void clear();
 
   ME_Model() {
@@ -95,13 +96,16 @@ public:
     _optimization_method = LBFGS;
   }
 
-public:
+ public:
   // obsolete. just for downward compatibility
-  int train(const std::vector<ME_Sample> & train);
+  int train(const std::vector<ME_Sample>& train);
 
-private:  
-
-  enum OPTIMIZATION_METHOD { LBFGS, OWLQN, SGD } _optimization_method;
+ private:
+  enum OPTIMIZATION_METHOD {
+    LBFGS,
+    OWLQN,
+    SGD
+  } _optimization_method;
   // OWLQN and SGD are available only for L1-regularization
 
   int SGD_ITER;
@@ -109,13 +113,13 @@ private:
   double SGD_ALPHA;
 
   double _l1reg, _l2reg;
-  
+
   struct Sample {
     int label;
     std::vector<int> positive_features;
     std::vector<std::pair<int, double> > rvfeatures;
-    std::vector<double> ref_pd; // reference probability distribution
-    bool operator<(const Sample & x) const {
+    std::vector<double> ref_pd;  // reference probability distribution
+    bool operator<(const Sample& x) const {
       for (unsigned int i = 0; i < positive_features.size(); i++) {
         if (i >= x.positive_features.size()) return false;
         int v0 = positive_features[i];
@@ -127,10 +131,11 @@ private:
     }
   };
 
-  struct ME_Feature
-  {
-    enum { MAX_LABEL_TYPES = 255 };
-      
+  struct ME_Feature {
+    enum {
+      MAX_LABEL_TYPES = 255
+    };
+
     //    ME_Feature(const int l, const int f) : _body((l << 24) + f) {
     //      assert(l >= 0 && l < 256);
     //      assert(f >= 0 && f <= 0xffffff);
@@ -144,20 +149,20 @@ private:
     int label() const { return _body & 0xff; }
     int feature() const { return _body >> 8; }
     unsigned int body() const { return _body; }
-  private:
+
+   private:
     unsigned int _body;
   };
 
-  struct ME_FeatureBag
-  {
+  struct ME_FeatureBag {
 #ifdef USE_HASH_MAP
     typedef __gnu_cxx::hash_map<unsigned int, int> map_type;
-#else    
+#else
     typedef std::map<unsigned int, int> map_type;
 #endif
     map_type mef2id;
     std::vector<ME_Feature> id2mef;
-    int Put(const ME_Feature & i) {
+    int Put(const ME_Feature& i) {
       map_type::const_iterator j = mef2id.find(i.body());
       if (j == mef2id.end()) {
         int id = id2mef.size();
@@ -167,7 +172,7 @@ private:
       }
       return j->second;
     }
-    int Id(const ME_Feature & i) const {
+    int Id(const ME_Feature& i) const {
       map_type::const_iterator j = mef2id.find(i.body());
       if (j == mef2id.end()) {
         return -1;
@@ -178,17 +183,14 @@ private:
       assert(id >= 0 && id < (int)id2mef.size());
       return id2mef[id];
     }
-    int Size() const {
-      return id2mef.size();
-    }
+    int Size() const { return id2mef.size(); }
     void Clear() {
       mef2id.clear();
       id2mef.clear();
     }
   };
 
-  struct hashfun_str
-  {
+  struct hashfun_str {
     size_t operator()(const std::string& s) const {
       assert(sizeof(int) == 4 && sizeof(char) == 1);
       const int* p = reinterpret_cast<const int*>(s.c_str());
@@ -196,7 +198,7 @@ private:
       int n = s.size() / 4;
       for (int i = 0; i < n; i++, p++) {
         //      v ^= *p;
-        v ^= *p << (4 * (i % 2)); // note) 0 <= char < 128
+        v ^= *p << (4 * (i % 2));  // note) 0 <= char < 128
       }
       int m = s.size() % 4;
       for (int i = 0; i < m; i++) {
@@ -206,17 +208,16 @@ private:
     }
   };
 
-  struct MiniStringBag
-  {
+  struct MiniStringBag {
 #ifdef USE_HASH_MAP
     typedef __gnu_cxx::hash_map<std::string, int, hashfun_str> map_type;
-#else    
+#else
     typedef std::map<std::string, int> map_type;
 #endif
     int _size;
     map_type str2id;
     MiniStringBag() : _size(0) {}
-    int Put(const std::string & i) {
+    int Put(const std::string& i) {
       map_type::const_iterator j = str2id.find(i);
       if (j == str2id.end()) {
         int id = _size;
@@ -226,21 +227,23 @@ private:
       }
       return j->second;
     }
-    int Id(const std::string & i) const {
+    int Id(const std::string& i) const {
       map_type::const_iterator j = str2id.find(i);
-      if (j == str2id.end())  return -1;
+      if (j == str2id.end()) return -1;
       return j->second;
     }
     int Size() const { return _size; }
-    void Clear() { str2id.clear(); _size = 0; }
+    void Clear() {
+      str2id.clear();
+      _size = 0;
+    }
     map_type::const_iterator begin() const { return str2id.begin(); }
-    map_type::const_iterator end()   const { return str2id.end(); }
+    map_type::const_iterator end() const { return str2id.end(); }
   };
 
-  struct StringBag : public MiniStringBag
-  {
+  struct StringBag : public MiniStringBag {
     std::vector<std::string> id2str;
-    int Put(const std::string & i) {
+    int Put(const std::string& i) {
       map_type::const_iterator j = str2id.find(i);
       if (j == str2id.end()) {
         int id = id2str.size();
@@ -261,7 +264,7 @@ private:
     }
   };
 
-  std::vector<Sample> _vs; // vector of training_samples
+  std::vector<Sample> _vs;  // vector of training_samples
   StringBag _label_bag;
   MiniStringBag _featurename_bag;
   std::vector<double> _vl;  // vector of lambda
@@ -269,41 +272,45 @@ private:
   int _num_classes;
   std::vector<double> _vee;  // empirical expectation
   std::vector<double> _vme;  // empirical expectation
-  std::vector< std::vector< int > > _feature2mef;
-  std::vector< Sample > _heldout;
-  double _train_error;   // current error rate on the training data
-  double _heldout_error; // current error rate on the heldout data
+  std::vector<std::vector<int> > _feature2mef;
+  std::vector<Sample> _heldout;
+  double _train_error;    // current error rate on the training data
+  double _heldout_error;  // current error rate on the heldout data
   int _nheldout;
   int _early_stopping_n;
   std::vector<double> _vhlogl;
-  const ME_Model * _ref_modelp;
+  const ME_Model* _ref_modelp;
 
   double heldout_likelihood();
-  int conditional_probability(const Sample & nbs, std::vector<double> & membp) const;
+  int conditional_probability(const Sample& nbs,
+                              std::vector<double>& membp) const;
   int make_feature_bag(const int cutoff);
-  int classify(const Sample & nbs, std::vector<double> & membp) const;
+  int classify(const Sample& nbs, std::vector<double>& membp) const;
   double update_model_expectation();
   int perform_QUASI_NEWTON();
   int perform_SGD();
   int perform_GIS(int C);
-  std::vector<double> perform_LBFGS(const std::vector<double> & x0);
-  std::vector<double> perform_OWLQN(const std::vector<double> & x0, const double C);
-  double backtracking_line_search(const Vec & x0, const Vec & grad0, const double f0, const Vec & dx, Vec & x, Vec & grad1);
-  double regularized_func_grad(const double C, const Vec & x, Vec & grad);
-  double constrained_line_search(double C, const Vec & x0, const Vec & grad0, const double f0, const Vec & dx, Vec & x, Vec & grad1);
+  std::vector<double> perform_LBFGS(const std::vector<double>& x0);
+  std::vector<double> perform_OWLQN(const std::vector<double>& x0,
+                                    const double C);
+  double backtracking_line_search(const Vec& x0, const Vec& grad0,
+                                  const double f0, const Vec& dx, Vec& x,
+                                  Vec& grad1);
+  double regularized_func_grad(const double C, const Vec& x, Vec& grad);
+  double constrained_line_search(double C, const Vec& x0, const Vec& grad0,
+                                 const double f0, const Vec& dx, Vec& x,
+                                 Vec& grad1);
 
-
-  void set_ref_dist(Sample & s) const;
+  void set_ref_dist(Sample& s) const;
   void init_feature2mef();
 
-  double FunctionGradient(const std::vector<double> & x, std::vector<double> & grad);
-  static double FunctionGradientWrapper(const std::vector<double> & x, std::vector<double> & grad);
-  
+  double FunctionGradient(const std::vector<double>& x,
+                          std::vector<double>& grad);
+  static double FunctionGradientWrapper(const std::vector<double>& x,
+                                        std::vector<double>& grad);
 };
 
-
 #endif
-
 
 /*
  * $Log: maxent.h,v $
