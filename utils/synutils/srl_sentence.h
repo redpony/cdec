@@ -8,9 +8,12 @@
 #ifndef SRL_SENTENCE_H_
 #define SRL_SENTENCE_H_
 
-#include "tree.h"
 
+#include <sstream>
 #include <vector>
+
+#include "tree.h"
+#include "utils/stringlib.h"
 
 using namespace std;
 

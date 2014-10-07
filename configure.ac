@@ -5,9 +5,9 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_LIBTOOL
 AC_PROG_LEX
-case $LEX in 
-:) AC_MSG_ERROR([No lex (Flex, lex, etc.) program found]);; 
-esac 
+case $LEX in
+:) AC_MSG_ERROR([No lex (Flex, lex, etc.) program found]);;
+esac
 OLD_CXXFLAGS=$CXXFLAGS
 AC_PROG_CC
 AC_PROG_CXX
@@ -208,6 +208,8 @@ fi
 # core cdec stuff
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([utils/Makefile])
+AC_CONFIG_FILES([utils/synutils/maxent-3.0/Makefile])
+AC_CONFIG_FILES([utils/synutils/Makefile])
 AC_CONFIG_FILES([mteval/Makefile])
 AC_CONFIG_FILES([mteval/meteor_jar.cc])
 AC_CONFIG_FILES([decoder/Makefile])
@@ -240,4 +242,3 @@ AC_CONFIG_FILES([training/dtrain/Makefile])
 AC_CONFIG_FILES([example_extff/Makefile])
 
 AC_OUTPUT
-

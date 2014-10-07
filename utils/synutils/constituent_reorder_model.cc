@@ -12,12 +12,12 @@
 #include "utility.h"
 #include "tsuruoka_maxent.h"
 
-#include <tr1/unordered_map>
+#include <unordered_map>
 
 using namespace std;
 
-typedef std::tr1::unordered_map<std::string, int> Map;
-typedef std::tr1::unordered_map<std::string, int>::iterator Iterator;
+typedef std::unordered_map<std::string, int> Map;
+typedef std::unordered_map<std::string, int>::iterator Iterator;
 
 namespace po = boost::program_options;
 
