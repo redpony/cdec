@@ -98,7 +98,7 @@ int ME_Model::conditional_probability(const Sample& s,
                                       std::vector<double>& membp) const {
   // int num_classes = membp.size();
   double sum = 0;
-  int max_label = -1;
+  int max_label = 0;
   //  double maxp = 0;
 
   vector<double> powv(_num_classes, 0.0);
@@ -134,7 +134,6 @@ int ME_Model::conditional_probability(const Sample& s,
     membp[label] /= sum;
     if (membp[label] > membp[max_label]) max_label = label;
   }
-  assert(max_label >= 0);
   return max_label;
 }
 
