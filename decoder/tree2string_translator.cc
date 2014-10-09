@@ -287,6 +287,8 @@ struct Tree2StringTranslatorImpl {
                  const vector<double>& weights,
                  Hypergraph* minus_lm_forest) {
     cdec::TreeFragment input_tree(input, false);
+    smeta->src_tree_ = input_tree;
+    smeta->input_type_ = cdec::kTREE;
     if (add_pass_through_rules) CreatePassThroughRules(input_tree);
     Hypergraph hg;
     hg.ReserveNodes(input_tree.nodes.size());

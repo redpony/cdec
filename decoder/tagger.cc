@@ -100,6 +100,8 @@ bool Tagger::TranslateImpl(const string& input,
   Lattice& lattice = smeta->src_lattice_;
   LatticeTools::ConvertTextToLattice(input, &lattice);
   smeta->SetSourceLength(lattice.size());
+  smeta->ComputeInputLatticeType();
+  assert(smeta->GetInputType() == cdec::kSEQUENCE);
   vector<WordID> sequence(lattice.size());
   for (int i = 0; i < lattice.size(); ++i) {
     assert(lattice[i].size() == 1);

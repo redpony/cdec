@@ -198,13 +198,13 @@ void AlignerTools::WriteAlignment(const Lattice& src_lattice,
   }
   const Hypergraph* g = &in_g;
   HypergraphP new_hg;
-  if (!src_lattice.IsSentence() ||
-      !trg_lattice.IsSentence()) {
+  if (!IsSentence(src_lattice) ||
+      !IsSentence(trg_lattice)) {
     if (map_instead_of_viterbi) {
       cerr << "  Lattice alignment: using Viterbi instead of MAP alignment\n";
     }
     map_instead_of_viterbi = false;
-    fix_up_src_spans = !src_lattice.IsSentence();
+    fix_up_src_spans = !IsSentence(src_lattice);
   }
 
   KBest::KBestDerivations<vector<Hypergraph::Edge const*>, ViterbiPathTraversal> kbest(in_g, k_best);
