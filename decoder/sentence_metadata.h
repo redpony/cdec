@@ -1,5 +1,5 @@
-#ifndef _SENTENCE_METADATA_H_
-#define _SENTENCE_METADATA_H_
+#ifndef SENTENCE_METADATA_H_
+#define SENTENCE_METADATA_H_
 
 #include <string>
 #include <map>

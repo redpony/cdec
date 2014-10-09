@@ -1,5 +1,5 @@
-#ifndef _JSON_WRAPPER_H_
-#define _JSON_WRAPPER_H_
+#ifndef JSON_WRAPPER_H_
+#define JSON_WRAPPER_H_
 
 #include <iostream>
 #include <cassert>

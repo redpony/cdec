@@ -1,5 +1,5 @@
-#ifndef _PHRASETABLE_FST_H_
-#define _PHRASETABLE_FST_H_
+#ifndef PHRASETABLE_FST_H_
+#define PHRASETABLE_FST_H_
 
 #include <vector>
 #include <string>

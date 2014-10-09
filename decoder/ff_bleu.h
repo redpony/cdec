@@ -1,5 +1,5 @@
-#ifndef _BLEU_FF_H_
-#define _BLEU_FF_H_
+#ifndef BLEU_FF_H_
+#define BLEU_FF_H_
 
 #include <vector>
 #include <string>

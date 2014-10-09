@@ -1,5 +1,5 @@
-#ifndef _FOREST_WRITER_H_
-#define _FOREST_WRITER_H_
+#ifndef FOREST_WRITER_H_
+#define FOREST_WRITER_H_
 
 #include <string>
 

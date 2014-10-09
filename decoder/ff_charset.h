@@ -1,5 +1,5 @@
-#ifndef _FFCHARSET_H_
-#define _FFCHARSET_H_
+#ifndef FFCHARSET_H_
+#define FFCHARSET_H_
 
 #include <string>
 #include <map>

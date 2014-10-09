@@ -1,5 +1,5 @@
-#ifndef _CSPLIT_H_
-#define _CSPLIT_H_
+#ifndef CSPLIT_H_
+#define CSPLIT_H_
 
 #include "translator.h"
 #include "lattice.h"

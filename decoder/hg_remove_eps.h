@@ -1,5 +1,5 @@
-#ifndef _HG_REMOVE_EPS_H_
-#define _HG_REMOVE_EPS_H_
+#ifndef HG_REMOVE_EPS_H_
+#define HG_REMOVE_EPS_H_
 
 #include "wordid.h"
 class Hypergraph;

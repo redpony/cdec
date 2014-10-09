@@ -1,5 +1,5 @@
-#ifndef _FF_SOURCE_PATH_H_
-#define _FF_SOURCE_PATH_H_
+#ifndef FF_SOURCE_PATH_H_
+#define FF_SOURCE_PATH_H_
 
 #include <vector>
 #include <map>

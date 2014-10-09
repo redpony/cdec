@@ -1,5 +1,5 @@
-#ifndef _LM_FF_H_
-#define _LM_FF_H_
+#ifndef LM_FF_H_
+#define LM_FF_H_
 
 #include <vector>
 #include <string>

@@ -1,5 +1,5 @@
-#ifndef _HG_IO_H_
-#define _HG_IO_H_
+#ifndef HG_IO_H_
+#define HG_IO_H_
 
 #include <iostream>
 #include <string>

@@ -1,5 +1,5 @@
-#ifndef __LATTICE_H_
-#define __LATTICE_H_
+#ifndef LATTICE_H_
+#define LATTICE_H_
 
 #include <string>
 #include <vector>
