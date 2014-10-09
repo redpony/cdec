@@ -1,5 +1,5 @@
-#ifndef _SMALL_VECTOR_H_
-#define _SMALL_VECTOR_H_
+#ifndef SMALL_VECTOR_H_
+#define SMALL_VECTOR_H_
 
 /* REQUIRES that T is POD (can be memcpy).  won't work (yet) due to union with SMALL_VECTOR_POD==0 - may be possible to handle movable types that have ctor/dtor, by using  explicit allocation, ctor/dtor calls.  but for now JUST USE THIS FOR no-meaningful ctor/dtor POD types.
 

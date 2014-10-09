@@ -1,5 +1,5 @@
-#ifndef _FDICT_H_
-#define _FDICT_H_
+#ifndef FDICT_H_
+#define FDICT_H_
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

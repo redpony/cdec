@@ -1,5 +1,5 @@
-#ifndef _WEIGHTS_H_
-#define _WEIGHTS_H_
+#ifndef WEIGHTS_H_
+#define WEIGHTS_H_
 
 #include <string>
 #include <vector>
