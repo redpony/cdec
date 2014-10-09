@@ -1,5 +1,5 @@
-#ifndef _PHRASEBASED_TRANSLATOR_H_
-#define _PHRASEBASED_TRANSLATOR_H_
+#ifndef PHRASEBASED_TRANSLATOR_H_
+#define PHRASEBASED_TRANSLATOR_H_
 
 #include "translator.h"
 

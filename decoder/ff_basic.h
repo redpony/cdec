@@ -1,5 +1,5 @@
-#ifndef _FF_BASIC_H_
-#define _FF_BASIC_H_
+#ifndef FF_BASIC_H_
+#define FF_BASIC_H_
 
 #include "ff.h"
 

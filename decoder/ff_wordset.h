@@ -1,5 +1,5 @@
-#ifndef _FF_WORDSET_H_
-#define _FF_WORDSET_H_
+#ifndef FF_WORDSET_H_
+#define FF_WORDSET_H_
 
 #include "ff.h"
 #include "tdict.h"

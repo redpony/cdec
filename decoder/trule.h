@@ -1,5 +1,5 @@
-#ifndef _RULE_H_
-#define _RULE_H_
+#ifndef TRULE_H_
+#define TRULE_H_
 
 #include <algorithm>
 #include <vector>

@@ -1,5 +1,5 @@
-#ifndef _FF_CSPLIT_H_
-#define _FF_CSPLIT_H_
+#ifndef FF_CSPLIT_H_
+#define FF_CSPLIT_H_
 
 #include <boost/shared_ptr.hpp>
 

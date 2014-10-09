@@ -1,5 +1,5 @@
-#ifndef _HG_H_
-#define _HG_H_
+#ifndef HG_H_
+#define HG_H_
 
 // define USE_INFO_EDGE 1 if you want lots of debug info shown with --show_derivations - otherwise it adds quite a bit of overhead if ffs have their logging enabled (e.g. ff_from_fsa)
 #ifndef USE_INFO_EDGE

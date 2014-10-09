@@ -1,5 +1,5 @@
-#ifndef _FACTORED_LEXICON_HELPER_
-#define _FACTORED_LEXICON_HELPER_
+#ifndef FACTORED_LEXICON_HELPER_
+#define FACTORED_LEXICON_HELPER_
 
 #include <cassert>
 #include <vector>
