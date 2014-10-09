@@ -33,7 +33,7 @@ class SentenceMetadata {
       if (alt.size() > 1) { input_type_ = cdec::kLATTICE; break; }
     }
   }
-  cdec::InputType GetInputType() { return input_type_; }
+  cdec::InputType GetInputType() const { return input_type_; }
 
   int GetSentenceId() const { return sent_id_; }
 
