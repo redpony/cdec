@@ -1,5 +1,5 @@
-#ifndef _NS_DOC_SCORER_H_
-#define _NS_DOC_SCORER_H_
+#ifndef NS_DOC_SCORER_H_
+#define NS_DOC_SCORER_H_
 
 #include <vector>
 #include <string>

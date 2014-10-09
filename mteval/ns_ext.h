@@ -1,5 +1,5 @@
-#ifndef _NS_EXTERNAL_SCORER_H_
-#define _NS_EXTERNAL_SCORER_H_
+#ifndef NS_EXTERNAL_SCORER_H_
+#define NS_EXTERNAL_SCORER_H_
 
 #include "ns.h"
 
