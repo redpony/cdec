@@ -1,5 +1,5 @@
-#ifndef _ALIAS_SAMPLER_H_
-#define _ALIAS_SAMPLER_H_
+#ifndef ALIAS_SAMPLER_H_
+#define ALIAS_SAMPLER_H_
 
 #include <vector>
 #include <limits>

@@ -1,5 +1,5 @@
-#ifndef _CORPUS_TOOLS_H_
-#define _CORPUS_TOOLS_H_
+#ifndef CORPUS_TOOLS_H_
+#define CORPUS_TOOLS_H_
 
 #include <string>
 #include <set>

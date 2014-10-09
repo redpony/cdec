@@ -1,5 +1,5 @@
-#ifndef _EXP_SEMIRING_H_
-#define _EXP_SEMIRING_H_
+#ifndef EXP_SEMIRING_H_
+#define EXP_SEMIRING_H_
 
 #include <iostream>
 #include "star.h"
