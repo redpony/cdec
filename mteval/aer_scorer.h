@@ -1,5 +1,5 @@
-#ifndef _AER_SCORER_
-#define _AER_SCORER_
+#ifndef AER_SCORER_
+#define AER_SCORER_
 
 #include <boost/shared_ptr.hpp>
 

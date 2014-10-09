@@ -1,5 +1,5 @@
-#ifndef _NS_COMB_H_
-#define _NS_COMB_H_
+#ifndef NS_COMB_H_
+#define NS_COMB_H_
 
 #include "ns.h"
 

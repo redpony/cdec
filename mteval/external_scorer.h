@@ -1,5 +1,5 @@
-#ifndef _EXTERNAL_SCORER_H_
-#define _EXTERNAL_SCORER_H_
+#ifndef EXTERNAL_SCORER_H_
+#define EXTERNAL_SCORER_H_
 
 #include <vector>
 #include <string>
