@@ -6,17 +6,16 @@
 #ifndef TSURUOKA_MAXENT_H_
 #define TSURUOKA_MAXENT_H_
 
+#include <assert.h>
+#include <string.h>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include "synutils.h"
 #include "stringlib.h"
 #include "maxent.h"
-
-#include <assert.h>
-#include <vector>
-#include <string>
-#include <string.h>
-#include <unordered_map>
-
-using namespace std;
 
 typedef std::unordered_map<std::string, int> Map;
 typedef std::unordered_map<std::string, int>::iterator Iterator;
@@ -67,10 +66,10 @@ struct Tsuruoka_Maxent {
       assert(p != NULL);
       p[0] = '\0';
       p++;
-      vector<string> vecContext;
-      SplitOnWhitespace(string(pszLine), &vecContext);
+      std::vector<std::string> vecContext;
+      SplitOnWhitespace(std::string(pszLine), &vecContext);
 
-      pmes->label = string(p);
+      pmes->label = std::string(p);
       for (size_t i = 0; i < vecContext.size(); i++)
         pmes->add_feature(vecContext[i]);
       pModel->add_training_sample((*pmes));
@@ -98,53 +97,53 @@ struct Tsuruoka_Maxent {
   }
 
   double fnEval(const char* pszContext, const char* pszOutcome) const {
-    vector<string> vecContext;
+    std::vector<std::string> vecContext;
     ME_Sample* pmes = new ME_Sample();
-    SplitOnWhitespace(string(pszContext), &vecContext);
+    SplitOnWhitespace(std::string(pszContext), &vecContext);
 
     for (size_t i = 0; i < vecContext.size(); i++)
       pmes->add_feature(vecContext[i]);
-    vector<double> vecProb = m_pModel->classify(*pmes);
+    std::vector<double> vecProb = m_pModel->classify(*pmes);
     delete pmes;
     int iLableID = m_pModel->get_class_id(pszOutcome);
     return vecProb[iLableID];
   }
   void fnEval(const char* pszContext,
-              vector<pair<string, double> >& vecOutput) const {
-    vector<string> vecContext;
+              std::vector<std::pair<std::string, double> >& vecOutput) const {
+    std::vector<std::string> vecContext;
     ME_Sample* pmes = new ME_Sample();
-    SplitOnWhitespace(string(pszContext), &vecContext);
+    SplitOnWhitespace(std::string(pszContext), &vecContext);
 
     vecOutput.clear();
 
     for (size_t i = 0; i < vecContext.size(); i++)
       pmes->add_feature(vecContext[i]);
-    vector<double> vecProb = m_pModel->classify(*pmes);
+    std::vector<double> vecProb = m_pModel->classify(*pmes);
 
     for (size_t i = 0; i < vecProb.size(); i++) {
-      string label = m_pModel->get_class_label(i);
+      std::string label = m_pModel->get_class_label(i);
       vecOutput.push_back(make_pair(label, vecProb[i]));
     }
     delete pmes;
   }
-  void fnEval(const char* pszContext, vector<double>& vecOutput) const {
-    vector<string> vecContext;
+  void fnEval(const char* pszContext, std::vector<double>& vecOutput) const {
+    std::vector<std::string> vecContext;
     ME_Sample* pmes = new ME_Sample();
-    SplitOnWhitespace(string(pszContext), &vecContext);
+    SplitOnWhitespace(std::string(pszContext), &vecContext);
 
     vecOutput.clear();
 
     for (size_t i = 0; i < vecContext.size(); i++)
       pmes->add_feature(vecContext[i]);
-    vector<double> vecProb = m_pModel->classify(*pmes);
+    std::vector<double> vecProb = m_pModel->classify(*pmes);
 
     for (size_t i = 0; i < vecProb.size(); i++) {
-      string label = m_pModel->get_class_label(i);
+      std::string label = m_pModel->get_class_label(i);
       vecOutput.push_back(vecProb[i]);
     }
     delete pmes;
   }
-  int fnGetClassId(const string& strLabel) const {
+  int fnGetClassId(const std::string& strLabel) const {
     return m_pModel->get_class_id(strLabel);
   }
 

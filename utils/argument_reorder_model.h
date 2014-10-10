@@ -8,17 +8,20 @@
 #ifndef ARGUMENT_REORDER_MODEL_H_
 #define ARGUMENT_REORDER_MODEL_H_
 
+#include <string>
+#include <vector>
+
 #include "alignment.h"
 #include "tree.h"
 #include "srl_sentence.h"
 
 // an argument item or a predicate item (the verb itself)
 struct SSRLItem {
-  SSRLItem(const STreeItem *tree_item, string role)
+  SSRLItem(const STreeItem *tree_item, std::string role)
       : tree_item_(tree_item), role_(role) {}
   ~SSRLItem() {}
   const STreeItem *tree_item_;
-  const string role_;
+  const std::string role_;
 };
 
 struct SPredicateItem {
@@ -26,11 +29,13 @@ struct SPredicateItem {
       : pred_(pred) {
     vec_items_.reserve(pred->m_vecArgt.size() + 1);
     for (int i = 0; i < pred->m_vecArgt.size(); i++) {
-      vec_items_.push_back(new SSRLItem(pred->m_vecArgt[i]->m_pTreeItem,
-                                        string(pred->m_vecArgt[i]->m_pszRole)));
+      vec_items_.push_back(
+          new SSRLItem(pred->m_vecArgt[i]->m_pTreeItem,
+                       std::string(pred->m_vecArgt[i]->m_pszRole)));
     }
-    vec_items_.push_back(new SSRLItem(
-        tree->m_vecTerminals[pred->m_iPosition]->m_ptParent, string("Pred")));
+    vec_items_.push_back(
+        new SSRLItem(tree->m_vecTerminals[pred->m_iPosition]->m_ptParent,
+                     std::string("Pred")));
     sort(vec_items_.begin(), vec_items_.end(), SortFunction);
 
     begin_ = vec_items_[0]->tree_item_->m_iBegin;
@@ -43,7 +48,7 @@ struct SPredicateItem {
     return (i->tree_item_->m_iBegin < j->tree_item_->m_iBegin);
   }
 
-  vector<SSRLItem *> vec_items_;
+  std::vector<SSRLItem *> vec_items_;
   int begin_;
   int end_;
   const SPredicate *pred_;
@@ -51,13 +56,14 @@ struct SPredicateItem {
 
 struct SArgumentReorderModel {
  public:
-  static string fnGetBlockOutcome(int iBegin, int iEnd, SAlignment *pAlign) {
+  static std::string fnGetBlockOutcome(int iBegin, int iEnd,
+                                       SAlignment *pAlign) {
     return pAlign->fnIsContinuous(iBegin, iEnd);
   }
   static void fnGetReorderType(SPredicateItem *pPredItem, SAlignment *pAlign,
-                               vector<string> &vecStrLeftReorder,
-                               vector<string> &vecStrRightReorder) {
-    vector<int> vecLeft, vecRight;
+                               std::vector<std::string> &vecStrLeftReorder,
+                               std::vector<std::string> &vecStrRightReorder) {
+    std::vector<int> vecLeft, vecRight;
     for (int i = 0; i < pPredItem->vec_items_.size(); i++) {
       const STreeItem *pCon1 = pPredItem->vec_items_[i]->tree_item_;
       int iLeft1, iRight1;
@@ -66,15 +72,15 @@ struct SArgumentReorderModel {
       vecLeft.push_back(iLeft1);
       vecRight.push_back(iRight1);
     }
-    vector<int> vecLeftPosition;
+    std::vector<int> vecLeftPosition;
     fnGetRelativePosition(vecLeft, vecLeftPosition);
-    vector<int> vecRightPosition;
+    std::vector<int> vecRightPosition;
     fnGetRelativePosition(vecRight, vecRightPosition);
 
     vecStrLeftReorder.clear();
     vecStrRightReorder.clear();
     for (int i = 1; i < vecLeftPosition.size(); i++) {
-      string strOutcome;
+      std::string strOutcome;
       fnGetOutcome(vecLeftPosition[i - 1], vecLeftPosition[i], strOutcome);
       vecStrLeftReorder.push_back(strOutcome);
       fnGetOutcome(vecRightPosition[i - 1], vecRightPosition[i], strOutcome);
@@ -115,32 +121,33 @@ struct SArgumentReorderModel {
   static void fnGenerateFeature(const SParsedTree *pTree,
                                 const SPredicate *pPred,
                                 const SPredicateItem *pPredItem, int iPos,
-                                const string &strBlock1,
-                                const string &strBlock2, ostringstream &ostr) {
+                                const std::string &strBlock1,
+                                const std::string &strBlock2,
+                                std::ostringstream &ostr) {
     SSRLItem *pSRLItem1 = pPredItem->vec_items_[iPos - 1];
     SSRLItem *pSRLItem2 = pPredItem->vec_items_[iPos];
     const STreeItem *pCon1 = pSRLItem1->tree_item_;
     const STreeItem *pCon2 = pSRLItem2->tree_item_;
 
-    string left_role = pSRLItem1->role_;
-    string right_role = pSRLItem2->role_;
+    std::string left_role = pSRLItem1->role_;
+    std::string right_role = pSRLItem2->role_;
 
-    string predicate_term =
+    std::string predicate_term =
         pTree->m_vecTerminals[pPred->m_iPosition]->m_pszTerm;
 
-    vector<string> vec_other_right_sibling;
+    std::vector<std::string> vec_other_right_sibling;
     for (int i = iPos + 1; i < pPredItem->vec_items_.size(); i++)
       vec_other_right_sibling.push_back(
-          string(pPredItem->vec_items_[i]->role_));
+          std::string(pPredItem->vec_items_[i]->role_));
     if (vec_other_right_sibling.size() == 0)
-      vec_other_right_sibling.push_back(string("NULL"));
+      vec_other_right_sibling.push_back(std::string("NULL"));
 
-    vector<string> vec_other_left_sibling;
+    std::vector<std::string> vec_other_left_sibling;
     for (int i = 0; i < iPos - 1; i++)
       vec_other_right_sibling.push_back(
-          string(pPredItem->vec_items_[i]->role_));
+          std::string(pPredItem->vec_items_[i]->role_));
     if (vec_other_left_sibling.size() == 0)
-      vec_other_left_sibling.push_back(string("NULL"));
+      vec_other_left_sibling.push_back(std::string("NULL"));
 
     // generate features
     // f1
@@ -190,26 +197,26 @@ struct SArgumentReorderModel {
   }
 
  private:
-  static void fnGetOutcome(int i1, int i2, string &strOutcome) {
+  static void fnGetOutcome(int i1, int i2, std::string &strOutcome) {
     assert(i1 != i2);
     if (i1 < i2) {
       if (i2 > i1 + 1)
-        strOutcome = string("DM");
+        strOutcome = std::string("DM");
       else
-        strOutcome = string("M");
+        strOutcome = std::string("M");
     } else {
       if (i1 > i2 + 1)
-        strOutcome = string("DS");
+        strOutcome = std::string("DS");
       else
-        strOutcome = string("S");
+        strOutcome = std::string("S");
     }
   }
 
-  static void fnGetRelativePosition(const vector<int> &vecLeft,
-                                    vector<int> &vecPosition) {
+  static void fnGetRelativePosition(const std::vector<int> &vecLeft,
+                                    std::vector<int> &vecPosition) {
     vecPosition.clear();
 
-    vector<float> vec;
+    std::vector<float> vec;
     for (int i = 0; i < vecLeft.size(); i++) {
       if (vecLeft[i] == -1) {
         if (i == 0)

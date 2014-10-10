@@ -15,8 +15,6 @@
 #include "tree.h"
 #include "stringlib.h"
 
-using namespace std;
-
 struct SArgument {
   SArgument(const char* pszRole, int iBegin, int iEnd, float fProb) {
     m_pszRole = new char[strlen(pszRole) + 1];
@@ -69,7 +67,7 @@ struct SPredicate {
   char* m_pszLemma;  // lemma of the predicate, for Chinese, it's always as same
                      // as the predicate itself
   int m_iPosition;  // the position in sentence
-  vector<SArgument*> m_vecArgt;  // arguments associated to the predicate
+  std::vector<SArgument*> m_vecArgt;  // arguments associated to the predicate
 };
 
 struct SSrlSentence {
@@ -91,7 +89,7 @@ struct SSrlSentence {
   int GetPredicateNum() { return m_vecPred.size(); }
 
   SParsedTree* m_pTree;
-  vector<SPredicate*> m_vecPred;
+  std::vector<SPredicate*> m_vecPred;
 };
 
 struct SSrlSentenceReader {
@@ -116,7 +114,7 @@ struct SSrlSentenceReader {
   // TODO: here only considers flat predicate-argument structure
   //      i.e., no overlap among them
   SSrlSentence* fnReadNextSrlSentence() {
-    vector<vector<string> > vecContent;
+    std::vector<std::vector<std::string> > vecContent;
     if (fnReadNextContent(vecContent) == false) return NULL;
 
     SSrlSentence* pSrlSentence = new SSrlSentence();
@@ -124,18 +122,18 @@ struct SSrlSentenceReader {
     // put together syntactic text
     std::ostringstream ostr;
     for (int i = 0; i < iSize; i++) {
-      string strSynSeg =
+      std::string strSynSeg =
           vecContent[i][5];  // the 5th column is the syntactic segment
       size_t iPosition = strSynSeg.find_first_of('*');
-      assert(iPosition != string::npos);
-      ostringstream ostrTmp;
+      assert(iPosition != std::string::npos);
+      std::ostringstream ostrTmp;
       ostrTmp << "(" << vecContent[i][2] << " " << vecContent[i][0]
               << ")";  // the 2th column is POS-tag, and the 0th column is word
       strSynSeg.replace(iPosition, 1, ostrTmp.str());
       fnReplaceAll(strSynSeg, "(", " (");
       ostr << strSynSeg;
     }
-    string strSyn = ostr.str();
+    std::string strSyn = ostr.str();
     pSrlSentence->m_pTree = SParsedTree::fnConvertFromString(strSyn.c_str());
     pSrlSentence->m_pTree->fnSetHeadWord();
     pSrlSentence->m_pTree->fnSetSpanInfo();
@@ -143,9 +141,9 @@ struct SSrlSentenceReader {
     // read predicate-argument structure
     int iNumPred = vecContent[0].size() - 8;
     for (int i = 0; i < iNumPred; i++) {
-      vector<string> vecRole;
-      vector<int> vecBegin;
-      vector<int> vecEnd;
+      std::vector<std::string> vecRole;
+      std::vector<int> vecBegin;
+      std::vector<int> vecEnd;
       int iPred = -1;
       for (int j = 0; j < iSize; j++) {
         const char* p = vecContent[j][i + 8].c_str();
@@ -184,7 +182,7 @@ struct SSrlSentenceReader {
   }
 
  private:
-  bool fnReadNextContent(vector<vector<string> >& vecContent) {
+  bool fnReadNextContent(std::vector<std::vector<std::string> >& vecContent) {
     vecContent.clear();
     if (feof(m_fpIn) == true) return false;
     char* pszLine;
@@ -200,7 +198,7 @@ struct SSrlSentenceReader {
       }
       if (iLen == 0) break;  // end of this sentence
 
-      vector<string> terms = SplitOnWhitespace(string(pszLine));
+      std::vector<std::string> terms = SplitOnWhitespace(std::string(pszLine));
       assert(terms.size() > 7);
       vecContent.push_back(terms);
     }
