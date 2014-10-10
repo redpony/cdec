@@ -8,7 +8,6 @@
 #ifndef SRL_SENTENCE_H_
 #define SRL_SENTENCE_H_
 
-
 #include <sstream>
 #include <vector>
 
@@ -36,7 +35,7 @@ struct SArgument {
 
   char* m_pszRole;  // argument rule, e.g., ARG0, ARGM-TMP
   int m_iBegin;
-  int m_iEnd;  // the span of the argument, [m_iBegin, m_iEnd]
+  int m_iEnd;     // the span of the argument, [m_iBegin, m_iEnd]
   float m_fProb;  // the probability of this role,
   STreeItem* m_pTreeItem;
 };
@@ -66,7 +65,7 @@ struct SPredicate {
 
   char* m_pszLemma;  // lemma of the predicate, for Chinese, it's always as same
                      // as the predicate itself
-  int m_iPosition;  // the position in sentence
+  int m_iPosition;   // the position in sentence
   std::vector<SArgument*> m_vecArgt;  // arguments associated to the predicate
 };
 

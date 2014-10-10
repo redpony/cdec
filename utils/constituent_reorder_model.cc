@@ -73,14 +73,14 @@ inline void fnPreparingTrainingdata(const char* pszFName, int iCutoff,
 
 struct SConstReorderTrainer {
   SConstReorderTrainer(
-      const char* pszSynFname,  // source-side flattened parse tree file name
-      const char* pszAlignFname,  // alignment filename
+      const char* pszSynFname,     // source-side flattened parse tree file name
+      const char* pszAlignFname,   // alignment filename
       const char* pszSourceFname,  // source file name
       const char* pszTargetFname,  // target file name
       const char* pszInstanceFname,  // training instance file name
-      const char* pszModelPrefix,  // classifier model file name prefix
-      int iClassifierType,  // classifier type
-      int iCutoff,  // feature count threshold
+      const char* pszModelPrefix,    // classifier model file name prefix
+      int iClassifierType,           // classifier type
+      int iCutoff,                   // feature count threshold
       const char* pszOption  // other classifier parameters (for svmlight)
       ) {
     fnGenerateInstanceFile(pszSynFname, pszAlignFname, pszSourceFname,
@@ -401,8 +401,8 @@ delete pZhangleMaxent;*/
   }
 
   void fnGenerateInstanceFile(
-      const char* pszSynFname,  // source-side flattened parse tree file name
-      const char* pszAlignFname,  // alignment filename
+      const char* pszSynFname,     // source-side flattened parse tree file name
+      const char* pszAlignFname,   // alignment filename
       const char* pszSourceFname,  // source file name
       const char* pszTargetFname,  // target file name
       const char* pszInstanceFname  // training instance file name
@@ -507,8 +507,8 @@ delete pZhangleMaxent;*/
   }
 
   void fnGenerateInstanceFile2(
-      const char* pszSynFname,  // source-side flattened parse tree file name
-      const char* pszAlignFname,  // alignment filename
+      const char* pszSynFname,     // source-side flattened parse tree file name
+      const char* pszAlignFname,   // alignment filename
       const char* pszSourceFname,  // source file name
       const char* pszTargetFname,  // target file name
       const char* pszInstanceFname  // training instance file name
@@ -582,13 +582,13 @@ struct SConstContTrainer {
   SConstContTrainer(
       const char* pszFlattenedSynFname,  // source-side flattened parse tree
                                          // file name
-      const char* pszAlignFname,  // alignment filename
-      const char* pszSourceFname,  // source file name
-      const char* pszTargetFname,  // target file name
-      const char* pszInstanceFname,  // training instance file name
-      const char* pszModelPrefix,  // classifier model file name prefix
-      int iClassifierType,  // classifier type
-      int iCutoff,  // feature count threshold
+      const char* pszAlignFname,         // alignment filename
+      const char* pszSourceFname,        // source file name
+      const char* pszTargetFname,        // target file name
+      const char* pszInstanceFname,      // training instance file name
+      const char* pszModelPrefix,        // classifier model file name prefix
+      int iClassifierType,               // classifier type
+      int iCutoff,                       // feature count threshold
       const char* pszOption  // other classifier parameters (for svmlight)
       ) {
     fnGenerateInstanceFile(pszFlattenedSynFname, pszAlignFname, pszSourceFname,
@@ -699,10 +699,10 @@ struct SConstContTrainer {
   void fnGenerateInstanceFile(
       const char* pszFlattenedSynFname,  // source-side flattened parse tree
                                          // file name
-      const char* pszAlignFname,  // alignment filename
-      const char* pszSourceFname,  // source file name
-      const char* pszTargetFname,  // target file name
-      const char* pszInstanceFname  // training instance file name
+      const char* pszAlignFname,         // alignment filename
+      const char* pszSourceFname,        // source file name
+      const char* pszTargetFname,        // target file name
+      const char* pszInstanceFname       // training instance file name
       ) {
     SAlignmentReader* pAlignReader = new SAlignmentReader(pszAlignFname);
     SParseReader* pParseReader = new SParseReader(pszFlattenedSynFname, true);
@@ -781,11 +781,11 @@ inline string str(char const* name, po::variables_map const& conf) {
 }
 
 //--parse_file /scratch0/mt_exp/gq-ctb/data/train.srl.cn --align_file
-///scratch0/mt_exp/gq-ctb/data/aligned.grow-diag-final-and --source_file
-///scratch0/mt_exp/gq-ctb/data/train.cn --target_file
-///scratch0/mt_exp/gq-ctb/data/train.en --instance_file
-///scratch0/mt_exp/gq-ctb/data/srl-instance --model_prefix
-///scratch0/mt_exp/gq-ctb/data/srl-instance --feature_cutoff 10
+/// scratch0/mt_exp/gq-ctb/data/aligned.grow-diag-final-and --source_file
+/// scratch0/mt_exp/gq-ctb/data/train.cn --target_file
+/// scratch0/mt_exp/gq-ctb/data/train.en --instance_file
+/// scratch0/mt_exp/gq-ctb/data/srl-instance --model_prefix
+/// scratch0/mt_exp/gq-ctb/data/srl-instance --feature_cutoff 10
 //--classifier_type 1
 int main(int argc, char** argv) {
 

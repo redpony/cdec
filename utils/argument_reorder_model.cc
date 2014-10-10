@@ -64,13 +64,13 @@ inline void fnPreparingTrainingdata(const char* pszFName, int iCutoff,
 
 struct SArgumentReorderTrainer {
   SArgumentReorderTrainer(
-      const char* pszSRLFname,  // source-side srl tree file name
-      const char* pszAlignFname,  // alignment filename
-      const char* pszSourceFname,  // source file name
-      const char* pszTargetFname,  // target file name
+      const char* pszSRLFname,           // source-side srl tree file name
+      const char* pszAlignFname,         // alignment filename
+      const char* pszSourceFname,        // source file name
+      const char* pszTargetFname,        // target file name
       const char* pszTopPredicateFname,  // target file name
-      const char* pszInstanceFname,  // training instance file name
-      const char* pszModelFname,  // classifier model file name
+      const char* pszInstanceFname,      // training instance file name
+      const char* pszModelFname,         // classifier model file name
       int iCutoff) {
     fnGenerateInstanceFiles(pszSRLFname, pszAlignFname, pszSourceFname,
                             pszTargetFname, pszTopPredicateFname,
@@ -110,14 +110,14 @@ struct SArgumentReorderTrainer {
   }
 
   void fnGenerateInstanceFiles(
-      const char* pszSRLFname,  // source-side flattened parse tree file name
-      const char* pszAlignFname,  // alignment filename
+      const char* pszSRLFname,     // source-side flattened parse tree file name
+      const char* pszAlignFname,   // alignment filename
       const char* pszSourceFname,  // source file name
       const char* pszTargetFname,  // target file name
       const char* pszTopPredicateFname,  // top predicate file name (we only
                                          // consider predicates with 100+
                                          // occurrences
-      const char* pszInstanceFname  // training instance file name
+      const char* pszInstanceFname       // training instance file name
       ) {
     SAlignmentReader* pAlignReader = new SAlignmentReader(pszAlignFname);
     SSrlSentenceReader* pSRLReader = new SSrlSentenceReader(pszSRLFname);
@@ -264,17 +264,17 @@ inline string str(char const* name, po::variables_map const& conf) {
 }
 
 //--srl_file /scratch0/mt_exp/gale-align/gale-align.nw.srl.cn --align_file
-///scratch0/mt_exp/gale-align/gale-align.nw.al --source_file
-///scratch0/mt_exp/gale-align/gale-align.nw.cn --target_file
-///scratch0/mt_exp/gale-align/gale-align.nw.en --instance_file
-///scratch0/mt_exp/gale-align/gale-align.nw.argreorder.instance --model_prefix
-///scratch0/mt_exp/gale-align/gale-align.nw.argreorder.model --feature_cutoff 2
+/// scratch0/mt_exp/gale-align/gale-align.nw.al --source_file
+/// scratch0/mt_exp/gale-align/gale-align.nw.cn --target_file
+/// scratch0/mt_exp/gale-align/gale-align.nw.en --instance_file
+/// scratch0/mt_exp/gale-align/gale-align.nw.argreorder.instance --model_prefix
+/// scratch0/mt_exp/gale-align/gale-align.nw.argreorder.model --feature_cutoff 2
 //--srl_file /scratch0/mt_exp/gale-ctb/gale-ctb.srl.cn --align_file
-///scratch0/mt_exp/gale-ctb/gale-ctb.align --source_file
-///scratch0/mt_exp/gale-ctb/gale-ctb.cn --target_file
-///scratch0/mt_exp/gale-ctb/gale-ctb.en0 --instance_file
-///scratch0/mt_exp/gale-ctb/gale-ctb.argreorder.instance --model_prefix
-///scratch0/mt_exp/gale-ctb/gale-ctb.argreorder.model --feature_cutoff 2
+/// scratch0/mt_exp/gale-ctb/gale-ctb.align --source_file
+/// scratch0/mt_exp/gale-ctb/gale-ctb.cn --target_file
+/// scratch0/mt_exp/gale-ctb/gale-ctb.en0 --instance_file
+/// scratch0/mt_exp/gale-ctb/gale-ctb.argreorder.instance --model_prefix
+/// scratch0/mt_exp/gale-ctb/gale-ctb.argreorder.model --feature_cutoff 2
 int main(int argc, char** argv) {
 
   po::options_description opts("Configuration options");
