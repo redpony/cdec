@@ -80,7 +80,7 @@ struct SConstReorderTrainer {
       const char* pszInstanceFname,  // training instance file name
       const char* pszModelPrefix,    // classifier model file name prefix
       int iCutoff,                   // feature count threshold
-      const char* pszOption  // other classifier parameters (for svmlight)
+      const char* /*pszOption*/  // other classifier parameters (for svmlight)
       ) {
     fnGenerateInstanceFile(pszSynFname, pszAlignFname, pszSourceFname,
                            pszTargetFname, pszInstanceFname);
@@ -134,14 +134,14 @@ delete pZhangleMaxent;*/
   }
 
   inline void fnGetOutcome(int iL1, int iR1, int iL2, int iR2,
-                           const SAlignment* pAlign, string& strOutcome) {
+                           const SAlignment* /*pAlign*/, string& strOutcome) {
     if (iL1 == -1 && iL2 == -1)
       strOutcome = "BU";  // 1. both are untranslated
     else if (iL1 == -1)
       strOutcome = "1U";  // 2. XP1 is untranslated
     else if (iL2 == -1)
       strOutcome = "2U";  // 3. XP2 is untranslated
-    else if (iL1 == iL2 && iR2 == iR2)
+    else if (iL1 == iL2 && iR1 == iR2)
       strOutcome = "SS";  // 4. Have same scope
     else if (iL1 <= iL2 && iR1 >= iR2)
       strOutcome = "1C2";  // 5. XP1's translation covers XP2's
@@ -240,7 +240,7 @@ delete pZhangleMaxent;*/
                           int iPos, const vector<string>& vecChunkStatus,
                           const vector<int>& vecPosition,
                           const vector<string>& vecSTerms,
-                          const vector<string>& vecTTerms, string& strOutcome,
+                          const vector<string>& /*vecTTerms*/, string& strOutcome,
                           ostringstream& ostr) {
     STreeItem* pCon1, *pCon2;
     pCon1 = pParent->m_vecChildren[iPos - 1];
@@ -313,11 +313,11 @@ delete pZhangleMaxent;*/
    * f8: the first and the last word of XP2's translation (f8_f, f8_l)
    * f9: the translation of XP1's and XP2's head word (f9_1, f9_2)
    */
-  void fnGenerateInstance(const SParsedTree* pTree, const STreeItem* pParent,
+  void fnGenerateInstance(const SParsedTree* /*pTree*/, const STreeItem* pParent,
                           const STreeItem* pCon1, const STreeItem* pCon2,
                           const SAlignment* pAlign,
                           const vector<string>& vecSTerms,
-                          const vector<string>& vecTTerms, string& strOutcome,
+                          const vector<string>& /*vecTTerms*/, string& strOutcome,
                           ostringstream& ostr) {
 
     int iLeft1, iRight1, iLeft2, iRight2;
