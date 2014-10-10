@@ -609,9 +609,9 @@ int main(int argc, char** argv) {
       "instance_file", po::value<string>(), "Instance file path (output)")(
       "model_prefix", po::value<string>(),
       "Model file path prefix (output): three files will be generated")(
-          "feature_cutoff", po::value<int>()->default_value(100),
-                  "Feature cutoff threshold")(
-      "svm_option", po::value<string>(), "Parameters for SVMLight classifier")(
+      "feature_cutoff", po::value<int>()->default_value(100),
+      "Feature cutoff threshold")("svm_option", po::value<string>(),
+                                  "Parameters for SVMLight classifier")(
       "help", "produce help message");
 
   po::variables_map vm;
