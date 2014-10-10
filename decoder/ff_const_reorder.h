@@ -13,9 +13,16 @@
 
 struct ConstReorderFeatureImpl;
 
+// Soft reordering constraint features from
+// http://www.aclweb.org/anthology/P14-1106. To train the classifers,
+// use utils/const_reorder_model_trainer for constituency reordering
+// constraints and utils/argument_reorder_model_trainer for SRL
+// reordering constraints.
+//
+// Input segments should provide path to parse tree (resp. SRL parse)
+// as "parse" (resp. "srl") properties.
 class ConstReorderFeature : public FeatureFunction {
  public:
-  // param = "filename n"
   ConstReorderFeature(const std::string& param);
   ~ConstReorderFeature();
   static std::string usage(bool param, bool verbose);
