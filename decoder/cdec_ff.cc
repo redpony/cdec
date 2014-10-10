@@ -78,6 +78,6 @@ void register_feature_functions() {
   ff_registry.Register("WordPairFeatures", new FFFactory<WordPairFeatures>);
   ff_registry.Register("SourcePathFeatures", new FFFactory<SourcePathFeatures>);
   ff_registry.Register("WordSet", new FFFactory<WordSet>);
-  ff_registry.Register("ConstReorderFeature", new ConstReorderFeatureFactory());
+  ff_registry.Register("ConstReorderFeature", new FFFactory<ConstReorderFeature>);
   ff_registry.Register("External", new FFFactory<ExternalFeature>);
 }

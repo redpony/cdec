@@ -1372,12 +1372,3 @@ boost::shared_ptr<FeatureFunction> CreateConstReorderModel(
   ConstReorderFeature* ret = new ConstReorderFeature(param);
   return boost::shared_ptr<FeatureFunction>(ret);
 }
-
-boost::shared_ptr<FeatureFunction> ConstReorderFeatureFactory::Create(
-    std::string param) const {
-  return CreateConstReorderModel(param);
-}
-
-std::string ConstReorderFeatureFactory::usage(bool params, bool verbose) const {
-  return ConstReorderFeature::usage(params, verbose);
-}
