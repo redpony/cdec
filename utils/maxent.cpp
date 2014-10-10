@@ -142,7 +142,7 @@ int ME_Model::make_feature_bag(const int cutoff) {
 
 // count the occurrences of features
 #ifdef USE_HASH_MAP
-  typedef __gnu_cxx::hash_map<unsigned int, int> map_type;
+  typedef std::unordered_map<unsigned int, int> map_type;
 #else
   typedef std::map<unsigned int, int> map_type;
 #endif
