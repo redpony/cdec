@@ -15,8 +15,6 @@
 
 #include "stringlib.h"
 
-using namespace std;
-
 /*
  * Note:
  *      m_vec_s_align.size() may not be equal to the length of source side
@@ -25,12 +23,12 @@ using namespace std;
  *
  */
 struct SAlignment {
-  typedef vector<int> SingleAlign;
+  typedef std::vector<int> SingleAlign;
   SAlignment(const char* pszAlign) { fnInitializeAlignment(pszAlign); }
   ~SAlignment() {}
 
   bool fnIsAligned(int i, bool s) const {
-    const vector<SingleAlign>* palign;
+    const std::vector<SingleAlign>* palign;
     if (s == true)
       palign = &m_vec_s_align;
     else
@@ -70,7 +68,7 @@ struct SAlignment {
   }
 
   bool fnIsAlignedTightPhrase(int b, int e, bool s, int* pob, int* poe) const {
-    const vector<SingleAlign>* palign;
+    const std::vector<SingleAlign>* palign;
     if (s == true)
       palign = &m_vec_s_align;
     else
@@ -97,7 +95,7 @@ struct SAlignment {
    * aligned to any word outside source[b, e]
    * 3) return "Discon't": otherwise;
    */
-  string fnIsContinuous(int b, int e) const {
+  std::string fnIsContinuous(int b, int e) const {
     int ob, oe;
     fnGetLeftRightMost(b, e, true, ob, oe);
     if (ob == -1) return "Unaligned";
@@ -124,7 +122,7 @@ struct SAlignment {
   }
 
  private:
-  void fnGetLeftRightMost(int b, int e, const vector<SingleAlign>& align,
+  void fnGetLeftRightMost(int b, int e, const std::vector<SingleAlign>& align,
                           int& ob, int& oe) const {
     ob = oe = -1;
     for (int i = b; i <= e && i < align.size(); i++) {
@@ -139,7 +137,7 @@ struct SAlignment {
     m_vec_s_align.clear();
     m_vec_t_align.clear();
 
-    vector<string> terms = SplitOnWhitespace(string(pszAlign));
+    std::vector<std::string> terms = SplitOnWhitespace(std::string(pszAlign));
     int si, ti;
     for (size_t i = 0; i < terms.size(); i++) {
       sscanf(terms[i].c_str(), "%d-%d", &si, &ti);
@@ -167,8 +165,8 @@ struct SAlignment {
   }
 
  private:
-  vector<SingleAlign> m_vec_s_align;  // source side words' alignment
-  vector<SingleAlign> m_vec_t_align;  // target side words' alignment
+  std::vector<SingleAlign> m_vec_s_align;  // source side words' alignment
+  std::vector<SingleAlign> m_vec_t_align;  // target side words' alignment
 };
 
 struct SAlignmentReader {

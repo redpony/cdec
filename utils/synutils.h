@@ -17,21 +17,17 @@
 #include <string>
 #include <unordered_map>
 
-using namespace std;
-
 typedef std::unordered_map<std::string, int> MapString2Int;
 typedef std::unordered_map<std::string, float> MapString2Float;
 typedef std::unordered_map<std::string, float>::iterator
     MapString2FloatIterator;
-
-using namespace std;
 
 struct SFReader {
   SFReader() {}
   virtual ~SFReader() {}
 
   virtual bool fnReadNextLine(char* pszLine, int* piLength) = 0;
-  virtual bool fnReadNextLine(string& strLine) = 0;
+  virtual bool fnReadNextLine(std::string& strLine) = 0;
 };
 
 struct STxtFileReader : public SFReader {
@@ -63,13 +59,13 @@ struct STxtFileReader : public SFReader {
     return true;
   }
 
-  bool fnReadNextLine(string& strLine) {
+  bool fnReadNextLine(std::string& strLine) {
     char* pszLine = new char[10001];
     bool bOut = fnReadNextLine(pszLine, NULL);
     if (bOut)
-      strLine = string(pszLine);
+      strLine = std::string(pszLine);
     else
-      strLine = string("");
+      strLine = std::string("");
     delete[] pszLine;
 
     return bOut;
@@ -108,13 +104,13 @@ struct SGZFileReader : public SFReader {
     return true;
   }
 
-  bool fnReadNextLine(string& strLine) {
+  bool fnReadNextLine(std::string& strLine) {
     char* pszLine = new char[10001];
     bool bOut = fnReadNextLine(pszLine, NULL);
     if (bOut)
-      strLine = string(pszLine);
+      strLine = std::string(pszLine);
     else
-      strLine = string("");
+      strLine = std::string("");
     delete[] pszLine;
 
     return bOut;

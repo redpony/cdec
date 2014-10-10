@@ -14,8 +14,6 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 struct STreeItem {
   STreeItem(const char *pszTerm) {
     m_pszTerm = new char[strlen(pszTerm) + 1];
@@ -53,7 +51,7 @@ struct STreeItem {
  public:
   char *m_pszTerm;
 
-  vector<STreeItem *> m_vecChildren;  // children items
+  std::vector<STreeItem *> m_vecChildren;  // children items
   STreeItem *m_ptParent;  // the parent item
 
   int m_iBegin;
@@ -64,7 +62,7 @@ struct STreeItem {
 };
 
 struct SGetHeadWord {
-  typedef vector<string> CVectorStr;
+  typedef std::vector<std::string> CVectorStr;
   SGetHeadWord() {}
   ~SGetHeadWord() {}
   int fnGetHeadWord(char *pszCFGLeft, CVectorStr vectRight) {
@@ -311,7 +309,7 @@ struct SParsedTree {
     if (strcmp(pszStr, "(())") == 0) return NULL;
     SParsedTree *pTree = new SParsedTree();
 
-    vector<string> vecSyn;
+    std::vector<std::string> vecSyn;
     fnReadSyntactic(pszStr, vecSyn);
 
     int iLeft = 1, iRight = 1;  //# left/right parenthesis
@@ -418,13 +416,13 @@ struct SParsedTree {
     for (I = 0; I < ptItem->m_vecChildren.size(); I++)
       fnSuffixTraverseSetHeadWord(ptItem->m_vecChildren[I], pGetHeadWord);
 
-    vector<string> vecRight;
+    std::vector<std::string> vecRight;
 
     if (ptItem->m_vecChildren.size() == 1)
       iHeadchild = 0;
     else {
       for (I = 0; I < ptItem->m_vecChildren.size(); I++)
-        vecRight.push_back(string(ptItem->m_vecChildren[I]->m_pszTerm));
+        vecRight.push_back(std::string(ptItem->m_vecChildren[I]->m_pszTerm));
 
       iHeadchild = pGetHeadWord->fnGetHeadWord(ptItem->m_pszTerm, vecRight);
     }
@@ -433,7 +431,8 @@ struct SParsedTree {
     ptItem->m_iHeadWord = ptItem->m_vecChildren[iHeadchild]->m_iHeadWord;
   }
 
-  static void fnReadSyntactic(const char *pszSyn, vector<string> &vec) {
+  static void fnReadSyntactic(const char *pszSyn,
+                              std::vector<std::string> &vec) {
     char *p;
     int I;
 
@@ -481,29 +480,29 @@ struct SParsedTree {
 
         if ((pszTerm[0] == '(') || (pszTerm[strlen(pszTerm) - 1] == ')')) {
           if (pszTerm[0] == '(') {
-            vec.push_back(string("("));
+            vec.push_back(std::string("("));
             iLeftNum++;
 
             I = 1;
             while (pszTerm[I] == '(' && pszTerm[I] != '\0') {
-              vec.push_back(string("("));
+              vec.push_back(std::string("("));
               iLeftNum++;
 
               I++;
             }
 
-            if (strlen(pszTerm) > 1) vec.push_back(string(pszTerm + I));
+            if (strlen(pszTerm) > 1) vec.push_back(std::string(pszTerm + I));
           } else {
             char *pTmp;
             pTmp = pszTerm + strlen(pszTerm) - 1;
             while ((pTmp[0] == ')') && (pTmp >= pszTerm)) pTmp--;
             pTmp[1] = '\0';
 
-            if (strlen(pszTerm) > 0) vec.push_back(string(pszTerm));
+            if (strlen(pszTerm) > 0) vec.push_back(std::string(pszTerm));
             pTmp += 2;
 
             for (I = 0; I <= (int)strlen(pTmp); I++) {
-              vec.push_back(string(")"));
+              vec.push_back(std::string(")"));
               iRightNum++;
             }
           }
@@ -512,26 +511,26 @@ struct SParsedTree {
           q = strchr(pszTerm, ')');
           if (q != NULL) {
             q[0] = '\0';
-            if (pszTerm[0] != '\0') vec.push_back(string(pszTerm));
-            vec.push_back(string(")"));
+            if (pszTerm[0] != '\0') vec.push_back(std::string(pszTerm));
+            vec.push_back(std::string(")"));
             iRightNum++;
 
             q++;
             while (q[0] == ')') {
-              vec.push_back(string(")"));
+              vec.push_back(std::string(")"));
               q++;
               iRightNum++;
             }
 
             while (q[0] == '(') {
-              vec.push_back(string("("));
+              vec.push_back(std::string("("));
               q++;
               iLeftNum++;
             }
 
-            if (q[0] != '\0') vec.push_back(string(q));
+            if (q[0] != '\0') vec.push_back(std::string(q));
           } else
-            vec.push_back(string(pszTerm));
+            vec.push_back(std::string(pszTerm));
         }
       }
 
@@ -547,10 +546,10 @@ struct SParsedTree {
 
       if (vec.size() >= 2 && strcmp(vec[1].c_str(), "(") == 0) {
         //( (IP..) )
-        std::vector<string>::iterator it;
+        std::vector<std::string>::iterator it;
         it = vec.begin();
         it++;
-        vec.insert(it, string("ROOT"));
+        vec.insert(it, std::string("ROOT"));
       }
 
       break;
@@ -563,7 +562,7 @@ struct SParsedTree {
 
  public:
   STreeItem *m_ptRoot;
-  vector<STreeItem *> m_vecTerminals;  // the leaf nodes
+  std::vector<STreeItem *> m_vecTerminals;  // the leaf nodes
 };
 
 struct SParseReader {
@@ -645,7 +644,7 @@ struct SParseReader {
     for (size_t i = 0; i < pTreeItem->m_vecChildren.size(); i++)
       fnSuffixTraverseSetHeadWord(pTreeItem->m_vecChildren[i]);
 
-    vector<string> vecRight;
+    std::vector<std::string> vecRight;
 
     int iHeadchild;
 
@@ -658,7 +657,7 @@ struct SParseReader {
         if (p[0] == '*' && p[strlen(p) - 1] == '*') {
           iHeadchild = i;
           p[strlen(p) - 1] = '\0';
-          string str = p + 1;
+          std::string str = p + 1;
           strcpy(p, str.c_str());  // erase the "*..*"
           break;
         }
