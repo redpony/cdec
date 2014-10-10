@@ -34,7 +34,7 @@ struct Tsuruoka_Maxent {
   }
 
   void fnTrain(const char* pszInstanceFName, const char* pszAlgorithm,
-               const char* pszModelFName, int iNumIteration) {
+               const char* pszModelFName, int /*iNumIteration*/) {
     assert(strcmp(pszAlgorithm, "l1") == 0 || strcmp(pszAlgorithm, "l2") == 0 ||
            strcmp(pszAlgorithm, "sgd") == 0 ||
            strcmp(pszAlgorithm, "SGD") == 0);

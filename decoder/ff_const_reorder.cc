@@ -1339,7 +1339,7 @@ void ConstReorderFeature::PrepareForInput(const SentenceMetadata& smeta) {
 void ConstReorderFeature::TraversalFeaturesImpl(
     const SentenceMetadata& /* smeta */, const Hypergraph::Edge& edge,
     const vector<const void*>& ant_states, SparseVector<double>* features,
-    SparseVector<double>* estimated_features, void* state) const {
+    SparseVector<double>* /*estimated_features*/, void* state) const {
   pimpl_->SetConstReorderFeature(edge, features, ant_states, state);
 }
 

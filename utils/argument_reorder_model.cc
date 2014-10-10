@@ -263,7 +263,7 @@ inline void print_options(std::ostream& out,
     if (i) out << ' ';
     out << "--" << ds[i]->long_name();
   }
-  out << '"\n';
+  out << '\n';
 }
 inline string str(char const* name, po::variables_map const& conf) {
   return conf[name].as<string>();
