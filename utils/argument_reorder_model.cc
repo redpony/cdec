@@ -6,11 +6,17 @@
  */
 
 #include <boost/program_options.hpp>
+#include <iostream>
 #include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include "argument_reorder_model.h"
 #include "synutils.h"
 #include "tsuruoka_maxent.h"
+
+using namespace std;
 
 inline void fnPreparingTrainingdata(const char* pszFName, int iCutoff,
                                     const char* pszNewFName) {

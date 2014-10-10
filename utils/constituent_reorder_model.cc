@@ -79,7 +79,6 @@ struct SConstReorderTrainer {
       const char* pszTargetFname,  // target file name
       const char* pszInstanceFname,  // training instance file name
       const char* pszModelPrefix,    // classifier model file name prefix
-      int iClassifierType,           // classifier type
       int iCutoff,                   // feature count threshold
       const char* pszOption  // other classifier parameters (for svmlight)
       ) {
@@ -578,193 +577,6 @@ delete pZhangleMaxent;*/
   }
 };
 
-struct SConstContTrainer {
-  SConstContTrainer(
-      const char* pszFlattenedSynFname,  // source-side flattened parse tree
-                                         // file name
-      const char* pszAlignFname,         // alignment filename
-      const char* pszSourceFname,        // source file name
-      const char* pszTargetFname,        // target file name
-      const char* pszInstanceFname,      // training instance file name
-      const char* pszModelPrefix,        // classifier model file name prefix
-      int iClassifierType,               // classifier type
-      int iCutoff,                       // feature count threshold
-      const char* pszOption  // other classifier parameters (for svmlight)
-      ) {
-    fnGenerateInstanceFile(pszFlattenedSynFname, pszAlignFname, pszSourceFname,
-                           pszTargetFname, pszInstanceFname);
-    // fnTraining(pszInstanceFname, pszModelPrefix, iClassifierType, iCutoff,
-    // pszOption);
-    fnTraining(pszInstanceFname, pszModelPrefix, iCutoff);
-  }
-  ~SConstContTrainer() {}
-
- private:
-  void fnTraining(const char* pszInstanceFname, const char* pszModelFname,
-                  int iCutoff) {
-    char* pszNewInstanceFName = new char[strlen(pszInstanceFname) + 50];
-    if (iCutoff > 0) {
-      sprintf(pszNewInstanceFName, "%s.tmp", pszInstanceFname);
-      fnPreparingTrainingdata(pszInstanceFname, iCutoff, pszNewInstanceFName);
-    } else {
-      strcpy(pszNewInstanceFName, pszInstanceFname);
-    }
-
-    /*Zhangle_Maxent *pZhangleMaxent = new Zhangle_Maxent(NULL);
-       pZhangleMaxent->fnTrain(pszInstanceFname, "lbfgs", pszModelFname, 100,
-       2.0);
-       delete pZhangleMaxent;*/
-
-    Tsuruoka_Maxent* pMaxent = new Tsuruoka_Maxent(NULL);
-    pMaxent->fnTrain(pszInstanceFname, "l1", pszModelFname, 300);
-    delete pMaxent;
-
-    if (strcmp(pszNewInstanceFName, pszInstanceFname) != 0) {
-      sprintf(pszNewInstanceFName, "rm %s.tmp", pszInstanceFname);
-      system(pszNewInstanceFName);
-    }
-    delete[] pszNewInstanceFName;
-  }
-
-  void fnGetFocusedParentNodes(const SParsedTree* pTree,
-                               vector<STreeItem*>& vecFocused) {
-    for (size_t i = 0; i < pTree->m_vecTerminals.size(); i++) {
-      STreeItem* pParent = pTree->m_vecTerminals[i]->m_ptParent;
-
-      while (pParent != NULL) {
-        // if (pParent->m_vecChildren.size() > 1 && pParent->m_iEnd -
-        // pParent->m_iBegin > 5) {
-        if (pParent->m_vecChildren.size() > 1) {
-          // do constituent reordering for all children of pParent
-          vecFocused.push_back(pParent);
-        }
-        if (pParent->m_iBrotherIndex != 0) break;
-        pParent = pParent->m_ptParent;
-      }
-    }
-  }
-
-  inline void fnGetOutcome(int iL1, int iR1, const SAlignment* pAlign,
-                           string& strOutcome) {
-    strOutcome = pAlign->fnIsContinuous(iL1, iR1);
-  }
-
-  inline string fnGetLengthType(int iLen) {
-    if (iLen == 1) return string("1");
-    if (iLen == 2) return string("2");
-    if (iLen == 3) return string("3");
-    if (iLen < 6) return string("4");
-    if (iLen < 11) return string("6");
-    return string("11");
-  }
-
-  /*
-   * Source side (11 features):
-   * f1: the syntactic category
-   * f2: the syntactic category of its parent
-   * f3: the head word's pos
-   * f4: =1 if it's the head of its parent node
-   *     or
-   *     the head of its parent node
-   * f5: length type
-   */
-  void fnGenerateInstance(const SParsedTree* pTree, const STreeItem* pCon1,
-                          const SAlignment* pAlign,
-                          const vector<string>& vecSTerms,
-                          const vector<string>& vecTTerms, string& strOutcome,
-                          ostringstream& ostr) {
-
-    fnGetOutcome(pCon1->m_iBegin, pCon1->m_iEnd, pAlign, strOutcome);
-
-    // generate features
-    // f1
-    ostr << "f1=" << pCon1->m_pszTerm;
-    // f2
-    ostr << " f2=" << pCon1->m_ptParent->m_pszTerm;
-    // f3
-    ostr << " f3=" << pTree->m_vecTerminals[pCon1->m_iHeadWord]
-                          ->m_ptParent->m_pszTerm;
-    // f4
-    if (pCon1->m_iBrotherIndex == pCon1->m_ptParent->m_iHeadChild) {
-      ostr << " f4=1";
-    } else {
-      ostr << " f4="
-           << pCon1->m_ptParent->m_vecChildren[pCon1->m_ptParent->m_iHeadChild]
-                  ->m_pszTerm;
-    }
-    // f5
-    ostr << " f5=" << fnGetLengthType(pCon1->m_iEnd - pCon1->m_iBegin + 1);
-  }
-
-  void fnGenerateInstanceFile(
-      const char* pszFlattenedSynFname,  // source-side flattened parse tree
-                                         // file name
-      const char* pszAlignFname,         // alignment filename
-      const char* pszSourceFname,        // source file name
-      const char* pszTargetFname,        // target file name
-      const char* pszInstanceFname       // training instance file name
-      ) {
-    SAlignmentReader* pAlignReader = new SAlignmentReader(pszAlignFname);
-    SParseReader* pParseReader = new SParseReader(pszFlattenedSynFname, true);
-    STxtFileReader* pTxtSReader = new STxtFileReader(pszSourceFname);
-    STxtFileReader* pTxtTReader = new STxtFileReader(pszTargetFname);
-
-    FILE* fpOut = fopen(pszInstanceFname, "w");
-    assert(fpOut != NULL);
-
-    // read sentence by sentence
-    SAlignment* pAlign;
-    SParsedTree* pTree;
-    char* pszLine = new char[50001];
-    int iSentNum = 0;
-    while ((pAlign = pAlignReader->fnReadNextAlignment()) != NULL) {
-      pTree = pParseReader->fnReadNextParseTree();
-      assert(pTree != NULL);
-      assert(pTxtSReader->fnReadNextLine(pszLine, NULL));
-      vector<string> vecSTerms;
-      SplitOnWhitespace(string(pszLine), &vecSTerms);
-      assert(pTxtTReader->fnReadNextLine(pszLine, NULL));
-      vector<string> vecTTerms;
-      SplitOnWhitespace(string(pszLine), &vecTTerms);
-
-      vector<STreeItem*> vecFocused;
-      fnGetFocusedParentNodes(pTree, vecFocused);
-
-      for (size_t i = 0;
-           i < vecFocused.size() && pTree->m_vecTerminals.size() > 10; i++) {
-
-        STreeItem* pParent = vecFocused[i];
-
-        for (size_t j = 0; j < pParent->m_vecChildren.size(); j++) {
-          // children[j-1] vs. children[j] reordering
-
-          string strOutcome;
-          ostringstream ostr;
-
-          fnGenerateInstance(pTree, pParent->m_vecChildren[j], pAlign,
-                             vecSTerms, vecTTerms, strOutcome, ostr);
-
-          // fprintf(stderr, "%s %s\n", ostr.str().c_str(), strOutcome.c_str());
-          fprintf(fpOut, "%s %s\n", ostr.str().c_str(), strOutcome.c_str());
-        }
-      }
-
-      delete pAlign;
-      delete pTree;
-      iSentNum++;
-
-      if (iSentNum % 100000 == 0) fprintf(stderr, "#%d\n", iSentNum);
-    }
-
-    fclose(fpOut);
-    delete pAlignReader;
-    delete pParseReader;
-    delete pTxtSReader;
-    delete pTxtTReader;
-    delete[] pszLine;
-  }
-};
-
 inline void print_options(std::ostream& out,
                           po::options_description const& opts) {
   typedef std::vector<boost::shared_ptr<po::option_description> > Ds;
@@ -786,7 +598,6 @@ inline string str(char const* name, po::variables_map const& conf) {
 /// scratch0/mt_exp/gq-ctb/data/train.en --instance_file
 /// scratch0/mt_exp/gq-ctb/data/srl-instance --model_prefix
 /// scratch0/mt_exp/gq-ctb/data/srl-instance --feature_cutoff 10
-//--classifier_type 1
 int main(int argc, char** argv) {
 
   po::options_description opts("Configuration options");
@@ -798,9 +609,7 @@ int main(int argc, char** argv) {
       "instance_file", po::value<string>(), "Instance file path (output)")(
       "model_prefix", po::value<string>(),
       "Model file path prefix (output): three files will be generated")(
-      "classifier_type", po::value<int>()->default_value(1),
-      "Classifier type: 1 for openNLP maxent; 2 for Zhangle maxent; and 3 for "
-      "SVMLight")("feature_cutoff", po::value<int>()->default_value(100),
+          "feature_cutoff", po::value<int>()->default_value(100),
                   "Feature cutoff threshold")(
       "svm_option", po::value<string>(), "Parameters for SVMLight classifier")(
       "help", "produce help message");
@@ -839,8 +648,8 @@ int main(int argc, char** argv) {
       str("parse_file", vm).c_str(), str("align_file", vm).c_str(),
       str("source_file", vm).c_str(), str("target_file", vm).c_str(),
       str("instance_file", vm).c_str(), str("model_prefix", vm).c_str(),
-      vm["classifier_type"].as<int>(), vm["feature_cutoff"].as<int>(), pOption);
+      vm["feature_cutoff"].as<int>(), pOption);
   delete pTrainer;
 
-  return 1;
+  return 0;
 }
