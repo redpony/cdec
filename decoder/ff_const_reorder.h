@@ -40,9 +40,4 @@ class ConstReorderFeature : public FeatureFunction {
   ConstReorderFeatureImpl* pimpl_;
 };
 
-struct ConstReorderFeatureFactory : public FactoryBase<FeatureFunction> {
-  FP Create(std::string param) const;
-  std::string usage(bool params, bool verbose) const;
-};
-
 #endif /* FF_CONST_REORDER_H_ */
