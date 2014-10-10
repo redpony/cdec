@@ -304,7 +304,7 @@ struct TargetTranslation {
     if (target_end == -1) target_begin = -1;
   }
 
-  const uint16_t begin_pos_, end_pos_;  // the position in parse
+  const uint16_t begin_pos_, end_pos_;              // the position in parse
   const uint16_t input_begin_pos_, input_end_pos_;  // the position in input
   const uint16_t e_num_words_;
   vector<AlignmentPoint*> align_;

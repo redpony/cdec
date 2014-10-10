@@ -276,7 +276,7 @@ public:
         models.EraseIgnoredBytes(&o_item_state);
         assert(item_state == o_item_state);
       } else {
-        assert(o_item->state_ == item->state_);    // sanity check!
+        assert(o_item->state_ == item->state_);  // sanity check!
       }
 
       o_item->est_prob_ = item->est_prob_;
@@ -623,9 +623,10 @@ void ApplyModelSet(const Hypergraph& in,
   if (models.stateless() || config.algorithm == IntersectionConfiguration::FULL) {
     NoPruningRescorer ma(models, smeta, in, out); // avoid overhead of best-first when no state
     ma.Apply();
-  } else if (config.algorithm == IntersectionConfiguration::CUBE
-             || config.algorithm == IntersectionConfiguration::FAST_CUBE_PRUNING
-             || config.algorithm == IntersectionConfiguration::FAST_CUBE_PRUNING_2) {
+  } else if (config.algorithm == IntersectionConfiguration::CUBE ||
+             config.algorithm == IntersectionConfiguration::FAST_CUBE_PRUNING ||
+             config.algorithm ==
+                 IntersectionConfiguration::FAST_CUBE_PRUNING_2) {
     int pl = config.pop_limit;
     const int max_pl_for_large=50;
     if (pl > max_pl_for_large && in.nodes_.size() > 80000) {

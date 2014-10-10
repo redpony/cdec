@@ -52,12 +52,12 @@ struct STreeItem {
   char *m_pszTerm;
 
   std::vector<STreeItem *> m_vecChildren;  // children items
-  STreeItem *m_ptParent;  // the parent item
+  STreeItem *m_ptParent;                   // the parent item
 
   int m_iBegin;
-  int m_iEnd;  // the node span words[m_iBegin, m_iEnd]
-  int m_iHeadChild;  // the index of its head child
-  int m_iHeadWord;  // the index of its head word
+  int m_iEnd;           // the node span words[m_iBegin, m_iEnd]
+  int m_iHeadChild;     // the index of its head child
+  int m_iHeadWord;      // the index of its head word
   int m_iBrotherIndex;  // the index in his brothers
 };
 
