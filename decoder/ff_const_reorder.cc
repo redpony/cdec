@@ -9,6 +9,7 @@
 #include "hash.h"
 #include "argument_reorder_model.h"
 
+#include <sstream>
 #include <string>
 #include <vector>
 #include <stdio.h>
@@ -187,14 +188,6 @@ struct TargetTranslation {
         vec_f_align_bit_array_(end_pos - begin_pos + 1, NULL),
         vec_e_align_bit_array_(e_num_word, NULL) {
     int len = end_pos - begin_pos + 1;
-
-    /*vec_f_align_bit_array_.reserve(len);
-    for (int i = 0; i < len; i++)
-            vec_f_align_bit_array_.push_back(NULL);
-
-    vec_e_align_bit_array_.reserve(e_num_word);
-    for (int i = 0; i < e_num_word; i++)
-            vec_e_align_bit_array_.push_back(NULL);*/
     align_.reserve(1.5 * len);
   }
   ~TargetTranslation() {
@@ -310,11 +303,10 @@ struct TargetTranslation {
   vector<AlignmentPoint*> align_;
 
  private:
-  vector<SBitArray*> vec_f_align_bit_array_;
-  vector<SBitArray*> vec_e_align_bit_array_;
-
   vector<short> vec_left_most_;
   vector<short> vec_right_most_;
+  vector<SBitArray*> vec_f_align_bit_array_;
+  vector<SBitArray*> vec_e_align_bit_array_;
 };
 
 struct FocusedConstituent {
@@ -710,7 +702,7 @@ struct ConstReorderFeatureImpl {
                               SparseVector<double>* features,
                               const TargetTranslation* target_translation,
                               const vector<const TargetTranslation*>& vec_node,
-                              std::vector<int>& findex) {
+                              std::vector<int>& /*findex*/) {
     if (b_srl_block_feature_ || b_srl_order_feature_) {
       double logprob_srl_reorder_left = 0.0, logprob_srl_reorder_right = 0.0;
       for (size_t i = 0; i < focused_srl_->focus_predicates_.size(); i++) {
@@ -1351,8 +1343,28 @@ void ConstReorderFeature::TraversalFeaturesImpl(
   pimpl_->SetConstReorderFeature(edge, features, ant_states, state);
 }
 
-string ConstReorderFeature::usage(bool /*param*/, bool /*verbose*/) {
-  return "ConstReorderFeature";
+string ConstReorderFeature::usage(bool show_params, bool show_details) {
+  ostringstream out;
+  out << "ConstReorderFeature";
+  if (show_params) {
+    out << " model_file_prefix [const_block=1 const_order=1] [srl_block=0 "
+           "srl_order=0]"
+        << "\nParameters:\n"
+        << "  const_{block,order}: enable/disable constituency constraints.\n"
+        << "  src_{block,order}: enable/disable semantic role labeling "
+           "constraints.\n";
+  }
+  if (show_details) {
+    out << "\n"
+        << "Soft reordering constraint features from "
+           "http://www.aclweb.org/anthology/P14-1106. To train the classifers, "
+           "use utils/const_reorder_model_trainer for constituency reordering "
+           "constraints and utils/argument_reorder_model_trainer for semantic "
+           "role labeling reordering constraints.\n"
+        << "Input segments should provide path to parse tree (resp. SRL parse) "
+           "as \"parse\" (resp. \"srl\") properties.\n";
+  }
+  return out.str();
 }
 
 boost::shared_ptr<FeatureFunction> CreateConstReorderModel(
