@@ -1,6 +1,7 @@
 #ifndef _FFSET_H_
 #define _FFSET_H_
 
+#include <utility>
 #include <vector>
 #include "value_array.h"
 #include "prob.h"
@@ -47,22 +48,18 @@ class ModelSet {
 
   bool stateless() const { return !state_size_; }
 
-  //added by ljh
-  //some states of features are not contextual, but used for storing some useful information for calculate feature val
-  //it needs to erase these states
-  //this function is only called by IncorporateIntoPlusLMForest(...) in apply_models.cc
-  void GetRealFFState(const FFState& state, FFState& real_state) const;
-  FFState GetRealFFState(const FFState& state) const;
-  bool HaveEraseState() const;
- private:
-  std::vector<int> erase_state_start_pos_;
-  std::vector<int> erase_state_end_pos_;
+  // Part of a feature state may be used for storing some side data for
+  // calculating feature values but not necessary for splitting hypernodes. Such
+  // bytes needs to be erased for hypernode splitting.
+  bool NeedsStateErasure() const;
+  void EraseIgnoredBytes(FFState* state) const;
 
  private:
   std::vector<const FeatureFunction*> models_;
   const std::vector<double>& weights_;
   int state_size_;
   std::vector<int> model_state_pos_;
+  std::vector<std::pair<int, int> > ranges_to_erase_;
 };
 
 #endif
