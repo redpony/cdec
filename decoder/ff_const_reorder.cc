@@ -1327,6 +1327,7 @@ struct ConstReorderFeatureImpl {
 ConstReorderFeature::ConstReorderFeature(const std::string& param) {
   pimpl_ = new ConstReorderFeatureImpl(param);
   SetStateSize(ConstReorderFeatureImpl::ReserveStateSize());
+  SetIgnoredStateSize(ConstReorderFeatureImpl::ReserveStateSize());
   name_ = "ConstReorderFeature";
 }
 
