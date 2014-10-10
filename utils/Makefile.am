@@ -1,4 +1,4 @@
-bin_PROGRAMS = reconstruct_weights atools const_reorder_model_trainer
+bin_PROGRAMS = reconstruct_weights atools const_reorder_model_trainer argument_reorder_model_trainer
 
 noinst_PROGRAMS = \
   ts \
@@ -108,6 +108,8 @@ atools_LDADD = libutils.a
 atools_LDFLAGS = $(STATIC_FLAGS)
 const_reorder_model_trainer_SOURCES = constituent_reorder_model.cc
 const_reorder_model_trainer_LDADD = libutils.a
+argument_reorder_model_trainer_SOURCES = argument_reorder_model.cc
+argument_reorder_model_trainer_LDADD = libutils.a
 
 phmt_SOURCES = phmt.cc
 phmt_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)

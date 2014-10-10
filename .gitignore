@@ -181,6 +181,7 @@ training/mr_reduce_to_weights
 training/optimize_test
 training/plftools
 training/test_ngram
+utils/argument_reorder_model_trainer
 utils/atools
 utils/bin/
 utils/const_reorder_model_trainer
