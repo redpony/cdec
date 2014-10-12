@@ -32,11 +32,11 @@ static void ReadTree2StringGrammar(istream* in, Tree2StringGrammarNode* root, bo
     ++lc;
     if (line.size() == 0 || line[0] == '#') continue;
     std::vector<StringPiece> fields = TokenizeMultisep(line, " ||| ");
-    if (has_multiple_states && fields.size() < 5) {
+    if (has_multiple_states && fields.size() < 4) {
       cerr << "Expected at least 4 fields in rule file but line " << lc << " is:\n" << line << endl;
       abort();
     }
-    if (!has_multiple_states && fields.size() < 4) {
+    if (!has_multiple_states && fields.size() < 3) {
       cerr << "Expected at least 3 fields in rule file but line " << lc << " is:\n" << line << endl;
       abort();
     }
