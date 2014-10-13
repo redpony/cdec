@@ -86,7 +86,7 @@ struct ELengthWeightFunction {
   }
 };
 inline void ShowBanner() {
-  cerr << "cdec (c) 2009--2014 by Chris Dyer\n";
+  cerr << "cdec (c) 2009--2014 by Chris Dyer" << endl;
 }
 
 inline string str(char const* name,po::variables_map const& conf) {
