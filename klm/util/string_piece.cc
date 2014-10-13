@@ -1,2 +1,1 @@
-// this has been moved to utils/ in cdec
-
+// moved to cdec/utils

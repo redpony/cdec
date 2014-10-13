@@ -11,6 +11,7 @@ libklm_util_stream_a_SOURCES = \
   line_input.hh \
   multi_progress.cc \
   multi_progress.hh \
+  multi_stream.hh \
   sort.hh \
   stream.hh \
   timer.hh

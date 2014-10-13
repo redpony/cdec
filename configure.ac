@@ -1,5 +1,5 @@
 AC_CONFIG_MACRO_DIR([m4])
-AC_INIT([cdec],[2014-09-08])
+AC_INIT([cdec],[2014-10-12])
 AC_CONFIG_SRCDIR([decoder/cdec.cc])
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(config.h)
