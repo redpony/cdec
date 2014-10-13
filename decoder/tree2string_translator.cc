@@ -267,6 +267,7 @@ struct Tree2StringTranslatorImpl {
       for (auto sym : rule_src)
         cur = &cur->next[sym];
       TRulePtr rule(new TRule(rhse, rhsf, lhs));
+      rule->a_.push_back(AlignmentPoint(0, 0));
       rule->ComputeArity();
       rule->scores_.set_value(ntfid, 1.0);
       rule->scores_.set_value(kFID, 1.0);
