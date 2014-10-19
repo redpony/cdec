@@ -930,7 +930,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
       Hypergraph new_hg;
       {
         ReadFile rf(writer.fname_);
-        bool succeeded = HypergraphIO::ReadFromJSON(rf.stream(), &new_hg);
+        bool succeeded = HypergraphIO::ReadFromBinary(rf.stream(), &new_hg);
         if (!succeeded) abort();
       }
       HG::Union(forest, &new_hg);
@@ -1023,7 +1023,7 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
           Hypergraph new_hg;
           {
             ReadFile rf(writer.fname_);
-            bool succeeded = HypergraphIO::ReadFromJSON(rf.stream(), &new_hg);
+            bool succeeded = HypergraphIO::ReadFromBinary(rf.stream(), &new_hg);
             if (!succeeded) abort();
           }
           HG::Union(forest, &new_hg);

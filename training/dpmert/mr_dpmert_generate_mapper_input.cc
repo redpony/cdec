@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
   unsigned dev_set_size = conf["dev_set_size"].as<unsigned>();
   for (unsigned i = 0; i < dev_set_size; ++i) {
     for (unsigned j = 0; j < directions.size(); ++j) {
-      cout << forest_repository << '/' << i << ".json.gz " << i << ' ';
+      cout << forest_repository << '/' << i << ".bin.gz " << i << ' ';
       print(cout, origin, "=", ";");
       cout << ' ';
       print(cout, directions[j], "=", ";");
