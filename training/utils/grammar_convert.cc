@@ -316,11 +316,11 @@ int main(int argc, char **argv) {
         line = line.substr(0, pos + 2);
       }
       istringstream is(line);
-      if (HypergraphIO::ReadFromJSON(&is, &hg)) {
+      if (HypergraphIO::ReadFromBinary(&is, &hg)) {
         ProcessHypergraph(w, conf, ref, &hg);
         hg.clear();
       } else {
-        cerr << "Error reading grammar from JSON: line " << lc << endl;
+        cerr << "Error reading grammar line " << lc << endl;
         exit(1);
       }
     } else {
