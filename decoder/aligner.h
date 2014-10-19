@@ -1,4 +1,4 @@
-#ifndef _ALIGNER_H_
+#ifndef ALIGNER_H
 
 #include <string>
 #include <iostream>
