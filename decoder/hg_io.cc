@@ -6,6 +6,10 @@
 #include <sstream>
 #include <iostream>
 
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+
 #include "fast_lexical_cast.hpp"
 
 #include "tdict.h"
@@ -271,97 +275,16 @@ bool HypergraphIO::ReadFromJSON(istream* in, Hypergraph* hg) {
   return reader.Parse(in);
 }
 
-static void WriteRule(const TRule& r, ostream* out) {
-  if (!r.lhs_) { (*out) << "[X] ||| "; }
-  JSONParser::WriteEscapedString(r.AsString(), out);
+bool HypergraphIO::ReadFromBinary(istream* in, Hypergraph* hg) {
+  boost::archive::binary_iarchive oa(*in);
+  hg->clear();
+  oa >> *hg;
+  return true;
 }
 
-bool HypergraphIO::WriteToJSON(const Hypergraph& hg, bool remove_rules, ostream* out) {
-  if (hg.empty()) { *out << "{}\n"; return true; }
-  map<const TRule*, int> rid;
-  ostream& o = *out;
-  rid[NULL] = 0;
-  o << '{';
-  if (!remove_rules) {
-    o << "\"rules\":[";
-    for (int i = 0; i < hg.edges_.size(); ++i) {
-      const TRule* r = hg.edges_[i].rule_.get();
-      int &id = rid[r];
-      if (!id) {
-        id=rid.size() - 1;
-        if (id > 1) o << ',';
-        o << id << ',';
-        WriteRule(*r, &o);
-      };
-    }
-    o << "],";
-  }
-  const bool use_fdict = FD::NumFeats() < 1000;
-  if (use_fdict) {
-    o << "\"features\":[";
-    for (int i = 1; i < FD::NumFeats(); ++i) {
-      o << (i==1 ? "":",");
-      JSONParser::WriteEscapedString(FD::Convert(i), &o);
-    }
-    o << "],";
-  }
-  vector<int> edgemap(hg.edges_.size(), -1);  // edges may be in non-topo order
-  int edge_count = 0;
-  for (int i = 0; i < hg.nodes_.size(); ++i) {
-    const Hypergraph::Node& node = hg.nodes_[i];
-    if (i > 0) { o << ","; }
-    o << "\"edges\":[";
-    for (int j = 0; j < node.in_edges_.size(); ++j) {
-      const Hypergraph::Edge& edge = hg.edges_[node.in_edges_[j]];
-      edgemap[edge.id_] = edge_count;
-      ++edge_count;
-      o << (j == 0 ? "" : ",") << "{";
-
-      o << "\"tail\":[";
-      for (int k = 0; k < edge.tail_nodes_.size(); ++k) {
-        o << (k > 0 ? "," : "") << edge.tail_nodes_[k];
-      }
-      o << "],";
-
-      o << "\"spans\":[" << edge.i_ << "," << edge.j_ << "," << edge.prev_i_ << "," << edge.prev_j_ << "],";
-
-      o << "\"feats\":[";
-      bool first = true;
-      for (SparseVector<double>::const_iterator it = edge.feature_values_.begin(); it != edge.feature_values_.end(); ++it) {
-        if (!it->second) continue;   // don't write features that have a zero value
-        if (!it->first) continue;    // if the feature set was frozen this might happen
-        if (!first) o << ',';
-        if (use_fdict)
-          o << (it->first - 1);
-        else {
-	  JSONParser::WriteEscapedString(FD::Convert(it->first), &o);
-        }
-	o << ',' << it->second;
-        first = false;
-      }
-      o << "]";
-      if (!remove_rules) { o << ",\"rule\":" << rid[edge.rule_.get()]; }
-      o << "}";
-    }
-    o << "],";
-
-    o << "\"node\":{\"in_edges\":[";
-    for (int j = 0; j < node.in_edges_.size(); ++j) {
-      int mapped_edge = edgemap[node.in_edges_[j]];
-      assert(mapped_edge >= 0);
-      o << (j == 0 ? "" : ",") << mapped_edge;
-    }
-    o << "]";
-    if (node.cat_ < 0) {
-       o << ",\"cat\":";
-       JSONParser::WriteEscapedString(TD::Convert(node.cat_ * -1), &o);
-    }
-    char buf[48];
-    sprintf(buf, "%016lX", node.node_hash);
-    o << ",\"node_hash\":\"" << buf << "\"";
-    o << "}";
-  }
-  o << "}\n";
+bool HypergraphIO::WriteToBinary(const Hypergraph& hg, ostream* out) {
+  boost::archive::binary_oarchive oa(*out);
+  oa << hg;
   return true;
 }
 

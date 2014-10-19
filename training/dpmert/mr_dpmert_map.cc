@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
     istringstream is(line);
     int sent_id;
     string file, s_origin, s_direction;
-    // path-to-file (JSON) sent_ed starting-point search-direction
+    // path-to-file sent_ed starting-point search-direction
     is >> file >> sent_id >> s_origin >> s_direction;
     SparseVector<double> origin;
     ReadSparseVectorString(s_origin, &origin);
@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
     if (last_file != file) {
       last_file = file;
       ReadFile rf(file);
-      HypergraphIO::ReadFromJSON(rf.stream(), &hg);
+      HypergraphIO::ReadFromBinary(rf.stream(), &hg);
     }
     const ConvexHullWeightFunction wf(origin, direction);
     const ConvexHull hull = Inside<ConvexHull, ConvexHullWeightFunction>(hg, NULL, wf);

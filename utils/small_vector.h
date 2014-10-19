@@ -15,6 +15,7 @@
 #include <new>
 #include <stdint.h>
 #include <boost/functional/hash.hpp>
+#include <boost/serialization/map.hpp>
 
 //sizeof(T)/sizeof(T*)>1?sizeof(T)/sizeof(T*):1
 
@@ -297,6 +298,21 @@ public:
     return hash_range(data_.ptr,data_.ptr+size_);
   }
 
+  template<class Archive>
+  void save(Archive & ar, const unsigned int) const {
+    ar & size_;
+    for (unsigned i = 0; i < size_; ++i)
+      ar & (*this)[i];
+  }
+  template<class Archive>
+  void load(Archive & ar, const unsigned int) {
+    uint16_t s;
+    ar & s;
+    this->resize(s);
+    for (unsigned i = 0; i < size_; ++i)
+      ar & (*this)[i];
+  }
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
  private:
   union StorageType {
     T vals[SV_MAX];

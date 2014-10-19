@@ -18,10 +18,11 @@ struct HypergraphIO {
   // see test_data/small.json.gz for an email encoding
   static bool ReadFromJSON(std::istream* in, Hypergraph* out);
 
+  static bool ReadFromBinary(std::istream* in, Hypergraph* out);
+  static bool WriteToBinary(const Hypergraph& hg, std::ostream* out);
+
   // if remove_rules is used, the hypergraph is serialized without rule information
   // (so it only contains structure and feature information)
-  static bool WriteToJSON(const Hypergraph& hg, bool remove_rules, std::ostream* out);
-
   static void WriteAsCFG(const Hypergraph& hg);
 
   // Write only the target size information in bottom-up order.  
