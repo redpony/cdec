@@ -71,7 +71,7 @@ namespace HG {
     short int prev_i_;
     short int prev_j_;
     template<class Archive>
-    void serialize(Archive & ar, const unsigned int version) {
+    void serialize(Archive & ar, const unsigned int /*version*/) {
       ar & head_node_;
       ar & tail_nodes_;
       ar & rule_;
@@ -163,7 +163,7 @@ namespace HG {
     EdgesVector in_edges_;   // an in edge is an edge with this node as its head.  (in edges come from the bottom up to us)  indices in edges_
     EdgesVector out_edges_;  // an out edge is an edge with this node as its tail.  (out edges leave us up toward the top/goal). indices in edges_
     template<class Archive>
-    void save(Archive & ar, const unsigned int version) const {
+    void save(Archive & ar, const unsigned int /*version*/) const {
       ar & node_hash;
       ar & id_;
       ar & TD::Convert(-cat_);
@@ -171,7 +171,7 @@ namespace HG {
       ar & out_edges_;
     }
     template<class Archive>
-    void load(Archive & ar, const unsigned int version) {
+    void load(Archive & ar, const unsigned int /*version*/) {
       ar & node_hash;
       ar & id_;
       std::string cat; ar & cat;
@@ -524,7 +524,7 @@ public:
   void check_ids() const; // assert that .id_ have been kept in sync
 
   template<class Archive>
-  void save(Archive & ar, const unsigned int version) const {
+  void save(Archive & ar, const unsigned int /*version*/) const {
     unsigned ns = nodes_.size(); ar & ns;
     unsigned es = edges_.size(); ar & es;
     for (auto& n : nodes_) ar & n;
@@ -534,7 +534,7 @@ public:
     x = is_linear_chain_; ar & x;
   }
   template<class Archive>
-  void load(Archive & ar, const unsigned int version) {
+  void load(Archive & ar, const unsigned int /*version*/) {
     unsigned ns; ar & ns; nodes_.resize(ns);
     unsigned es; ar & es; edges_.resize(es);
     for (auto& n : nodes_) ar & n;

@@ -9,15 +9,6 @@ class Hypergraph;
 
 struct HypergraphIO {
 
-  // the format is basically a list of nodes and edges in topological order
-  // any edge you read, you must have already read its tail nodes
-  // any node you read, you must have already read its incoming edges
-  // this may make writing a bit more challenging if your forest is not
-  // topologically sorted (but that probably doesn't happen very often),
-  // but it makes reading much more memory efficient.
-  // see test_data/small.json.gz for an email encoding
-  static bool ReadFromJSON(std::istream* in, Hypergraph* out);
-
   static bool ReadFromBinary(std::istream* in, Hypergraph* out);
   static bool WriteToBinary(const Hypergraph& hg, std::ostream* out);
 

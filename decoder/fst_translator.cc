@@ -27,11 +27,15 @@ struct FSTTranslatorImpl {
                  const vector<double>& weights,
                  Hypergraph* forest) {
     bool composed = false;
-    if (input.find("{\"rules\"") == 0) {
+    if (input.find("::forest::") == 0) {
       istringstream is(input);
+      string header, fname;
+      is >> header >> fname;
+      ReadFile rf(fname);
+      if (!rf) { cerr << "Failed to open " << fname << endl; abort(); }
       Hypergraph src_cfg_hg;
-      if (!HypergraphIO::ReadFromJSON(&is, &src_cfg_hg)) {
-        cerr << "Failed to read HG from JSON.\n";
+      if (!HypergraphIO::ReadFromBinary(rf.stream(), &src_cfg_hg)) {
+        cerr << "Failed to read HG.\n";
         abort();
       }
       if (add_pass_through_rules) {

@@ -9,7 +9,6 @@
 #include <iostream>
 #include "tdict.h"
 
-#include "json_parse.h"
 #include "hg_intersect.h"
 #include "hg_union.h"
 #include "viterbi.h"
@@ -397,16 +396,6 @@ BOOST_AUTO_TEST_CASE(Small) {
   vector<prob_t> post;
   prob_t c2 = Inside<prob_t, ScaledEdgeProb>(hg, NULL, ScaledEdgeProb(0.6));
   BOOST_CHECK_CLOSE(2.1431036, log(c2), 1e-4);
-}
-
-BOOST_AUTO_TEST_CASE(JSONTest) {
-  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
-  ostringstream os;
-  JSONParser::WriteEscapedString("\"I don't know\", she said.", &os);
-  BOOST_CHECK_EQUAL("\"\\\"I don't know\\\", she said.\"", os.str());
-  ostringstream os2;
-  JSONParser::WriteEscapedString("yes", &os2);
-  BOOST_CHECK_EQUAL("\"yes\"", os2.str());
 }
 
 BOOST_AUTO_TEST_CASE(TestGenericKBest) {

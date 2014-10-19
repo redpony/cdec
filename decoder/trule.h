@@ -167,7 +167,7 @@ class TRule {
 
   friend class boost::serialization::access;
   template<class Archive>
-  void save(Archive & ar, const unsigned int version) const {
+  void save(Archive & ar, const unsigned int /*version*/) const {
     ar & TD::Convert(-lhs_);
     unsigned f_size = f_.size();
     ar & f_size;
@@ -195,7 +195,7 @@ class TRule {
     ar & scores_;
   }
   template<class Archive>
-  void load(Archive & ar, const unsigned int version) {
+  void load(Archive & ar, const unsigned int /*version*/) {
     std::string lhs; ar & lhs; lhs_ = -TD::Convert(lhs);
     unsigned f_size; ar & f_size;
     f_.resize(f_size);

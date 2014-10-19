@@ -33,7 +33,6 @@ noinst_LIBRARIES = libcdec.a
 EXTRA_DIST = test_data rule_lexer.ll
 
 libcdec_a_SOURCES = \
-  JSON_parser.h \
   aligner.h \
   apply_models.h \
   bottom_up_parser.h \
@@ -80,7 +79,6 @@ libcdec_a_SOURCES = \
   hg_union.h \
   incremental.h \
   inside_outside.h \
-  json_parse.h \
   kbest.h \
   lattice.h \
   lexalign.h \
@@ -141,7 +139,6 @@ libcdec_a_SOURCES = \
   hg_sampler.cc \
   hg_union.cc \
   incremental.cc \
-  json_parse.cc \
   lattice.cc \
   lexalign.cc \
   lextrans.cc \
@@ -157,5 +154,4 @@ libcdec_a_SOURCES = \
   tagger.cc \
   translator.cc \
   trule.cc \
-  viterbi.cc \
-  JSON_parser.c
+  viterbi.cc
