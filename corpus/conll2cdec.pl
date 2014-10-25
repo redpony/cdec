@@ -1,12 +1,15 @@
 #!/usr/bin/perl -w
 use strict;
 
+die "Usage: $0 file.conll\n\n  Converts a CoNLL formatted labeled sequence into cdec's format.\n\n" unless scalar @ARGV == 1;
+open F, "<$ARGV[0]" or die "Can't read $ARGV[0]: $!\n";
+
 my @xx;
 my @yy;
 my @os;
 my $sec = undef;
 my $i = 0;
-while(<>) {
+while(<F>) {
   chomp;
   if (/^\s*$/) {
     print "<seg id=\"$i\"";
