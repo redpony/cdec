@@ -934,10 +934,10 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
         if (!succeeded) abort();
       }
       HG::Union(forest, &new_hg);
-      bool succeeded = writer.Write(new_hg, false);
+      bool succeeded = writer.Write(new_hg);
       if (!succeeded) abort();
     } else {
-      bool succeeded = writer.Write(forest, false);
+      bool succeeded = writer.Write(forest);
       if (!succeeded) abort();
     }
   }
@@ -1027,10 +1027,10 @@ bool DecoderImpl::Decode(const string& input, DecoderObserver* o) {
             if (!succeeded) abort();
           }
           HG::Union(forest, &new_hg);
-          bool succeeded = writer.Write(new_hg, false);
+          bool succeeded = writer.Write(new_hg);
           if (!succeeded) abort();
         } else {
-          bool succeeded = writer.Write(forest, false);
+          bool succeeded = writer.Write(forest);
           if (!succeeded) abort();
         }
       }
