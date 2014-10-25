@@ -44,12 +44,13 @@ libcdec_a_SOURCES = \
   ff_basic.h \
   ff_bleu.h \
   ff_charset.h \
+  ff_conll.h \
   ff_context.h \
   ff_csplit.h \
   ff_external.h \
   ff_factory.h \
   ff_klm.h \
-	ff_lexical.h \
+  ff_lexical.h \
   ff_lm.h \
   ff_ngrams.h \
   ff_parse_match.h \
@@ -108,6 +109,7 @@ libcdec_a_SOURCES = \
   ff_basic.cc \
   ff_bleu.cc \
   ff_charset.cc \
+  ff_conll.cc \
   ff_context.cc \
   ff_csplit.cc \
   ff_external.cc \
