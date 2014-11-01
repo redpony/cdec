@@ -59,6 +59,7 @@ libcdec_a_SOURCES = \
   ff_rules.h \
   ff_ruleshape.h \
   ff_sample_fsa.h \
+  ff_soft_syn.h \
   ff_soft_syntax.h \
   ff_soft_syntax_mindist.h \
   ff_source_path.h \
@@ -122,6 +123,7 @@ libcdec_a_SOURCES = \
   ff_parse_match.cc \
   ff_rules.cc \
   ff_ruleshape.cc \
+  ff_soft_syn.cc \
   ff_soft_syntax.cc \
   ff_soft_syntax_mindist.cc \
   ff_source_path.cc \
