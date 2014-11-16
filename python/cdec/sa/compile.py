@@ -119,7 +119,7 @@ def main():
     a = cdec.sa.Alignment(from_text=args.alignment)
     a.write_binary(a_bin)
     stop_time = monitor_cpu()
-    logger.info('Compiling alignment took %f seonds', stop_time - start_time)
+    logger.info('Compiling alignment took %f seconds', stop_time - start_time)
 
     start_time = monitor_cpu()
     logger.info('Compiling bilexical dictionary')
