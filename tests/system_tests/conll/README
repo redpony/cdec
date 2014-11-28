@@ -1,0 +1,8 @@
+To generate the input file, run:
+
+  ~/cdec/corpus/conll2cdec.pl input.conll > input.txt
+
+This will create a training corpus (i.e., an input is present as well as
+gold standard output is present) in input.txt.
+
+See cdec.ini for examples of how to include features in the model.
