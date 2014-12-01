@@ -36,6 +36,7 @@ libcdec_a_SOURCES = \
   aligner.h \
   apply_models.h \
   bottom_up_parser.h \
+  bottom_up_parser-rs.h \
   csplit.h \
   decoder.h \
   earley_composer.h \
@@ -99,6 +100,7 @@ libcdec_a_SOURCES = \
   aligner.cc \
   apply_models.cc \
   bottom_up_parser.cc \
+  bottom_up_parser-rs.cc \
   cdec.cc \
   cdec_ff.cc \
   csplit.cc \
