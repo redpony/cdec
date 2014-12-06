@@ -12,12 +12,12 @@
 #include <string>
 #include <vector>
 
-#include "filelib.h"
+#include "utils/filelib.h"
 
-#include "argument_reorder_model.h"
-#include "tsuruoka_maxent.h"
+#include "decoder/ff_const_reorder_common.h"
 
 using namespace std;
+using namespace const_reorder;
 
 inline void fnPreparingTrainingdata(const char* pszFName, int iCutoff,
                                     const char* pszNewFName) {
