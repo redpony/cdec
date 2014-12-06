@@ -240,123 +240,6 @@ struct FocusedSRL {
   vector<const FocusedPredicate*> focus_predicates_;
 };
 
-/*
- * Note:
- *      In BOLT experiments, we need to merged some sequence words into one term
- *(like from "1999 nian 1 yue 10 ri" to "1999_nian_1_yue_10_ri") due to some
- *reasons;
- *      but in the parse file, we still use the parse tree before merging any
- *words;
- *      therefore, the words in source sentence and parse tree diverse and we
- *need to map a word in merged sentence into its original index;
- *      a word in source sentence maps 1 or more words in parse tree
- *      the index map info is stored at variable index_map_;
- *      if the index_map_ is NULL, indicating the word index in source sentence
- *and parse tree is always same.
- *
- *      In ConstReorderFeatureImpl, as to store alignment info, we use the word
- *index of the parse tree
- */
-
-struct SIndexMap {
-  SIndexMap(const string& index_map_file) {
-    if (index_map_file == "") {
-      index_map_input_2_parse = NULL;
-      index_map_parse_2_input = NULL;
-      return;
-    }
-    vector<string> terms;
-    {
-      ReadFile file(index_map_file);
-      string line;
-      assert(getline(*file.stream(), line));
-      SplitOnWhitespace(line, &terms);
-    }
-
-    index_map_input_2_parse = new short int[terms.size() + 1];
-    int ix = 0;
-    size_t i;
-    for (i = 0; i < terms.size(); i++) {
-      index_map_input_2_parse[i] = ix;
-      ix += atoi(terms[i].c_str());
-    }
-    index_map_input_2_parse[i] = ix;
-    // assert(ix == parsed_tree_->m_vecTerminals.size());
-
-    index_map_parse_2_input = new short int[ix + 1];
-    int jx = 0;
-    for (i = 0; i < terms.size(); i++) {
-      int num_word = atoi(terms[i].c_str());
-      for (int j = 0; j < num_word; j++) index_map_parse_2_input[jx++] = i;
-    }
-    index_map_parse_2_input[jx] = i;
-    assert(jx == ix);
-  }
-
-  ~SIndexMap() {
-    if (index_map_input_2_parse != NULL) delete index_map_input_2_parse;
-    if (index_map_parse_2_input != NULL) delete index_map_parse_2_input;
-  }
-
-  /*
-   * an input word maps to 1 or more words in parse
-   */
-  void MapIndex_Input_2_Parse(short int ix, short int& mapped_begin,
-                              short int& mapped_end) {
-    MapIndex_Input_2_Parse(ix, ix, mapped_begin, mapped_end);
-  }
-
-  /*
-   * given the indices in input,
-   * return the indices in parse tree
-   */
-  void MapIndex_Input_2_Parse(short int begin, short int end,
-                              short int& mapped_begin, short int& mapped_end) {
-    if (index_map_input_2_parse == NULL) {
-      mapped_begin = begin;
-      mapped_end = end;
-      return;
-    }
-
-    mapped_begin = index_map_input_2_parse[begin];
-    mapped_end = index_map_input_2_parse[end + 1] - 1;
-  }
-
-  /*
-   * given the indices in input,
-   * return the indices in parse tree
-   */
-  void MapIndex_Parse_2_Input(short int mapped_begin, short int mapped_end,
-                              short int& begin, short int& end) {
-    if (index_map_parse_2_input == NULL) {
-      begin = mapped_begin;
-      end = mapped_end;
-      return;
-    }
-
-    begin = index_map_parse_2_input[mapped_begin];
-    end = index_map_parse_2_input[mapped_end];
-
-    assert(mapped_begin == 0 || index_map_parse_2_input[mapped_begin - 1] !=
-                                    index_map_parse_2_input[mapped_begin]);
-    assert(index_map_parse_2_input[mapped_end + 1] !=
-           index_map_parse_2_input[mapped_end]);
-  }
-
-  /*
-   * given a index in input
-   * return the number of its corresponding words in parse tree
-   */
-  int MapIndexWordCount(int ix) {
-    if (index_map_input_2_parse == NULL) return 1;
-    return index_map_input_2_parse[ix + 1] - index_map_input_2_parse[ix];
-  }
-
- private:
-  short int* index_map_input_2_parse;
-  short int* index_map_parse_2_input;
-};
-
 struct ConstReorderFeatureImpl {
   ConstReorderFeatureImpl(const std::string& param) {
 
@@ -406,7 +289,6 @@ struct ConstReorderFeatureImpl {
 
     parsed_tree_ = NULL;
     focused_consts_ = NULL;
-    index_map_ = NULL;
 
     srl_sentence_ = NULL;
     focused_srl_ = NULL;
@@ -435,8 +317,7 @@ struct ConstReorderFeatureImpl {
   static int ReserveStateSize() { return 1 * sizeof(TargetTranslation*); }
 
   void InitializeInputSentence(const std::string& parse_file,
-                               const std::string& srl_file,
-                               const std::string& index_map_file) {
+                               const std::string& srl_file) {
     FreeSentenceVariables();
     if (b_srl_block_feature_ || b_srl_order_feature_) {
       assert(srl_file != "");
@@ -469,8 +350,6 @@ struct ConstReorderFeatureImpl {
       }
     }
 
-    index_map_ = new SIndexMap(index_map_file);
-
     if (parsed_tree_ != NULL) {
       size_t i = parsed_tree_->m_vecTerminals.size();
       vec_target_tran_.reserve(20 * i * i * i);
@@ -484,9 +363,7 @@ struct ConstReorderFeatureImpl {
                               void* state) {
     if (parsed_tree_ == NULL) return;
 
-    short int mapped_begin, mapped_end;
-    index_map_->MapIndex_Input_2_Parse(edge.i_, edge.j_ - 1, mapped_begin,
-                                       mapped_end);
+    short int mapped_begin = edge.i_, mapped_end = edge.j_ - 1;
 
     typedef TargetTranslation* PtrTargetTranslation;
     PtrTargetTranslation* remnant =
@@ -562,16 +439,9 @@ struct ConstReorderFeatureImpl {
       }
     }
     for (size_t i = 0; i < edge.rule_->a_.size(); i++) {
-      short int parse_index_begin, parse_index_end;
-      index_map_->MapIndex_Input_2_Parse(f_index[edge.rule_->a_[i].s_],
-                                         parse_index_begin, parse_index_end);
-      int findex = parse_index_begin;
+      int findex = f_index[edge.rule_->a_[i].s_];
       int eindex = e_index[edge.rule_->a_[i].t_];
-      int word_count =
-          index_map_->MapIndexWordCount(f_index[edge.rule_->a_[i].s_]);
-      assert(word_count == parse_index_end - parse_index_begin + 1);
-      for (int i = 0; i < word_count; i++)
-        remnant[0]->InsertAlignmentPoint(findex + i, eindex);
+      remnant[0]->InsertAlignmentPoint(findex, eindex);
     }
 
     // till now, we finished setting state values
@@ -946,9 +816,6 @@ struct ConstReorderFeatureImpl {
       delete vec_target_tran_[i];
     vec_target_tran_.clear();
 
-    if (index_map_ != NULL) delete index_map_;
-    index_map_ = NULL;
-
     if (map_left_ != NULL) delete map_left_;
     map_left_ = NULL;
     if (map_right_ != NULL) delete map_right_;
@@ -1193,8 +1060,6 @@ struct ConstReorderFeatureImpl {
   SSrlSentence* srl_sentence_;
   FocusedSRL* focused_srl_;
 
-  SIndexMap* index_map_;
-
   Dict* dict_block_status_;
 };
 
@@ -1214,8 +1079,7 @@ void ConstReorderFeature::PrepareForInput(const SentenceMetadata& smeta) {
   string srl_file = smeta.GetSGMLValue("srl");
   assert(!(parse_file == "" && srl_file == ""));
 
-  string indexmap_file = smeta.GetSGMLValue("index-map");
-  pimpl_->InitializeInputSentence(parse_file, srl_file, indexmap_file);
+  pimpl_->InitializeInputSentence(parse_file, srl_file);
 }
 
 void ConstReorderFeature::TraversalFeaturesImpl(
