@@ -235,6 +235,7 @@ AC_CONFIG_FILES([training/minrisk/Makefile])
 AC_CONFIG_FILES([training/mira/Makefile])
 AC_CONFIG_FILES([training/latent_svm/Makefile])
 AC_CONFIG_FILES([training/dtrain/Makefile])
+AC_CONFIG_FILES([training/const_reorder/Makefile])
 
 # external feature function example code
 AC_CONFIG_FILES([example_extff/Makefile])
