@@ -13,7 +13,6 @@
 #include <utility>
 #include <vector>
 
-#include "synutils.h"
 #include "stringlib.h"
 #include "maxent.h"
 

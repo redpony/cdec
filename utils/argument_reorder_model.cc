@@ -12,60 +12,49 @@
 #include <string>
 #include <vector>
 
+#include "filelib.h"
+
 #include "argument_reorder_model.h"
-#include "synutils.h"
 #include "tsuruoka_maxent.h"
 
 using namespace std;
 
 inline void fnPreparingTrainingdata(const char* pszFName, int iCutoff,
                                     const char* pszNewFName) {
-  SFReader* pFReader = new STxtFileReader(pszFName);
-  char* pszLine = new char[100001];
-  int iLen;
   Map hashPredicate;
-  while (pFReader->fnReadNextLine(pszLine, &iLen)) {
-    if (iLen == 0) continue;
-
-    vector<string> vecTerms;
-    SplitOnWhitespace(string(pszLine), &vecTerms);
-
-    for (size_t i = 0; i < vecTerms.size() - 1; i++) {
-      Iterator iter = hashPredicate.find(vecTerms[i]);
-      if (iter == hashPredicate.end()) {
-        hashPredicate[vecTerms[i]] = 1;
-
-      } else {
-        iter->second++;
+  {
+    ReadFile in(pszFName);
+    string line;
+    while (getline(*in.stream(), line)) {
+      if (!line.size()) continue;
+      vector<string> terms;
+      SplitOnWhitespace(line, &terms);
+      for (const auto& i : terms) {
+        ++hashPredicate[i];
       }
     }
   }
-  delete pFReader;
 
-  pFReader = new STxtFileReader(pszFName);
-  FILE* fpOut = fopen(pszNewFName, "w");
-  while (pFReader->fnReadNextLine(pszLine, &iLen)) {
-    if (iLen == 0) continue;
-
-    vector<string> vecTerms;
-    SplitOnWhitespace(string(pszLine), &vecTerms);
-    ostringstream ostr;
-    for (size_t i = 0; i < vecTerms.size() - 1; i++) {
-      Iterator iter = hashPredicate.find(vecTerms[i]);
-      assert(iter != hashPredicate.end());
-      if (iter->second >= iCutoff) {
-        ostr << vecTerms[i] << " ";
+  {
+    ReadFile in(pszFName);
+    WriteFile out(pszNewFName);
+    string line;
+    while (getline(*in.stream(), line)) {
+      if (!line.size()) continue;
+      vector<string> terms;
+      SplitOnWhitespace(line, &terms);
+      bool written = false;
+      for (const auto& i : terms) {
+        if (hashPredicate[i] >= iCutoff) {
+          (*out.stream()) << i << " ";
+          written = true;
+        }
+      }
+      if (written) {
+        (*out.stream()) << "\n";
       }
     }
-    if (ostr.str().length() > 0) {
-      ostr << vecTerms[vecTerms.size() - 1];
-      fprintf(fpOut, "%s\n", ostr.str().c_str());
-    }
   }
-  fclose(fpOut);
-  delete pFReader;
-
-  delete[] pszLine;
 }
 
 struct SArgumentReorderTrainer {
@@ -127,8 +116,8 @@ struct SArgumentReorderTrainer {
       ) {
     SAlignmentReader* pAlignReader = new SAlignmentReader(pszAlignFname);
     SSrlSentenceReader* pSRLReader = new SSrlSentenceReader(pszSRLFname);
-    STxtFileReader* pTxtSReader = new STxtFileReader(pszSourceFname);
-    STxtFileReader* pTxtTReader = new STxtFileReader(pszTargetFname);
+    ReadFile source_file(pszSourceFname);
+    ReadFile target_file(pszTargetFname);
 
     Map* pMapPredicate;
     if (pszTopPredicateFname != NULL)
@@ -136,13 +125,10 @@ struct SArgumentReorderTrainer {
     else
       pMapPredicate = NULL;
 
-    char* pszLine = new char[50001];
+    string line;
 
-    FILE* fpLeftOut, *fpRightOut;
-    sprintf(pszLine, "%s.left", pszInstanceFname);
-    fpLeftOut = fopen(pszLine, "w");
-    sprintf(pszLine, "%s.right", pszInstanceFname);
-    fpRightOut = fopen(pszLine, "w");
+    WriteFile left_file(pszInstanceFname + string(".left"));
+    WriteFile right_file(pszInstanceFname + string(".right"));
 
     // read sentence by sentence
     SAlignment* pAlign;
@@ -153,12 +139,12 @@ struct SArgumentReorderTrainer {
       pSRL = pSRLReader->fnReadNextSrlSentence();
       assert(pSRL != NULL);
       pTree = pSRL->m_pTree;
-      assert(pTxtSReader->fnReadNextLine(pszLine, NULL));
+      assert(getline(*source_file.stream(), line));
       vector<string> vecSTerms;
-      SplitOnWhitespace(string(pszLine), &vecSTerms);
-      assert(pTxtTReader->fnReadNextLine(pszLine, NULL));
+      SplitOnWhitespace(line, &vecSTerms);
+      assert(getline(*target_file.stream(), line));
       vector<string> vecTTerms;
-      SplitOnWhitespace(string(pszLine), &vecTTerms);
+      SplitOnWhitespace(line, &vecTTerms);
       // vecTPOSTerms.size() == 0, given the case when an english sentence fails
       // parsing
 
@@ -204,10 +190,10 @@ struct SArgumentReorderTrainer {
             // strOutcome.c_str());
             // fprintf(fpOut, "sentid=%d %s %s\n", iSentNum, ostr.str().c_str(),
             // strOutcome.c_str());
-            fprintf(fpLeftOut, "%s %s\n", ostr.str().c_str(),
-                    strLeftOutcome.c_str());
-            fprintf(fpRightOut, "%s %s\n", ostr.str().c_str(),
-                    strRightOutcome.c_str());
+            (*left_file.stream()) << ostr.str() << " " << strLeftOutcome
+                                  << "\n";
+            (*right_file.stream()) << ostr.str() << " " << strRightOutcome
+                                   << "\n";
           }
         }
       }
@@ -218,36 +204,28 @@ struct SArgumentReorderTrainer {
 
       if (iSentNum % 100000 == 0) fprintf(stderr, "#%d\n", iSentNum);
     }
-    delete[] pszLine;
-
-    fclose(fpLeftOut);
-    fclose(fpRightOut);
 
     delete pAlignReader;
     delete pSRLReader;
-    delete pTxtSReader;
-    delete pTxtTReader;
   }
 
   Map* fnLoadTopPredicates(const char* pszTopPredicateFname) {
     if (pszTopPredicateFname == NULL) return NULL;
 
     Map* pMapPredicate = new Map();
-    STxtFileReader* pReader = new STxtFileReader(pszTopPredicateFname);
-    char* pszLine = new char[50001];
+    // STxtFileReader* pReader = new STxtFileReader(pszTopPredicateFname);
+    ReadFile in(pszTopPredicateFname);
+    // char* pszLine = new char[50001];
+    string line;
     int iNumCount = 0;
-    while (pReader->fnReadNextLine(pszLine, NULL)) {
-      if (pszLine[0] == '#') continue;
-      char* p = strchr(pszLine, ' ');
-      assert(p != NULL);
-      p[0] = '\0';
-      p++;
-      int iCount = atoi(p);
+    while (getline(*in.stream(), line)) {
+      if (line.size() && line[0] == '#') continue;
+      auto p = line.find(' ');
+      assert(p != string::npos);
+      int iCount = atoi(line.substr(p + 1).c_str());
       if (iCount < 100) break;
-      (*pMapPredicate)[string(pszLine)] = iNumCount++;
+      (*pMapPredicate)[line] = iNumCount++;
     }
-    delete pReader;
-    delete[] pszLine;
     return pMapPredicate;
   }
 };

@@ -1,5 +1,6 @@
 #include "ff_const_reorder.h"
 
+#include "filelib.h"
 #include "stringlib.h"
 #include "hg.h"
 #include "sentence_metadata.h"
@@ -383,13 +384,13 @@ struct SIndexMap {
       index_map_parse_2_input = NULL;
       return;
     }
-    STxtFileReader* reader = new STxtFileReader(index_map_file.c_str());
-    char szLine[10001];
-    szLine[0] = '\0';
-    reader->fnReadNextLine(szLine, NULL);
-    delete reader;
     vector<string> terms;
-    SplitOnWhitespace(string(szLine), &terms);
+    {
+      ReadFile file(index_map_file);
+      string line;
+      assert(getline(*file.stream(), line));
+      SplitOnWhitespace(line, &terms);
+    }
 
     index_map_input_2_parse = new short int[terms.size() + 1];
     int ix = 0;
