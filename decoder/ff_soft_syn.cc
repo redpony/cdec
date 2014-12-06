@@ -45,8 +45,6 @@ struct SoftSynFeatureImpl {
 
   ~SoftSynFeatureImpl() { FreeSentenceVariables(); }
 
-  static int ReserveStateSize() { return 2 * sizeof(uint16_t); }
-
   void InitializeInputSentence(const std::string& parse_file,
                                const std::string& index_map_file) {
     FreeSentenceVariables();
@@ -210,24 +208,11 @@ struct SoftSynFeatureImpl {
   }
 
   void SetSoftSynFeature(const Hypergraph::Edge& edge,
-                         SparseVector<double>* features,
-                         const vector<const void*>& ant_states, void* state) {
-    vector<uint16_t> vec_pos;
+                         SparseVector<double>* features) {
     if (parsed_tree_ == NULL) return;
-
-    uint16_t* remnant = reinterpret_cast<uint16_t*>(state);
 
     short int mapped_begin, mapped_end;
     MapIndex(edge.i_, edge.j_ - 1, mapped_begin, mapped_end);
-
-    remnant[0] = mapped_begin;
-    remnant[1] = mapped_end;
-
-    for (size_t i = 0; i < edge.tail_nodes_.size(); i++) {
-      const uint16_t* astate = reinterpret_cast<const uint16_t*>(ant_states[i]);
-      vec_pos.push_back(astate[0]);
-      vec_pos.push_back(astate[1]);
-    }
 
     // soft feature for the whole span
     const vector<string> vecFeature =
@@ -300,7 +285,6 @@ struct SoftSynFeatureImpl {
 
 SoftSynFeature::SoftSynFeature(std::string param) {
   pimpl_ = new SoftSynFeatureImpl(param);
-  SetStateSize(SoftSynFeatureImpl::ReserveStateSize());
   name_ = "SoftSynFeature";
 }
 
@@ -316,10 +300,10 @@ void SoftSynFeature::PrepareForInput(const SentenceMetadata& smeta) {
 }
 
 void SoftSynFeature::TraversalFeaturesImpl(
-    const SentenceMetadata& /* smeta */, const Hypergraph::Edge& edge,
-    const vector<const void*>& ant_states, SparseVector<double>* features,
-    SparseVector<double>* /*estimated_features*/, void* state) const {
-  pimpl_->SetSoftSynFeature(edge, features, ant_states, state);
+    const SentenceMetadata& /*smeta*/, const Hypergraph::Edge& edge,
+    const vector<const void*>& /*ant_states*/, SparseVector<double>* features,
+    SparseVector<double>* /*estimated_features*/, void* /*state*/) const {
+  pimpl_->SetSoftSynFeature(edge, features);
 }
 
 string SoftSynFeature::usage(bool /*param*/, bool /*verbose*/) {
@@ -369,8 +353,6 @@ struct SoftKBestSynFeatureImpl {
 
   ~SoftKBestSynFeatureImpl() { FreeSentenceVariables(); }
 
-  static int ReserveStateSize() { return 2 * sizeof(uint16_t); }
-
   void InitializeInputSentence(const std::string& parse_file,
                                const std::string& index_map_file) {
     FreeSentenceVariables();
@@ -384,25 +366,11 @@ struct SoftKBestSynFeatureImpl {
   }
 
   void SetSoftKBestSynFeature(const Hypergraph::Edge& edge,
-                              SparseVector<double>* features,
-                              const vector<const void*>& ant_states,
-                              void* state) {
-    vector<uint16_t> vec_pos;
+                              SparseVector<double>* features) {
     if (vec_parsed_tree_.size() == 0) return;
-
-    uint16_t* remnant = reinterpret_cast<uint16_t*>(state);
 
     short int mapped_begin, mapped_end;
     MapIndex(edge.i_, edge.j_ - 1, mapped_begin, mapped_end);
-
-    remnant[0] = mapped_begin;
-    remnant[1] = mapped_end;
-
-    for (size_t i = 0; i < edge.tail_nodes_.size(); i++) {
-      const uint16_t* astate = reinterpret_cast<const uint16_t*>(ant_states[i]);
-      vec_pos.push_back(astate[0]);
-      vec_pos.push_back(astate[1]);
-    }
 
     // soft feature for the whole span
     const MapDouble* pMapFeature =
@@ -646,7 +614,6 @@ struct SoftKBestSynFeatureImpl {
 
 SoftKBestSynFeature::SoftKBestSynFeature(std::string param) {
   pimpl_ = new SoftKBestSynFeatureImpl(param);
-  SetStateSize(SoftKBestSynFeatureImpl::ReserveStateSize());
   name_ = "SoftKBestSynFeature";
 }
 
@@ -663,9 +630,9 @@ void SoftKBestSynFeature::PrepareForInput(const SentenceMetadata& smeta) {
 
 void SoftKBestSynFeature::TraversalFeaturesImpl(
     const SentenceMetadata& /* smeta */, const Hypergraph::Edge& edge,
-    const vector<const void*>& ant_states, SparseVector<double>* features,
-    SparseVector<double>* /*estimated_features*/, void* state) const {
-  pimpl_->SetSoftKBestSynFeature(edge, features, ant_states, state);
+    const vector<const void*>& /*ant_states*/, SparseVector<double>* features,
+    SparseVector<double>* /*estimated_features*/, void* /*state*/) const {
+  pimpl_->SetSoftKBestSynFeature(edge, features);
 }
 
 string SoftKBestSynFeature::usage(bool /*param*/, bool /*verbose*/) {
