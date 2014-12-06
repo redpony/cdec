@@ -5,14 +5,16 @@
  *      Author: junhuili
  */
 
+#include <string>
+#include <unordered_map>
+
 #include <boost/program_options.hpp>
+
+#include "filelib.h"
 
 #include "alignment.h"
 #include "tree.h"
-#include "synutils.h"
 #include "tsuruoka_maxent.h"
-
-#include <unordered_map>
 
 using namespace std;
 
@@ -23,52 +25,40 @@ namespace po = boost::program_options;
 
 inline void fnPreparingTrainingdata(const char* pszFName, int iCutoff,
                                     const char* pszNewFName) {
-  SFReader* pFReader = new STxtFileReader(pszFName);
-  char* pszLine = new char[100001];
-  int iLen;
   Map hashPredicate;
-  while (pFReader->fnReadNextLine(pszLine, &iLen)) {
-    if (iLen == 0) continue;
-
-    vector<string> vecTerms;
-    SplitOnWhitespace(string(pszLine), &vecTerms);
-
-    for (size_t i = 0; i < vecTerms.size() - 1; i++) {
-      Iterator iter = hashPredicate.find(vecTerms[i]);
-      if (iter == hashPredicate.end()) {
-        hashPredicate[vecTerms[i]] = 1;
-
-      } else {
-        iter->second++;
+  {
+    ReadFile f(pszFName);
+    string line;
+    while (getline(*f.stream(), line)) {
+      if (!line.size()) continue;
+      vector<string> terms;
+      SplitOnWhitespace(line, &terms);
+      for (const auto& i : terms) {
+        ++hashPredicate[i];
       }
     }
   }
-  delete pFReader;
 
-  pFReader = new STxtFileReader(pszFName);
-  FILE* fpOut = fopen(pszNewFName, "w");
-  while (pFReader->fnReadNextLine(pszLine, &iLen)) {
-    if (iLen == 0) continue;
-
-    vector<string> vecTerms;
-    SplitOnWhitespace(string(pszLine), &vecTerms);
-    ostringstream ostr;
-    for (size_t i = 0; i < vecTerms.size() - 1; i++) {
-      Iterator iter = hashPredicate.find(vecTerms[i]);
-      assert(iter != hashPredicate.end());
-      if (iter->second >= iCutoff) {
-        ostr << vecTerms[i] << " ";
+  {
+    ReadFile in(pszFName);
+    WriteFile out(pszNewFName);
+    string line;
+    while (getline(*in.stream(), line)) {
+      if (!line.size()) continue;
+      vector<string> terms;
+      SplitOnWhitespace(line, &terms);
+      bool written = false;
+      for (const auto& i : terms) {
+        if (hashPredicate[i] >= iCutoff) {
+          (*out.stream()) << i << " ";
+          written = true;
+        }
+      }
+      if (written) {
+        (*out.stream()) << "\n";
       }
     }
-    if (ostr.str().length() > 0) {
-      ostr << vecTerms[vecTerms.size() - 1];
-      fprintf(fpOut, "%s\n", ostr.str().c_str());
-    }
   }
-  fclose(fpOut);
-  delete pFReader;
-
-  delete[] pszLine;
 }
 
 struct SConstReorderTrainer {
@@ -408,31 +398,29 @@ delete pZhangleMaxent;*/
       ) {
     SAlignmentReader* pAlignReader = new SAlignmentReader(pszAlignFname);
     SParseReader* pParseReader = new SParseReader(pszSynFname, false);
-    STxtFileReader* pTxtSReader = new STxtFileReader(pszSourceFname);
-    STxtFileReader* pTxtTReader = new STxtFileReader(pszTargetFname);
 
+    ReadFile source_file(pszSourceFname);
+    ReadFile target_file(pszTargetFname);
     string strInstanceLeftFname = string(pszInstanceFname) + string(".left");
     string strInstanceRightFname = string(pszInstanceFname) + string(".right");
-
-    FILE* fpLeftOut = fopen(strInstanceLeftFname.c_str(), "w");
-    assert(fpLeftOut != NULL);
-
-    FILE* fpRightOut = fopen(strInstanceRightFname.c_str(), "w");
-    assert(fpRightOut != NULL);
+    WriteFile left_file(strInstanceLeftFname);
+    WriteFile right_file(strInstanceRightFname);
 
     // read sentence by sentence
     SAlignment* pAlign;
     SParsedTree* pTree;
-    char* pszLine = new char[50001];
+    string line;
     int iSentNum = 0;
     while ((pAlign = pAlignReader->fnReadNextAlignment()) != NULL) {
       pTree = pParseReader->fnReadNextParseTree();
-      assert(pTxtSReader->fnReadNextLine(pszLine, NULL));
+
+      assert(getline(*source_file.stream(), line));
       vector<string> vecSTerms;
-      SplitOnWhitespace(string(pszLine), &vecSTerms);
-      assert(pTxtTReader->fnReadNextLine(pszLine, NULL));
+      SplitOnWhitespace(line, &vecSTerms);
+
+      assert(getline(*target_file.stream(), line));
       vector<string> vecTTerms;
-      SplitOnWhitespace(string(pszLine), &vecTTerms);
+      SplitOnWhitespace(line, &vecTTerms);
 
       if (pTree != NULL) {
 
@@ -475,16 +463,18 @@ delete pZhangleMaxent;*/
                                vecLeftPosition, vecSTerms, vecTTerms,
                                strLeftOutcome, ostr);
 
+            string ostr_str = ostr.str();
+
             // fprintf(stderr, "%s %s\n", ostr.str().c_str(),
             // strLeftOutcome.c_str());
-            fprintf(fpLeftOut, "%s %s\n", ostr.str().c_str(),
-                    strLeftOutcome.c_str());
+            (*left_file.stream()) << ostr_str << " " << strLeftOutcome << "\n";
 
             string strRightOutcome;
             fnGetOutcome(vecRightPosition[j - 1], vecRightPosition[j],
                          strRightOutcome);
-            fprintf(fpRightOut, "%s LeftOrder=%s %s\n", ostr.str().c_str(),
-                    strLeftOutcome.c_str(), strRightOutcome.c_str());
+            (*right_file.stream()) << ostr_str
+                                   << " LeftOrder=" << strLeftOutcome << " "
+                                   << strRightOutcome << "\n";
           }
         }
         delete pTree;
@@ -496,13 +486,8 @@ delete pZhangleMaxent;*/
       if (iSentNum % 100000 == 0) fprintf(stderr, "#%d\n", iSentNum);
     }
 
-    fclose(fpLeftOut);
-    fclose(fpRightOut);
     delete pAlignReader;
     delete pParseReader;
-    delete pTxtSReader;
-    delete pTxtTReader;
-    delete[] pszLine;
   }
 
   void fnGenerateInstanceFile2(
@@ -514,25 +499,26 @@ delete pZhangleMaxent;*/
       ) {
     SAlignmentReader* pAlignReader = new SAlignmentReader(pszAlignFname);
     SParseReader* pParseReader = new SParseReader(pszSynFname, false);
-    STxtFileReader* pTxtSReader = new STxtFileReader(pszSourceFname);
-    STxtFileReader* pTxtTReader = new STxtFileReader(pszTargetFname);
 
-    FILE* fpOut = fopen(pszInstanceFname, "w");
-    assert(fpOut != NULL);
+    ReadFile source_file(pszSourceFname);
+    ReadFile target_file(pszTargetFname);
+
+    WriteFile output_file(pszInstanceFname);
 
     // read sentence by sentence
     SAlignment* pAlign;
     SParsedTree* pTree;
-    char* pszLine = new char[50001];
+    string line;
     int iSentNum = 0;
     while ((pAlign = pAlignReader->fnReadNextAlignment()) != NULL) {
       pTree = pParseReader->fnReadNextParseTree();
-      assert(pTxtSReader->fnReadNextLine(pszLine, NULL));
+      assert(getline(*source_file.stream(), line));
       vector<string> vecSTerms;
-      SplitOnWhitespace(string(pszLine), &vecSTerms);
-      assert(pTxtTReader->fnReadNextLine(pszLine, NULL));
+      SplitOnWhitespace(line, &vecSTerms);
+
+      assert(getline(*target_file.stream(), line));
       vector<string> vecTTerms;
-      SplitOnWhitespace(string(pszLine), &vecTTerms);
+      SplitOnWhitespace(line, &vecTTerms);
 
       if (pTree != NULL) {
 
@@ -556,7 +542,7 @@ delete pZhangleMaxent;*/
 
             // fprintf(stderr, "%s %s\n", ostr.str().c_str(),
             // strOutcome.c_str());
-            fprintf(fpOut, "%s %s\n", ostr.str().c_str(), strOutcome.c_str());
+            (*output_file.stream()) << ostr.str() << " " << strOutcome << "\n";
           }
         }
         delete pTree;
@@ -568,12 +554,8 @@ delete pZhangleMaxent;*/
       if (iSentNum % 100000 == 0) fprintf(stderr, "#%d\n", iSentNum);
     }
 
-    fclose(fpOut);
     delete pAlignReader;
     delete pParseReader;
-    delete pTxtSReader;
-    delete pTxtTReader;
-    delete[] pszLine;
   }
 };
 
