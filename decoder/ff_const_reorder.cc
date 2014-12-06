@@ -17,114 +17,6 @@ using namespace const_reorder;
 
 typedef HASH_MAP<std::string, vector<double> > MapClassifier;
 
-struct SBitArray {
-  SBitArray(int size) : size_(size) {
-    int bit_size = size / 8;
-    if (size % 8 > 0) bit_size++;
-
-    char_ = new unsigned char[bit_size];
-    memset(char_, 0, bit_size);
-  }
-  ~SBitArray() { delete[] char_; }
-
-  int Get(int index) const {
-    int i;
-
-    i = index;
-    if (i < 0) i = size_ + i;
-    assert(i > -1 && i < size_);
-
-    int byte_index, bit_index;
-    byte_index = i / 8;
-    bit_index = i % 8;
-    unsigned char res;
-    if (bit_index == 0)
-      res = char_[byte_index] & 0x01;
-    else if (bit_index == 1)
-      res = char_[byte_index] & 0x02;
-    else if (bit_index == 2)
-      res = char_[byte_index] & 0x04;
-    else if (bit_index == 3)
-      res = char_[byte_index] & 0x08;
-    else if (bit_index == 4)
-      res = char_[byte_index] & 0x10;
-    else if (bit_index == 5)
-      res = char_[byte_index] & 0x20;
-    else if (bit_index == 6)
-      res = char_[byte_index] & 0x40;
-    else if (bit_index == 7)
-      res = char_[byte_index] & 0x80;
-    else
-      assert(false);
-    if (res != 0)
-      return 1;
-    else
-      return 0;
-  }
-
-  void Set(int index, int val) {
-    assert(val == 0 || val == 1);
-    int i;
-
-    i = index;
-    if (i < 0) i = size_ + i;
-    assert(i > -1 && i < size_);
-
-    int byte_index, bit_index;
-    byte_index = i / 8;
-    bit_index = i % 8;
-    unsigned char res;
-
-    if (bit_index == 0) {
-      if (val == 0)
-        res = char_[byte_index] & 0xFE;
-      else
-        res = char_[byte_index] | 0x01;
-    } else if (bit_index == 1) {
-      if (val == 0)
-        res = char_[byte_index] & 0xFD;
-      else
-        res = char_[byte_index] | 0x02;
-    } else if (bit_index == 2) {
-      if (val == 0)
-        res = char_[byte_index] & 0xFB;
-      else
-        res = char_[byte_index] | 0x04;
-    } else if (bit_index == 3) {
-      if (val == 0)
-        res = char_[byte_index] & 0xF7;
-      else
-        res = char_[byte_index] | 0x08;
-    } else if (bit_index == 4) {
-      if (val == 0)
-        res = char_[byte_index] & 0xEF;
-      else
-        res = char_[byte_index] | 0x10;
-    } else if (bit_index == 5) {
-      if (val == 0)
-        res = char_[byte_index] & 0xDF;
-      else
-        res = char_[byte_index] | 0x20;
-    } else if (bit_index == 6) {
-      if (val == 0)
-        res = char_[byte_index] & 0xBF;
-      else
-        res = char_[byte_index] | 0x40;
-    } else if (bit_index == 7) {
-      if (val == 0)
-        res = char_[byte_index] & 0x7F;
-      else
-        res = char_[byte_index] | 0x80;
-    } else
-      assert(false);
-    char_[byte_index] = res;
-  }
-
- private:
-  const int size_;
-  unsigned char* char_;
-};
-
 inline bool is_inside(int i, int left, int right) {
   if (i < left || i > right) return false;
   return true;
@@ -184,33 +76,24 @@ struct TargetTranslation {
         e_num_words_(e_num_word),
         vec_left_most_(end_pos - begin_pos + 1, e_num_word),
         vec_right_most_(end_pos - begin_pos + 1, -1),
-        vec_f_align_bit_array_(end_pos - begin_pos + 1, NULL),
-        vec_e_align_bit_array_(e_num_word, NULL) {
+        vec_f_align_bit_array_(end_pos - begin_pos + 1),
+        vec_e_align_bit_array_(e_num_word) {
     int len = end_pos - begin_pos + 1;
     align_.reserve(1.5 * len);
-  }
-  ~TargetTranslation() {
-    for (size_t i = 0; i < vec_f_align_bit_array_.size(); i++)
-      if (vec_f_align_bit_array_[i] != NULL) delete vec_f_align_bit_array_[i];
-
-    for (size_t i = 0; i < vec_e_align_bit_array_.size(); i++)
-      if (vec_e_align_bit_array_[i] != NULL) delete vec_e_align_bit_array_[i];
-
-    for (size_t i = 0; i < align_.size(); i++) delete align_[i];
   }
 
   void InsertAlignmentPoint(int s, int t) {
     int i = s - begin_pos_;
 
-    SBitArray*& b = vec_f_align_bit_array_[i];
-    if (b == NULL) b = new SBitArray(e_num_words_);
-    b->Set(t, 1);
+    vector<bool>& b = vec_f_align_bit_array_[i];
+    if (b.empty()) b.resize(e_num_words_);
+    b[t] = 1;
 
-    SBitArray*& a = vec_e_align_bit_array_[t];
-    if (a == NULL) a = new SBitArray(end_pos_ - begin_pos_ + 1);
-    a->Set(i, 1);
+    vector<bool>& a = vec_e_align_bit_array_[t];
+    if (a.empty()) a.resize(end_pos_ - begin_pos_ + 1);
+    a[i] = 1;
 
-    align_.push_back(new AlignmentPoint(s, t));
+    align_.push_back({s, t});
 
     if (t > vec_right_most_[i]) vec_right_most_[i] = t;
     if (t < vec_left_most_[i]) vec_left_most_[i] = t;
@@ -229,10 +112,10 @@ struct TargetTranslation {
     if (target_begin == -1) return "0";
 
     for (int i = target_begin; i <= target_end; i++) {
-      if (vec_e_align_bit_array_[i] == NULL) continue;
+      if (vec_e_align_bit_array_[i].empty()) continue;
       int j = begin;
       for (; j <= end; j++) {
-        if (vec_e_align_bit_array_[i]->Get(j - begin_pos_)) break;
+        if (vec_e_align_bit_array_[i][j - begin_pos_]) break;
       }
       if (j == end + 1)  // e[i] is aligned, but e[i] doesn't align to any
                          // source word in [begin_pos, end_pos]
@@ -247,10 +130,10 @@ struct TargetTranslation {
     if (target_begin == -1) return "Unaligned";
 
     for (int i = target_begin; i <= target_end; i++) {
-      if (vec_e_align_bit_array_[i] == NULL) continue;
+      if (vec_e_align_bit_array_[i].empty()) continue;
       int j = begin;
       for (; j <= end; j++) {
-        if (vec_e_align_bit_array_[i]->Get(j - begin_pos_)) break;
+        if (vec_e_align_bit_array_[i][j - begin_pos_]) break;
       }
       if (j == end + 1)  // e[i] is aligned, but e[i] doesn't align to any
                          // source word in [begin_pos, end_pos]
@@ -277,17 +160,17 @@ struct TargetTranslation {
     target_end = -1;
 
     for (int i = begin - begin_pos_; i < end - begin_pos_ + 1; i++) {
-      if (vec_f_align_bit_array_[i] == NULL) continue;
+      if (vec_f_align_bit_array_[i].empty()) continue;
       for (int j = 0; j < target_begin; j++)
-        if (vec_f_align_bit_array_[i]->Get(j)) {
+        if (vec_f_align_bit_array_[i][j]) {
           target_begin = j;
           break;
         }
     }
     for (int i = end - begin_pos_; i > begin - begin_pos_ - 1; i--) {
-      if (vec_f_align_bit_array_[i] == NULL) continue;
+      if (vec_f_align_bit_array_[i].empty()) continue;
       for (int j = e_num_words_ - 1; j > target_end; j--)
-        if (vec_f_align_bit_array_[i]->Get(j)) {
+        if (vec_f_align_bit_array_[i][j]) {
           target_end = j;
           break;
         }
@@ -299,13 +182,13 @@ struct TargetTranslation {
   const uint16_t begin_pos_, end_pos_;              // the position in parse
   const uint16_t input_begin_pos_, input_end_pos_;  // the position in input
   const uint16_t e_num_words_;
-  vector<AlignmentPoint*> align_;
+  vector<AlignmentPoint> align_;
 
  private:
   vector<short> vec_left_most_;
   vector<short> vec_right_most_;
-  vector<SBitArray*> vec_f_align_bit_array_;
-  vector<SBitArray*> vec_e_align_bit_array_;
+  vector<vector<bool> > vec_f_align_bit_array_;
+  vector<vector<bool> > vec_e_align_bit_array_;
 };
 
 struct FocusedConstituent {
@@ -672,10 +555,10 @@ struct ConstReorderFeatureImpl {
 
       // i aligns j
       int eindex = e_index[j];
-      const vector<AlignmentPoint*>& align =
+      const vector<AlignmentPoint>& align =
           vec_node[-1 * edge.rule_->e_[j]]->align_;
       for (size_t k = 0; k < align.size(); k++) {
-        remnant[0]->InsertAlignmentPoint(align[k]->s_, eindex + align[k]->t_);
+        remnant[0]->InsertAlignmentPoint(align[k].s_, eindex + align[k].t_);
       }
     }
     for (size_t i = 0; i < edge.rule_->a_.size(); i++) {
