@@ -8,13 +8,14 @@
 #include "stringlib.h"
 #include "hg.h"
 #include "sentence_metadata.h"
-#include "tree.h"
+#include "ff_const_reorder_common.h"
 
 #include <string>
 #include <vector>
 #include <stdio.h>
 
 using namespace std;
+using namespace const_reorder;
 
 typedef HASH_MAP<std::string, vector<string> > MapFeatures;
 
