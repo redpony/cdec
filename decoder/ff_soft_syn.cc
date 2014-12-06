@@ -3,11 +3,12 @@
  *
  */
 #include "ff_soft_syn.h"
+
+#include "filelib.h"
 #include "stringlib.h"
 #include "hg.h"
 #include "sentence_metadata.h"
 #include "tree.h"
-#include "synutils.h"
 
 #include <string>
 #include <vector>
@@ -34,7 +35,7 @@ typedef HASH_MAP<std::string, vector<string> > MapFeatures;
  */
 
 struct SoftSynFeatureImpl {
-  SoftSynFeatureImpl(const string& params) {
+  SoftSynFeatureImpl(const string& /*params*/) {
     parsed_tree_ = NULL;
     index_map_ = NULL;
 
@@ -58,12 +59,13 @@ struct SoftSynFeatureImpl {
   }
 
   void ReadIndexMap(const std::string& index_map_file) {
-    STxtFileReader* reader = new STxtFileReader(index_map_file.c_str());
-    char szLine[10001];
-    szLine[0] = '\0';
-    reader->fnReadNextLine(szLine, NULL);
     vector<string> terms;
-    SplitOnWhitespace(string(szLine), &terms);
+    {
+      ReadFile file(index_map_file);
+      string line;
+      assert(getline(*file.stream(), line));
+      SplitOnWhitespace(line, &terms);
+    }
 
     index_map_ = new short int[terms.size() + 1];
     int ix = 0;
@@ -74,7 +76,6 @@ struct SoftSynFeatureImpl {
     }
     index_map_[i] = ix;
     assert(parsed_tree_ == NULL || ix == parsed_tree_->m_vecTerminals.size());
-    delete reader;
   }
 
   void MapIndex(short int begin, short int end, short int& mapped_begin,
@@ -316,7 +317,7 @@ void SoftSynFeature::PrepareForInput(const SentenceMetadata& smeta) {
 void SoftSynFeature::TraversalFeaturesImpl(
     const SentenceMetadata& /* smeta */, const Hypergraph::Edge& edge,
     const vector<const void*>& ant_states, SparseVector<double>* features,
-    SparseVector<double>* estimated_features, void* state) const {
+    SparseVector<double>* /*estimated_features*/, void* state) const {
   pimpl_->SetSoftSynFeature(edge, features, ant_states, state);
 }
 
@@ -359,7 +360,7 @@ typedef HASH_MAP<std::string, MapDouble*> MapDoubleFeatures;
  */
 
 struct SoftKBestSynFeatureImpl {
-  SoftKBestSynFeatureImpl(const string& params) {
+  SoftKBestSynFeatureImpl(const string& /*params*/) {
     index_map_ = NULL;
 
     map_features_ = NULL;
@@ -414,12 +415,13 @@ struct SoftKBestSynFeatureImpl {
 
  private:
   void ReadIndexMap(const std::string& index_map_file) {
-    STxtFileReader* reader = new STxtFileReader(index_map_file.c_str());
-    char szLine[10001];
-    szLine[0] = '\0';
-    reader->fnReadNextLine(szLine, NULL);
     vector<string> terms;
-    SplitOnWhitespace(string(szLine), &terms);
+    {
+      ReadFile file(index_map_file);
+      string line;
+      assert(getline(*file.stream(), line));
+      SplitOnWhitespace(line, &terms);
+    }
 
     index_map_ = new short int[terms.size() + 1];
     int ix = 0;
@@ -431,7 +433,6 @@ struct SoftKBestSynFeatureImpl {
     index_map_[i] = ix;
     assert(vec_parsed_tree_.size() == 0 ||
            ix == vec_parsed_tree_[0]->m_vecTerminals.size());
-    delete reader;
   }
 
   void MapIndex(short int begin, short int end, short int& mapped_begin,
@@ -595,10 +596,10 @@ struct SoftKBestSynFeatureImpl {
 
   void ReadParseTree(const std::string& parse_file,
                      vector<SParsedTree*>& vec_tree, vector<double>& vec_prob) {
-    STxtFileReader* reader = new STxtFileReader(parse_file.c_str());
+    ReadFile in(parse_file);
     SParsedTree* tree;
     string line;
-    while (reader->fnReadNextLine(line)) {
+    while (getline(*in.stream(), line)) {
       const char* p = strchr(line.c_str(), ' ');
       assert(p != NULL);
       string strProb = line.substr(0, line.find(' '));
@@ -613,7 +614,6 @@ struct SoftKBestSynFeatureImpl {
         vec_prob.push_back(atof(strProb.c_str()));
       }
     }
-    delete reader;
   }
 
   void ReadParseTree2(const std::string& parse_file,
@@ -663,7 +663,7 @@ void SoftKBestSynFeature::PrepareForInput(const SentenceMetadata& smeta) {
 void SoftKBestSynFeature::TraversalFeaturesImpl(
     const SentenceMetadata& /* smeta */, const Hypergraph::Edge& edge,
     const vector<const void*>& ant_states, SparseVector<double>* features,
-    SparseVector<double>* estimated_features, void* state) const {
+    SparseVector<double>* /*estimated_features*/, void* state) const {
   pimpl_->SetSoftKBestSynFeature(edge, features, ant_states, state);
 }
 
