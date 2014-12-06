@@ -1,4 +1,4 @@
-bin_PROGRAMS = reconstruct_weights atools const_reorder_model_trainer argument_reorder_model_trainer
+bin_PROGRAMS = reconstruct_weights atools
 
 noinst_PROGRAMS = \
   ts \
@@ -20,9 +20,7 @@ noinst_LIBRARIES = libutils.a
 libutils_a_SOURCES = \
   test_data \
   alias_sampler.h \
-  alignment.h \
   alignment_io.h \
-  argument_reorder_model.h \
   array2d.h \
   b64tools.h \
   batched_append.h \
@@ -61,15 +59,12 @@ libutils_a_SOURCES = \
   show.h \
   small_vector.h \
   sparse_vector.h \
-  srl_sentence.h \
   star.h \
   static_utoa.h \
   stringlib.h \
   string_piece.hh \
   tdict.h \
   timing_stats.h \
-  tree.h \
-  tsuruoka_maxent.h \
   utoa.h \
   value_array.h \
   verbose.h \
@@ -91,7 +86,6 @@ libutils_a_SOURCES = \
   filelib.cc \
   stringlib.cc \
   string_piece.cc \
-  synutils.h \
   sparse_vector.cc \
   timing_stats.cc \
   verbose.cc \
@@ -106,10 +100,6 @@ reconstruct_weights_LDADD = libutils.a
 atools_SOURCES = atools.cc
 atools_LDADD = libutils.a
 atools_LDFLAGS = $(STATIC_FLAGS)
-const_reorder_model_trainer_SOURCES = constituent_reorder_model.cc
-const_reorder_model_trainer_LDADD = libutils.a
-argument_reorder_model_trainer_SOURCES = argument_reorder_model.cc
-argument_reorder_model_trainer_LDADD = libutils.a
 
 phmt_SOURCES = phmt.cc
 phmt_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)

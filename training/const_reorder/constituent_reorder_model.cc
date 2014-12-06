@@ -10,13 +10,12 @@
 
 #include <boost/program_options.hpp>
 
-#include "filelib.h"
+#include "utils/filelib.h"
 
-#include "alignment.h"
-#include "tree.h"
-#include "tsuruoka_maxent.h"
+#include "decoder/ff_const_reorder_common.h"
 
 using namespace std;
+using namespace const_reorder;
 
 typedef std::unordered_map<std::string, int> Map;
 typedef std::unordered_map<std::string, int>::iterator Iterator;

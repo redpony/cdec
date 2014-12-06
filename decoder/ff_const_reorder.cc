@@ -4,11 +4,8 @@
 #include "stringlib.h"
 #include "hg.h"
 #include "sentence_metadata.h"
-#include "tree.h"
-#include "srl_sentence.h"
-#include "tsuruoka_maxent.h"
 #include "hash.h"
-#include "argument_reorder_model.h"
+#include "ff_const_reorder_common.h"
 
 #include <sstream>
 #include <string>
@@ -16,6 +13,7 @@
 #include <stdio.h>
 
 using namespace std;
+using namespace const_reorder;
 
 typedef HASH_MAP<std::string, vector<double> > MapClassifier;
 
