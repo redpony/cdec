@@ -66,13 +66,9 @@ inline void NewAndCopyCharArray(char** p, const char* q) {
 
 // TODO:to make the alignment more efficient
 struct TargetTranslation {
-  typedef vector<int> SingleWordAlign;
-  TargetTranslation(int begin_pos, int end_pos, int input_begin_pos,
-                    int input_end_pos, int e_num_word)
+  TargetTranslation(int begin_pos, int end_pos,int e_num_word)
       : begin_pos_(begin_pos),
         end_pos_(end_pos),
-        input_begin_pos_(input_begin_pos),
-        input_end_pos_(input_end_pos),
         e_num_words_(e_num_word),
         vec_left_most_(end_pos - begin_pos + 1, e_num_word),
         vec_right_most_(end_pos - begin_pos + 1, -1),
@@ -179,8 +175,7 @@ struct TargetTranslation {
     if (target_end == -1) target_begin = -1;
   }
 
-  const uint16_t begin_pos_, end_pos_;              // the position in parse
-  const uint16_t input_begin_pos_, input_end_pos_;  // the position in input
+  const uint16_t begin_pos_, end_pos_;              // the position in input
   const uint16_t e_num_words_;
   vector<AlignmentPoint> align_;
 
@@ -304,6 +299,7 @@ struct ConstReorderFeatureImpl {
     dict_block_status_->Convert("Discon't", false);
     dict_block_status_->Convert("Con't", false);
   }
+
   ~ConstReorderFeatureImpl() {
     if (const_reorder_classifier_left_) delete const_reorder_classifier_left_;
     if (const_reorder_classifier_right_) delete const_reorder_classifier_right_;
@@ -363,7 +359,7 @@ struct ConstReorderFeatureImpl {
                               void* state) {
     if (parsed_tree_ == NULL) return;
 
-    short int mapped_begin = edge.i_, mapped_end = edge.j_ - 1;
+    short int begin = edge.i_, end = edge.j_ - 1;
 
     typedef TargetTranslation* PtrTargetTranslation;
     PtrTargetTranslation* remnant =
@@ -383,8 +379,7 @@ struct ConstReorderFeatureImpl {
       e_num_word--;
     }
 
-    remnant[0] = new TargetTranslation(mapped_begin, mapped_end, edge.i_,
-                                       edge.j_ - 1, e_num_word);
+    remnant[0] = new TargetTranslation(begin, end, e_num_word);
     vec_target_tran_.push_back(remnant[0]);
 
     // reset the alignment
@@ -398,7 +393,7 @@ struct ConstReorderFeatureImpl {
       f_index[i] = index;
       const WordID& c = rule->f_[i];
       if (c < 1)
-        index = vec_node[vc++]->input_end_pos_ + 1;
+        index = vec_node[vc++]->end_pos_ + 1;
       else
         index++;
     }
@@ -446,11 +441,11 @@ struct ConstReorderFeatureImpl {
 
     // till now, we finished setting state values
     // next, use the state values to calculate constituent reorder feature
-    SetConstReorderFeature(mapped_begin, mapped_end, features, remnant[0],
+    SetConstReorderFeature(begin, end, features, remnant[0],
                            vec_node, f_index);
   }
 
-  void SetConstReorderFeature(short int mapped_begin, short int mapped_end,
+  void SetConstReorderFeature(short int begin, short int end,
                               SparseVector<double>* features,
                               const TargetTranslation* target_translation,
                               const vector<const TargetTranslation*>& vec_node,
@@ -459,7 +454,7 @@ struct ConstReorderFeatureImpl {
       double logprob_srl_reorder_left = 0.0, logprob_srl_reorder_right = 0.0;
       for (size_t i = 0; i < focused_srl_->focus_predicates_.size(); i++) {
         const FocusedPredicate* pred = focused_srl_->focus_predicates_[i];
-        if (!is_overlap(mapped_begin, mapped_end, pred->begin_, pred->end_))
+        if (!is_overlap(begin, end, pred->begin_, pred->end_))
           continue;  // have no overlap between this predicate (with its
                      // argument) and the current edge
 
@@ -475,7 +470,7 @@ struct ConstReorderFeatureImpl {
         vecBlockStatus.reserve(pred->vec_items_.size());
         for (j = 0; j < pred->vec_items_.size(); j++) {
           const STreeItem* con1 = pred->vec_items_[j]->tree_item_;
-          if (con1->m_iBegin < mapped_begin || con1->m_iEnd > mapped_end) {
+          if (con1->m_iBegin < begin || con1->m_iEnd > end) {
             vecBlockStatus.push_back(0);
             continue;
           }  // the node is partially outside the current edge
@@ -507,7 +502,7 @@ struct ConstReorderFeatureImpl {
         vecRelativeRightPosition.reserve(pred->vec_items_.size());
         for (j = 0; j < pred->vec_items_.size(); j++) {
           const STreeItem* con1 = pred->vec_items_[j]->tree_item_;
-          if (con1->m_iBegin < mapped_begin || con1->m_iEnd > mapped_end) {
+          if (con1->m_iBegin < begin || con1->m_iEnd > end) {
             vecPosition.push_back(-1);
             vecRightPosition.push_back(-1);
             continue;
@@ -525,7 +520,7 @@ struct ConstReorderFeatureImpl {
           const STreeItem* con1 = pred->vec_items_[j - 1]->tree_item_;
           const STreeItem* con2 = pred->vec_items_[j]->tree_item_;
 
-          if (con1->m_iBegin < mapped_begin || con2->m_iEnd > mapped_end)
+          if (con1->m_iBegin < begin || con2->m_iEnd > end)
             continue;  // one of the two nodes is partially outside the current
                        // edge
 
@@ -577,7 +572,7 @@ struct ConstReorderFeatureImpl {
 
       for (size_t i = 0; i < focused_consts_->focus_parents_.size(); i++) {
         STreeItem* parent = focused_consts_->focus_parents_[i];
-        if (!is_overlap(mapped_begin, mapped_end, parent->m_iBegin,
+        if (!is_overlap(begin, end, parent->m_iBegin,
                         parent->m_iEnd))
           continue;  // have no overlap between this parent node and the current
                      // edge
@@ -591,8 +586,8 @@ struct ConstReorderFeatureImpl {
         if (j < vec_node.size()) continue;
 
         if (b_block_feature_) {
-          if (parent->m_iBegin >= mapped_begin &&
-              parent->m_iEnd <= mapped_end) {
+          if (parent->m_iBegin >= begin &&
+              parent->m_iEnd <= end) {
             string type = target_translation->IsTargetConstinousSpan2(
                 parent->m_iBegin, parent->m_iEnd);
             int f_id = FD::Convert(string(parent->m_pszTerm) + type);
@@ -607,7 +602,7 @@ struct ConstReorderFeatureImpl {
 
         for (j = 0; j < parent->m_vecChildren.size(); j++) {
           STreeItem* con1 = parent->m_vecChildren[j];
-          if (con1->m_iBegin < mapped_begin || con1->m_iEnd > mapped_end) {
+          if (con1->m_iBegin < begin || con1->m_iEnd > end) {
             vecChunkBlock.push_back(0);
             continue;
           }  // the node is partially outside the current edge
@@ -640,7 +635,7 @@ struct ConstReorderFeatureImpl {
         vecRelativeRightPosition.reserve(parent->m_vecChildren.size());
         for (j = 0; j < parent->m_vecChildren.size(); j++) {
           STreeItem* con1 = parent->m_vecChildren[j];
-          if (con1->m_iBegin < mapped_begin || con1->m_iEnd > mapped_end) {
+          if (con1->m_iBegin < begin || con1->m_iEnd > end) {
             vecPosition.push_back(-1);
             vecRightPosition.push_back(-1);
             continue;
@@ -658,7 +653,7 @@ struct ConstReorderFeatureImpl {
           STreeItem* con1 = parent->m_vecChildren[j - 1];
           STreeItem* con2 = parent->m_vecChildren[j];
 
-          if (con1->m_iBegin < mapped_begin || con2->m_iEnd > mapped_end)
+          if (con1->m_iBegin < begin || con2->m_iEnd > end)
             continue;  // one of the two nodes is partially outside the current
                        // edge
 
