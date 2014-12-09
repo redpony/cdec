@@ -17,114 +17,6 @@ using namespace const_reorder;
 
 typedef HASH_MAP<std::string, vector<double> > MapClassifier;
 
-struct SBitArray {
-  SBitArray(int size) : size_(size) {
-    int bit_size = size / 8;
-    if (size % 8 > 0) bit_size++;
-
-    char_ = new unsigned char[bit_size];
-    memset(char_, 0, bit_size);
-  }
-  ~SBitArray() { delete[] char_; }
-
-  int Get(int index) const {
-    int i;
-
-    i = index;
-    if (i < 0) i = size_ + i;
-    assert(i > -1 && i < size_);
-
-    int byte_index, bit_index;
-    byte_index = i / 8;
-    bit_index = i % 8;
-    unsigned char res;
-    if (bit_index == 0)
-      res = char_[byte_index] & 0x01;
-    else if (bit_index == 1)
-      res = char_[byte_index] & 0x02;
-    else if (bit_index == 2)
-      res = char_[byte_index] & 0x04;
-    else if (bit_index == 3)
-      res = char_[byte_index] & 0x08;
-    else if (bit_index == 4)
-      res = char_[byte_index] & 0x10;
-    else if (bit_index == 5)
-      res = char_[byte_index] & 0x20;
-    else if (bit_index == 6)
-      res = char_[byte_index] & 0x40;
-    else if (bit_index == 7)
-      res = char_[byte_index] & 0x80;
-    else
-      assert(false);
-    if (res != 0)
-      return 1;
-    else
-      return 0;
-  }
-
-  void Set(int index, int val) {
-    assert(val == 0 || val == 1);
-    int i;
-
-    i = index;
-    if (i < 0) i = size_ + i;
-    assert(i > -1 && i < size_);
-
-    int byte_index, bit_index;
-    byte_index = i / 8;
-    bit_index = i % 8;
-    unsigned char res;
-
-    if (bit_index == 0) {
-      if (val == 0)
-        res = char_[byte_index] & 0xFE;
-      else
-        res = char_[byte_index] | 0x01;
-    } else if (bit_index == 1) {
-      if (val == 0)
-        res = char_[byte_index] & 0xFD;
-      else
-        res = char_[byte_index] | 0x02;
-    } else if (bit_index == 2) {
-      if (val == 0)
-        res = char_[byte_index] & 0xFB;
-      else
-        res = char_[byte_index] | 0x04;
-    } else if (bit_index == 3) {
-      if (val == 0)
-        res = char_[byte_index] & 0xF7;
-      else
-        res = char_[byte_index] | 0x08;
-    } else if (bit_index == 4) {
-      if (val == 0)
-        res = char_[byte_index] & 0xEF;
-      else
-        res = char_[byte_index] | 0x10;
-    } else if (bit_index == 5) {
-      if (val == 0)
-        res = char_[byte_index] & 0xDF;
-      else
-        res = char_[byte_index] | 0x20;
-    } else if (bit_index == 6) {
-      if (val == 0)
-        res = char_[byte_index] & 0xBF;
-      else
-        res = char_[byte_index] | 0x40;
-    } else if (bit_index == 7) {
-      if (val == 0)
-        res = char_[byte_index] & 0x7F;
-      else
-        res = char_[byte_index] | 0x80;
-    } else
-      assert(false);
-    char_[byte_index] = res;
-  }
-
- private:
-  const int size_;
-  unsigned char* char_;
-};
-
 inline bool is_inside(int i, int left, int right) {
   if (i < left || i > right) return false;
   return true;
@@ -174,43 +66,30 @@ inline void NewAndCopyCharArray(char** p, const char* q) {
 
 // TODO:to make the alignment more efficient
 struct TargetTranslation {
-  typedef vector<int> SingleWordAlign;
-  TargetTranslation(int begin_pos, int end_pos, int input_begin_pos,
-                    int input_end_pos, int e_num_word)
+  TargetTranslation(int begin_pos, int end_pos,int e_num_word)
       : begin_pos_(begin_pos),
         end_pos_(end_pos),
-        input_begin_pos_(input_begin_pos),
-        input_end_pos_(input_end_pos),
         e_num_words_(e_num_word),
         vec_left_most_(end_pos - begin_pos + 1, e_num_word),
         vec_right_most_(end_pos - begin_pos + 1, -1),
-        vec_f_align_bit_array_(end_pos - begin_pos + 1, NULL),
-        vec_e_align_bit_array_(e_num_word, NULL) {
+        vec_f_align_bit_array_(end_pos - begin_pos + 1),
+        vec_e_align_bit_array_(e_num_word) {
     int len = end_pos - begin_pos + 1;
     align_.reserve(1.5 * len);
-  }
-  ~TargetTranslation() {
-    for (size_t i = 0; i < vec_f_align_bit_array_.size(); i++)
-      if (vec_f_align_bit_array_[i] != NULL) delete vec_f_align_bit_array_[i];
-
-    for (size_t i = 0; i < vec_e_align_bit_array_.size(); i++)
-      if (vec_e_align_bit_array_[i] != NULL) delete vec_e_align_bit_array_[i];
-
-    for (size_t i = 0; i < align_.size(); i++) delete align_[i];
   }
 
   void InsertAlignmentPoint(int s, int t) {
     int i = s - begin_pos_;
 
-    SBitArray*& b = vec_f_align_bit_array_[i];
-    if (b == NULL) b = new SBitArray(e_num_words_);
-    b->Set(t, 1);
+    vector<bool>& b = vec_f_align_bit_array_[i];
+    if (b.empty()) b.resize(e_num_words_);
+    b[t] = 1;
 
-    SBitArray*& a = vec_e_align_bit_array_[t];
-    if (a == NULL) a = new SBitArray(end_pos_ - begin_pos_ + 1);
-    a->Set(i, 1);
+    vector<bool>& a = vec_e_align_bit_array_[t];
+    if (a.empty()) a.resize(end_pos_ - begin_pos_ + 1);
+    a[i] = 1;
 
-    align_.push_back(new AlignmentPoint(s, t));
+    align_.push_back({s, t});
 
     if (t > vec_right_most_[i]) vec_right_most_[i] = t;
     if (t < vec_left_most_[i]) vec_left_most_[i] = t;
@@ -229,10 +108,10 @@ struct TargetTranslation {
     if (target_begin == -1) return "0";
 
     for (int i = target_begin; i <= target_end; i++) {
-      if (vec_e_align_bit_array_[i] == NULL) continue;
+      if (vec_e_align_bit_array_[i].empty()) continue;
       int j = begin;
       for (; j <= end; j++) {
-        if (vec_e_align_bit_array_[i]->Get(j - begin_pos_)) break;
+        if (vec_e_align_bit_array_[i][j - begin_pos_]) break;
       }
       if (j == end + 1)  // e[i] is aligned, but e[i] doesn't align to any
                          // source word in [begin_pos, end_pos]
@@ -247,10 +126,10 @@ struct TargetTranslation {
     if (target_begin == -1) return "Unaligned";
 
     for (int i = target_begin; i <= target_end; i++) {
-      if (vec_e_align_bit_array_[i] == NULL) continue;
+      if (vec_e_align_bit_array_[i].empty()) continue;
       int j = begin;
       for (; j <= end; j++) {
-        if (vec_e_align_bit_array_[i]->Get(j - begin_pos_)) break;
+        if (vec_e_align_bit_array_[i][j - begin_pos_]) break;
       }
       if (j == end + 1)  // e[i] is aligned, but e[i] doesn't align to any
                          // source word in [begin_pos, end_pos]
@@ -277,17 +156,17 @@ struct TargetTranslation {
     target_end = -1;
 
     for (int i = begin - begin_pos_; i < end - begin_pos_ + 1; i++) {
-      if (vec_f_align_bit_array_[i] == NULL) continue;
+      if (vec_f_align_bit_array_[i].empty()) continue;
       for (int j = 0; j < target_begin; j++)
-        if (vec_f_align_bit_array_[i]->Get(j)) {
+        if (vec_f_align_bit_array_[i][j]) {
           target_begin = j;
           break;
         }
     }
     for (int i = end - begin_pos_; i > begin - begin_pos_ - 1; i--) {
-      if (vec_f_align_bit_array_[i] == NULL) continue;
+      if (vec_f_align_bit_array_[i].empty()) continue;
       for (int j = e_num_words_ - 1; j > target_end; j--)
-        if (vec_f_align_bit_array_[i]->Get(j)) {
+        if (vec_f_align_bit_array_[i][j]) {
           target_end = j;
           break;
         }
@@ -296,16 +175,15 @@ struct TargetTranslation {
     if (target_end == -1) target_begin = -1;
   }
 
-  const uint16_t begin_pos_, end_pos_;              // the position in parse
-  const uint16_t input_begin_pos_, input_end_pos_;  // the position in input
+  const uint16_t begin_pos_, end_pos_;              // the position in input
   const uint16_t e_num_words_;
-  vector<AlignmentPoint*> align_;
+  vector<AlignmentPoint> align_;
 
  private:
   vector<short> vec_left_most_;
   vector<short> vec_right_most_;
-  vector<SBitArray*> vec_f_align_bit_array_;
-  vector<SBitArray*> vec_e_align_bit_array_;
+  vector<vector<bool> > vec_f_align_bit_array_;
+  vector<vector<bool> > vec_e_align_bit_array_;
 };
 
 struct FocusedConstituent {
@@ -357,123 +235,6 @@ struct FocusedSRL {
   vector<const FocusedPredicate*> focus_predicates_;
 };
 
-/*
- * Note:
- *      In BOLT experiments, we need to merged some sequence words into one term
- *(like from "1999 nian 1 yue 10 ri" to "1999_nian_1_yue_10_ri") due to some
- *reasons;
- *      but in the parse file, we still use the parse tree before merging any
- *words;
- *      therefore, the words in source sentence and parse tree diverse and we
- *need to map a word in merged sentence into its original index;
- *      a word in source sentence maps 1 or more words in parse tree
- *      the index map info is stored at variable index_map_;
- *      if the index_map_ is NULL, indicating the word index in source sentence
- *and parse tree is always same.
- *
- *      In ConstReorderFeatureImpl, as to store alignment info, we use the word
- *index of the parse tree
- */
-
-struct SIndexMap {
-  SIndexMap(const string& index_map_file) {
-    if (index_map_file == "") {
-      index_map_input_2_parse = NULL;
-      index_map_parse_2_input = NULL;
-      return;
-    }
-    vector<string> terms;
-    {
-      ReadFile file(index_map_file);
-      string line;
-      assert(getline(*file.stream(), line));
-      SplitOnWhitespace(line, &terms);
-    }
-
-    index_map_input_2_parse = new short int[terms.size() + 1];
-    int ix = 0;
-    size_t i;
-    for (i = 0; i < terms.size(); i++) {
-      index_map_input_2_parse[i] = ix;
-      ix += atoi(terms[i].c_str());
-    }
-    index_map_input_2_parse[i] = ix;
-    // assert(ix == parsed_tree_->m_vecTerminals.size());
-
-    index_map_parse_2_input = new short int[ix + 1];
-    int jx = 0;
-    for (i = 0; i < terms.size(); i++) {
-      int num_word = atoi(terms[i].c_str());
-      for (int j = 0; j < num_word; j++) index_map_parse_2_input[jx++] = i;
-    }
-    index_map_parse_2_input[jx] = i;
-    assert(jx == ix);
-  }
-
-  ~SIndexMap() {
-    if (index_map_input_2_parse != NULL) delete index_map_input_2_parse;
-    if (index_map_parse_2_input != NULL) delete index_map_parse_2_input;
-  }
-
-  /*
-   * an input word maps to 1 or more words in parse
-   */
-  void MapIndex_Input_2_Parse(short int ix, short int& mapped_begin,
-                              short int& mapped_end) {
-    MapIndex_Input_2_Parse(ix, ix, mapped_begin, mapped_end);
-  }
-
-  /*
-   * given the indices in input,
-   * return the indices in parse tree
-   */
-  void MapIndex_Input_2_Parse(short int begin, short int end,
-                              short int& mapped_begin, short int& mapped_end) {
-    if (index_map_input_2_parse == NULL) {
-      mapped_begin = begin;
-      mapped_end = end;
-      return;
-    }
-
-    mapped_begin = index_map_input_2_parse[begin];
-    mapped_end = index_map_input_2_parse[end + 1] - 1;
-  }
-
-  /*
-   * given the indices in input,
-   * return the indices in parse tree
-   */
-  void MapIndex_Parse_2_Input(short int mapped_begin, short int mapped_end,
-                              short int& begin, short int& end) {
-    if (index_map_parse_2_input == NULL) {
-      begin = mapped_begin;
-      end = mapped_end;
-      return;
-    }
-
-    begin = index_map_parse_2_input[mapped_begin];
-    end = index_map_parse_2_input[mapped_end];
-
-    assert(mapped_begin == 0 || index_map_parse_2_input[mapped_begin - 1] !=
-                                    index_map_parse_2_input[mapped_begin]);
-    assert(index_map_parse_2_input[mapped_end + 1] !=
-           index_map_parse_2_input[mapped_end]);
-  }
-
-  /*
-   * given a index in input
-   * return the number of its corresponding words in parse tree
-   */
-  int MapIndexWordCount(int ix) {
-    if (index_map_input_2_parse == NULL) return 1;
-    return index_map_input_2_parse[ix + 1] - index_map_input_2_parse[ix];
-  }
-
- private:
-  short int* index_map_input_2_parse;
-  short int* index_map_parse_2_input;
-};
-
 struct ConstReorderFeatureImpl {
   ConstReorderFeatureImpl(const std::string& param) {
 
@@ -523,7 +284,6 @@ struct ConstReorderFeatureImpl {
 
     parsed_tree_ = NULL;
     focused_consts_ = NULL;
-    index_map_ = NULL;
 
     srl_sentence_ = NULL;
     focused_srl_ = NULL;
@@ -539,6 +299,7 @@ struct ConstReorderFeatureImpl {
     dict_block_status_->Convert("Discon't", false);
     dict_block_status_->Convert("Con't", false);
   }
+
   ~ConstReorderFeatureImpl() {
     if (const_reorder_classifier_left_) delete const_reorder_classifier_left_;
     if (const_reorder_classifier_right_) delete const_reorder_classifier_right_;
@@ -552,8 +313,7 @@ struct ConstReorderFeatureImpl {
   static int ReserveStateSize() { return 1 * sizeof(TargetTranslation*); }
 
   void InitializeInputSentence(const std::string& parse_file,
-                               const std::string& srl_file,
-                               const std::string& index_map_file) {
+                               const std::string& srl_file) {
     FreeSentenceVariables();
     if (b_srl_block_feature_ || b_srl_order_feature_) {
       assert(srl_file != "");
@@ -586,8 +346,6 @@ struct ConstReorderFeatureImpl {
       }
     }
 
-    index_map_ = new SIndexMap(index_map_file);
-
     if (parsed_tree_ != NULL) {
       size_t i = parsed_tree_->m_vecTerminals.size();
       vec_target_tran_.reserve(20 * i * i * i);
@@ -601,9 +359,7 @@ struct ConstReorderFeatureImpl {
                               void* state) {
     if (parsed_tree_ == NULL) return;
 
-    short int mapped_begin, mapped_end;
-    index_map_->MapIndex_Input_2_Parse(edge.i_, edge.j_ - 1, mapped_begin,
-                                       mapped_end);
+    short int begin = edge.i_, end = edge.j_ - 1;
 
     typedef TargetTranslation* PtrTargetTranslation;
     PtrTargetTranslation* remnant =
@@ -623,8 +379,7 @@ struct ConstReorderFeatureImpl {
       e_num_word--;
     }
 
-    remnant[0] = new TargetTranslation(mapped_begin, mapped_end, edge.i_,
-                                       edge.j_ - 1, e_num_word);
+    remnant[0] = new TargetTranslation(begin, end, e_num_word);
     vec_target_tran_.push_back(remnant[0]);
 
     // reset the alignment
@@ -638,7 +393,7 @@ struct ConstReorderFeatureImpl {
       f_index[i] = index;
       const WordID& c = rule->f_[i];
       if (c < 1)
-        index = vec_node[vc++]->input_end_pos_ + 1;
+        index = vec_node[vc++]->end_pos_ + 1;
       else
         index++;
     }
@@ -672,32 +427,25 @@ struct ConstReorderFeatureImpl {
 
       // i aligns j
       int eindex = e_index[j];
-      const vector<AlignmentPoint*>& align =
+      const vector<AlignmentPoint>& align =
           vec_node[-1 * edge.rule_->e_[j]]->align_;
       for (size_t k = 0; k < align.size(); k++) {
-        remnant[0]->InsertAlignmentPoint(align[k]->s_, eindex + align[k]->t_);
+        remnant[0]->InsertAlignmentPoint(align[k].s_, eindex + align[k].t_);
       }
     }
     for (size_t i = 0; i < edge.rule_->a_.size(); i++) {
-      short int parse_index_begin, parse_index_end;
-      index_map_->MapIndex_Input_2_Parse(f_index[edge.rule_->a_[i].s_],
-                                         parse_index_begin, parse_index_end);
-      int findex = parse_index_begin;
+      int findex = f_index[edge.rule_->a_[i].s_];
       int eindex = e_index[edge.rule_->a_[i].t_];
-      int word_count =
-          index_map_->MapIndexWordCount(f_index[edge.rule_->a_[i].s_]);
-      assert(word_count == parse_index_end - parse_index_begin + 1);
-      for (int i = 0; i < word_count; i++)
-        remnant[0]->InsertAlignmentPoint(findex + i, eindex);
+      remnant[0]->InsertAlignmentPoint(findex, eindex);
     }
 
     // till now, we finished setting state values
     // next, use the state values to calculate constituent reorder feature
-    SetConstReorderFeature(mapped_begin, mapped_end, features, remnant[0],
+    SetConstReorderFeature(begin, end, features, remnant[0],
                            vec_node, f_index);
   }
 
-  void SetConstReorderFeature(short int mapped_begin, short int mapped_end,
+  void SetConstReorderFeature(short int begin, short int end,
                               SparseVector<double>* features,
                               const TargetTranslation* target_translation,
                               const vector<const TargetTranslation*>& vec_node,
@@ -706,7 +454,7 @@ struct ConstReorderFeatureImpl {
       double logprob_srl_reorder_left = 0.0, logprob_srl_reorder_right = 0.0;
       for (size_t i = 0; i < focused_srl_->focus_predicates_.size(); i++) {
         const FocusedPredicate* pred = focused_srl_->focus_predicates_[i];
-        if (!is_overlap(mapped_begin, mapped_end, pred->begin_, pred->end_))
+        if (!is_overlap(begin, end, pred->begin_, pred->end_))
           continue;  // have no overlap between this predicate (with its
                      // argument) and the current edge
 
@@ -722,7 +470,7 @@ struct ConstReorderFeatureImpl {
         vecBlockStatus.reserve(pred->vec_items_.size());
         for (j = 0; j < pred->vec_items_.size(); j++) {
           const STreeItem* con1 = pred->vec_items_[j]->tree_item_;
-          if (con1->m_iBegin < mapped_begin || con1->m_iEnd > mapped_end) {
+          if (con1->m_iBegin < begin || con1->m_iEnd > end) {
             vecBlockStatus.push_back(0);
             continue;
           }  // the node is partially outside the current edge
@@ -754,7 +502,7 @@ struct ConstReorderFeatureImpl {
         vecRelativeRightPosition.reserve(pred->vec_items_.size());
         for (j = 0; j < pred->vec_items_.size(); j++) {
           const STreeItem* con1 = pred->vec_items_[j]->tree_item_;
-          if (con1->m_iBegin < mapped_begin || con1->m_iEnd > mapped_end) {
+          if (con1->m_iBegin < begin || con1->m_iEnd > end) {
             vecPosition.push_back(-1);
             vecRightPosition.push_back(-1);
             continue;
@@ -772,7 +520,7 @@ struct ConstReorderFeatureImpl {
           const STreeItem* con1 = pred->vec_items_[j - 1]->tree_item_;
           const STreeItem* con2 = pred->vec_items_[j]->tree_item_;
 
-          if (con1->m_iBegin < mapped_begin || con2->m_iEnd > mapped_end)
+          if (con1->m_iBegin < begin || con2->m_iEnd > end)
             continue;  // one of the two nodes is partially outside the current
                        // edge
 
@@ -824,7 +572,7 @@ struct ConstReorderFeatureImpl {
 
       for (size_t i = 0; i < focused_consts_->focus_parents_.size(); i++) {
         STreeItem* parent = focused_consts_->focus_parents_[i];
-        if (!is_overlap(mapped_begin, mapped_end, parent->m_iBegin,
+        if (!is_overlap(begin, end, parent->m_iBegin,
                         parent->m_iEnd))
           continue;  // have no overlap between this parent node and the current
                      // edge
@@ -838,8 +586,8 @@ struct ConstReorderFeatureImpl {
         if (j < vec_node.size()) continue;
 
         if (b_block_feature_) {
-          if (parent->m_iBegin >= mapped_begin &&
-              parent->m_iEnd <= mapped_end) {
+          if (parent->m_iBegin >= begin &&
+              parent->m_iEnd <= end) {
             string type = target_translation->IsTargetConstinousSpan2(
                 parent->m_iBegin, parent->m_iEnd);
             int f_id = FD::Convert(string(parent->m_pszTerm) + type);
@@ -854,7 +602,7 @@ struct ConstReorderFeatureImpl {
 
         for (j = 0; j < parent->m_vecChildren.size(); j++) {
           STreeItem* con1 = parent->m_vecChildren[j];
-          if (con1->m_iBegin < mapped_begin || con1->m_iEnd > mapped_end) {
+          if (con1->m_iBegin < begin || con1->m_iEnd > end) {
             vecChunkBlock.push_back(0);
             continue;
           }  // the node is partially outside the current edge
@@ -887,7 +635,7 @@ struct ConstReorderFeatureImpl {
         vecRelativeRightPosition.reserve(parent->m_vecChildren.size());
         for (j = 0; j < parent->m_vecChildren.size(); j++) {
           STreeItem* con1 = parent->m_vecChildren[j];
-          if (con1->m_iBegin < mapped_begin || con1->m_iEnd > mapped_end) {
+          if (con1->m_iBegin < begin || con1->m_iEnd > end) {
             vecPosition.push_back(-1);
             vecRightPosition.push_back(-1);
             continue;
@@ -905,7 +653,7 @@ struct ConstReorderFeatureImpl {
           STreeItem* con1 = parent->m_vecChildren[j - 1];
           STreeItem* con2 = parent->m_vecChildren[j];
 
-          if (con1->m_iBegin < mapped_begin || con2->m_iEnd > mapped_end)
+          if (con1->m_iBegin < begin || con2->m_iEnd > end)
             continue;  // one of the two nodes is partially outside the current
                        // edge
 
@@ -1062,9 +810,6 @@ struct ConstReorderFeatureImpl {
     for (size_t i = 0; i < vec_target_tran_.size(); i++)
       delete vec_target_tran_[i];
     vec_target_tran_.clear();
-
-    if (index_map_ != NULL) delete index_map_;
-    index_map_ = NULL;
 
     if (map_left_ != NULL) delete map_left_;
     map_left_ = NULL;
@@ -1310,8 +1055,6 @@ struct ConstReorderFeatureImpl {
   SSrlSentence* srl_sentence_;
   FocusedSRL* focused_srl_;
 
-  SIndexMap* index_map_;
-
   Dict* dict_block_status_;
 };
 
@@ -1331,8 +1074,7 @@ void ConstReorderFeature::PrepareForInput(const SentenceMetadata& smeta) {
   string srl_file = smeta.GetSGMLValue("srl");
   assert(!(parse_file == "" && srl_file == ""));
 
-  string indexmap_file = smeta.GetSGMLValue("index-map");
-  pimpl_->InitializeInputSentence(parse_file, srl_file, indexmap_file);
+  pimpl_->InitializeInputSentence(parse_file, srl_file);
 }
 
 void ConstReorderFeature::TraversalFeaturesImpl(
