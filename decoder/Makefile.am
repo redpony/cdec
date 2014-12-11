@@ -45,6 +45,8 @@ libcdec_a_SOURCES = \
   ff_basic.h \
   ff_bleu.h \
   ff_charset.h \
+  ff_const_reorder_common.h \
+  ff_const_reorder.h \
   ff_context.h \
   ff_csplit.h \
   ff_external.h \
@@ -111,6 +113,7 @@ libcdec_a_SOURCES = \
   ff_bleu.cc \
   ff_charset.cc \
   ff_context.cc \
+  ff_const_reorder.cc \
   ff_csplit.cc \
   ff_external.cc \
   ff_factory.cc \

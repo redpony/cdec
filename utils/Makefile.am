@@ -38,13 +38,20 @@ libutils_a_SOURCES = \
   have_64_bits.h \
   indices_after.h \
   kernel_string_subseq.h \
+  lbfgs.h \
+  lbfgs.cpp \
   logval.h \
   m.h \
+  mathvec.h \
+  maxent.h \
+  maxent.cpp \
   murmur_hash3.h \
   murmur_hash3.cc \
   named_enum.h \
   null_deleter.h \
   null_traits.h \
+  owlqn.cpp \
+  sgd.cpp \
   perfect_hash.h \
   prob.h \
   sampler.h \
@@ -117,4 +124,3 @@ stringlib_test_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_U
 # do NOT NOT NOT add any other -I includes NO NO NO NO NO ######
 AM_CPPFLAGS = -DBOOST_TEST_DYN_LINK -W -Wall -I. -I$(top_srcdir) -DTEST_DATA=\"$(top_srcdir)/utils/test_data\"
 ################################################################
-

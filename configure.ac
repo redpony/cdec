@@ -5,9 +5,9 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_LIBTOOL
 AC_PROG_LEX
-case $LEX in 
-:) AC_MSG_ERROR([No lex (Flex, lex, etc.) program found]);; 
-esac 
+case $LEX in
+:) AC_MSG_ERROR([No lex (Flex, lex, etc.) program found]);;
+esac
 OLD_CXXFLAGS=$CXXFLAGS
 AC_PROG_CC
 AC_PROG_CXX
@@ -235,9 +235,9 @@ AC_CONFIG_FILES([training/minrisk/Makefile])
 AC_CONFIG_FILES([training/mira/Makefile])
 AC_CONFIG_FILES([training/latent_svm/Makefile])
 AC_CONFIG_FILES([training/dtrain/Makefile])
+AC_CONFIG_FILES([training/const_reorder/Makefile])
 
 # external feature function example code
 AC_CONFIG_FILES([example_extff/Makefile])
 
 AC_OUTPUT
-

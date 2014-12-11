@@ -8,5 +8,5 @@ SUBDIRS = \
   dtrain \
   latent_svm \
   mira \
-  rampion
-
+  rampion \
+  const_reorder
