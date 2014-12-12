@@ -19,74 +19,21 @@ using namespace const_reorder;
 
 typedef HASH_MAP<std::string, vector<string> > MapFeatures;
 
-/*
- * Note:
- *      In BOLT experiments, we need to merged some sequence words into one term
- *(like from "1999 nian 1 yue 10 ri" to "1999_nian_1_yue_10_ri") due to some
- *reasons;
- *      but in the parse file, we still use the parse tree before merging any
- *words;
- *      therefore, the words in source sentence and parse tree diverse and we
- *need to map a word in merged sentence into its original index;
- *      a word in source sentence maps 1 or more words in parse tree
- *      the index map info is stored at variable index_map_;
- *      if the index_map_ is NULL, indicating the word index in source sentence
- *and parse tree is always same.
- *
- */
-
 struct SoftSynFeatureImpl {
   SoftSynFeatureImpl(const string& /*params*/) {
     parsed_tree_ = NULL;
-    index_map_ = NULL;
-
     map_features_ = NULL;
   }
 
   ~SoftSynFeatureImpl() { FreeSentenceVariables(); }
 
-  void InitializeInputSentence(const std::string& parse_file,
-                               const std::string& index_map_file) {
+  void InitializeInputSentence(const std::string& parse_file) {
     FreeSentenceVariables();
     parsed_tree_ = ReadParseTree(parse_file);
-
-    if (index_map_file != "") ReadIndexMap(index_map_file);
 
     // we can do the features "off-line"
     map_features_ = new MapFeatures();
     InitializeFeatures(map_features_);
-  }
-
-  void ReadIndexMap(const std::string& index_map_file) {
-    vector<string> terms;
-    {
-      ReadFile file(index_map_file);
-      string line;
-      assert(getline(*file.stream(), line));
-      SplitOnWhitespace(line, &terms);
-    }
-
-    index_map_ = new short int[terms.size() + 1];
-    int ix = 0;
-    size_t i;
-    for (i = 0; i < terms.size(); i++) {
-      index_map_[i] = ix;
-      ix += atoi(terms[i].c_str());
-    }
-    index_map_[i] = ix;
-    assert(parsed_tree_ == NULL || ix == parsed_tree_->m_vecTerminals.size());
-  }
-
-  void MapIndex(short int begin, short int end, short int& mapped_begin,
-                short int& mapped_end) {
-    if (index_map_ == NULL) {
-      mapped_begin = begin;
-      mapped_end = end;
-      return;
-    }
-
-    mapped_begin = index_map_[begin];
-    mapped_end = index_map_[end + 1] - 1;
   }
 
   /*
@@ -211,12 +158,9 @@ struct SoftSynFeatureImpl {
                          SparseVector<double>* features) {
     if (parsed_tree_ == NULL) return;
 
-    short int mapped_begin, mapped_end;
-    MapIndex(edge.i_, edge.j_ - 1, mapped_begin, mapped_end);
-
     // soft feature for the whole span
     const vector<string> vecFeature =
-        GenerateSoftFeature(mapped_begin, mapped_end, map_features_);
+        GenerateSoftFeature(edge.i_, edge.j_ - 1, map_features_);
     for (size_t i = 0; i < vecFeature.size(); i++) {
       int f_id = FD::Convert(vecFeature[i]);
       if (f_id) features->set_value(f_id, 1);
@@ -261,9 +205,6 @@ struct SoftSynFeatureImpl {
 
   void FreeSentenceVariables() {
     if (parsed_tree_ != NULL) delete parsed_tree_;
-    if (index_map_ != NULL) delete[] index_map_;
-    index_map_ = NULL;
-
     if (map_features_ != NULL) delete map_features_;
   }
 
@@ -278,8 +219,6 @@ struct SoftSynFeatureImpl {
  private:
   SParsedTree* parsed_tree_;
 
-  short int* index_map_;
-
   MapFeatures* map_features_;
 };
 
@@ -292,11 +231,11 @@ SoftSynFeature::~SoftSynFeature() { delete pimpl_; }
 
 void SoftSynFeature::PrepareForInput(const SentenceMetadata& smeta) {
   string parse_file = smeta.GetSGMLValue("parse");
-  assert(parse_file != "");
-
-  string indexmap_file = smeta.GetSGMLValue("index-map");
-
-  pimpl_->InitializeInputSentence(parse_file, indexmap_file);
+  if (parse_file.empty()) {
+    parse_file = smeta.GetSGMLValue("src_tree");
+  }
+  assert(parse_file.size());
+  pimpl_->InitializeInputSentence(parse_file);
 }
 
 void SoftSynFeature::TraversalFeaturesImpl(
