@@ -1,5 +1,5 @@
-#ifndef _INSIDE_OUTSIDE_H_
-#define _INSIDE_OUTSIDE_H_
+#ifndef INSIDE_OUTSIDE_H_
+#define INSIDE_OUTSIDE_H_
 
 #include <vector>
 #include <algorithm>

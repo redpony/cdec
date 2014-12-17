@@ -1,3 +1,5 @@
+klm/lm/builder/dump_counts
+klm/util/cat_compressed
 example_extff/ff_example.lo
 example_extff/libff_example.la
 mteval/meteor_jar.cc
@@ -226,3 +228,4 @@ training/utils/sentserver
 utils/stringlib_test
 word-aligner/binderiv
 word-aligner/fast_align
+test-driver

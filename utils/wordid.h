@@ -1,5 +1,5 @@
-#ifndef _WORD_ID_H_
-#define _WORD_ID_H_
+#ifndef WORD_ID_H_
+#define WORD_ID_H_
 
 #include <limits>
 

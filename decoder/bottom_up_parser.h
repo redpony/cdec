@@ -1,5 +1,5 @@
-#ifndef _BOTTOM_UP_PARSER_H_
-#define _BOTTOM_UP_PARSER_H_
+#ifndef BOTTOM_UP_PARSER_H_
+#define BOTTOM_UP_PARSER_H_
 
 #include <vector>
 #include <string>

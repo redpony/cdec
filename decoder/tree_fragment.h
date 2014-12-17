@@ -72,6 +72,8 @@ class TreeFragment {
   BreadthFirstIterator bfs_begin(unsigned node_idx) const;
   BreadthFirstIterator bfs_end() const;
 
+  std::vector<int> Terminals() const;
+
  private:
   // cp is the character index in the tree
   // np keeps track of the nodes (nonterminals) that have been built

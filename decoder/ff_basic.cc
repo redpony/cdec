@@ -49,9 +49,7 @@ void SourceWordPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   features->set_value(fid_, edge.rule_->FWords() * value_);
 }
 
-
-ArityPenalty::ArityPenalty(const std::string& param) :
-    value_(-1.0 / log(10)) {
+ArityPenalty::ArityPenalty(const std::string& param) {
   string fname = "Arity_";
   unsigned MAX=DEFAULT_MAX_ARITY;
   using namespace boost;
@@ -61,7 +59,8 @@ ArityPenalty::ArityPenalty(const std::string& param) :
     WordID fid=FD::Convert(fname+lexical_cast<string>(i));
     fids_.push_back(fid);
   }
-  while (!fids_.empty() && fids_.back()==0) fids_.pop_back(); // pretty up features vector in case FD was frozen.  doesn't change anything
+  // pretty up features vector in case FD was frozen.  doesn't change anything
+  while (!fids_.empty() && fids_.back()==0) fids_.pop_back();
 }
 
 void ArityPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
@@ -75,6 +74,6 @@ void ArityPenalty::TraversalFeaturesImpl(const SentenceMetadata& smeta,
   (void) state;
   (void) estimated_features;
   unsigned a=edge.Arity();
-  features->set_value(a<fids_.size()?fids_[a]:0, value_);
+  if (a < fids_.size()) features->set_value(fids_[a], 1.0);
 }
 

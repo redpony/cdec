@@ -3,6 +3,10 @@
 #define BOOST_TEST_MODULE svTest
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <string>
+#include <sstream>
 #include <iostream>
 #include <vector>
 
@@ -128,3 +132,29 @@ BOOST_AUTO_TEST_CASE(Small) {
   cerr << sizeof(SmallVectorInt) << endl;
   cerr << sizeof(vector<int>) << endl;
 }
+
+BOOST_AUTO_TEST_CASE(Serialize) {
+  std::string in;
+  {
+    SmallVectorInt v;
+    v.push_back(0);
+    v.push_back(1);
+    v.push_back(-2);
+    ostringstream os;
+    boost::archive::text_oarchive oa(os);
+    oa << v;
+    in = os.str();
+    cerr << in;
+  }
+  {
+    istringstream is(in);
+    boost::archive::text_iarchive ia(is);
+    SmallVectorInt v;
+    ia >> v;
+    BOOST_CHECK_EQUAL(v.size(), 3);
+    BOOST_CHECK_EQUAL(v[0], 0);
+    BOOST_CHECK_EQUAL(v[1], 1);
+    BOOST_CHECK_EQUAL(v[2], -2);
+  }
+}
+

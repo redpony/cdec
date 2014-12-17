@@ -114,6 +114,7 @@ struct PhraseBasedTranslatorImpl {
     Lattice lattice;
     LatticeTools::ConvertTextOrPLF(input, &lattice);
     smeta->SetSourceLength(lattice.size());
+    smeta->ComputeInputLatticeType();
     size_t est_nodes = lattice.size() * lattice.size() * (1 << max_distortion);
     minus_lm_forest->ReserveNodes(est_nodes, est_nodes * 100);
     if (add_pass_through_rules) {

@@ -203,7 +203,7 @@ int main(int argc, char** argv) {
     const string kbest_file = os.str();
     if (FileExists(kbest_file))
       J_i.ReadFromFile(kbest_file);
-    HypergraphIO::ReadFromJSON(rf.stream(), &hg);
+    HypergraphIO::ReadFromBinary(rf.stream(), &hg);
     hg.Reweight(weights);
     J_i.AddKBestCandidates(hg, kbest_size, ds[sent_id]);
     J_i.WriteToFile(kbest_file);

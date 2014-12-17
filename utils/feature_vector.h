@@ -1,5 +1,5 @@
-#ifndef _FEATURE_VECTOR_H_
-#define _FEATURE_VECTOR_H_
+#ifndef FEATURE_VECTOR_H_
+#define FEATURE_VECTOR_H_
 
 #include <vector>
 #include "sparse_vector.h"

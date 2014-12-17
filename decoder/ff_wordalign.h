@@ -1,5 +1,5 @@
-#ifndef _FF_WORD_ALIGN_H_
-#define _FF_WORD_ALIGN_H_
+#ifndef FF_WORD_ALIGN_H_
+#define FF_WORD_ALIGN_H_
 
 #include "ff.h"
 #include "array2d.h"

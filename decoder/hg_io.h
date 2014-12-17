@@ -1,5 +1,5 @@
-#ifndef _HG_IO_H_
-#define _HG_IO_H_
+#ifndef HG_IO_H_
+#define HG_IO_H_
 
 #include <iostream>
 #include <string>
@@ -9,19 +9,11 @@ class Hypergraph;
 
 struct HypergraphIO {
 
-  // the format is basically a list of nodes and edges in topological order
-  // any edge you read, you must have already read its tail nodes
-  // any node you read, you must have already read its incoming edges
-  // this may make writing a bit more challenging if your forest is not
-  // topologically sorted (but that probably doesn't happen very often),
-  // but it makes reading much more memory efficient.
-  // see test_data/small.json.gz for an email encoding
-  static bool ReadFromJSON(std::istream* in, Hypergraph* out);
+  static bool ReadFromBinary(std::istream* in, Hypergraph* out);
+  static bool WriteToBinary(const Hypergraph& hg, std::ostream* out);
 
   // if remove_rules is used, the hypergraph is serialized without rule information
   // (so it only contains structure and feature information)
-  static bool WriteToJSON(const Hypergraph& hg, bool remove_rules, std::ostream* out);
-
   static void WriteAsCFG(const Hypergraph& hg);
 
   // Write only the target size information in bottom-up order.  

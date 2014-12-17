@@ -356,6 +356,7 @@ void RuleLexer::ReadRules(std::istream* in, RuleLexer::RuleCallback func, const 
 
 void RuleLexer::ReadRule(const std::string& srule, RuleCallback func, bool mono, void* extra) {
   init_default_feature_names();
+  scfglex_fname = srule;
   lex_mono_rules = mono;
   lex_line = 1;
   rule_callback_extra = extra;

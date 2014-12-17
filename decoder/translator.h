@@ -1,5 +1,5 @@
-#ifndef _TRANSLATOR_H_
-#define _TRANSLATOR_H_
+#ifndef TRANSLATOR_H_
+#define TRANSLATOR_H_
 
 #include <string>
 #include <vector>

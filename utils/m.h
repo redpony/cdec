@@ -1,5 +1,5 @@
-#ifndef _M_H_
-#define _M_H_
+#ifndef M_H_HEADER_
+#define M_H_HEADER_
 
 #include <cassert>
 #include <cmath>

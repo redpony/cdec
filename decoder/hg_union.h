@@ -1,5 +1,5 @@
-#ifndef _HG_UNION_H_
-#define _HG_UNION_H_
+#ifndef HG_UNION_H_
+#define HG_UNION_H_
 
 class Hypergraph;
 namespace HG {

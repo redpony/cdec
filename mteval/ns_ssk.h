@@ -1,5 +1,5 @@
-#ifndef _NS_SSK_H_
-#define _NS_SSK_H_
+#ifndef NS_SSK_H_
+#define NS_SSK_H_
 
 #include "ns.h"
 

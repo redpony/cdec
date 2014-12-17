@@ -1,5 +1,5 @@
-#ifndef UTIL_EXCEPTION__
-#define UTIL_EXCEPTION__
+#ifndef UTIL_EXCEPTION_H
+#define UTIL_EXCEPTION_H
 
 #include <exception>
 #include <limits>
@@ -83,6 +83,9 @@ template <class Except, class Data> typename Except::template ExceptionTag<Excep
 #define UTIL_THROW(Exception, Modify) \
   UTIL_THROW_BACKEND(NULL, Exception, , Modify);
 
+#define UTIL_THROW2(Modify) \
+  UTIL_THROW_BACKEND(NULL, util::Exception, , Modify);
+
 #if __GNUC__ >= 3
 #define UTIL_UNLIKELY(x) __builtin_expect (!!(x), 0)
 #else
@@ -143,4 +146,4 @@ inline std::size_t CheckOverflow(uint64_t value) {
 
 } // namespace util
 
-#endif // UTIL_EXCEPTION__
+#endif // UTIL_EXCEPTION_H

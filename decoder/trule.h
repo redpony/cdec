@@ -1,5 +1,5 @@
-#ifndef _RULE_H_
-#define _RULE_H_
+#ifndef TRULE_H_
+#define TRULE_H_
 
 #include <algorithm>
 #include <vector>
@@ -11,6 +11,7 @@
 
 #include "sparse_vector.h"
 #include "wordid.h"
+#include "tdict.h"
 
 class TRule;
 typedef boost::shared_ptr<TRule> TRulePtr;
@@ -26,6 +27,7 @@ struct AlignmentPoint {
   short s_;
   short t_;
 };
+
 inline std::ostream& operator<<(std::ostream& os, const AlignmentPoint& p) {
   return os << static_cast<int>(p.s_) << '-' << static_cast<int>(p.t_);
 }
@@ -163,6 +165,66 @@ class TRule {
   // optional, shows internal structure of TSG rules
   boost::shared_ptr<cdec::TreeFragment> tree_structure;
 
+  friend class boost::serialization::access;
+  template<class Archive>
+  void save(Archive & ar, const unsigned int /*version*/) const {
+    ar & TD::Convert(-lhs_);
+    unsigned f_size = f_.size();
+    ar & f_size;
+    assert(f_size <= (sizeof(size_t) * 8));
+    size_t f_nt_mask = 0;
+    for (int i = f_.size() - 1; i >= 0; --i) {
+      f_nt_mask <<= 1;
+      f_nt_mask |= (f_[i] <= 0 ? 1 : 0);
+    }
+    ar & f_nt_mask;
+    for (unsigned i = 0; i < f_.size(); ++i)
+      ar & TD::Convert(f_[i] < 0 ? -f_[i] : f_[i]);
+    unsigned e_size = e_.size();
+    ar & e_size;
+    size_t e_nt_mask = 0;
+    assert(e_size <= (sizeof(size_t) * 8));
+    for (int i = e_.size() - 1; i >= 0; --i) {
+      e_nt_mask <<= 1;
+      e_nt_mask |= (e_[i] <= 0 ? 1 : 0);
+    }
+    ar & e_nt_mask;
+    for (unsigned i = 0; i < e_.size(); ++i)
+      if (e_[i] <= 0) ar & e_[i]; else ar & TD::Convert(e_[i]);
+    ar & arity_;
+    ar & scores_;
+  }
+  template<class Archive>
+  void load(Archive & ar, const unsigned int /*version*/) {
+    std::string lhs; ar & lhs; lhs_ = -TD::Convert(lhs);
+    unsigned f_size; ar & f_size;
+    f_.resize(f_size);
+    size_t f_nt_mask; ar & f_nt_mask;
+    std::string sym;
+    for (unsigned i = 0; i < f_size; ++i) {
+      bool mask = (f_nt_mask & 1);
+      ar & sym;
+      f_[i] = TD::Convert(sym) * (mask ? -1 : 1);
+      f_nt_mask >>= 1;
+    }
+    unsigned e_size; ar & e_size;
+    e_.resize(e_size);
+    size_t e_nt_mask; ar & e_nt_mask;
+    for (unsigned i = 0; i < e_size; ++i) {
+      bool mask = (e_nt_mask & 1);
+      if (mask) {
+        ar & e_[i];
+      } else {
+        ar & sym;
+        e_[i] = TD::Convert(sym);
+      }
+      e_nt_mask >>= 1;
+    }
+    ar & arity_;
+    ar & scores_;
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
  private:
   TRule(const WordID& src, const WordID& trg) : e_(1, trg), f_(1, src), lhs_(), arity_(), prev_i(), prev_j() {}
 };

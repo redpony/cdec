@@ -1,5 +1,5 @@
-#ifndef _VITERBI_H_
-#define _VITERBI_H_
+#ifndef VITERBI_H_
+#define VITERBI_H_
 
 #include <vector>
 #include "prob.h"

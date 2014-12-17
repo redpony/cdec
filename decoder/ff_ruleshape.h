@@ -1,5 +1,5 @@
-#ifndef _FF_RULESHAPE_H_
-#define _FF_RULESHAPE_H_
+#ifndef FF_RULESHAPE_H_
+#define FF_RULESHAPE_H_
 
 #include <vector>
 #include <map>

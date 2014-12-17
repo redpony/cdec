@@ -1,5 +1,5 @@
-#ifndef _FF_SOURCE_SYNTAX2_H_
-#define _FF_SOURCE_SYNTAX2_H_
+#ifndef FF_SOURCE_SYNTAX2_H_
+#define FF_SOURCE_SYNTAX2_H_
 
 #include "ff.h"
 #include "hg.h"

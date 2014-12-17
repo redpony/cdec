@@ -195,6 +195,7 @@ struct SCFGTranslatorImpl {
     Lattice& lattice = smeta->src_lattice_;
     LatticeTools::ConvertTextOrPLF(input, &lattice);
     smeta->SetSourceLength(lattice.size());
+    smeta->ComputeInputLatticeType();
     if (add_pass_through_rules){
       if (!SILENT) cerr << "Adding pass through grammar" << endl;
       PassThroughGrammar* g = new PassThroughGrammar(lattice, default_nt, ctf_iterations_, num_pt_features);

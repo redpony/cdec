@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
     ReadFile rf(file);
     if (kis.size() % 5 == 0) { cerr << '.'; }
     if (kis.size() % 200 == 0) { cerr << " [" << kis.size() << "]\n"; }
-    HypergraphIO::ReadFromJSON(rf.stream(), &hg);
+    HypergraphIO::ReadFromBinary(rf.stream(), &hg);
     hg.Reweight(weights);
     curkbest.AddKBestCandidates(hg, kbest_size, ds[sent_id]);
     if (kbest_file.size())

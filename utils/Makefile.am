@@ -22,6 +22,7 @@ libutils_a_SOURCES = \
   alias_sampler.h \
   alignment_io.h \
   array2d.h \
+  b64featvector.h \
   b64tools.h \
   batched_append.h \
   city.h \
@@ -72,6 +73,7 @@ libutils_a_SOURCES = \
   fast_lexical_cast.hpp \
   intrusive_refcount.hpp \
   alignment_io.cc \
+  b64featvector.cc \
   b64tools.cc \
   corpus_tools.cc \
   dict.cc \

@@ -1,5 +1,5 @@
-#ifndef _LEVENSHTEIN_H_
-#define _LEVENSHTEIN_H_
+#ifndef LEVENSHTEIN_H_
+#define LEVENSHTEIN_H_
 
 namespace cdec {
 

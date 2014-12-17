@@ -1,5 +1,5 @@
-#ifndef _FFEXTERNAL_H_
-#define _FFEXTERNAL_H_
+#ifndef FFEXTERNAL_H_
+#define FFEXTERNAL_H_
 
 #include "ff.h"
 

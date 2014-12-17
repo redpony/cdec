@@ -1,5 +1,5 @@
-#ifndef _SMALL_VECTOR_H_
-#define _SMALL_VECTOR_H_
+#ifndef SMALL_VECTOR_H_
+#define SMALL_VECTOR_H_
 
 /* REQUIRES that T is POD (can be memcpy).  won't work (yet) due to union with SMALL_VECTOR_POD==0 - may be possible to handle movable types that have ctor/dtor, by using  explicit allocation, ctor/dtor calls.  but for now JUST USE THIS FOR no-meaningful ctor/dtor POD types.
 
@@ -15,6 +15,7 @@
 #include <new>
 #include <stdint.h>
 #include <boost/functional/hash.hpp>
+#include <boost/serialization/map.hpp>
 
 //sizeof(T)/sizeof(T*)>1?sizeof(T)/sizeof(T*):1
 
@@ -297,6 +298,21 @@ public:
     return hash_range(data_.ptr,data_.ptr+size_);
   }
 
+  template<class Archive>
+  void save(Archive & ar, const unsigned int) const {
+    ar & size_;
+    for (unsigned i = 0; i < size_; ++i)
+      ar & (*this)[i];
+  }
+  template<class Archive>
+  void load(Archive & ar, const unsigned int) {
+    uint16_t s;
+    ar & s;
+    this->resize(s);
+    for (unsigned i = 0; i < size_; ++i)
+      ar & (*this)[i];
+  }
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
  private:
   union StorageType {
     T vals[SV_MAX];
