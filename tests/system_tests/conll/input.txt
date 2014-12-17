@@ -1,0 +1,2 @@
+<seg id="0" feat1="the angry dog bite I ." feat2="DT JJ NN VBD PRN ."> the angry dog bit me . ||| O O O B I O </seg>
+<seg id="1" feat1="i eat some pie ." feat2="PRN VBD DT NN ."> i ate some pie . ||| O B I I O </seg>

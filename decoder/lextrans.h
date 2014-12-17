@@ -1,5 +1,5 @@
-#ifndef _LEXTrans_H_
-#define _LEXTrans_H_
+#ifndef LEXTrans_H_
+#define LEXTrans_H_
 
 #include "translator.h"
 #include "lattice.h"

@@ -1,5 +1,5 @@
-#ifndef _TDICT_H_
-#define _TDICT_H_
+#ifndef TDICT_H_
+#define TDICT_H_
 
 #include <string>
 #include <vector>

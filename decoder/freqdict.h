@@ -1,5 +1,5 @@
-#ifndef _FREQDICT_H_
-#define _FREQDICT_H_
+#ifndef FREQDICT_H_
+#define FREQDICT_H_
 
 #include <iostream>
 #include <map>

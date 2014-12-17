@@ -1,5 +1,5 @@
-#ifndef _FF_TAGGER_H_
-#define _FF_TAGGER_H_
+#ifndef FF_TAGGER_H_
+#define FF_TAGGER_H_
 
 #include <map>
 #include <boost/scoped_ptr.hpp>

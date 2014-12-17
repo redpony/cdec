@@ -14,7 +14,7 @@
 
 #include "utils/filelib.h"
 
-#include "decoder/ff_const_reorder_common.h"
+#include "trainer.h"
 
 using namespace std;
 using namespace const_reorder;
@@ -93,8 +93,8 @@ struct SArgumentReorderTrainer {
       strcpy(pszNewInstanceFName, pszInstanceFname);
     }
 
-    Tsuruoka_Maxent* pMaxent = new Tsuruoka_Maxent(NULL);
-    pMaxent->fnTrain(pszNewInstanceFName, "l1", pszModelFname, 300);
+    Tsuruoka_Maxent_Trainer* pMaxent = new Tsuruoka_Maxent_Trainer;
+    pMaxent->fnTrain(pszNewInstanceFName, "l1", pszModelFname);
     delete pMaxent;
 
     if (strcmp(pszNewInstanceFName, pszInstanceFname) != 0) {

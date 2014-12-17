@@ -1,5 +1,5 @@
-#ifndef _FF_PARSE_MATCH_H_
-#define _FF_PARSE_MATCH_H_
+#ifndef FF_PARSE_MATCH_H_
+#define FF_PARSE_MATCH_H_
 
 #include "ff.h"
 #include "hg.h"

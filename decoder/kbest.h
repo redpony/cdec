@@ -1,5 +1,5 @@
-#ifndef _HG_KBEST_H_
-#define _HG_KBEST_H_
+#ifndef HG_KBEST_H_
+#define HG_KBEST_H_
 
 #include <vector>
 #include <utility>

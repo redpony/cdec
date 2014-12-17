@@ -1071,6 +1071,9 @@ ConstReorderFeature::~ConstReorderFeature() {  // TODO
 
 void ConstReorderFeature::PrepareForInput(const SentenceMetadata& smeta) {
   string parse_file = smeta.GetSGMLValue("parse");
+  if (parse_file.empty()) {
+    parse_file = smeta.GetSGMLValue("src_tree");
+  }
   string srl_file = smeta.GetSGMLValue("srl");
   assert(!(parse_file == "" && srl_file == ""));
 

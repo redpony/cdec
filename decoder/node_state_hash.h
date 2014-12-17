@@ -1,5 +1,5 @@
-#ifndef _NODE_STATE_HASH_
-#define _NODE_STATE_HASH_
+#ifndef NODE_STATE_HASH_
+#define NODE_STATE_HASH_
 
 #include <cassert>
 #include <cstring>

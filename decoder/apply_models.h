@@ -1,5 +1,5 @@
-#ifndef _APPLY_MODELS_H_
-#define _APPLY_MODELS_H_
+#ifndef APPLY_MODELS_H_
+#define APPLY_MODELS_H_
 
 #include <iostream>
 

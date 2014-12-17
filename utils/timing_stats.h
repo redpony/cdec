@@ -1,5 +1,5 @@
-#ifndef _TIMING_STATS_H_
-#define _TIMING_STATS_H_
+#ifndef TIMING_STATS_H_
+#define TIMING_STATS_H_
 
 #include <string>
 #include <map>

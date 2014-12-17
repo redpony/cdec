@@ -22,6 +22,7 @@ libutils_a_SOURCES = \
   alias_sampler.h \
   alignment_io.h \
   array2d.h \
+  b64featvector.h \
   b64tools.h \
   batched_append.h \
   city.h \
@@ -38,11 +39,8 @@ libutils_a_SOURCES = \
   have_64_bits.h \
   indices_after.h \
   kernel_string_subseq.h \
-  lbfgs.h \
-  lbfgs.cpp \
   logval.h \
   m.h \
-  mathvec.h \
   maxent.h \
   maxent.cpp \
   murmur_hash3.h \
@@ -50,8 +48,6 @@ libutils_a_SOURCES = \
   named_enum.h \
   null_deleter.h \
   null_traits.h \
-  owlqn.cpp \
-  sgd.cpp \
   perfect_hash.h \
   prob.h \
   sampler.h \
@@ -77,6 +73,7 @@ libutils_a_SOURCES = \
   fast_lexical_cast.hpp \
   intrusive_refcount.hpp \
   alignment_io.cc \
+  b64featvector.cc \
   b64tools.cc \
   corpus_tools.cc \
   dict.cc \

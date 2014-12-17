@@ -1,5 +1,5 @@
-#ifndef _FILELIB_H_
-#define _FILELIB_H_
+#ifndef FILELIB_H_
+#define FILELIB_H_
 
 #include <cassert>
 #include <string>

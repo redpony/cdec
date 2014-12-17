@@ -1,5 +1,5 @@
-#ifndef _FAST_SPARSE_VECTOR_H_
-#define _FAST_SPARSE_VECTOR_H_
+#ifndef FAST_SPARSE_VECTOR_H_
+#define FAST_SPARSE_VECTOR_H_
 
 // FastSparseVector<T> is a integer indexed unordered map that supports very fast
 // (mathematical) vector operations when the sizes are very small, and reasonably

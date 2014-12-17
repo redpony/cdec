@@ -1,5 +1,5 @@
-#ifndef _NS_WER_H_
-#define _NS_WER_H_
+#ifndef NS_WER_H_
+#define NS_WER_H_
 
 #include "ns.h"
 

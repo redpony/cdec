@@ -7,6 +7,13 @@ if [[ $# == 1 && $1 == '-u' ]] ; then
     NORMARGS="--batchline"
     SEDFLAGS="-u"
 else
+    if [[ $# != 0 ]] ; then
+        echo Usage: `basename $0` [-u] \< file.in \> file.out 1>&2
+        echo 1>&2
+        echo Tokenizes text in a reasonable way in most languages. 1>&2
+        echo 1>&2
+        exit 1
+    fi
     NORMARGS=""
     SEDFLAGS=""
 fi

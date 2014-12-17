@@ -1,5 +1,5 @@
-#ifndef _INCREMENTAL_H_
-#define _INCREMENTAL_H_
+#ifndef INCREMENTAL_H_
+#define INCREMENTAL_H_
 
 #include "weights.h"
 #include <vector>

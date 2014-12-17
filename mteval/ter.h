@@ -1,5 +1,5 @@
-#ifndef _TER_H_
-#define _TER_H_
+#ifndef TER_H_
+#define TER_H_
 
 #include "scorer.h"
 

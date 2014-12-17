@@ -1,5 +1,5 @@
-#ifndef _EARLEY_COMPOSER_H_
-#define _EARLEY_COMPOSER_H_
+#ifndef EARLEY_COMPOSER_H_
+#define EARLEY_COMPOSER_H_
 
 #include <iostream>
 

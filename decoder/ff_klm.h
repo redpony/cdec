@@ -1,5 +1,5 @@
-#ifndef _KLM_FF_H_
-#define _KLM_FF_H_
+#ifndef KLM_FF_H_
+#define KLM_FF_H_
 
 #include <vector>
 #include <string>

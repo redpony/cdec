@@ -1,5 +1,5 @@
-#ifndef _COMB_SCORER_
-#define _COMB_SCORER_
+#ifndef COMB_SCORER_H_
+#define COMB_SCORER_H_
 
 #include "scorer.h"
 

@@ -1,5 +1,5 @@
-#ifndef _KERNEL_STRING_SUBSEQ_H_
-#define _KERNEL_STRING_SUBSEQ_H_
+#ifndef KERNEL_STRING_SUBSEQ_H_
+#define KERNEL_STRING_SUBSEQ_H_
 
 #include <vector>
 #include <cmath>

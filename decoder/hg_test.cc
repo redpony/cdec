@@ -1,10 +1,14 @@
 #define BOOST_TEST_MODULE hg_test
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/vector.hpp>
+#include <sstream>
 #include <iostream>
 #include "tdict.h"
 
-#include "json_parse.h"
 #include "hg_intersect.h"
 #include "hg_union.h"
 #include "viterbi.h"
@@ -394,16 +398,6 @@ BOOST_AUTO_TEST_CASE(Small) {
   BOOST_CHECK_CLOSE(2.1431036, log(c2), 1e-4);
 }
 
-BOOST_AUTO_TEST_CASE(JSONTest) {
-  std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
-  ostringstream os;
-  JSONParser::WriteEscapedString("\"I don't know\", she said.", &os);
-  BOOST_CHECK_EQUAL("\"\\\"I don't know\\\", she said.\"", os.str());
-  ostringstream os2;
-  JSONParser::WriteEscapedString("yes", &os2);
-  BOOST_CHECK_EQUAL("\"yes\"", os2.str());
-}
-
 BOOST_AUTO_TEST_CASE(TestGenericKBest) {
   std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
   Hypergraph hg;
@@ -427,19 +421,29 @@ BOOST_AUTO_TEST_CASE(TestGenericKBest) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(TestReadWriteHG) {
+BOOST_AUTO_TEST_CASE(TestReadWriteHG_Boost) {
   std::string path(boost::unit_test::framework::master_test_suite().argc == 2 ? boost::unit_test::framework::master_test_suite().argv[1] : TEST_DATA);
-  Hypergraph hg,hg2;
-  CreateHG(path, &hg);
-  hg.edges_.front().j_ = 23;
-  hg.edges_.back().prev_i_ = 99;
-  ostringstream os;
-  HypergraphIO::WriteToJSON(hg, false, &os);
-  istringstream is(os.str());
-  HypergraphIO::ReadFromJSON(&is, &hg2);
-  BOOST_CHECK_EQUAL(hg2.NumberOfPaths(), hg.NumberOfPaths());
-  BOOST_CHECK_EQUAL(hg2.edges_.front().j_, 23);
-  BOOST_CHECK_EQUAL(hg2.edges_.back().prev_i_, 99);
+  Hypergraph hg;
+  Hypergraph hg2;
+  std::string out;
+  {
+    CreateHG(path, &hg);
+    hg.edges_.front().j_ = 23;
+    hg.edges_.back().prev_i_ = 99;
+    ostringstream os;
+    boost::archive::text_oarchive oa(os);
+    oa << hg;
+    out = os.str();
+  }
+  {
+    cerr << out << endl;
+    istringstream is(out);
+    boost::archive::text_iarchive ia(is);
+    ia >> hg2;
+    BOOST_CHECK_EQUAL(hg2.NumberOfPaths(), hg.NumberOfPaths());
+    BOOST_CHECK_EQUAL(hg2.edges_.front().j_, 23);
+    BOOST_CHECK_EQUAL(hg2.edges_.back().prev_i_, 99);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
