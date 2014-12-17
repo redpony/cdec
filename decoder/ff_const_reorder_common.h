@@ -1081,7 +1081,7 @@ typedef std::unordered_map<std::string, int>::iterator Iterator;
 struct Tsuruoka_Maxent {
   Tsuruoka_Maxent(const char* pszModelFName) {
     if (pszModelFName != NULL) {
-      m_pModel = new ME_Model();
+      m_pModel = new maxent::ME_Model();
       m_pModel->load_from_file(pszModelFName);
     } else
       m_pModel = NULL;
@@ -1093,7 +1093,7 @@ struct Tsuruoka_Maxent {
 
   void fnEval(const char* pszContext, std::vector<double>& vecOutput) const {
     std::vector<std::string> vecContext;
-    ME_Sample* pmes = new ME_Sample();
+    maxent::ME_Sample* pmes = new maxent::ME_Sample();
     SplitOnWhitespace(std::string(pszContext), &vecContext);
 
     vecOutput.clear();
@@ -1113,7 +1113,7 @@ struct Tsuruoka_Maxent {
   }
 
  private:
-  ME_Model* m_pModel;
+  maxent::ME_Model* m_pModel;
 };
 
 // an argument item or a predicate item (the verb itself)
