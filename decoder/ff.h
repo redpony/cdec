@@ -17,11 +17,23 @@ class FeatureFunction {
   friend class ExternalFeature;
  public:
   std::string name_; // set by FF factory using usage()
-  FeatureFunction() : state_size_() {}
-  explicit FeatureFunction(int state_size) : state_size_(state_size) {}
+  FeatureFunction() : state_size_(), ignored_state_size_() {}
+  explicit FeatureFunction(int state_size, int ignored_state_size = 0)
+      : state_size_(state_size), ignored_state_size_(ignored_state_size) {}
   virtual ~FeatureFunction();
   bool IsStateful() const { return state_size_ > 0; }
   int StateSize() const { return state_size_; }
+  // Returns the number of bytes in the state that should be ignored during
+  // search. When non-zero, the last N bytes in the state should be ignored when
+  // splitting a hypernode by the state. This allows the feature function to
+  // store some side data and later retrieve it via the state bytes.
+  //
+  // In general, this should not be necessary and it should always be possible
+  // to replace this with a more appropriate design of state (if you find
+  // yourself having to ignore some part of the state, you are most likely
+  // storing redundant information in the state). Be sure that you
+  // understand how this affects ApplyModelSet() before using it.
+  int IgnoredStateSize() const { return ignored_state_size_; }
 
   // override this.  not virtual because we want to expose this to factory template for help before creating a FF
   static std::string usage(bool show_params,bool show_details) {
@@ -71,12 +83,18 @@ class FeatureFunction {
                                      SparseVector<double>* estimated_features,
                                      void* context) const;
 
-  // !!! ONLY call this from subclass *CONSTRUCTORS* !!!
+  // !!! ONLY call these from subclass *CONSTRUCTORS* !!!
   void SetStateSize(size_t state_size) {
     state_size_ = state_size;
   }
+
+  // See document of IgnoredStateSize() above.
+  void SetIgnoredStateSize(size_t ignored_state_size) {
+    ignored_state_size_ = ignored_state_size;
+  }
+
  private:
-  int state_size_;
+  int state_size_, ignored_state_size_;
 };
 
 #endif
