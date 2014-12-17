@@ -1,5 +1,5 @@
-#ifndef _NS_H_
-#define _NS_H_
+#ifndef NS_H_
+#define NS_H_
 
 #include <string>
 #include <vector>

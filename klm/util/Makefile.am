@@ -1,10 +1,8 @@
 
-#noinst_PROGRAMS = \
-#  file_piece_test \
-#  joint_sort_test \
-#  key_value_packing_test \
-#  probing_hash_table_test \
-#  sorted_uniform_test
+noinst_PROGRAMS = cat_compressed
+
+cat_compressed_SOURCES = cat_compressed_main.cc
+cat_compressed_LDADD = libklm_util.a
 
 #TESTS = \
 #  file_piece_test \
@@ -12,9 +10,11 @@
 #  key_value_packing_test \
 #  probing_hash_table_test \
 #  sorted_uniform_test
-
-#file_piece_test_SOURCES = file_piece_test.cc
-#file_piece_test_LDADD = libklm_util.a
+#  file_piece_test \
+#  joint_sort_test \
+#  key_value_packing_test \
+#  probing_hash_table_test \
+#  sorted_uniform_test
 
 noinst_LIBRARIES = libklm_util.a
 
@@ -30,6 +30,8 @@ libklm_util_a_SOURCES = \
   file.hh \
   file_piece.cc \
   file_piece.hh \
+  fixed_array.hh \
+  getopt.c \
   getopt.hh \
   have.hh \
   joint_sort.hh \
@@ -38,6 +40,8 @@ libklm_util_a_SOURCES = \
   multi_intersection.hh \
   murmur_hash.cc \
   murmur_hash.hh \
+  parallel_read.cc \
+  parallel_read.hh \
   pcqueue.hh \
   pool.cc \
   pool.hh \
@@ -54,7 +58,9 @@ libklm_util_a_SOURCES = \
   string_piece_hash.hh \
   thread_pool.hh \
   tokenize_piece.hh \
+  unistd.hh \
   usage.cc \
   usage.hh
 
 AM_CPPFLAGS = -W -Wall -I$(top_srcdir)/klm -I$(top_srcdir)/klm/util/double-conversion
+

@@ -1,5 +1,5 @@
-#ifndef _FF_SPANS_H_
-#define _FF_SPANS_H_
+#ifndef FF_SPANS_H_
+#define FF_SPANS_H_
 
 #include <vector>
 #include <map>

@@ -1,5 +1,5 @@
-#ifndef _VERBOSE_H_
-#define _VERBOSE_H_
+#ifndef VERBOSE_H_
+#define VERBOSE_H_
 
 extern bool SILENT;
 

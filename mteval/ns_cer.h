@@ -1,5 +1,5 @@
-#ifndef _NS_CER_H_
-#define _NS_CER_H_
+#ifndef NS_CER_H_
+#define NS_CER_H_
 
 #include "ns.h"
 

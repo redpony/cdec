@@ -88,7 +88,7 @@ namespace HG {
 bool Intersect(const Lattice& target, Hypergraph* hg) {
   // there are a number of faster algorithms available for restricted
   // classes of hypergraph and/or target.
-  if (hg->IsLinearChain() && target.IsSentence())
+  if (hg->IsLinearChain() && IsSentence(target))
     return FastLinearIntersect(target, hg);
 
   vector<bool> rem(hg->edges_.size(), false);

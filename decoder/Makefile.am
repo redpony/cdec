@@ -33,10 +33,10 @@ noinst_LIBRARIES = libcdec.a
 EXTRA_DIST = test_data rule_lexer.ll
 
 libcdec_a_SOURCES = \
-  JSON_parser.h \
   aligner.h \
   apply_models.h \
   bottom_up_parser.h \
+  bottom_up_parser-rs.h \
   csplit.h \
   decoder.h \
   earley_composer.h \
@@ -45,6 +45,7 @@ libcdec_a_SOURCES = \
   ff_basic.h \
   ff_bleu.h \
   ff_charset.h \
+  ff_conll.h \
   ff_const_reorder_common.h \
   ff_const_reorder.h \
   ff_context.h \
@@ -52,7 +53,7 @@ libcdec_a_SOURCES = \
   ff_external.h \
   ff_factory.h \
   ff_klm.h \
-	ff_lexical.h \
+  ff_lexical.h \
   ff_lm.h \
   ff_ngrams.h \
   ff_parse_match.h \
@@ -83,7 +84,6 @@ libcdec_a_SOURCES = \
   hg_union.h \
   incremental.h \
   inside_outside.h \
-  json_parse.h \
   kbest.h \
   lattice.h \
   lexalign.h \
@@ -103,6 +103,7 @@ libcdec_a_SOURCES = \
   aligner.cc \
   apply_models.cc \
   bottom_up_parser.cc \
+  bottom_up_parser-rs.cc \
   cdec.cc \
   cdec_ff.cc \
   csplit.cc \
@@ -113,6 +114,7 @@ libcdec_a_SOURCES = \
   ff_basic.cc \
   ff_bleu.cc \
   ff_charset.cc \
+  ff_conll.cc \
   ff_context.cc \
   ff_const_reorder.cc \
   ff_csplit.cc \
@@ -146,7 +148,6 @@ libcdec_a_SOURCES = \
   hg_sampler.cc \
   hg_union.cc \
   incremental.cc \
-  json_parse.cc \
   lattice.cc \
   lexalign.cc \
   lextrans.cc \
@@ -162,5 +163,4 @@ libcdec_a_SOURCES = \
   tagger.cc \
   translator.cc \
   trule.cc \
-  viterbi.cc \
-  JSON_parser.c
+  viterbi.cc

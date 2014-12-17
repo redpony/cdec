@@ -1,5 +1,5 @@
-#ifndef _FF_H_
-#define _FF_H_
+#ifndef FF_H_
+#define FF_H_
 
 #include <string>
 #include <vector>
@@ -27,6 +27,12 @@ class FeatureFunction {
   // search. When non-zero, the last N bytes in the state should be ignored when
   // splitting a hypernode by the state. This allows the feature function to
   // store some side data and later retrieve it via the state bytes.
+  //
+  // In general, this should not be necessary and it should always be possible
+  // to replace this with a more appropriate design of state (if you find
+  // yourself having to ignore some part of the state, you are most likely
+  // storing redundant information in the state). Be sure that you
+  // understand how this affects ApplyModelSet() before using it.
   int IgnoredStateSize() const { return ignored_state_size_; }
 
   // override this.  not virtual because we want to expose this to factory template for help before creating a FF
@@ -82,6 +88,7 @@ class FeatureFunction {
     state_size_ = state_size;
   }
 
+  // See document of IgnoredStateSize() above.
   void SetIgnoredStateSize(size_t ignored_state_size) {
     ignored_state_size_ = ignored_state_size;
   }

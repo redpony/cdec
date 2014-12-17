@@ -1,5 +1,5 @@
-#ifndef _NGRAMS_FF_H_
-#define _NGRAMS_FF_H_
+#ifndef NGRAMS_FF_H_
+#define NGRAMS_FF_H_
 
 #include <vector>
 #include <map>

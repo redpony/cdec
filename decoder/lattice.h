@@ -1,5 +1,5 @@
-#ifndef __LATTICE_H_
-#define __LATTICE_H_
+#ifndef LATTICE_H_
+#define LATTICE_H_
 
 #include <string>
 #include <vector>
@@ -25,22 +25,24 @@ class Lattice : public std::vector<std::vector<LatticeArc> > {
   friend void LatticeTools::ConvertTextOrPLF(const std::string& text_or_plf, Lattice* pl);
   friend void LatticeTools::ConvertTextToLattice(const std::string& text, Lattice* pl);
  public:
-  Lattice() : is_sentence_(false) {}
+  Lattice() {}
   explicit Lattice(size_t t, const std::vector<LatticeArc>& v = std::vector<LatticeArc>()) :
-   std::vector<std::vector<LatticeArc> >(t, v),
-   is_sentence_(false) {}
+   std::vector<std::vector<LatticeArc>>(t, v) {}
   int Distance(int from, int to) const {
     if (dist_.empty())
       return (to - from);
     return dist_(from, to);
   }
-  // TODO this should actually be computed based on the contents
-  // of the lattice
-  bool IsSentence() const { return is_sentence_; }
  private:
   void ComputeDistances();
   Array2D<int> dist_;
-  bool is_sentence_;
 };
+
+inline bool IsSentence(const Lattice& in) {
+  bool res = true;
+  for (auto& alt : in)
+    if (alt.size() > 1) { res = false; break; }
+  return res;
+}
 
 #endif

@@ -271,10 +271,9 @@ bool LexicalTrans::TranslateImpl(const string& input,
                       Hypergraph* forest) {
   Lattice& lattice = smeta->src_lattice_;
   LatticeTools::ConvertTextOrPLF(input, &lattice);
-  if (!lattice.IsSentence()) {
-    // lexical models make independence assumptions
-    // that don't work with lattices or conf nets
-    cerr << "LexicalTrans: cannot deal with lattice source input!\n";
+  smeta->ComputeInputLatticeType();
+  if (smeta->GetInputType() != cdec::kSEQUENCE) {
+    cerr << "LexicalTrans: cannot deal with non-sequence inputs\n";
     abort();
   }
   smeta->SetSourceLength(lattice.size());

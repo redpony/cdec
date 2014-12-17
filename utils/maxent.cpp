@@ -3,12 +3,15 @@
  */
 
 #include "maxent.h"
+
+#include <vector>
+#include <iostream>
 #include <cmath>
 #include <cstdio>
-#include "lbfgs.h"
 
 using namespace std;
 
+namespace maxent {
 double ME_Model::FunctionGradient(const vector<double>& x,
                                   vector<double>& grad) {
   assert((int)_fb.Size() == x.size());
@@ -600,6 +603,428 @@ vector<double> ME_Model::classify(ME_Sample& mes) const {
   mes.label = get_class_label(label);
   return vp;
 }
+
+// template<class FuncGrad>
+// std::vector<double>
+// perform_LBFGS(FuncGrad func_grad, const std::vector<double> & x0);
+
+std::vector<double> perform_LBFGS(
+    double (*func_grad)(const std::vector<double> &, std::vector<double> &),
+    const std::vector<double> &x0);
+
+std::vector<double> perform_OWLQN(
+    double (*func_grad)(const std::vector<double> &, std::vector<double> &),
+    const std::vector<double> &x0, const double C);
+
+const int LBFGS_M = 10;
+
+const static int M = LBFGS_M;
+const static double LINE_SEARCH_ALPHA = 0.1;
+const static double LINE_SEARCH_BETA = 0.5;
+
+// stopping criteria
+int LBFGS_MAX_ITER = 300;
+const static double MIN_GRAD_NORM = 0.0001;
+
+// LBFGS
+
+double ME_Model::backtracking_line_search(const Vec& x0, const Vec& grad0,
+                                          const double f0, const Vec& dx,
+                                          Vec& x, Vec& grad1) {
+  double t = 1.0 / LINE_SEARCH_BETA;
+
+  double f;
+  do {
+    t *= LINE_SEARCH_BETA;
+    x = x0 + t * dx;
+    f = FunctionGradient(x.STLVec(), grad1.STLVec());
+    //        cout << "*";
+  } while (f > f0 + LINE_SEARCH_ALPHA * t * dot_product(dx, grad0));
+
+  return f;
+}
+
+//
+// Jorge Nocedal, "Updating Quasi-Newton Matrices With Limited Storage",
+// Mathematics of Computation, Vol. 35, No. 151, pp. 773-782, 1980.
+//
+Vec approximate_Hg(const int iter, const Vec& grad, const Vec s[],
+                   const Vec y[], const double z[]) {
+  int offset, bound;
+  if (iter <= M) {
+    offset = 0;
+    bound = iter;
+  } else {
+    offset = iter - M;
+    bound = M;
+  }
+
+  Vec q = grad;
+  double alpha[M], beta[M];
+  for (int i = bound - 1; i >= 0; i--) {
+    const int j = (i + offset) % M;
+    alpha[i] = z[j] * dot_product(s[j], q);
+    q += -alpha[i] * y[j];
+  }
+  if (iter > 0) {
+    const int j = (iter - 1) % M;
+    const double gamma = ((1.0 / z[j]) / dot_product(y[j], y[j]));
+    //    static double gamma;
+    //    if (gamma == 0) gamma = ((1.0 / z[j]) / dot_product(y[j], y[j]));
+    q *= gamma;
+  }
+  for (int i = 0; i <= bound - 1; i++) {
+    const int j = (i + offset) % M;
+    beta[i] = z[j] * dot_product(y[j], q);
+    q += s[j] * (alpha[i] - beta[i]);
+  }
+
+  return q;
+}
+
+vector<double> ME_Model::perform_LBFGS(const vector<double>& x0) {
+  const size_t dim = x0.size();
+  Vec x = x0;
+
+  Vec grad(dim), dx(dim);
+  double f = FunctionGradient(x.STLVec(), grad.STLVec());
+
+  Vec s[M], y[M];
+  double z[M];  // rho
+
+  for (int iter = 0; iter < LBFGS_MAX_ITER; iter++) {
+
+    fprintf(stderr, "%3d  obj(err) = %f (%6.4f)", iter + 1, -f, _train_error);
+    if (_nheldout > 0) {
+      const double heldout_logl = heldout_likelihood();
+      fprintf(stderr, "  heldout_logl(err) = %f (%6.4f)", heldout_logl,
+              _heldout_error);
+    }
+    fprintf(stderr, "\n");
+
+    if (sqrt(dot_product(grad, grad)) < MIN_GRAD_NORM) break;
+
+    dx = -1 * approximate_Hg(iter, grad, s, y, z);
+
+    Vec x1(dim), grad1(dim);
+    f = backtracking_line_search(x, grad, f, dx, x1, grad1);
+
+    s[iter % M] = x1 - x;
+    y[iter % M] = grad1 - grad;
+    z[iter % M] = 1.0 / dot_product(y[iter % M], s[iter % M]);
+    x = x1;
+    grad = grad1;
+  }
+
+  return x.STLVec();
+}
+
+// OWLQN
+
+// stopping criteria
+int OWLQN_MAX_ITER = 300;
+
+Vec approximate_Hg(const int iter, const Vec& grad, const Vec s[],
+                   const Vec y[], const double z[]);
+
+inline int sign(double x) {
+  if (x > 0) return 1;
+  if (x < 0) return -1;
+  return 0;
+};
+
+static Vec pseudo_gradient(const Vec& x, const Vec& grad0, const double C) {
+  Vec grad = grad0;
+  for (size_t i = 0; i < x.Size(); i++) {
+    if (x[i] != 0) {
+      grad[i] += C * sign(x[i]);
+      continue;
+    }
+    const double gm = grad0[i] - C;
+    if (gm > 0) {
+      grad[i] = gm;
+      continue;
+    }
+    const double gp = grad0[i] + C;
+    if (gp < 0) {
+      grad[i] = gp;
+      continue;
+    }
+    grad[i] = 0;
+  }
+
+  return grad;
+}
+
+double ME_Model::regularized_func_grad(const double C, const Vec& x,
+                                       Vec& grad) {
+  double f = FunctionGradient(x.STLVec(), grad.STLVec());
+  for (size_t i = 0; i < x.Size(); i++) {
+    f += C * fabs(x[i]);
+  }
+
+  return f;
+}
+
+double ME_Model::constrained_line_search(double C, const Vec& x0,
+                                         const Vec& grad0, const double f0,
+                                         const Vec& dx, Vec& x, Vec& grad1) {
+  // compute the orthant to explore
+  Vec orthant = x0;
+  for (size_t i = 0; i < orthant.Size(); i++) {
+    if (orthant[i] == 0) orthant[i] = -grad0[i];
+  }
+
+  double t = 1.0 / LINE_SEARCH_BETA;
+
+  double f;
+  do {
+    t *= LINE_SEARCH_BETA;
+    x = x0 + t * dx;
+    x.Project(orthant);
+    //    for (size_t i = 0; i < x.Size(); i++) {
+    //      if (x0[i] != 0 && sign(x[i]) != sign(x0[i])) x[i] = 0;
+    //    }
+
+    f = regularized_func_grad(C, x, grad1);
+    //        cout << "*";
+  } while (f > f0 + LINE_SEARCH_ALPHA * dot_product(x - x0, grad0));
+
+  return f;
+}
+
+vector<double> ME_Model::perform_OWLQN(const vector<double>& x0,
+                                       const double C) {
+  const size_t dim = x0.size();
+  Vec x = x0;
+
+  Vec grad(dim), dx(dim);
+  double f = regularized_func_grad(C, x, grad);
+
+  Vec s[M], y[M];
+  double z[M];  // rho
+
+  for (int iter = 0; iter < OWLQN_MAX_ITER; iter++) {
+    Vec pg = pseudo_gradient(x, grad, C);
+
+    fprintf(stderr, "%3d  obj(err) = %f (%6.4f)", iter + 1, -f, _train_error);
+    if (_nheldout > 0) {
+      const double heldout_logl = heldout_likelihood();
+      fprintf(stderr, "  heldout_logl(err) = %f (%6.4f)", heldout_logl,
+              _heldout_error);
+    }
+    fprintf(stderr, "\n");
+
+    if (sqrt(dot_product(pg, pg)) < MIN_GRAD_NORM) break;
+
+    dx = -1 * approximate_Hg(iter, pg, s, y, z);
+    if (dot_product(dx, pg) >= 0) dx.Project(-1 * pg);
+
+    Vec x1(dim), grad1(dim);
+    f = constrained_line_search(C, x, pg, f, dx, x1, grad1);
+
+    s[iter % M] = x1 - x;
+    y[iter % M] = grad1 - grad;
+    z[iter % M] = 1.0 / dot_product(y[iter % M], s[iter % M]);
+
+    x = x1;
+    grad = grad1;
+  }
+
+  return x.STLVec();
+}
+
+// SGD
+
+// const double SGD_ETA0 = 1;
+// const double SGD_ITER = 30;
+// const double SGD_ALPHA = 0.85;
+
+//#define FOLOS_NAIVE
+//#define FOLOS_LAZY
+#define SGD_CP
+
+inline void apply_l1_penalty(const int i, const double u, vector<double>& _vl,
+                             vector<double>& q) {
+  double& w = _vl[i];
+  const double z = w;
+  double& qi = q[i];
+  if (w > 0) {
+    w = max(0.0, w - (u + qi));
+  } else if (w < 0) {
+    w = min(0.0, w + (u - qi));
+  }
+  qi += w - z;
+}
+
+static double l1norm(const vector<double>& v) {
+  double sum = 0;
+  for (size_t i = 0; i < v.size(); i++) sum += abs(v[i]);
+  return sum;
+}
+
+inline void update_folos_lazy(const int iter_sample, const int k,
+                              vector<double>& _vl,
+                              const vector<double>& sum_eta,
+                              vector<int>& last_updated) {
+  const double penalty = sum_eta[iter_sample] - sum_eta[last_updated[k]];
+  double& x = _vl[k];
+  if (x > 0)
+    x = max(0.0, x - penalty);
+  else
+    x = min(0.0, x + penalty);
+  last_updated[k] = iter_sample;
+}
+
+int ME_Model::perform_SGD() {
+  if (_l2reg > 0) {
+    cerr << "error: L2 regularization is currently not supported in SGD mode."
+         << endl;
+    exit(1);
+  }
+
+  cerr << "performing SGD" << endl;
+
+  const double l1param = _l1reg;
+
+  const int d = _fb.Size();
+
+  vector<int> ri(_vs.size());
+  for (size_t i = 0; i < ri.size(); i++) ri[i] = i;
+
+  vector<double> grad(d);
+  int iter_sample = 0;
+  const double eta0 = SGD_ETA0;
+
+  //  cerr << "l1param = " << l1param << endl;
+  cerr << "eta0 = " << eta0 << " alpha = " << SGD_ALPHA << endl;
+
+  double u = 0;
+  vector<double> q(d, 0);
+  vector<int> last_updated(d, 0);
+  vector<double> sum_eta;
+  sum_eta.push_back(0);
+
+  for (int iter = 0; iter < SGD_ITER; iter++) {
+
+    random_shuffle(ri.begin(), ri.end());
+
+    double logl = 0;
+    int ncorrect = 0, ntotal = 0;
+    for (size_t i = 0; i < _vs.size(); i++, ntotal++, iter_sample++) {
+      const Sample& s = _vs[ri[i]];
+
+#ifdef FOLOS_LAZY
+      for (vector<int>::const_iterator j = s.positive_features.begin();
+           j != s.positive_features.end(); j++) {
+        for (vector<int>::const_iterator k = _feature2mef[*j].begin();
+             k != _feature2mef[*j].end(); k++) {
+          update_folos_lazy(iter_sample, *k, _vl, sum_eta, last_updated);
+        }
+      }
+#endif
+
+      vector<double> membp(_num_classes);
+      const int max_label = conditional_probability(s, membp);
+
+      const double eta =
+          eta0 * pow(SGD_ALPHA,
+                     (double)iter_sample / _vs.size());  // exponential decay
+      //      const double eta = eta0 / (1.0 + (double)iter_sample /
+      // _vs.size());
+
+      //      if (iter_sample % _vs.size() == 0) cerr << "eta = " << eta <<
+      // endl;
+      u += eta * l1param;
+
+      sum_eta.push_back(sum_eta.back() + eta * l1param);
+
+      logl += log(membp[s.label]);
+      if (max_label == s.label) ncorrect++;
+
+      // binary features
+      for (vector<int>::const_iterator j = s.positive_features.begin();
+           j != s.positive_features.end(); j++) {
+        for (vector<int>::const_iterator k = _feature2mef[*j].begin();
+             k != _feature2mef[*j].end(); k++) {
+          const double me = membp[_fb.Feature(*k).label()];
+          const double ee = (_fb.Feature(*k).label() == s.label ? 1.0 : 0);
+          const double grad = (me - ee);
+          _vl[*k] -= eta * grad;
+#ifdef SGD_CP
+          apply_l1_penalty(*k, u, _vl, q);
+#endif
+        }
+      }
+      // real-valued features
+      for (vector<pair<int, double> >::const_iterator j = s.rvfeatures.begin();
+           j != s.rvfeatures.end(); j++) {
+        for (vector<int>::const_iterator k = _feature2mef[j->first].begin();
+             k != _feature2mef[j->first].end(); k++) {
+          const double me = membp[_fb.Feature(*k).label()];
+          const double ee = (_fb.Feature(*k).label() == s.label ? 1.0 : 0);
+          const double grad = (me - ee) * j->second;
+          _vl[*k] -= eta * grad;
+#ifdef SGD_CP
+          apply_l1_penalty(*k, u, _vl, q);
+#endif
+        }
+      }
+
+#ifdef FOLOS_NAIVE
+      for (size_t j = 0; j < d; j++) {
+        double& x = _vl[j];
+        if (x > 0)
+          x = max(0.0, x - eta * l1param);
+        else
+          x = min(0.0, x + eta * l1param);
+      }
+#endif
+    }
+    logl /= _vs.size();
+//    fprintf(stderr, "%4d logl = %8.3f acc = %6.4f ", iter, logl,
+// (double)ncorrect / ntotal);
+
+#ifdef FOLOS_LAZY
+    if (l1param > 0) {
+      for (size_t j = 0; j < d; j++)
+        update_folos_lazy(iter_sample, j, _vl, sum_eta, last_updated);
+    }
+#endif
+
+    double f = logl;
+    if (l1param > 0) {
+      const double l1 =
+          l1norm(_vl);  // this is not accurate when lazy update is used
+      //      cerr << "f0 = " <<  update_model_expectation() - l1param * l1 << "
+      // ";
+      f -= l1param * l1;
+      int nonzero = 0;
+      for (int j = 0; j < d; j++)
+        if (_vl[j] != 0) nonzero++;
+      //      cerr << " f = " << f << " l1 = " << l1 << " nonzero_features = "
+      // << nonzero << endl;
+    }
+    //    fprintf(stderr, "%4d  obj = %7.3f acc = %6.4f", iter+1, f,
+    // (double)ncorrect/ntotal);
+    //    fprintf(stderr, "%4d  obj = %f", iter+1, f);
+    fprintf(stderr, "%3d  obj(err) = %f (%6.4f)", iter + 1, f,
+            1 - (double)ncorrect / ntotal);
+
+    if (_nheldout > 0) {
+      double heldout_logl = heldout_likelihood();
+      //      fprintf(stderr, "  heldout_logl = %f  acc = %6.4f\n",
+      // heldout_logl, 1 - _heldout_error);
+      fprintf(stderr, "  heldout_logl(err) = %f (%6.4f)", heldout_logl,
+              _heldout_error);
+    }
+    fprintf(stderr, "\n");
+  }
+
+  return 0;
+}
+
+}  // namespace maxent
 
 /*
  * $Log: maxent.cpp,v $

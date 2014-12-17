@@ -1,5 +1,5 @@
-#ifndef _NS_TER_H_
-#define _NS_TER_H_
+#ifndef NS_TER_H_
+#define NS_TER_H_
 
 #include "ns.h"
 

@@ -1,5 +1,5 @@
-#ifndef _HG_INTERSECT_H_
-#define _HG_INTERSECT_H_
+#ifndef HG_INTERSECT_H_
+#define HG_INTERSECT_H_
 
 #include "lattice.h"
 

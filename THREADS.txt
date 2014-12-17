@@ -1,0 +1,5 @@
+The cdec decoder is not, in general, thread safe. There are system components
+that make use of multi-threading, but the decoder may not be used from multiple
+threads. If you wish to decode in parallel, independent decoder processes
+must be run.
+

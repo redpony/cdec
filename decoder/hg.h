@@ -1,5 +1,5 @@
-#ifndef _HG_H_
-#define _HG_H_
+#ifndef HG_H_
+#define HG_H_
 
 // define USE_INFO_EDGE 1 if you want lots of debug info shown with --show_derivations - otherwise it adds quite a bit of overhead if ffs have their logging enabled (e.g. ff_from_fsa)
 #ifndef USE_INFO_EDGE
@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include <boost/serialization/vector.hpp>
 
 #include "feature_vector.h"
 #include "small_vector.h"
@@ -69,6 +70,18 @@ namespace HG {
     short int j_;
     short int prev_i_;
     short int prev_j_;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int /*version*/) {
+      ar & head_node_;
+      ar & tail_nodes_;
+      ar & rule_;
+      ar & feature_values_;
+      ar & i_;
+      ar & j_;
+      ar & prev_i_;
+      ar & prev_j_;
+      ar & id_;
+    }
     void show(std::ostream &o,unsigned mask=SPAN|RULE) const {
       o<<'{';
       if (mask&CATEGORY)
@@ -149,6 +162,24 @@ namespace HG {
     WordID NT() const { return -cat_; }
     EdgesVector in_edges_;   // an in edge is an edge with this node as its head.  (in edges come from the bottom up to us)  indices in edges_
     EdgesVector out_edges_;  // an out edge is an edge with this node as its tail.  (out edges leave us up toward the top/goal). indices in edges_
+    template<class Archive>
+    void save(Archive & ar, const unsigned int /*version*/) const {
+      ar & node_hash;
+      ar & id_;
+      ar & TD::Convert(-cat_);
+      ar & in_edges_;
+      ar & out_edges_;
+    }
+    template<class Archive>
+    void load(Archive & ar, const unsigned int /*version*/) {
+      ar & node_hash;
+      ar & id_;
+      std::string cat; ar & cat;
+      cat_ = -TD::Convert(cat);
+      ar & in_edges_;
+      ar & out_edges_;
+    }
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
     void copy_fixed(Node const& o) { // nonstructural fields only - structural ones are managed by sorting/pruning/subsetting
       node_hash = o.node_hash;
       cat_=o.cat_;
@@ -492,6 +523,27 @@ public:
   void set_ids(); // resync edge,node .id_
   void check_ids() const; // assert that .id_ have been kept in sync
 
+  template<class Archive>
+  void save(Archive & ar, const unsigned int /*version*/) const {
+    unsigned ns = nodes_.size(); ar & ns;
+    unsigned es = edges_.size(); ar & es;
+    for (auto& n : nodes_) ar & n;
+    for (auto& e : edges_) ar & e;
+    int x;
+    x = edges_topo_; ar & x;
+    x = is_linear_chain_; ar & x;
+  }
+  template<class Archive>
+  void load(Archive & ar, const unsigned int /*version*/) {
+    unsigned ns; ar & ns; nodes_.resize(ns);
+    unsigned es; ar & es; edges_.resize(es);
+    for (auto& n : nodes_) ar & n;
+    for (auto& e : edges_) ar & e;
+    int x;
+    ar & x; edges_topo_ = x;
+    ar & x; is_linear_chain_ = x;
+  }
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
 private:
   Hypergraph(int num_nodes, int num_edges, bool is_lc) : is_linear_chain_(is_lc), nodes_(num_nodes), edges_(num_edges),edges_topo_(true) {}
 };

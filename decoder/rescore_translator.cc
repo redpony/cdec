@@ -3,6 +3,7 @@
 #include <sstream>
 #include <boost/shared_ptr.hpp>
 
+#include "filelib.h"
 #include "sentence_metadata.h"
 #include "hg.h"
 #include "hg_io.h"
@@ -20,16 +21,18 @@ struct RescoreTranslatorImpl {
   bool Translate(const string& input,
                  const vector<double>& weights,
                  Hypergraph* forest) {
-    if (input == "{}") return false;
-    if (input.find("{\"rules\"") == 0) {
-      istringstream is(input);
-      Hypergraph src_cfg_hg;
-      if (!HypergraphIO::ReadFromJSON(&is, forest)) {
-        cerr << "Parse error while reading HG from JSON.\n";
-        abort();
-      }
-    } else {
-      cerr << "Can only read HG input from JSON: use training/grammar_convert\n";
+    istringstream is(input);
+    string header, fname;
+    is >> header >> fname;
+    if (header != "::forest::") {
+      cerr << "RescoreTranslator: expected input lines of form ::forest:: filename.gz\n";
+      abort();
+    }
+    ReadFile rf(fname);
+    if (!rf) { cerr << "Can't read " << fname << endl; abort(); }
+    Hypergraph src_cfg_hg;
+    if (!HypergraphIO::ReadFromBinary(rf.stream(), forest)) {
+      cerr << "Parse error while reading HG.\n";
       abort();
     }
     Hypergraph::TailNodeVector tail(1, forest->nodes_.size() - 1);
@@ -53,6 +56,7 @@ bool RescoreTranslator::TranslateImpl(const string& input,
                               const vector<double>& weights,
                               Hypergraph* minus_lm_forest) {
   smeta->SetSourceLength(0);  // don't know how to compute this
+  smeta->input_type_ = cdec::kFOREST;
   return pimpl_->Translate(input, weights, minus_lm_forest);
 }
 
