@@ -151,6 +151,7 @@ bool CompoundSplit::TranslateImpl(const string& input,
   smeta->SetSourceLength(in.size());  // TODO do utf8 or somethign
   for (int i = 0; i < in.size(); ++i)
     smeta->src_lattice_.push_back(vector<LatticeArc>(1, LatticeArc(TD::Convert(in[i]), 0.0, 1)));
+  smeta->ComputeInputLatticeType();
   pimpl_->BuildTrellis(in, forest);
   forest->Reweight(weights);
   return true;

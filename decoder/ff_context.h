@@ -1,6 +1,5 @@
-
-#ifndef _FF_CONTEXT_H_
-#define _FF_CONTEXT_H_
+#ifndef FF_CONTEXT_H_
+#define FF_CONTEXT_H_
 
 #include <vector>
 #include <boost/xpressive/xpressive.hpp>

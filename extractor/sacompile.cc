@@ -114,6 +114,7 @@ int main(int argc, char** argv) {
   stop_write = Clock::now();
   write_duration += GetDuration(start_write, stop_write);
 
+  stop_time = Clock::now();
   cerr << "Constructing suffix array took "
        << GetDuration(start_time, stop_time) << " seconds" << endl;
 

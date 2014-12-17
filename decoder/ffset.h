@@ -1,5 +1,5 @@
-#ifndef _FFSET_H_
-#define _FFSET_H_
+#ifndef FFSET_H_
+#define FFSET_H_
 
 #include <utility>
 #include <vector>

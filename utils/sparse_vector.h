@@ -1,5 +1,5 @@
-#ifndef _SPARSE_VECTOR_H_
-#define _SPARSE_VECTOR_H_
+#ifndef SPARSE_VECTOR_H_
+#define SPARSE_VECTOR_H_
 
 #include "fast_sparse_vector.h"
 #define SparseVector FastSparseVector

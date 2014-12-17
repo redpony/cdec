@@ -1,5 +1,5 @@
-#ifndef _PERFECT_HASH_MAP_H_
-#define _PERFECT_HASH_MAP_H_
+#ifndef PERFECT_HASH_MAP_H_
+#define PERFECT_HASH_MAP_H_
 
 #include <vector>
 #include <boost/utility.hpp>

@@ -12,12 +12,8 @@ namespace {
 
 typedef char const* Name;
 
-Name urdu_json="urdu.json.gz";
-Name urdu_wts="Arity_0 1.70741473606976 Arity_1 1.12426238048012 Arity_2 1.14986187839554 Glue -0.04589037041388 LanguageModel 1.09051 PassThrough -3.66226367902928 PhraseModel_0 -1.94633451863252 PhraseModel_1 -0.1475347695476 PhraseModel_2 -1.614818994946 WordPenalty -3.0 WordPenaltyFsa -0.56028442964748 ShorterThanPrev -10 LongerThanPrev -10";
-Name small_json="small.json.gz";
+Name small_json="small.bin.gz";
 Name small_wts="Model_0 -2 Model_1 -.5 Model_2 -1.1 Model_3 -1 Model_4 -1 Model_5 .5 Model_6 .2 Model_7 -.3";
-Name perro_json="perro.json.gz";
-Name perro_wts="SameFirstLetter 1 LongerThanPrev 1 ShorterThanPrev 1 GlueTop 0.0 Glue -1.0 EgivenF -0.5 FgivenE -0.5 LexEgivenF -0.5 LexFgivenE -0.5 LM 1";
 
 }
 
@@ -32,7 +28,7 @@ struct HGSetup {
 
   static void JsonFile(Hypergraph *hg,std::string f) {
     ReadFile rf(f);
-    HypergraphIO::ReadFromJSON(rf.stream(), hg);
+    HypergraphIO::ReadFromBinary(rf.stream(), hg);
   }
   static void JsonTestFile(Hypergraph *hg,std::string path,std::string n) {
     JsonFile(hg,path + "/"+n);
@@ -48,35 +44,35 @@ void AddNullEdge(Hypergraph* hg) {
 }
 
 void HGSetup::CreateTinyLatticeHG(const std::string& path,Hypergraph* hg) {
-  ReadFile rf(path + "/hg_test.tiny_lattice");
-  HypergraphIO::ReadFromJSON(rf.stream(), hg);
+  ReadFile rf(path + "/hg_test.tiny_lattice.bin.gz");
+  HypergraphIO::ReadFromBinary(rf.stream(), hg);
   AddNullEdge(hg);
 }
 
 void HGSetup::CreateLatticeHG(const std::string& path,Hypergraph* hg) {
-  ReadFile rf(path + "/hg_test.lattice");
-  HypergraphIO::ReadFromJSON(rf.stream(), hg);
+  ReadFile rf(path + "/hg_test.lattice.bin.gz");
+  HypergraphIO::ReadFromBinary(rf.stream(), hg);
   AddNullEdge(hg);
 }
 
 void HGSetup::CreateHG_tiny(const std::string& path, Hypergraph* hg) {
-  ReadFile rf(path + "/hg_test.tiny");
-  HypergraphIO::ReadFromJSON(rf.stream(), hg);
+  ReadFile rf(path + "/hg_test.tiny.bin.gz");
+  HypergraphIO::ReadFromBinary(rf.stream(), hg);
 }
 
 void HGSetup::CreateHG_int(const std::string& path,Hypergraph* hg) {
-  ReadFile rf(path + "/hg_test.hg_int");
-  HypergraphIO::ReadFromJSON(rf.stream(), hg);
+  ReadFile rf(path + "/hg_test.hg_int.bin.gz");
+  HypergraphIO::ReadFromBinary(rf.stream(), hg);
 }
 
 void HGSetup::CreateHG(const std::string& path,Hypergraph* hg) {
-  ReadFile rf(path + "/hg_test.hg");
-  HypergraphIO::ReadFromJSON(rf.stream(), hg);
+  ReadFile rf(path + "/hg_test.hg.bin.gz");
+  HypergraphIO::ReadFromBinary(rf.stream(), hg);
 }
 
 void HGSetup::CreateHGBalanced(const std::string& path,Hypergraph* hg) {
-  ReadFile rf(path + "/hg_test.hg_balanced");
-  HypergraphIO::ReadFromJSON(rf.stream(), hg);
+  ReadFile rf(path + "/hg_test.hg_balanced.bin.gz");
+  HypergraphIO::ReadFromBinary(rf.stream(), hg);
 }
 
 #endif

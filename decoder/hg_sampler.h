@@ -1,6 +1,5 @@
-#ifndef _HG_SAMPLER_H_
-#define _HG_SAMPLER_H_
-
+#ifndef HG_SAMPLER_H_
+#define HG_SAMPLER_H_
 
 #include <vector>
 #include <string>

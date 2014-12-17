@@ -1,0 +1,13 @@
+the	the	DT	O
+angry	angry	JJ	O
+dog	dog	NN	O
+bit	bite	VBD	B
+me	I	PRN	I
+.	.	.	O
+
+i	i	PRN	O
+ate	eat	VBD	B
+some	some	DT	I
+pie	pie	NN	I
+.	.	.	O
+

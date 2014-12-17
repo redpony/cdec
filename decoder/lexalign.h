@@ -1,5 +1,5 @@
-#ifndef _LEXALIGN_H_
-#define _LEXALIGN_H_
+#ifndef LEXALIGN_H_
+#define LEXALIGN_H_
 
 #include "translator.h"
 #include "lattice.h"

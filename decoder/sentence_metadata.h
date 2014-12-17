@@ -1,13 +1,19 @@
-#ifndef _SENTENCE_METADATA_H_
-#define _SENTENCE_METADATA_H_
+#ifndef SENTENCE_METADATA_H_
+#define SENTENCE_METADATA_H_
 
 #include <string>
 #include <map>
 #include <cassert>
 #include "lattice.h"
+#include "tree_fragment.h"
 
 struct DocScorer;  // deprecated, will be removed
 struct Score;     // deprecated, will be removed
+
+namespace cdec {
+enum InputType { kSEQUENCE, kTREE, kLATTICE, kFOREST, kUNKNOWN };
+class TreeFragment;
+}
 
 class SentenceMetadata {
  public:
@@ -17,13 +23,25 @@ class SentenceMetadata {
     src_len_(-1),
     has_reference_(ref.size() > 0),
     trg_len_(ref.size()),
-    ref_(has_reference_ ? &ref : NULL) {}
+    ref_(has_reference_ ? &ref : NULL),
+    input_type_(cdec::kUNKNOWN) {}
+
+  // helper function for lattice inputs
+  void ComputeInputLatticeType() {
+    input_type_ = cdec::kSEQUENCE;
+    for (auto& alt : src_lattice_) {
+      if (alt.size() > 1) { input_type_ = cdec::kLATTICE; break; }
+    }
+  }
+  cdec::InputType GetInputType() const { return input_type_; }
 
   int GetSentenceId() const { return sent_id_; }
 
   // this should be called by the Translator object after
   // it has parsed the source
   void SetSourceLength(int sl) { src_len_ = sl; }
+
+  const cdec::TreeFragment& GetSourceTree() const { return src_tree_; }
 
   // this should be called if a separate model needs to
   // specify how long the target sentence should be
@@ -64,12 +82,15 @@ class SentenceMetadata {
   const Score* app_score;
  public:
   Lattice src_lattice_;  // this will only be set if inputs are finite state!
+  cdec::TreeFragment src_tree_; // this will be set only if inputs are trees
  private:
   // you need to be very careful when depending on these values
   // they will only be set during training / alignment contexts
   const bool has_reference_;
   int trg_len_;
   const Lattice* const ref_;
+ public:
+  cdec::InputType input_type_;
 };
 
 #endif

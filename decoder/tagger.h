@@ -1,5 +1,5 @@
-#ifndef _TAGGER_H_
-#define _TAGGER_H_
+#ifndef TAGGER_H_
+#define TAGGER_H_
 
 #include "translator.h"
 

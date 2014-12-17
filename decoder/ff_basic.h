@@ -1,5 +1,5 @@
-#ifndef _FF_BASIC_H_
-#define _FF_BASIC_H_
+#ifndef FF_BASIC_H_
+#define FF_BASIC_H_
 
 #include "ff.h"
 
@@ -41,7 +41,7 @@ class SourceWordPenalty : public FeatureFunction {
   const double value_;
 };
 
-#define DEFAULT_MAX_ARITY 9
+#define DEFAULT_MAX_ARITY 50
 #define DEFAULT_MAX_ARITY_STRINGIZE(x) #x
 #define DEFAULT_MAX_ARITY_STRINGIZE_EVAL(x) DEFAULT_MAX_ARITY_STRINGIZE(x)
 #define DEFAULT_MAX_ARITY_STR DEFAULT_MAX_ARITY_STRINGIZE_EVAL(DEFAULT_MAX_ARITY)
@@ -62,7 +62,6 @@ class ArityPenalty : public FeatureFunction {
                                      void* context) const;
  private:
   std::vector<WordID> fids_;
-  const double value_;
 };
 
 #endif

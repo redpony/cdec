@@ -1,5 +1,5 @@
-#ifndef _STAR_H_
-#define _STAR_H_
+#ifndef STAR_H_
+#define STAR_H_
 
 // star(x) computes the infinite sum x^0 + x^1 + x^2 + ...
 

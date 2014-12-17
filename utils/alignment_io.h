@@ -1,5 +1,5 @@
-#ifndef _ALIGNMENT_IO_H_
-#define _ALIGNMENT_IO_H_
+#ifndef ALIGNMENT_IO_H_
+#define ALIGNMENT_IO_H_
 
 #include <string>
 #include <iostream>

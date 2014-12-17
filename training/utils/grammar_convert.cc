@@ -43,7 +43,7 @@ void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::notify(*conf);
 
   if (conf->count("help") || conf->count("input") == 0) {
-    cerr << "\nUsage: grammar_convert [-options]\n\nConverts a grammar file (in Hiero format) into JSON hypergraph.\n";
+    cerr << "\nUsage: grammar_convert [-options]\n\nConverts a grammar file (in Hiero format) into serialized hypergraph.\n";
     cerr << dcmdline_options << endl;
     exit(1);
   }
@@ -254,7 +254,8 @@ void ProcessHypergraph(const vector<double>& w, const po::variables_map& conf, c
   if (w.size() > 0) { hg->Reweight(w); }
   if (conf.count("collapse_weights")) CollapseWeights(hg);
   if (conf["output"].as<string>() == "json") {
-    HypergraphIO::WriteToJSON(*hg, false, &cout);
+    cerr << "NOT IMPLEMENTED ... talk to cdyer if you need this functionality\n";
+    // HypergraphIO::WriteToBinary(*hg, &cout);
     if (!ref.empty()) { cerr << "REF: " << ref << endl; }
   } else {
     vector<WordID> onebest;
@@ -315,11 +316,11 @@ int main(int argc, char **argv) {
         line = line.substr(0, pos + 2);
       }
       istringstream is(line);
-      if (HypergraphIO::ReadFromJSON(&is, &hg)) {
+      if (HypergraphIO::ReadFromBinary(&is, &hg)) {
         ProcessHypergraph(w, conf, ref, &hg);
         hg.clear();
       } else {
-        cerr << "Error reading grammar from JSON: line " << lc << endl;
+        cerr << "Error reading grammar line " << lc << endl;
         exit(1);
       }
     } else {

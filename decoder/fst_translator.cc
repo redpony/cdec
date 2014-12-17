@@ -27,11 +27,15 @@ struct FSTTranslatorImpl {
                  const vector<double>& weights,
                  Hypergraph* forest) {
     bool composed = false;
-    if (input.find("{\"rules\"") == 0) {
+    if (input.find("::forest::") == 0) {
       istringstream is(input);
+      string header, fname;
+      is >> header >> fname;
+      ReadFile rf(fname);
+      if (!rf) { cerr << "Failed to open " << fname << endl; abort(); }
       Hypergraph src_cfg_hg;
-      if (!HypergraphIO::ReadFromJSON(&is, &src_cfg_hg)) {
-        cerr << "Failed to read HG from JSON.\n";
+      if (!HypergraphIO::ReadFromBinary(rf.stream(), &src_cfg_hg)) {
+        cerr << "Failed to read HG.\n";
         abort();
       }
       if (add_pass_through_rules) {
@@ -95,6 +99,7 @@ bool FSTTranslator::TranslateImpl(const string& input,
                               const vector<double>& weights,
                               Hypergraph* minus_lm_forest) {
   smeta->SetSourceLength(0);  // don't know how to compute this
+  smeta->input_type_ = cdec::kFOREST;
   return pimpl_->Translate(input, weights, minus_lm_forest);
 }
 

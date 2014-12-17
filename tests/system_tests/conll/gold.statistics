@@ -1,0 +1,20 @@
+-lm_nodes 12
+-lm_edges 24
+-lm_paths 729
++lm_nodes 12
++lm_edges 24
++lm_paths 729
++lm_trans O O O B I O
+constr_nodes 12
+constr_edges 12
+constr_paths 1
+-lm_nodes 10
+-lm_edges 20
+-lm_paths 243
++lm_nodes 10
++lm_edges 20
++lm_paths 243
++lm_trans O B I I O
+constr_nodes 10
+constr_edges 10
+constr_paths 1

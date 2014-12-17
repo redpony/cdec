@@ -1,5 +1,5 @@
-#ifndef _FF_SOFT_SYNTAX_MINDIST_H_
-#define _FF_SOFT_SYNTAX_MINDIST_H_
+#ifndef FF_SOFT_SYNTAX_MINDIST_H_
+#define FF_SOFT_SYNTAX_MINDIST_H_
 
 #include "ff.h"
 #include "hg.h"

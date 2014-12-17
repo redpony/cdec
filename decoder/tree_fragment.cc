@@ -64,6 +64,13 @@ int TreeFragment::SetupSpansRec(unsigned cur, int left) {
   return right;
 }
 
+vector<int> TreeFragment::Terminals() const {
+  vector<int> terms;
+  for (auto& x : *this)
+    if (IsTerminal(x)) terms.push_back(x);
+  return terms;
+}
+
 // cp is the character index in the tree
 // np keeps track of the nodes (nonterminals) that have been built
 // symp keeps track of the terminal symbols that have been built
