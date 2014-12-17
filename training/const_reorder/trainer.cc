@@ -10,7 +10,7 @@ void Tsuruoka_Maxent_Trainer::fnTrain(const char* pszInstanceFName,
          strcmp(pszAlgorithm, "sgd") == 0 || strcmp(pszAlgorithm, "SGD") == 0);
   FILE* fpIn = fopen(pszInstanceFName, "r");
 
-  ME_Model* pModel = new ME_Model();
+  maxent::ME_Model* pModel = new maxent::ME_Model();
 
   char* pszLine = new char[100001];
   int iNumInstances = 0;
@@ -30,7 +30,7 @@ void Tsuruoka_Maxent_Trainer::fnTrain(const char* pszInstanceFName,
 
     iNumInstances++;
 
-    ME_Sample* pmes = new ME_Sample();
+    maxent::ME_Sample* pmes = new maxent::ME_Sample();
 
     char* p = strrchr(pszLine, ' ');
     assert(p != NULL);
