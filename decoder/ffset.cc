@@ -14,6 +14,11 @@ ModelSet::ModelSet(const vector<double>& w, const vector<const FeatureFunction*>
   for (int i = 0; i < models_.size(); ++i) {
     model_state_pos_[i] = state_size_;
     state_size_ += models_[i]->StateSize();
+    int num_ignored_bytes = models_[i]->IgnoredStateSize();
+    if (num_ignored_bytes > 0) {
+      ranges_to_erase_.push_back(
+          {state_size_ - num_ignored_bytes, state_size_});
+    }
   }
 }
 
@@ -70,3 +75,13 @@ void ModelSet::AddFinalFeatures(const FFState& state, HG::Edge* edge,SentenceMet
   edge->edge_prob_.logeq(edge->feature_values_.dot(weights_));
 }
 
+bool ModelSet::NeedsStateErasure() const { return !ranges_to_erase_.empty(); }
+
+void ModelSet::EraseIgnoredBytes(FFState* state) const {
+  // TODO: can we memset?
+  for (const auto& range : ranges_to_erase_) {
+    for (int i = range.first; i < range.second; ++i) {
+      (*state)[i] = 0;
+    }
+  }
+}
