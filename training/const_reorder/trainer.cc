@@ -1,5 +1,7 @@
 #include "trainer.h"
 
+#include "utils/maxent.h"
+
 Tsuruoka_Maxent_Trainer::Tsuruoka_Maxent_Trainer()
     : const_reorder::Tsuruoka_Maxent(NULL) {}
 
