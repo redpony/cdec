@@ -15,6 +15,7 @@
 #include "ff_rules.h"
 #include "ff_ruleshape.h"
 #include "ff_bleu.h"
+#include "ff_soft_syn.h"
 #include "ff_soft_syntax.h"
 #include "ff_soft_syntax_mindist.h"
 #include "ff_source_path.h"
@@ -80,4 +81,5 @@ void register_feature_functions() {
   ff_registry.Register("WordSet", new FFFactory<WordSet>);
   ff_registry.Register("ConstReorderFeature", new FFFactory<ConstReorderFeature>);
   ff_registry.Register("External", new FFFactory<ExternalFeature>);
+  ff_registry.Register("SoftSynFeature", new SoftSynFeatureFactory());
 }
