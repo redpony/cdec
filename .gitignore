@@ -183,6 +183,8 @@ training/mr_reduce_to_weights
 training/optimize_test
 training/plftools
 training/test_ngram
+training/const_reorder/argument_reorder_model_trainer
+training/const_reorder/const_reorder_model_trainer
 utils/atools
 utils/bin/
 utils/crp_test
