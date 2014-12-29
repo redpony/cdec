@@ -1,5 +1,6 @@
 /^(al|el|ul|e)\-[a-z]+$/
 /^((а|А)(ль|ш)|уль)-\p{Cyrillic}+$/
+/^(юл)-\p{Cyrillic}+$/
 /^\p{Cyrillic}\.\p{Cyrillic}\.$/
 /^(\d|\d\d|\d\d\d)\.$/
 
