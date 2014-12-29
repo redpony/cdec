@@ -1,9 +1,54 @@
 ##################### hyphenated words added by Fei since 3/7/05
 ##X-ray
 
-# Finnish abbreviation patterns
+# Finnish
 eaa.
-v.
+ap.
+arv.
+ay.
+eKr.
+em.
+engl.
+esim.
+fil.
+lis.
+fil.
+maist.
+fil.toht.
+harv.
+ilt.
+jatk.
+jKr.
+jms.
+jne.
+joht.
+klo
+ko.
+ks.
+leht.
+lv.
+lyh.
+mm.
+mon.
+nim.
+nro.
+ns.
+nti.
+os.
+oy.
+pj.
+pnä.
+puh.
+pvm.
+rva.
+tms.
+ts.
+vars.
+vrt.
+ym.
+yms.
+yo.
+>>>>>>> 8646b68e5b124f612fd65b51ea40624f65a2f3d6
 
 # hindi abbreviation patterns
 जन.
