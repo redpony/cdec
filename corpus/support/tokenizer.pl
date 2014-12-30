@@ -415,7 +415,7 @@ sub deep_proc_token {
     }
 
     ## remove the ending periods that follow number etc.
-    if($line =~ /^(.*(\d|\~|\^|\&|\:|\,|\#|\*|\%|\-|\_|\/|\\|\$|\'))(\.+)$/){
+    if($line =~ /^(.*(\d|\~|\^|\&|\:|\,|\#|\*|\%|€|\-|\_|\/|\\|\$|\'))(\.+)$/){
 	##    12~13. => 12~13 .
 	my $t1 = $1;
 	my $t3 = $3;
@@ -600,12 +600,12 @@ sub deep_proc_token {
 
 
     ## deal with "%"
-    if(($line =~ /\%/) && ($Split_On_PercentSign > 0)){
+    if(($line =~ /\%|€/) && ($Split_On_PercentSign > 0)){
 	my $suc = 0;
 	if($Split_On_PercentSign >= 2){
-	    $suc += ($line =~ s/(\D)(\%+)/$1 $2/g);
+	    $suc += ($line =~ s/(\D)(\%+|€+)/$1 $2/g);
 	}else{
-	    $suc += ($line =~ s/(\%+)/ $1 /g);
+	    $suc += ($line =~ s/(\%+|€+)/ $1 /g);
 	}
 
 	if($suc){
