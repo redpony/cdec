@@ -7,7 +7,7 @@
 
 if which uconv > /dev/null
 then
-  CMD="uconv -f utf8 -t utf8 -x Any-NFKC --callback skip"
+  CMD="uconv -f utf8 -t utf8 -x Any-NFKC --callback skip --remove-signature"
 else
   echo "Cannot find ICU uconv (http://site.icu-project.org/) ... falling back to iconv. Normalization NOT taking place." 1>&2
   CMD="iconv -f utf8 -t utf8 -c"
