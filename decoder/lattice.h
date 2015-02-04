@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "sparse_vector.h"
 #include "wordid.h"
 #include "array2d.h"
 
@@ -15,10 +16,10 @@ struct LatticeTools {
 
 struct LatticeArc {
   WordID label;
-  double cost;
+  SparseVector<double> features;
   int dist2next;
-  LatticeArc() : label(), cost(), dist2next() {}
-  LatticeArc(WordID w, double c, int i) : label(w), cost(c), dist2next(i) {}
+  LatticeArc() : label(), features(), dist2next() {}
+  LatticeArc(WordID w, const SparseVector<double>& f, int i) : label(w), features(f), dist2next(i) {}
 };
 
 class Lattice : public std::vector<std::vector<LatticeArc> > {

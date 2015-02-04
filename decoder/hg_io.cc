@@ -87,6 +87,12 @@ string HypergraphIO::AsPLF(const Hypergraph& hg, bool include_global_parentheses
   return os.str();
 }
 
+// TODO this should write out the PLF with the Python dictionary format
+// rather than just the single "LatticeCost" feature
+double PLFFeatureDictionary(const SparseVector<double>& f) {
+  return f.get(FD::Convert("LatticeCost"));
+}
+
 string HypergraphIO::AsPLF(const Lattice& lat, bool include_global_parentheses) {
   static bool first = true;
   if (first) { InitEscapes(); first = false; }
@@ -99,7 +105,7 @@ string HypergraphIO::AsPLF(const Lattice& lat, bool include_global_parentheses) 
     os << '(';
     for (int j = 0; j < arcs.size(); ++j) {
       os << "('" << Escape(TD::Convert(arcs[j].label)) << "',"
-                 << arcs[j].cost << ',' << arcs[j].dist2next << "),";
+                 << PLFFeatureDictionary(arcs[j].features) << ',' << arcs[j].dist2next << "),";
     }
     os << "),";
   }
@@ -204,8 +210,14 @@ void ReadPLFEdge(const std::string& in, int &c, int cur_node, Hypergraph* hg) {
   assert(head_node < MAX_NODES);  // prevent malicious PLFs from using all the memory
   if (hg->nodes_.size() < (head_node + 1)) { hg->ResizeNodes(head_node + 1); }
   hg->ConnectEdgeToHeadNode(edge, &hg->nodes_[head_node]);
-  for (int i = 0; i < probs.size(); ++i)
-    edge->feature_values_.set_value(FD::Convert("Feature_" + boost::lexical_cast<string>(i)), probs[i]);
+  if (probs.size() != 0) {
+    if (probs.size() == 1) {
+      edge->feature_values_.set_value(FD::Convert("LatticeCost"), probs[0]);
+    } else {
+      cerr << "Don't know how to deal with multiple lattice edge features: implement Python dictionary format.\n";
+      abort();
+    }
+  }
 }
 
 // parse (('foo', 0.23), ('bar', 0.77))
@@ -263,7 +275,6 @@ void HypergraphIO::PLFtoLattice(const string& plf, Lattice* pl) {
   ReadFromPLF(plf, &g, 0);
   const int num_nodes = g.nodes_.size() - 1;
   l.resize(num_nodes);
-  int fid0=FD::Convert("Feature_0");
   for (int i = 0; i < num_nodes; ++i) {
     vector<LatticeArc>& alts = l[i];
     const Hypergraph::Node& node = g.nodes_[i];
@@ -272,7 +283,7 @@ void HypergraphIO::PLFtoLattice(const string& plf, Lattice* pl) {
     for (int j = 0; j < num_alts; ++j) {
       const Hypergraph::Edge& edge = g.edges_[node.out_edges_[j]];
       alts[j].label = edge.rule_->e_[1];
-      alts[j].cost = edge.feature_values_.get(fid0);
+      alts[j].features = edge.feature_values_;
       alts[j].dist2next = edge.head_node_ - node.id_;
     }
   }

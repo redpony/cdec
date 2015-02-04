@@ -47,8 +47,8 @@ BOOST_AUTO_TEST_CASE(TestTextGrammarFile) {
   GrammarPtr g(new TextGrammar(path + "/grammar.prune"));
   vector<GrammarPtr> grammars(1, g);
 
-  LatticeArc a(TD::Convert("ein"), 0.0, 1);
-  LatticeArc b(TD::Convert("haus"), 0.0, 1);
+  LatticeArc a(TD::Convert("ein"), SparseVector<double>(), 1);
+  LatticeArc b(TD::Convert("haus"), SparseVector<double>(), 1);
   Lattice lattice(2);
   lattice[0].push_back(a);
   lattice[1].push_back(b);
