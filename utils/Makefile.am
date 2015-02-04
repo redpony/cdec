@@ -1,4 +1,4 @@
-bin_PROGRAMS = reconstruct_weights atools
+bin_PROGRAMS = reconstruct_weights atools dedup_corpus
 
 noinst_PROGRAMS = \
   ts \
@@ -97,6 +97,10 @@ reconstruct_weights_LDADD = libutils.a
 atools_SOURCES = atools.cc
 atools_LDADD = libutils.a
 atools_LDFLAGS = $(STATIC_FLAGS)
+
+dedup_corpus_SOURCES = dedup_corpus.cc
+dedup_corpus_LDADD = libutils.a
+dedup_corpus_LDFLAGS = $(STATIC_FLAGS)
 
 phmt_SOURCES = phmt.cc
 phmt_LDADD = libutils.a $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)

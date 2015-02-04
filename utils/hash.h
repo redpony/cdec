@@ -13,7 +13,9 @@
 # include <sparsehash/dense_hash_map>
 # include <sparsehash/dense_hash_set>
 # include <sparsehash/sparse_hash_map>
+# include <sparsehash/sparse_hash_set>
 # define SPARSE_HASH_MAP google::sparse_hash_map
+# define SPARSE_HASH_SET google::sparse_hash_set
 # define HASH_MAP google::dense_hash_map
 # define HASH_SET google::dense_hash_set
 # define HASH_MAP_DELETED(h,deleted) do { (h).set_deleted_key(deleted); } while(0)
@@ -29,6 +31,7 @@
 namespace std { using std::tr1::unordered_map; using std::tr1::unordered_set; }
 #endif
 # define SPARSE_HASH_MAP std::unordered_map
+# define SPARSE_HASH_SET std::unordered_set
 # define HASH_MAP std::unordered_map
 # define HASH_SET std::unordered_set
 # define HASH_MAP_DELETED(h,deleted)
