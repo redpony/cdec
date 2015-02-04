@@ -49,7 +49,7 @@ void LatticeTools::ConvertTextToLattice(const string& text, Lattice* pl) {
   l.clear();
   l.resize(ids.size());
   for (int i = 0; i < l.size(); ++i)
-    l[i].push_back(LatticeArc(ids[i], 0.0, 1));
+    l[i].push_back(LatticeArc(ids[i], SparseVector<double>(), 1));
 }
 
 void LatticeTools::ConvertTextOrPLF(const string& text_or_plf, Lattice* pl) {

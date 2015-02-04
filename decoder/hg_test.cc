@@ -214,8 +214,8 @@ BOOST_AUTO_TEST_CASE(TestIntersect) {
   BOOST_CHECK_EQUAL(4, best);
 
   Lattice target(2);
-  target[0].push_back(LatticeArc(TD::Convert("a"), 0.0, 1));
-  target[1].push_back(LatticeArc(TD::Convert("b"), 0.0, 1));
+  target[0].push_back(LatticeArc(TD::Convert("a"), SparseVector<double>(), 1));
+  target[1].push_back(LatticeArc(TD::Convert("b"), SparseVector<double>(), 1));
   HG::Intersect(target, &hg);
   hg.PrintGraphviz();
 }
@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE(PLF) {
   string inplf = "((('haupt',-2.06655,1),('hauptgrund',-5.71033,2),),(('grund',-1.78709,1),),(('für\\'',0.1,1),),)";
   HypergraphIO::ReadFromPLF(inplf, &hg);
   SparseVector<double> wts;
-  wts.set_value(FD::Convert("Feature_0"), 1.0);
+  wts.set_value(FD::Convert("LatticeCost"), 1.0);
   hg.Reweight(wts);
   hg.PrintGraphviz();
   string outplf = HypergraphIO::AsPLF(hg);
