@@ -2,4 +2,5 @@ WordPenalty 1
 SourceWordPenalty 1
 Glue 0
 Cost -1
-LatticeCost -1
+LatticeCost_0 -1
+UsesDPrime 1000
