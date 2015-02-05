@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE(PLF) {
   string inplf = "((('haupt',-2.06655,1),('hauptgrund',-5.71033,2),),(('grund',-1.78709,1),),(('für\\'',0.1,1),),)";
   HypergraphIO::ReadFromPLF(inplf, &hg);
   SparseVector<double> wts;
-  wts.set_value(FD::Convert("LatticeCost"), 1.0);
+  wts.set_value(FD::Convert("LatticeCost_0"), 1.0);
   hg.Reweight(wts);
   hg.PrintGraphviz();
   string outplf = HypergraphIO::AsPLF(hg);
