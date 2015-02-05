@@ -207,7 +207,10 @@ void ReadPLFEdge(const std::string& in, int &c, int cur_node, Hypergraph* hg) {
   // Read in sparse feature format
   if (get(in,c) == '{') {
     c++;
-    ReadPLFFeature(in, c, features);
+    eatws(in,c);
+    if (get(in,c) != '}') { 
+      ReadPLFFeature(in, c, features);
+    }
     while (get(in,c) == ',') {
       c++;
       if (get(in,c) == '}') { break; }
