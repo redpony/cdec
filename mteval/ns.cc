@@ -13,6 +13,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "config.h"
+
 #include "tdict.h"
 #include "filelib.h"
 #include "stringlib.h"
@@ -272,14 +274,14 @@ EvaluationMetric* EvaluationMetric::Instance(const string& imetric_id) {
     } else if (metric_id == "TER") {
       m = new TERMetric;
     } else if (metric_id == "METEOR") {
-#if HAVE_METEOR
+#ifdef METEOR_JAR
       if (!FileExists(meteor_jar_path)) {
         cerr << meteor_jar_path << " not found!\n";
         abort();
       }
       m = new ExternalMetric("METEOR", string("java -Xmx1536m -jar ") + meteor_jar_path + " - - -mira -lower -t tune -l en");
 #else
-      cerr << "cdec was not built with the --with-meteor option." << endl;
+      cerr << "cdec was not built with the -DMETEOR_JAR=/path/to/meteor.jar option." << endl;
       abort();
 #endif
     } else if (metric_id.find("COMB:") == 0) {

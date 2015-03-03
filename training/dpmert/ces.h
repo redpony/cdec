@@ -1,9 +1,9 @@
 #ifndef _CES_H_
 #define _CES_H_
 
-class ConvexHull;
+struct ConvexHull;
 class Hypergraph;
-class SegmentEvaluator;
+struct SegmentEvaluator;
 class ErrorSurface;
 class EvaluationMetric;
 

@@ -54,7 +54,7 @@ class Translator {
   State state_;
 };
 
-class SCFGTranslatorImpl;
+struct SCFGTranslatorImpl;
 class SCFGTranslator : public Translator {
  public:
   SCFGTranslator(const boost::program_options::variables_map& conf);
@@ -72,7 +72,7 @@ class SCFGTranslator : public Translator {
   boost::shared_ptr<SCFGTranslatorImpl> pimpl_;
 };
 
-class FSTTranslatorImpl;
+struct FSTTranslatorImpl;
 class FSTTranslator : public Translator {
  public:
   FSTTranslator(const boost::program_options::variables_map& conf);
@@ -85,7 +85,7 @@ class FSTTranslator : public Translator {
   boost::shared_ptr<FSTTranslatorImpl> pimpl_;
 };
 
-class RescoreTranslatorImpl;
+struct RescoreTranslatorImpl;
 class RescoreTranslator : public Translator {
  public:
   RescoreTranslator(const boost::program_options::variables_map& conf);
@@ -98,7 +98,7 @@ class RescoreTranslator : public Translator {
   boost::shared_ptr<RescoreTranslatorImpl> pimpl_;
 };
 
-class Tree2StringTranslatorImpl;
+struct Tree2StringTranslatorImpl;
 class Tree2StringTranslator : public Translator {
  public:
   Tree2StringTranslator(const boost::program_options::variables_map& conf,

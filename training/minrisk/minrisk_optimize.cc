@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
   cerr << "Loading hypergraphs...\n";
   while(getline(in, line)) {
     istringstream is(line);
-    int sent_id;
+    int sent_id = 0;
     kis.resize(kis.size() + 1);
     training::CandidateSet& curkbest = kis.back();
     string kbest_file;

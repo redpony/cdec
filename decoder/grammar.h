@@ -61,7 +61,7 @@ struct Grammar {
 
 typedef boost::shared_ptr<Grammar> GrammarPtr;
 
-class TGImpl;
+struct TGImpl;
 struct TextGrammar : public Grammar {
   TextGrammar();
   explicit TextGrammar(const std::string& file);

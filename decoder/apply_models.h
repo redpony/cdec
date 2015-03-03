@@ -3,9 +3,9 @@
 
 #include <iostream>
 
-struct ModelSet;
-struct Hypergraph;
-struct SentenceMetadata;
+class ModelSet;
+class Hypergraph;
+class SentenceMetadata;
 
 struct exhaustive_t {};
 
