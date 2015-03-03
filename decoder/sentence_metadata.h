@@ -7,8 +7,8 @@
 #include "lattice.h"
 #include "tree_fragment.h"
 
-struct DocScorer;  // deprecated, will be removed
-struct Score;     // deprecated, will be removed
+class DocScorer;  // deprecated, will be removed
+class Score;     // deprecated, will be removed
 
 namespace cdec {
 enum InputType { kSEQUENCE, kTREE, kLATTICE, kFOREST, kUNKNOWN };
@@ -17,7 +17,7 @@ class TreeFragment;
 
 class SentenceMetadata {
  public:
-  friend class DecoderImpl;
+  friend struct DecoderImpl;
   SentenceMetadata(int id, const Lattice& ref) :
     sent_id_(id),
     src_len_(-1),

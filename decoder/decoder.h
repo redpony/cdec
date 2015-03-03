@@ -25,7 +25,7 @@ private:
 
 class SentenceMetadata;
 class Hypergraph;
-class DecoderImpl;
+struct DecoderImpl;
 
 class DecoderObserver {
  public:
@@ -38,7 +38,7 @@ class DecoderObserver {
   virtual void NotifyDecodingComplete(const SentenceMetadata& smeta);
 };
 
-class Grammar;  // TODO once the decoder interface is cleaned up,
+struct Grammar;  // TODO once the decoder interface is cleaned up,
                 // this should be somewhere else
 class Decoder {
  public:

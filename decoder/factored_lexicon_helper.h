@@ -7,7 +7,7 @@
 #include <map>
 #include "tdict.h"
 
-struct SentenceMetadata;
+class SentenceMetadata;
 
 // when computing features, it can be advantageous to:
 //   1) back off to less specific forms (e.g., less highly inflected forms, POS tags, etc)

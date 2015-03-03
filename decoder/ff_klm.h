@@ -7,7 +7,7 @@
 #include "ff_factory.h"
 #include "ff.h"
 
-template <class Model> struct KLanguageModelImpl;
+template <class Model> class KLanguageModelImpl;
 
 // the supported template types are instantiated explicitly
 // in ff_klm.cc.
