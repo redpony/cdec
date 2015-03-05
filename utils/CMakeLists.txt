@@ -70,7 +70,6 @@ set(utils_STAT_SRCS
     named_enum.h
     null_deleter.h
     null_traits.h
-    perfect_hash.h
     prob.h
     sampler.h
     semiring.h
