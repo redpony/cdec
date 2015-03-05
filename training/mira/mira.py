@@ -22,23 +22,9 @@ dlog = None
 
 #scoring function using pycdec scoring
 def fast_score(hyps, refs, metric):
-  #scorer = cdec.score.Scorer(metric)
-  #logging.info('loaded {0} references for scoring with {1}'.format(
-  #              len(refs), metric))
-  #if metric=='BLEU':
-  #  logging.warning('BLEU is ambiguous, assuming IBM_BLEU\n')
-  #  metric = 'IBM_BLEU'
-  #elif metric=='COMBI':
-  #  logging.warning('COMBI metric is no longer supported, switching to '
-  #                  'COMB:TER=-0.5;BLEU=0.5')
-  #  metric = 'COMB:TER=-0.5;BLEU=0.5'
-  #stats = sum(scorer(r).evaluate(h) for h,r in itertools.izip(hyps,refs))
-  #logging.info('Score={} ({})'.format(stats.score, stats.detail))
-  #return stats.score
   cmd = ('{0} -r{1} -i {2} -m {3}').format(fast_score_binary, refs, hyps, metric)
   proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
   o = proc.stdout.readline().strip()
-  print 'res: ', o
   return float(o)
 
 #create new parallel input file in output directory in sgml format
