@@ -3,6 +3,8 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../mteval)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../klm)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/..)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 PROJECT(decoder C CXX)
 
 find_package(FLEX REQUIRED)
@@ -145,7 +147,7 @@ add_library(libcdec STATIC ${libcdec_SRCS})
 
 set(cdec_SRCS cdec.cc)
 add_executable(cdec ${cdec_SRCS})
-target_link_libraries(cdec libcdec mteval utils ksearch klm klm_util klm_util_double ${Boost_LIBRARIES} ${ZLIB_LIBRARIES})
+target_link_libraries(cdec libcdec mteval utils ksearch klm klm_util klm_util_double ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBDL_LIBRARIES})
 
 set(TEST_SRCS
   grammar_test.cc

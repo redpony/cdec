@@ -11,6 +11,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 #### packages
 find_package(ZLIB REQUIRED)
 find_package(BZip2 REQUIRED)
+find_package(LibDL REQUIRED)
 
 # for pycdec
 find_package(PythonInterp 2.7 REQUIRED)
