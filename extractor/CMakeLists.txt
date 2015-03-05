@@ -8,9 +8,10 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-find_package(GTest REQUIRED)
-find_package(GMock REQUIRED)
-if(GMOCK_FOUND)
+find_package(GTest)
+find_package(GMock)
+if(GTEST_FOUND)
+ if(GMOCK_FOUND)
   #rule_factory_test.cc
   set(TEST_SRCS alignment_test.cc
     data_array_test.cc
@@ -50,7 +51,8 @@ if(GMOCK_FOUND)
     add_test(NAME ${testName} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/${testName} 
        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
   endforeach(testSrc)
-endif(GMOCK_FOUND)
+ endif(GMOCK_FOUND)
+endif(GTEST_FOUND)
 
 set(sacompile_SRCS sacompile.cc)
 add_executable(sacompile ${sacompile_SRCS})
