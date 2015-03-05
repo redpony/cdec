@@ -1,13 +1,15 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/..)
 
+find_package(RT)
+
 set(build_binary_SRCS build_binary_main.cc)
 add_executable(build_binary ${build_binary_SRCS})
-target_link_libraries(build_binary klm klm_util klm_util_double z)
+target_link_libraries(build_binary klm klm_util klm_util_double z ${RT_LIBRARIES})
 
 
 set(ngram_query_SRCS query_main.cc)
 add_executable(ngram_query ${ngram_query_SRCS})
-target_link_libraries(ngram_query klm klm_util klm_util_double z)
+target_link_libraries(ngram_query klm klm_util klm_util_double z ${RT_LIBRARIES})
 
 set(klm_STAT_SRCS
     bhiksha.hh
