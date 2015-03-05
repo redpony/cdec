@@ -5,6 +5,8 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 PROJECT(decoder C CXX)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 find_package(FLEX REQUIRED)
 
 FLEX_TARGET(RuleLexer rule_lexer.ll ${CMAKE_CURRENT_BINARY_DIR}/rule_lexer.cc)
@@ -145,7 +147,7 @@ add_library(libcdec STATIC ${libcdec_SRCS})
 
 set(cdec_SRCS cdec.cc)
 add_executable(cdec ${cdec_SRCS})
-target_link_libraries(cdec libcdec mteval utils ksearch klm klm_util klm_util_double ${Boost_LIBRARIES} ${ZLIB_LIBRARIES})
+target_link_libraries(cdec libcdec mteval utils ksearch klm klm_util klm_util_double ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBDL_LIBRARIES})
 
 set(TEST_SRCS
   grammar_test.cc

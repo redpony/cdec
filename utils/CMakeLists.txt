@@ -1,4 +1,4 @@
-include_directories()
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(TEST_SRCS dict_test.cc
   logval_test.cc
