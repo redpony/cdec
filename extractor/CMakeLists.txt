@@ -1,9 +1,17 @@
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../utils)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/features)
 
-find_package(GTest)
-find_package(GMock)
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
+find_package(GTest REQUIRED)
+find_package(GMock REQUIRED)
 if(GMOCK_FOUND)
+  #rule_factory_test.cc
   set(TEST_SRCS alignment_test.cc
     data_array_test.cc
     fast_intersector_test.cc
@@ -15,7 +23,6 @@ if(GMOCK_FOUND)
     precomputation_test.cc
     rule_extractor_helper_test.cc
     rule_extractor_test.cc
-    rule_factory_test.cc
     scorer2_test.cc
     suffix_array_sampler_test.cc
     suffix_array_test.cc
@@ -56,7 +63,7 @@ target_link_libraries(run_extractor extractor ${Boost_LIBRARIES} z)
 
 set(extract_SRCS extract.cc)
 add_executable(extract ${extract_SRCS})
-target_link_libraries(extract extractor ${Boost_LIBRARIES} z)
+target_link_libraries(extract extractor utils ${Boost_LIBRARIES} z)
 
 
 set(extractor_STAT_SRCS
