@@ -204,7 +204,7 @@ def main():
   args.devset = newdev
   
   log_config(args)
-  args.weights, hope_best_fear = optimize(args, script_dir, dev_size)
+  args.weights, hope_best_fear = optimize(args, script_dir, dev_size, score_sign)
   
   graph_file = ''
   if have_mpl: graph_file = graph(args.output_dir, hope_best_fear, args.metric)
