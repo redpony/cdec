@@ -152,6 +152,9 @@ def main():
   args = parser.parse_args()
 
   args.metric = args.metric.upper()
+  score_sign = 1.0
+  if args.metric == 'TER' or args.metric == 'WER' or args.metric == 'CER':
+    score_sign = -1.0
 
   if not args.update_size:
     args.update_size = args.kbest_size
@@ -319,7 +322,7 @@ def split_devset(dev, outdir):
   refs.close()
   return (outdir+'/source.input', outdir+'/refs.input')
 
-def optimize(args, script_dir, dev_size):
+def optimize(args, script_dir, dev_size, score_sign):
   parallelize = script_dir+'/../utils/parallelize.pl'
   if args.qsub:
     parallelize += " -p %s"%args.pmem
@@ -330,7 +333,7 @@ def optimize(args, script_dir, dev_size):
   num_features = 0
   last_p_score = 0
   best_score_iter = -1
-  best_score = -1
+  best_score = -10 * score_sign
   i = 0
   hope_best_fear = {'hope':[],'best':[],'fear':[]}
   #main optimization loop
@@ -450,7 +453,7 @@ def optimize(args, script_dir, dev_size):
     hope_best_fear['fear'].append(dec_score_f)
     logging.info('DECODER SCORE: {0} HOPE: {1} FEAR: {2}'.format(
                   dec_score, dec_score_h, dec_score_f))
-    if dec_score > best_score:
+    if score_sign*dec_score > score_sign*best_score:
       best_score_iter = i
       best_score = dec_score
 
