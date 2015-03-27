@@ -274,7 +274,7 @@ void PassiveChart::ApplyRules(const int i,
 void PassiveChart::ApplyUnaryRules(const int i, const int j) {
   const vector<int>& nodes = chart_(i,j);  // reference is important!
   for (unsigned di = 0; di < nodes.size(); ++di) {
-    const WordID& cat = forest_->nodes_[nodes[di]].cat_;
+    const WordID cat = forest_->nodes_[nodes[di]].cat_;
     for (unsigned ri = 0; ri < unaries_.size(); ++ri) {
       //cerr << "At (" << i << "," << j << "): applying " << unaries_[ri]->AsString() << endl;
       if (unaries_[ri]->f()[0] == cat) {
