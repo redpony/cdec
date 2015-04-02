@@ -1,4 +1,8 @@
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+if (CMAKE_VERSION VERSION_LESS 2.8.9) # TODO remove once we increase the cmake requirement
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -DPIC")
+else()
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
 
 set(TEST_SRCS dict_test.cc
   logval_test.cc
