@@ -44,8 +44,7 @@ class LanguageModelInterface {
   }
 };
 
-struct LanguageModelImpl;
-
+class LanguageModelImpl;
 class LanguageModel : public FeatureFunction {
  public:
   // param = "filename.lm [-o n]"

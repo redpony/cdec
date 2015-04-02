@@ -7,7 +7,7 @@
 
 #include "ff.h"
 
-struct NgramDetectorImpl;
+class NgramDetectorImpl;
 class NgramDetector : public FeatureFunction {
  public:
   // param = "filename.lm [-o <order>] [-U <unigram-prefix>] [-B <bigram-prefix>] [-T <trigram-prefix>] [-4 <4-gram-prefix>] [-5 <5-gram-prefix>] [-S <separator>]

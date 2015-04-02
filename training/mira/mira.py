@@ -5,12 +5,6 @@ import argparse
 import logging
 import random, time
 import gzip, itertools
-try:
-  import cdec.score
-except ImportError:
-  sys.stderr.write('Could not import pycdec, see cdec/python/README.md for details\n')
-  sys.exit(1)
-have_mpl = True
 try: 
   import matplotlib
   matplotlib.use('Agg')
@@ -19,26 +13,19 @@ except ImportError:
   have_mpl = False
 
 #mira run script
-#requires pycdec to be built, since it is used for scoring hypothesis
-#translations.
 #matplotlib must be installed for graphing to work
 #email option requires mail
 
+script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+fast_score_binary = script_dir+'/../../mteval/fast_score'
+dlog = None
+
 #scoring function using pycdec scoring
 def fast_score(hyps, refs, metric):
-  scorer = cdec.score.Scorer(metric)
-  logging.info('loaded {0} references for scoring with {1}'.format(
-                len(refs), metric))
-  if metric=='BLEU':
-    logging.warning('BLEU is ambiguous, assuming IBM_BLEU\n')
-    metric = 'IBM_BLEU'
-  elif metric=='COMBI':
-    logging.warning('COMBI metric is no longer supported, switching to '
-                    'COMB:TER=-0.5;BLEU=0.5')
-    metric = 'COMB:TER=-0.5;BLEU=0.5'
-  stats = sum(scorer(r).evaluate(h) for h,r in itertools.izip(hyps,refs))
-  logging.info('Score={} ({})'.format(stats.score, stats.detail))
-  return stats.score
+  cmd = ('{0} -r{1} -i {2} -m {3}').format(fast_score_binary, refs, hyps, metric)
+  proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+  o = proc.stdout.readline().strip()
+  return float(o)
 
 #create new parallel input file in output directory in sgml format
 def enseg(devfile, newfile, gprefix):
@@ -81,7 +68,6 @@ def enseg(devfile, newfile, gprefix):
 def main():
   #set logging to write all info messages to stderr
   logging.basicConfig(level=logging.INFO)
-  script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
   if not have_mpl:
     logging.warning('Failed to import matplotlib, graphs will not be generated.')
 
@@ -376,7 +362,8 @@ def optimize(args, script_dir, dev_size, score_sign):
     
     cmd = parallel_cmd + ' ' + decoder_cmd
     logging.info('OPTIMIZATION COMMAND: {}'.format(cmd))
-   
+  
+    global dlog 
     dlog = open(decoderlog,'w')
     runf = open(runfile,'w')
     retries = 0
@@ -423,7 +410,7 @@ def optimize(args, script_dir, dev_size, score_sign):
     bests = []
     fears = []
     for line in run:
-      hope, best, fear = line.split(' ||| ')
+      hope, best, fear = line.strip().split(' ||| ')
       hopes.append(hope)
       bests.append(best)
       fears.append(fear)
@@ -439,14 +426,10 @@ def optimize(args, script_dir, dev_size, score_sign):
     gzip_file(runfile)
     gzip_file(decoderlog)
 
-    ref_file = open(refs)
-    references = [line.split(' ||| ') for line in 
-                  ref_file.read().strip().split('\n')]
-    ref_file.close()
     #get score for best hypothesis translations, hope and fear translations
-    dec_score = fast_score(bests, references, args.metric)
-    dec_score_h = fast_score(hopes, references, args.metric)
-    dec_score_f = fast_score(fears, references, args.metric)
+    dec_score = fast_score(runfile+'.B', refs, args.metric)
+    dec_score_h = fast_score(runfile+'.H', refs, args.metric)
+    dec_score_f = fast_score(runfile+'.F', refs, args.metric)
     
     hope_best_fear['hope'].append(dec_score)
     hope_best_fear['best'].append(dec_score_h)

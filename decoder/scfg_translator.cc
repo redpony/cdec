@@ -62,7 +62,7 @@ PassThroughGrammar::PassThroughGrammar(const Lattice& input, const string& cat, 
   for (int i = 0; i < input.size(); ++i) {
     const vector<LatticeArc>& alts = input[i];
     for (int k = 0; k < alts.size(); ++k) {
-      const int j = alts[k].dist2next + i;
+      // const int j = alts[k].dist2next + i;
       const string& src = TD::Convert(alts[k].label);
       if (ss.count(alts[k].label) == 0) {
         if (num_pt_features > 0) {

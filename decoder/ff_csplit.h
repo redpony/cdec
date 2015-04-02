@@ -6,7 +6,7 @@
 #include "ff.h"
 #include "klm/lm/model.hh"
 
-class BasicCSplitFeaturesImpl;
+struct BasicCSplitFeaturesImpl;
 class BasicCSplitFeatures : public FeatureFunction {
  public:
   BasicCSplitFeatures(const std::string& param);
@@ -22,7 +22,7 @@ class BasicCSplitFeatures : public FeatureFunction {
   boost::shared_ptr<BasicCSplitFeaturesImpl> pimpl_;
 };
 
-template <class M> class ReverseCharLMCSplitFeatureImpl;
+template <class M> struct ReverseCharLMCSplitFeatureImpl;
 class ReverseCharLMCSplitFeature : public FeatureFunction {
  public:
   ReverseCharLMCSplitFeature(const std::string& param);

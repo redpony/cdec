@@ -3,7 +3,7 @@
 
 #include "translator.h"
 
-class PhraseBasedTranslatorImpl;
+struct PhraseBasedTranslatorImpl;
 class PhraseBasedTranslator : public Translator {
  public:
   PhraseBasedTranslator(const boost::program_options::variables_map& conf);

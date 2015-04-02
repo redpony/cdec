@@ -79,7 +79,7 @@ void TreeFragment::ParseRec(const StringPiece& tree, bool afs, unsigned cp, unsi
     cerr << "Expected ( at " << cp << endl;
     abort();
   }
-  const unsigned i = symp;
+  // const unsigned i = symp;
   vector<unsigned> rhs; // w | 0 = terminal, w | NT_BIT, index | FRONTIER_BIT
   ++cp;
   while(tree[cp] == ' ') { ++cp; }
@@ -119,7 +119,7 @@ void TreeFragment::ParseRec(const StringPiece& tree, bool afs, unsigned cp, unsi
       } 
     }
   } // continuent has completed, cp is at ), build node
-  const unsigned j = symp; // span from (i,j)
+  // const unsigned j = symp; // span from (i,j)
   // add an internal non-terminal symbol
   const unsigned nt = TD::Convert(tree.substr(nt_start, nt_end - nt_start).as_string()) | RHS_BIT;
   nodes[np] = TreeFragmentProduction(nt, rhs);

@@ -16,7 +16,7 @@
 class TRule;
 typedef boost::shared_ptr<TRule> TRulePtr;
 
-namespace cdec { struct TreeFragment; }
+namespace cdec { class TreeFragment; }
 
 struct AlignmentPoint {
   AlignmentPoint() : s_(), t_() {}
