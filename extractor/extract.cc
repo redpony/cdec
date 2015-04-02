@@ -14,6 +14,7 @@
   const unsigned omp_get_num_threads() { return 1; }
 #endif
 
+#include "filelib.h"
 #include "alignment.h"
 #include "data_array.h"
 #include "features/count_source_target.h"
@@ -42,8 +43,8 @@ using namespace features;
 using namespace std;
 
 // Returns the file path in which a given grammar should be written.
-fs::path GetGrammarFilePath(const fs::path& grammar_path, int file_number) {
-  string file_name = "grammar." + to_string(file_number);
+fs::path GetGrammarFilePath(const fs::path& grammar_path, int file_number, bool use_zip) {
+  string file_name = "grammar." + to_string(file_number) + (use_zip ? ".gz" : "");
   return grammar_path / file_name;
 }
 
@@ -58,6 +59,7 @@ int main(int argc, char** argv) {
     ("threads,t", po::value<int>()->required()->default_value(1),
      threads_option.c_str())
     ("grammars,g", po::value<string>()->required(), "Grammars output path")
+    ("gzip,z", "Gzip grammars")
     ("max_rule_span", po::value<int>()->default_value(15),
         "Maximum rule span")
     ("max_rule_symbols", po::value<int>()->default_value(5),
@@ -205,12 +207,14 @@ int main(int argc, char** argv) {
       vm["max_rule_symbols"].as<int>(),
       vm["max_samples"].as<int>(),
       vm["tight_phrases"].as<bool>());
+  const bool use_zip = vm.count("gzip");
 
   // Creates the grammars directory if it doesn't exist.
   fs::path grammar_path = vm["grammars"].as<string>();
   if (!fs::is_directory(grammar_path)) {
     fs::create_directory(grammar_path);
   }
+  grammar_path = fs::canonical(grammar_path);
 
   // Reads all sentences for which we extract grammar rules (the paralellization
   // is simplified if we read all sentences upfront).
@@ -239,12 +243,12 @@ int main(int argc, char** argv) {
     }
     Grammar grammar = extractor.GetGrammar(
         sentences[i], blacklisted_sentence_ids);
-    ofstream output(GetGrammarFilePath(grammar_path, i).c_str());
-    output << grammar;
+    WriteFile wf(GetGrammarFilePath(grammar_path, i, use_zip).c_str());
+    *wf.stream() << grammar;
   }
 
   for (size_t i = 0; i < sentences.size(); ++i) {
-    cout << "<seg grammar=" << GetGrammarFilePath(grammar_path, i) << " id=\""
+    cout << "<seg grammar=" << GetGrammarFilePath(grammar_path, i, use_zip) << " id=\""
          << i << "\"> " << sentences[i] << " </seg> " << suffixes[i] << endl;
   }
 

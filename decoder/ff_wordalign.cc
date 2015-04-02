@@ -28,8 +28,6 @@ namespace std { using std::tr1::unordered_map; }
 #include "tdict.h"   // Blunsom hack
 #include "filelib.h" // Blunsom hack
 
-static const int MAX_SENTENCE_SIZE = 100;
-
 static const int kNULL_i = 255;  // -1 as an unsigned char
 
 using namespace std;

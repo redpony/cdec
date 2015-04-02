@@ -18,7 +18,6 @@ namespace po = boost::program_options;
 
 // since this is a ranking model, there should be equal numbers of
 // positive and negative examples, so the bias should be 0
-static const double MAX_BIAS = 1e-10;
 
 void InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description opts("Configuration options");

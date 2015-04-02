@@ -20,9 +20,7 @@
 #endif
 
 #include <boost/static_assert.hpp>
-#if HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP
 #include <boost/serialization/map.hpp>
-#endif
 
 #include "fdict.h"
 
@@ -471,7 +469,6 @@ class FastSparseVector {
   unsigned char local_size_;
   bool is_remote_;
 
-#if HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP
  private:
   friend class boost::serialization::access;
   template<class Archive>
@@ -502,12 +499,9 @@ class FastSparseVector {
     }
   }
   BOOST_SERIALIZATION_SPLIT_MEMBER()
-#endif
 };
 
-#if HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP
 BOOST_CLASS_TRACKING(FastSparseVector<double>,track_never)
-#endif
 
 template <typename T>
 const FastSparseVector<T> operator+(const FastSparseVector<T>& x, const FastSparseVector<T>& y) {

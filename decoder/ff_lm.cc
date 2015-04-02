@@ -211,7 +211,7 @@ class LanguageModelImpl : public LanguageModelInterface {
 
   // may be shorter than actual null-terminated length.  context must be null terminated.  len is just to save effort for subclasses that don't support contextID
   virtual int ContextSize(WordID const* context,int len) {
-    unsigned ret;
+    unsigned ret = 0;
     //ngram_.contextID((VocabIndex*)context,ret);
     return ret;
   }

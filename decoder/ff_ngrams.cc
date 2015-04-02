@@ -33,11 +33,12 @@ struct State {
   }
   const State& operator=(const State<MAX_ORDER>& other) {
     memcpy(state, other.state, sizeof(state));
+    return *this;
   }
   explicit State(const State<MAX_ORDER>& other, unsigned order, WordID extend) {
-    char om1 = order - 1;
+    unsigned om1 = order - 1;
     if (!om1) { memset(state, 0, sizeof(state)); return; }
-    for (char i = 1; i < om1; ++i) state[i - 1]= other.state[i];
+    for (unsigned i = 1; i < om1; ++i) state[i - 1]= other.state[i];
     state[om1 - 1] = extend;
   }
   const WordID& operator[](size_t i) const { return state[i]; }
@@ -249,8 +250,6 @@ class NgramDetectorImpl {
 
  public:
   void LookupWords(const TRule& rule, const vector<const void*>& ant_states, SparseVector<double>* feats, SparseVector<double>* est_feats, void* remnant) {
-    double sum = 0.0;
-    double est_sum = 0.0;
     int num_scored = 0;
     int num_estimated = 0;
     bool saw_eos = false;
@@ -264,7 +263,6 @@ class NgramDetectorImpl {
         int unscored_ant_len = UnscoredSize(astate);
         for (int k = 0; k < unscored_ant_len; ++k) {
           const WordID cur_word = IthUnscoredWord(k, astate);
-          const bool is_oov = (cur_word == 0);
           SparseVector<double> p;
           if (cur_word == kSOS_) {
             state = BeginSentenceState();

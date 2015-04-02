@@ -1,0 +1,10 @@
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../utils)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../mteval)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../klm)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../decoder)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/..)
+
+set(ff_example_LIB_SRCS ff_example.cc)
+add_library(ff_example SHARED ${ff_example_LIB_SRCS})
+target_link_libraries(ff_example libcdec utils)
+set_target_properties(ff_example PROPERTIES VERSION 1.0.0 SOVERSION 1)

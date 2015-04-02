@@ -347,7 +347,6 @@ void KLanguageModel<Model>::TraversalFeaturesImpl(const SentenceMetadata& /* sme
                                           SparseVector<double>* features,
                                           SparseVector<double>* /*estimated_features*/,
                                           void* state) const {
-  double est = 0;
   double oovs = 0;
   double emit = 0;
   features->set_value(fid_, pimpl_->LookupWords(*edge.rule_, ant_states, &oovs, &emit, state));

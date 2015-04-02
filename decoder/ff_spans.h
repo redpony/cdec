@@ -62,7 +62,6 @@ class CMR2008ReorderingFeatures : public FeatureFunction {
 
   // collapsed feature values
   bool use_collapsed_features_;
-  int fid_reorder_;
   std::pair<double, double> uncoditioned_vals_;
   std::vector<std::pair<double, double> > fvals_;
 };

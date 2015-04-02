@@ -64,9 +64,9 @@ void Union(const Hypergraph& in, Hypergraph* out) {
   double n_created = 0;
   for (const auto& in_node : in.nodes_) {
     HG::Node& out_node = out->nodes_[h2n[in_node.node_hash]];
-    for (const auto oeid : out_node.in_edges_) {
+    //for (const auto oeid : out_node.in_edges_) {
       // TODO hash currently existing edges for quick check for duplication
-    }
+    //}
     for (const auto ieid : in_node.in_edges_) {
       const HG::Edge& in_edge = in.edges_[ieid];
       // TODO: replace slow N^2 check with hashing
