@@ -52,6 +52,7 @@ set(mteval_STAT_SRCS
     comb_scorer.cc
     external_scorer.cc
     meteor_jar.cc
+    wer.cc
     ns.cc
     ns_cer.cc
     ns_comb.cc
