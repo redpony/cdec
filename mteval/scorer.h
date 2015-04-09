@@ -17,7 +17,7 @@ class ErrorSurface;
 class Hypergraph;  // needed for alignment
 
 //TODO: BLEU N (N separate arg, not part of enum)?
-enum ScoreType { IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, BLEU_minus_TER_over_2, SER, AER, IBM_BLEU_3, METEOR };
+enum ScoreType { IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, BLEU_minus_TER_over_2, SER, AER, IBM_BLEU_3, METEOR, WER };
 ScoreType ScoreTypeFromString(const std::string& st);
 std::string StringFromScoreType(ScoreType st);
 

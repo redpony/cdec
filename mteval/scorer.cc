@@ -14,6 +14,7 @@
 #include "filelib.h"
 #include "ter.h"
 #include "aer_scorer.h"
+#include "wer.h"
 #include "comb_scorer.h"
 #include "tdict.h"
 #include "stringlib.h"
@@ -46,12 +47,14 @@ ScoreType ScoreTypeFromString(const string& st) {
     return BLEU_minus_TER_over_2;
   if (sl == "meteor")
     return METEOR;
+  if (sl == "wer")
+    return WER;
   cerr << "Don't understand score type '" << st << "', defaulting to ibm_bleu.\n";
   return IBM_BLEU;
 }
 
 static char const* score_names[]={
-  "IBM_BLEU", "NIST_BLEU", "Koehn_BLEU", "TER", "BLEU_minus_TER_over_2", "SER", "AER", "IBM_BLEU_3", "METEOR"
+  "IBM_BLEU", "NIST_BLEU", "Koehn_BLEU", "TER", "BLEU_minus_TER_over_2", "SER", "AER", "IBM_BLEU_3", "METEOR", "WER"
 };
 
 std::string StringFromScoreType(ScoreType st) {
@@ -360,6 +363,7 @@ ScorerP SentenceScorer::CreateSentenceScorer(const ScoreType type,
     case SER: r = new SERScorer(refs);break;
     case BLEU_minus_TER_over_2: r = new BLEUTERCombinationScorer(refs);break;
     case METEOR: r = new ExternalSentenceScorer(ScoreServerManager::Instance("meteor"), refs); break;
+    case WER: r = new WERScorer(refs);break;
     default:
       assert(!"Not implemented!");
   }
@@ -404,6 +408,8 @@ ScoreP SentenceScorer::CreateScoreFromString(const ScoreType type, const string&
       return BLEUTERCombinationScorer::ScoreFromString(in);
     case METEOR:
       return ExternalSentenceScorer::ScoreFromString(ScoreServerManager::Instance("meteor"), in);
+    case WER:
+      return WERScorer::ScoreFromString(in);
     default:
       assert(!"Not implemented!");
   }
