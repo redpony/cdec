@@ -12,4 +12,4 @@ set(dtrain_SRCS
     pairsampling.h
     score.h)
 add_executable(dtrain ${dtrain_SRCS})
-target_link_libraries(dtrain libcdec ksearch mteval utils klm klm_util klm_util_double ${Boost_LIBRARIES} z ${LIBDL_LIBRARIES})
+target_link_libraries(dtrain libcdec ksearch mteval utils klm klm_util klm_util_double ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES} ${LIBDL_LIBRARIES})
