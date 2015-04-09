@@ -10,7 +10,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 #### packages
 find_package(ZLIB REQUIRED)
-find_package(BZip2 REQUIRED)
+if(ZLIB_FOUND)
+  set(HAVE_ZLIB 1)
+endif(ZLIB_FOUND)
+find_package(BZip2)
+if(BZIP2_FOUND)
+  set(HAVE_BZLIB 1)
+endif(BZIP2_FOUND)
 find_package(LibDL REQUIRED)
 
 # for pycdec
