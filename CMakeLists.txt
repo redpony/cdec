@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-add_definitions(-DKENLM_MAX_ORDER=6)
+add_definitions(-DKENLM_MAX_ORDER=6 -DHAVE_CONFIG_H)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -O3")
 set(METEOR_JAR "" CACHE FILEPATH "Path to meteor.jar")
@@ -17,6 +17,11 @@ find_package(BZip2)
 if(BZIP2_FOUND)
   set(HAVE_BZLIB 1)
 endif(BZIP2_FOUND)
+find_package(LibLZMA)
+if(LIBLZMA_FOUND)
+  set(HAVE_XZLIB 1)
+endif(LIBLZMA_FOUND)
+
 find_package(LibDL REQUIRED)
 
 # for pycdec

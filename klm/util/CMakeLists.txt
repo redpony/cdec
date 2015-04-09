@@ -3,7 +3,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(cat_compressed_SRCS cat_compressed_main.cc)
 
 add_executable(cat_compressed ${cat_compressed_SRCS})
-target_link_libraries(cat_compressed klm_util)
+target_link_libraries(cat_compressed klm_util ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES})
 
 set(klm_util_STAT_SRCS
     bit_packing.cc

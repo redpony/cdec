@@ -151,7 +151,7 @@ add_library(libcdec STATIC ${libcdec_SRCS})
 
 set(cdec_SRCS cdec.cc)
 add_executable(cdec ${cdec_SRCS})
-target_link_libraries(cdec libcdec mteval utils ksearch klm klm_util klm_util_double ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBDL_LIBRARIES})
+target_link_libraries(cdec libcdec mteval utils ksearch klm klm_util klm_util_double ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES} ${LIBDL_LIBRARIES})
 
 set(TEST_SRCS
   grammar_test.cc
@@ -169,7 +169,7 @@ foreach(testSrc ${TEST_SRCS})
   add_executable(${testName} ${testSrc})
 
   #link to Boost libraries AND your targets and dependencies
-  target_link_libraries(${testName} libcdec mteval utils ksearch klm klm_util klm_util_double ${Boost_LIBRARIES} ${ZLIB_LIBRARIES})
+  target_link_libraries(${testName} libcdec mteval utils ksearch klm klm_util klm_util_double ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES})
 
   #I like to move testing binaries into a testBin directory
   set_target_properties(${testName} PROPERTIES 
@@ -180,6 +180,4 @@ foreach(testSrc ${TEST_SRCS})
   add_test(NAME ${testName} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/${testName} 
      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endforeach(testSrc)
-
-
 
