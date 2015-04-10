@@ -9,6 +9,7 @@ try:
   import matplotlib
   matplotlib.use('Agg')
   import matplotlib.pyplot as plt
+  have_mpl = True
 except ImportError:
   have_mpl = False
 
