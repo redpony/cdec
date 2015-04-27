@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
+project(cdec)
 
 add_definitions(-DKENLM_MAX_ORDER=6 -DHAVE_CONFIG_H)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -7,8 +8,21 @@ set(METEOR_JAR "" CACHE FILEPATH "Path to meteor.jar")
 
 enable_testing()
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-#### packages
+# core packages
+find_package(LibDL REQUIRED)
+find_package(Boost COMPONENTS regex filesystem serialization program_options unit_test_framework system thread REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+
+# eigen, used in some modeling extensions
+find_package(Eigen3)
+if(EIGEN3_FOUND)
+  include_directories(${EIGEN3_INCLUDE_DIR})
+  set(HAVE_EIGEN 1)
+endif(EIGEN3_FOUND)
+
+# compression packages (primarily used by KenLM)
 find_package(ZLIB REQUIRED)
 if(ZLIB_FOUND)
   set(HAVE_ZLIB 1)
@@ -22,14 +36,10 @@ if(LIBLZMA_FOUND)
   set(HAVE_XZLIB 1)
 endif(LIBLZMA_FOUND)
 
-find_package(LibDL REQUIRED)
-
 # for pycdec
 find_package(PythonInterp 2.7 REQUIRED)
 
-find_package(Boost COMPONENTS regex filesystem serialization program_options unit_test_framework system thread REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-
+# generate config.h
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 add_subdirectory(utils)
@@ -45,4 +55,14 @@ add_subdirectory(training)
 add_subdirectory(word-aligner)
 add_subdirectory(extractor)
 add_subdirectory(example_extff)
+
+set(CPACK_PACKAGE_VERSION_MAJOR "2015")
+set(CPACK_PACKAGE_VERSION_MINOR "04")
+set(CPACK_PACKAGE_VERSION_PATCH "26")
+set(CPACK_SOURCE_GENERATOR "TBZ2")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME
+  "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+set(CPACK_SOURCE_IGNORE_FILES
+  "/.git/;/.gitignore;/Testing/;/build/;/.bzr/;~$;/CMakeCache.txt;/CMakeFiles/;${CPACK_SOURCE_IGNORE_FILES}")
+include(CPack)
 
