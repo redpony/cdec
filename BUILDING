@@ -1,36 +1,28 @@
 To build cdec, you'll need:
 
  * boost headers & boost program_options (you may need to install a package
-    like boost-devel)
+    like libboost-dev)
 
 
 Instructions for building
 -----------------------------------
 
- 1) Use automake / autoconf to generate the configure script.
-    I'm not an expert at using these tools, but this should be sufficient:
+ 1) Create a build directory and generate Makefiles using CMake
 
-        autoreconf -ifv
+        mkdir build
+        cd build
+        cmake ..
+ 
+    If the cmake command completes successfully, you can proceed. If you have
+    libraries (such as Boost) installed in nonstandard locations, you may need
+    to run cmake with special options like -DBOOST_ROOT=/path/to/boost.
 
- 2) Configure and build.  Your command will look something like this.
+ 2) Build
 
-        ./configure
-        make
-
-    If you get errors during configure about missing BOOST macros, then step 3
-    failed, and you need to keep working at it.  If you get errors during the
-    build, it's probably a problem with step 3 or possibly with some compiler
-    version idiosyncracies (generally, I assume you have a relatively new
-    of g++).
-
-    If you're building on cygwin, their libtool is buggy; this make command
-    works for now:
-
-        make LIBS+="-lz -lboost_program_options" \
-             CFLAGS+="-Wno-sign-compare"
-
+        make -j 2
+   
  3) Test
-
+        make test
         ./tests/run-system-tests.pl
 
     Everything should pass.

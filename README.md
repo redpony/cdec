@@ -10,17 +10,16 @@
     - You may need to build your own C++ compiler or upgrade your operating system's.
 - [Boost C++ libraries (version 1.44 or later)](http://www.boost.org/)
     - If you build your own boost, you _must install it_ using `bjam install` (to install it into a customized location use `--prefix=/path/to/target`).
-    - Older versions of Boost _may_ work, but problems have been reported with command line option parsing on some platforms with older versions.
 - [GNU Flex](http://flex.sourceforge.net/)
 - [cmake](http://www.cmake.org/) - <font color="red"><b>(NEW)</b></font>
 
-## Building the software from a git clone
-
-In addition to the standard `cdec` third party software requirements, you will additionally need the following software to work with the `cdec` source code directly from git:
+## Building the software
 
 Build instructions:
 
-    cmake .
+    mkdir build
+    cd build
+    cmake ..
     make -j4
     make test
     ./tests/run-system-tests.pl

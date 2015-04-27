@@ -28,6 +28,14 @@ set(mr_dpmert_reduce_SRCS
 add_executable(mr_dpmert_reduce ${mr_dpmert_reduce_SRCS})
 target_link_libraries(mr_dpmert_reduce dpmert training_utils libcdec ksearch mteval utils klm klm_util klm_util_double ${Boost_LIBRARIES} z)
 
+add_custom_command(TARGET mr_dpmert_reduce
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/dpmert.pl ${CMAKE_CURRENT_BINARY_DIR})
+
+add_custom_command(TARGET mr_dpmert_reduce
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/divide_refs.py ${CMAKE_CURRENT_BINARY_DIR})
+
 
 set(mr_dpmert_generate_mapper_input_SRCS mr_dpmert_generate_mapper_input.cc)
 add_executable(mr_dpmert_generate_mapper_input ${mr_dpmert_generate_mapper_input_SRCS})
