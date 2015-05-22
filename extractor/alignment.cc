@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <vector>
 
+#include "filelib.h"
+
 #include <boost/algorithm/string.hpp>
 
 using namespace std;
@@ -14,7 +16,8 @@ using namespace std;
 namespace extractor {
 
 Alignment::Alignment(const string& filename) {
-  ifstream infile(filename.c_str());
+  ReadFile rf(filename);
+  istream& infile = *rf.stream();
   string line;
   while (getline(infile, line)) {
     vector<string> items;
