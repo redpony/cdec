@@ -388,15 +388,18 @@ sub deep_proc_token {
     ##### step 1: separate by punct T2 on the boundary
     my $t2 = '\`|\!|\@|\+|\=|\[|\]|\<|\>|\||\(|\)|\{|\}|\?|\"|;|●|○';
     if($line =~ s/^(($t2)+)/$1 /){
+        $line =~ s/"/“/;
 	return proc_line($line);
     }
 	
     if($line =~ s/(($t2)+)$/ $1/){
+        $line =~ s/"/”/;
 	return proc_line($line);
     }	
 
     ## step 2: separate by punct T2 in any position
     if($line =~ s/(($t2)+)/ $1 /g){
+        $line =~ s/"/”/g;  # probably before punctuation char
 	return proc_line($line);
     }
 
