@@ -56,7 +56,7 @@ endif(GTEST_FOUND)
 
 set(sacompile_SRCS sacompile.cc)
 add_executable(sacompile ${sacompile_SRCS})
-target_link_libraries(sacompile extractor ${Boost_LIBRARIES} z)
+target_link_libraries(sacompile extractor utils ${Boost_LIBRARIES} z)
 
 set(run_extractor_SRCS run_extractor.cc)
 add_executable(run_extractor ${run_extractor_SRCS})

@@ -5,6 +5,8 @@
 #include <sstream>
 #include <string>
 
+#include "filelib.h"
+
 using namespace std;
 
 namespace extractor {
@@ -20,7 +22,8 @@ DataArray::DataArray() {
 
 DataArray::DataArray(const string& filename) {
   InitializeDataArray();
-  ifstream infile(filename.c_str());
+  ReadFile rf(filename);
+  istream& infile = *rf.stream();
   vector<string> lines;
   string line;
   while (getline(infile, line)) {
@@ -31,7 +34,8 @@ DataArray::DataArray(const string& filename) {
 
 DataArray::DataArray(const string& filename, const Side& side) {
   InitializeDataArray();
-  ifstream infile(filename.c_str());
+  ReadFile rf(filename);
+  istream& infile = *rf.stream();
   vector<string> lines;
   string line, delimiter = "|||";
   while (getline(infile, line)) {
