@@ -236,7 +236,7 @@ def graph(output_dir, hope_best_fear, metric):
 
 #evaluate a given test set using decode-and-evaluate.pl
 def evaluate(testset, weights, ini, script_dir, out_dir, jobs):
-  evaluator = '{}/../utils/decode-and-evaluate.pl'.format(script_dir)
+  evaluator = '{}/../../utils/decode-and-evaluate.pl'.format(script_dir)
   try:
     p = subprocess.Popen([evaluator, '-c', ini, '-w', weights, '-i', testset, 
                          '-d', out_dir, '--jobs', str(jobs)], stdout=subprocess.PIPE)
@@ -310,7 +310,7 @@ def split_devset(dev, outdir):
   return (outdir+'/source.input', outdir+'/refs.input')
 
 def optimize(args, script_dir, dev_size, score_sign):
-  parallelize = script_dir+'/../utils/parallelize.pl'
+  parallelize = script_dir+'/../../utils/parallelize.pl'
   if args.qsub:
     parallelize += " -p %s"%args.pmem
   decoder = script_dir+'/kbest_cut_mira'
