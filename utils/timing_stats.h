@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <sys/types.h>
 
 struct TimerInfo {
   int calls;
