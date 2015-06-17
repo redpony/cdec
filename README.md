@@ -17,9 +17,7 @@
 
 Build instructions:
 
-    mkdir build
-    cd build
-    cmake ..
+    cmake .
     make -j4
     make test
     ./tests/run-system-tests.pl

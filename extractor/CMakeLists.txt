@@ -56,17 +56,15 @@ endif(GTEST_FOUND)
 
 set(sacompile_SRCS sacompile.cc)
 add_executable(sacompile ${sacompile_SRCS})
-target_link_libraries(sacompile extractor utils ${Boost_LIBRARIES} z)
+target_link_libraries(sacompile extractor utils ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES})
 
 set(run_extractor_SRCS run_extractor.cc)
 add_executable(run_extractor ${run_extractor_SRCS})
-target_link_libraries(run_extractor extractor ${Boost_LIBRARIES} z)
-
+target_link_libraries(run_extractor extractor utils ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES})
 
 set(extract_SRCS extract.cc)
 add_executable(extract ${extract_SRCS})
-target_link_libraries(extract extractor utils ${Boost_LIBRARIES} z)
-
+target_link_libraries(extract extractor utils ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES})
 
 set(extractor_STAT_SRCS
     alignment.cc
