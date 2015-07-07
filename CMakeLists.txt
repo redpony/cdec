@@ -12,6 +12,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # core packages
 find_package(LibDL REQUIRED)
+set(Boost_NO_SYSTEM_PATHS ON)
+set(Boost_REALPATH ON)
 find_package(Boost COMPONENTS regex filesystem serialization program_options unit_test_framework system thread REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
