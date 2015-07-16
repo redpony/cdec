@@ -18,3 +18,28 @@ Then, you simply need to:
 
     cd cdec/extractor
     make check
+
+To run the extractor as a daemon for online grammar extraction you need to compile with [nanomsg](http://nanomsg.org/download.html) in your system's PATH and then:
+
+    cdec/extractor/extract_daemon -c <compile_config_file> -g <grammar_output_path> -a <address>
+
+It can be killed using the SID supplied in the log file.
+
+To then query the daemon you need to implement the Requester class supplied in
+extractor/libextract_request.a. It's constructor takes the same address string as supplied for the daemon. E.g.:
+
+    #include <iostream>
+
+    #include "extract_request.h"
+
+    using namespace std;
+
+    int main(int argc, char** argv) {
+      extractor::Requester requester("ipc:///tmp/extract_daemon.ipc");
+      cout << requester.request_for_sentence("<input sentence>") << endl;
+      return 0;
+    }
+
+which can be compiled with:
+
+    g++ extract_request_test.cc -o run_test -lextract_request -L/workspace/osm/cdec/extractor/ -I/workspace/osm/cdec/extractor/ -lnanomsg

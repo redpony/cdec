@@ -43,12 +43,12 @@ if(GTEST_FOUND)
     target_link_libraries(${testName} extractor ${GMOCK_BOTH_LIBRARIES} ${GTEST_BOTH_LIBRARIES} ${Boost_LIBRARIES} ${ZLIB_LIBRARIES})
 
     #I like to move testing binaries into a testBin directory
-    set_target_properties(${testName} PROPERTIES 
+    set_target_properties(${testName} PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR})
 
-    #Finally add it to test execution - 
+    #Finally add it to test execution -
     #Notice the WORKING_DIRECTORY and COMMAND
-    add_test(NAME ${testName} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/${testName} 
+    add_test(NAME ${testName} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/${testName}
        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
   endforeach(testSrc)
  endif(GMOCK_FOUND)
@@ -66,10 +66,30 @@ set(extract_SRCS extract.cc)
 add_executable(extract ${extract_SRCS})
 target_link_libraries(extract extractor utils ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES})
 
+# nanomsg, use for the extractor daemon
+# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/extractor/cmake/Modules/")
+find_package(nanomsg)
+if(NANOMSG_FOUND)
+  include_directories(${NANOMSG_INCLUDE_DIR})
+
+  set(extract_request_STAT_SRCS extract_request.cc)
+  add_library(extract_request STATIC ${extract_request_STAT_SRCS})
+  target_link_libraries(extract_request ${NANOMSG_STATIC})
+
+  #set(extract_request_test_SRCS extract_request_test.cc)
+  #add_executable(run_extractor_request_test ${extract_request_test_SRCS})
+  #target_link_libraries(run_extractor_request_test extractor ${NANOMSG_LIBRARIES})
+
+  set(extract_daemon_SRCS extract_daemon.cc)
+  add_executable(extract_daemon ${extract_daemon_SRCS})
+  target_link_libraries(extract_daemon extractor utils ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES} ${NANOMSG_LIBRARIES})
+endif(NANOMSG_FOUND)
+
 set(extractor_STAT_SRCS
     alignment.cc
     backoff_sampler.cc
     data_array.cc
+    extract_request.cc
     fast_intersector.cc
     features/count_source_target.cc
     features/feature.cc
@@ -111,6 +131,7 @@ set(extractor_STAT_SRCS
     alignment.h
     backoff_sampler.h
     data_array.h
+    extract_request.h
     fast_intersector.h
     grammar.h
     grammar_extractor.h
@@ -136,4 +157,3 @@ set(extractor_STAT_SRCS
     vocabulary.h)
 
 add_library(extractor STATIC ${extractor_STAT_SRCS})
-
