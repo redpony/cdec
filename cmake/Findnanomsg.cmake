@@ -5,7 +5,7 @@
 #
 # Defines the following variables:
 #
-#   NANOMSG_FOUND - Found the Google Testing framework
+#   NANOMSG_FOUND - Found the nanomsg library
 #   NANOMSG_INCLUDE_DIR - Include directory
 #
 # Also defines the library variables below as normal

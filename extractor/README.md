@@ -23,7 +23,7 @@ To run the extractor as a daemon for online grammar extraction you need to compi
 
     cdec/extractor/extract_daemon -c <compile_config_file> -g <grammar_output_path> -a <address>
 
-It can be killed using the SID supplied in the log file.
+Online here means that sentences are received in an online fashion and rather than loading the files from <compile_config_file> anew when a new sentence is received, they are stored in RAM and a new grammar can be requested via the daemon. The daemon can be killed using the SID supplied in the log file.
 
 To then query the daemon you need to implement the Requester class supplied in
 extractor/libextract_request.a. It's constructor takes the same address string as supplied for the daemon. E.g.:
