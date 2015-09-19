@@ -69,10 +69,10 @@ my $CCONFIG = {
 #    'DefaultJobs' => 12,
 #  },
   'cluster.cl.uni-heidelberg.de' => {
-    'HOST_REGEXP' => qr/(node\d\d\.cluster\.lan|cluster\.cl\.uni-heidelberg\.de)/i,
+    'HOST_REGEXP' => qr/^(CLuster|node\d\d\.cluster\.lan|cluster\.cl\.uni-heidelberg\.de)$/,
     'JobControl'  => 'qsub',
-    'QSubMemFlag' => '-l mem_free=',
-    'DefaultJobs' => 14,
+    'QSubMemFlag' => '-l h_vmem=',
+    'DefaultJobs' => 16,
   },
   'LOCAL' => {  # LOCAL must be last in the list!!!
     'HOST_REGEXP' => qr//,
