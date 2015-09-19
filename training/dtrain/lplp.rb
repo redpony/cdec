@@ -1,4 +1,4 @@
-# lplp.rb
+#!/usr/bin/env ruby
 
 # norms
 def l0(feature_column, n)
@@ -19,7 +19,8 @@ end
 
 # stats
 def median(feature_column, n)
-  return feature_column.concat(0.step(n-feature_column.size-1).map{|i|0}).sort[feature_column.size/2]
+  return feature_column.concat(0.step(n-feature_column.size-1).map{|i|0})
+    .sort[feature_column.size/2]
 end
 
 def mean(feature_column, n)
@@ -28,7 +29,7 @@ end
 
 # selection
 def select_k(weights, norm_fun, n, k=10000)
-  weights.sort{|a,b| norm_fun.call(b[1], n) <=> norm_fun.call(a[1], n)}.each { |p|
+  weights.sort{|a,b| norm_fun.call(b[1], n)<=>norm_fun.call(a[1], n)}.each { |p|
     puts "#{p[0]}\t#{mean(p[1], n)}"
     k -= 1
     if k == 0 then break end
@@ -84,17 +85,16 @@ def _test()
 end
 #_test()
 
-
 def usage()
   puts "lplp.rb <l0,l1,l2,linfty,mean,median> <cut|select_k> <k|threshold> <#shards> < <input>"
   puts "   l0...: norms for selection"
   puts "select_k: only output top k (according to the norm of their column vector) features"
   puts "     cut: output features with weight >= threshold"
-  puts "       n: if we do not have a shard count use this number for averaging"
+  puts "       n: number of shards for averaging"
   exit 1
 end
 
-if ARGV.size < 4 then usage end
+usage if ARGV.size<4
 norm_fun = method(ARGV[0].to_sym)
 type = ARGV[1]
 x = ARGV[2].to_f
