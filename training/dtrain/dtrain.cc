@@ -112,7 +112,7 @@ main(int argc, char** argv)
   cerr << setw(25) << "learning rate " << eta << endl;
   cerr << setw(25) << "margin " << margin << endl;
   if (!structured) {
-    cerr << setw(25) << "cut " << cut << endl;
+    cerr << setw(25) << "cut " << round(cut*100) << "%" << endl;
     cerr << setw(25) << "adjust " << adjust_cut << endl;
   } else {
     cerr << setw(25) << "struct. obj " << structured << endl;

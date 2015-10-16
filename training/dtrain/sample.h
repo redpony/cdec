@@ -115,7 +115,7 @@ struct KSampler : public HypSampler
       effective_size++;
       feature_count += sample.back().f.size();
     }
-    sort(sample.begin(), sample.end(), [](Hyp& first, Hyp& second) {
+    sort(sample.begin(), sample.end(), [](Hyp first, Hyp second) {
         return first.model > second.model;
       });
     for (unsigned i=0; i<sample.size(); i++) {

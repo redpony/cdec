@@ -26,7 +26,7 @@ updates_multipartite(vector<Hyp>* sample,
   size_t up = 0;
   size_t sz = sample->size();
   if (sz < 2) return 0;
-  sort(sample->begin(), sample->end(), [](Hyp& first, Hyp& second)
+  sort(sample->begin(), sample->end(), [](Hyp first, Hyp second)
     {
       return first.gold > second.gold;
     });
@@ -95,7 +95,7 @@ updates_all(vector<Hyp>* sample,
 {
   size_t up = 0;
   size_t sz = sample->size();
-  sort(sample->begin(), sample->end(), [](Hyp& first, Hyp& second)
+  sort(sample->begin(), sample->end(), [](Hyp first, Hyp second)
     {
       return first.gold > second.gold;
     });
@@ -129,13 +129,13 @@ update_structured(vector<Hyp>* sample,
                   ostream& os=cout)
 {
   // hope
-  sort(sample->begin(), sample->end(), [](Hyp& first, Hyp& second)
+  sort(sample->begin(), sample->end(), [](Hyp first, Hyp second)
     {
       return (first.model+first.gold) > (second.model+second.gold);
     });
   Hyp hope = (*sample)[0];
   // fear
-  sort(sample->begin(), sample->end(), [](Hyp& first, Hyp& second)
+  sort(sample->begin(), sample->end(), [](Hyp first, Hyp second)
     {
       return (first.model-first.gold) > (second.model-second.gold);
     });

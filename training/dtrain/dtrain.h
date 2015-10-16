@@ -64,7 +64,7 @@ dtrain_init(int argc,
 pair sampling, 0 to use all pairs TODO")
     ("adjust,A",           po::bool_switch()->default_value(false),
      "adjust cut for optimal pos. in k-best to cut")
-    ("score,s",            po::value<string>()->default_value("chiang"),
+    ("score,s",            po::value<string>()->default_value("nakov"),
      "per-sentence BLEU (approx.)")
     ("nakov_fix",         po::value<weight_t>()->default_value(1.0),
      "add to reference length [see score.h]")
