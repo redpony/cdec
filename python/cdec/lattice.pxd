@@ -1,14 +1,14 @@
 from libcpp.vector cimport vector
 from libcpp.string cimport string
-from utils cimport WordID
+from utils cimport *
 
 cdef extern from "decoder/lattice.h":
     cdef cppclass LatticeArc:
         WordID label
-        double cost
+        FastSparseVector[double] features
         int dist2next
         LatticeArc()
-        LatticeArc(WordID w, double c, int i)
+        LatticeArc(WordID w, FastSparseVector[double] c, int i)
 
     cdef cppclass Lattice(vector): # (vector[vector[LatticeArc]])
         Lattice()

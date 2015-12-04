@@ -16,6 +16,10 @@ To re-build pycdec from the cython source, modify setup.py in the following ways
 
 Then just build and install normally, as described above.
 
+To rebuild cdec/\_cdec.cpp, run:
+
+ 	cython --cplus \_cdec.pyx
+
 ## Grammar extractor
 
 Compile a parallel corpus and a word alignment into a suffix array representation:

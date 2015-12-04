@@ -27,20 +27,28 @@ cdef class Lattice:
         arcs = []
         cdef vector[lattice.LatticeArc] arc_vector = self.lattice[0][index]
         cdef lattice.LatticeArc* arc
+        cdef FastSparseVector[double]* vp
+        cdef SparseVector v = SparseVector.__new__(SparseVector)
         cdef unsigned i
         for i in range(arc_vector.size()):
             arc = &arc_vector[i]
+            vp = new FastSparseVector[double](arc.features)
+            v.vector = vp
             label = unicode(TDConvert(arc.label).c_str(), 'utf8')
-            arcs.append((label, arc.cost, arc.dist2next))
+            arcs.append((label, v, arc.dist2next))
         return tuple(arcs)
 
     def __setitem__(self, int index, tuple arcs):
         if not 0 <= index < len(self):
             raise IndexError('lattice index out of range')
         cdef lattice.LatticeArc* arc
-        for (label, cost, dist2next) in arcs:
+        cdef FastSparseVector[double]* vp
+        cdef SparseVector v = SparseVector.__new__(SparseVector)
+        for (label, features, dist2next) in arcs:
             label_str = as_str(label)
-            arc = new lattice.LatticeArc(TDConvert(label_str), cost, dist2next)
+            v = features
+            vp = v.vector
+            arc = new lattice.LatticeArc(TDConvert(label_str), vp[0], dist2next)
             self.lattice[0][index].push_back(arc[0])
             del arc
 

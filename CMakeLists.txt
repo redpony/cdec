@@ -3,7 +3,7 @@ project(cdec)
 
 add_definitions(-DKENLM_MAX_ORDER=6 -DHAVE_CONFIG_H)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -O3 -g")
+set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -O3 -g -fPIC")
 set(METEOR_JAR "" CACHE FILEPATH "Path to meteor.jar")
 
 enable_testing()
