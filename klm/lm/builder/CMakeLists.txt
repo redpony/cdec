@@ -24,8 +24,9 @@ set(lmplz_SRCS
     sort.hh)
 
 add_executable(lmplz ${lmplz_SRCS})
-target_link_libraries(lmplz klm klm_util_double klm_util_stream klm_util ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES})
+target_link_libraries(lmplz klm klm_util_double klm_util_stream klm_util ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 set(dump_counts_SRCS print.cc dump_counts_main.cc)
 add_executable(dump_counts ${dump_counts_SRCS})
-target_link_libraries(dump_counts klm klm_util_double klm_util_stream klm_util ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES})
+target_link_libraries(dump_counts klm klm_util_double klm_util_stream klm_util ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LIBLZMA_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
