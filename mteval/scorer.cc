@@ -49,12 +49,17 @@ ScoreType ScoreTypeFromString(const string& st) {
     return METEOR;
   if (sl == "wer")
     return WER;
+  if (sl == "cbleu")
+    return CBLEU;
+  if (sl == "bleu_cbleu")
+    return BLEU_plus_CBLEU_over_2;
   cerr << "Don't understand score type '" << st << "', defaulting to ibm_bleu.\n";
+  assert (false);
   return IBM_BLEU;
 }
 
 static char const* score_names[]={
-  "IBM_BLEU", "NIST_BLEU", "Koehn_BLEU", "TER", "BLEU_minus_TER_over_2", "SER", "AER", "IBM_BLEU_3", "METEOR", "WER"
+  "IBM_BLEU", "NIST_BLEU", "Koehn_BLEU", "TER", "BLEU_minus_TER_over_2", "SER", "AER", "IBM_BLEU_3", "METEOR", "WER", "CBLEU", "BLEU_plus_CBLEU_over_2"
 };
 
 std::string StringFromScoreType(ScoreType st) {
@@ -291,6 +296,21 @@ ScoreP BLEUScorerBase::ScoreFromString(const string& in) {
   return ScoreP(r);
 }
 
+class CBLEUScorer : public BLEUScorerBase {
+ public:
+  CBLEUScorer(const vector<vector<WordID> >& references,
+  int n=5) : BLEUScorerBase(Characterize(references), n), lengths_(references.size()) {
+    for (unsigned i=0; i < references.size(); ++i)
+      lengths_[i] = Characterize(references[i]).size();
+  }
+
+  float ComputeRefLength(const vector<WordID>& hyp) const {
+    return 1000;
+  }
+ private:
+  vector<int> lengths_;
+};
+
 class IBM_BLEUScorer : public BLEUScorerBase {
  public:
     IBM_BLEUScorer(const vector<vector<WordID> >& references,
@@ -362,8 +382,10 @@ ScorerP SentenceScorer::CreateSentenceScorer(const ScoreType type,
     case TER: r = new TERScorer(refs);break;
     case SER: r = new SERScorer(refs);break;
     case BLEU_minus_TER_over_2: r = new BLEUTERCombinationScorer(refs);break;
+    case BLEU_plus_CBLEU_over_2: r = new BLEUCBLEUCombinationScorer(refs); break;
     case METEOR: r = new ExternalSentenceScorer(ScoreServerManager::Instance("meteor"), refs); break;
     case WER: r = new WERScorer(refs);break;
+    case CBLEU: r = new CBLEUScorer(refs, 5); break;
     default:
       assert(!"Not implemented!");
   }
@@ -410,6 +432,10 @@ ScoreP SentenceScorer::CreateScoreFromString(const ScoreType type, const string&
       return ExternalSentenceScorer::ScoreFromString(ScoreServerManager::Instance("meteor"), in);
     case WER:
       return WERScorer::ScoreFromString(in);
+    case CBLEU:
+      return CBLEUScorer::ScoreFromString(in);
+    case BLEU_plus_CBLEU_over_2:
+      return BLEUCBLEUCombinationScorer::ScoreFromString(in);
     default:
       assert(!"Not implemented!");
   }
@@ -684,4 +710,34 @@ void DocStreamScorer::update(const std::string& ref) {
 	string src_line;
 	TD::ConvertSentence(ref, &refs[0]);
 	scorer = ScorerP(SentenceScorer::CreateSentenceScorer(type, refs, src_line));
+}
+
+vector<WordID> Characterize(const vector<WordID>& reference) {
+  vector<WordID> r;
+  string space = " ";
+  for (WordID word_id: reference) {
+    string word = TD::Convert(word_id);
+    unsigned i = 0;
+    while (i < word.length()) {
+      unsigned char_length = UTF8Len(word[i]);
+      string c = word.substr(i, char_length);
+      i += char_length;
+      r.push_back(TD::Convert(c));
+    }
+    r.push_back(TD::Convert(space));
+  }
+
+  // Remove the last space
+  if (r.size() > 0) {
+    r.pop_back();
+  }
+  return r;
+}
+
+vector<vector<WordID>> Characterize(const vector<vector<WordID> >& references) {
+  vector<vector<WordID> > r;
+  for (const vector<WordID>& reference : references) {
+    r.push_back(Characterize(reference));
+  }
+  return r;
 }

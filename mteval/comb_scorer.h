@@ -14,4 +14,15 @@ class BLEUTERCombinationScorer : public SentenceScorer {
   ScorerP bleu_,ter_;
 };
 
+class BLEUCBLEUCombinationScorer : public SentenceScorer {
+ public:
+  BLEUCBLEUCombinationScorer(const std::vector<std::vector<WordID> >& refs);
+  ~BLEUCBLEUCombinationScorer();
+  ScoreP ScoreCandidate(const std::vector<WordID>& hyp) const;
+  ScoreP ScoreCCandidate(const std::vector<WordID>& hyp) const;
+  static ScoreP ScoreFromString(const std::string& in);
+ private:
+  ScorerP bleu_, cbleu_;
+};
+
 #endif
