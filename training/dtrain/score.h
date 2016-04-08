@@ -356,14 +356,14 @@ class LiangBleuScorer : public Scorer
           break;
         } else {
           weight_t i_score = log((weight_t)counts.clipped[i]/counts.sum[i]);
-          for (size_t j=i; j < M; j++) {
+          for (size_t j=i; j<M; j++) {
             i_bleu[j] += (1/((weight_t)j+1)) * i_score;
           }
         }
-        sum += exp(i_bleu[i])/pow(2.0, (double)(N_-i+2));
+        sum += exp(i_bleu[i])/pow(2.0, (double)(N_-i));
       }
 
-      return brevity_penalty(hl, hl) * sum;
+      return brevity_penalty(hl, rl) * sum;
    }
 };
 
