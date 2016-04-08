@@ -68,7 +68,7 @@ dtrain_init(int argc,
     ("margin,m",           po::value<weight_t>()->default_value(1.0),
      "margin for margin perceptron [set =0 for standard perceptron]")
     ("cut,u",              po::value<weight_t>()->default_value(0.1),
-     "use top/bottom 10% (default) of k-best as 'good' and 'bad' for pair sampling, 0 to use all pairs TODO")
+     "use top/bottom 10% (default) of k-best as 'good' and 'bad' for pair sampling, 0 to use all pairs")
     ("adjust,A",           po::bool_switch()->default_value(false),
      "adjust cut for optimal pos. in k-best to cut")
     ("score,s",            po::value<string>()->default_value("nakov"),

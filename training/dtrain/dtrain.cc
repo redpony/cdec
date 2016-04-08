@@ -173,10 +173,10 @@ main(int argc, char** argv)
   SparseVector<weight_t> gradient_accum, update_accum;
   if (use_adadelta && adadelta_input!="") {
     vector<weight_t> grads_tmp;
-    Weights::InitFromFile(adadelta_input+".gradient", &grads_tmp);
+    Weights::InitFromFile(adadelta_input+".gradient.gz", &grads_tmp);
     Weights::InitSparseVector(grads_tmp, &gradient_accum);
     vector<weight_t> update_tmp;
-    Weights::InitFromFile(adadelta_input+".update", &update_tmp);
+    Weights::InitFromFile(adadelta_input+".update.gz", &update_tmp);
     Weights::InitSparseVector(update_tmp, &update_accum);
   }
 
