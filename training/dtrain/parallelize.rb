@@ -76,6 +76,7 @@ def make_shards input, num_shards, epoch, rand
   }
   while leftover > 0
     j = index.pop
+    break if !j
     shard_in_files[-1].write in_lines[j]
     leftover -= 1
   end
