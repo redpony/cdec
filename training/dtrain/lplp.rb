@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'zipf'
+
 # norms
 def l0(feature_column, n)
   if feature_column.size >= n then return 1 else return 0 end
@@ -86,7 +88,7 @@ end
 #_test()
 
 def usage()
-  puts "lplp.rb <l0,l1,l2,linfty,mean,median> <cut|select_k> <k|threshold> <#shards> < <input>"
+  puts "lplp.rb <l0,l1,l2,linfty,mean,median,/path/to/file> <cut|select_k|feature_names> <k|threshold|--> <#shards> < <input>"
   puts "   l0...: norms for selection"
   puts "select_k: only output top k (according to the norm of their column vector) features"
   puts "     cut: output features with weight >= threshold"
@@ -95,8 +97,14 @@ def usage()
 end
 
 usage if ARGV.size<4
-norm_fun = method(ARGV[0].to_sym)
+norm_fun = nil
+feature_names = nil
 type = ARGV[1]
+if type == 'feature_names'
+  feature_names = ARGV[0]
+else
+  norm_fun = method(ARGV[0].to_sym)
+end
 x = ARGV[2].to_f
 shard_count = ARGV[3].to_f
 
@@ -117,6 +125,17 @@ if type == 'cut'
   cut(w, norm_fun, shard_count, x)
 elsif type == 'select_k'
   select_k(w, norm_fun, shard_count, x)
+elsif type == 'feature_names'
+  a = ReadFile.readlines_strip "#{fnames}"
+  h = {}
+  a.each { |i|
+    h[i] = true
+  }
+  w.each_pair { |k,v|
+    if h[k]
+      puts "#{k}\t#{mean(v, shard_count)}"
+    end
+  }
 else
   puts "oh oh"
 end
