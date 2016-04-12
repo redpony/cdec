@@ -18,10 +18,10 @@ void WERMetric::ComputeSufficientStatistics(const std::vector<WordID>& hyp,
                                             const std::vector<std::vector<WordID> >& refs,
                                             SufficientStats* out) const {
   out->fields.resize(kNUMFIELDS);
-  float best_score = hyp.size();
+  float best_score = 0;
   for (size_t i = 0; i < refs.size(); ++i) {
     float score = cdec::LevenshteinDistance(hyp, refs[i]);
-    if (score < best_score) {
+    if (score < best_score || i == 0) {
       out->fields[kEDITDISTANCE] = score;
       out->fields[kCHARCOUNT] = refs[i].size();
       best_score = score;

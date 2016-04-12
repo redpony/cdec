@@ -646,7 +646,7 @@ int main(int argc, char** argv) {
   ScoreType type = ScoreTypeFromString(metric_name);
 
   //establish metric used for tuning
-  if (type == TER) {
+  if (type == TER || type == WER) {
     invert_score = true;
   } else {
     invert_score = false;

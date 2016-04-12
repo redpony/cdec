@@ -31,16 +31,17 @@ class WERScore : public ScoreBase<WERScore> {
  WERScore() : stats(0,kDUMMY_LAST_ENTRY) {}
   float ComputePartialScore() const { return 0.0;}
   float ComputeScore() const {
+    if (static_cast<float>(stats[kCHARCOUNT]) < 0.5)
+      return 0;
     return static_cast<float>(stats[kEDITDISTANCE]) / static_cast<float>(stats[kCHARCOUNT]);
   }
   void ScoreDetails(string* details) const;
   void PlusPartialEquals(const Score& rhs, int oracle_e_cover, int oracle_f_cover, int src_len){}
   void PlusEquals(const Score& delta, const float scale) {
-    if (scale==1)
-      stats += static_cast<const WERScore&>(delta).stats;
-    if (scale==-1)
-      stats -= static_cast<const WERScore&>(delta).stats;
-    throw std::runtime_error("WERScore::PlusEquals with scale != +-1");
+    const WERScore& delta_stats = static_cast<const WERScore&>(delta);
+    for (unsigned i = 0; i < kDUMMY_LAST_ENTRY; ++i) {
+        stats[i] += scale * static_cast<float>(delta_stats.stats[i]);
+    }
  }
   void PlusEquals(const Score& delta) {
     stats += static_cast<const WERScore&>(delta).stats;
@@ -88,7 +89,7 @@ void WERScore::ScoreDetails(std::string* details) const {
 }
 
 WERScorer::~WERScorer() {}
-WERScorer::WERScorer(const vector<vector<WordID> >& refs) {}
+WERScorer::WERScorer(const vector<vector<WordID> >& refs) {this->refs = refs;}
 
 ScoreP WERScorer::ScoreCCandidate(const vector<WordID>& hyp) const {
   return ScoreP();
@@ -97,6 +98,9 @@ ScoreP WERScorer::ScoreCCandidate(const vector<WordID>& hyp) const {
 float WERScorer::Calculate(const std::vector<WordID>& hyp, const Sentence& ref, int& edits, int& char_count) const {
   edits = cdec::LevenshteinDistance(hyp, ref);
   char_count = ref.size();
+  if (char_count == 0) {
+    return 0;
+  }
   return static_cast<float>(edits) / static_cast<float>(char_count);
 }
 

@@ -17,9 +17,13 @@ class ErrorSurface;
 class Hypergraph;  // needed for alignment
 
 //TODO: BLEU N (N separate arg, not part of enum)?
-enum ScoreType { IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, BLEU_minus_TER_over_2, SER, AER, IBM_BLEU_3, METEOR, WER };
+enum ScoreType { IBM_BLEU, NIST_BLEU, Koehn_BLEU, TER, BLEU_minus_TER_over_2, SER, AER, IBM_BLEU_3, METEOR, WER, CBLEU, BLEU_plus_CBLEU_over_2 };
 ScoreType ScoreTypeFromString(const std::string& st);
 std::string StringFromScoreType(ScoreType st);
+
+std::vector<WordID> Characterize(const std::vector<WordID>& reference);
+std::vector<std::vector<WordID> > Characterize(const std::vector<std::vector<WordID> >& references);
+
 
 class Score : public boost::intrusive_refcount<Score> {
  public:

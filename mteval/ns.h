@@ -8,6 +8,9 @@
 #include "wordid.h"
 #include <iostream>
 
+std::vector<WordID> Characterize(const std::vector<WordID>& reference);
+std::vector<std::vector<WordID> > Characterize(const std::vector<std::vector<WordID> >& references);
+
 class SufficientStats {
  public:
   SufficientStats() : id_() {}
