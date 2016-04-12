@@ -14,7 +14,6 @@
   const unsigned omp_get_num_threads() { return 1; }
 #endif
 
-#include "filelib.h"
 #include "alignment.h"
 #include "data_array.h"
 #include "features/count_source_target.h"
@@ -25,6 +24,7 @@
 #include "features/max_lex_target_given_source.h"
 #include "features/sample_source_count.h"
 #include "features/target_given_source_coherent.h"
+#include "filelib.h"
 #include "grammar.h"
 #include "grammar_extractor.h"
 #include "precomputation.h"
