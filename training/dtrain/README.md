@@ -14,7 +14,7 @@ Builds when building cdec, see ../../BUILDING .
 
 Running
 -------
-Download runnable examples for all use cases from [1] and extract here.
+Download examples for all use cases from [1] and extract here.
 
 TODO
 ----
@@ -36,10 +36,10 @@ TODO
 
 Legal
 -----
-Copyright (c) 2012-2015 by Patrick Simianer <p@simianer.de>
+Copyright (c) 2012-2016 by Patrick Simianer <p@simianer.de>
 
-See the file LICENSE.txt in the root folder for the licensing terms that this software is
-released under.
+See the file LICENSE.txt in the root folder for the licensing terms that this
+software is released under.
 
 
 [1] http://simianer.de/dtrain-example.tar.gz
