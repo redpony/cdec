@@ -97,7 +97,7 @@ main(int argc, char** argv)
   size_t input_sz = 0;
 
   // output configuration
-  cerr << fixed << setprecision(4);
+  cerr << fixed << setprecision(2);
   cerr << "Parameters:" << endl;
   cerr << setw(25) << "bitext " << "'" << input_fn << "'" << endl;
   cerr << setw(25) << "k " << k << endl;
@@ -381,7 +381,7 @@ main(int argc, char** argv)
     cerr << endl;
   }
   cerr << "        ---" << endl;
-  cerr << resetiosflags(ios::showpos)
+  cerr << resetiosflags(ios::showpos)  << fixed
        << "       1best avg score: "   << gold_avg*100;
   cerr << setiosflags(ios::showpos)    << fixed << " ("
        << (gold_avg-gold_prev)*100     << ")" << endl;
