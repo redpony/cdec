@@ -42,5 +42,5 @@ See the file LICENSE.txt in the root folder for the licensing terms that this
 software is released under.
 
 
-[1] http://simianer.de/dtrain-example.tar.gz
+[1] http://simianer.de/dtrain-example.tar.xz
 
