@@ -48,6 +48,7 @@ main(int argc, char** argv)
   const string adadelta_output   = conf["adadelta_output"].as<string>();
   const size_t max_input         = conf["stop_after"].as<size_t>();
   const bool batch               = conf["batch"].as<bool>();
+  const bool all                 = conf["all"].as<bool>();
 
   // setup decoder
   register_feature_functions();
@@ -267,14 +268,14 @@ main(int argc, char** argv)
       num_up += update_structured(sample, updates, margin,
                                   out_up, i);
     else if (all_pairs)
-      num_up += updates_all(sample, updates, max_up, threshold,
+      num_up += updates_all(sample, updates, max_up, margin, threshold, all,
                             out_up, i);
     else if (pro)
       num_up += updates_pro(sample, updates, cut, max_up, threshold,
                             out_up, i);
     else
       num_up += updates_multipartite(sample, updates, cut, margin,
-                                     max_up, threshold, adjust_cut,
+                                     max_up, threshold, adjust_cut, all,
                                      out_up, i);
 
     SparseVector<weight_t> lambdas_copy;

@@ -20,6 +20,7 @@ updates_multipartite(vector<Hyp>* sample,
                      size_t max_up,
                      weight_t threshold,
                      bool adjust,
+                     bool all,
                      WriteFile& output,
                      size_t id)
 {
@@ -44,9 +45,11 @@ updates_multipartite(vector<Hyp>* sample,
   for (size_t i = 0; i < sep_hi; i++) {
     for (size_t j = sep_hi; j < sz; j++) {
       Hyp& first=(*sample)[i], second=(*sample)[j];
-      if ((first.model-second.model)>margin
-           || (first.gold==second.gold)
-           || (threshold && (first.gold-second.gold < threshold)))
+      if (first.gold==second.gold)
+        continue;
+      if (!all
+          && (((first.model-second.model)>margin)
+              || (threshold && (first.gold-second.gold < threshold))))
         continue;
       if (output)
         *output << id << "\t" << first.f-second.f << endl;
@@ -64,9 +67,11 @@ updates_multipartite(vector<Hyp>* sample,
   for (size_t i = sep_hi; i < sep_lo; i++) {
     for (size_t j = sep_lo; j < sz; j++) {
       Hyp& first=(*sample)[i], second=(*sample)[j];
-      if ((first.model-second.model)>margin
-           || (first.gold==second.gold)
-           || (threshold && (first.gold-second.gold < threshold)))
+      if (first.gold==second.gold)
+        continue;
+      if (!all
+           && (((first.model-second.model)>margin)
+               || (threshold && (first.gold-second.gold < threshold))))
         continue;
       if (output)
         *output << id << "\t" << first.f-second.f << endl;
@@ -83,13 +88,16 @@ updates_multipartite(vector<Hyp>* sample,
  * all pairs
  *  only ignore a pair if gold scores are
  *  identical
+ *  FIXME: that's really _all_
  *
  */
 inline size_t
 updates_all(vector<Hyp>* sample,
             SparseVector<weight_t>& updates,
             size_t max_up,
+            weight_t margin,
             weight_t threshold,
+            bool all,
             WriteFile output,
             size_t id)
 {
@@ -102,8 +110,11 @@ updates_all(vector<Hyp>* sample,
   for (size_t i = 0; i < sz-1; i++) {
     for (size_t j = i+1; j < sz; j++) {
       Hyp& first=(*sample)[i], second=(*sample)[j];
-      if ((first.gold == second.gold)
-           || (threshold && (first.gold-second.gold < threshold)))
+      if (first.gold == second.gold)
+        continue;
+      if (!all
+          && (((first.model-second.model)>margin)
+              || (threshold && (first.gold-second.gold < threshold))))
         continue;
       if (output)
         *output << id << "\t" << first.f-second.f << endl;

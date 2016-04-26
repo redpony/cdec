@@ -71,6 +71,8 @@ dtrain_init(int argc,
      "use top/bottom 10% (default) of k-best as 'good' and 'bad' for pair sampling, 0 to use all pairs")
     ("adjust,A",           po::bool_switch()->default_value(false),
      "adjust cut for optimal pos. in k-best to cut")
+    ("all,A",              po::bool_switch()->default_value(false),
+     "update using all pairs, ignoring margin and threshold")
     ("score,s",            po::value<string>()->default_value("nakov"),
      "per-sentence BLEU (approx.)")
     ("nakov_fix",         po::value<weight_t>()->default_value(1.0),
@@ -106,7 +108,7 @@ dtrain_init(int argc,
      "output raw data (e.g. k-best lists) [to filename]")
     ("stop_after",         po::value<size_t>()->default_value(numeric_limits<size_t>::max()),
      "only look at this number of segments")
-    ("print_weights,P",    po::value<string>()->default_value("EgivenFCoherent SampleCountF CountEF MaxLexFgivenE MaxLexEgivenF IsSingletonF IsSingletonFE Glue WordPenalty PassThrough LanguageModel LanguageModel_OOV"),
+    ("print_weights",      po::value<string>()->default_value("EgivenFCoherent SampleCountF CountEF MaxLexFgivenE MaxLexEgivenF IsSingletonF IsSingletonFE Glue WordPenalty PassThrough LanguageModel LanguageModel_OOV"),
      "list of weights to print after each iteration");
   po::options_description clopts("Command Line Options");
   clopts.add_options()
