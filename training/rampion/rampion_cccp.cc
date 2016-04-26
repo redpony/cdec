@@ -122,6 +122,7 @@ int main(int argc, char** argv) {
   while(getline(in, line)) {
     istringstream is(line);
     int sent_id;
+	is >> file >> sent_id;
     kis.resize(kis.size() + 1);
     training::CandidateSet& curkbest = kis.back();
     string kbest_file;
@@ -132,7 +133,7 @@ int main(int argc, char** argv) {
       if (FileExists(kbest_file))
         curkbest.ReadFromFile(kbest_file);
     }
-    is >> file >> sent_id;
+//    is >> file >> sent_id;
     ReadFile rf(file);
     if (kis.size() % 5 == 0) { cerr << '.'; }
     if (kis.size() % 200 == 0) { cerr << " [" << kis.size() << "]\n"; }
