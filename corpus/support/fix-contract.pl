@@ -7,6 +7,8 @@ while(<>) {
   #s/ - (year) - (old)/ -$1-$2/ig;
   s/ ' (s|m|ll|re|d|ve) / '$1 /ig;
   s/n ' t / n't /ig;
+  s/( |^)(\d+)-(\d+)( |$)/$1$2 - $3$4/g;
+  s/ "$/ ”/;
   print;
 }
 

@@ -4,7 +4,7 @@ use utf8;
 
 ##### EDIT THESE SETTINGS ####################################################
 my $AUTOMATIC_INCLUDE_IF_SHORTER_THAN = 7; # if both are shorter, include
-my $MAX_ZSCORE = 1.8; # how far from the mean can the (log)ratio be?
+my $MAX_ZSCORE = 2.0; # how far from the mean can the (log)ratio be?
 ##############################################################################
 
 die "Usage: $0 [-NNN] corpus.fr-en\n\n  Filter sentence pairs containing sentences longer than NNN words (where NNN\n  is 150 by default) or whose log length ratios are $MAX_ZSCORE stddevs away from the\n  mean log ratio.\n\n" unless scalar @ARGV == 1 || scalar @ARGV == 2;
@@ -44,7 +44,7 @@ while(<F>) {
   $lines++;
   if ($lines % 100000 == 0) { print STDERR " [$lines]\n"; }
   elsif ($lines % 2500 == 0) { print STDERR "."; }
-  my ($sf, $se, @d) = split /\s*\|\|\|\s*/;
+  my ($sf, $se, @d) = split /\s*\|\|\|\s*| *\t */;
   if (scalar @d != 0 or !defined $se) {
     $bad_format++;
     if ($bad_format > 100 && ($bad_format / $lines) > 0.02) {
@@ -101,7 +101,7 @@ my $pass1_discard = $zerof + $zeroe + $absbadrat + $overlene + $overlenf + $bad_
 my $discard_rate = int(10000 * $pass1_discard / $lines) / 100;
 print STDERR "      Total lines: $lines\n";
 print STDERR " Already discared: $pass1_discard\t(discard rate = $discard_rate%)\n";
-print STDERR "   Mean F:E ratio: " . exp($lmean) . "\n"; 
+print STDERR "   Mean F:E ratio: " . exp($lmean) . "\n";
 print STDERR " StdDev F:E ratio: " . exp($lsd) . "\n";
 print STDERR "Writing...\n";
 open F,$ff or die "Can't reread $corpus: $!";
@@ -115,7 +115,7 @@ while(<F>) {
   $lines++;
   if ($lines % 100000 == 0) { print STDERR " [$lines]\n"; }
   elsif ($lines % 2500 == 0) { print STDERR "."; }
-  my ($sf, $se, @d) = split / \|\|\| /;
+  my ($sf, $se, @d) = split /\s*\|\|\|\s*| *\t */;
   if (!defined $se) { next; }
   my @fs = split /\s+/, $sf;
   my @es = split /\s+/, $se;

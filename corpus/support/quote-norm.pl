@@ -146,7 +146,7 @@ while(<STDIN>) {
   tr/०-९/0-9/; # devangari
   tr/౦-౯/0-9/; # telugu
   tr/೦-೯/0-9/; # kannada
-  tr/೦-௯/0-9/; # tamil
+  #tr/೦-௯/0-9/; # tamil
   tr/൦-൯/0-9/; # malayalam
 
   # Random punctuation:
