@@ -45,6 +45,7 @@ set(mteval_STAT_SRCS
     ns_ext.h
     ns_ssk.h
     ns_ter.h
+    ns_ter_impl.h
     ns_wer.h
     scorer.h
     ter.h
@@ -60,6 +61,7 @@ set(mteval_STAT_SRCS
     ns_ext.cc
     ns_ssk.cc
     ns_ter.cc
+    ns_ter_impl.cc
     ns_wer.cc
     scorer.cc
     ter.cc)
