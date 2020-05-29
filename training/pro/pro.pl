@@ -73,6 +73,7 @@ if (GetOptions(
 	"weights=s" => \$initial_weights,
         "devset=s" => \$devset,
 	"jobs=i" => \$jobs,
+  "max-iterations=i" => \$max_iterations,
 	"metric=s" => \$metric,
 	"pass-suffix=s" => \$pass_suffix,
         "qsub" => \$useqsub,

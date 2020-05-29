@@ -57,7 +57,8 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
         ("sample_forest,f", "Instead of a k-best list, sample k hypotheses from the decoder's forest")
         ("sample_forest_unit_weight_vector,x", "Before sampling (must use -f option), rescale the weight vector used so it has unit length; this may improve the quality of the samples")
         ("random_seed,S", po::value<uint32_t>(), "Random seed (if not specified, /dev/random will be used)")
-        ("decoder_config,c",po::value<string>(),"Decoder configuration file");
+        ("decoder_config,c",po::value<string>(),"Decoder configuration file")
+        ("verbose,v", po::value<bool>()->zero_tokens(), "verbose stderr output");
   po::options_description clo("Command line options");
   clo.add_options()
         ("config", po::value<string>(), "Configuration file")
@@ -188,6 +189,8 @@ int main(int argc, char** argv) {
   po::variables_map conf;
   if (!InitCommandLine(argc, argv, &conf)) return 1;
 
+  const bool VERBOSE = conf.count("verbose");
+
   if (conf.count("random_seed"))
     rng.reset(new MT19937(conf["random_seed"].as<uint32_t>()));
   else
@@ -254,7 +257,8 @@ int main(int argc, char** argv) {
     if ((cur_sent * 40 / corpus.size()) > dots) { ++dots; cerr << '.'; }
     if (corpus.size() == cur_sent) {
       cerr << " [AVG METRIC LAST PASS=" << (tot_loss / corpus.size()) << "]\n";
-      Weights::ShowLargestFeatures(dense_weights);
+      if (VERBOSE)
+        Weights::ShowLargestFeatures(dense_weights);
       cur_sent = 0;
       tot_loss = 0;
       dots = 0;

@@ -1,9 +1,6 @@
 #ifndef _DTRAIN_H_
 #define _DTRAIN_H_
 
-#define DTRAIN_DOTS 10 // after how many inputs to display a '.'
-#define DTRAIN_SCALE 100000
-
 #include <iomanip>
 #include <climits>
 #include <string.h>
@@ -25,112 +22,126 @@ namespace po = boost::program_options;
 namespace dtrain
 {
 
-
-inline void register_and_convert(const vector<string>& strs, vector<WordID>& ids)
+struct Hyp
 {
-  vector<string>::const_iterator it;
-  for (it = strs.begin(); it < strs.end(); it++)
-    ids.push_back(TD::Convert(*it));
-}
+  Hyp() {}
+  Hyp(vector<WordID> w, SparseVector<weight_t> f, weight_t model, weight_t gold,
+        size_t rank) : w(w), f(f), model(model), gold(gold), rank(rank) {}
 
-inline string gettmpf(const string path, const string infix)
-{
-  char fn[path.size() + infix.size() + 8];
-  strcpy(fn, path.c_str());
-  strcat(fn, "/");
-  strcat(fn, infix.c_str());
-  strcat(fn, "-XXXXXX");
-  if (!mkstemp(fn)) {
-    cerr << "Cannot make temp file in" << path << " , exiting." << endl;
-    exit(1);
-  }
-  return string(fn);
-}
-
-typedef double score_t;
-
-struct ScoredHyp
-{
-  vector<WordID> w;
-  SparseVector<double> f;
-  score_t model;
-  score_t score;
-  unsigned rank;
+  vector<WordID>         w;
+  SparseVector<weight_t> f;
+  weight_t               model, gold;
+  size_t                 rank;
 };
 
-struct LocalScorer
+bool
+dtrain_init(int argc,
+            char** argv,
+            po::variables_map* conf)
 {
-  unsigned N_;
-  vector<score_t> w_;
+  po::options_description opts("Configuration File Options");
+  opts.add_options()
+    ("bitext,b",           po::value<string>(),
+     "bitext, source and references in a single file [e ||| f]")
+    ("decoder_conf,C",     po::value<string>(),
+     "decoder configuration file")
+    ("iterations,T",       po::value<size_t>()->default_value(15),
+     "number of iterations T")
+    ("k",                  po::value<size_t>()->default_value(100),
+     "sample size per input (e.g. size of k-best lists)")
+    ("unique_kbest",       po::bool_switch()->default_value(true),
+     "unique k-best lists")
+    ("forest_sample",      po::bool_switch()->default_value(false),
+     "sample k hyptheses from forest instead of using k-best list")
+    ("learning_rate,l",    po::value<weight_t>()->default_value(0.00001),
+     "learning rate [only meaningful if margin>0 or input weights are given]")
+    ("l1_reg,r",           po::value<weight_t>()->default_value(0.),
+     "l1 regularization strength [see Tsuruoka, Tsujii and Ananiadou (2009)]")
+    ("adadelta,D",         po::bool_switch()->default_value(false),
+     "use AdaDelta dynamic learning rates")
+    ("adadelta_decay",     po::value<weight_t>()->default_value(0.9),
+     "decay for AdaDelta algorithm")
+    ("adadelta_input",     po::value<string>()->default_value(""),
+     "input for AdaDelta's parameters, two files: file.gradient, and file.update")
+    ("adadelta_output",    po::value<string>()->default_value(""),
+     "prefix for outputting AdaDelta's parameters")
+    ("margin,m",           po::value<weight_t>()->default_value(1.0),
+     "margin for margin perceptron [set =0 for standard perceptron]")
+    ("cut,u",              po::value<weight_t>()->default_value(0.1),
+     "use top/bottom 10% (default) of k-best as 'good' and 'bad' for pair sampling, 0 to use all pairs")
+    ("adjust,A",           po::bool_switch()->default_value(false),
+     "adjust cut for optimal pos. in k-best to cut")
+    ("all,A",              po::bool_switch()->default_value(false),
+     "update using all pairs, ignoring margin and threshold")
+    ("score,s",            po::value<string>()->default_value("nakov"),
+     "per-sentence BLEU (approx.)")
+    ("nakov_fix",         po::value<weight_t>()->default_value(1.0),
+     "add to reference length [see score.h]")
+    ("chiang_decay",       po::value<weight_t>()->default_value(0.9),
+     "decaying factor for Chiang's approx. BLEU")
+    ("N",                  po::value<size_t>()->default_value(4),
+     "N for BLEU approximation")
+    ("input_weights,w",    po::value<string>(),
+     "weights to initialize model")
+    ("average,a",          po::bool_switch()->default_value(true),
+     "output average weights")
+    ("keep,K",             po::bool_switch()->default_value(false),
+     "output a weight file per iteration [as weights.T.gz]")
+    ("structured,S",       po::bool_switch()->default_value(false),
+     "structured prediction objective [hope/fear] w/ SGD")
+    ("pro_sampling",       po::bool_switch()->default_value(false),
+     "updates from pairs selected as shown in Fig.4 of (Hopkins and May, 2011) [Gamma=max_pairs (default 5000), Xi=cut (default 50); threshold default 0.05]")
+    ("threshold",          po::value<weight_t>()->default_value(0.),
+     "(min.) threshold in terms of gold score for pair selection")
+    ("max_pairs",
+     po::value<size_t>()->default_value(numeric_limits<size_t>::max()),
+     "max. number of updates/pairs")
+    ("batch,B",            po::bool_switch()->default_value(false),
+     "perform batch updates")
+    ("output,o",           po::value<string>()->default_value("-"),
+     "output weights file, '-' for STDOUT")
+    ("disable_learning,X", po::bool_switch()->default_value(false),
+     "fix model")
+    ("output_updates,U",   po::value<string>()->default_value(""),
+     "output updates (diff. vectors) [to filename]")
+    ("output_raw,R",       po::value<string>()->default_value(""),
+     "output raw data (e.g. k-best lists) [to filename]")
+    ("stop_after",         po::value<size_t>()->default_value(numeric_limits<size_t>::max()),
+     "only look at this number of segments")
+    ("print_weights",      po::value<string>()->default_value("EgivenFCoherent SampleCountF CountEF MaxLexFgivenE MaxLexEgivenF IsSingletonF IsSingletonFE Glue WordPenalty PassThrough LanguageModel LanguageModel_OOV"),
+     "list of weights to print after each iteration");
+  po::options_description clopts("Command Line Options");
+  clopts.add_options()
+    ("conf,c", po::value<string>(), "dtrain configuration file")
+    ("help,h", po::bool_switch(),             "display options");
+  opts.add(clopts);
+  po::store(parse_command_line(argc, argv, opts), *conf);
+  cerr << "*dtrain*" << endl << endl;
+  if ((*conf)["help"].as<bool>()) {
+    cerr << setprecision(3) << opts << endl;
 
-  virtual score_t
-  Score(const vector<WordID>& hyp, const vector<WordID>& ref, const unsigned rank, const unsigned src_len)=0;
+    return false;
+  }
+  if (conf->count("conf")) {
+    ifstream f((*conf)["conf"].as<string>().c_str());
+    po::store(po::parse_config_file(f, opts), *conf);
+  }
+  po::notify(*conf);
+  if (!conf->count("decoder_conf")) {
+    cerr << "Missing decoder configuration." << endl;
+    cerr << opts << endl;
 
-  virtual void Reset() {} // only for ApproxBleuScorer, LinearBleuScorer
+    return false;
+  }
+  if (!conf->count("bitext")) {
+    cerr << "No input bitext." << endl;
+    cerr << opts << endl;
 
-  inline void
-  Init(unsigned N, vector<score_t> weights)
-  {
-    assert(N > 0);
-    N_ = N;
-    if (weights.empty()) for (unsigned i = 0; i < N_; i++) w_.push_back(1./N_);
-    else w_ = weights;
+    return false;
   }
 
-  inline score_t
-  brevity_penalty(const unsigned hyp_len, const unsigned ref_len)
-  {
-    if (hyp_len > ref_len) return 1;
-    return exp(1 - (score_t)ref_len/hyp_len);
-  }
-};
-
-struct HypSampler : public DecoderObserver
-{
-  LocalScorer* scorer_;
-  vector<WordID>* ref_;
-  unsigned f_count_, sz_;
-  virtual vector<ScoredHyp>* GetSamples()=0;
-  inline void SetScorer(LocalScorer* scorer) { scorer_ = scorer; }
-  inline void SetRef(vector<WordID>& ref) { ref_ = &ref; }
-  inline unsigned get_f_count() { return f_count_; }
-  inline unsigned get_sz() { return sz_; }
-};
-
-struct HSReporter
-{
-  string task_id_;
-
-  HSReporter(string task_id) : task_id_(task_id) {}
-
-  inline void update_counter(string name, unsigned amount) {
-    cerr << "reporter:counter:" << task_id_ << "," << name << "," << amount << endl;
-  }
-  inline void update_gcounter(string name, unsigned amount) {
-    cerr << "reporter:counter:Global," << name << "," << amount << endl;
-  }
-};
-
-inline ostream& _np(ostream& out) { return out << resetiosflags(ios::showpos); }
-inline ostream& _p(ostream& out)  { return out << setiosflags(ios::showpos); }
-inline ostream& _p2(ostream& out) { return out << setprecision(2); }
-inline ostream& _p5(ostream& out) { return out << setprecision(5); }
-
-inline void printWordIDVec(vector<WordID>& v, ostream& os=cerr)
-{
-  for (unsigned i = 0; i < v.size(); i++) {
-    os << TD::Convert(v[i]);
-    if (i < v.size()-1) os << " ";
-  }
+  return true;
 }
-
-template<typename T>
-inline T sign(T z)
-{
-  if (z == 0) return 0;
-  return z < 0 ? -1 : +1;
-}
-
 
 } // namespace
 

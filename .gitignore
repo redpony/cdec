@@ -76,7 +76,6 @@ dpmert/scorer_test
 dpmert/sentclient
 dpmert/sentserver
 dpmert/union_forests
-dtrain/dtrain
 extools/build_lexical_translation
 extools/extractor
 extools/extractor_monolingual
@@ -226,6 +225,7 @@ training/dpmert/mr_dpmert_reduce
 training/dpmert/sentclient
 training/dpmert/sentserver
 training/dtrain/dtrain
+training/dtrain/example/
 training/latent_svm/latent_svm
 training/minrisk/minrisk_optimize
 training/mira/ada_opt_sm

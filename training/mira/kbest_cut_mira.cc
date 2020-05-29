@@ -96,7 +96,7 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
     ("weights_output,O",po::value<string>(),"Directory to write weights to")
     ("output_dir,D",po::value<string>(),"Directory to place output in")
     ("decoder_config,c",po::value<string>(),"Decoder configuration file")
-	("verbose,v",po::value<bool>()->zero_tokens(),"verbose stderr output");
+	  ("verbose,v",po::value<bool>()->zero_tokens(),"Verbose stderr output");
   po::options_description clo("Command line options");
   clo.add_options()
     ("config", po::value<string>(), "Configuration file")
@@ -104,7 +104,7 @@ bool InitCommandLine(int argc, char** argv, po::variables_map* conf) {
   po::options_description dconfig_options, dcmdline_options;
   dconfig_options.add(opts);
   dcmdline_options.add(opts).add(clo);
-  
+
   po::store(parse_command_line(argc, argv, dcmdline_options), *conf);
   if (conf->count("config")) {
     ifstream config((*conf)["config"].as<string>().c_str());
@@ -229,14 +229,15 @@ void CuttingPlane(vector<boost::shared_ptr<HypothesisInfo> >* cur_c, bool* again
 }
 
 
-double ComputeDelta(vector<boost::shared_ptr<HypothesisInfo> >* cur_p, double max_step_size,vector<weight_t> dense_weights )
+double ComputeDelta(vector<boost::shared_ptr<HypothesisInfo> >* cur_p, double max_step_size,vector<weight_t> dense_weights, bool verbose = true )
 {
   vector<boost::shared_ptr<HypothesisInfo> >& cur_pair = *cur_p;
    double loss = cur_pair[0]->oracle_loss - cur_pair[1]->oracle_loss;
 
    double margin = -(cur_pair[0]->oracleN->features.dot(dense_weights)- cur_pair[0]->features.dot(dense_weights)) + (cur_pair[1]->oracleN->features.dot(dense_weights) - cur_pair[1]->features.dot(dense_weights));
    const double num = margin +  loss;
-   cerr << "LOSS: " << num << " Margin:" << margin << " BLEUL:" << loss << " " << cur_pair[1]->features.dot(dense_weights) << " " << cur_pair[0]->features.dot(dense_weights) <<endl;
+   if (verbose)
+     cerr << "LOSS: " << num << " Margin:" << margin << " BLEUL:" << loss << " " << cur_pair[1]->features.dot(dense_weights) << " " << cur_pair[0]->features.dot(dense_weights) <<endl;
    
 
   SparseVector<double> diff = cur_pair[0]->features;
@@ -704,7 +705,8 @@ int main(int argc, char** argv) {
   SparseVector<double> old_lambdas = lambdas;
   tot.clear();
   tot += lambdas;
-  cerr << "PASS " << cur_pass << " " << endl << lambdas << endl; 
+  if (VERBOSE)
+    cerr << "PASS " << cur_pass << " " << endl << lambdas << endl;
   ScoreP acc, acc_h, acc_f;
   
   while(*in) {
@@ -841,7 +843,7 @@ int main(int argc, char** argv) {
 			cur_pair.clear();
 			cur_pair.push_back(cur_constraint[j]);
 			cur_pair.push_back(cur_constraint[i]);
-			double delta = ComputeDelta(&cur_pair,max_step_size, dense_weights);
+			double delta = ComputeDelta(&cur_pair,max_step_size, dense_weights, VERBOSE);
 			
 			if (delta == 0) optimize_again = false;
 			cur_constraint[j]->alpha += delta;
@@ -865,7 +867,7 @@ int main(int argc, char** argv) {
 	}
       else if(optimizer == 2 || optimizer == 3) //PA and Cutting Plane MIRA update
 	  {
-	    bool DEBUG_SMO= true;
+	    bool DEBUG_SMO= false;
 	    vector<boost::shared_ptr<HypothesisInfo> > cur_constraint;
 	    cur_constraint.push_back(cur_good_v[0]); //add oracle to constraint set
 	    bool optimize_again = true;
@@ -914,7 +916,7 @@ int main(int argc, char** argv) {
 			  continue;
 			} //pair is undefined so we are done with this smo 
 
-			double delta = ComputeDelta(&cur_pair,max_step_size, dense_weights);
+			double delta = ComputeDelta(&cur_pair,max_step_size, dense_weights, VERBOSE);
 
 			cur_pair[0]->alpha += delta;
 			cur_pair[1]->alpha -= delta;
@@ -928,7 +930,7 @@ int main(int argc, char** argv) {
 			//reload weights based on update
 			dense_weights.clear();
 			lambdas.init_vector(&dense_weights);
-                        if (dense_weights.size() < 500)
+                        if (VERBOSE && dense_weights.size() < 500)
                           ShowLargestFeatures(dense_weights);
 			dense_w_local = dense_weights;
 			iter++;
@@ -968,12 +970,14 @@ int main(int argc, char** argv) {
 
 	    for(int u=0;u!=cur_constraint.size();u++)	
 	      { 
-		cerr << "alpha=" << cur_constraint[u]->alpha << " hope=" << cur_constraint[u]->hope << " fear=" << cur_constraint[u]->fear << endl;
+          if (VERBOSE)
+		        cerr << "alpha=" << cur_constraint[u]->alpha << " hope=" << cur_constraint[u]->hope << " fear=" << cur_constraint[u]->fear << endl;
 		temp_objective += cur_constraint[u]->alpha * cur_constraint[u]->fear;
 	      }
 	    objective += temp_objective;
 	    
-	    cerr << "SENT OBJ: " << temp_objective << " NEW OBJ: " << objective << endl;
+      if (VERBOSE)
+	      cerr << "SENT OBJ: " << temp_objective << " NEW OBJ: " << objective << endl;
 	  }
       
     
