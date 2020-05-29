@@ -43,6 +43,9 @@ endif(LIBLZMA_FOUND)
 # for pycdec
 find_package(PythonInterp 2.7 REQUIRED)
 
+# for pthread
+find_package(Threads REQUIRED)
+
 # generate config.h
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
