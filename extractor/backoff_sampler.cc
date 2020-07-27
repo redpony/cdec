@@ -2,6 +2,7 @@
 
 #include "data_array.h"
 #include "phrase_location.h"
+#include <cmath>
 
 namespace extractor {
 
